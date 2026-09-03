@@ -35,12 +35,15 @@ Repository inspection and tests on 2026-09-03 confirmed:
 ```text
 Documentation consistency review: IN PROGRESS
 SQLite migration infrastructure: VERIFIED
+Core application migration — 0001_core.sql: VERIFIED
 Business-domain migrations: PLANNED
-Isolated database tests: PASS — 28 tests
-Git baseline: NOT PRESENT
+Permanent isolated database tests: PASS — 40 tests
+Local Git repository and baseline: PRESENT
+Remote origin: CONFIGURED
+origin/main publication: PENDING
 ```
 
-The explicit 2026-09-03 implementation task authorized the SQLite infrastructure slice before a Git baseline was established. Establishing and reviewing that baseline remains a P0 prerequisite for the next persistence slice.
+The explicit 2026-09-03 implementation task authorized the SQLite infrastructure slice before a Git baseline was established. The local baseline now exists, but publishing `main` to `origin/main` remains pending.
 
 ---
 
@@ -60,19 +63,21 @@ Documentation remains in `REVIEW` until accepted; review completion does not imp
 
 ---
 
-# 4. P0 — Establish Git Baseline
+# 4. P0 — Publish Git Baseline
 
-Git does not currently recognize `C:\Dev\F7Hub\` as a repository.
+`C:\Dev\F7Hub\` is a local Git repository on `main`. The local baseline exists, `origin` is configured, and two local commits were present when the Slice 001 follow-up was verified. No pre-Slice-001 focused diff is available because the initial baseline commit was created after the implementation.
 
-After documentation acceptance:
+Current actions:
 
-- [ ] Decide whether this directory should be initialized as the canonical Git repository.
-- [ ] Review and populate `.gitignore` before the first commit.
+- [x] Initialize this directory as the canonical local Git repository.
+- [x] Establish the local `main` branch and baseline commit.
+- [x] Configure `origin` as `git@github.com:JDecelles1990/F7Hub.git`.
+- [ ] Review and populate `.gitignore` before remote publication.
 - [ ] Exclude runtime databases, logs, secrets, caches and generated artifacts as appropriate.
-- [ ] Review the initial file set for sensitive or obsolete content.
-- [ ] Create the initial commit only with explicit user authorization.
+- [ ] Review the local baseline file set for sensitive or obsolete content before publication.
+- [ ] Publish local `main` to `origin/main` only with explicit user authorization.
 
-This review must not auto-commit.
+This task must not commit or push.
 
 ---
 
@@ -124,20 +129,44 @@ Run the isolated database test suite and report only `PASS`, `FAIL`, `NOT RUN`, 
 Status: PASS — 28 tests — 2026-09-03
 ```
 
+## Permanent Regression Follow-Up
+
+- [x] Reject renamed applied migrations.
+- [x] Parse semicolons in quoted values, line comments and block comments.
+- [x] Reject migration-authored `BEGIN`, `COMMIT`, `ROLLBACK` and `SAVEPOINT`.
+- [x] Reject migration-authored `ATTACH` and `DETACH`.
+- [x] Verify rollback, absent history records and usable connections after rejection.
+- [x] Verify the approved `schema_migrations` structure and constraints.
+- [x] Verify negative migration execution times are rejected.
+
+```text
+Status: PASS — 35 tests — 2026-09-03
+```
+
 ---
 
-# 6. P1 — Second Persistence Slice
+# 6. P1 — Second Persistence Slice: Taxonomy
 
-After migration infrastructure is tested:
+After the verified core migration:
 
-- [ ] Implement shared taxonomy required by the target schema.
-- [ ] Implement companies and contacts persistence.
-- [ ] Add focused migrations, repositories, validation and tests.
-- [ ] Include `company_notes` or `company_links` only when required by the first real workflow.
+- [ ] Create `Database\Migrations\0002_taxonomy.sql`.
+- [ ] Implement only `categories` and `tags` from the approved physical schema.
+- [ ] Add focused constraint, rollback, checksum, idempotency and integrity tests.
+- [ ] Do not begin company, contact, ticket or GUI work in this slice.
 
 ---
 
-# 7. P1 — Third Persistence Slice
+# 7. P1 — Third Persistence Slice: Companies and Contacts
+
+After taxonomy is tested:
+
+- [ ] Create `Database\Migrations\0003_companies_contacts.sql`.
+- [ ] Implement `companies`, `company_notes`, `company_links` and `contacts`.
+- [ ] Add focused repository, validation, relationship and failure-path tests.
+
+---
+
+# 8. P1 — Fourth Persistence Slice: Tickets
 
 After taxonomy, companies and contacts are tested:
 
@@ -150,7 +179,7 @@ The minimal PyQt6 ticket workflow follows as a separate slice using the tested s
 
 ---
 
-# 8. Repository Follow-Ups
+# 9. Repository Follow-Ups
 
 These are real repository issues found during documentation review but are not part of the documentation-only edit scope:
 
@@ -165,7 +194,7 @@ These are real repository issues found during documentation review but are not p
 
 ---
 
-# 9. Deferred Work
+# 10. Deferred Work
 
 The following remain `DEFERRED` until earlier foundations and real requirements justify them:
 
@@ -181,7 +210,7 @@ Long-term placement belongs in `16_Roadmap.md`.
 
 ---
 
-# 10. Rejected Directions
+# 11. Rejected Directions
 
 The following remain `REJECTED` unless an explicitly approved architecture change revisits them:
 
@@ -194,7 +223,7 @@ The following remain `REJECTED` unless an explicitly approved architecture chang
 
 ---
 
-# 11. Maintenance Rule
+# 12. Maintenance Rule
 
 Keep this file short and actionable.
 

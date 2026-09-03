@@ -52,7 +52,7 @@ AutoHotkey implementation: PLANNED
 Migration infrastructure: VERIFIED
 Business-domain migrations and repositories: PLANNED
 Isolated database tests: PASS — 28 tests
-Git baseline: NOT PRESENT
+Git baseline: PRESENT — local main; origin configured
 Project-local .agents/skills/: NOT PRESENT
 ```
 

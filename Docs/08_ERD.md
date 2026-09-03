@@ -75,10 +75,11 @@ SQL Schema
 
 # 3. Current ERD Status
 
-This document defines the intended logical data model. Repository inspection and tests on 2026-09-03 verified the `schema_migrations` bootstrap infrastructure, but found no business-domain migrations or repositories in the canonical implementation trees.
+This document defines the intended logical data model. Repository inspection and tests on 2026-09-03 verified the bootstrap-owned `schema_migrations` infrastructure and the versioned `application_metadata` core table. No business-domain migrations or repositories exist in the canonical implementation trees.
 
 ```text
 schema_migrations infrastructure: VERIFIED
+application_metadata implementation status: VERIFIED
 Business-domain ERD implementation status: PLANNED
 ```
 
@@ -1894,7 +1895,7 @@ Canonical conceptual inventory:
 | Domain | Entity | Purpose | Implementation Status |
 |---|---|---|---|
 | Core | schema_migrations | Track schema evolution | VERIFIED |
-| Core | application_metadata | Store application-level metadata | PLANNED |
+| Core | application_metadata | Store application-level metadata | VERIFIED |
 | Taxonomy | categories | Shared hierarchical classification | PLANNED |
 | Taxonomy | tags | Shared flexible tags | PLANNED |
 | Companies | companies | Supported organizations | PLANNED |

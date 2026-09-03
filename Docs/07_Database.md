@@ -1025,6 +1025,8 @@ The authoritative migration record is the dedicated `schema_migrations` table de
 
 `PRAGMA user_version` is not a competing migration-state authority.
 
+`schema_migrations` is owned by the migration bootstrap infrastructure and is created before versioned migrations are evaluated. Versioned migration `0001_core.sql` therefore does not recreate it; `0001_core.sql` owns the first versioned application-schema object, `application_metadata`.
+
 ---
 
 # 49. Migration Rules
@@ -1890,12 +1892,13 @@ Explicit review is required before:
 
 # 93. Current Implementation Status
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. The migration directory contains no business-domain migration, and no business repository or application schema has been implemented. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. The first versioned application migration, `0001_core.sql`, creates only `application_metadata`; the migration directory contains no business-domain migration, and no business repository has been implemented. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 ```text
 SQLite migration infrastructure: VERIFIED
+Core application schema — application_metadata: VERIFIED
 Business database implementation: PLANNED
-Isolated database tests: PASS — 28 tests
+Isolated database tests: PASS — 40 tests
 ```
 
 This document defines the intended database architecture beyond the verified infrastructure slice.

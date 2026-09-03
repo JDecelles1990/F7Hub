@@ -280,13 +280,18 @@ transactional migration execution
 migration failure handling
 ```
 
-Potential first migration:
+First versioned application-schema migration:
 
 ```text
 0001_core.sql
+→ application_metadata
 ```
 
-The exact migration strategy belongs in `07_Database.md` and `09_SQLSchema.md`.
+`schema_migrations` remains bootstrap-owned migration-engine infrastructure and is not duplicated in `0001_core.sql`. The exact migration strategy belongs in `07_Database.md` and `09_SQLSchema.md`.
+
+```text
+0001_core.sql: VERIFIED — 2026-09-03 — full database suite PASS, 40 tests
+```
 
 ---
 
@@ -318,6 +323,20 @@ categories
 tags
 companies
 contacts
+```
+
+Implement this phase as separate vertical slices:
+
+```text
+0002_taxonomy.sql
+→ categories
+→ tags
+
+0003_companies_contacts.sql
+→ companies
+→ company_notes
+→ company_links
+→ contacts
 ```
 
 Include:

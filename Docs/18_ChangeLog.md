@@ -47,7 +47,67 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
-# 3. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
+# 3. 2026-09-03 — First Versioned Core Migration
+
+## Architecture Decision
+
+- Established `schema_migrations` as bootstrap-owned migration-engine infrastructure created before versioned migrations run.
+- Kept `schema_migrations` out of `0001_core.sql`, avoiding duplicate and circular ownership.
+
+## Implementation
+
+- Added `Database\Migrations\0001_core.sql` as the first versioned application-schema migration.
+- Added only the canonical `application_metadata` table; no business-domain table, seed data, repository, service or GUI was added.
+- Corrected the unreleased migration so `metadata_key TEXT NOT NULL PRIMARY KEY` enforces the documented required-key contract in SQLite.
+- Added isolated permanent tests for fresh application, history recording, checksum validation, idempotency, exact structure, constraints, rollback and integrity.
+- Changed no production Python infrastructure because the existing bootstrap behavior already implemented the correct ownership model.
+
+## Validation
+
+```text
+Focused core-migration tests: PASS — 5 tests
+Full database suite: PASS — 40 tests
+PRAGMA integrity_check: PASS
+PRAGMA foreign_key_check: PASS
+NULL metadata_key rejection: PASS
+Development database isolation: PASS
+```
+
+---
+
+# 4. 2026-09-03 — Slice 001 Verification Follow-Ups
+
+## Git State
+
+- Confirmed the local Git repository is present on `main`.
+- Confirmed the local baseline exists and two local commits were present at verification time.
+- Confirmed `origin` is configured as `git@github.com:JDecelles1990/F7Hub.git`.
+- Confirmed `origin/main` is not yet present; remote publication remains pending.
+- Recorded that a focused pre-Slice-001 Git diff is unavailable because no earlier baseline commit exists.
+
+## Regression Coverage
+
+- Promoted seven independently verified SQLite migration behaviors into permanent `unittest` coverage.
+- Added coverage for renamed migrations, quoted/comment semicolons, transaction-control denial, `ATTACH`/`DETACH` denial, rollback state, the exact migration-history structure, and its nonnegative execution-time constraint.
+- Changed no production SQLite implementation because the permanent tests confirmed the existing behavior.
+
+## Documentation
+
+- Updated current Git status in `ROOT.md` and current Git/test readiness in `17_Todo.md`.
+- Preserved earlier ChangeLog statements as historical observations rather than rewriting them as current state.
+
+## Validation
+
+```text
+Permanent database infrastructure tests: PASS — 35 tests
+Focused new regression tests: PASS — 7 tests
+Production SQLite source changes: NONE
+origin/main publication: PENDING
+```
+
+---
+
+# 5. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
 
 ## Security Cleanup
 
@@ -84,7 +144,7 @@ The tests used temporary file-backed databases and did not create or modify `Dat
 
 ---
 
-# 4. 2026-09-02 — Documentation Consistency Review
+# 6. 2026-09-02 — Documentation Consistency Review
 
 ## Scope
 
@@ -171,7 +231,7 @@ The SQLite checks validate the documented DDL, not migrations or runtime applica
 
 ---
 
-# 5. 2026-09-02 — Canonical Architecture Baseline
+# 7. 2026-09-02 — Canonical Architecture Baseline
 
 The documentation baseline established these project decisions:
 
@@ -190,7 +250,7 @@ The documentation baseline established these project decisions:
 
 ---
 
-# 6. Superseded Directions
+# 8. Superseded Directions
 
 The following earlier directions were replaced by the canonical architecture:
 
@@ -210,7 +270,7 @@ Archived documents and legacy diagrams do not override these decisions.
 
 ---
 
-# 7. Maintenance Rule
+# 9. Maintenance Rule
 
 Record only meaningful completed changes here.
 

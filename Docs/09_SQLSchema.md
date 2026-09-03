@@ -146,18 +146,19 @@ Current implementation status:
 SCHEMA DESIGN: REVIEW
 SCHEMA DDL VALIDATION: PASS
 MIGRATION INFRASTRUCTURE: VERIFIED
+CORE APPLICATION MIGRATION: VERIFIED — 0001_core.sql
 BUSINESS-DOMAIN MIGRATIONS: PLANNED
 REPOSITORIES: PLANNED
-ISOLATED DATABASE INFRASTRUCTURE TESTS: PASS — 28 tests
+ISOLATED DATABASE TESTS: PASS — 40 tests
 ```
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. No business-domain migration, repository or application schema was added. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migration `0001_core.sql` now creates only `application_metadata`; no business-domain migration or repository was added. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 The documented `CREATE` blocks were executed in order against a fresh in-memory SQLite database on 2026-09-02. All 71 DDL blocks executed successfully; `PRAGMA integrity_check` returned `ok` and `PRAGMA foreign_key_check` returned zero violations. This validates the documented DDL only, not application migrations or runtime behavior.
 
 A table appearing in this document does not mean the corresponding migration has already been implemented.
 
-The `schema_migrations` table is the exception: the verified bootstrap infrastructure creates it directly as migration-state infrastructure before applying migration files.
+The `schema_migrations` table is the exception: the verified bootstrap infrastructure creates it directly as migration-engine infrastructure before applying versioned migration files. It is not recreated by `0001_core.sql`.
 
 ---
 
@@ -905,6 +906,15 @@ CREATE TABLE schema_migrations (
 );
 ```
 
+Ownership:
+
+```text
+Migration bootstrap infrastructure
+→ creates schema_migrations
+→ validates versioned migration history
+→ applies 0001_core.sql and later migrations
+```
+
 ---
 
 # 30. `application_metadata`
@@ -933,10 +943,16 @@ DDL:
 
 ```sql
 CREATE TABLE application_metadata (
-    metadata_key TEXT PRIMARY KEY,
+    metadata_key TEXT NOT NULL PRIMARY KEY,
     metadata_value TEXT NOT NULL,
     updated_at TEXT NOT NULL
 );
+```
+
+Implementation status:
+
+```text
+VERIFIED — created by Database\Migrations\0001_core.sql
 ```
 
 ---

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import sqlite3
 import tempfile
 import unittest
 
@@ -12,7 +13,9 @@ from f7hub.infrastructure.migrations import (
     MigrationChecksumError,
     MigrationHistoryError,
     discover_migrations,
+    initialize_migration_table,
     list_applied_migrations,
+    run_migrations,
 )
 
 
@@ -31,6 +34,33 @@ class MigrationTests(unittest.TestCase):
         migration_path = self.migrations_dir / filename
         migration_path.write_text(sql, encoding="utf-8")
         return migration_path
+
+    def assert_rejected_migration_rolls_back(
+        self,
+        *,
+        database_path: Path,
+        migrations_dir: Path,
+        sql: str,
+    ) -> None:
+        migrations_dir.mkdir(parents=True)
+        (migrations_dir / "0001_rejected.sql").write_text(sql, encoding="utf-8")
+
+        with self.assertRaises(MigrationApplicationError):
+            bootstrap_database(database_path, migrations_dir)
+
+        with database_connection(database_path) as connection:
+            partial_table_count = connection.execute(
+                "SELECT COUNT(*) FROM sqlite_master WHERE name = ?",
+                ("partial_items",),
+            ).fetchone()[0]
+            migration_count = connection.execute(
+                "SELECT COUNT(*) FROM schema_migrations"
+            ).fetchone()[0]
+            connection_is_usable = connection.execute("SELECT 1").fetchone()[0]
+
+        self.assertEqual(partial_table_count, 0)
+        self.assertEqual(migration_count, 0)
+        self.assertEqual(connection_is_usable, 1)
 
     def test_empty_migration_directory_initializes_schema_migrations(self) -> None:
         result = bootstrap_database(self.database_path, self.migrations_dir)
@@ -184,6 +214,14 @@ class MigrationTests(unittest.TestCase):
         with self.assertRaises(MigrationChecksumError):
             bootstrap_database(self.database_path, self.migrations_dir)
 
+    def test_rejects_renamed_applied_migration(self) -> None:
+        migration_path = self.write_migration("0001_core.sql", "SELECT 1;")
+        bootstrap_database(self.database_path, self.migrations_dir)
+        migration_path.rename(self.migrations_dir / "0001_renamed.sql")
+
+        with self.assertRaises(MigrationHistoryError):
+            bootstrap_database(self.database_path, self.migrations_dir)
+
     def test_rejects_missing_applied_migration_file(self) -> None:
         migration_path = self.write_migration("0001_core.sql", "SELECT 1;")
         bootstrap_database(self.database_path, self.migrations_dir)
@@ -259,6 +297,198 @@ class MigrationTests(unittest.TestCase):
                 ("escaped_items", "never_created"),
             ).fetchone()[0]
         self.assertEqual(escaped_table_count, 0)
+
+    def test_rejects_migration_authored_transaction_control(self) -> None:
+        transaction_statements = (
+            "BEGIN;",
+            "COMMIT;",
+            "ROLLBACK;",
+            "SAVEPOINT migration_scope;",
+        )
+
+        for index, transaction_statement in enumerate(transaction_statements):
+            with self.subTest(statement=transaction_statement):
+                case_path = self.temporary_path / f"transaction_control_{index}"
+                self.assert_rejected_migration_rolls_back(
+                    database_path=case_path / "database.db",
+                    migrations_dir=case_path / "migrations",
+                    sql=f"""
+                    CREATE TABLE partial_items (
+                        item_id INTEGER PRIMARY KEY,
+                        value TEXT NOT NULL
+                    );
+                    INSERT INTO partial_items (value) VALUES ('temporary');
+                    {transaction_statement}
+                    CREATE TABLE unreachable_items (item_id INTEGER PRIMARY KEY);
+                    """,
+                )
+
+    def test_rejects_migration_authored_attach(self) -> None:
+        case_path = self.temporary_path / "attach"
+        self.assert_rejected_migration_rolls_back(
+            database_path=case_path / "database.db",
+            migrations_dir=case_path / "migrations",
+            sql="""
+            CREATE TABLE partial_items (
+                item_id INTEGER PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+            INSERT INTO partial_items (value) VALUES ('temporary');
+            ATTACH DATABASE ':memory:' AS external_database;
+            """,
+        )
+
+    def test_rejects_migration_authored_detach(self) -> None:
+        self.write_migration(
+            "0001_detach.sql",
+            """
+            CREATE TABLE partial_items (
+                item_id INTEGER PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+            INSERT INTO partial_items (value) VALUES ('temporary');
+            DETACH DATABASE external_database;
+            """,
+        )
+
+        with database_connection(self.database_path) as connection:
+            initialize_migration_table(connection)
+            connection.execute("ATTACH DATABASE ':memory:' AS external_database")
+
+            with self.assertRaises(MigrationApplicationError):
+                run_migrations(connection, discover_migrations(self.migrations_dir))
+
+            partial_table_count = connection.execute(
+                "SELECT COUNT(*) FROM sqlite_master WHERE name = ?",
+                ("partial_items",),
+            ).fetchone()[0]
+            migration_count = connection.execute(
+                "SELECT COUNT(*) FROM schema_migrations"
+            ).fetchone()[0]
+            connection_is_usable = connection.execute("SELECT 1").fetchone()[0]
+
+        self.assertEqual(partial_table_count, 0)
+        self.assertEqual(migration_count, 0)
+        self.assertEqual(connection_is_usable, 1)
+
+    def test_parses_semicolons_inside_quoted_values_and_comments(self) -> None:
+        self.write_migration(
+            "0001_semicolons.sql",
+            """
+            CREATE TABLE parsed_values (value TEXT NOT NULL);
+            -- A line-comment semicolon ; must not split the statement.
+            INSERT INTO parsed_values (value) VALUES ('alpha;beta');
+            /* A block-comment semicolon ; must not split the statement. */
+            INSERT INTO parsed_values (value) VALUES ('gamma;delta');
+            """,
+        )
+
+        bootstrap_database(self.database_path, self.migrations_dir)
+
+        with database_connection(self.database_path) as connection:
+            values = tuple(
+                row[0]
+                for row in connection.execute(
+                    "SELECT value FROM parsed_values ORDER BY rowid"
+                ).fetchall()
+            )
+
+        self.assertEqual(values, ("alpha;beta", "gamma;delta"))
+
+    def test_schema_migrations_has_approved_structure_and_constraints(self) -> None:
+        bootstrap_database(self.database_path, self.migrations_dir)
+
+        with database_connection(self.database_path) as connection:
+            columns = tuple(
+                (row[1], row[2], row[3], row[5])
+                for row in connection.execute(
+                    "PRAGMA table_info(schema_migrations)"
+                ).fetchall()
+            )
+            table_ddl = connection.execute(
+                """
+                SELECT sql
+                FROM sqlite_master
+                WHERE type = 'table' AND name = ?
+                """,
+                ("schema_migrations",),
+            ).fetchone()[0]
+
+            connection.execute(
+                """
+                INSERT INTO schema_migrations (
+                    version,
+                    name,
+                    checksum_sha256,
+                    applied_at,
+                    execution_ms
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (1, "core", "a" * 64, "2026-09-03T00:00:00.000Z", 0),
+            )
+            with self.assertRaises(sqlite3.IntegrityError):
+                connection.execute(
+                    """
+                    INSERT INTO schema_migrations (
+                        version,
+                        name,
+                        checksum_sha256,
+                        applied_at,
+                        execution_ms
+                    ) VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (1, "duplicate", "b" * 64, "2026-09-03T00:00:01.000Z", 1),
+                )
+            with self.assertRaises(sqlite3.IntegrityError):
+                connection.execute(
+                    """
+                    INSERT INTO schema_migrations (
+                        version,
+                        name,
+                        checksum_sha256,
+                        applied_at,
+                        execution_ms
+                    ) VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (2, None, "c" * 64, "2026-09-03T00:00:02.000Z", 1),
+                )
+
+        self.assertEqual(
+            columns,
+            (
+                ("version", "INTEGER", 0, 1),
+                ("name", "TEXT", 1, 0),
+                ("checksum_sha256", "TEXT", 1, 0),
+                ("applied_at", "TEXT", 1, 0),
+                ("execution_ms", "INTEGER", 1, 0),
+            ),
+        )
+        self.assertIn("CHECK (execution_ms >= 0)", table_ddl)
+
+    def test_schema_migrations_rejects_negative_execution_time(self) -> None:
+        bootstrap_database(self.database_path, self.migrations_dir)
+
+        with database_connection(self.database_path) as connection:
+            with self.assertRaises(sqlite3.IntegrityError):
+                connection.execute(
+                    """
+                    INSERT INTO schema_migrations (
+                        version,
+                        name,
+                        checksum_sha256,
+                        applied_at,
+                        execution_ms
+                    ) VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (1, "invalid", "a" * 64, "2026-09-03T00:00:00.000Z", -1),
+                )
+            migration_count = connection.execute(
+                "SELECT COUNT(*) FROM schema_migrations"
+            ).fetchone()[0]
+            connection_is_usable = connection.execute("SELECT 1").fetchone()[0]
+
+        self.assertEqual(migration_count, 0)
+        self.assertEqual(connection_is_usable, 1)
 
     def test_trigger_body_is_parsed_as_one_complete_statement(self) -> None:
         self.write_migration(
