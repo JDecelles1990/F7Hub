@@ -3216,12 +3216,12 @@ Before substantial implementation begins:
 [x] Existing Python runtime located and used for isolated infrastructure tests
 ```
 
-Consistency review work is complete. Document acceptance remains `REVIEW` pending user approval. The local Git baseline, migration infrastructure, migrations through `0003_companies_contacts.sql`, and company/contact repositories are verified. Publication of local `main` to an upstream branch remains pending.
+Consistency review work is complete. Document acceptance remains `REVIEW` pending user approval. The local Git baseline, migration infrastructure, migrations through the ticket-core schema in `0004_tickets.sql`, and company/contact repositories are verified. Publication of local `main` to an upstream branch remains pending.
 
 The next implementation target is:
 
 ```text
-Ticket creation persistence through a tested TicketRepository and TicketService boundary
+Ticket creation persistence through a tested `TicketRepository` boundary, followed by `TicketService` validation and transaction coordination
 ```
 
 ---

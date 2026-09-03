@@ -75,13 +75,14 @@ SQL Schema
 
 # 3. Current ERD Status
 
-This document defines the intended logical data model. Repository inspection and tests on 2026-09-03 verified the bootstrap-owned `schema_migrations` infrastructure, the versioned core and taxonomy tables, the company/contact tables through `0003_companies_contacts.sql`, and the Python company/contact repositories. Remaining business domains are planned.
+This document defines the intended logical data model. Repository inspection and tests on 2026-09-03 verified the bootstrap-owned `schema_migrations` infrastructure, the versioned core and taxonomy tables, the company/contact tables through `0003_companies_contacts.sql`, the ticket-core tables through `0004_tickets.sql`, and the Python company/contact repositories. Remaining business domains and the ticket repository/service boundary are planned.
 
 ```text
 schema_migrations infrastructure: VERIFIED
 application_metadata implementation status: VERIFIED
 Taxonomy implementation status: VERIFIED
 Company/contact schema and repository status: VERIFIED
+Ticket-core schema status: VERIFIED
 Remaining business-domain ERD implementation status: PLANNED
 ```
 
@@ -1904,10 +1905,10 @@ Canonical conceptual inventory:
 | Companies | company_notes | Company technical notes | VERIFIED |
 | Companies | company_links | Company resources | VERIFIED |
 | Contacts | contacts | Supported contacts | VERIFIED |
-| Tickets | tickets | Support cases | PLANNED |
-| Tickets | ticket_notes | Ticket documentation | PLANNED |
-| Tickets | ticket_status_history | Status transitions | PLANNED |
-| Tickets | ticket_timeline_events | Unified case history | PLANNED |
+| Tickets | tickets | Support cases | VERIFIED |
+| Tickets | ticket_notes | Ticket documentation | VERIFIED |
+| Tickets | ticket_status_history | Status transitions | VERIFIED |
+| Tickets | ticket_timeline_events | Unified case history | VERIFIED |
 | Tickets | ticket_attachments | Attachment metadata | PLANNED |
 | Tickets | ticket_relationships | Ticket-to-ticket links | PLANNED |
 | Tickets | ticket_tags | Ticket/tag junction | PLANNED |
@@ -1938,7 +1939,7 @@ Canonical conceptual inventory:
 | Workspaces | workspace_panels | Optional normalized panel state | DEFERRED |
 | Integrations | external_entity_mappings | Generic external mapping concept | DEFERRED |
 
-The 39 `PLANNED` entities match the baseline relational table inventory in `09_SQLSchema.md`. Deferred concepts require a later approved schema decision.
+The baseline entities match the relational table inventory in `09_SQLSchema.md`. Implementation statuses distinguish verified migrations from planned tables, and deferred concepts require a later approved schema decision.
 
 ---
 
@@ -1983,6 +1984,10 @@ ticket_timeline_events
 ```
 
 Attachments, relationships and tagging may follow when required by the ticket workflow.
+
+```text
+Status: VERIFIED — 0004_tickets.sql — 2026-09-03 — 10 focused tests; 79 full database tests
+```
 
 ---
 

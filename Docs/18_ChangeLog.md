@@ -47,7 +47,32 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
-# 3. 2026-09-03 — Company and Contact Repositories
+# 3. 2026-09-03 — Ticket Core Schema Migration
+
+## Implementation
+
+- Added `Database\Migrations\0004_tickets.sql` with the canonical `tickets`, `ticket_notes`, `ticket_status_history` and `ticket_timeline_events` tables.
+- Added the nine documented ticket and ticket-detail indexes.
+- Preserved nullable company, contact and category relationships through `ON DELETE SET NULL` and owned ticket-detail rows through `ON DELETE CASCADE`.
+- Preserved the slice as schema-only: no repository, service, GUI, attachment, relationship, tagging or FTS implementation was added.
+
+## Validation
+
+```text
+Focused ticket migration tests: PASS — 10 tests
+Full database suite: PASS — 79 tests
+Migration ordering, checksum and idempotency: PASS
+Ticket constraints, defaults and foreign-key behavior: PASS
+Owned-row cascade and nullable-reference delete behavior: PASS
+Failed ticket migration rollback: PASS
+PRAGMA integrity_check: PASS
+PRAGMA foreign_key_check: PASS
+Development database isolation: PASS
+```
+
+---
+
+# 4. 2026-09-03 — Company and Contact Repositories
 
 ## Implementation
 
@@ -70,7 +95,7 @@ Company deletion preserves contacts with a null company reference: PASS
 
 ---
 
-# 4. 2026-09-03 — Company and Contact Schema Migration
+# 5. 2026-09-03 — Company and Contact Schema Migration
 
 ## Implementation
 
@@ -95,7 +120,7 @@ Development database isolation: PASS
 
 ---
 
-# 5. 2026-09-03 — Taxonomy Schema Migration
+# 6. 2026-09-03 — Taxonomy Schema Migration
 
 ## Implementation
 
@@ -119,7 +144,7 @@ Development database isolation: PASS
 
 ---
 
-# 6. 2026-09-03 — First Versioned Core Migration
+# 7. 2026-09-03 — First Versioned Core Migration
 
 ## Architecture Decision
 
@@ -147,7 +172,7 @@ Development database isolation: PASS
 
 ---
 
-# 7. 2026-09-03 — Slice 001 Verification Follow-Ups
+# 8. 2026-09-03 — Slice 001 Verification Follow-Ups
 
 ## Git State
 
@@ -179,7 +204,7 @@ origin/main publication: PENDING
 
 ---
 
-# 8. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
+# 9. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
 
 ## Security Cleanup
 
@@ -216,7 +241,7 @@ The tests used temporary file-backed databases and did not create or modify `Dat
 
 ---
 
-# 9. 2026-09-02 — Documentation Consistency Review
+# 10. 2026-09-02 — Documentation Consistency Review
 
 ## Scope
 
@@ -303,7 +328,7 @@ The SQLite checks validate the documented DDL, not migrations or runtime applica
 
 ---
 
-# 10. 2026-09-02 — Canonical Architecture Baseline
+# 11. 2026-09-02 — Canonical Architecture Baseline
 
 The documentation baseline established these project decisions:
 
@@ -322,7 +347,7 @@ The documentation baseline established these project decisions:
 
 ---
 
-# 11. Superseded Directions
+# 12. Superseded Directions
 
 The following earlier directions were replaced by the canonical architecture:
 
@@ -342,7 +367,7 @@ Archived documents and legacy diagrams do not override these decisions.
 
 ---
 
-# 12. Maintenance Rule
+# 13. Maintenance Rule
 
 Record only meaningful completed changes here.
 

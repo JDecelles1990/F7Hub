@@ -38,9 +38,10 @@ SQLite migration infrastructure: VERIFIED
 Core application migration — 0001_core.sql: VERIFIED
 Taxonomy migration — 0002_taxonomy.sql: VERIFIED
 Company/contact migration — 0003_companies_contacts.sql: VERIFIED
+Ticket-core migration — 0004_tickets.sql: VERIFIED
 CompanyRepository and ContactRepository: VERIFIED
 Remaining business-domain migrations: PLANNED
-Permanent isolated database tests: PASS — 69 tests
+Permanent isolated database tests: PASS — 79 tests
 Local Git repository and baseline: PRESENT
 Remote origin: CONFIGURED
 origin/main publication: PENDING
@@ -194,12 +195,22 @@ Status: PASS — 5 CompanyRepository tests; 5 ContactRepository tests; 69 full d
 
 # 9. P1 — Fourth Persistence Slice: Tickets
 
-After taxonomy, companies and contacts are tested:
+The schema-only ticket slice was completed and verified on 2026-09-03:
 
-- [ ] Implement ticket creation persistence.
-- [ ] Implement `TicketRepository` and `TicketService` validation.
-- [ ] Create initial status history transactionally with the ticket where required.
-- [ ] Test constraints, foreign keys, rollback and reload behavior.
+- [x] Create `Database\Migrations\0004_tickets.sql`.
+- [x] Implement `tickets`, `ticket_notes`, `ticket_status_history` and `ticket_timeline_events` from the approved physical schema.
+- [x] Add the nine documented ticket-core indexes.
+- [x] Test migration ordering, checksum validation, idempotency, constraints, foreign keys, delete behavior, rollback and integrity.
+
+```text
+Status: PASS — 10 focused ticket migration tests; 79 full database tests
+```
+
+Next repository/service slices:
+
+- [ ] Implement `TicketRepository` creation and reload behavior with focused persistence and rollback tests.
+- [ ] Implement `TicketService` validation and transaction coordination as a separate slice.
+- [ ] Create initial status history and timeline records transactionally with the ticket.
 
 The minimal PyQt6 ticket workflow follows as a separate slice using the tested service boundary.
 

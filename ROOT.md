@@ -51,9 +51,9 @@ Remaining Python application implementation: PLANNED
 PowerShell implementation: PLANNED
 AutoHotkey implementation: PLANNED
 Migration infrastructure: VERIFIED
-Business-domain migrations through 0003: VERIFIED
+Business-domain migrations through 0004: VERIFIED
 Remaining business-domain migrations and repositories: PLANNED
-Isolated database tests: PASS — 69 tests
+Isolated database tests: PASS — 79 tests
 Git baseline: PRESENT — local main; origin configured
 Project-local .agents/skills/: NOT PRESENT
 ```
@@ -288,9 +288,9 @@ Verified scope:
 - transactional migration execution
 - isolated database tests
 
-No business-domain migration was added. Taxonomy, companies, contacts, tickets, GUI, PowerShell, AutoHotkey, AI, diagnostics and plugins remain outside the completed first task.
+Subsequent verified slices added taxonomy, company/contact schema and repositories, and the ticket-core schema through `0004_tickets.sql`. No ticket repository, application service, GUI, PowerShell, AutoHotkey, AI, diagnostic or plugin implementation has been added.
 
-The next independently reviewed implementation slice is taxonomy, companies and contacts persistence with its focused migrations, repositories, validation and tests.
+The next independently reviewed implementation slice is the `TicketRepository` persistence boundary with focused success, failure and transaction tests.
 
 The exact task contract is defined in `AGENTS.md`; the wider sequence belongs to `Docs/16_Roadmap.md`.
 

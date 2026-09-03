@@ -92,12 +92,13 @@ Validation and test results use `PASS`, `FAIL`, `NOT RUN`, or `BLOCKED`.
 
 # 4. Current Project Status
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection and migration infrastructure, migrations through `0003_companies_contacts.sql`, and the company/contact repositories. No application service, GUI, PowerShell, AutoHotkey or ticket implementation exists yet.
+Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection and migration infrastructure, migrations through the ticket-core schema in `0004_tickets.sql`, and the company/contact repositories. No application service, GUI, PowerShell, AutoHotkey or ticket repository exists yet.
 
 ```text
 Documentation consistency review: IN PROGRESS
 Phase 1A migration infrastructure: VERIFIED
 Phase 1B taxonomy and company/contact persistence: VERIFIED
+Phase 1C ticket-core schema migration: VERIFIED
 Remaining application implementation: PLANNED
 ```
 
@@ -376,6 +377,11 @@ ticket_timeline_events
 
 Do not build attachments, relationships, advanced taxonomy, and external sync prematurely.
 
+```text
+0004_tickets.sql: VERIFIED — 2026-09-03 — 10 focused tests; 79 full database tests
+TicketRepository and TicketService: PLANNED
+```
+
 ---
 
 # 14. Phase 1 Acceptance Criteria
@@ -383,8 +389,8 @@ Do not build attachments, relationships, advanced taxonomy, and external sync pr
 Database foundation is ready when:
 
 ```text
-[ ] Companies persist correctly
-[ ] Contacts persist correctly
+[x] Companies persist correctly
+[x] Contacts persist correctly
 [ ] Tickets persist correctly
 [ ] Ticket notes persist correctly
 [ ] Ticket status history is preserved

@@ -149,13 +149,14 @@ MIGRATION INFRASTRUCTURE: VERIFIED
 CORE APPLICATION MIGRATION: VERIFIED — 0001_core.sql
 TAXONOMY MIGRATION: VERIFIED — 0002_taxonomy.sql
 COMPANY/CONTACT MIGRATION: VERIFIED — 0003_companies_contacts.sql
+TICKET-CORE MIGRATION: VERIFIED — 0004_tickets.sql
 REMAINING BUSINESS-DOMAIN MIGRATIONS: PLANNED
 COMPANY/CONTACT REPOSITORIES: VERIFIED
 REMAINING REPOSITORIES: PLANNED
-ISOLATED DATABASE TESTS: PASS — 69 tests
+ISOLATED DATABASE TESTS: PASS — 79 tests
 ```
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migration `0001_core.sql` creates only `application_metadata`, `0002_taxonomy.sql` creates shared taxonomy, and `0003_companies_contacts.sql` creates the canonical company/contact tables and indexes. `CompanyRepository` and `ContactRepository` now implement the approved Python persistence boundary without changing the production schema. No service, GUI or ticket persistence was added. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migration `0001_core.sql` creates only `application_metadata`, `0002_taxonomy.sql` creates shared taxonomy, `0003_companies_contacts.sql` creates the canonical company/contact tables and indexes, and `0004_tickets.sql` creates the canonical ticket-core tables and indexes. `CompanyRepository` and `ContactRepository` implement the approved Python persistence boundary. No ticket repository, service or GUI was added. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 The documented `CREATE` blocks were executed in order against a fresh in-memory SQLite database on 2026-09-02. All 71 DDL blocks executed successfully; `PRAGMA integrity_check` returned `ok` and `PRAGMA foreign_key_check` returned zero violations. This validates the documented DDL only, not application migrations or runtime behavior.
 
@@ -5823,6 +5824,10 @@ ticket_timeline_events
 ```
 
 Attachments, relationships, and tagging may be added as the ticket workflow expands.
+
+```text
+Status: VERIFIED — 0004_tickets.sql — 2026-09-03 — 10 focused tests; 79 full database tests
+```
 
 ---
 
