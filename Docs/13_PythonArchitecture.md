@@ -3261,19 +3261,20 @@ However, full localization infrastructure should not be added until justified.
 
 # 176. Current Implementation Status
 
-Repository inspection and tests on 2026-09-03 verified the SQLite infrastructure under `Python\f7hub\infrastructure\`. No GUI, application service, domain model or business repository has been implemented.
+Repository inspection and tests on 2026-09-03 verified the SQLite infrastructure under `Python\f7hub\infrastructure\` and the company/contact persistence boundaries under `Python\f7hub\repositories\`. `CompanyRepository` and `ContactRepository` return frozen structured records and use parameterized SQL through configured SQLite connections. No GUI, application service, domain model, ticket repository or other business repository has been implemented.
 
 ```text
 Python SQLite infrastructure: VERIFIED
+CompanyRepository and ContactRepository: VERIFIED
 Remaining Python application implementation: PLANNED
-Isolated database tests: PASS — 28 tests
+Isolated database tests: PASS — 69 tests
 ```
 
 This verification does not prove that:
 
 - PyQt6 is installed
 - GUI or application bootstrap exists
-- business repositories exist
+- business repositories beyond companies and contacts exist
 - services exist
 - PowerShell integration exists
 - tests outside the isolated database infrastructure suite pass

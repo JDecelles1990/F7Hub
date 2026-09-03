@@ -1892,26 +1892,27 @@ Explicit review is required before:
 
 # 93. Current Implementation Status
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migrations now create `application_metadata` through `0001_core.sql`, shared taxonomy through `0002_taxonomy.sql`, and the company/contact persistence schema through `0003_companies_contacts.sql`. No business repository has been implemented. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migrations now create `application_metadata` through `0001_core.sql`, shared taxonomy through `0002_taxonomy.sql`, and the company/contact persistence schema through `0003_companies_contacts.sql`. `CompanyRepository` and `ContactRepository` provide parameterized create, read, list, update and activation-state persistence through the approved Python repository boundary. No application service, GUI or ticket persistence has been implemented. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 ```text
 SQLite migration infrastructure: VERIFIED
 Core application schema — application_metadata: VERIFIED
 Taxonomy schema — categories and tags: VERIFIED
 Company/contact schema — companies, notes, links and contacts: VERIFIED
+Company/contact repositories: VERIFIED
 Remaining business database implementation: PLANNED
-Isolated database tests: PASS — 59 tests
+Isolated database tests: PASS — 69 tests
 ```
 
 This document defines the intended database architecture beyond the verified infrastructure slice.
 
 It must not be interpreted as proof that:
 
-- business-domain tables exist
-- business-domain migrations exist
-- indexes exist
+- business-domain tables beyond the company/contact slice exist
+- business-domain migrations beyond `0003_companies_contacts.sql` exist
+- indexes beyond the verified migrations exist
 - FTS5 is configured
-- repositories exist
+- repositories beyond `CompanyRepository` and `ContactRepository` exist
 - tests outside the isolated database infrastructure suite pass
 
 ---

@@ -47,7 +47,30 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
-# 3. 2026-09-03 — Company and Contact Schema Migration
+# 3. 2026-09-03 — Company and Contact Repositories
+
+## Implementation
+
+- Added `Python\f7hub\repositories\` with explicit `CompanyRepository` and `ContactRepository` persistence boundaries.
+- Added frozen `CompanyRecord` and `ContactRecord` return values rather than exposing SQLite rows or cursors.
+- Implemented parameterized create, read, stable list, update and activation-state operations, plus company-code lookup and contact filtering by company.
+- Preserved the slice as repository-only: no production schema, migration, service, GUI, ticket or dependency change was added.
+
+## Validation
+
+```text
+CompanyRepository tests: PASS — 5 tests
+ContactRepository tests: PASS — 5 tests
+Full database suite: PASS — 69 tests
+Constraint and foreign-key behavior: PASS
+Stable ordering and active filtering: PASS
+SQL-looking input treated as data: PASS
+Company deletion preserves contacts with a null company reference: PASS
+```
+
+---
+
+# 4. 2026-09-03 — Company and Contact Schema Migration
 
 ## Implementation
 
@@ -72,7 +95,7 @@ Development database isolation: PASS
 
 ---
 
-# 4. 2026-09-03 — Taxonomy Schema Migration
+# 5. 2026-09-03 — Taxonomy Schema Migration
 
 ## Implementation
 
@@ -96,7 +119,7 @@ Development database isolation: PASS
 
 ---
 
-# 5. 2026-09-03 — First Versioned Core Migration
+# 6. 2026-09-03 — First Versioned Core Migration
 
 ## Architecture Decision
 
@@ -124,7 +147,7 @@ Development database isolation: PASS
 
 ---
 
-# 6. 2026-09-03 — Slice 001 Verification Follow-Ups
+# 7. 2026-09-03 — Slice 001 Verification Follow-Ups
 
 ## Git State
 
@@ -156,7 +179,7 @@ origin/main publication: PENDING
 
 ---
 
-# 7. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
+# 8. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
 
 ## Security Cleanup
 
@@ -193,7 +216,7 @@ The tests used temporary file-backed databases and did not create or modify `Dat
 
 ---
 
-# 8. 2026-09-02 — Documentation Consistency Review
+# 9. 2026-09-02 — Documentation Consistency Review
 
 ## Scope
 
@@ -280,7 +303,7 @@ The SQLite checks validate the documented DDL, not migrations or runtime applica
 
 ---
 
-# 9. 2026-09-02 — Canonical Architecture Baseline
+# 10. 2026-09-02 — Canonical Architecture Baseline
 
 The documentation baseline established these project decisions:
 
@@ -299,7 +322,7 @@ The documentation baseline established these project decisions:
 
 ---
 
-# 10. Superseded Directions
+# 11. Superseded Directions
 
 The following earlier directions were replaced by the canonical architecture:
 
@@ -319,7 +342,7 @@ Archived documents and legacy diagrams do not override these decisions.
 
 ---
 
-# 11. Maintenance Rule
+# 12. Maintenance Rule
 
 Record only meaningful completed changes here.
 

@@ -46,12 +46,14 @@ Repository inspection performed on 2026-09-03 found:
 Canonical Docs/00–19 files: PRESENT
 Canonical top-level directories: PRESENT
 Python SQLite infrastructure: VERIFIED
+Company/contact repositories: VERIFIED
 Remaining Python application implementation: PLANNED
 PowerShell implementation: PLANNED
 AutoHotkey implementation: PLANNED
 Migration infrastructure: VERIFIED
-Business-domain migrations and repositories: PLANNED
-Isolated database tests: PASS — 28 tests
+Business-domain migrations through 0003: VERIFIED
+Remaining business-domain migrations and repositories: PLANNED
+Isolated database tests: PASS — 69 tests
 Git baseline: PRESENT — local main; origin configured
 Project-local .agents/skills/: NOT PRESENT
 ```

@@ -3212,16 +3212,16 @@ Before substantial implementation begins:
 [x] AGENTS.md final review
 [ ] Mermaid diagram organization
 [x] Repository inspection
-[ ] Git baseline
+[x] Git baseline
 [x] Existing Python runtime located and used for isolated infrastructure tests
 ```
 
-Consistency review work is complete. Document acceptance remains `REVIEW` pending user approval. The explicit 2026-09-03 implementation task authorized the first SQLite infrastructure slice before a Git baseline was established; Phase 1A is now verified, while the Git baseline remains pending.
+Consistency review work is complete. Document acceptance remains `REVIEW` pending user approval. The local Git baseline, migration infrastructure, migrations through `0003_companies_contacts.sql`, and company/contact repositories are verified. Publication of local `main` to an upstream branch remains pending.
 
-The next implementation target after deliberate Git-baseline review is:
+The next implementation target is:
 
 ```text
-Taxonomy, companies and contacts persistence
+Ticket creation persistence through a tested TicketRepository and TicketService boundary
 ```
 
 ---

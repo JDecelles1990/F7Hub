@@ -92,11 +92,12 @@ Validation and test results use `PASS`, `FAIL`, `NOT RUN`, or `BLOCKED`.
 
 # 4. Current Project Status
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection and migration infrastructure. No business-domain migration, repository, GUI, PowerShell or AutoHotkey implementation exists yet.
+Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection and migration infrastructure, migrations through `0003_companies_contacts.sql`, and the company/contact repositories. No application service, GUI, PowerShell, AutoHotkey or ticket implementation exists yet.
 
 ```text
 Documentation consistency review: IN PROGRESS
 Phase 1A migration infrastructure: VERIFIED
+Phase 1B taxonomy and company/contact persistence: VERIFIED
 Remaining application implementation: PLANNED
 ```
 
@@ -344,6 +345,7 @@ Implementation status:
 ```text
 0002_taxonomy.sql: VERIFIED — 2026-09-03 — full database suite PASS, 49 tests
 0003_companies_contacts.sql: VERIFIED — 2026-09-03 — full database suite PASS, 59 tests
+CompanyRepository and ContactRepository: VERIFIED — 2026-09-03 — 10 focused repository tests; 69 full database tests
 ```
 
 Include:

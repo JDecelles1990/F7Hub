@@ -75,12 +75,14 @@ SQL Schema
 
 # 3. Current ERD Status
 
-This document defines the intended logical data model. Repository inspection and tests on 2026-09-03 verified the bootstrap-owned `schema_migrations` infrastructure and the versioned `application_metadata` core table. No business-domain migrations or repositories exist in the canonical implementation trees.
+This document defines the intended logical data model. Repository inspection and tests on 2026-09-03 verified the bootstrap-owned `schema_migrations` infrastructure, the versioned core and taxonomy tables, the company/contact tables through `0003_companies_contacts.sql`, and the Python company/contact repositories. Remaining business domains are planned.
 
 ```text
 schema_migrations infrastructure: VERIFIED
 application_metadata implementation status: VERIFIED
-Business-domain ERD implementation status: PLANNED
+Taxonomy implementation status: VERIFIED
+Company/contact schema and repository status: VERIFIED
+Remaining business-domain ERD implementation status: PLANNED
 ```
 
 The planned baseline entities and relationships are aligned with the physical target in `09_SQLSchema.md`. Deferred concepts are labeled explicitly and are not part of the baseline physical schema.

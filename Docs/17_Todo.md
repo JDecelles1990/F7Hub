@@ -38,8 +38,9 @@ SQLite migration infrastructure: VERIFIED
 Core application migration — 0001_core.sql: VERIFIED
 Taxonomy migration — 0002_taxonomy.sql: VERIFIED
 Company/contact migration — 0003_companies_contacts.sql: VERIFIED
+CompanyRepository and ContactRepository: VERIFIED
 Remaining business-domain migrations: PLANNED
-Permanent isolated database tests: PASS — 59 tests
+Permanent isolated database tests: PASS — 69 tests
 Local Git repository and baseline: PRESENT
 Remote origin: CONFIGURED
 origin/main publication: PENDING
@@ -176,7 +177,22 @@ Status: PASS — 10 focused company/contact tests; 59 full database tests
 
 ---
 
-# 8. P1 — Fourth Persistence Slice: Tickets
+# 8. P1 — Company and Contact Repository Slice
+
+Before beginning ticket persistence, the company/contact repository follow-up was completed and verified on 2026-09-03:
+
+- [x] Add `CompanyRepository` with structured company records and parameterized create, read, list, update and activation operations.
+- [x] Add `ContactRepository` with structured contact records, company filtering and parameterized create, read, list, update and activation operations.
+- [x] Preserve database constraints, `ON DELETE SET NULL` contact behavior and SQL-injection resistance.
+- [x] Keep services, GUI, tickets, dependencies and production schema out of this repository-only slice.
+
+```text
+Status: PASS — 5 CompanyRepository tests; 5 ContactRepository tests; 69 full database tests
+```
+
+---
+
+# 9. P1 — Fourth Persistence Slice: Tickets
 
 After taxonomy, companies and contacts are tested:
 
@@ -189,7 +205,7 @@ The minimal PyQt6 ticket workflow follows as a separate slice using the tested s
 
 ---
 
-# 9. Repository Follow-Ups
+# 10. Repository Follow-Ups
 
 These are real repository issues found during documentation review but are not part of the documentation-only edit scope:
 
@@ -204,7 +220,7 @@ These are real repository issues found during documentation review but are not p
 
 ---
 
-# 10. Deferred Work
+# 11. Deferred Work
 
 The following remain `DEFERRED` until earlier foundations and real requirements justify them:
 
@@ -220,7 +236,7 @@ Long-term placement belongs in `16_Roadmap.md`.
 
 ---
 
-# 11. Rejected Directions
+# 12. Rejected Directions
 
 The following remain `REJECTED` unless an explicitly approved architecture change revisits them:
 
@@ -233,7 +249,7 @@ The following remain `REJECTED` unless an explicitly approved architecture chang
 
 ---
 
-# 12. Maintenance Rule
+# 13. Maintenance Rule
 
 Keep this file short and actionable.
 
