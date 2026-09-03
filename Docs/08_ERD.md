@@ -1898,10 +1898,10 @@ Canonical conceptual inventory:
 | Core | application_metadata | Store application-level metadata | VERIFIED |
 | Taxonomy | categories | Shared hierarchical classification | VERIFIED |
 | Taxonomy | tags | Shared flexible tags | VERIFIED |
-| Companies | companies | Supported organizations | PLANNED |
-| Companies | company_notes | Company technical notes | PLANNED |
-| Companies | company_links | Company resources | PLANNED |
-| Contacts | contacts | Supported contacts | PLANNED |
+| Companies | companies | Supported organizations | VERIFIED |
+| Companies | company_notes | Company technical notes | VERIFIED |
+| Companies | company_links | Company resources | VERIFIED |
+| Contacts | contacts | Supported contacts | VERIFIED |
 | Tickets | tickets | Support cases | PLANNED |
 | Tickets | ticket_notes | Ticket documentation | PLANNED |
 | Tickets | ticket_status_history | Status transitions | PLANNED |

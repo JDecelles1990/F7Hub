@@ -37,8 +37,9 @@ Documentation consistency review: IN PROGRESS
 SQLite migration infrastructure: VERIFIED
 Core application migration — 0001_core.sql: VERIFIED
 Taxonomy migration — 0002_taxonomy.sql: VERIFIED
+Company/contact migration — 0003_companies_contacts.sql: VERIFIED
 Remaining business-domain migrations: PLANNED
-Permanent isolated database tests: PASS — 49 tests
+Permanent isolated database tests: PASS — 59 tests
 Local Git repository and baseline: PRESENT
 Remote origin: CONFIGURED
 origin/main publication: PENDING
@@ -163,11 +164,15 @@ Status: PASS — 9 focused taxonomy tests; 49 full database tests
 
 # 7. P1 — Third Persistence Slice: Companies and Contacts
 
-After taxonomy is tested:
+Completed and verified on 2026-09-03:
 
-- [ ] Create `Database\Migrations\0003_companies_contacts.sql`.
-- [ ] Implement `companies`, `company_notes`, `company_links` and `contacts`.
-- [ ] Add focused repository, validation, relationship and failure-path tests.
+- [x] Create `Database\Migrations\0003_companies_contacts.sql`.
+- [x] Implement `companies`, `company_notes`, `company_links` and `contacts`.
+- [x] Add focused migration, constraint, relationship and failure-path tests.
+
+```text
+Status: PASS — 10 focused company/contact tests; 59 full database tests
+```
 
 ---
 
