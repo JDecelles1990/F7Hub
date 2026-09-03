@@ -1,0 +1,2150 @@
+﻿# F7Hub User Workflows
+
+> Document: `Docs/04_UserWorkflows.md`  
+> Project: F7Hub  
+> Purpose: Define how technicians interact with F7Hub to complete common IT support tasks.  
+> Scope: User journeys, workflow sequences, decision points and expected outcomes.  
+> Related Documents: `02_ProductRequirements.md`, `03_Features.md`, `05_GUI.md`, `06_SystemArchitecture.md`, `07_Database.md`
+
+---
+
+# 1. Purpose
+
+This document defines the principal user workflows of F7Hub.
+
+It answers:
+
+> How does the technician use F7Hub to accomplish real support work?
+
+This document focuses on:
+
+- technician actions
+- workflow sequences
+- decision points
+- expected results
+- feature interactions
+- failure and escalation paths
+
+It does not define:
+
+- exact GUI layouts
+- database tables
+- Python classes
+- PowerShell implementation details
+- SQL schemas
+
+Those belong in architecture-specific documents.
+
+---
+
+# 2. Workflow Philosophy
+
+F7Hub should guide technicians through useful workflows without forcing unnecessary steps.
+
+The primary support lifecycle is:
+
+```text
+Receive Work
+    ↓
+Understand Context
+    ↓
+Search Existing Knowledge
+    ↓
+Troubleshoot
+    ↓
+Run Diagnostics
+    ↓
+Use Approved Automation
+    ↓
+Evaluate Results
+    ↓
+Resolve or Escalate
+    ↓
+Document Work
+    ↓
+Preserve Knowledge
+```
+
+The technician remains in control throughout the workflow.
+
+---
+
+# 3. Workflow Principles
+
+All workflows should follow these principles:
+
+1. preserve context
+2. minimize repetitive navigation
+3. reuse existing information
+4. expose relevant knowledge early
+5. prefer deterministic troubleshooting where possible
+6. preserve technician control
+7. validate before privileged actions
+8. preserve useful history
+9. support failure and escalation paths
+10. avoid unnecessary duplication of work
+
+---
+
+# 4. Primary User Context
+
+F7Hub may maintain an active support context containing:
+
+```text
+Active Context
+│
+├── Ticket
+├── Company
+├── Contact
+├── Diagnostic Session
+└── Workspace
+```
+
+When practical, related modules should use this context.
+
+Example:
+
+Opening a ticket may automatically make its:
+
+- company
+- contact
+- related knowledge
+- diagnostics
+- scripts
+- timeline
+
+available to other modules.
+
+---
+
+# 5. Workflow Status
+
+The workflows in this document represent intended product behavior.
+
+Repository inspection determines whether these workflows exist:
+
+```text
+Workflow implementation status: PLANNED
+```
+
+Repository inspection on 2026-09-02 found no implemented application workflows in the canonical source trees.
+
+A documented workflow does not prove that the corresponding functionality currently exists.
+
+---
+
+# 6. Application Startup Workflow
+
+Related Features:
+
+- `FEAT-APP-001`
+- `FEAT-APP-002`
+- `FEAT-DASH-001`
+
+## Goal
+
+Start F7Hub and reach a usable technician workspace.
+
+## Workflow
+
+```text
+Launch F7Hub
+    ↓
+Load Configuration
+    ↓
+Initialize Logging
+    ↓
+Validate Environment
+    ↓
+Open SQLite Database
+    ↓
+Check Migrations
+    ↓
+Initialize Core Services
+    ↓
+Attempt Optional Integrations
+    ↓
+Restore Workspace
+    ↓
+Display Main Window
+    ↓
+Ready
+```
+
+## Expected Outcome
+
+The technician reaches the main application even if optional services such as AI or Microsoft Graph are unavailable.
+
+## Failure Paths
+
+### Database Failure
+
+```text
+Database initialization fails
+    ↓
+Prevent unsafe writes
+    ↓
+Display meaningful error
+    ↓
+Provide recovery information
+```
+
+### Optional Integration Failure
+
+```text
+Microsoft Graph unavailable
+    ↓
+Mark integration unavailable
+    ↓
+Continue local application startup
+```
+
+---
+
+# 7. Open Existing Ticket Workflow
+
+Related Features:
+
+- `FEAT-TICKET-001`
+- `FEAT-TICKET-002`
+- `FEAT-TICKET-004`
+
+## Goal
+
+Open an existing ticket and establish support context.
+
+## Workflow
+
+```text
+Open Tickets
+    ↓
+Search or Select Ticket
+    ↓
+Load Ticket
+    ↓
+Load Company
+    ↓
+Load Contact
+    ↓
+Load Notes
+    ↓
+Load Timeline
+    ↓
+Load Related Resources
+    ↓
+Set Active Ticket Context
+    ↓
+Display Ticket Workspace
+```
+
+## Related Resources May Include
+
+- related tickets
+- knowledge articles
+- diagnostic workflows
+- script recommendations
+- attachments
+- company context
+- previous activity
+
+## Expected Outcome
+
+The technician can understand the case without manually reopening information across unrelated tools.
+
+---
+
+# 8. Create Ticket Workflow
+
+Related Requirements:
+
+- `FR-TICKET-001`
+
+Related Feature:
+
+- `FEAT-TICKET-001`
+
+## Goal
+
+Create a local F7Hub ticket record.
+
+## Workflow
+
+```text
+New Ticket
+    ↓
+Enter Required Information
+    ↓
+Select Company
+    ↓
+Select Contact
+    ↓
+Enter Description
+    ↓
+Validate
+    ↓
+Save
+    ↓
+Create Ticket Record
+    ↓
+Create Initial Timeline Event
+    ↓
+Open Ticket Workspace
+```
+
+## Validation Examples
+
+- required fields present
+- company reference valid
+- contact reference valid
+- values within expected limits
+
+## Failure Path
+
+```text
+Validation Fails
+    ↓
+Highlight Invalid Data
+    ↓
+Preserve Entered Information
+    ↓
+Allow Correction
+```
+
+---
+
+# 9. Ticket Investigation Workflow
+
+Related Features:
+
+- Ticket Center
+- Company Center
+- Contact Center
+- Knowledge Base
+- Search
+- Diagnostics
+
+## Goal
+
+Understand the issue before attempting remediation.
+
+## Workflow
+
+```text
+Open Ticket
+    ↓
+Read Description
+    ↓
+Review Existing Notes
+    ↓
+Review Company Context
+    ↓
+Review Contact History
+    ↓
+Check Related Tickets
+    ↓
+Search Knowledge
+    ↓
+Identify Likely Issue Category
+    ↓
+Choose Troubleshooting Path
+```
+
+## Technician Questions
+
+The workflow should help answer:
+
+- What is failing?
+- Who is affected?
+- When did it start?
+- What changed?
+- Is this isolated or widespread?
+- Has this happened before?
+- What troubleshooting has already been performed?
+- Is there an existing KB article?
+- Is there an approved diagnostic workflow?
+
+---
+
+# 10. Add Ticket Note Workflow
+
+Related Feature:
+
+- `FEAT-TICKET-003`
+
+## Goal
+
+Record meaningful support activity.
+
+## Workflow
+
+```text
+Open Ticket
+    ↓
+Select Add Note
+    ↓
+Choose Note Type
+    ↓
+Enter / Paste Content
+    ↓
+Optionally Format or Improve
+    ↓
+Review
+    ↓
+Save
+    ↓
+Add Timeline Event
+```
+
+## Possible Note Types
+
+- troubleshooting
+- internal
+- customer communication
+- escalation
+- resolution
+
+## Expected Outcome
+
+The note becomes part of the persistent ticket history.
+
+---
+
+# 11. Ticket Resolution Workflow
+
+Related Feature:
+
+- `FEAT-TICKET-008`
+
+## Goal
+
+Record a successful resolution clearly.
+
+## Workflow
+
+```text
+Issue Resolved
+    ↓
+Review Troubleshooting Performed
+    ↓
+Record Root Cause if Known
+    ↓
+Record Resolution
+    ↓
+Record Verification
+    ↓
+Link Relevant KB if Applicable
+    ↓
+Update Ticket Status
+    ↓
+Save
+```
+
+## Resolution Content Should Ideally Include
+
+- issue
+- root cause
+- actions performed
+- final resolution
+- verification
+- relevant commands or scripts
+- KB reference
+
+---
+
+# 12. Ticket Escalation Workflow
+
+Related Feature:
+
+- `FEAT-TICKET-008`
+
+## Goal
+
+Escalate a ticket with sufficient technical context.
+
+## Workflow
+
+```text
+Unable to Resolve
+    ↓
+Review Troubleshooting History
+    ↓
+Collect Diagnostic Results
+    ↓
+Collect Relevant Logs
+    ↓
+Record Attempts
+    ↓
+Describe Current State
+    ↓
+Specify Escalation Reason
+    ↓
+Recommend Next Step
+    ↓
+Create Escalation Summary
+```
+
+## Escalation Summary Should Include
+
+- issue
+- affected user/system
+- troubleshooting performed
+- results
+- failed remediation
+- relevant logs
+- diagnostic evidence
+- suspected cause
+- next recommended action
+
+---
+
+# 13. Company Context Workflow
+
+Related Features:
+
+- `FEAT-COMPANY-001`
+- `FEAT-COMPANY-002`
+
+## Goal
+
+Access company-specific support information while troubleshooting.
+
+## Workflow
+
+```text
+Open Ticket
+    ↓
+Resolve Associated Company
+    ↓
+Open Company Context
+    ↓
+Review Technical Information
+    ↓
+Review Known Issues
+    ↓
+Review Relevant Links
+    ↓
+Return to Ticket
+```
+
+## Possible Company Context
+
+- tenant information
+- domains
+- network notes
+- supported applications
+- environment notes
+- escalation information
+- KB links
+- admin portals
+
+---
+
+# 14. Contact History Workflow
+
+Related Feature:
+
+- `FEAT-CONTACT-002`
+
+## Goal
+
+Understand whether the user has experienced related problems previously.
+
+## Workflow
+
+```text
+Open Contact
+    ↓
+View Contact Details
+    ↓
+Load Related Tickets
+    ↓
+Filter Relevant History
+    ↓
+Open Previous Case if Needed
+```
+
+This may reveal:
+
+- recurring issues
+- previous resolutions
+- device/user history
+- known environmental patterns
+
+---
+
+# 15. Knowledge Search Workflow
+
+Related Features:
+
+- `FEAT-KB-003`
+- `FEAT-SEARCH-001`
+
+## Goal
+
+Find relevant existing knowledge before reinventing troubleshooting steps.
+
+## Workflow
+
+```text
+Enter Search Query
+    ↓
+Normalize Query
+    ↓
+Search Relevant Sources
+    ↓
+Rank Results
+    ↓
+Filter if Needed
+    ↓
+Open Result
+    ↓
+Use Knowledge
+```
+
+## Search Examples
+
+```text
+Outlook cached credentials
+Teams camera not detected
+VPN DNS issue
+Exchange shared mailbox permissions
+Intune device not compliant
+```
+
+---
+
+# 16. Contextual KB Workflow
+
+## Goal
+
+Find knowledge related to the current ticket automatically or semi-automatically.
+
+## Workflow
+
+```text
+Open Ticket
+    ↓
+Extract Ticket Context
+    ↓
+Search KB
+    ↓
+Rank Matches
+    ↓
+Display Related Knowledge
+    ↓
+Technician Selects Article
+```
+
+Relevant context may include:
+
+- title
+- description
+- category
+- technology
+- company
+- previous diagnostics
+
+AI may assist ranking later, but local deterministic search should remain available.
+
+---
+
+# 17. Create Knowledge Article Workflow
+
+Related Features:
+
+- `FEAT-KB-001`
+- `FEAT-KB-002`
+
+## Goal
+
+Preserve reusable technical knowledge.
+
+## Workflow
+
+```text
+New KB Article
+    ↓
+Choose Article Type
+    ↓
+Enter Title
+    ↓
+Enter Procedure / Content
+    ↓
+Assign Category
+    ↓
+Assign Tags
+    ↓
+Add Related Scripts / Tickets
+    ↓
+Review
+    ↓
+Save as Draft or Active
+```
+
+---
+
+# 18. Create KB from Resolved Ticket Workflow
+
+## Goal
+
+Convert solved support work into reusable knowledge.
+
+## Workflow
+
+```text
+Resolve Ticket
+    ↓
+Identify Reusable Solution
+    ↓
+Select Create KB from Ticket
+    ↓
+Extract Relevant Information
+    ↓
+Remove Ticket-Specific Noise
+    ↓
+Structure Procedure
+    ↓
+Add Metadata
+    ↓
+Review
+    ↓
+Save KB Article
+    ↓
+Link Article to Ticket
+```
+
+This workflow supports knowledge reuse rather than repeated rediscovery.
+
+---
+
+# 19. Script Discovery Workflow
+
+Related Features:
+
+- `FEAT-SCRIPT-001`
+- `FEAT-SCRIPT-004`
+
+## Goal
+
+Find an existing approved script.
+
+## Workflow
+
+```text
+Open Script Library
+    ↓
+Search by Purpose / Technology
+    ↓
+Filter Results
+    ↓
+Select Script
+    ↓
+Review Description
+    ↓
+Review Risk / Privilege
+    ↓
+Review Parameters
+```
+
+Possible searches:
+
+```text
+DNS
+Exchange mailbox
+M365 license
+Intune device
+Windows network reset
+```
+
+---
+
+# 20. Script Execution Workflow
+
+Related Features:
+
+- `FEAT-SCRIPT-005`
+- `FEAT-SCRIPT-006`
+- `FEAT-PS-001`
+
+## Goal
+
+Run an approved automation safely.
+
+## Workflow
+
+```text
+Select Script
+    ↓
+Review Purpose
+    ↓
+Review Privilege Requirement
+    ↓
+Enter Parameters
+    ↓
+Validate Parameters
+    ↓
+Review Target
+    ↓
+Execute
+    ↓
+Capture Output
+    ↓
+Parse Structured Result
+    ↓
+Display Result
+    ↓
+Record Execution History
+```
+
+## Safety Boundary
+
+The system should never treat arbitrary text from:
+
+- AI
+- ticket descriptions
+- clipboard
+- external APIs
+
+as executable command input without validation.
+
+---
+
+# 21. Privileged Script Workflow
+
+## Goal
+
+Prevent accidental administrative action.
+
+## Workflow
+
+```text
+Select Privileged Script
+    ↓
+Display Target
+    ↓
+Display Operation
+    ↓
+Display Required Privilege
+    ↓
+Validate Parameters
+    ↓
+Technician Confirms
+    ↓
+Execute Through Controlled Gateway
+    ↓
+Capture Result
+```
+
+F7Hub should not silently elevate privilege.
+
+---
+
+# 22. Diagnostic Workflow Selection
+
+Related Feature:
+
+- `FEAT-DIAG-001`
+
+## Goal
+
+Select an appropriate diagnostic procedure.
+
+## Workflow
+
+```text
+Open Ticket
+    ↓
+Identify Issue Category
+    ↓
+Display Matching Diagnostic Workflows
+    ↓
+Technician Selects Workflow
+    ↓
+Start Diagnostic Session
+```
+
+Possible diagnostic workflows:
+
+- Outlook cannot open
+- Microsoft 365 authentication
+- MFA failure
+- VPN connectivity
+- DNS resolution
+- Teams camera
+- OneDrive synchronization
+- printer failure
+- Windows performance
+- Intune compliance
+
+---
+
+# 23. Guided Diagnostic Workflow
+
+Related Features:
+
+- `FEAT-DIAG-001`
+- `FEAT-DIAG-002`
+- `FEAT-DIAG-003`
+
+## Goal
+
+Guide the technician through structured troubleshooting.
+
+## Workflow
+
+```text
+Start Diagnostic Session
+    ↓
+Load Workflow
+    ↓
+Display Current Step
+    ↓
+Collect Technician Input
+    ↓
+Evaluate Condition
+    ↓
+Determine Next Step
+    ↓
+Continue Until Outcome
+```
+
+Example:
+
+```text
+Can the user sign in?
+│
+├── Yes
+│   ↓
+│ Check application-specific issue
+│
+└── No
+    ↓
+Check authentication / account state
+```
+
+---
+
+# 24. Automated Diagnostic Step Workflow
+
+Related Feature:
+
+- `FEAT-DIAG-004`
+
+## Goal
+
+Collect technical evidence automatically.
+
+## Workflow
+
+```text
+Diagnostic Step Requires Script
+    ↓
+Load Approved Script Reference
+    ↓
+Build Validated Parameters
+    ↓
+Execute PowerShell
+    ↓
+Receive Structured Result
+    ↓
+Store Result
+    ↓
+Evaluate Result
+    ↓
+Continue Workflow
+```
+
+---
+
+# 25. Diagnostic Completion Workflow
+
+Related Feature:
+
+- `FEAT-DIAG-005`
+
+## Workflow
+
+```text
+Final Diagnostic Step
+    ↓
+Evaluate Session
+    ↓
+Produce Outcome
+    ↓
+Suggest Resolution / Escalation
+    ↓
+Save Session
+    ↓
+Link to Ticket
+    ↓
+Add Timeline Entry
+```
+
+---
+
+# 26. Diagnostic Failure Workflow
+
+## Goal
+
+Handle failed automation without losing troubleshooting progress.
+
+## Workflow
+
+```text
+Diagnostic Script Fails
+    ↓
+Capture Error
+    ↓
+Preserve Existing Session
+    ↓
+Display Failure
+    ↓
+Offer Manual Path / Retry if Safe
+    ↓
+Continue or Escalate
+```
+
+A failed diagnostic script should not erase previous answers.
+
+---
+
+# 27. Clipboard Snippet Workflow
+
+Related Feature:
+
+- `FEAT-CLIP-002`
+
+## Goal
+
+Reuse frequently typed support text.
+
+## Workflow
+
+```text
+Open Clipboard / Snippets
+    ↓
+Search Snippet
+    ↓
+Select Snippet
+    ↓
+Preview
+    ↓
+Copy or Insert
+```
+
+Possible snippets:
+
+- customer greetings
+- escalation text
+- troubleshooting steps
+- standard responses
+- ticket-note templates
+
+---
+
+# 28. Clipboard Capture Workflow
+
+Related Feature:
+
+- `FEAT-CLIP-001`
+
+## Workflow
+
+```text
+Copy Text
+    ↓
+Clipboard Handler Receives Content
+    ↓
+Check Persistence Rules
+    ↓
+Check Exclusion / Sensitivity Rules
+    ↓
+Store if Allowed
+    ↓
+Make Available in History
+```
+
+Sensitive clipboard content must not automatically be assumed safe to persist.
+
+---
+
+# 29. Clipboard Transformation Workflow
+
+Related Feature:
+
+- `FEAT-CLIP-003`
+
+## Workflow
+
+```text
+Select Clipboard Content
+    ↓
+Choose Transformation
+    ↓
+Transform
+    ↓
+Preview
+    ↓
+Copy / Insert
+```
+
+Examples:
+
+- clean whitespace
+- remove formatting
+- extract URLs
+- extract email addresses
+- extract IP addresses
+- format ticket notes
+
+---
+
+# 30. AutoHotkey Quick Action Workflow
+
+Related Features:
+
+- `FEAT-AHK-001`
+- `FEAT-AHK-003`
+
+## Goal
+
+Trigger common actions without navigating manually.
+
+## Workflow
+
+```text
+Press Hotkey
+    ↓
+AHK Detects Shortcut
+    ↓
+Resolve Registered Action
+    ↓
+Launch / Focus / Send Request
+    ↓
+F7Hub or External Tool Responds
+```
+
+AHK should remain a lightweight automation layer.
+
+---
+
+# 31. Command Palette Workflow
+
+Related Feature:
+
+- `FEAT-APP-003`
+
+## Goal
+
+Execute common F7Hub actions from the keyboard.
+
+## Workflow
+
+```text
+Open Command Palette
+    ↓
+Type Search Text
+    ↓
+Filter Registered Commands
+    ↓
+Select Command
+    ↓
+Validate Availability
+    ↓
+Execute Registered Action
+```
+
+Examples:
+
+```text
+Open ticket INC-10254
+Search KB Outlook
+Run DNS diagnostics
+Switch workspace
+Open Exchange Admin Center
+```
+
+---
+
+# 32. Universal Search Workflow
+
+Related Feature:
+
+- `FEAT-SEARCH-001`
+
+## Workflow
+
+```text
+Open Search
+    ↓
+Enter Query
+    ↓
+Normalize Query
+    ↓
+Search Providers
+    ↓
+Combine Results
+    ↓
+Rank
+    ↓
+Display Unified Results
+    ↓
+Open Selected Result
+```
+
+Supported result types may include:
+
+- tickets
+- companies
+- contacts
+- KB
+- scripts
+- prompts
+- clipboard
+- commands
+
+---
+
+# 33. Microsoft Admin Portal Workflow
+
+Related Feature:
+
+- `FEAT-M365-001`
+
+## Goal
+
+Open the appropriate Microsoft administration environment quickly.
+
+## Workflow
+
+```text
+Open Microsoft Administration
+    ↓
+Select Service
+    ↓
+Launch Approved Portal
+```
+
+Possible targets:
+
+- Microsoft 365 Admin
+- Entra
+- Exchange
+- Intune
+- Defender
+- Teams
+- SharePoint
+
+---
+
+# 34. Microsoft Graph Read Workflow
+
+Related Feature:
+
+- `FEAT-M365-002`
+
+## Goal
+
+Retrieve supported Microsoft cloud information.
+
+## Workflow
+
+```text
+Technician Requests Information
+    ↓
+Validate Request
+    ↓
+Check Authentication
+    ↓
+Call Microsoft Graph Gateway
+    ↓
+Receive Response
+    ↓
+Validate / Parse
+    ↓
+Display Result
+```
+
+External failures should not corrupt local data.
+
+---
+
+# 35. Microsoft Administrative Change Workflow
+
+## Goal
+
+Perform an approved cloud administrative action safely.
+
+## Workflow
+
+```text
+Select Administrative Action
+    ↓
+Identify Target
+    ↓
+Enter Parameters
+    ↓
+Validate
+    ↓
+Display Impact
+    ↓
+Check Privilege
+    ↓
+Technician Confirms
+    ↓
+Execute
+    ↓
+Capture Result
+    ↓
+Record Appropriate Audit Information
+```
+
+Examples may eventually include:
+
+- account actions
+- mailbox operations
+- group membership
+- license operations
+- device diagnostics
+
+Each operation requires separate security and implementation review.
+
+---
+
+# 36. AI Ticket Summary Workflow
+
+Related Feature:
+
+- `FEAT-AI-001`
+
+## Workflow
+
+```text
+Open Ticket
+    ↓
+Select Summarize
+    ↓
+Build Approved Context
+    ↓
+Apply Privacy Rules
+    ↓
+Send to AI Provider
+    ↓
+Receive Summary
+    ↓
+Display as Suggestion
+    ↓
+Technician Reviews
+```
+
+AI output must not silently overwrite ticket information.
+
+---
+
+# 37. AI Troubleshooting Workflow
+
+Related Feature:
+
+- `FEAT-AI-002`
+
+## Workflow
+
+```text
+Ticket / Diagnostic Context
+    ↓
+Technician Requests Assistance
+    ↓
+Build Context
+    ↓
+Retrieve Relevant KB if Available
+    ↓
+Send Approved Context
+    ↓
+Receive Suggestions
+    ↓
+Display Hypotheses / Next Steps
+    ↓
+Technician Decides
+```
+
+AI remains advisory.
+
+---
+
+# 38. AI Note Improvement Workflow
+
+Related Feature:
+
+- `FEAT-AI-003`
+
+## Workflow
+
+```text
+Technician Writes Rough Note
+    ↓
+Select Improve / Structure
+    ↓
+AI Generates Draft
+    ↓
+Technician Reviews
+    ↓
+Edit if Required
+    ↓
+Save
+```
+
+The original ticket data should not be overwritten without explicit action.
+
+---
+
+# 39. AI Script Assistance Workflow
+
+Related Feature:
+
+- `FEAT-AI-004`
+
+## Workflow
+
+```text
+Select Script
+    ↓
+Ask AI to Explain / Review
+    ↓
+AI Produces Analysis
+    ↓
+Technician Reviews
+    ↓
+No Automatic Execution
+```
+
+If AI suggests modifications, they remain untrusted until reviewed and tested.
+
+---
+
+# 40. Prompt Library Workflow
+
+Related Features:
+
+- `FEAT-PROMPT-001`
+- `FEAT-PROMPT-002`
+- `FEAT-PROMPT-003`
+
+## Workflow
+
+```text
+Open Prompt Library
+    ↓
+Search Prompt
+    ↓
+Select Template
+    ↓
+Populate Variables
+    ↓
+Preview Final Prompt
+    ↓
+Review Context
+    ↓
+Submit if Desired
+```
+
+---
+
+# 41. Workspace Switching Workflow
+
+Related Feature:
+
+- `FEAT-WORKSPACE-002`
+
+## Goal
+
+Reconfigure the interface for different support tasks.
+
+## Workflow
+
+```text
+Open Workspace Selector
+    ↓
+Choose Profile
+    ↓
+Save Current State if Needed
+    ↓
+Load Selected Layout
+    ↓
+Restore Panels
+```
+
+Potential workspaces:
+
+- Helpdesk
+- Microsoft 365
+- Networking
+- Automation
+- Knowledge Authoring
+- AI
+
+---
+
+# 42. Save Workspace Workflow
+
+## Workflow
+
+```text
+Arrange Panels
+    ↓
+Select Save Workspace
+    ↓
+Name / Update Profile
+    ↓
+Persist Layout
+    ↓
+Confirm Save
+```
+
+Invalid layouts should be recoverable.
+
+---
+
+# 43. Reporting Workflow
+
+Related Features:
+
+- `FEAT-REPORT-001`
+- `FEAT-REPORT-002`
+- `FEAT-REPORT-003`
+
+## Workflow
+
+```text
+Open Reports
+    ↓
+Select Report Type
+    ↓
+Choose Filters
+    ↓
+Generate Structured Report
+    ↓
+Review
+    ↓
+Export if Needed
+```
+
+Possible report types:
+
+- diagnostic session
+- script execution
+- ticket activity
+- troubleshooting summary
+
+---
+
+# 44. Settings Workflow
+
+Related Feature:
+
+- `FEAT-SETTINGS-001`
+
+## Workflow
+
+```text
+Open Settings
+    ↓
+Select Category
+    ↓
+Modify Setting
+    ↓
+Validate
+    ↓
+Save
+    ↓
+Apply Immediately or on Restart
+```
+
+Sensitive credentials must not be treated as ordinary plaintext settings.
+
+---
+
+# 45. Integration Configuration Workflow
+
+## Workflow
+
+```text
+Open Settings
+    ↓
+Select Integration
+    ↓
+Configure Required Information
+    ↓
+Authenticate if Required
+    ↓
+Test Connection
+    ↓
+Display Status
+    ↓
+Save Non-Secret Configuration
+```
+
+Possible integration states:
+
+```text
+NOT_CONFIGURED
+AVAILABLE
+AUTHENTICATING
+CONNECTED
+DEGRADED
+UNAVAILABLE
+ERROR
+```
+
+---
+
+# 46. Plugin Enable Workflow
+
+Related Features:
+
+- `FEAT-PLUGIN-001`
+- `FEAT-PLUGIN-002`
+- `FEAT-PLUGIN-003`
+
+## Workflow
+
+```text
+Discover Plugin
+    ↓
+Validate Metadata
+    ↓
+Check Compatibility
+    ↓
+Review Permissions
+    ↓
+Enable Plugin
+    ↓
+Initialize
+    ↓
+Expose Approved Extension Points
+```
+
+A plugin must not receive unrestricted access to core F7Hub internals.
+
+---
+
+# 47. Plugin Failure Workflow
+
+## Workflow
+
+```text
+Plugin Error
+    ↓
+Capture Error
+    ↓
+Disable / Isolate Plugin if Required
+    ↓
+Log Failure
+    ↓
+Notify Technician
+    ↓
+Continue Core Application
+```
+
+---
+
+# 48. Search-to-Action Workflow
+
+One important F7Hub design pattern is:
+
+```text
+Search
+   ↓
+Find
+   ↓
+Open
+   ↓
+Act
+```
+
+Examples:
+
+```text
+Search ticket
+→ Open ticket
+
+Search KB
+→ Open procedure
+
+Search script
+→ Review / Execute
+
+Search company
+→ Open company context
+
+Search command
+→ Execute registered application action
+```
+
+Search should be actionable, not merely a list of results.
+
+---
+
+# 49. Ticket-to-Diagnostic-to-KB Workflow
+
+This is one of the most important integrated workflows in F7Hub.
+
+```text
+Open Ticket
+    ↓
+Understand Context
+    ↓
+Search KB
+    ↓
+Start Diagnostic Workflow
+    ↓
+Collect Answers
+    ↓
+Run Approved Diagnostics
+    ↓
+Evaluate Results
+    ↓
+Find Relevant KB
+    ↓
+Perform Resolution
+    ↓
+Document Ticket
+```
+
+---
+
+# 50. Ticket-to-Escalation Workflow
+
+```text
+Open Ticket
+    ↓
+Troubleshoot
+    ↓
+Run Diagnostics
+    ↓
+Resolution Unsuccessful
+    ↓
+Compile Evidence
+    ↓
+Generate Escalation Summary
+    ↓
+Technician Reviews
+    ↓
+Escalate
+```
+
+---
+
+# 51. Ticket-to-Knowledge Workflow
+
+```text
+Resolve Ticket
+    ↓
+Identify Reusable Information
+    ↓
+Create KB Draft
+    ↓
+Generalize Procedure
+    ↓
+Review
+    ↓
+Publish / Activate
+    ↓
+Future Tickets Can Retrieve It
+```
+
+This creates a continuous knowledge loop.
+
+---
+
+# 52. Knowledge Improvement Loop
+
+```text
+Ticket
+  ↓
+Troubleshooting
+  ↓
+Resolution
+  ↓
+Knowledge Article
+  ↓
+Future Search
+  ↓
+Faster Resolution
+  ↓
+Updated Knowledge
+```
+
+This loop is central to the long-term value of F7Hub.
+
+---
+
+# 53. Failure Handling Pattern
+
+Most workflows should follow a consistent failure model:
+
+```text
+Operation
+    ↓
+Failure
+    ↓
+Capture Technical Error
+    ↓
+Preserve User State
+    ↓
+Display Understandable Message
+    ↓
+Offer Safe Recovery / Retry
+```
+
+Failures should not silently destroy technician work.
+
+---
+
+# 54. Cancellation Pattern
+
+For cancellable long-running operations:
+
+```text
+Operation Running
+    ↓
+Technician Requests Cancel
+    ↓
+Check Whether Safe to Cancel
+    │
+    ├── Yes → Cancel → Report Cancelled
+    │
+    └── No  → Explain Operation Must Complete
+```
+
+The GUI must not claim an action was cancelled if the underlying administrative operation continued.
+
+---
+
+# 55. Offline Workflow
+
+F7Hub should remain useful without cloud access.
+
+```text
+Internet / Cloud Unavailable
+    ↓
+Continue Local Features
+    │
+    ├── Tickets
+    ├── KB
+    ├── Search
+    ├── Scripts
+    ├── Clipboard
+    ├── Prompts
+    └── Settings
+```
+
+Connected features should clearly indicate unavailable status.
+
+---
+
+# 56. Application Shutdown Workflow
+
+```text
+Close F7Hub
+    ↓
+Check Running Operations
+    ↓
+Handle Safe Cancellation
+    ↓
+Save Workspace State
+    ↓
+Complete / Roll Back Pending DB Work
+    ↓
+Close Database
+    ↓
+Flush Logs
+    ↓
+Stop Managed Child Processes
+    ↓
+Exit
+```
+
+Shutdown must preserve data integrity.
+
+---
+
+# 57. Keyboard-First Workflow
+
+Frequently used actions should eventually be reachable without extensive mouse navigation.
+
+Examples:
+
+```text
+Open Command Palette
+Search
+Open Ticket
+Save
+Switch Workspace
+Run Diagnostic
+Open KB
+```
+
+Exact shortcuts belong in `05_GUI.md`.
+
+---
+
+# 58. Workflow Composition
+
+F7Hub workflows should be composable.
+
+Example:
+
+```text
+Ticket Workflow
+    │
+    ├── Company Workflow
+    ├── Contact Workflow
+    ├── Search Workflow
+    ├── Knowledge Workflow
+    ├── Diagnostic Workflow
+    ├── Script Workflow
+    ├── AI Workflow
+    └── Resolution Workflow
+```
+
+Modules should cooperate through shared context rather than duplicate the same data.
+
+---
+
+# 59. Workflow Traceability
+
+User workflows should trace to features and requirements.
+
+Preferred chain:
+
+```text
+Requirement
+    ↓
+Feature
+    ↓
+Workflow
+    ↓
+GUI
+    ↓
+Architecture
+    ↓
+Implementation
+    ↓
+Test
+```
+
+Example:
+
+```text
+FR-DIAG-001
+    ↓
+FEAT-DIAG-001
+    ↓
+Guided Diagnostic Workflow
+    ↓
+05_GUI.md
+    ↓
+06_SystemArchitecture.md
+    ↓
+Implementation
+    ↓
+Tests
+```
+
+---
+
+# 60. Workflow Acceptance Rule
+
+A workflow is not complete merely because individual buttons exist.
+
+A completed workflow should normally satisfy:
+
+```text
+[ ] Entry point exists
+[ ] Required data can be loaded
+[ ] User can complete primary path
+[ ] Input is validated
+[ ] Failure path exists
+[ ] User state is preserved appropriately
+[ ] Database state remains valid
+[ ] Security boundaries are respected
+[ ] Result is clearly communicated
+[ ] Tests cover critical behavior
+```
+
+---
+
+# 61. High-Priority End-to-End Workflows
+
+The following workflows should receive early end-to-end validation:
+
+1. application startup
+2. create ticket
+3. open ticket
+4. add ticket note
+5. search tickets
+6. create KB article
+7. search KB
+8. find script
+9. execute safe PowerShell script
+10. run diagnostic workflow
+11. record diagnostic session
+12. resolve ticket
+
+These prove that the core architecture works across multiple layers.
+
+---
+
+# 62. Future Workflow Candidates
+
+Later workflows may include:
+
+- HaloPSA synchronization
+- NinjaOne device context
+- Microsoft Graph administration
+- Intune diagnostics
+- Exchange administration
+- Defender investigation
+- plugin installation
+- AI-assisted knowledge creation
+- multi-technician collaboration
+- advanced reporting
+- cloud synchronization
+
+These should not be implemented until their requirements and architecture are approved.
+
+---
+
+# 63. Workflow Anti-Patterns
+
+Avoid:
+
+## Duplicate Data Entry
+
+Technician repeatedly enters information already available in active ticket context.
+
+---
+
+## Hidden Automation
+
+Administrative action occurs without technician understanding what is being executed.
+
+---
+
+## Dead-End Errors
+
+Workflow fails and discards technician progress.
+
+---
+
+## AI-Controlled Administration
+
+AI independently decides and executes privileged operations.
+
+---
+
+## Workflow Explosion
+
+Every minor variation becomes a completely separate workflow when existing workflows can be reused or parameterized.
+
+---
+
+## GUI-Defined Business Rules
+
+Important workflow rules exist only inside button handlers.
+
+---
+
+# 64. Workflow Design Rule
+
+When adding a new workflow:
+
+```text
+Identify User Goal
+    ↓
+Identify Existing Features
+    ↓
+Define Entry Point
+    ↓
+Define Required Context
+    ↓
+Define Happy Path
+    ↓
+Define Decision Points
+    ↓
+Define Failure Paths
+    ↓
+Define Result
+    ↓
+Map Requirements
+    ↓
+Define Tests
+```
+
+---
+
+# 65. Core F7Hub Technician Workflow
+
+The central F7Hub experience is:
+
+```text
+                Incoming Support Issue
+                         │
+                         ▼
+                    Open Ticket
+                         │
+                         ▼
+                 Understand Context
+                         │
+              ┌──────────┴──────────┐
+              ▼                     ▼
+       Search Knowledge       Review History
+              │                     │
+              └──────────┬──────────┘
+                         ▼
+                   Troubleshoot
+                         │
+                         ▼
+                 Run Diagnostics
+                         │
+                         ▼
+               Use Approved Scripts
+                         │
+                         ▼
+                 Evaluate Results
+                         │
+              ┌──────────┴──────────┐
+              ▼                     ▼
+           Resolve               Escalate
+              │                     │
+              └──────────┬──────────┘
+                         ▼
+                     Document
+                         │
+                         ▼
+               Preserve Knowledge
+```
+
+---
+
+# 66. Final Workflow Principles
+
+F7Hub workflows should:
+
+- start from the technician's real task
+- preserve active context
+- surface relevant knowledge
+- reuse existing automation
+- provide deterministic diagnostic guidance
+- allow safe PowerShell execution
+- record useful history
+- support escalation
+- integrate AI as assistance
+- remain usable when cloud services fail
+- reduce duplicate technician effort
+
+The core interaction model is:
+
+> Understand → Search → Troubleshoot → Diagnose → Automate → Resolve → Document → Reuse
+
+F7Hub should make each transition easier without hiding the technical work from the technician.
