@@ -1896,8 +1896,8 @@ Canonical conceptual inventory:
 |---|---|---|---|
 | Core | schema_migrations | Track schema evolution | VERIFIED |
 | Core | application_metadata | Store application-level metadata | VERIFIED |
-| Taxonomy | categories | Shared hierarchical classification | PLANNED |
-| Taxonomy | tags | Shared flexible tags | PLANNED |
+| Taxonomy | categories | Shared hierarchical classification | VERIFIED |
+| Taxonomy | tags | Shared flexible tags | VERIFIED |
 | Companies | companies | Supported organizations | PLANNED |
 | Companies | company_notes | Company technical notes | PLANNED |
 | Companies | company_links | Company resources | PLANNED |

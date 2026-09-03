@@ -147,12 +147,13 @@ SCHEMA DESIGN: REVIEW
 SCHEMA DDL VALIDATION: PASS
 MIGRATION INFRASTRUCTURE: VERIFIED
 CORE APPLICATION MIGRATION: VERIFIED — 0001_core.sql
-BUSINESS-DOMAIN MIGRATIONS: PLANNED
+TAXONOMY MIGRATION: VERIFIED — 0002_taxonomy.sql
+REMAINING BUSINESS-DOMAIN MIGRATIONS: PLANNED
 REPOSITORIES: PLANNED
-ISOLATED DATABASE TESTS: PASS — 40 tests
+ISOLATED DATABASE TESTS: PASS — 49 tests
 ```
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migration `0001_core.sql` now creates only `application_metadata`; no business-domain migration or repository was added. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migration `0001_core.sql` creates only `application_metadata`, and `0002_taxonomy.sql` creates the shared `categories` and `tags` tables plus the documented category indexes. No repository was added. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 The documented `CREATE` blocks were executed in order against a fresh in-memory SQLite database on 2026-09-02. All 71 DDL blocks executed successfully; `PRAGMA integrity_check` returned `ok` and `PRAGMA foreign_key_check` returned zero violations. This validates the documented DDL only, not application migrations or runtime behavior.
 

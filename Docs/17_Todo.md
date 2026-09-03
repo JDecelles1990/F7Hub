@@ -36,8 +36,9 @@ Repository inspection and tests on 2026-09-03 confirmed:
 Documentation consistency review: IN PROGRESS
 SQLite migration infrastructure: VERIFIED
 Core application migration — 0001_core.sql: VERIFIED
-Business-domain migrations: PLANNED
-Permanent isolated database tests: PASS — 40 tests
+Taxonomy migration — 0002_taxonomy.sql: VERIFIED
+Remaining business-domain migrations: PLANNED
+Permanent isolated database tests: PASS — 49 tests
 Local Git repository and baseline: PRESENT
 Remote origin: CONFIGURED
 origin/main publication: PENDING
@@ -147,12 +148,16 @@ Status: PASS — 35 tests — 2026-09-03
 
 # 6. P1 — Second Persistence Slice: Taxonomy
 
-After the verified core migration:
+Completed and verified on 2026-09-03:
 
-- [ ] Create `Database\Migrations\0002_taxonomy.sql`.
-- [ ] Implement only `categories` and `tags` from the approved physical schema.
-- [ ] Add focused constraint, rollback, checksum, idempotency and integrity tests.
-- [ ] Do not begin company, contact, ticket or GUI work in this slice.
+- [x] Create `Database\Migrations\0002_taxonomy.sql`.
+- [x] Implement only `categories` and `tags` from the approved physical schema.
+- [x] Add focused constraint, rollback, checksum, idempotency and integrity tests.
+- [x] Do not begin company, contact, ticket or GUI work in this slice.
+
+```text
+Status: PASS — 9 focused taxonomy tests; 49 full database tests
+```
 
 ---
 

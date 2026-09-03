@@ -339,6 +339,13 @@ Implement this phase as separate vertical slices:
 → contacts
 ```
 
+Implementation status:
+
+```text
+0002_taxonomy.sql: VERIFIED — 2026-09-03 — full database suite PASS, 49 tests
+0003_companies_contacts.sql: PLANNED
+```
+
 Include:
 
 - primary keys

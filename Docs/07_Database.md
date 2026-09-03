@@ -1892,13 +1892,14 @@ Explicit review is required before:
 
 # 93. Current Implementation Status
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. The first versioned application migration, `0001_core.sql`, creates only `application_metadata`; the migration directory contains no business-domain migration, and no business repository has been implemented. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migrations now create `application_metadata` through `0001_core.sql` and the shared `categories` and `tags` taxonomy schema through `0002_taxonomy.sql`. No business repository has been implemented. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 ```text
 SQLite migration infrastructure: VERIFIED
 Core application schema — application_metadata: VERIFIED
-Business database implementation: PLANNED
-Isolated database tests: PASS — 40 tests
+Taxonomy schema — categories and tags: VERIFIED
+Remaining business database implementation: PLANNED
+Isolated database tests: PASS — 49 tests
 ```
 
 This document defines the intended database architecture beyond the verified infrastructure slice.

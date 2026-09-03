@@ -47,7 +47,31 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
-# 3. 2026-09-03 — First Versioned Core Migration
+# 3. 2026-09-03 — Taxonomy Schema Migration
+
+## Implementation
+
+- Added `Database\Migrations\0002_taxonomy.sql` with the canonical `categories` and `tags` tables.
+- Added the documented parent-category and scope/active/sort indexes without adding redundant tag indexes.
+- Preserved taxonomy as a schema-only slice: no seed data, repository, service, trigger, GUI or dependent business-domain table was added.
+- Changed no production Python because the existing migration engine applied the new migration correctly.
+
+## Validation
+
+```text
+Focused taxonomy migration tests: PASS — 9 tests
+Full database suite: PASS — 49 tests
+Migration ordering, checksum and idempotency: PASS
+Taxonomy constraints and foreign-key behavior: PASS
+Failed taxonomy migration rollback: PASS
+PRAGMA integrity_check: PASS
+PRAGMA foreign_key_check: PASS
+Development database isolation: PASS
+```
+
+---
+
+# 4. 2026-09-03 — First Versioned Core Migration
 
 ## Architecture Decision
 
@@ -75,7 +99,7 @@ Development database isolation: PASS
 
 ---
 
-# 4. 2026-09-03 — Slice 001 Verification Follow-Ups
+# 5. 2026-09-03 — Slice 001 Verification Follow-Ups
 
 ## Git State
 
@@ -107,7 +131,7 @@ origin/main publication: PENDING
 
 ---
 
-# 5. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
+# 6. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
 
 ## Security Cleanup
 
@@ -144,7 +168,7 @@ The tests used temporary file-backed databases and did not create or modify `Dat
 
 ---
 
-# 6. 2026-09-02 — Documentation Consistency Review
+# 7. 2026-09-02 — Documentation Consistency Review
 
 ## Scope
 
@@ -231,7 +255,7 @@ The SQLite checks validate the documented DDL, not migrations or runtime applica
 
 ---
 
-# 7. 2026-09-02 — Canonical Architecture Baseline
+# 8. 2026-09-02 — Canonical Architecture Baseline
 
 The documentation baseline established these project decisions:
 
@@ -250,7 +274,7 @@ The documentation baseline established these project decisions:
 
 ---
 
-# 8. Superseded Directions
+# 9. Superseded Directions
 
 The following earlier directions were replaced by the canonical architecture:
 
@@ -270,7 +294,7 @@ Archived documents and legacy diagrams do not override these decisions.
 
 ---
 
-# 9. Maintenance Rule
+# 10. Maintenance Rule
 
 Record only meaningful completed changes here.
 
