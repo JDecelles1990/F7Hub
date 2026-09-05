@@ -6,6 +6,7 @@ from PySide6.QtGui import QAction, QKeySequence
 from PySide6.QtWidgets import QMainWindow, QWidget, QStackedWidget, QMessageBox
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.ticket_workspace import TicketWorkspace
+from f7hub.services.ticket_reference_service import TicketReferenceService
 
 from f7hub.gui.ticket_create_widget import (
     TicketCreateWidget,
@@ -20,6 +21,7 @@ class MainWindow(QMainWindow):
         self,
         ticket_service: TicketCreationService,
         *,
+        reference_service: TicketReferenceService | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -30,7 +32,9 @@ class MainWindow(QMainWindow):
 
         self.runner = ServiceTaskRunner(self)
         self.pages = QStackedWidget(self)
-        self.ticket_create_widget = TicketCreateWidget(ticket_service, task_runner=self.runner, parent=self)
+        self.ticket_create_widget = TicketCreateWidget(
+            ticket_service, reference_service=reference_service, task_runner=self.runner, parent=self,
+        )
         self.workspace = TicketWorkspace(ticket_service, self.runner, self)
         self.pages.addWidget(self.ticket_create_widget)
         self.pages.addWidget(self.workspace)

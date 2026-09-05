@@ -84,6 +84,8 @@ class TicketDetailsRecord:
     notes: tuple[TicketNoteRecord, ...]
     status_history: tuple[TicketStatusHistoryRecord, ...]
     timeline_events: tuple[TicketTimelineEventRecord, ...]
+    company_name: str | None = None
+    contact_name: str | None = None
 
 
 _TICKET_COLUMNS = """
@@ -221,10 +223,17 @@ class TicketRepository:
             ticket = _get_ticket(connection, ticket_id)
             if ticket is None:
                 return None
+            references = connection.execute(
+                "SELECT c.name AS company_name, p.display_name AS contact_name "
+                "FROM tickets t LEFT JOIN companies c ON c.company_id = t.company_id "
+                "LEFT JOIN contacts p ON p.contact_id = t.contact_id WHERE t.ticket_id = ?",
+                (ticket_id,),
+            ).fetchone()
             return TicketDetailsRecord(
                 ticket, _list_notes(connection, ticket_id),
                 _list_status_history(connection, ticket_id),
                 _list_timeline_events(connection, ticket_id),
+                references["company_name"], references["contact_name"],
             )
 
     def get_ticket_by_number(self, ticket_number: str) -> TicketRecord | None:
@@ -541,21 +550,21 @@ class TicketRepositoryTransaction:
             raise RuntimeError("Inserted ticket timeline event could not be reloaded.")
         return _timeline_event_from_row(row)
 
-    def company_exists(self, company_id: int) -> bool:
+    def company_exists(self, company_id: int, *, active_only: bool = False) -> bool:
         """Return whether a company reference exists."""
 
         row = self._connection.execute(
-            "SELECT 1 FROM companies WHERE company_id = ?",
-            (company_id,),
+            "SELECT 1 FROM companies WHERE company_id = ? AND (? = 0 OR is_active = 1)",
+            (company_id, active_only),
         ).fetchone()
         return row is not None
 
-    def get_contact_reference(self, contact_id: int) -> tuple[bool, int | None]:
+    def get_contact_reference(self, contact_id: int, *, active_only: bool = False) -> tuple[bool, int | None]:
         """Return whether a contact exists and its optional company ID."""
 
         row = self._connection.execute(
-            "SELECT company_id FROM contacts WHERE contact_id = ?",
-            (contact_id,),
+            "SELECT company_id FROM contacts WHERE contact_id = ? AND (? = 0 OR is_active = 1)",
+            (contact_id, active_only),
         ).fetchone()
         if row is None:
             return False, None

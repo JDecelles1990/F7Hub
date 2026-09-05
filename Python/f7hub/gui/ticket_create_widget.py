@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Protocol
 import logging
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Signal, QTimer
 from PySide6.QtGui import QFont, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QComboBox,
@@ -22,17 +22,10 @@ from PySide6.QtWidgets import (
 
 from f7hub.repositories.ticket_repository import TicketRecord
 from f7hub.gui.service_task_runner import ServiceTaskRunner
+from f7hub.services.ticket_reference_service import TicketReferenceOption, TicketReferenceService
 from f7hub.services.ticket_service import (
     TicketValidationError,
 )
-
-
-@dataclass(frozen=True)
-class TicketReferenceOption:
-    """One display label and persistent identifier offered by the form."""
-
-    reference_id: int
-    label: str
 
 
 @dataclass(frozen=True)
@@ -62,6 +55,7 @@ class TicketCreateWidget(QWidget):
         ticket_service: TicketCreationService,
         *,
         reference_options: TicketReferenceOptions | None = None,
+        reference_service: TicketReferenceService | None = None,
         task_runner: ServiceTaskRunner | None = None,
         parent: QWidget | None = None,
     ) -> None:
@@ -69,8 +63,106 @@ class TicketCreateWidget(QWidget):
         self._ticket_service = ticket_service
         self._reference_options = reference_options or TicketReferenceOptions()
         self._task_runner = task_runner
+        self._reference_service = reference_service
+        self._references_started = False
+        self._reference_timer = QTimer(self)
+        self._reference_timer.setSingleShot(True)
+        self._reference_timer.timeout.connect(self.refresh_references)
         self._submitting = False
         self._build_ui()
+        if reference_service is not None:
+            self.contact_input.setEnabled(False)
+            self.company_input.currentIndexChanged.connect(self._company_changed)
+
+    def showEvent(self, event) -> None:
+        super().showEvent(event)
+        if self._reference_service is not None and not self._references_started:
+            self._references_started = True
+            self._reference_timer.start(0)
+
+    def _reference_task(self, work, success, failure) -> None:
+        if self._task_runner is not None:
+            self._task_runner.submit(work, success, failure)
+        else:
+            try:
+                result = work()
+            except Exception as error:
+                failure(error)
+            else:
+                success(result)
+
+    def refresh_references(self) -> None:
+        """Refresh choices without clearing text or valid reference selections."""
+        if self._reference_service is None or (self._task_runner and self._task_runner.busy):
+            return
+        company_id = self.company_input.currentData()
+        contact_id = self.contact_input.currentData()
+        self.reference_feedback.setText("Loading companies…")
+
+        def loaded(options):
+            self.company_input.blockSignals(True)
+            self.company_input.clear()
+            self.company_input.addItem("Not selected", None)
+            for option in options:
+                self.company_input.addItem(option.label, option.reference_id)
+            self.company_input.setCurrentIndex(max(0, self.company_input.findData(company_id)))
+            self.company_input.blockSignals(False)
+            self._load_contacts(contact_id=contact_id)
+            if not options:
+                self.reference_feedback.setText("No active companies. You can create a ticket without references.")
+
+        self._reference_task(self._reference_service.list_active_companies, loaded,
+                             lambda error: self._reference_failed(error, "companies"))
+
+    def _company_changed(self) -> None:
+        self._load_contacts()
+
+    def _load_contacts(self, *, contact_id=None) -> None:
+        company_id = self.company_input.currentData()
+        previous_options = tuple(
+            (self.contact_input.itemText(index), self.contact_input.itemData(index))
+            for index in range(1, self.contact_input.count())
+        ) if contact_id is not None else ()
+        self.contact_input.clear()
+        self.contact_input.addItem("Not selected", None)
+        self.contact_input.setEnabled(False)
+        if company_id is None:
+            self.reference_feedback.setText("Select a company to choose a contact. References are optional.")
+            return
+        self.reference_feedback.setText("Loading contacts…")
+
+        def loaded(options):
+            # Ignore a result if the form was reset or its company changed.
+            if self.company_input.currentData() != company_id:
+                return
+            for option in options:
+                self.contact_input.addItem(option.label, option.reference_id)
+            self.contact_input.setCurrentIndex(max(0, self.contact_input.findData(contact_id)))
+            self.contact_input.setEnabled(bool(options))
+            self.reference_feedback.setText(
+                "Contact is optional." if options else "No active contacts for this company."
+            )
+
+        def failed(error):
+            if self.company_input.currentData() != company_id:
+                return
+            # A refresh failure keeps the prior selection; save revalidates it.
+            for label, reference_id in previous_options:
+                self.contact_input.addItem(label, reference_id)
+            self.contact_input.setCurrentIndex(max(0, self.contact_input.findData(contact_id)))
+            self.contact_input.setEnabled(bool(previous_options))
+            self._reference_failed(error, "contacts")
+
+        self._reference_task(
+            lambda: self._reference_service.list_active_contacts_for_company(company_id),
+            loaded, failed,
+        )
+
+    def _reference_failed(self, error, kind) -> None:
+        logging.getLogger(__name__).error("Reference load failed: %s", type(error).__name__)
+        self.reference_feedback.setText(
+            f"Could not load {kind}. Your ticket draft is preserved. Use Refresh references to retry."
+        )
 
     def submit(self) -> None:
         """Validate presentation input and invoke the ticket service once."""
@@ -221,12 +313,17 @@ class TicketCreateWidget(QWidget):
             "Category",
             self._reference_options.categories,
         )
+        self.reference_feedback = QLabel(self)
+        self.reference_feedback.setWordWrap(True)
+        self.refresh_references_button = QPushButton("Refresh references", self)
+        self.refresh_references_button.clicked.connect(self.refresh_references)
+        self.refresh_references_button.setVisible(self._reference_service is not None)
 
         self.description_input = QTextEdit(self)
         self.description_input.setObjectName("ticketDescriptionInput")
         self.description_input.setAccessibleName("Description")
         self.description_input.setAcceptRichText(False)
-        self.description_input.setMinimumHeight(140)
+        self.description_input.setMinimumHeight(120)
         self.description_input.setMaximumHeight(220)
 
         form = QFormLayout()
@@ -238,6 +335,9 @@ class TicketCreateWidget(QWidget):
         form.addRow("Priority", self.priority_input)
         form.addRow("Company", self.company_input)
         form.addRow("Contact", self.contact_input)
+        if self._reference_service is not None:
+            form.addRow("", self.reference_feedback)
+            form.addRow("", self.refresh_references_button)
         form.addRow("Category", self.category_input)
         form.addRow("Description", self.description_input)
 

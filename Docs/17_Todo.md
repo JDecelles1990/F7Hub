@@ -277,7 +277,15 @@ F7 launch/focus slice — verified 2026-09-05:
 - [x] Check missing runtime, timeout/retry, cold launch, actual global F7 focus/restore and duplicate shortcut startup.
 - [x] Keep normal startup unelevated and leave login-startup registration unchanged.
 
-Next application slice: KnowledgeRepository creation/reload and tests using the existing knowledge schema.
+Slice 006 — reference-aware ticket creation, verified 2026-09-05:
+
+- [x] Load active company choices and filter active contacts by the selected company through the service boundary.
+- [x] Clear incompatible contact selections and preserve drafts on query/save failures.
+- [x] Revalidate active references and membership in the creation transaction.
+- [x] Display company/contact names when reopening saved tickets; handle null, inactive and deleted references safely.
+- [x] Verify 142 database, 16 GUI and 21 integration tests, plus native Windows visual/input checks using isolated synthetic data. No migration.
+
+Recommended next slice (not implemented): KnowledgeRepository article creation/reload and isolated repository tests using the existing knowledge schema.
 
 ---
 

@@ -671,6 +671,14 @@ Services may:
 
 Services should not contain PySide6-specific code.
 
+## Implemented Ticket Reference Boundary — Slice 006
+
+`TicketReferenceService` provides narrow read-only company/contact choices using the existing CompanyRepository and ContactRepository. It returns frozen `TicketReferenceOption` IDs and canonical labels without PySide6 dependencies. Bootstrap injects it into the existing form; TicketService continues to own creation, reference validation and atomic history/timeline writes. This separates selector reads from write workflow coordination without introducing a framework or duplicate repositories.
+
+`TicketCreateWidget` uses the shared ServiceTaskRunner for reference queries and a widget-owned single-shot timer for initial loading. Destruction cancels the deferred initial callback. Company changes clear incompatible contacts; refresh/query failure preserves draft text, and failed refresh of a selected contact retains the prior choice for service revalidation. Conflicting actions remain disabled while workers execute.
+
+TicketService checks active companies/contacts and selected-company membership inside BEGIN IMMEDIATE, including a contact detached after selection. Optional references remain supported. TicketRepository adds canonical company/contact names to the existing detail snapshot using LEFT JOIN without filtering out inactive rows. Existing ON DELETE SET NULL behavior remains unchanged; labels are current names, not immutable historical snapshots. No migration or production dependency was added.
+
 ## Implemented Ticket Activity Boundary
 
 `TicketService.add_note()` validates note text, type, ticket identity and metadata, then atomically inserts the note, its `NOTE_ADDED` timeline event and the ticket's `updated_at` value. The event stores a `ticket_note_id` reference rather than copying note content. Notes remain available on closed and cancelled tickets; adding a `RESOLUTION` note alone does not change status.
@@ -693,7 +701,7 @@ The initial transition policy, implemented in `TICKET_STATUS_TRANSITIONS`, is:
 
 `TicketRepository` exposes frozen `TicketNoteRecord` results and parameterized note lookup/list operations. Its transaction session provides current-ticket reads, note inserts and narrow activity/status updates. `BEGIN IMMEDIATE` reserves the writer before reading current state so concurrent workflows validate against serialized ticket state. Existing configured connection timeouts and foreign-key enforcement remain in effect.
 
-`TicketNotFoundError` identifies a missing workflow target; `TicketValidationError` identifies rejected input or transitions; `TicketUpdateError` translates SQLite activity-write failures into safe service feedback. Persistence operations do not independently select transitions or create history/timeline records. The notes/status GUI remains planned.
+`TicketNotFoundError` identifies a missing workflow target; `TicketValidationError` identifies rejected input or transitions; `TicketUpdateError` translates SQLite activity-write failures into safe service feedback. Persistence operations do not independently select transitions or create history/timeline records. The notes/status GUI is implemented in TicketWorkspace.
 
 ---
 
@@ -3296,9 +3304,9 @@ TicketCreateWidget: VERIFIED
 Application entry point, bootstrap and minimal MainWindow: VERIFIED
 Saved-ticket workspace and background service runner: VERIFIED
 Remaining Python application implementation: PLANNED
-Isolated database tests: PASS — 133 tests
-GUI tests: PASS — 10 tests
-Application and GUI integration tests: PASS — 14 tests
+Isolated database tests: PASS — 142 tests
+GUI tests: PASS — 16 tests
+Application and GUI integration tests: PASS — 21 tests
 ```
 
 This verification does not prove that:

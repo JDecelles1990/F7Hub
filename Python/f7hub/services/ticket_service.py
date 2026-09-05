@@ -373,18 +373,17 @@ class TicketService:
         contact_id: int | None,
         category_id: int | None,
     ) -> None:
-        if company_id is not None and not transaction.company_exists(company_id):
-            raise TicketValidationError("company_id does not reference a company.")
+        if company_id is not None and not transaction.company_exists(company_id, active_only=True):
+            raise TicketValidationError("Select an active company. Refresh references and select again.")
 
         if contact_id is not None:
             contact_exists, contact_company_id = transaction.get_contact_reference(
-                contact_id
+                contact_id, active_only=True
             )
             if not contact_exists:
-                raise TicketValidationError("contact_id does not reference a contact.")
+                raise TicketValidationError("Select an active contact. Refresh references and select again.")
             if (
                 company_id is not None
-                and contact_company_id is not None
                 and contact_company_id != company_id
             ):
                 raise TicketValidationError(
@@ -436,7 +435,7 @@ def _choice(value: object, field_name: str, choices: frozenset[str]) -> str:
 def _validate_optional_id(value: object | None, field_name: str) -> None:
     if value is None:
         return
-    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+    if isinstance(value, bool) or not isinstance(value, int) or not 1 <= value <= 2**63 - 1:
         raise TicketValidationError(f"{field_name} must be a positive integer or None.")
 
 
