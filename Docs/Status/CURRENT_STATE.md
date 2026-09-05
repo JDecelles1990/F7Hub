@@ -2,55 +2,50 @@
 
 Last verified: 2026-09-05
 
-Branch: `main` and `recovery/2026-09-05-first-usable-ticket-workflow`
+Branch: `feat/ticket-reference-data`
 
-HEAD after commit: this recovery checkpoint commit (`git rev-parse HEAD`)
+Base HEAD: `3e99db6f35ddf5d23a2d22905a92a40c3d0425c2`; Slice 006 changes are uncommitted for review.
 
 ## Working
 
 - SQLite bootstrap, migrations through `0005_knowledge.sql`, and integrity checks
 - Company and contact repositories
-- Ticket creation, reload, notes, status history, timeline, resolution, closure, and reopening
-- PySide6 New Ticket and Saved Tickets workflows with background service execution
-- AutoHotkey v2 F7 launch, focus, restore, and duplicate-launch protection
+- Ticket creation and Saved Tickets reopening
+- Ticket notes, status history, timeline, resolution, closure and reopening
+- Company-aware and contact-aware ticket creation with active, company-filtered choices
+- Reference refresh/retry, draft preservation and transactional reference validation
+- Saved-ticket company/contact names, including inactive references and safe null/deletion handling
+- AutoHotkey v2 F7 launch/focus/restore (previously verified; not rerun in Slice 006)
 
 ## Partial
 
-- Company, contact, and category fields exist in ticket creation, but reference choices are not loaded into the GUI
-- AutoHotkey is a development-session launcher; login startup is not configured
+- Category choices are not loaded into New Ticket
+- Company/contact management GUI is not implemented; selectors use existing database records
+- AutoHotkey login startup is not configured
 
 ## Not Started
 
-- Reference-aware company/contact ticket creation
 - Knowledge repositories and knowledge GUI
 - PowerShell integration
 
 ## Current Milestone
 
-First Useful Local Ticket Workflow
+Reference-Aware Ticket Creation
 
-## Baseline Tests
+## Validation
 
-Database: PASS — 133 tests
+Database: PASS — 142 tests
 
-GUI: PASS — 10 tests
+GUI: PASS — 16 tests
 
-Integration: PASS — 14 tests
+Integration: PASS — 21 tests
 
-AutoHotkey: PASS — live launcher verification
+Native Windows visual/input checks: PASS — synthetic reference selection, switching, save/reopen, empty states, query/stale-reference errors and draft preservation; initial size and 1000×700. Agent checks, not user acceptance testing.
 
-## Next Approved Slice
+AutoHotkey: NOT RUN in this slice
 
-Reference-aware company/contact ticket creation
+Migration: NONE
 
-## Next User-Visible Target
+## Recommended Next Slice
 
-```text
-Launch F7Hub
-→ New Ticket
-→ select company
-→ select matching contact
-→ Save
-→ reopen ticket
-→ correct company/contact displayed
-```
+KnowledgeRepository article creation/reload with isolated repository tests using the existing `0005_knowledge.sql` schema. Not implemented.

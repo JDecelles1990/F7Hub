@@ -10,6 +10,9 @@ from f7hub.infrastructure.database import BootstrapResult, bootstrap_database
 from f7hub.infrastructure.database_paths import resolve_development_database_path
 from f7hub.repositories.ticket_repository import TicketRepository
 from f7hub.services.ticket_service import TicketService
+from f7hub.repositories.company_repository import CompanyRepository
+from f7hub.repositories.contact_repository import ContactRepository
+from f7hub.services.ticket_reference_service import TicketReferenceService
 
 
 DEFAULT_PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -47,7 +50,10 @@ def bootstrap_application(
     )
     ticket_repository = TicketRepository(resolved_database_path)
     ticket_service = TicketService(ticket_repository)
-    main_window = MainWindow(ticket_service)
+    reference_service = TicketReferenceService(
+        CompanyRepository(resolved_database_path), ContactRepository(resolved_database_path),
+    )
+    main_window = MainWindow(ticket_service, reference_service=reference_service)
 
     return ApplicationContext(
         database_path=resolved_database_path,

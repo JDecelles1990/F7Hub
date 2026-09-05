@@ -47,6 +47,17 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-05 — Slice 006: Reference-Aware Ticket Creation
+
+- Added active company selection and company-filtered active contacts to New Ticket through a narrow TicketReferenceService and the existing background runner. IDs remain separate from canonical display labels.
+- Company switching clears the old contact. Empty choices and reference-query failures have inline feedback and retry; draft text and valid reference selections survive refresh failures.
+- Creation rechecks active state and company/contact membership in its existing transaction. Ticket details resolve names from the same SQLite snapshot, including inactive rows; deletion retains the existing SET NULL behavior.
+- Fixed deferred initial reference loading so widget destruction cancels its callback. Adjusted description minimum height to fit the added controls and error feedback at 1000×700.
+- Validation: PASS — 142 database, 16 GUI and 21 integration tests. Native Windows visual inspection and Qt input-event checks: PASS for company loading, contact filtering, switching, persistence/reopening, empty choices, query errors and stale references. These are agent checks, not user acceptance testing. AutoHotkey was not rerun in this slice.
+- No schema, migration or production dependency changes. Synthetic databases and screenshots remain outside the repository. Changes remain uncommitted for independent review.
+
+---
+
 # 2026-09-05 — Windows Usability Check and F7 Shortcut
 
 - Inspected native Windows renders at the initial size and 1000×700, with an available screen of 1600×852. Exercised creation, notes, resolution and Enter-to-open using Qt input events against an isolated database. Native visual/interaction check: PASS; this is agent inspection, not user acceptance testing.

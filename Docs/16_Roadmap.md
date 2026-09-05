@@ -104,6 +104,7 @@ Ticket notes/status/resolution/reopening repository and service boundary: VERIFI
 Minimal ticket creation GUI: VERIFIED
 Minimal application bootstrap and MainWindow: VERIFIED
 Saved-ticket workspace and background service runner: VERIFIED
+Reference-aware company/contact ticket creation: VERIFIED
 AutoHotkey F7 launch/focus shortcut: VERIFIED
 Relational knowledge schema migration: VERIFIED
 Remaining application implementation: PLANNED
@@ -671,8 +672,8 @@ recent tickets by contact
 # 31. Phase 4 Acceptance Criteria
 
 ```text
-[ ] Ticket can reference company
-[ ] Ticket can reference contact
+[x] Ticket can reference company
+[x] Ticket can reference contact
 [ ] Company view lists relevant tickets
 [ ] Contact view lists relevant tickets
 [ ] Relationships preserve integrity

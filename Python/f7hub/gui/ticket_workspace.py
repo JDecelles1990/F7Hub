@@ -249,6 +249,8 @@ class TicketWorkspace(QWidget):
         self.heading.setText(f"{ticket.ticket_number} — {ticket.subject}\n{ticket.status} · {ticket.priority}")
         self.summary.setPlainText(
             f"{ticket.description or '(No description)'}\n\n"
+            f"Company: {details.company_name or ('Unavailable' if ticket.company_id else 'Not selected')}\n"
+            f"Contact: {details.contact_name or ('Unavailable' if ticket.contact_id else 'Not selected')}\n\n"
             f"Assigned to: {ticket.assigned_to or 'Unassigned'}\n"
             f"Created: {ticket.created_at}\nUpdated: {ticket.updated_at}\n"
             f"Resolved: {ticket.resolved_at or '—'}\nClosed: {ticket.closed_at or '—'}\n\n"

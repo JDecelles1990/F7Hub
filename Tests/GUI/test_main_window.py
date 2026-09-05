@@ -27,6 +27,7 @@ class RecordingTicketService:
             assigned_to=None, created_at="2026-09-04T15:00:00.000Z",
             updated_at="2026-09-04T15:00:00.000Z", resolved_at=None,
             closed_at=None, resolution=None,
+            company_id=None, contact_id=None,
         )
 
     def create_ticket(self, **values: object) -> object:
@@ -41,7 +42,8 @@ class RecordingTicketService:
         return (self.ticket,)
 
     def get_ticket_details(self, ticket_id):
-        return SimpleNamespace(ticket=self.ticket, notes=(), status_history=(), timeline_events=())
+        return SimpleNamespace(ticket=self.ticket, notes=(), status_history=(), timeline_events=(),
+                               company_name=None, contact_name=None)
 
     allowed_statuses = staticmethod(TicketService.allowed_statuses)
 
