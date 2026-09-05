@@ -54,7 +54,7 @@ The repository root should remain stable unless restructuring is explicitly appr
 F7Hub uses several technologies with deliberately separate responsibilities.
 
 ```text
-Python / PyQt6
+Python / PySide6
 → Primary application and GUI
 
 SQLite
@@ -268,7 +268,7 @@ Potential responsibilities:
 
 Purpose:
 
-PyQt6 interface implementation.
+PySide6 interface implementation.
 
 Potential contents:
 
@@ -321,7 +321,7 @@ Potential contents:
 - workflow rules
 - domain exceptions
 
-Domain logic should remain independent of PyQt6.
+Domain logic should remain independent of PySide6.
 
 ---
 
@@ -507,7 +507,7 @@ Purpose:
 
 Lightweight popup or context menus.
 
-Do not recreate major PyQt6 application screens here.
+Do not recreate major PySide6 application screens here.
 
 ---
 
@@ -1189,7 +1189,7 @@ Examples:
 
 Purpose:
 
-PyQt6 GUI tests and workflow validation.
+PySide6 GUI tests and workflow validation.
 
 ---
 
@@ -1565,7 +1565,7 @@ Examples:
 
 | Folder | Owner |
 |---|---|
-| `Python\f7hub\gui` | Python/PyQt6 application |
+| `Python\f7hub\gui` | Python/PySide6 application |
 | `Python\f7hub\repositories` | Persistence layer |
 | `PowerShell\Diagnostics` | PowerShell subsystem |
 | `AutoHotkey\Hotkeys` | AHK subsystem |
@@ -1839,17 +1839,20 @@ Small feature-specific folders do not require architectural review if they follo
 
 This document defines the intended canonical structure.
 
-Repository inspection on 2026-09-03 confirmed:
+Repository inspection and tests through 2026-09-04 confirmed:
 
 ```text
 Top-level canonical directories: PASS
 Canonical Docs/00–19 files: PASS
 Canonical scaffold script location: PASS
 SQLite infrastructure substructure: PASS
+Services and repositories for ticket creation: PASS
+PySide6 ticket creation GUI: PASS
+Python application bootstrap and minimal MainWindow: PASS
 Remaining implementation substructure: PLANNED
 ```
 
-`Python\f7hub\infrastructure\` now contains the verified SQLite path, connection, migration, bootstrap and integrity implementation, with isolated tests under `Tests\Database\`. Other application source areas remain unimplemented. `Database\SQLite\F7Hub.db` is still a zero-byte legacy scaffold artifact rather than the planned development database at `Database\Dev\f7hub_dev.db`; the test suite did not use either file.
+`Python\f7hub\infrastructure\` contains the verified SQLite foundation, `repositories\` and `services\` contain the verified ticket-creation boundary, `gui\` contains the tested ticket form and minimal main window, and `app\` centrally composes the current dependencies. `Python\f7hub\__main__.py` is the development entry point. Tests remain separated under `Tests\Database\`, `Tests\GUI\` and `Tests\Integration\`. Remaining feature areas are still planned. `Database\SQLite\F7Hub.db` remains a zero-byte legacy scaffold and was not used by the tests.
 
 Two root-level legacy PowerShell scripts still contain the former OneDrive path. They are not canonical architecture and require a separate source-cleanup decision; this documentation-only review does not modify them. The repository also contains an empty noncanonical `zip\` directory whose disposition remains a follow-up.
 
@@ -1892,7 +1895,7 @@ Defines:
 # 103. Folder Structure Golden Rules
 
 1. `C:\Dev\F7Hub` is the canonical development root.
-2. Python/PyQt6 is the primary application layer.
+2. Python/PySide6 is the primary application layer.
 3. PowerShell owns Windows/Microsoft administration and diagnostics.
 4. AutoHotkey owns lightweight desktop automation.
 5. SQLite persistence is accessed through Python repositories.

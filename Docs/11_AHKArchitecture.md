@@ -3,7 +3,7 @@
 > Document: `Docs/11_AHKArchitecture.md`  
 > Project: F7Hub  
 > Technology: AutoHotkey v2  
-> Purpose: Define how AutoHotkey v2 is used inside F7Hub, including hotkeys, hotstrings, clipboard automation, launchers, quick menus, Windows integration, security boundaries, and communication with the primary Python/PyQt6 application.  
+> Purpose: Define how AutoHotkey v2 is used inside F7Hub, including hotkeys, hotstrings, clipboard automation, launchers, quick menus, Windows integration, security boundaries, and communication with the primary Python/PySide6 application.
 > Related Documents: `04_UserWorkflows.md`, `05_GUI.md`, `06_SystemArchitecture.md`, `10_FolderStructure.md`, `12_PowerShellArchitecture.md`, `13_PythonArchitecture.md`
 
 ---
@@ -35,7 +35,7 @@ The main desktop application is designed to be implemented with:
 ```text
 Python
 +
-PyQt6
+PySide6
 ```
 
 ---
@@ -72,7 +72,7 @@ Keyboard / Clipboard / Windows
 
 AHK complements the Python application.
 
-It should not duplicate the PyQt6 application.
+It should not duplicate the PySide6 application.
 
 ---
 
@@ -82,7 +82,7 @@ Responsibilities are divided as follows:
 
 | Concern | Primary Technology |
 |---|---|
-| Main GUI | Python / PyQt6 |
+| Main GUI | Python / PySide6 |
 | Application services | Python |
 | Persistent database access | Python repositories |
 | Windows/M365 administration | PowerShell |
@@ -453,7 +453,7 @@ F7 Quick Menu
 
 AHK menus should remain small and fast.
 
-They should not reproduce complex PyQt6 screens.
+They should not reproduce complex PySide6 screens.
 
 ---
 
@@ -1513,7 +1513,7 @@ Complex Graph or Exchange administration is implemented directly in AHK.
 
 ## AHK GUI Duplication
 
-Large AHK windows recreate PyQt6 modules.
+Large AHK windows recreate PySide6 modules.
 
 ## Hard-Coded Paths Everywhere
 
@@ -1541,7 +1541,7 @@ Before implementing something in AutoHotkey, ask:
 2. Does it involve global keyboard input?
 3. Does it involve clipboard interaction?
 4. Does it involve lightweight window/process handling?
-5. Would Python/PyQt6 provide a cleaner application-level solution?
+5. Would Python/PySide6 provide a cleaner application-level solution?
 6. Would PowerShell provide a safer administration solution?
 7. Does an existing AHK component already provide it?
 
@@ -1554,7 +1554,7 @@ If the task is not fundamentally desktop automation, it probably belongs elsewhe
 Preferred architecture:
 
 ```text
-             Python / PyQt6
+             Python / PySide6
              Primary F7Hub App
                     │
          ┌──────────┴──────────┐
@@ -1607,21 +1607,21 @@ Major feature changes may also require:
 
 # 79. Current Implementation Status
 
-Repository inspection on 2026-09-02 found no AutoHotkey implementation under `AutoHotkey\`.
+On 2026-09-05, `AutoHotkey/F7Hub.ahk` and `Launchers/F7HubLauncher.ahk` implement the F7 launch/focus slice. The entry point registers F7 with one shortcut-script instance and one handler at a time. The launcher derives the project root from the script location, uses `.venv/Scripts/pythonw.exe -m f7hub` without a console, and supplies the project's Python path to the child process.
+
+Existing windows are recognized by exact `F7Hub` title, Qt window class and Python process name. F7 activates the window or restores it from minimized state. A pending process is retained after a 15-second startup timeout to prevent another launch on retry. Missing files, launch failure, early process exit, startup timeout and denied activation produce actionable feedback. This is a development launcher for one checkout: separately started copies with the same window identity are not distinguished. It is not an application-wide single-instance lock.
+
+Start the shortcut by opening `AutoHotkey/F7Hub.ahk` with AutoHotkey v2. Use its tray menu to exit or reload. Login startup registration is not installed by this slice. The default app uses `Database/Dev/f7hub_dev.db`; the launcher class accepts an explicit database path for isolated live tests.
 
 ```text
-AutoHotkey implementation status: PLANNED
+F7 launch/focus: VERIFIED
+Live launcher checks with AutoHotkey 2.0.26: PASS
+Other AutoHotkey features: PLANNED
 ```
 
-This document defines intended architecture.
+`Tests/AutoHotkey/test_f7hub_launcher.ahk` accepts a new isolated database path and refuses to run while F7Hub or its shortcut is already active. It checks missing runtime, repeated timeout without duplicate launch, cold launch, parent environment restoration, focus, minimized restoration, repeated calls, unrelated window rejection, actual global F7 input and duplicate shortcut startup. The test closes only the app and shortcut it starts.
 
-It does not prove that:
-
-- hotkeys exist
-- clipboard integration exists
-- menus exist
-- Python communication exists
-- tests pass
+Remaining sections describe intended architecture; clipboard integration, quick menus and richer Python command communication remain planned.
 
 ---
 
@@ -1677,7 +1677,7 @@ An AHK feature is complete when applicable:
 # 82. AutoHotkey Golden Rules
 
 1. F7Hub uses AutoHotkey v2 only.
-2. Python/PyQt6 remains the primary application.
+2. Python/PySide6 remains the primary application.
 3. AHK owns desktop automation.
 4. PowerShell owns administration and diagnostics.
 5. AHK should not directly own SQLite persistence.
@@ -1721,7 +1721,7 @@ It should make common technician interactions faster without becoming the applic
 The architectural boundary is:
 
 ```text
-PyQt6
+PySide6
 → full application interface
 
 Python

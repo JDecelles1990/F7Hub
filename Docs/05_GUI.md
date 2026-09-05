@@ -1,4 +1,4 @@
-﻿# F7Hub GUI Design
+# F7Hub GUI Design
 
 > Document: `Docs/05_GUI.md`  
 > Project: F7Hub  
@@ -33,7 +33,7 @@ This document defines:
 - accessibility
 - error presentation
 
-Implementation details such as PyQt6 classes, signal wiring and threading belong in:
+Implementation details such as PySide6 classes, signal wiring and threading belong in:
 
 `13_PythonArchitecture.md`
 
@@ -81,13 +81,20 @@ The primary interaction principle is:
 
 # 4. Current Implementation Status
 
-The actual GUI implementation was inspected during the 2026-09-02 consistency review.
+Repository inspection and tests through 2026-09-05 verified ticket creation and the saved-ticket workspace in the application shell.
 
 ```text
-GUI implementation status: PLANNED
+TicketCreateWidget: VERIFIED
+Application entry point, bootstrap and MainWindow: VERIFIED
+Saved-ticket list, details, notes and status controls: VERIFIED
+Remaining navigation and GUI modules: PLANNED
+GUI tests: PASS — 10 tests
+Application and GUI integration tests: PASS — 14 tests
 ```
 
-Repository inspection on 2026-09-02 found no PyQt6 application implementation under `Python\`.
+`TicketCreateWidget` provides the minimum ticket input form, inline required-field feedback, safe persistence-error presentation, input preservation, keyboard save action, service delegation and a successful-ticket signal. The main window provides New ticket and Saved tickets navigation. Successful creation opens the saved ticket. The queue supports status filtering and pages of 100 tickets; details show notes, lifecycle history and timeline events. Technicians can add notes, resolve with a summary, close and reopen using service-provided status choices.
+
+Failed saves preserve drafts. Switching tickets or leaving activity drafts prompts before discarding them; failed loads preserve existing details and drafts. A committed save followed by a failed reload remains reported as saved. If the initial detail load fails after creation, the queue refreshes so the saved ticket can be opened again. Operations disable conflicting actions while running; closing waits for the operation to finish. Automated GUI checks run offscreen; native Windows visual inspection and input-event checks are PASS on 2026-09-05 at the default size and 1000×700. Initial window sizing now leaves space for Windows borders and the taskbar. Reference-data loading remains planned. The AutoHotkey F7 shortcut launches, focuses or restores the application while its script is active.
 
 The layouts in this document represent intended product behavior.
 
@@ -100,10 +107,10 @@ Primary framework:
 ```text
 Python
 +
-PyQt6
+PySide6
 ```
 
-PyQt6 owns:
+PySide6 owns:
 
 - main application window
 - navigation
@@ -2040,7 +2047,7 @@ Defines:
 
 Defines:
 
-> How is the PyQt6 implementation structured internally?
+> How is the PySide6 implementation structured internally?
 
 ---
 

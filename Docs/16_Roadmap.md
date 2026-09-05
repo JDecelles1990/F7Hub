@@ -1,4 +1,4 @@
-﻿# F7Hub Roadmap
+# F7Hub Roadmap
 
 > Document: `Docs/16_Roadmap.md`  
 > Project: F7Hub  
@@ -92,13 +92,20 @@ Validation and test results use `PASS`, `FAIL`, `NOT RUN`, or `BLOCKED`.
 
 # 4. Current Project Status
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection and migration infrastructure, migrations through the ticket-core schema in `0004_tickets.sql`, and the company/contact repositories. No application service, GUI, PowerShell, AutoHotkey or ticket repository exists yet.
+Repository inspection and tests through 2026-09-05 verified the Python SQLite foundation, migrations through `0005_knowledge.sql`, the company/contact repositories, the ticket repository/service workflows, the PySide6 ticket creation and saved-ticket workspace, and the AutoHotkey F7 launch/focus shortcut. PowerShell and the knowledge repository do not exist yet.
 
 ```text
 Documentation consistency review: IN PROGRESS
 Phase 1A migration infrastructure: VERIFIED
 Phase 1B taxonomy and company/contact persistence: VERIFIED
 Phase 1C ticket-core schema migration: VERIFIED
+Ticket creation repository/service boundary: VERIFIED
+Ticket notes/status/resolution/reopening repository and service boundary: VERIFIED
+Minimal ticket creation GUI: VERIFIED
+Minimal application bootstrap and MainWindow: VERIFIED
+Saved-ticket workspace and background service runner: VERIFIED
+AutoHotkey F7 launch/focus shortcut: VERIFIED
+Relational knowledge schema migration: VERIFIED
 Remaining application implementation: PLANNED
 ```
 
@@ -379,7 +386,7 @@ Do not build attachments, relationships, advanced taxonomy, and external sync pr
 
 ```text
 0004_tickets.sql: VERIFIED — 2026-09-03 — 10 focused tests; 79 full database tests
-TicketRepository and TicketService: PLANNED
+TicketRepository and TicketService creation boundary: VERIFIED — 2026-09-04 — 11 focused tests; 101 full database tests
 ```
 
 ---
@@ -391,12 +398,12 @@ Database foundation is ready when:
 ```text
 [x] Companies persist correctly
 [x] Contacts persist correctly
-[ ] Tickets persist correctly
+[x] Tickets persist correctly
 [ ] Ticket notes persist correctly
-[ ] Ticket status history is preserved
-[ ] FK failures are tested
-[ ] Required indexes exist
-[ ] Transactions are tested
+[x] Ticket status history is preserved for creation
+[x] FK failures are tested
+[x] Required indexes exist
+[x] Ticket creation transactions are tested
 [ ] Schema docs match implementation
 ```
 
@@ -421,7 +428,7 @@ Migration
 
 ## Objective
 
-Create the smallest working PyQt6 application architecture.
+Create the smallest working PySide6 application architecture.
 
 ---
 
@@ -433,12 +440,19 @@ Establish:
 supported Python version
 virtual environment
 dependency definition
-PyQt6 dependency
+PySide6 dependency
 test framework
 package entry point
 ```
 
 Do not add a large dependency list.
+
+```text
+Python 3.14.6 development environment: VERIFIED
+PySide6 6.11.2 dependency: VERIFIED
+unittest-based test framework: VERIFIED
+Package entry point: VERIFIED
+```
 
 ---
 
@@ -481,14 +495,14 @@ Do not implement every future dock at once.
 # 20. Phase 2 Acceptance Criteria
 
 ```text
-[ ] F7Hub starts successfully
-[ ] Main window opens
-[ ] SQLite initializes
-[ ] Migrations execute safely
+[x] F7Hub starts successfully
+[x] Main window opens
+[x] SQLite initializes
+[x] Migrations execute safely
 [ ] Logging initializes
-[ ] Application closes cleanly
-[ ] Startup failure produces useful error
-[ ] Basic application startup test exists
+[x] Application closes cleanly
+[x] Startup failure produces useful error
+[x] Basic application startup test exists
 ```
 
 ---
@@ -581,6 +595,8 @@ timestamps
 
 This is a high-value technician workflow.
 
+Repository and service operations were verified on 2026-09-04: note creation/reload, metadata, timeline references, ticket activity timestamps and atomic rollback. The notes editor/history GUI remains planned.
+
 ---
 
 # 27. Phase 3E: Ticket Status
@@ -597,6 +613,8 @@ OPEN
 ```
 
 Exact statuses should be defined in the schema and requirements.
+
+The initial service transition policy is implemented and verified on 2026-09-04, including required resolution summaries, closure and the approved reopening of RESOLVED/CLOSED tickets to OPEN. Status/history/timeline writes are atomic; prior resolutions survive reopening. Saved-ticket GUI controls and the create/note/resolve/close/reopen flow are verified by automated tests on 2026-09-05. Native Windows visual/input checks passed on 2026-09-05 at the initial size and 1000×700. See `13_PythonArchitecture.md` for the exact service policy.
 
 ---
 
@@ -672,10 +690,20 @@ Create reusable technician knowledge.
 
 # 33. Phase 5A: Knowledge Articles
 
-Implement:
+Relational schema foundation:
 
 ```text
 knowledge_articles
+knowledge_article_versions
+knowledge_article_links
+knowledge_article_relationships
+ticket_knowledge_articles
+knowledge_article_tags
+```
+
+```text
+0005_knowledge.sql: VERIFIED — 2026-09-04 — 11 focused tests; 90 full database tests
+KnowledgeRepository and application workflows: PLANNED
 ```
 
 Initial capabilities:
@@ -691,18 +719,16 @@ Initial capabilities:
 
 # 34. Phase 5B: Knowledge Relationships
 
-Add only useful relationships:
+Use the verified relationship tables only through explicit application workflows:
 
 ```text
 ticket_knowledge_articles
 knowledge_article_tags
 ```
 
-Potential later:
+Potential later, after the scripts schema exists:
 
 ```text
-knowledge_article_versions
-knowledge_article_relationships
 knowledge_article_scripts
 ```
 
@@ -1048,7 +1074,7 @@ RESULT
 
 # 57. Phase 9C: Dynamic Forms
 
-PyQt6 should render form controls based on workflow step definition.
+PySide6 should render form controls based on workflow step definition.
 
 Examples:
 
@@ -1168,7 +1194,7 @@ Persistent clipboard history belongs to Python/SQLite if later implemented.
 
 ```text
 [ ] AutoHotkey v2 only
-[ ] F7 launches/focuses reliably
+[x] F7 launches/focuses reliably (live Windows checks, 2026-09-05)
 [ ] No duplicate app launch under normal test
 [ ] Clipboard is preserved where required
 [ ] Hotkeys avoid known conflicts
@@ -2324,11 +2350,23 @@ and tests.
 Then:
 
 ```text
-Implement minimal PyQt6 ticket creation GUI
+Implement minimal PySide6 ticket creation GUI
 using the existing TicketService.
 ```
 
-This completes the first vertical slice.
+```text
+Status: VERIFIED — 2026-09-04 — 5 GUI tests; 1 GUI-to-database integration test
+```
+
+This completes the first ticket-creation vertical slice.
+
+The minimal application-shell follow-up was completed and verified on 2026-09-04:
+
+```text
+Status: VERIFIED — 7 GUI tests; 5 application and GUI integration tests
+```
+
+Full navigation, toolbar and logging work remain planned within Phase 2.
 
 ---
 
@@ -2370,7 +2408,7 @@ M3
 Ticket Persistence
 
 M4
-PyQt6 Application Shell
+PySide6 Application Shell
 
 M5
 Ticket Creation Workflow
@@ -2630,7 +2668,7 @@ Documentation
       ↓
 Database Foundation
       ↓
-Python / PyQt6 Shell
+Python / PySide6 Shell
       ↓
 Tickets
       ↓

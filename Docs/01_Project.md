@@ -1,4 +1,4 @@
-﻿# F7Hub Project Information
+# F7Hub Project Information
 
 > Document: `Docs/01_Project.md`  
 > Project: F7Hub  
@@ -14,7 +14,7 @@
 | Project Name | F7Hub |
 | Project Type | Modular Windows IT Support and Technician Productivity Platform |
 | Primary Platform | Windows 11 |
-| Primary GUI Framework | Python / PyQt6 |
+| Primary GUI Framework | Python / PySide6 |
 | Automation Technologies | PowerShell 7 and AutoHotkey v2 |
 | Database | SQLite |
 | Primary Domain | IT Support, Helpdesk, MSP Operations and Microsoft 365 Administration |
@@ -128,7 +128,7 @@ Typical responsibilities:
 
 ---
 
-### PyQt6
+### PySide6
 
 Primary graphical user interface framework.
 
@@ -326,7 +326,7 @@ Primary development tools may include:
 Visual Studio Code
 PowerShell 7
 Python
-PyQt6
+PySide6
 Qt Designer
 SQLite
 DB Browser for SQLite
@@ -474,7 +474,7 @@ PowerShell\
 → PowerShell automation and administration scripts
 
 Python\
-→ Python application and PyQt6 source
+→ Python application and PySide6 source
 
 Database\
 → SQLite schema, migrations and database tooling
@@ -720,7 +720,7 @@ Possible considerations include:
 - private/proprietary development
 - open-source distribution
 - third-party library licenses
-- PyQt6 licensing requirements
+- PySide6 licensing requirements
 - bundled tool licenses
 - icons and visual asset licenses
 - Microsoft API terms
@@ -905,7 +905,7 @@ The project documents answer different questions.
 → What belongs to PowerShell?
 
 13_PythonArchitecture.md
-→ What belongs to Python / PyQt6?
+→ What belongs to Python / PySide6?
 
 14_DesignPrinciples.md
 → What engineering principles apply?
@@ -959,7 +959,7 @@ Core project scope includes:
 ## Desktop Application
 
 - Python desktop application
-- PyQt6 GUI
+- PySide6 GUI
 - navigation
 - workspaces
 - dockable panels
@@ -1474,7 +1474,7 @@ For example:
 → F7Hub should become a technician command center.
 
 01_Project.md
-→ F7Hub is designed as a Windows-first modular application using Python, PyQt6, PowerShell, AutoHotkey and SQLite.
+→ F7Hub is designed as a Windows-first modular application using Python, PySide6, PowerShell, AutoHotkey and SQLite.
 ```
 
 ---
@@ -1525,12 +1525,12 @@ For example:
 
 # 43. Project Summary
 
-F7Hub is a Windows-first modular IT support platform centered around a Python/PyQt6 desktop application.
+F7Hub is a Windows-first modular IT support platform centered around a Python/PySide6 desktop application.
 
 Its architecture combines:
 
 ```text
-PyQt6
+PySide6
 → User interface
 
 Python

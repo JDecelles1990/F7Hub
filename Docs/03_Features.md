@@ -1,4 +1,4 @@
-﻿# F7Hub Features
+# F7Hub Features
 
 > Document: `Docs/03_Features.md`  
 > Project: F7Hub  
@@ -101,7 +101,7 @@ F7Hub
 Priority: P0  
 Requirements: `FR-APP-001`, `FR-APP-002`
 
-F7Hub shall provide a primary Windows desktop application built with Python and PyQt6.
+F7Hub shall provide a primary Windows desktop application built with Python and PySide6.
 
 The application shell provides:
 
@@ -745,7 +745,7 @@ A workflow may contain:
 Priority: P2  
 Requirements: `FR-DIAG-002`
 
-Diagnostic questions may dynamically generate PyQt6 form controls.
+Diagnostic questions may dynamically generate PySide6 form controls.
 
 ---
 

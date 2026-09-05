@@ -128,7 +128,7 @@ The preferred dependency direction is:
 
 ┌──────────────────────────────────────┐
 │                 GUI                  │
-│            Python / PyQt6            │
+│            Python / PySide6          │
 └──────────────────┬───────────────────┘
                    │
                    ▼
@@ -205,7 +205,7 @@ F7Hub operates between the technician and multiple local or remote systems.
                                     ▼
                         ┌───────────────────────┐
                         │        F7Hub          │
-                        │    Python / PyQt6     │
+                        │    Python / PySide6   │
                         └───────────┬───────────┘
                                     │
          ┌──────────────────────────┼──────────────────────────┐
@@ -282,7 +282,7 @@ The Application Core should not contain unrelated domain logic.
 
 # 9. GUI Layer
 
-The GUI is designed to be implemented primarily with Python and PyQt6.
+The GUI is designed to be implemented primarily with Python and PySide6.
 
 Responsibilities include:
 
@@ -1868,7 +1868,7 @@ Database
 → GUI
 
 PowerShell Script
-→ PyQt6 Widgets
+→ PySide6 Widgets
 
 AHK
 → Direct SQLite Schema Manipulation
@@ -1890,7 +1890,7 @@ Primary Technology
 
 Main GUI
 
-Python / PyQt6
+Python / PySide6
 
 Application services
 
@@ -2210,7 +2210,7 @@ The early target architecture should remain small and should be reached through 
 
 Recommended initial system:
 
-PyQt6 Application Shell
+PySide6 Application Shell
         │
         ├── SettingsService
         ├── TicketService
@@ -2244,7 +2244,7 @@ A reasonable architectural growth path is:
        ↓
 3. Ticket persistence and service
        ↓
-4. PyQt6 application shell and ticket GUI
+4. PySide6 application shell and ticket GUI
        ↓
 5. Knowledge Base
        ↓
@@ -2390,18 +2390,18 @@ How does PowerShell automation operate?
 
 Defines:
 
-How is the Python/PyQt6 application structured internally?
+How is the Python/PySide6 application structured internally?
 
 # 90. Final Architecture Summary
 
-F7Hub should be built as a modular Windows desktop application centered on Python and PyQt6.
+F7Hub should be built as a modular Windows desktop application centered on Python and PySide6.
 
 Its core architecture is:
 
                     Technician
                          │
                          ▼
-                  Python / PyQt6
+                  Python / PySide6
                          │
                          ▼
                 Application Services
@@ -2420,7 +2420,7 @@ Its core architecture is:
 
 Subsystem ownership is deliberate:
 
-PyQt6 owns the primary interface
+PySide6 owns the primary interface
 
 Python owns application orchestration and domain services
 

@@ -1,8 +1,8 @@
-﻿# F7Hub Naming Conventions
+# F7Hub Naming Conventions
 
 > Document: `Docs/15_NamingConventions.md`  
 > Project: F7Hub  
-> Purpose: Define consistent naming rules for files, folders, Python, PyQt6, PowerShell, AutoHotkey v2, SQLite, configuration, tests, logs, documentation, integrations, commands, and identifiers.  
+> Purpose: Define consistent naming rules for files, folders, Python, PySide6, PowerShell, AutoHotkey v2, SQLite, configuration, tests, logs, documentation, integrations, commands, and identifiers.
 > Related Documents: `06_SystemArchitecture.md`, `07_Database.md`, `09_SQLSchema.md`, `10_FolderStructure.md`, `11_AHKArchitecture.md`, `12_PowerShellArchitecture.md`, `13_PythonArchitecture.md`, `14_DesignPrinciples.md`
 
 ---
@@ -695,7 +695,7 @@ TicketDataObject
 
 ---
 
-# 31. PyQt6 Widget Naming
+# 31. PySide6 Widget Naming
 
 Python widget classes use PascalCase.
 
@@ -711,7 +711,7 @@ MainWindow
 
 ---
 
-# 32. PyQt6 View Naming
+# 32. PySide6 View Naming
 
 Use `View` when a component represents a substantial feature screen.
 
@@ -734,7 +734,7 @@ PowerShellOutputPanel
 
 ---
 
-# 33. PyQt6 Dialog Naming
+# 33. PySide6 Dialog Naming
 
 Dialogs should end with:
 
@@ -752,7 +752,7 @@ TicketDeleteDialog
 
 ---
 
-# 34. PyQt6 Widget Variable Names
+# 34. PySide6 Widget Variable Names
 
 Use descriptive snake_case.
 
@@ -777,7 +777,7 @@ in maintained application code.
 
 ---
 
-# 35. PyQt6 Action Naming
+# 35. PySide6 Action Naming
 
 Internal Qt actions may use:
 
@@ -2985,7 +2985,7 @@ Use `Windows PowerShell 5.1` explicitly when referring to the legacy Windows run
 Canonical GUI framework:
 
 ```text
-PyQt6
+PySide6
 ```
 
 Do not mix documentation references to:

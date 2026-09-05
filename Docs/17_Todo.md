@@ -30,7 +30,7 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
-Repository inspection and tests on 2026-09-03 confirmed:
+Repository inspection and tests through 2026-09-05 confirmed:
 
 ```text
 Documentation consistency review: IN PROGRESS
@@ -39,12 +39,21 @@ Core application migration — 0001_core.sql: VERIFIED
 Taxonomy migration — 0002_taxonomy.sql: VERIFIED
 Company/contact migration — 0003_companies_contacts.sql: VERIFIED
 Ticket-core migration — 0004_tickets.sql: VERIFIED
+Knowledge migration — 0005_knowledge.sql: VERIFIED
 CompanyRepository and ContactRepository: VERIFIED
+TicketRepository and TicketService creation boundary: VERIFIED
+Ticket notes, status changes, resolution and reopening service boundary: VERIFIED
+PySide6 ticket creation widget and vertical integration: VERIFIED
+PySide6 application bootstrap and minimal MainWindow: VERIFIED
 Remaining business-domain migrations: PLANNED
-Permanent isolated database tests: PASS — 79 tests
-Local Git repository and baseline: PRESENT
+Saved-ticket workspace and background service runner: VERIFIED
+AutoHotkey F7 launch/focus shortcut: VERIFIED
+Permanent isolated database tests: PASS — 133 tests
+GUI tests: PASS — 10 tests
+Application and GUI integration tests: PASS — 14 tests
+Local Git repository and recovery baseline: PRESENT
 Remote origin: CONFIGURED
-origin/main publication: PENDING
+GitHub synchronization: BLOCKED — SSH public-key authentication
 ```
 
 The explicit 2026-09-03 implementation task authorized the SQLite infrastructure slice before a Git baseline was established. The local baseline now exists, but publishing `main` to `origin/main` remains pending.
@@ -76,12 +85,12 @@ Current actions:
 - [x] Initialize this directory as the canonical local Git repository.
 - [x] Establish the local `main` branch and baseline commit.
 - [x] Configure `origin` as `git@github.com:JDecelles1990/F7Hub.git`.
-- [ ] Review and populate `.gitignore` before remote publication.
-- [ ] Exclude runtime databases, logs, secrets, caches and generated artifacts as appropriate.
-- [ ] Review the local baseline file set for sensitive or obsolete content before publication.
+- [x] Review and populate `.gitignore` before remote publication.
+- [x] Exclude runtime databases, logs, secrets, caches and generated artifacts as appropriate.
+- [x] Review the local baseline file set for sensitive or obsolete content before publication.
 - [ ] Publish local `main` to `origin/main` only with explicit user authorization.
 
-This task must not commit or push.
+Remote publication remains pending until GitHub authentication succeeds and remote history can be inspected safely.
 
 ---
 
@@ -107,7 +116,7 @@ Implement F7Hub SQLite bootstrap and migration infrastructure.
 
 - taxonomy or business-domain tables
 - company, contact or ticket repositories
-- PyQt6 GUI
+- PySide6 GUI
 - PowerShell execution
 - AutoHotkey
 - diagnostics
@@ -206,17 +215,89 @@ The schema-only ticket slice was completed and verified on 2026-09-03:
 Status: PASS — 10 focused ticket migration tests; 79 full database tests
 ```
 
-Next repository/service slices:
+The ticket repository/service creation boundary was completed and verified on 2026-09-04:
 
-- [ ] Implement `TicketRepository` creation and reload behavior with focused persistence and rollback tests.
-- [ ] Implement `TicketService` validation and transaction coordination as a separate slice.
-- [ ] Create initial status history and timeline records transactionally with the ticket.
+- [x] Implement `TicketRepository` creation and reload behavior with focused persistence and rollback tests.
+- [x] Implement `TicketService` validation and transaction coordination as a separate application layer.
+- [x] Create initial status history and timeline records transactionally with the ticket.
 
-The minimal PyQt6 ticket workflow follows as a separate slice using the tested service boundary.
+```text
+Status: PASS — 6 focused TicketRepository tests; 5 focused TicketService tests; 101 full database tests
+```
+
+The minimal PySide6 ticket workflow was completed and verified as a separate GUI slice using the tested service boundary:
+
+- [x] Adopt PySide6 6.11.2 and update the current canonical framework references from PyQt6.
+- [x] Add `TicketCreateWidget` with required fields, optional references, inline feedback, safe persistence errors and keyboard save behavior.
+- [x] Keep workflow validation and persistence in `TicketService`; the widget contains no SQL.
+- [x] Add isolated GUI tests and a complete GUI-to-service-to-repository-to-SQLite integration test.
+
+```text
+Status: PASS — 5 focused GUI tests; 1 vertical integration test; 101 database tests
+```
+
+Application-shell follow-up:
+
+- [x] Add application bootstrap and a minimal `QMainWindow` that composes the tested ticket form.
+- [x] Add the `python -m f7hub` development entry point and safe startup failure feedback.
+- [x] Keep F7 launch/focus behavior outside this Python slice.
+
+```text
+Status: PASS — 7 GUI tests; 5 application and GUI integration tests; 101 database tests
+```
+
+Ticket activity persistence/service slice — verified 2026-09-04:
+
+- [x] Implement ticket notes and status transitions through repository and service boundaries before adding their GUI workflow.
+- [x] Persist notes, timeline references and ticket activity timestamps atomically.
+- [x] Validate status transitions and atomically update lifecycle fields, status history and timeline.
+- [x] Require a resolution summary and preserve it as a resolution note.
+- [x] Support the approved reopening of resolved/closed tickets to Open, preserving older resolution text.
+- [x] Verify validation, writer serialization, missing records, reload and failure rollback.
+
+```text
+Status: PASS — 11 activity repository tests; 17 activity service tests; 129 full database tests
+GUI regression: PASS — 7 tests; application/integration regression: PASS — 5 tests
+```
+
+Saved-ticket workspace slice — verified 2026-09-05:
+
+- [x] Add list/reload service operations and a minimal ticket list/detail GUI for saved tickets, notes, history and status actions.
+- [x] Connect successful ticket creation to its saved detail view and verify the complete create/open/work/reopen workflow.
+- [x] Verify draft preservation, failed saves, committed saves with failed reloads, paging and status filtering.
+- [x] Run service calls in a worker while disabling conflicting GUI actions.
+- [x] Perform a native Windows visual/input check of the saved-ticket workspace (agent visual inspection and Qt input events, default size and 1000×700; 2026-09-05).
+
+Validation: PASS — 133 database tests, 10 GUI tests, 14 application/integration tests, including nine saved-ticket GUI flows against isolated SQLite. Integrity and foreign-key checks: PASS. Native Windows visual/input check: PASS at the initial size and 1000×700.
+
+F7 launch/focus slice — verified 2026-09-05:
+
+- [x] Add the AutoHotkey v2 entry point and project-relative Python launcher.
+- [x] Focus/restore existing windows and guard repeated startup attempts.
+- [x] Check missing runtime, timeout/retry, cold launch, actual global F7 focus/restore and duplicate shortcut startup.
+- [x] Keep normal startup unelevated and leave login-startup registration unchanged.
+
+Next application slice: KnowledgeRepository creation/reload and tests using the existing knowledge schema.
 
 ---
 
-# 10. Repository Follow-Ups
+# 10. P1 — Fifth Persistence Slice: Knowledge
+
+The schema-only relational knowledge slice was completed and verified on 2026-09-04:
+
+- [x] Create `Database\Migrations\0005_knowledge.sql`.
+- [x] Implement knowledge articles, versions, links, article relationships, ticket/article links and article/tag links from the approved physical schema.
+- [x] Add the seven documented relational knowledge indexes.
+- [x] Test ordering, checksums, idempotency, constraints, foreign keys, cascades, rollback and integrity.
+- [x] Keep `knowledge_article_scripts` deferred until the scripts schema exists and keep all FTS objects in the later FTS migration.
+
+```text
+Status: PASS — 11 focused knowledge migration tests; 90 full database tests
+```
+
+---
+
+# 11. Repository Follow-Ups
 
 These are real repository issues found during documentation review but are not part of the documentation-only edit scope:
 
@@ -231,7 +312,7 @@ These are real repository issues found during documentation review but are not p
 
 ---
 
-# 11. Deferred Work
+# 12. Deferred Work
 
 The following remain `DEFERRED` until earlier foundations and real requirements justify them:
 
@@ -247,7 +328,7 @@ Long-term placement belongs in `16_Roadmap.md`.
 
 ---
 
-# 12. Rejected Directions
+# 13. Rejected Directions
 
 The following remain `REJECTED` unless an explicitly approved architecture change revisits them:
 
@@ -260,7 +341,7 @@ The following remain `REJECTED` unless an explicitly approved architecture chang
 
 ---
 
-# 13. Maintenance Rule
+# 14. Maintenance Rule
 
 Keep this file short and actionable.
 

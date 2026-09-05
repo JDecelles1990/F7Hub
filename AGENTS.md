@@ -114,7 +114,7 @@ NOT VERIFIED
 The canonical technology responsibilities are:
 
 ```text
-Python / PyQt6
+Python / PySide6
 → primary desktop application
 → GUI
 → application orchestration
@@ -153,7 +153,7 @@ Do not move functionality between technologies merely because another implementa
 The preferred architecture is:
 
 ```text
-PyQt6 GUI
+PySide6 GUI
     ↓
 Application Services
     ↓
@@ -457,7 +457,7 @@ Python\
 Tests\
 ```
 
-PyQt6 is the primary GUI framework.
+PySide6 is the primary GUI framework.
 
 Do not move primary GUI ownership into AutoHotkey.
 
@@ -558,7 +558,7 @@ Use PowerShell 7 by default unless a verified compatibility requirement requires
 
 ---
 
-# 19. Python / PyQt6 Tasks
+# 19. Python / PySide6 Tasks
 
 Read:
 
@@ -828,7 +828,7 @@ OUT OF SCOPE
 
 # 26. Python Architecture Rules
 
-Python/PyQt6 is the architectural center of F7Hub.
+Python/PySide6 is the architectural center of F7Hub.
 
 Preferred dependency direction:
 
@@ -848,7 +848,7 @@ Do not create reverse dependencies such as:
 
 ```text
 domain
-→ PyQt6
+→ PySide6
 ```
 
 or:
@@ -862,7 +862,7 @@ repository
 
 # 27. GUI Rules
 
-PyQt6 GUI components primarily own:
+PySide6 GUI components primarily own:
 
 - rendering
 - input collection
@@ -919,7 +919,7 @@ Services may:
 - manage transaction boundaries
 - enforce application rules
 
-Services should not contain PyQt6-specific presentation logic.
+Services should not contain PySide6-specific presentation logic.
 
 ---
 
@@ -927,7 +927,7 @@ Services should not contain PyQt6-specific presentation logic.
 
 Domain logic should remain independent from:
 
-- PyQt6
+- PySide6
 - SQLite implementation details
 - PowerShell
 - external provider SDKs
@@ -1808,7 +1808,7 @@ Do not audit every click.
 
 # 69. Background Work
 
-Never block the PyQt6 event loop with:
+Never block the PySide6 event loop with:
 
 - PowerShell
 - network calls
@@ -1861,7 +1861,7 @@ For changing technologies and APIs, verify current official documentation where 
 Especially:
 
 - Python
-- PyQt6
+- PySide6
 - SQLite
 - Microsoft Graph
 - Exchange Online
@@ -2078,7 +2078,7 @@ Explicit review is required before:
 - plugin architecture changes
 - IPC/cross-language contract changes
 - replacement of SQLite
-- replacement of PyQt6
+- replacement of PySide6
 - change to Python ownership
 - major PowerShell/AHK ownership change
 
@@ -2375,7 +2375,7 @@ Ticket Persistence
         ↓
 Ticket Service
         ↓
-PyQt6 Application Shell
+PySide6 Application Shell
         ↓
 Ticket Creation UI
         ↓

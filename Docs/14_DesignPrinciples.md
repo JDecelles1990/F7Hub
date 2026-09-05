@@ -1,4 +1,4 @@
-﻿# F7Hub Design Principles
+# F7Hub Design Principles
 
 > Document: `Docs/14_DesignPrinciples.md`  
 > Project: F7Hub  
@@ -229,7 +229,7 @@ Avoid components whose responsibility can only be described as:
 Technology responsibilities should remain explicit.
 
 ```text
-Python / PyQt6
+Python / PySide6
 → primary application and GUI
 
 PowerShell
@@ -322,7 +322,7 @@ Services coordinate the components needed to perform those workflows.
 
 Core business rules should not require:
 
-- PyQt6
+- PySide6
 - SQLite
 - PowerShell
 - external APIs
@@ -1069,7 +1069,7 @@ Cloud authentication and heavy indexing should not unnecessarily block startup.
 
 # 58. Keep the GUI Responsive
 
-Blocking operations must not freeze the PyQt6 event loop.
+Blocking operations must not freeze the PySide6 event loop.
 
 Potential blocking work includes:
 
@@ -1896,7 +1896,7 @@ Examples:
 - Microsoft Graph
 - Exchange Online
 - Intune
-- PyQt6
+- PySide6
 - OpenAI APIs
 - Python
 - SQLite

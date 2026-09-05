@@ -239,7 +239,7 @@ It does not override higher-priority explicit requirements.
 | DOC-10 | `10_FolderStructure.md` | Canonical repository/filesystem organization | ARCHITECTURE | REVIEW |
 | DOC-11 | `11_AHKArchitecture.md` | AutoHotkey v2 architecture | TECHNOLOGY | REVIEW |
 | DOC-12 | `12_PowerShellArchitecture.md` | PowerShell architecture | TECHNOLOGY | REVIEW |
-| DOC-13 | `13_PythonArchitecture.md` | Python/PyQt6 architecture | TECHNOLOGY | REVIEW |
+| DOC-13 | `13_PythonArchitecture.md` | Python/PySide6 architecture | TECHNOLOGY | REVIEW |
 | DOC-14 | `14_DesignPrinciples.md` | Engineering and design principles | DESIGN | REVIEW |
 | DOC-15 | `15_NamingConventions.md` | Cross-technology naming standards | DESIGN | REVIEW |
 | DOC-16 | `16_Roadmap.md` | Development phases and milestones | PLANNING | REVIEW |
@@ -297,7 +297,7 @@ AutoHotkey v2 architecture
 PowerShell architecture
 → 12_PowerShellArchitecture.md
 
-Python/PyQt6 architecture
+Python/PySide6 architecture
 → 13_PythonArchitecture.md
 
 Design principles
@@ -356,7 +356,7 @@ For a developer learning F7Hub from the beginning:
       ↓
 12 PowerShell Architecture
       ↓
-13 Python/PyQt6 Architecture
+13 Python/PySide6 Architecture
       ↓
 14 Design Principles
       ↓
@@ -633,7 +633,7 @@ Infrastructure
 
 ## `13_PythonArchitecture.md`
 
-Owns the implementation architecture for PyQt6 and Python.
+Owns the implementation architecture for PySide6 and Python.
 
 Detailed Python implementation should not be placed in `05_GUI.md`.
 
@@ -684,7 +684,7 @@ Owns:
 
 ```text
 Python package architecture
-PyQt6 application
+PySide6 application
 services
 domain
 repositories
@@ -822,7 +822,7 @@ Then read the architecture document for the affected subsystem.
 
 # 26. Task Routing: GUI
 
-For general PyQt6 GUI work:
+For general PySide6 GUI work:
 
 ```text
 04_UserWorkflows.md
@@ -908,7 +908,7 @@ Read `09_SQLSchema.md` only if workspace persistence is actually being implement
 
 # 30. Task Routing: Python General
 
-For general Python/PyQt6 implementation:
+For general Python/PySide6 implementation:
 
 ```text
 06_SystemArchitecture.md
@@ -2794,7 +2794,7 @@ Exchange Online
 Intune
 Defender
 OpenAI APIs
-PyQt6
+PySide6
 Python
 SQLite
 GitHub
@@ -2925,7 +2925,7 @@ Review:
 
 Question:
 
-> Is responsibility clearly separated between AutoHotkey v2, PowerShell, and Python/PyQt6?
+> Is responsibility clearly separated between AutoHotkey v2, PowerShell, and Python/PySide6?
 
 ---
 

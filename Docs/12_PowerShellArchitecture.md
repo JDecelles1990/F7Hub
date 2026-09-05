@@ -3,7 +3,7 @@
 > Document: `Docs/12_PowerShellArchitecture.md`  
 > Project: F7Hub  
 > Technology: PowerShell 7  
-> Purpose: Define how PowerShell is used inside F7Hub for Windows administration, Microsoft 365 administration, diagnostics, reporting, automation, structured execution, and integration with the Python/PyQt6 application.  
+> Purpose: Define how PowerShell is used inside F7Hub for Windows administration, Microsoft 365 administration, diagnostics, reporting, automation, structured execution, and integration with the Python/PySide6 application.
 > Related Documents: `02_ProductRequirements.md`, `04_UserWorkflows.md`, `06_SystemArchitecture.md`, `07_Database.md`, `10_FolderStructure.md`, `11_AHKArchitecture.md`, `13_PythonArchitecture.md`
 
 ---
@@ -40,7 +40,7 @@ The main application remains:
 ```text
 Python
 +
-PyQt6
+PySide6
 ```
 
 ---
@@ -97,7 +97,7 @@ PowerShell should provide capabilities rather than own application state.
 
 | Concern | Primary Technology |
 |---|---|
-| Main GUI | Python / PyQt6 |
+| Main GUI | Python / PySide6 |
 | Application services | Python |
 | Domain logic | Python |
 | Database persistence | Python repositories / SQLite |
@@ -994,7 +994,7 @@ errors
 warnings
 ```
 
-It should not directly manipulate PyQt6 widgets or Python application state.
+It should not directly manipulate PySide6 widgets or Python application state.
 
 ---
 
@@ -1809,7 +1809,7 @@ Never tell the user an administrative operation was cancelled if the service alr
 
 # 93. Background Execution
 
-PowerShell processes should not block the PyQt6 event loop.
+PowerShell processes should not block the PySide6 event loop.
 
 Conceptually:
 
@@ -2143,7 +2143,7 @@ One script performs every M365 and Windows operation.
 
 ## Raw Shell Strings from GUI
 
-PyQt6 buttons construct arbitrary commands.
+PySide6 buttons construct arbitrary commands.
 
 ## PowerShell-Owned Database
 
@@ -2195,7 +2195,7 @@ Before implementing something in PowerShell, ask:
 # 111. Cross-Technology Architecture
 
 ```text
-                      PyQt6 GUI
+                      PySide6 GUI
                          │
                          ▼
                   Python Services
@@ -2327,7 +2327,7 @@ A PowerShell feature is complete when applicable:
 # 116. PowerShell Golden Rules
 
 1. PowerShell 7 is the preferred runtime.
-2. Python/PyQt6 controls application workflows.
+2. Python/PySide6 controls application workflows.
 3. PowerShell owns Windows and Microsoft administration.
 4. Scripts should be narrow and reusable.
 5. Separate diagnostics from remediation.
@@ -2374,7 +2374,7 @@ Reporting
 Structured Results
       │
       ▼
-Python / PyQt6
+Python / PySide6
 ```
 
 The responsibility boundary is:

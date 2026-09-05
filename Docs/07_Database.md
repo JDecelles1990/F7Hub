@@ -1,4 +1,4 @@
-﻿# F7Hub Database Architecture
+# F7Hub Database Architecture
 
 > Document: `Docs/07_Database.md`  
 > Project: F7Hub  
@@ -101,7 +101,7 @@ A server database should not be introduced without a demonstrated requirement.
 Preferred data flow:
 
 ```text
-PyQt6 GUI
+PySide6 GUI
     │
     ▼
 Application Services
@@ -1818,7 +1818,7 @@ SQLite connection and path resolution: VERIFIED
 Migration discovery and history validation: VERIFIED
 Transactional migration execution: VERIFIED
 Integrity helpers: VERIFIED
-Business-domain migrations through `0004_tickets.sql`: VERIFIED
+Business-domain migrations through `0005_knowledge.sql`: VERIFIED
 ```
 
 ---
@@ -1893,7 +1893,7 @@ Explicit review is required before:
 
 # 93. Current Implementation Status
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migrations now create `application_metadata` through `0001_core.sql`, shared taxonomy through `0002_taxonomy.sql`, the company/contact persistence schema through `0003_companies_contacts.sql`, and the ticket-core schema through `0004_tickets.sql`. `CompanyRepository` and `ContactRepository` provide parameterized create, read, list, update and activation-state persistence through the approved Python repository boundary. No application service, GUI or ticket repository has been implemented. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and tests through 2026-09-04 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migrations now create `application_metadata` through `0001_core.sql`, shared taxonomy through `0002_taxonomy.sql`, the company/contact persistence schema through `0003_companies_contacts.sql`, the ticket-core schema through `0004_tickets.sql`, and the relational knowledge schema through `0005_knowledge.sql`. `CompanyRepository`, `ContactRepository` and `TicketRepository` provide parameterized persistence through the approved Python repository boundary. `TicketService` validates and atomically coordinates ticket creation, notes, status changes, resolution, closure and reopening with their history/timeline records. Writer transactions reserve the SQLite writer before reading current state. The first ticket-creation GUI and minimal application shell delegate through that service; notes/status GUI and the knowledge repository remain planned. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 ```text
 SQLite migration infrastructure: VERIFIED
@@ -1901,21 +1901,24 @@ Core application schema — application_metadata: VERIFIED
 Taxonomy schema — categories and tags: VERIFIED
 Company/contact schema — companies, notes, links and contacts: VERIFIED
 Ticket-core schema — tickets, notes, status history and timeline: VERIFIED
+Knowledge schema — articles, versions, links and approved junctions: VERIFIED
 Company/contact repositories: VERIFIED
+Ticket creation repository/service boundary: VERIFIED
+Ticket activity repository/service boundary: VERIFIED
 Remaining business database implementation: PLANNED
-Isolated database tests: PASS — 79 tests
+Isolated database tests: PASS — 129 tests
 ```
 
 This document defines the intended database architecture beyond the verified infrastructure slice.
 
 It must not be interpreted as proof that:
 
-- business-domain tables beyond the ticket-core slice exist
-- business-domain migrations beyond `0004_tickets.sql` exist
+- business-domain tables beyond the knowledge slice exist
+- business-domain migrations beyond `0005_knowledge.sql` exist
 - indexes beyond the verified migrations exist
 - FTS5 is configured
-- repositories beyond `CompanyRepository` and `ContactRepository` exist
-- tests outside the isolated database infrastructure suite pass
+- repositories beyond `CompanyRepository`, `ContactRepository` and `TicketRepository` exist
+- tests outside the reported suites pass
 
 ---
 

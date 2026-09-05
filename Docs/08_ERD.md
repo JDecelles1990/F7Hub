@@ -75,7 +75,7 @@ SQL Schema
 
 # 3. Current ERD Status
 
-This document defines the intended logical data model. Repository inspection and tests on 2026-09-03 verified the bootstrap-owned `schema_migrations` infrastructure, the versioned core and taxonomy tables, the company/contact tables through `0003_companies_contacts.sql`, the ticket-core tables through `0004_tickets.sql`, and the Python company/contact repositories. Remaining business domains and the ticket repository/service boundary are planned.
+This document defines the intended logical data model. Repository inspection and tests through 2026-09-04 verified the bootstrap-owned `schema_migrations` infrastructure, the versioned core and taxonomy tables, the company/contact tables through `0003_companies_contacts.sql`, the ticket-core tables through `0004_tickets.sql`, the relational knowledge tables through `0005_knowledge.sql`, the Python company/contact repositories, and the transactional ticket creation repository/service boundary. Remaining business domains and workflows are planned.
 
 ```text
 schema_migrations infrastructure: VERIFIED
@@ -83,6 +83,8 @@ application_metadata implementation status: VERIFIED
 Taxonomy implementation status: VERIFIED
 Company/contact schema and repository status: VERIFIED
 Ticket-core schema status: VERIFIED
+Ticket creation repository/service status: VERIFIED
+Knowledge relational schema status: VERIFIED
 Remaining business-domain ERD implementation status: PLANNED
 ```
 
@@ -413,6 +415,8 @@ NEW / OPEN / IN_PROGRESS / WAITING
   ↓
 CANCELLED
 ```
+
+The implemented initial service policy allows movement among active work states without requiring every example step. Resolving requires a summary; closing follows resolution. Per the user's 2026-09-04 decision, both RESOLVED and CLOSED may reopen to OPEN. CANCELLED remains terminal for now. Reopening clears current resolution/lifecycle fields and preserves previous resolution content in notes. The full service transition table is maintained in `13_PythonArchitecture.md`.
 
 Relationship:
 
@@ -1912,12 +1916,12 @@ Canonical conceptual inventory:
 | Tickets | ticket_attachments | Attachment metadata | PLANNED |
 | Tickets | ticket_relationships | Ticket-to-ticket links | PLANNED |
 | Tickets | ticket_tags | Ticket/tag junction | PLANNED |
-| Knowledge | knowledge_articles | Reusable knowledge | PLANNED |
-| Knowledge | knowledge_article_versions | Article history | PLANNED |
-| Knowledge | knowledge_article_links | Article references | PLANNED |
-| Knowledge | knowledge_article_relationships | Article-to-article links | PLANNED |
-| Knowledge | ticket_knowledge_articles | Ticket/KB junction | PLANNED |
-| Knowledge | knowledge_article_tags | KB/tag junction | PLANNED |
+| Knowledge | knowledge_articles | Reusable knowledge | VERIFIED |
+| Knowledge | knowledge_article_versions | Article history | VERIFIED |
+| Knowledge | knowledge_article_links | Article references | VERIFIED |
+| Knowledge | knowledge_article_relationships | Article-to-article links | VERIFIED |
+| Knowledge | ticket_knowledge_articles | Ticket/KB junction | VERIFIED |
+| Knowledge | knowledge_article_tags | KB/tag junction | VERIFIED |
 | Knowledge | knowledge_article_scripts | KB/script junction | PLANNED |
 | Automation | scripts | Script registry | PLANNED |
 | Automation | script_parameters | Script input definitions | PLANNED |
@@ -1992,6 +1996,12 @@ Status: VERIFIED — 0004_tickets.sql — 2026-09-03 — 10 focused tests; 79 fu
 ---
 
 # 79. Subsequent Database Slices
+
+The relational knowledge slice is verified:
+
+```text
+Status: VERIFIED — 0005_knowledge.sql — 2026-09-04 — 11 focused tests; 90 full database tests
+```
 
 Later slices should introduce, in dependency order:
 

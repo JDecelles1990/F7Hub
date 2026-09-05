@@ -150,13 +150,16 @@ CORE APPLICATION MIGRATION: VERIFIED — 0001_core.sql
 TAXONOMY MIGRATION: VERIFIED — 0002_taxonomy.sql
 COMPANY/CONTACT MIGRATION: VERIFIED — 0003_companies_contacts.sql
 TICKET-CORE MIGRATION: VERIFIED — 0004_tickets.sql
+KNOWLEDGE MIGRATION: VERIFIED — 0005_knowledge.sql
 REMAINING BUSINESS-DOMAIN MIGRATIONS: PLANNED
 COMPANY/CONTACT REPOSITORIES: VERIFIED
+TICKET REPOSITORY/SERVICE CREATION BOUNDARY: VERIFIED
+TICKET NOTES/STATUS/RESOLUTION/REOPENING SERVICE BOUNDARY: VERIFIED
 REMAINING REPOSITORIES: PLANNED
-ISOLATED DATABASE TESTS: PASS — 79 tests
+ISOLATED DATABASE TESTS: PASS — 129 tests
 ```
 
-Repository inspection and isolated tests on 2026-09-03 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migration `0001_core.sql` creates only `application_metadata`, `0002_taxonomy.sql` creates shared taxonomy, `0003_companies_contacts.sql` creates the canonical company/contact tables and indexes, and `0004_tickets.sql` creates the canonical ticket-core tables and indexes. `CompanyRepository` and `ContactRepository` implement the approved Python persistence boundary. No ticket repository, service or GUI was added. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and tests through 2026-09-04 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migration `0001_core.sql` creates only `application_metadata`, `0002_taxonomy.sql` creates shared taxonomy, `0003_companies_contacts.sql` creates the canonical company/contact tables and indexes, `0004_tickets.sql` creates the canonical ticket-core tables and indexes, and `0005_knowledge.sql` creates the canonical relational knowledge tables and indexes. `CompanyRepository`, `ContactRepository` and `TicketRepository` implement approved Python persistence boundaries. `TicketService` validates and transactionally coordinates ticket creation, initial status history and the initial timeline event. The tested ticket-creation GUI and minimal application shell use this boundary; no knowledge repository was added. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 The documented `CREATE` blocks were executed in order against a fresh in-memory SQLite database on 2026-09-02. All 71 DDL blocks executed successfully; `PRAGMA integrity_check` returned `ok` and `PRAGMA foreign_key_check` returned zero violations. This validates the documented DDL only, not application migrations or runtime behavior.
 
@@ -230,7 +233,7 @@ The F7Hub schema should preserve:
 Normal runtime database writes flow through:
 
 ```text
-PyQt6 GUI
+PySide6 GUI
     ↓
 Application Service
     ↓
@@ -639,6 +642,7 @@ Example:
 0002_taxonomy.sql
 0003_companies_contacts.sql
 0004_tickets.sql
+0005_knowledge.sql
 ```
 
 ---
@@ -1554,6 +1558,8 @@ CREATE TABLE ticket_status_history (
 ```
 
 Status history should be created by `TicketService` in the same transaction as the status update.
+
+The notes and lifecycle service boundary was verified on 2026-09-04 using this unchanged schema. Notes, resolution notes, history and timeline events are written within service-coordinated transactions. Reopening clears incompatible lifecycle timestamps while preserving prior resolution content in notes. The exact transition policy belongs to `13_PythonArchitecture.md`.
 
 ---
 
@@ -4781,6 +4787,7 @@ The planned sequence begins:
 0002_taxonomy.sql
 0003_companies_contacts.sql
 0004_tickets.sql
+0005_knowledge.sql
 ```
 
 This list is a dependency map, not the scope of the first coding task. The first completed task was limited to the bootstrap and migration infrastructure defined in Section 202.
@@ -4895,7 +4902,7 @@ close cleanly
 
 # 159. Threading
 
-Do not casually share SQLite connection objects between PyQt6 worker threads.
+Do not casually share SQLite connection objects between PySide6 worker threads.
 
 Connection ownership must be explicit.
 
@@ -5836,7 +5843,7 @@ Status: VERIFIED — 0004_tickets.sql — 2026-09-03 — 10 focused tests; 79 fu
 The first architectural proof should be:
 
 ```text
-PyQt6 Ticket Form
+PySide6 Ticket Form
         ↓
 TicketService
         ↓
@@ -5916,7 +5923,7 @@ Trying to store tickets, KB, prompts, scripts, and diagnostics in one generic en
 
 ## Direct GUI SQL
 
-PyQt6 widgets executing raw SQL.
+PySide6 widgets executing raw SQL.
 
 ## Direct AHK SQL
 
@@ -6137,7 +6144,7 @@ Current task:
 The physical architecture is:
 
 ```text
-PyQt6 GUI
+PySide6 GUI
     ↓
 Application Services
     ↓

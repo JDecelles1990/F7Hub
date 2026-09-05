@@ -40,20 +40,28 @@ Production runtime behavior must not depend permanently on this development path
 
 # 3. Verified Current State
 
-Repository inspection performed on 2026-09-03 found:
+Repository inspection and isolated database tests through 2026-09-05 found:
 
 ```text
 Canonical Docs/00–19 files: PRESENT
 Canonical top-level directories: PRESENT
 Python SQLite infrastructure: VERIFIED
 Company/contact repositories: VERIFIED
+TicketRepository and TicketService creation boundary: VERIFIED
+Ticket notes, status changes, resolution and reopening service boundary: VERIFIED
+PySide6 ticket creation widget and vertical integration: VERIFIED
+PySide6 application entry point, bootstrap and minimal main window: VERIFIED
+Saved-ticket workspace and background service runner: VERIFIED
 Remaining Python application implementation: PLANNED
 PowerShell implementation: PLANNED
-AutoHotkey implementation: PLANNED
+AutoHotkey F7 launch/focus shortcut: VERIFIED
+Remaining AutoHotkey implementation: PLANNED
 Migration infrastructure: VERIFIED
-Business-domain migrations through 0004: VERIFIED
+Business-domain migrations through 0005: VERIFIED
 Remaining business-domain migrations and repositories: PLANNED
-Isolated database tests: PASS — 79 tests
+Isolated database tests: PASS — 133 tests
+GUI tests: PASS — 10 tests
+Application and GUI integration tests: PASS — 14 tests
 Git baseline: PRESENT — local main; origin configured
 Project-local .agents/skills/: NOT PRESENT
 ```
@@ -66,27 +74,40 @@ Documentation describes the target system. It does not prove that application be
 
 ---
 
-# 4. Technology Ownership
+# 4. Development Launch
+
+From the project root, start the current development application with:
+
+```powershell
+$env:PYTHONPATH = "$PWD\Python"
+.\.venv\Scripts\python.exe -m f7hub
+```
+
+This initializes `Database\Dev\f7hub_dev.db`, applies the available migrations and opens the application with New ticket and Saved tickets workflows. Open `AutoHotkey/F7Hub.ahk` with AutoHotkey v2 to enable F7. F7 launches F7Hub or focuses/restores its existing window. Exit or reload the shortcut from its tray icon. It runs only while that script is active; automatic login startup is not configured.
+
+---
+
+# 5. Technology Ownership
 
 | Technology | Primary responsibility |
 |---|---|
-| Python / PyQt6 | Primary desktop application, GUI, orchestration, services, repositories and integrations |
+| Python / PySide6 | Primary desktop application, GUI, orchestration, services, repositories and integrations |
 | SQLite | Primary persistent relational data store |
 | PowerShell 7 | Windows and Microsoft administration, diagnostics, reporting and controlled automation |
 | AutoHotkey v2 | Global hotkeys, hotstrings, clipboard helpers, launch/focus behavior and lightweight quick menus |
 
-PyQt6 is the primary GUI. AutoHotkey is not a second application framework.
+PySide6 is the primary GUI. AutoHotkey is not a second application framework.
 
 Normal core SQLite writes flow through Python repositories. PowerShell and AutoHotkey do not independently own core application persistence.
 
 ---
 
-# 5. Primary Architecture
+# 6. Primary Architecture
 
 F7Hub begins as a modular monolith with this dependency direction:
 
 ```text
-PyQt6 GUI
+PySide6 GUI
     ↓
 Application Services
     ↓
@@ -100,7 +121,7 @@ Infrastructure
 Key boundaries:
 
 - GUI components do not own raw SQL, migrations or shell-command construction.
-- Domain logic does not depend on PyQt6, SQLite details or provider SDKs.
+- Domain logic does not depend on PySide6, SQLite details or provider SDKs.
 - Repositories own normal SQLite persistence.
 - Gateways isolate PowerShell, files and external APIs.
 - PowerShell returns structured results to Python.
@@ -111,7 +132,7 @@ Detailed ownership belongs to the canonical architecture documents, not this fil
 
 ---
 
-# 6. Source-of-Truth Priority
+# 7. Source-of-Truth Priority
 
 When project information conflicts, use:
 
@@ -129,7 +150,7 @@ Surface material conflicts rather than resolving them silently.
 
 ---
 
-# 7. Project Navigation
+# 8. Project Navigation
 
 For significant work, follow:
 
@@ -166,7 +187,7 @@ Do not read all canonical documents for every task. Use the index to select the 
 
 ---
 
-# 8. Canonical Documentation
+# 9. Canonical Documentation
 
 F7Hub has 20 canonical Markdown documents numbered `00` through `19`, stored directly under `Docs\`.
 
@@ -204,7 +225,7 @@ Docs/18_ChangeLog.md
 
 ---
 
-# 9. Repository Structure
+# 10. Repository Structure
 
 Canonical top-level directories are:
 
@@ -230,7 +251,7 @@ Exact folder ownership belongs to `Docs/10_FolderStructure.md`. Do not create sp
 
 ---
 
-# 10. Status Discipline
+# 11. Status Discipline
 
 Documentation status and implementation status are separate.
 
@@ -269,7 +290,7 @@ Do not equate documented or approved architecture with implemented or verified b
 
 ---
 
-# 11. Implementation Sequence
+# 12. Implementation Sequence
 
 The first coding task was completed and verified on 2026-09-03:
 
@@ -288,15 +309,15 @@ Verified scope:
 - transactional migration execution
 - isolated database tests
 
-Subsequent verified slices added taxonomy, company/contact schema and repositories, and the ticket-core schema through `0004_tickets.sql`. No ticket repository, application service, GUI, PowerShell, AutoHotkey, AI, diagnostic or plugin implementation has been added.
+Subsequent verified slices added taxonomy, company/contact schema and repositories, the ticket-core schema through `0004_tickets.sql`, the relational knowledge schema through `0005_knowledge.sql`, the ticket creation persistence/service boundary, the first PySide6 ticket creation form, and a thin application bootstrap with a minimal `QMainWindow`. The repository/service layer also supports ticket notes, status changes, resolution, closure and reopening with atomic history and timeline writes. These activity operations are exposed in the saved-ticket workspace and verified by automated GUI integration tests. The AutoHotkey F7 launch/focus shortcut is also verified. Knowledge repositories, PowerShell, remaining AutoHotkey features, AI, diagnostics and plugins remain planned.
 
-The next independently reviewed implementation slice is the `TicketRepository` persistence boundary with focused success, failure and transaction tests.
+The saved-ticket workspace now lets technicians open saved tickets, review history, add notes, resolve, close and reopen tickets. Failed saves preserve drafts; committed saves remain clearly reported when reload fails. Native Windows visual inspection and Qt input-event checks are PASS at the default size and 1000×700. F7 launch/focus is verified. The next approved slice is reference-aware company/contact ticket creation.
 
 The exact task contract is defined in `AGENTS.md`; the wider sequence belongs to `Docs/16_Roadmap.md`.
 
 ---
 
-# 12. Final Principle
+# 13. Final Principle
 
 F7Hub should become more understandable after every development cycle.
 

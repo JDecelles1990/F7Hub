@@ -1,4 +1,4 @@
-﻿# F7Hub Product Requirements
+# F7Hub Product Requirements
 
 > Document: `Docs/02_ProductRequirements.md`  
 > Project: F7Hub  
@@ -2255,7 +2255,7 @@ PowerShell architecture changes shall update:
 
 Priority: P1
 
-Python/PyQt6 architecture changes shall update:
+Python/PySide6 architecture changes shall update:
 
 `13_PythonArchitecture.md`
 

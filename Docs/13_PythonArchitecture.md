@@ -2,7 +2,7 @@
 
 > Document: `Docs/13_PythonArchitecture.md`  
 > Project: F7Hub  
-> Technology: Python + PyQt6  
+> Technology: Python + PySide6
 > Purpose: Define the internal Python architecture of F7Hub, including application startup, GUI composition, services, domain logic, repositories, infrastructure, integrations, background execution, state management, diagnostics, search, AI boundaries, and testing.  
 > Related Documents: `04_UserWorkflows.md`, `05_GUI.md`, `06_SystemArchitecture.md`, `07_Database.md`, `10_FolderStructure.md`, `11_AHKArchitecture.md`, `12_PowerShellArchitecture.md`
 
@@ -19,7 +19,7 @@ It answers:
 Python is responsible for:
 
 - application startup
-- PyQt6 GUI
+- PySide6 GUI
 - application services
 - domain logic
 - repository coordination
@@ -46,7 +46,7 @@ The main application stack is:
 ```text
 Python
 +
-PyQt6
+PySide6
 +
 SQLite
 ```
@@ -96,7 +96,7 @@ This gives F7Hub strong separation without introducing unnecessary distributed-s
 # 4. Main Architecture
 
 ```text
-PyQt6 GUI
+PySide6 GUI
     │
     ▼
 Application Services
@@ -155,21 +155,20 @@ The package should not become a flat collection of unrelated files.
 
 # 7. Application Entry Point
 
-F7Hub should have one clear application entry point.
-
-Potential future example:
+F7Hub has one clear development application entry point:
 
 ```text
 Python\f7hub\__main__.py
 ```
 
-or:
+From the project root it is launched with:
 
-```text
-Python\f7hub\app\main.py
+```powershell
+$env:PYTHONPATH = "$PWD\Python"
+.\.venv\Scripts\python.exe -m f7hub
 ```
 
-The final entry-point convention should be standardized before implementation.
+`Python\f7hub\app\main.py` keeps argument handling and the Qt event loop separate from the module entry point. An optional `--database` argument supports an explicit SQLite path; the default source-development path is `Database\Dev\f7hub_dev.db`.
 
 ---
 
@@ -300,7 +299,7 @@ Python\f7hub\gui\
 
 Purpose:
 
-Implement the PyQt6 interface described in `05_GUI.md`.
+Implement the PySide6 interface described in `05_GUI.md`.
 
 Potential structure:
 
@@ -366,7 +365,7 @@ It should not own:
 
 # 16. Dockable Panels
 
-PyQt6 dockable areas should use:
+PySide6 dockable areas should use:
 
 ```python
 QDockWidget
@@ -415,7 +414,7 @@ A feature workspace should be treated as a cohesive view rather than a random co
 
 # 18. GUI Component Rule
 
-A PyQt6 widget should primarily handle:
+A PySide6 widget should primarily handle:
 
 - presentation
 - user interaction
@@ -649,6 +648,7 @@ Examples:
 ```python
 ticket_service.create_ticket(...)
 ticket_service.add_note(...)
+ticket_service.change_status(...)
 knowledge_service.search_articles(...)
 diagnostic_service.start_session(...)
 script_service.execute_registered_script(...)
@@ -669,7 +669,31 @@ Services may:
 - manage transactions
 - return structured results
 
-Services should not contain PyQt6-specific code.
+Services should not contain PySide6-specific code.
+
+## Implemented Ticket Activity Boundary
+
+`TicketService.add_note()` validates note text, type, ticket identity and metadata, then atomically inserts the note, its `NOTE_ADDED` timeline event and the ticket's `updated_at` value. The event stores a `ticket_note_id` reference rather than copying note content. Notes remain available on closed and cancelled tickets; adding a `RESOLUTION` note alone does not change status.
+
+`TicketService.change_status()` validates the current-state transition inside the repository transaction. It updates the ticket lifecycle fields and inserts status history and a `STATUS_CHANGED` event together. Resolving requires a resolution summary and also creates a persistent `RESOLUTION` note and its timeline reference in that same transaction.
+
+The initial transition policy, implemented in `TICKET_STATUS_TRANSITIONS`, is:
+
+| Current status | Allowed destination statuses |
+|---|---|
+| NEW | OPEN, IN_PROGRESS, WAITING, RESOLVED, CANCELLED |
+| OPEN | IN_PROGRESS, WAITING, RESOLVED, CANCELLED |
+| IN_PROGRESS | OPEN, WAITING, RESOLVED, CANCELLED |
+| WAITING | OPEN, IN_PROGRESS, RESOLVED, CANCELLED |
+| RESOLVED | OPEN, CLOSED |
+| CLOSED | OPEN |
+| CANCELLED | None |
+
+`NEW` is creation-only; same-status requests are rejected without writing history. Closing retains the current resolution and resolution timestamp. Reopening clears `resolution`, `resolved_at` and `closed_at` while preserving previous resolution notes. A legacy ticket's current resolution is saved as a note before reopening if no matching resolution note exists; that snapshot uses source `REOPEN_SNAPSHOT` and leaves unknown authorship unset.
+
+`TicketRepository` exposes frozen `TicketNoteRecord` results and parameterized note lookup/list operations. Its transaction session provides current-ticket reads, note inserts and narrow activity/status updates. `BEGIN IMMEDIATE` reserves the writer before reading current state so concurrent workflows validate against serialized ticket state. Existing configured connection timeouts and foreign-key enforcement remain in effect.
+
+`TicketNotFoundError` identifies a missing workflow target; `TicketValidationError` identifies rejected input or transitions; `TicketUpdateError` translates SQLite activity-write failures into safe service feedback. Persistence operations do not independently select transitions or create history/timeline records. The notes/status GUI remains planned.
 
 ---
 
@@ -696,7 +720,7 @@ domain exceptions
 workflow rules
 ```
 
-Domain code should remain usable without PyQt6.
+Domain code should remain usable without PySide6.
 
 ---
 
@@ -1152,7 +1176,7 @@ Avoid building one giant shell string.
 
 # 56. Background Execution
 
-Long-running work must not block the PyQt6 event loop.
+Long-running work must not block the PySide6 event loop.
 
 Examples:
 
@@ -1547,7 +1571,7 @@ Do not embed arbitrary PowerShell inside workflow definitions.
 
 # 77. Dynamic Diagnostic Forms
 
-PyQt6 diagnostic forms may be generated from workflow step definitions.
+PySide6 diagnostic forms may be generated from workflow step definitions.
 
 Example:
 
@@ -2219,7 +2243,7 @@ Avoid reverse dependencies such as:
 
 ```text
 domain
-→ imports PyQt6
+→ imports PySide6
 ```
 
 or:
@@ -2235,7 +2259,7 @@ repositories
 
 The domain layer should not depend directly on:
 
-- PyQt6
+- PySide6
 - SQLite
 - PowerShell
 - Microsoft Graph SDK
@@ -2373,7 +2397,7 @@ Each dependency should have a real purpose.
 Potential major dependencies may include:
 
 ```text
-PyQt6
+PySide6
 ```
 
 Additional packages should be introduced only when justified.
@@ -2412,27 +2436,26 @@ This should not be committed to Git.
 
 # 125. Python Version
 
-The project should choose and document a supported Python version before implementation.
-
-Until verified:
+The first GUI slice was verified with:
 
 ```text
-Python version: NOT YET FINALIZED
+Python version: 3.14.6
 ```
 
-The chosen version must support the selected PyQt6 release and other dependencies.
+The pinned PySide6 release supports Python 3.10 through 3.14. Broader project-version testing remains future work.
 
 ---
 
-# 126. PyQt6 Version
+# 126. PySide6 Version
 
-The supported PyQt6 version should be pinned or constrained during implementation.
-
-Until verified:
+The initial GUI dependency is pinned in `requirements.txt`:
 
 ```text
-PyQt6 version: NOT YET FINALIZED
+PySide6 version: 6.11.2
+License: LGPL-3.0-only OR GPL-2.0-only OR GPL-3.0-only
 ```
+
+Packaging and distribution must preserve applicable Qt/PySide license notices and LGPL compliance.
 
 ---
 
@@ -2979,9 +3002,9 @@ Taxonomy / Company / Contact persistence
       ↓
 Ticket repository and service
       ↓
-Application bootstrap and PyQt6 shell
+Application bootstrap and PySide6 shell
       ↓
-Basic PyQt6 ticket workflow
+Basic PySide6 ticket workflow
       ↓
 Tests
 ```
@@ -3164,7 +3187,7 @@ Abstraction should not hide these concepts unnecessarily.
 
 ---
 
-# 170. PyQt6 Designer
+# 170. PySide6 Designer
 
 Qt Designer may be used for selected interface layouts if useful.
 
@@ -3236,7 +3259,7 @@ Exact theme implementation belongs in GUI work.
 
 # 174. Accessibility
 
-PyQt6 implementation should consider:
+PySide6 implementation should consider:
 
 - keyboard navigation
 - focus order
@@ -3261,25 +3284,33 @@ However, full localization infrastructure should not be added until justified.
 
 # 176. Current Implementation Status
 
-Repository inspection and tests on 2026-09-03 verified the SQLite infrastructure under `Python\f7hub\infrastructure\`, migrations through the ticket-core schema in `0004_tickets.sql`, and the company/contact persistence boundaries under `Python\f7hub\repositories\`. `CompanyRepository` and `ContactRepository` return frozen structured records and use parameterized SQL through configured SQLite connections. No GUI, application service, domain model, ticket repository or other business repository has been implemented.
+Repository inspection and tests through 2026-09-05 verified the SQLite infrastructure under `Python\f7hub\infrastructure\`, migrations through the relational knowledge schema in `0005_knowledge.sql`, and the company, contact and ticket persistence boundaries. `TicketService` owns workflow validation and transactional ticket creation; its new notes/status operations extend the same boundary without a schema change. The initial PySide6 `TicketCreateWidget` delegates to that service without owning SQL or workflow rules. The thin module entry point, central application bootstrap and minimal `MainWindow` now initialize the database, compose the repository/service/widget dependency chain and enter the Qt event loop. The saved-ticket workspace now provides list/detail navigation and notes/status controls. ServiceTaskRunner executes one service call at a time in a QThread and delivers completion on the GUI thread; each repository operation owns its connection. The window disables conflicting actions and blocks closing while work is active. Initial size respects the available screen with space for window borders. Native Windows visual/input checks passed at the initial size and 1000×700 on 2026-09-05. A separate domain model, the knowledge repository and other application services remain planned.
 
 ```text
 Python SQLite infrastructure: VERIFIED
 CompanyRepository and ContactRepository: VERIFIED
+TicketRepository and TicketService creation boundary: VERIFIED
+TicketRepository and TicketService notes/status boundary: VERIFIED
+PySide6 6.11.2 dependency and isolated environment: VERIFIED
+TicketCreateWidget: VERIFIED
+Application entry point, bootstrap and minimal MainWindow: VERIFIED
+Saved-ticket workspace and background service runner: VERIFIED
 Remaining Python application implementation: PLANNED
-Isolated database tests: PASS — 79 tests
+Isolated database tests: PASS — 133 tests
+GUI tests: PASS — 10 tests
+Application and GUI integration tests: PASS — 14 tests
 ```
 
 This verification does not prove that:
 
-- PyQt6 is installed
-- GUI or application bootstrap exists
-- business repositories beyond companies and contacts exist
-- services exist
+- navigation or queues beyond the saved-ticket workspace exist
+- business repositories beyond companies, contacts and tickets exist
+- usability across other screen sizes, DPI settings or assistive technologies has been verified
+- application services beyond ticket workflows exist
 - PowerShell integration exists
-- tests outside the isolated database infrastructure suite pass
+- tests outside the listed suites pass
 
-It defines intended architecture only.
+Unimplemented sections describe intended architecture.
 
 ---
 
@@ -3294,10 +3325,14 @@ Python\
     ├── __main__.py
     │
     ├── app\
-    │   └── __init__.py
+    │   ├── __init__.py
+    │   ├── bootstrap.py
+    │   └── main.py
     │
     ├── gui\
-    │   └── __init__.py
+    │   ├── __init__.py
+    │   ├── main_window.py
+    │   └── ticket_create_widget.py
     │
     ├── services\
     │   └── __init__.py
@@ -3356,10 +3391,10 @@ A Python feature is complete when applicable:
 
 # 180. Python Golden Rules
 
-1. Python/PyQt6 is the primary F7Hub application.
+1. Python/PySide6 is the primary F7Hub application.
 2. GUI handles presentation, not persistence.
 3. Services coordinate use cases.
-4. Domain logic remains independent of PyQt6.
+4. Domain logic remains independent of PySide6.
 5. Repositories own SQLite access.
 6. Infrastructure owns technical adapters.
 7. PowerShell execution goes through one controlled gateway.
@@ -3384,7 +3419,7 @@ A Python feature is complete when applicable:
 Python is the architectural center of F7Hub.
 
 ```text
-                     PyQt6
+                     PySide6
                       GUI
                        │
                        ▼
@@ -3420,7 +3455,7 @@ desktop automation
 The architectural responsibility is:
 
 ```text
-PyQt6
+PySide6
 → presentation
 
 Python Services

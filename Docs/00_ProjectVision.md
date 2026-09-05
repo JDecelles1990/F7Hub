@@ -1,4 +1,4 @@
-﻿# F7Hub Project Vision
+# F7Hub Project Vision
 
 > Document: `Docs/00_ProjectVision.md`  
 > Project: F7Hub  
@@ -15,7 +15,7 @@
 | Project Name | F7Hub |
 | Project Type | Modular Windows IT Support and Technician Productivity Platform |
 | Primary Platform | Windows 11 |
-| Primary GUI Technology | Python / PyQt6 |
+| Primary GUI Technology | Python / PySide6 |
 | Desktop Automation | AutoHotkey v2 |
 | Administration & Automation | PowerShell |
 | Persistent Data | SQLite |
@@ -481,9 +481,9 @@ F7Hub deliberately uses multiple technologies.
 
 Each technology has a defined responsibility.
 
-## 9.1 Python / PyQt6
+## 9.1 Python / PySide6
 
-Python and PyQt6 form the primary advanced desktop application and GUI layer.
+Python and PySide6 form the primary advanced desktop application and GUI layer.
 
 Responsibilities may include:
 
@@ -596,7 +596,7 @@ F7Hub should generally follow this application flow:
 ```text
 ┌───────────────────────────────────────────┐
 │                  GUI                      │
-│             Python / PyQt6                │
+│             Python / PySide6              │
 └─────────────────────┬─────────────────────┘
                       │
                       ▼
@@ -640,7 +640,7 @@ Cross-language communication must use documented contracts rather than hidden co
 F7Hub
 │
 ├── Python
-│   └── Main Application / PyQt6 GUI
+│   └── Main Application / PySide6 GUI
 │
 ├── AutoHotkey
 │   └── Desktop Automation Layer
@@ -804,7 +804,7 @@ Panels may eventually support states such as:
 - moved between monitors
 - saved as part of a workspace
 
-Exact PyQt6 implementation is defined elsewhere.
+Exact PySide6 implementation is defined elsewhere.
 
 ---
 
@@ -1224,7 +1224,7 @@ Docs/
 │      What responsibilities belong to PowerShell?
 │
 ├── 13_PythonArchitecture.md
-│      What responsibilities belong to Python and PyQt6?
+│      What responsibilities belong to Python and PySide6?
 │
 ├── 14_DesignPrinciples.md
 │      What engineering principles guide development?
@@ -1646,7 +1646,7 @@ AutoHotkey changes
 PowerShell changes
 → 12_PowerShellArchitecture.md
 
-Python / PyQt6 changes
+Python / PySide6 changes
 → 13_PythonArchitecture.md
 
 Repository structure changes
@@ -1737,7 +1737,7 @@ F7Hub is intended to become a modular Windows IT support command center built ar
 
 Its major foundations are:
 
-- Python / PyQt6 for the primary application experience
+- Python / PySide6 for the primary application experience
 - AutoHotkey v2 for Windows desktop automation
 - PowerShell for Windows and Microsoft administration
 - SQLite for persistent structured data

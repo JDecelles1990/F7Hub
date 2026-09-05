@@ -47,7 +47,133 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
-# 3. 2026-09-03 — Ticket Core Schema Migration
+# 2026-09-05 — Windows Usability Check and F7 Shortcut
+
+- Inspected native Windows renders at the initial size and 1000×700, with an available screen of 1600×852. Exercised creation, notes, resolution and Enter-to-open using Qt input events against an isolated database. Native visual/interaction check: PASS; this is agent inspection, not user acceptance testing.
+- Adjusted the initial window size to leave room for Windows borders and the taskbar.
+- Added the AutoHotkey v2 entry point and F7 launcher: focus/restore an existing window, otherwise start the project Python application. Repeated presses and pending startup retries avoid duplicate launches; startup/focus failures provide feedback.
+- Live AutoHotkey checks: PASS, including cold launch, actual global F7 focus/restore, single shortcut instance, missing runtime and timeout/retry handling. GUI regression: PASS — 10 tests. Application/integration regression: PASS — 14 tests.
+- No schema, service workflow, production dependency or login-startup changes.
+
+---
+
+# 2026-09-05 — Saved-Ticket Workspace Verification
+
+- Completed verification of the saved-ticket queue, status filtering, paging, detail display, notes, history, resolution, closure and reopening through the application window and real service workers.
+- Confirmed failed saves preserve drafts and failed detail loads preserve existing information. Committed writes retain success feedback when subsequent reads fail.
+- Fixed creation recovery: if the first detail load fails after a successful save, the workspace explicitly reports creation and refreshes the queue for retry.
+- Added nine integration tests using isolated SQLite databases, including integrity and foreign-key checks. Corrected a test-only connection cleanup issue found during the first run.
+- Validation: PASS — 133 database tests, 10 GUI tests and 14 application/integration tests. Native Windows smoke validation: PASS.
+- Preserved service-owned validation and transactions; no schema or dependency changes. F7 launch/focus is verified separately.
+
+---
+
+# 3. 2026-09-04 — Ticket Notes and Status Service Boundary
+
+## Implementation
+
+- Extended `TicketRepository` with frozen `TicketNoteRecord` results, note creation/reload/list operations, transaction-scoped current-ticket reads and narrow activity/lifecycle updates.
+- Reserved repository writes with `BEGIN IMMEDIATE` before reading current ticket state, preserving configured busy-timeout and foreign-key behavior.
+- Added `TicketService.add_note()` validation and atomic persistence of the note, a `NOTE_ADDED` event referencing its ID and the ticket activity timestamp. Notes preserve author, source and AI-origin metadata and can be added to closed or cancelled tickets.
+- Added `TicketService.change_status()` to validate lifecycle transitions and atomically persist the ticket, status history and `STATUS_CHANGED` timeline event. `NEW` remains creation-only, resolved and closed tickets may reopen to `OPEN`, and `CANCELLED` is terminal.
+- Required resolution text when resolving and saved a `RESOLUTION` note plus its timeline reference in the same transaction. Closing retains the resolution; reopening clears current lifecycle fields while preserving resolution notes, including a legacy-resolution snapshot when needed.
+- Added missing-ticket validation and safe `TicketUpdateError` feedback for persistence failures. A resolution-typed note alone does not transition the ticket.
+- Preserved the existing schema and kept notes/status GUI controls as the next interface slice.
+
+## Validation
+
+```text
+Ticket activity repository tests: PASS — 11 tests
+Ticket activity service tests: PASS — 17 tests
+Full database suite: PASS — 129 tests
+Existing GUI regression tests: PASS — 7 tests
+Application and GUI integration tests: PASS — 5 tests
+Notes/status GUI: NOT RUN — implementation remains planned
+```
+
+---
+
+# 4. 2026-09-04 — PySide6 Application Shell and Ticket Creation GUI
+
+## Architecture Decision
+
+- Replaced PyQt6 with the explicitly approved PySide6 framework for the primary Python GUI.
+- Pinned `PySide6==6.11.2`, verified it with Python 3.14.6, and installed it into the ignored project `.venv`.
+- Selected the community distribution under its available LGPLv3/GPL licensing terms; packaging must preserve applicable notices and LGPL compliance.
+
+## Implementation
+
+- Added `TicketCreateWidget` with ticket number, subject, type, priority, optional company/contact/category references and description input.
+- Added inline required-field feedback, safe persistence-error presentation, input preservation, `Ctrl+S`, duplicate-submit protection and created/failed signals.
+- Kept the GUI dependent on `TicketService`; no SQL or workflow validation moved into the widget.
+- Added service-level translation of SQLite failures into `TicketCreationError` so the GUI does not expose database details.
+- Added the thin `python -m f7hub` entry point, central application bootstrap and minimal `QMainWindow` that composes `TicketRepository`, `TicketService` and `TicketCreateWidget`.
+- Added a File/Exit action, ready/created status feedback, explicit development-database override and safe fatal-startup feedback.
+- Kept the global F7 launch/focus hotkey in the later AutoHotkey slice.
+
+## Validation
+
+```text
+Focused GUI tests: PASS — 7 tests
+Application and GUI integration tests: PASS — 5 tests
+Full database suite: PASS — 101 tests
+Package entry point and startup failure path: PASS
+Windows-platform visual render review: PASS
+Development database isolation: PASS
+```
+
+---
+
+# 5. 2026-09-04 — Ticket Persistence and Creation Service
+
+## Implementation
+
+- Added `TicketRepository` with frozen ticket, status-history and timeline records, parameterized ticket creation/reload, case-insensitive number lookup and stable activity retrieval.
+- Added a repository transaction session so one service workflow can reuse a private configured SQLite connection without exposing SQL to the service or GUI.
+- Added `TicketService` separately to validate ticket fields and references, generate ticket numbers when needed, and atomically create the ticket, initial `NEW` status history and `TICKET_CREATED` timeline event.
+- Kept GUI, ticket editing, notes, status transitions and unrelated repositories outside this slice.
+
+## Validation
+
+```text
+TicketRepository tests: PASS — 6 tests
+TicketService tests: PASS — 5 tests
+Full database suite: PASS — 101 tests
+Ticket creation and reload: PASS
+Required-field, enum and relationship validation: PASS
+Parameterized SQL and database constraints: PASS
+Transaction commit and forced-failure rollback: PASS
+Development database isolation: PASS
+```
+
+---
+
+# 6. 2026-09-04 — Knowledge Schema Migration
+
+## Implementation
+
+- Added `Database\Migrations\0005_knowledge.sql` with the canonical relational knowledge tables: articles, versions, links, article relationships, ticket/article links and article/tag links.
+- Added the seven documented knowledge indexes and preserved canonical constraints and foreign-key delete behavior.
+- Kept `knowledge_article_scripts` deferred until the scripts schema exists and kept FTS tables and synchronization triggers in the later FTS migration.
+- Preserved the slice as schema-only: no repository, service, GUI, script schema or FTS implementation was added.
+
+## Validation
+
+```text
+Focused knowledge migration tests: PASS — 11 tests
+Full database suite: PASS — 90 tests
+Migration ordering, checksum and idempotency: PASS
+Knowledge constraints, defaults and foreign-key behavior: PASS
+Owned-row cascades and category nullification: PASS
+Failed knowledge migration rollback: PASS
+PRAGMA integrity_check: PASS
+PRAGMA foreign_key_check: PASS
+Development database isolation: PASS
+```
+
+---
+
+# 7. 2026-09-03 — Ticket Core Schema Migration
 
 ## Implementation
 
@@ -72,7 +198,7 @@ Development database isolation: PASS
 
 ---
 
-# 4. 2026-09-03 — Company and Contact Repositories
+# 8. 2026-09-03 — Company and Contact Repositories
 
 ## Implementation
 
@@ -95,7 +221,7 @@ Company deletion preserves contacts with a null company reference: PASS
 
 ---
 
-# 5. 2026-09-03 — Company and Contact Schema Migration
+# 9. 2026-09-03 — Company and Contact Schema Migration
 
 ## Implementation
 
@@ -120,7 +246,7 @@ Development database isolation: PASS
 
 ---
 
-# 6. 2026-09-03 — Taxonomy Schema Migration
+# 10. 2026-09-03 — Taxonomy Schema Migration
 
 ## Implementation
 
@@ -144,7 +270,7 @@ Development database isolation: PASS
 
 ---
 
-# 7. 2026-09-03 — First Versioned Core Migration
+# 11. 2026-09-03 — First Versioned Core Migration
 
 ## Architecture Decision
 
@@ -172,7 +298,7 @@ Development database isolation: PASS
 
 ---
 
-# 8. 2026-09-03 — Slice 001 Verification Follow-Ups
+# 12. 2026-09-03 — Slice 001 Verification Follow-Ups
 
 ## Git State
 
@@ -204,7 +330,7 @@ origin/main publication: PENDING
 
 ---
 
-# 9. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
+# 13. 2026-09-03 — SQLite Bootstrap and Migration Infrastructure
 
 ## Security Cleanup
 
@@ -241,7 +367,7 @@ The tests used temporary file-backed databases and did not create or modify `Dat
 
 ---
 
-# 10. 2026-09-02 — Documentation Consistency Review
+# 14. 2026-09-02 — Documentation Consistency Review
 
 ## Scope
 
@@ -328,7 +454,7 @@ The SQLite checks validate the documented DDL, not migrations or runtime applica
 
 ---
 
-# 11. 2026-09-02 — Canonical Architecture Baseline
+# 15. 2026-09-02 — Canonical Architecture Baseline
 
 The documentation baseline established these project decisions:
 
@@ -347,14 +473,14 @@ The documentation baseline established these project decisions:
 
 ---
 
-# 12. Superseded Directions
+# 16. Superseded Directions
 
 The following earlier directions were replaced by the canonical architecture:
 
 | Earlier direction | Current decision |
 |---|---|
 | OneDrive-based development root | `C:\Dev\F7Hub\` |
-| PySide6 | PyQt6 |
+| PyQt6 | PySide6 |
 | AutoHotkey as the primary GUI | AutoHotkey v2 as desktop productivity support |
 | PowerShell as the primary application layer | PowerShell 7 as controlled administration and diagnostics |
 | Direct PowerShell/AHK core database ownership | Python repository ownership |
@@ -367,7 +493,7 @@ Archived documents and legacy diagrams do not override these decisions.
 
 ---
 
-# 13. Maintenance Rule
+# 17. Maintenance Rule
 
 Record only meaningful completed changes here.
 
