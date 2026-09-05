@@ -1,0 +1,326 @@
+"""Minimal ticket-creation form backed by ``TicketService``."""
+
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Protocol
+import logging
+
+from PySide6.QtCore import Signal
+from PySide6.QtGui import QFont, QKeySequence, QShortcut
+from PySide6.QtWidgets import (
+    QComboBox,
+    QFormLayout,
+    QHBoxLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTextEdit,
+    QVBoxLayout,
+    QWidget,
+)
+
+from f7hub.repositories.ticket_repository import TicketRecord
+from f7hub.gui.service_task_runner import ServiceTaskRunner
+from f7hub.services.ticket_service import (
+    TicketValidationError,
+)
+
+
+@dataclass(frozen=True)
+class TicketReferenceOption:
+    """One display label and persistent identifier offered by the form."""
+
+    reference_id: int
+    label: str
+
+
+@dataclass(frozen=True)
+class TicketReferenceOptions:
+    """Reference choices supplied by application composition code."""
+
+    companies: tuple[TicketReferenceOption, ...] = ()
+    contacts: tuple[TicketReferenceOption, ...] = ()
+    categories: tuple[TicketReferenceOption, ...] = ()
+
+
+class TicketCreationService(Protocol):
+    """The service operation consumed by the ticket form."""
+
+    def create_ticket(self, **values: object) -> TicketRecord:
+        """Create and return a ticket."""
+
+
+class TicketCreateWidget(QWidget):
+    """Collect ticket input and delegate creation to a service."""
+
+    ticket_created = Signal(object)
+    submission_failed = Signal(str)
+
+    def __init__(
+        self,
+        ticket_service: TicketCreationService,
+        *,
+        reference_options: TicketReferenceOptions | None = None,
+        task_runner: ServiceTaskRunner | None = None,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self._ticket_service = ticket_service
+        self._reference_options = reference_options or TicketReferenceOptions()
+        self._task_runner = task_runner
+        self._submitting = False
+        self._build_ui()
+
+    def submit(self) -> None:
+        """Validate presentation input and invoke the ticket service once."""
+
+        if self._submitting or (self._task_runner and self._task_runner.busy):
+            return
+        self._clear_feedback()
+        subject = self.subject_input.text()
+        if not subject.strip():
+            self._show_field_error(
+                self.subject_error,
+                self.subject_input,
+                "Subject is required.",
+            )
+            return
+
+        values = dict(
+            ticket_number=self.ticket_number_input.text().strip() or None,
+            subject=subject,
+            ticket_type=str(self.ticket_type_input.currentData()),
+            priority=str(self.priority_input.currentData()),
+            company_id=self.company_input.currentData(),
+            contact_id=self.contact_input.currentData(),
+            category_id=self.category_input.currentData(),
+            description=self.description_input.toPlainText(),
+        )
+        self.save_button.setEnabled(False)
+        self._submitting = True
+        if self._task_runner is not None:
+            self._task_runner.submit(
+                lambda: self._ticket_service.create_ticket(**values),
+                self._submit_succeeded, self._submit_failed,
+            )
+        else:
+            try:
+                ticket = self._ticket_service.create_ticket(**values)
+            except Exception as error:
+                self._submit_failed(error)
+            else:
+                self._submit_succeeded(ticket)
+
+    def _submit_failed(self, error: Exception) -> None:
+        self._submitting = False
+        self.save_button.setEnabled(True)
+        if isinstance(error, TicketValidationError):
+            self._show_validation_error(str(error))
+            self.submission_failed.emit(str(error))
+        else:
+            logging.getLogger(__name__).error("Ticket save failed: %s", type(error).__name__)
+            message = (
+                "F7Hub could not save the ticket. "
+                "Your entered information has been preserved."
+            )
+            self.form_error.setText(message)
+            self.form_error.setVisible(True)
+            self.submission_failed.emit(message)
+
+    def _submit_succeeded(self, ticket: TicketRecord) -> None:
+        self._submitting = False
+        self.save_button.setEnabled(True)
+        self.status_label.setText(
+            f"Created ticket {ticket.ticket_number} successfully."
+        )
+        self.status_label.setVisible(True)
+        self.ticket_created.emit(ticket)
+
+    def has_draft(self) -> bool:
+        return bool(
+            self.ticket_number_input.text() or self.subject_input.text()
+            or self.description_input.toPlainText()
+            or self.ticket_type_input.currentIndex() != 0
+            or self.priority_input.currentIndex() != 1
+            or any(combo.currentIndex() > 0 for combo in (
+                self.company_input, self.contact_input, self.category_input,
+            ))
+        )
+
+    def reset_form(self) -> None:
+        """Clear a successfully saved form before the next ticket."""
+        self.ticket_number_input.clear()
+        self.subject_input.clear()
+        self.description_input.clear()
+        self.ticket_type_input.setCurrentIndex(0)
+        self.priority_input.setCurrentIndex(1)
+        for combo in (self.company_input, self.contact_input, self.category_input):
+            combo.setCurrentIndex(0)
+        self._clear_feedback()
+
+    def _build_ui(self) -> None:
+        self.setObjectName("ticketCreateWidget")
+        self.setWindowTitle("New Ticket")
+        self.setFont(QFont("Segoe UI", 10))
+
+        heading = QLabel("New Ticket", self)
+        heading.setObjectName("ticketCreateHeading")
+        heading_font = QFont(self.font())
+        heading_font.setPointSize(18)
+        heading_font.setBold(True)
+        heading.setFont(heading_font)
+
+        self.ticket_number_input = QLineEdit(self)
+        self.ticket_number_input.setObjectName("ticketNumberInput")
+        self.ticket_number_input.setPlaceholderText("Generated automatically if blank")
+        self.ticket_number_input.setAccessibleName("Ticket number")
+
+        self.ticket_number_error = self._new_error_label("ticketNumberError")
+
+        self.subject_input = QLineEdit(self)
+        self.subject_input.setObjectName("ticketSubjectInput")
+        self.subject_input.setAccessibleName("Subject, required")
+        self.subject_error = self._new_error_label("ticketSubjectError")
+
+        self.ticket_type_input = QComboBox(self)
+        self.ticket_type_input.setObjectName("ticketTypeInput")
+        self.ticket_type_input.setAccessibleName("Ticket type")
+        for label, value in (
+            ("Incident", "INCIDENT"),
+            ("Service request", "SERVICE_REQUEST"),
+            ("Problem", "PROBLEM"),
+            ("Task", "TASK"),
+        ):
+            self.ticket_type_input.addItem(label, value)
+
+        self.priority_input = QComboBox(self)
+        self.priority_input.setObjectName("ticketPriorityInput")
+        self.priority_input.setAccessibleName("Priority")
+        for label, value in (
+            ("Low", "LOW"),
+            ("Medium", "MEDIUM"),
+            ("High", "HIGH"),
+            ("Critical", "CRITICAL"),
+        ):
+            self.priority_input.addItem(label, value)
+        self.priority_input.setCurrentIndex(1)
+
+        self.company_input = self._new_reference_combo(
+            "ticketCompanyInput",
+            "Company",
+            self._reference_options.companies,
+        )
+        self.contact_input = self._new_reference_combo(
+            "ticketContactInput",
+            "Contact",
+            self._reference_options.contacts,
+        )
+        self.category_input = self._new_reference_combo(
+            "ticketCategoryInput",
+            "Category",
+            self._reference_options.categories,
+        )
+
+        self.description_input = QTextEdit(self)
+        self.description_input.setObjectName("ticketDescriptionInput")
+        self.description_input.setAccessibleName("Description")
+        self.description_input.setAcceptRichText(False)
+        self.description_input.setMinimumHeight(140)
+        self.description_input.setMaximumHeight(220)
+
+        form = QFormLayout()
+        form.addRow("Ticket number", self.ticket_number_input)
+        form.addRow("", self.ticket_number_error)
+        form.addRow("Subject *", self.subject_input)
+        form.addRow("", self.subject_error)
+        form.addRow("Type", self.ticket_type_input)
+        form.addRow("Priority", self.priority_input)
+        form.addRow("Company", self.company_input)
+        form.addRow("Contact", self.contact_input)
+        form.addRow("Category", self.category_input)
+        form.addRow("Description", self.description_input)
+
+        self.form_error = self._new_error_label("ticketFormError")
+        self.status_label = QLabel(self)
+        self.status_label.setObjectName("ticketStatusLabel")
+        self.status_label.setProperty("successMessage", True)
+        self.status_label.setVisible(False)
+
+        self.save_button = QPushButton("Create Ticket", self)
+        self.save_button.setObjectName("createTicketButton")
+        self.save_button.setDefault(True)
+        self.save_button.clicked.connect(self.submit)
+
+        actions = QHBoxLayout()
+        actions.addStretch()
+        actions.addWidget(self.save_button)
+
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(24, 24, 24, 24)
+        layout.setSpacing(12)
+        layout.addWidget(heading)
+        layout.addLayout(form)
+        layout.addWidget(self.form_error)
+        layout.addWidget(self.status_label)
+        layout.addLayout(actions)
+        layout.addStretch()
+
+        save_shortcut = QShortcut(QKeySequence.StandardKey.Save, self)
+        save_shortcut.activated.connect(self.submit)
+        self._save_shortcut = save_shortcut
+
+    def _new_reference_combo(
+        self,
+        object_name: str,
+        accessible_name: str,
+        options: tuple[TicketReferenceOption, ...],
+    ) -> QComboBox:
+        combo = QComboBox(self)
+        combo.setObjectName(object_name)
+        combo.setAccessibleName(accessible_name)
+        combo.addItem("Not selected", None)
+        for option in options:
+            combo.addItem(option.label, option.reference_id)
+        return combo
+
+    def _new_error_label(self, object_name: str) -> QLabel:
+        label = QLabel(self)
+        label.setObjectName(object_name)
+        label.setProperty("validationError", True)
+        label.setWordWrap(True)
+        label.setVisible(False)
+        return label
+
+    def _clear_feedback(self) -> None:
+        for label in (
+            self.ticket_number_error,
+            self.subject_error,
+            self.form_error,
+            self.status_label,
+        ):
+            label.clear()
+            label.setVisible(False)
+
+    def _show_validation_error(self, message: str) -> None:
+        if message.startswith("subject "):
+            self._show_field_error(self.subject_error, self.subject_input, message)
+        elif message.startswith("ticket_number "):
+            self._show_field_error(
+                self.ticket_number_error,
+                self.ticket_number_input,
+                message,
+            )
+        else:
+            self.form_error.setText(message)
+            self.form_error.setVisible(True)
+
+    @staticmethod
+    def _show_field_error(
+        label: QLabel,
+        field: QLineEdit,
+        message: str,
+    ) -> None:
+        label.setText(message)
+        label.setVisible(True)
+        field.setFocus()
