@@ -120,9 +120,11 @@ class CompanyRepository:
             connection.commit()
         return company
 
-    def get_company(self, company_id: int) -> CompanyRecord | None:
+    def get_company(self, company_id: int, *, connection: sqlite3.Connection | None = None) -> CompanyRecord | None:
         """Return a company by internal ID, or ``None`` when it is absent."""
 
+        if connection is not None:
+            return _get_company(connection, company_id)
         with database_connection(self._database_path) as connection:
             return _get_company(connection, company_id)
 

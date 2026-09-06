@@ -313,6 +313,18 @@ A failed write retains dialog input for retry. If creation commits but the compa
 
 Native Windows synthetic-data checks on 2026-09-06 passed for validation, cancel, creation, refresh recovery, draft preservation and save/reopen at 1000×700. Full company management and contact creation remain outside this slice.
 
+## Quick Contact Creation — Slice 009
+
+From New Ticket, select an active company (including one just created through Add Company), choose **Add Contact**, enter the required contact name and optional email, and choose **Create Contact**. Add Contact is unavailable without a selected company or during background work/pending reference reconciliation. The service validates the current company, trims name/email, stores blank email as NULL and creates an active contact; duplicate names/emails remain allowed.
+
+Success closes the dialog, reloads only that company's contacts and selects the new contact. Ticket number, subject, type, priority, company, category and description remain intact. Save and reopen through the existing ticket workflow displays the correct company/contact labels. Cancel before submission performs no write; validation/write failures retain dialog inputs, and submission blocks duplicate writes and unsafe close/cancel actions while the worker finishes.
+
+If contact creation commits but selector refresh fails, the form reports successful creation and retains the contact and company IDs. Company switching, Add Company, Add Contact and ticket submission are blocked until **Refresh references** reconciles the contact; retry reads only contacts and never repeats the insertion. If a successful later read no longer includes the contact, auto-selection is abandoned with explicit feedback and the technician can choose another contact or continue without one. TicketService remains the authoritative save-time integrity boundary.
+
+If the company is deactivated or deleted after the contact commits, the form explains that the saved contact could not be selected and offers **Continue without this contact**. This explicitly abandons auto-selection, clears the pending lock and company/contact selections, and refreshes active companies without reloading categories. All non-reference ticket fields remain intact. The technician can select another active company/contact or save without references. The contact is never inserted again or deleted by recovery; company deletion retains the contact with a NULL company ID under the existing foreign key rule. Transient read failures retain the ordinary retry path.
+
+Native Windows synthetic-data checks on 2026-09-06 passed for validation, cancel, create, auto-selection, every draft field, post-commit recovery, combined company/contact creation and save/reopen. Form/dialog/saved-ticket layout was inspected at 1000×700. Contact editing/deletion and full management remain deferred.
+
 ## Validation Examples
 
 - required fields present

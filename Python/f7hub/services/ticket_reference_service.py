@@ -20,6 +20,10 @@ class TicketReferenceError(ValueError):
     """Reference choices are unavailable or the requested company is invalid."""
 
 
+class CompanyReferenceUnavailableError(TicketReferenceError):
+    """An authoritative read found the company missing or inactive."""
+
+
 class TicketReferenceService:
     """Supply only the read operations needed by the ticket form."""
 
@@ -50,7 +54,7 @@ class TicketReferenceService:
         try:
             company = self._companies.get_company(company_id)
             if company is None or not company.is_active:
-                raise TicketReferenceError("The selected company is no longer available.")
+                raise CompanyReferenceUnavailableError("The selected company is no longer available.")
             return tuple(TicketReferenceOption(row.contact_id, row.display_name)
                          for row in self._contacts.list_contacts_for_company(company_id)
                          if row.is_active)

@@ -23,8 +23,12 @@ from PySide6.QtWidgets import (
 from f7hub.repositories.ticket_repository import TicketRecord
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.quick_company_dialog import QuickCompanyDialog
+from f7hub.gui.quick_contact_dialog import QuickContactDialog
 from f7hub.services.company_service import CompanyService
-from f7hub.services.ticket_reference_service import TicketReferenceOption, TicketReferenceService
+from f7hub.services.contact_service import ContactService
+from f7hub.services.ticket_reference_service import (
+    CompanyReferenceUnavailableError, TicketReferenceOption, TicketReferenceService,
+)
 from f7hub.services.ticket_service import (
     TicketValidationError,
 )
@@ -59,6 +63,7 @@ class TicketCreateWidget(QWidget):
         reference_options: TicketReferenceOptions | None = None,
         reference_service: TicketReferenceService | None = None,
         company_service: CompanyService | None = None,
+        contact_service: ContactService | None = None,
         task_runner: ServiceTaskRunner | None = None,
         parent: QWidget | None = None,
     ) -> None:
@@ -68,6 +73,11 @@ class TicketCreateWidget(QWidget):
         self._task_runner = task_runner
         self._reference_service = reference_service
         self._company_service = company_service
+        self._contact_service = contact_service
+        self._contact_dialog = None
+        self._pending_contact = None
+        self._pending_contact_company_unavailable = False
+        self._contact_load_generation = 0
         self._company_dialog = None
         self._pending_company_id = None
         self._references_started = False
@@ -79,6 +89,9 @@ class TicketCreateWidget(QWidget):
         if reference_service is not None:
             self.contact_input.setEnabled(False)
             self.company_input.currentIndexChanged.connect(self._company_changed)
+        if task_runner is not None:
+            task_runner.busy_changed.connect(self._update_contact_controls)
+        self._update_contact_controls()
 
     def showEvent(self, event) -> None:
         super().showEvent(event)
@@ -99,6 +112,10 @@ class TicketCreateWidget(QWidget):
 
     def refresh_references(self) -> None:
         """Refresh choices without clearing text or valid reference selections."""
+        if self._pending_contact is not None:
+            if not (self._task_runner and self._task_runner.busy):
+                self._load_contacts()
+            return
         self.refresh_categories(on_finished=self._refresh_companies)
 
     def refresh_categories(self, *, on_finished=None) -> None:
@@ -156,13 +173,81 @@ class TicketCreateWidget(QWidget):
                              lambda error: self._reference_failed(error, "companies"))
 
     def _company_changed(self) -> None:
+        if self._pending_contact is not None:
+            # Also guard programmatic changes while reconciliation is pending.
+            self.company_input.blockSignals(True)
+            self.company_input.setCurrentIndex(self.company_input.findData(self._pending_contact.company_id))
+            self.company_input.blockSignals(False)
+            return
         self._pending_company_id = None
         self.add_company_button.setEnabled(True)
         self._load_contacts()
 
+    def _update_contact_controls(self, *_):
+        busy = bool(self._task_runner and self._task_runner.busy)
+        pending = self._pending_contact is not None
+        self.abandon_contact_button.setVisible(pending and self._pending_contact_company_unavailable)
+        self.abandon_contact_button.setEnabled(not busy)
+        company_id = self.company_input.currentData()
+        self.add_contact_button.setEnabled(
+            self._contact_service is not None and self._reference_service is not None
+            and self._task_runner is not None and not busy and not pending
+            and self._pending_company_id is None
+            and type(company_id) is int and 1 <= company_id <= 2**63 - 1
+        )
+        self.company_input.setEnabled(not busy and not pending)
+        self.add_company_button.setEnabled(not busy and not pending and self._pending_company_id is None)
+
+    def open_contact_dialog(self):
+        self._update_contact_controls()
+        if not self.add_contact_button.isEnabled():
+            return
+        if self._contact_dialog is not None:
+            self._contact_dialog.raise_()
+            return
+        dialog = QuickContactDialog(self._contact_service, self._task_runner,
+                                    self.company_input.currentData(), self)
+        self._contact_dialog = dialog
+        dialog.contact_created.connect(self._contact_created)
+        dialog.finished.connect(self._contact_dialog_finished)
+        dialog.open()
+        dialog.name_input.setFocus()
+
+    def _contact_dialog_finished(self):
+        dialog = self._contact_dialog
+        self._contact_dialog = None
+        dialog.deleteLater()
+
+    def _contact_created(self, contact):
+        self._pending_contact = contact
+        self._pending_contact_company_unavailable = False
+        self.status_label.setText("Contact created successfully.")
+        self.status_label.setVisible(True)
+        self._update_contact_controls()
+        self._load_contacts()
+
+    def abandon_pending_contact(self) -> None:
+        """Release auto-selection only; the contact write has already committed."""
+        if (self._pending_contact is None or not self._pending_contact_company_unavailable
+                or (self._task_runner and self._task_runner.busy)):
+            return
+        self._contact_load_generation += 1
+        self._pending_contact = None
+        self._pending_contact_company_unavailable = False
+        self._pending_company_id = None
+        self.company_input.blockSignals(True)
+        self.company_input.setCurrentIndex(0)
+        self.company_input.blockSignals(False)
+        self.contact_input.clear()
+        self.contact_input.addItem("Not selected", None)
+        self.contact_input.setEnabled(False)
+        self._update_contact_controls()
+        self._refresh_companies()
+
     def open_company_dialog(self) -> None:
         if (self._company_service is None or self._task_runner is None
-                or self._task_runner.busy or self._pending_company_id is not None):
+                or self._task_runner.busy or self._pending_company_id is not None
+                or self._pending_contact is not None):
             return
         if self._company_dialog is not None:
             self._company_dialog.raise_()
@@ -194,7 +279,14 @@ class TicketCreateWidget(QWidget):
         self._refresh_companies()
 
     def _load_contacts(self, *, contact_id=None) -> None:
+        self._contact_load_generation += 1
+        generation = self._contact_load_generation
         company_id = self.company_input.currentData()
+        if self._pending_contact is not None:
+            if company_id != self._pending_contact.company_id:
+                return
+            contact_id = self._pending_contact.contact_id
+        self._update_contact_controls()
         previous_options = tuple(
             (self.contact_input.itemText(index), self.contact_input.itemData(index))
             for index in range(1, self.contact_input.count())
@@ -209,18 +301,43 @@ class TicketCreateWidget(QWidget):
 
         def loaded(options):
             # Ignore a result if the form was reset or its company changed.
-            if self.company_input.currentData() != company_id:
+            if (generation != self._contact_load_generation
+                    or self.company_input.currentData() != company_id):
                 return
+            self._pending_contact_company_unavailable = False
             for option in options:
                 self.contact_input.addItem(option.label, option.reference_id)
+            if self._pending_contact is not None:
+                if self.contact_input.findData(contact_id) < 0:
+                    # A successful authoritative read can report a later deletion/inactivation.
+                    self._pending_contact = None
+                    self._update_contact_controls()
+                    self.contact_input.setEnabled(bool(options))
+                    self.reference_feedback.setText(
+                        "Contact was created but is no longer available. Select an active contact or continue without one."
+                    )
+                    return
+                self._pending_contact = None
             self.contact_input.setCurrentIndex(max(0, self.contact_input.findData(contact_id)))
             self.contact_input.setEnabled(bool(options))
+            self._update_contact_controls()
             self.reference_feedback.setText(
                 "Contact is optional." if options else "No active contacts for this company."
             )
 
         def failed(error):
-            if self.company_input.currentData() != company_id:
+            if (generation != self._contact_load_generation
+                    or self.company_input.currentData() != company_id):
+                return
+            if (self._pending_contact is not None
+                    and isinstance(error, CompanyReferenceUnavailableError)):
+                self._pending_contact_company_unavailable = True
+                self._update_contact_controls()
+                self.reference_feedback.setText(
+                    "Contact created successfully, but its company is no longer available. "
+                    "The contact could not be selected for this ticket. Refresh references or "
+                    "continue without this contact; the saved contact and ticket draft are preserved."
+                )
                 return
             # A refresh failure keeps the prior selection; save revalidates it.
             for label, reference_id in previous_options:
@@ -237,7 +354,8 @@ class TicketCreateWidget(QWidget):
     def _reference_failed(self, error, kind) -> None:
         logging.getLogger(__name__).error("Reference load failed: %s", type(error).__name__)
         self.reference_feedback.setText(
-            ("Company created successfully. " if self._pending_company_id is not None else "")
+            ("Contact created successfully. " if self._pending_contact is not None else
+             "Company created successfully. " if self._pending_company_id is not None else "")
             + f"Could not load {kind}. Your ticket draft is preserved. Use Refresh references to retry."
         )
 
@@ -245,6 +363,13 @@ class TicketCreateWidget(QWidget):
         """Validate presentation input and invoke the ticket service once."""
 
         if self._submitting or (self._task_runner and self._task_runner.busy):
+            return
+        if self._pending_contact is not None:
+            if self._pending_contact_company_unavailable:
+                return
+            self.reference_feedback.setText(
+                "Contact created successfully. Use Refresh references before saving this ticket."
+            )
             return
         if self._pending_company_id is not None:
             self.reference_feedback.setText(
@@ -325,6 +450,9 @@ class TicketCreateWidget(QWidget):
     def reset_form(self) -> None:
         """Clear a successfully saved form before the next ticket."""
         self._pending_company_id = None
+        self._pending_contact = None
+        self._pending_contact_company_unavailable = False
+        self._contact_load_generation += 1
         self.add_company_button.setEnabled(True)
         self.ticket_number_input.clear()
         self.subject_input.clear()
@@ -334,6 +462,7 @@ class TicketCreateWidget(QWidget):
         for combo in (self.company_input, self.contact_input, self.category_input):
             combo.setCurrentIndex(0)
         self._clear_feedback()
+        self._update_contact_controls()
 
     def _build_ui(self) -> None:
         self.setObjectName("ticketCreateWidget")
@@ -402,6 +531,11 @@ class TicketCreateWidget(QWidget):
         self.refresh_references_button = QPushButton("Refresh references", self)
         self.refresh_references_button.clicked.connect(self.refresh_references)
         self.refresh_references_button.setVisible(self._reference_service is not None)
+        self.abandon_contact_button = QPushButton("Continue without this contact", self)
+        self.abandon_contact_button.setObjectName("abandonPendingContactButton")
+        self.abandon_contact_button.setAutoDefault(False)
+        self.abandon_contact_button.clicked.connect(self.abandon_pending_contact)
+        self.abandon_contact_button.setVisible(False)
         self.category_feedback = QLabel(self)
         self.category_feedback.setWordWrap(True)
         self.refresh_categories_button = QPushButton("Refresh categories", self)
@@ -434,10 +568,24 @@ class TicketCreateWidget(QWidget):
         )
         company_row.addWidget(self.add_company_button)
         form.addRow("Company", company_row)
-        form.addRow("Contact", self.contact_input)
+        contact_row = QHBoxLayout()
+        contact_row.addWidget(self.contact_input, 1)
+        self.add_contact_button = QPushButton("Add Contact", self)
+        self.add_contact_button.setObjectName("addContactButton")
+        self.add_contact_button.setAutoDefault(False)
+        self.add_contact_button.clicked.connect(self.open_contact_dialog)
+        self.add_contact_button.setVisible(
+            self._contact_service is not None and self._reference_service is not None
+            and self._task_runner is not None
+        )
+        contact_row.addWidget(self.add_contact_button)
+        form.addRow("Contact", contact_row)
         if self._reference_service is not None:
             form.addRow("", self.reference_feedback)
-            form.addRow("", self.refresh_references_button)
+            reference_actions = QHBoxLayout()
+            reference_actions.addWidget(self.refresh_references_button)
+            reference_actions.addWidget(self.abandon_contact_button)
+            form.addRow("", reference_actions)
         form.addRow("Category", self.category_input)
         if self._reference_service is not None:
             category_state = QHBoxLayout()
