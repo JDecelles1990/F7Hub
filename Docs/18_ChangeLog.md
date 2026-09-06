@@ -47,6 +47,18 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-05 — Slice 007: Ticket Category Reference Integration
+
+- Added a small read-only CategoryRepository for scoped category facts, with deterministic sort-order/name/ID ordering. TicketReferenceService supplies active TICKET options with separate IDs and labels.
+- New Ticket loads categories through the existing ServiceTaskRunner. Category-only refresh/retry avoids company/contact queries and preserves the draft and reference selections on failure. Empty lists retain optional Not selected.
+- Reused existing TicketService validation and atomic ticket/history/timeline persistence unchanged. Saved-ticket details resolve current category names, including inactive categories, and handle null/deleted references through the existing SET NULL relationship.
+- Reduced the description minimum height to 100 pixels after native inspection found the additional feedback row exceeded the 1000×700 target. Corrected an existing GUI test double to include category reference fields.
+- Validation: PASS — 152 database, 22 GUI and 27 integration tests (201 total). Focused runs: 10 database tests, 24 GUI/integration tests and one additional category-worker responsiveness test. Integrity check returned ok; foreign-key check returned zero violations; migration count remains five.
+- Native Windows visual/input verification: PASS — category population/filtering, retry, draft and company/contact preservation, create/reopen, optional category, notes and Resolve → Close → Reopen. The corrected form and saved-ticket workspace fit 1000×700. Agent verification, not user acceptance testing. AutoHotkey: NOT RUN — launch contract unchanged.
+- No schema, historical migration or dependency changes. ROOT.md and the unrelated archived modification were preserved. Slice changes remain uncommitted for independent review.
+
+---
+
 # 2026-09-05 — Slice 006: Reference-Aware Ticket Creation
 
 - Added active company selection and company-filtered active contacts to New Ticket through a narrow TicketReferenceService and the existing background runner. IDs remain separate from canonical display labels.

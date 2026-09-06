@@ -291,13 +291,17 @@ Create Initial Timeline Event
 Open Ticket Workspace
 ```
 
-## Implemented Reference Selection — Slice 006
+## Implemented Reference Selection — Slices 006–007
 
 New Ticket loads active company names. Selecting a company loads only its active contacts; changing or clearing the company clears the previous contact. Both selections remain optional. Refresh references retries failed loads without clearing ticket text or valid selections. Creation revalidates active references and company/contact membership inside its existing transaction.
 
 Successful creation opens Saved Tickets. Reopening displays company and contact names, including names of subsequently inactive rows. Null references show Not selected. Existing foreign keys clear references on deletion; deleted names are not retained as historical snapshots.
 
 Validation on 2026-09-05: automated integration and native Windows visual/input checks with isolated synthetic data are PASS, including empty choices, query failure, stale selections, draft preservation and create/reopen.
+
+Slice 007 adds optional active TICKET category choices, ordered by sort order, name and category ID. New Ticket displays category names and saves the separate ID through the existing creation service. Refresh categories retries just that list without reloading companies or contacts; a failed load preserves the draft and selected references. No active categories leaves Not selected available. Full reference refresh also loads categories, and company switching preserves the category selection.
+
+Saved Tickets displays the current category name, including subsequently inactive categories. Null or deleted references display Not selected. Creation rejects inactive, wrong-scope or missing categories without partial ticket/history/timeline writes. Native Windows category selection, failure/retry, optional creation and reopening were verified with synthetic data on 2026-09-05.
 
 ## Validation Examples
 

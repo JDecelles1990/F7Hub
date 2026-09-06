@@ -17,6 +17,7 @@ from f7hub.app.bootstrap import bootstrap_application
 from f7hub.infrastructure.database import bootstrap_database, database_connection
 from f7hub.services.ticket_service import TicketValidationError
 from Tests.Database.test_ticket_references import seed_references
+from Tests.Database.test_category_references import seed_categories
 
 
 class TicketReferenceFlowTests(unittest.TestCase):
@@ -29,6 +30,7 @@ class TicketReferenceFlowTests(unittest.TestCase):
         self.path = Path(self.temp.name) / "reference-flow.db"
         bootstrap_database(self.path, Path(__file__).resolve().parents[2] / "Database/Migrations")
         self.a, self.b, self.empty, self.inactive, self.alice, self.bob, self.charlie = seed_references(self.path)
+        seed_categories(self.path)
         self.context = bootstrap_application(database_path=self.path)
         self.window = self.context.main_window
         self.form = self.window.ticket_create_widget
@@ -91,6 +93,125 @@ class TicketReferenceFlowTests(unittest.TestCase):
             self.context.ticket_service.create_ticket(subject="Mismatch", company_id=self.a.company_id,
                                                        contact_id=self.charlie.contact_id)
         self.assertEqual(self.context.ticket_service.list_tickets(), ())
+
+    def test_category_select_save_reopen_and_optional_ticket(self):
+        self.assertEqual([(self.form.category_input.itemText(i), self.form.category_input.itemData(i))
+                          for i in range(self.form.category_input.count())],
+                         [("Not selected", None), ("Hardware", 23), ("Microsoft 365", 12), ("Networking", 31)])
+        self.form.category_input.setCurrentIndex(self.form.category_input.findData(31))
+        self.select_company(self.a)
+        self.form.contact_input.setCurrentIndex(1)
+        QTest.keyClicks(self.form.subject_input, "Synthetic Networking ticket")
+        QTest.mouseClick(self.form.save_button, Qt.MouseButton.LeftButton)
+        self.wait_idle()
+        workspace = self.window.workspace
+        ticket_id = workspace.details.ticket.ticket_id
+        self.assertIs(self.window.pages.currentWidget(), workspace)
+        with database_connection(self.path) as connection:
+            self.assertEqual(connection.execute("SELECT category_id FROM tickets WHERE ticket_id = ?", (ticket_id,)).fetchone()[0], 31)
+        self.window.show_new_ticket()
+        self.window.show_tickets()
+        self.wait_idle()
+        workspace.table.setCurrentIndex(workspace.model.index(0, 0))
+        QTest.keyClick(workspace.table, Qt.Key.Key_Return)
+        self.wait_idle()
+        self.assertIn("Category: Networking", workspace.summary.toPlainText())
+        self.assertIn("Contact: Alice Example", workspace.summary.toPlainText())
+        self.window.show_new_ticket()
+        self.assertIsNone(self.form.category_input.currentData())
+        self.form.subject_input.setText("No category test")
+        self.form.save_button.click()
+        self.wait_idle()
+        self.assertIsNone(workspace.details.ticket.category_id)
+        self.assertIn("Category: Not selected", workspace.summary.toPlainText())
+
+    def test_wrong_scope_category_cannot_bypass_service(self):
+        for category_id in (55, 66, 77):
+            with self.assertRaises(TicketValidationError):
+                self.context.ticket_service.create_ticket(subject="Wrong scope", category_id=category_id)
+        self.assertEqual(self.context.ticket_service.list_tickets(), ())
+
+    def test_category_worker_failure_preserves_all_choices_and_retries_independently(self):
+        self.select_company(self.a)
+        self.form.contact_input.setCurrentIndex(1)
+        self.form.category_input.setCurrentIndex(self.form.category_input.findData(31))
+        self.form.subject_input.setText("Category draft")
+        self.form.description_input.setPlainText("Synthetic description")
+        references = self.form._reference_service
+        with patch.object(references, "list_active_companies", wraps=references.list_active_companies) as companies:
+            with patch.object(references, "list_active_contacts_for_company", wraps=references.list_active_contacts_for_company) as contacts:
+                with patch.object(references, "list_active_ticket_categories", side_effect=RuntimeError("private detail")):
+                    self.form.refresh_categories_button.click()
+                    self.wait_idle()
+                self.assertIn("Could not load categories", self.form.category_feedback.text())
+                self.assertNotIn("private detail", self.form.category_feedback.text())
+                self.form.refresh_categories_button.click()
+                self.wait_idle()
+                companies.assert_not_called()
+                contacts.assert_not_called()
+        self.assertEqual(self.form.subject_input.text(), "Category draft")
+        self.assertEqual(self.form.description_input.toPlainText(), "Synthetic description")
+        self.assertEqual(self.form.company_input.currentData(), self.a.company_id)
+        self.assertEqual(self.form.contact_input.currentData(), self.alice.contact_id)
+        self.assertEqual(self.form.category_input.currentData(), 31)
+        self.assertEqual(self.form.category_feedback.text(), "Category is optional.")
+
+    def test_stale_category_rejected_and_refresh_recovers(self):
+        self.form.category_input.setCurrentIndex(self.form.category_input.findData(31))
+        self.form.subject_input.setText("Stale category draft")
+        with database_connection(self.path) as connection:
+            connection.execute("UPDATE categories SET is_active = 0 WHERE category_id = ?", (31,))
+        self.form.save_button.click()
+        self.wait_idle()
+        self.assertEqual(self.form.subject_input.text(), "Stale category draft")
+        self.assertIn("active TICKET category", self.form.form_error.text())
+        self.assertEqual(self.context.ticket_service.list_tickets(), ())
+        self.form.refresh_categories_button.click()
+        self.wait_idle()
+        self.assertIsNone(self.form.category_input.currentData())
+        self.form.save_button.click()
+        self.wait_idle()
+        self.assertIn("Category: Not selected", self.window.workspace.summary.toPlainText())
+
+    def test_category_query_runs_off_gui_thread_and_keeps_event_loop_responsive(self):
+        gate = threading.Event()
+        worker_threads = []
+        gui_thread = threading.get_ident()
+        original = self.form._reference_service.list_active_ticket_categories
+
+        def delayed():
+            worker_threads.append(threading.get_ident())
+            gate.wait(3)
+            return original()
+
+        with patch.object(self.form._reference_service, "list_active_ticket_categories", side_effect=delayed):
+            try:
+                self.form.refresh_categories_button.click()
+                ticks = []
+                QTimer.singleShot(0, lambda: ticks.append(True))
+                QTest.qWait(30)
+                self.assertTrue(ticks)
+                self.assertTrue(self.window.runner.busy)
+                self.assertFalse(self.window.pages.isEnabled())
+            finally:
+                gate.set()
+                self.wait_idle()
+        self.assertEqual(len(worker_threads), 1)
+        self.assertNotEqual(worker_threads[0], gui_thread)
+
+    def test_inactive_and_deleted_category_detail_display(self):
+        ticket = self.context.ticket_service.create_ticket(subject="Category history", category_id=31)
+        with database_connection(self.path) as connection:
+            connection.execute("UPDATE categories SET is_active = 0 WHERE category_id = ?", (31,))
+        self.window.pages.setCurrentWidget(self.window.workspace)
+        self.window.workspace.open_ticket(ticket.ticket_id)
+        self.wait_idle()
+        self.assertIn("Category: Networking", self.window.workspace.summary.toPlainText())
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM categories WHERE category_id = ?", (31,))
+        self.window.workspace.reload_button.click()
+        self.wait_idle()
+        self.assertIn("Category: Not selected", self.window.workspace.summary.toPlainText())
 
     def test_empty_contacts_and_no_reference_tickets(self):
         self.select_company(self.empty)

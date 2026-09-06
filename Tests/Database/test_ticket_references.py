@@ -9,6 +9,7 @@ from unittest.mock import patch
 from f7hub.infrastructure.database import bootstrap_database, database_connection
 from f7hub.repositories.company_repository import CompanyRepository
 from f7hub.repositories.contact_repository import ContactRepository
+from f7hub.repositories.category_repository import CategoryRepository
 from f7hub.repositories.ticket_repository import TicketRepository
 from f7hub.services.ticket_reference_service import TicketReferenceService, TicketReferenceError
 from f7hub.services.ticket_service import TicketService, TicketValidationError
@@ -35,7 +36,7 @@ class TicketReferenceTests(unittest.TestCase):
         self.path = Path(self.temp.name) / "references.db"
         bootstrap_database(self.path, Path(__file__).resolve().parents[2] / "Database/Migrations")
         self.companies, self.contacts = CompanyRepository(self.path), ContactRepository(self.path)
-        self.references = TicketReferenceService(self.companies, self.contacts)
+        self.references = TicketReferenceService(self.companies, self.contacts, CategoryRepository(self.path))
         self.repository = TicketRepository(self.path)
         self.service = TicketService(self.repository)
 

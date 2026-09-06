@@ -105,6 +105,7 @@ Minimal ticket creation GUI: VERIFIED
 Minimal application bootstrap and MainWindow: VERIFIED
 Saved-ticket workspace and background service runner: VERIFIED
 Reference-aware company/contact ticket creation: VERIFIED
+Ticket category selection, persistence and reopened label: VERIFIED
 AutoHotkey F7 launch/focus shortcut: VERIFIED
 Relational knowledge schema migration: VERIFIED
 Remaining application implementation: PLANNED
@@ -113,6 +114,8 @@ Remaining application implementation: PLANNED
 ---
 
 # 5. Roadmap Layers
+
+After Slice 007, the verified milestone is **Ticket Creation References Complete**. Recommended next bounded user-visible slice: create an active company from New Ticket and select it immediately, reusing CompanyRepository through a service boundary. Do not expand that slice into full company/contact management. Category hierarchy formatting remains deferred; the current selector uses category names directly.
 
 The F7Hub roadmap is organized into:
 

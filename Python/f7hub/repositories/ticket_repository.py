@@ -86,6 +86,7 @@ class TicketDetailsRecord:
     timeline_events: tuple[TicketTimelineEventRecord, ...]
     company_name: str | None = None
     contact_name: str | None = None
+    category_name: str | None = None
 
 
 _TICKET_COLUMNS = """
@@ -224,9 +225,10 @@ class TicketRepository:
             if ticket is None:
                 return None
             references = connection.execute(
-                "SELECT c.name AS company_name, p.display_name AS contact_name "
+                "SELECT c.name AS company_name, p.display_name AS contact_name, k.name AS category_name "
                 "FROM tickets t LEFT JOIN companies c ON c.company_id = t.company_id "
-                "LEFT JOIN contacts p ON p.contact_id = t.contact_id WHERE t.ticket_id = ?",
+                "LEFT JOIN contacts p ON p.contact_id = t.contact_id "
+                "LEFT JOIN categories k ON k.category_id = t.category_id WHERE t.ticket_id = ?",
                 (ticket_id,),
             ).fetchone()
             return TicketDetailsRecord(
@@ -234,6 +236,7 @@ class TicketRepository:
                 _list_status_history(connection, ticket_id),
                 _list_timeline_events(connection, ticket_id),
                 references["company_name"], references["contact_name"],
+                references["category_name"],
             )
 
     def get_ticket_by_number(self, ticket_number: str) -> TicketRecord | None:

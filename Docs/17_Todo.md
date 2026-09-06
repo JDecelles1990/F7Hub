@@ -285,7 +285,16 @@ Slice 006 — reference-aware ticket creation, verified 2026-09-05:
 - [x] Display company/contact names when reopening saved tickets; handle null, inactive and deleted references safely.
 - [x] Verify 142 database, 16 GUI and 21 integration tests, plus native Windows visual/input checks using isolated synthetic data. No migration.
 
-Recommended next slice (not implemented): KnowledgeRepository article creation/reload and isolated repository tests using the existing knowledge schema.
+Slice 007 — ticket category references, verified 2026-09-05:
+
+- [x] Load active TICKET categories through CategoryRepository and TicketReferenceService; order by sort order, name and ID.
+- [x] Preserve optional selection, draft text and company/contact choices through category failure and independent retry.
+- [x] Reuse transactional save-time validation; reject inactive, missing and wrong-scope categories without partial activity writes.
+- [x] Display current category names for saved tickets, including inactive categories and safe null/deletion handling.
+- [x] Verify focused automated tests and native Windows selection, persistence, reopening, failure/retry and 1000×700 layout with synthetic data.
+- [ ] Consider hierarchical selector labels in a later slice; current names are displayed directly.
+
+Recommended next slice (not implemented): create an active company from New Ticket and select it immediately, using a small service-backed form and the existing CompanyRepository. Full company/contact management remains outside that slice.
 
 ---
 
