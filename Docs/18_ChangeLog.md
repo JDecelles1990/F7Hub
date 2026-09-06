@@ -47,6 +47,20 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-06 — Slice 008: Quick Company Creation from New Ticket
+
+- Added a name-only Quick Add Company dialog and narrow CompanyService. Creation trims and validates text, supplies matching UTC timestamps and persists an active company through CompanyRepository.
+- Reused ServiceTaskRunner for responsive background creation, guarded repeated submissions and blocked cancellation/closing while the write finishes. Cancel before submission performs no write; failures retain input and show safe messages.
+- Successful creation refreshes companies and contacts, selects the new company and clears incompatible contact selection without reloading categories or resetting any unrelated ticket field. The existing TicketService save/reopen path is unchanged.
+- Retained committed company identity after failed selector refresh. Recovery through Refresh references selects the existing record without another insertion; committed creation remains explicitly reported as successful.
+- Made CompanyRepository INSERT and returned-record reload one transaction. Reload failure rolls back the insert, eliminating ambiguous retry after a partial repository operation. Other repository behavior and all five migrations are unchanged.
+- Native Windows inspection found that a separate success-message row expanded the window above 1000×700. Moved success feedback beside Create Ticket and verified the corrected size during success and refresh failure.
+- Focused checks: PASS — 14 service/repository, 8 GUI and 5 integration tests; all 27 rerun after the final service-error and layout adjustments. Full regression: PASS — 161 database, 30 GUI and 32 integration tests (223 total). Isolated integrity_check = ok, foreign_key_check = zero violations, migration count = 5.
+- Native Windows visual/input checks: PASS — validation, cancel, create, automatic selection, draft preservation, contact reset, post-commit refresh recovery, save/reopen, notes and Resolve → Close → Reopen at 1000×700. Agent verification, not user acceptance testing. AutoHotkey: NOT RUN; launcher contract unchanged.
+- No schema, dependency or ROOT.md changes. The archived user modification was preserved exactly. Synthetic databases, screenshots and the native verification script remain outside the repository. No staging, commit, push or merge performed.
+
+---
+
 # 2026-09-05 — Slice 007: Ticket Category Reference Integration
 
 - Added a small read-only CategoryRepository for scoped category facts, with deterministic sort-order/name/ID ordering. TicketReferenceService supplies active TICKET options with separate IDs and labels.

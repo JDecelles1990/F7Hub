@@ -294,7 +294,17 @@ Slice 007 — ticket category references, verified 2026-09-05:
 - [x] Verify focused automated tests and native Windows selection, persistence, reopening, failure/retry and 1000×700 layout with synthetic data.
 - [ ] Consider hierarchical selector labels in a later slice; current names are displayed directly.
 
-Recommended next slice (not implemented): create an active company from New Ticket and select it immediately, using a small service-backed form and the existing CompanyRepository. Full company/contact management remains outside that slice.
+Slice 008 — quick company creation, verified 2026-09-06:
+
+- [x] Add a name-only Quick Add Company dialog and narrow CompanyService using CompanyRepository.
+- [x] Run creation in the existing worker, prevent duplicate submissions and preserve input after failure.
+- [x] Select the new active company, clear incompatible contacts and preserve the complete ticket draft without category reload.
+- [x] Retain committed identity through failed selector refresh and recover without duplicate insertion.
+- [x] Make repository insert/reload atomic and verify rollback before retry.
+- [x] Verify native Windows validation, cancel, create, refresh recovery, save/reopen and 1000×700 layout with synthetic data.
+- [x] Complete regression: 161 database, 30 GUI and 32 integration tests (223 total); integrity_check = ok, foreign_key_check = zero violations, five unchanged migrations.
+
+Recommended next slice (not implemented): minimal knowledge article creation, listing and reopening through a narrow service/repository boundary and the existing relational schema. Exclude editing, search/FTS, ticket linking and broader knowledge management from that initial slice.
 
 ---
 

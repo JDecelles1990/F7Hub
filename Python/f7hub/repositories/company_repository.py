@@ -76,6 +76,8 @@ class CompanyRepository:
         """Insert a company and return its database-generated identity and values."""
 
         with database_connection(self._database_path) as connection:
+            # Return a reloadable record or roll back the insertion as one unit.
+            connection.execute("BEGIN")
             cursor = connection.execute(
                 """
                 INSERT INTO companies (
@@ -113,9 +115,9 @@ class CompanyRepository:
                 ),
             )
             company = _get_company(connection, int(cursor.lastrowid))
-
-        if company is None:
-            raise RuntimeError("Inserted company could not be reloaded.")
+            if company is None:
+                raise RuntimeError("Inserted company could not be reloaded.")
+            connection.commit()
         return company
 
     def get_company(self, company_id: int) -> CompanyRecord | None:

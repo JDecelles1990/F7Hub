@@ -303,6 +303,16 @@ Slice 007 adds optional active TICKET category choices, ordered by sort order, n
 
 Saved Tickets displays the current category name, including subsequently inactive categories. Null or deleted references display Not selected. Creation rejects inactive, wrong-scope or missing categories without partial ticket/history/timeline writes. Native Windows category selection, failure/retry, optional creation and reopening were verified with synthetic data on 2026-09-05.
 
+## Quick Company Creation — Slice 008
+
+From New Ticket, choose **Add Company**, enter the required company name and choose **Create Company**. The service trims the name and creates an active company. Company code is not exposed. Duplicate names remain allowed. Cancel, Escape and closing the dialog before submission perform no write and preserve the ticket draft. During creation, duplicate submission and closing are blocked until the worker finishes.
+
+After creation, the company list refreshes in its existing stable order, the new company is selected and the previous contact is cleared. Contacts load for the new company; categories are not reloaded. Ticket number, subject, type, priority, category and description remain intact. Saving still uses TicketService, and reopening displays the new company name.
+
+A failed write retains dialog input for retry. If creation commits but the company refresh fails, the dialog completes and the form explicitly reports successful creation with a refresh problem. The committed ID is retained for **Refresh references** recovery; Add Company and ticket submission cannot repeat or bypass the pending recovery. Choosing another company explicitly replaces that pending selection. A contact-load failure retains the newly selected company and permits reference retry.
+
+Native Windows synthetic-data checks on 2026-09-06 passed for validation, cancel, creation, refresh recovery, draft preservation and save/reopen at 1000×700. Full company management and contact creation remain outside this slice.
+
 ## Validation Examples
 
 - required fields present

@@ -679,6 +679,14 @@ Services should not contain PySide6-specific code.
 
 TicketService checks active companies/contacts and selected-company membership inside BEGIN IMMEDIATE, including a contact detached after selection. Optional references remain supported. TicketRepository adds canonical company/contact names to the existing detail snapshot using LEFT JOIN without filtering out inactive rows. Existing ON DELETE SET NULL behavior remains unchanged; labels are current names, not immutable historical snapshots. No migration or production dependency was added.
 
+## Implemented Quick Company Creation — Slice 008
+
+Bootstrap injects a narrow `CompanyService` using the same CompanyRepository as TicketReferenceService. `create_company(name=...)` validates text and nonblank input, trims the name, supplies matching UTC timestamps and explicitly chooses active state. It translates persistence failures into safe application errors. No update/delete operations or company-code input are added.
+
+`QuickCompanyDialog` uses the shared ServiceTaskRunner and asynchronous modal opening. Submission disables editing/cancellation and prevents duplicate writes; completion returns a CompanyRecord to TicketCreateWidget. The form retains the committed company ID across failed company-list refreshes and retries through the existing reference service without recreating the company. Company/contact refresh does not reload categories, and ticket persistence still uses the unchanged TicketService path.
+
+CompanyRepository creation now places INSERT and record reload in one transaction on the same connection. It commits only after constructing the record; reload failure rolls back the insertion through the existing connection context. This closes retry ambiguity without changing other repository operations or the schema. Isolated tests cover successful commit and both failed/missing reload rollback.
+
 ## Implemented Category Reference Boundary — Slice 007
 
 `CategoryRepository.list_categories(scope=..., active_only=...)` owns the shared taxonomy read boundary. It returns frozen category records ordered by sort_order, case-insensitive name and category_id, using parameterized values and configured database connections. Company/contact repositories do not own shared taxonomy; TicketRepository retains only its transaction-local category validation and ticket-detail reads.
@@ -3305,6 +3313,7 @@ Repository inspection and tests through 2026-09-05 verified the SQLite infrastru
 ```text
 Python SQLite infrastructure: VERIFIED
 CompanyRepository and ContactRepository: VERIFIED
+CompanyService and QuickCompanyDialog creation boundary: VERIFIED (2026-09-06)
 TicketRepository and TicketService creation boundary: VERIFIED
 TicketRepository and TicketService notes/status boundary: VERIFIED
 PySide6 6.11.2 dependency and isolated environment: VERIFIED
@@ -3312,9 +3321,9 @@ TicketCreateWidget: VERIFIED
 Application entry point, bootstrap and minimal MainWindow: VERIFIED
 Saved-ticket workspace and background service runner: VERIFIED
 Remaining Python application implementation: PLANNED
-Isolated database tests: PASS — 152 tests
-GUI tests: PASS — 22 tests
-Application and GUI integration tests: PASS — 27 tests
+Isolated database tests: PASS — 161 tests (2026-09-06)
+GUI tests: PASS — 30 tests (2026-09-06)
+Application and GUI integration tests: PASS — 32 tests (2026-09-06)
 ```
 
 This verification does not prove that:

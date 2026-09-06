@@ -22,6 +22,8 @@ from PySide6.QtWidgets import (
 
 from f7hub.repositories.ticket_repository import TicketRecord
 from f7hub.gui.service_task_runner import ServiceTaskRunner
+from f7hub.gui.quick_company_dialog import QuickCompanyDialog
+from f7hub.services.company_service import CompanyService
 from f7hub.services.ticket_reference_service import TicketReferenceOption, TicketReferenceService
 from f7hub.services.ticket_service import (
     TicketValidationError,
@@ -56,6 +58,7 @@ class TicketCreateWidget(QWidget):
         *,
         reference_options: TicketReferenceOptions | None = None,
         reference_service: TicketReferenceService | None = None,
+        company_service: CompanyService | None = None,
         task_runner: ServiceTaskRunner | None = None,
         parent: QWidget | None = None,
     ) -> None:
@@ -64,6 +67,9 @@ class TicketCreateWidget(QWidget):
         self._reference_options = reference_options or TicketReferenceOptions()
         self._task_runner = task_runner
         self._reference_service = reference_service
+        self._company_service = company_service
+        self._company_dialog = None
+        self._pending_company_id = None
         self._references_started = False
         self._reference_timer = QTimer(self)
         self._reference_timer.setSingleShot(True)
@@ -128,7 +134,7 @@ class TicketCreateWidget(QWidget):
     def _refresh_companies(self) -> None:
         if self._reference_service is None or (self._task_runner and self._task_runner.busy):
             return
-        company_id = self.company_input.currentData()
+        company_id = self._pending_company_id or self.company_input.currentData()
         contact_id = self.contact_input.currentData()
         self.reference_feedback.setText("Loading companies…")
 
@@ -140,6 +146,8 @@ class TicketCreateWidget(QWidget):
                 self.company_input.addItem(option.label, option.reference_id)
             self.company_input.setCurrentIndex(max(0, self.company_input.findData(company_id)))
             self.company_input.blockSignals(False)
+            self._pending_company_id = None
+            self.add_company_button.setEnabled(True)
             self._load_contacts(contact_id=contact_id)
             if not options:
                 self.reference_feedback.setText("No active companies. You can create a ticket without references.")
@@ -148,7 +156,42 @@ class TicketCreateWidget(QWidget):
                              lambda error: self._reference_failed(error, "companies"))
 
     def _company_changed(self) -> None:
+        self._pending_company_id = None
+        self.add_company_button.setEnabled(True)
         self._load_contacts()
+
+    def open_company_dialog(self) -> None:
+        if (self._company_service is None or self._task_runner is None
+                or self._task_runner.busy or self._pending_company_id is not None):
+            return
+        if self._company_dialog is not None:
+            self._company_dialog.raise_()
+            return
+        dialog = QuickCompanyDialog(self._company_service, self._task_runner, self)
+        self._company_dialog = dialog
+        dialog.company_created.connect(self._company_created)
+        dialog.finished.connect(self._company_dialog_finished)
+        dialog.open()
+        dialog.name_input.setFocus()
+
+    def _company_dialog_finished(self) -> None:
+        dialog = self._company_dialog
+        self._company_dialog = None
+        dialog.deleteLater()
+
+    def _company_created(self, company) -> None:
+        # The write has committed. Retain its ID across any failed selector reload.
+        self._pending_company_id = company.company_id
+        self.status_label.setText("Company created successfully.")
+        self.status_label.setVisible(True)
+        self.add_company_button.setEnabled(False)
+        self.company_input.blockSignals(True)
+        self.company_input.setCurrentIndex(0)
+        self.company_input.blockSignals(False)
+        self.contact_input.clear()
+        self.contact_input.addItem("Not selected", None)
+        self.contact_input.setEnabled(False)
+        self._refresh_companies()
 
     def _load_contacts(self, *, contact_id=None) -> None:
         company_id = self.company_input.currentData()
@@ -194,13 +237,19 @@ class TicketCreateWidget(QWidget):
     def _reference_failed(self, error, kind) -> None:
         logging.getLogger(__name__).error("Reference load failed: %s", type(error).__name__)
         self.reference_feedback.setText(
-            f"Could not load {kind}. Your ticket draft is preserved. Use Refresh references to retry."
+            ("Company created successfully. " if self._pending_company_id is not None else "")
+            + f"Could not load {kind}. Your ticket draft is preserved. Use Refresh references to retry."
         )
 
     def submit(self) -> None:
         """Validate presentation input and invoke the ticket service once."""
 
         if self._submitting or (self._task_runner and self._task_runner.busy):
+            return
+        if self._pending_company_id is not None:
+            self.reference_feedback.setText(
+                "Company created successfully. Use Refresh references before saving this ticket."
+            )
             return
         self._clear_feedback()
         subject = self.subject_input.text()
@@ -275,6 +324,8 @@ class TicketCreateWidget(QWidget):
 
     def reset_form(self) -> None:
         """Clear a successfully saved form before the next ticket."""
+        self._pending_company_id = None
+        self.add_company_button.setEnabled(True)
         self.ticket_number_input.clear()
         self.subject_input.clear()
         self.description_input.clear()
@@ -371,7 +422,18 @@ class TicketCreateWidget(QWidget):
         form.addRow("", self.subject_error)
         form.addRow("Type", self.ticket_type_input)
         form.addRow("Priority", self.priority_input)
-        form.addRow("Company", self.company_input)
+        company_row = QHBoxLayout()
+        company_row.addWidget(self.company_input, 1)
+        self.add_company_button = QPushButton("Add Company", self)
+        self.add_company_button.setObjectName("addCompanyButton")
+        self.add_company_button.setAutoDefault(False)
+        self.add_company_button.clicked.connect(self.open_company_dialog)
+        self.add_company_button.setVisible(
+            self._company_service is not None and self._reference_service is not None
+            and self._task_runner is not None
+        )
+        company_row.addWidget(self.add_company_button)
+        form.addRow("Company", company_row)
         form.addRow("Contact", self.contact_input)
         if self._reference_service is not None:
             form.addRow("", self.reference_feedback)
@@ -396,6 +458,7 @@ class TicketCreateWidget(QWidget):
         self.save_button.clicked.connect(self.submit)
 
         actions = QHBoxLayout()
+        actions.addWidget(self.status_label, 1)
         actions.addStretch()
         actions.addWidget(self.save_button)
 
@@ -405,7 +468,6 @@ class TicketCreateWidget(QWidget):
         layout.addWidget(heading)
         layout.addLayout(form)
         layout.addWidget(self.form_error)
-        layout.addWidget(self.status_label)
         layout.addLayout(actions)
         layout.addStretch()
 

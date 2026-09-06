@@ -81,15 +81,15 @@ The primary interaction principle is:
 
 # 4. Current Implementation Status
 
-Repository inspection and tests through 2026-09-05 verified ticket creation and the saved-ticket workspace in the application shell.
+Repository inspection and tests through 2026-09-06 verified ticket creation, quick company creation and the saved-ticket workspace in the application shell.
 
 ```text
 TicketCreateWidget: VERIFIED
 Application entry point, bootstrap and MainWindow: VERIFIED
 Saved-ticket list, details, notes and status controls: VERIFIED
 Remaining navigation and GUI modules: PLANNED
-GUI tests: PASS — 22 tests
-Application and GUI integration tests: PASS — 27 tests
+GUI tests: PASS — 30 tests
+Application and GUI integration tests: PASS — 32 tests
 ```
 
 `TicketCreateWidget` provides the minimum ticket input form, inline required-field feedback, safe persistence-error presentation, input preservation, keyboard save action, service delegation and a successful-ticket signal. The main window provides New ticket and Saved tickets navigation. Successful creation opens the saved ticket. The queue supports status filtering and pages of 100 tickets; details show notes, lifecycle history and timeline events. Technicians can add notes, resolve with a summary, close and reopen using service-provided status choices.
@@ -97,6 +97,10 @@ Application and GUI integration tests: PASS — 27 tests
 Failed saves preserve drafts. Switching tickets or leaving activity drafts prompts before discarding them; failed loads preserve existing details and drafts. A committed save followed by a failed reload remains reported as saved. If the initial detail load fails after creation, the queue refreshes so the saved ticket can be opened again. Operations disable conflicting actions while running; closing waits for the operation to finish. Automated GUI checks run offscreen; native Windows visual inspection and input-event checks are PASS on 2026-09-05 at the default size and 1000×700. Initial window sizing now leaves space for Windows borders and the taskbar. Reference-data loading is verified: New Ticket loads active companies and company-filtered active contacts through a background service call. Changing company clears the old contact. Refresh references supports retry and preserves draft text and valid selections. Saved ticket details display company/contact names, including inactive references; null or deleted references show Not selected. Native Windows Slice 006 visual/input checks passed at the initial size and 1000×700, including error feedback. The AutoHotkey F7 shortcut launches, focuses or restores the application while its script is active.
 
 Slice 007 category integration is verified on 2026-09-05. New Ticket loads active TICKET category names through the existing background runner, with independent ID values, Not selected, empty feedback and a Refresh categories retry action. Category failures preserve text and company/contact/category selections; category-only retry does not query companies or contacts. Saved details show current category names, including inactive references, and Not selected after null/deletion. The description minimum height is 100 pixels so the added feedback row fits at 1000×700. Native Windows renders and input checks passed for the category workflow and failure feedback; these are agent checks, not user acceptance testing.
+
+Slice 008 adds a secondary **Add Company** action beside the company selector and a bounded **Quick Add Company** dialog with required name, Cancel and Create Company. It opens asynchronously, uses ServiceTaskRunner for persistence, prevents repeated submission and preserves input after errors. Successful creation refreshes only companies and contacts, selects the new company and preserves all unrelated ticket fields. A committed creation with failed refresh is reported distinctly and recovered through Refresh references without another insertion. Company code and broader company/contact management are not exposed.
+
+Native Windows Slice 008 visual/input checks passed on 2026-09-06 for validation, cancel, creation, selection, draft preservation, refresh recovery and saved-ticket reopening at 1000×700. Success feedback shares the Create Ticket action row so it does not force the window above that size. These are agent checks, not user acceptance testing.
 
 The layouts in this document represent intended product behavior.
 
