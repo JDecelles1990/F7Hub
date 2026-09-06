@@ -679,6 +679,14 @@ Services should not contain PySide6-specific code.
 
 TicketService checks active companies/contacts and selected-company membership inside BEGIN IMMEDIATE, including a contact detached after selection. Optional references remain supported. TicketRepository adds canonical company/contact names to the existing detail snapshot using LEFT JOIN without filtering out inactive rows. Existing ON DELETE SET NULL behavior remains unchanged; labels are current names, not immutable historical snapshots. No migration or production dependency was added.
 
+## Implemented Category Reference Boundary — Slice 007
+
+`CategoryRepository.list_categories(scope=..., active_only=...)` owns the shared taxonomy read boundary. It returns frozen category records ordered by sort_order, case-insensitive name and category_id, using parameterized values and configured database connections. Company/contact repositories do not own shared taxonomy; TicketRepository retains only its transaction-local category validation and ticket-detail reads.
+
+`TicketReferenceService.list_active_ticket_categories()` requests active TICKET rows, maps IDs and names into existing TicketReferenceOption values, and translates SQLite read errors safely. Bootstrap injects CategoryRepository. The form chains category loading before existing company/contact refresh through ServiceTaskRunner; success and failure both continue full refresh. A separate category refresh retries without company/contact queries. Company changes do not reload categories.
+
+Existing TicketService category validation and atomic creation are reused unchanged. TicketDetailsRecord now includes category_name from a LEFT JOIN in the existing detail snapshot, without an active filter; names are current labels, not historical snapshots. No schema, migration or dependency change was needed.
+
 ## Implemented Ticket Activity Boundary
 
 `TicketService.add_note()` validates note text, type, ticket identity and metadata, then atomically inserts the note, its `NOTE_ADDED` timeline event and the ticket's `updated_at` value. The event stores a `ticket_note_id` reference rather than copying note content. Notes remain available on closed and cancelled tickets; adding a `RESOLUTION` note alone does not change status.
@@ -3304,9 +3312,9 @@ TicketCreateWidget: VERIFIED
 Application entry point, bootstrap and minimal MainWindow: VERIFIED
 Saved-ticket workspace and background service runner: VERIFIED
 Remaining Python application implementation: PLANNED
-Isolated database tests: PASS — 142 tests
-GUI tests: PASS — 16 tests
-Application and GUI integration tests: PASS — 21 tests
+Isolated database tests: PASS — 152 tests
+GUI tests: PASS — 22 tests
+Application and GUI integration tests: PASS — 27 tests
 ```
 
 This verification does not prove that:

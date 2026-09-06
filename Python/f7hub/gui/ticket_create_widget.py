@@ -93,6 +93,39 @@ class TicketCreateWidget(QWidget):
 
     def refresh_references(self) -> None:
         """Refresh choices without clearing text or valid reference selections."""
+        self.refresh_categories(on_finished=self._refresh_companies)
+
+    def refresh_categories(self, *, on_finished=None) -> None:
+        """Refresh category choices independently; failure retains prior selections."""
+        if self._reference_service is None or (self._task_runner and self._task_runner.busy):
+            return
+        category_id = self.category_input.currentData()
+        self.category_feedback.setText("Loading categories…")
+
+        def loaded(options):
+            self.category_input.clear()
+            self.category_input.addItem("Not selected", None)
+            for option in options:
+                self.category_input.addItem(option.label, option.reference_id)
+            self.category_input.setCurrentIndex(max(0, self.category_input.findData(category_id)))
+            self.category_feedback.setText(
+                "Category is optional." if options
+                else "No active ticket categories. You can create a ticket without a category."
+            )
+            if on_finished is not None:
+                on_finished()
+
+        def failed(error):
+            logging.getLogger(__name__).error("Category load failed: %s", type(error).__name__)
+            self.category_feedback.setText(
+                "Could not load categories. Your draft is preserved. Use Refresh categories to retry."
+            )
+            if on_finished is not None:
+                on_finished()
+
+        self._reference_task(self._reference_service.list_active_ticket_categories, loaded, failed)
+
+    def _refresh_companies(self) -> None:
         if self._reference_service is None or (self._task_runner and self._task_runner.busy):
             return
         company_id = self.company_input.currentData()
@@ -318,12 +351,17 @@ class TicketCreateWidget(QWidget):
         self.refresh_references_button = QPushButton("Refresh references", self)
         self.refresh_references_button.clicked.connect(self.refresh_references)
         self.refresh_references_button.setVisible(self._reference_service is not None)
+        self.category_feedback = QLabel(self)
+        self.category_feedback.setWordWrap(True)
+        self.refresh_categories_button = QPushButton("Refresh categories", self)
+        self.refresh_categories_button.clicked.connect(self.refresh_categories)
+        self.refresh_categories_button.setVisible(self._reference_service is not None)
 
         self.description_input = QTextEdit(self)
         self.description_input.setObjectName("ticketDescriptionInput")
         self.description_input.setAccessibleName("Description")
         self.description_input.setAcceptRichText(False)
-        self.description_input.setMinimumHeight(120)
+        self.description_input.setMinimumHeight(100)
         self.description_input.setMaximumHeight(220)
 
         form = QFormLayout()
@@ -339,6 +377,11 @@ class TicketCreateWidget(QWidget):
             form.addRow("", self.reference_feedback)
             form.addRow("", self.refresh_references_button)
         form.addRow("Category", self.category_input)
+        if self._reference_service is not None:
+            category_state = QHBoxLayout()
+            category_state.addWidget(self.category_feedback, 1)
+            category_state.addWidget(self.refresh_categories_button)
+            form.addRow("", category_state)
         form.addRow("Description", self.description_input)
 
         self.form_error = self._new_error_label("ticketFormError")

@@ -12,6 +12,7 @@ from f7hub.repositories.ticket_repository import TicketRepository
 from f7hub.services.ticket_service import TicketService
 from f7hub.repositories.company_repository import CompanyRepository
 from f7hub.repositories.contact_repository import ContactRepository
+from f7hub.repositories.category_repository import CategoryRepository
 from f7hub.services.ticket_reference_service import TicketReferenceService
 
 
@@ -52,6 +53,7 @@ def bootstrap_application(
     ticket_service = TicketService(ticket_repository)
     reference_service = TicketReferenceService(
         CompanyRepository(resolved_database_path), ContactRepository(resolved_database_path),
+        CategoryRepository(resolved_database_path),
     )
     main_window = MainWindow(ticket_service, reference_service=reference_service)
 

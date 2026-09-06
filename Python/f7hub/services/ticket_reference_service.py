@@ -1,10 +1,11 @@
-"""Read company/contact choices for ticket creation without GUI dependencies."""
+"""Read company, contact and category choices without GUI dependencies."""
 
 from dataclasses import dataclass
 import sqlite3
 
 from f7hub.repositories.company_repository import CompanyRepository
 from f7hub.repositories.contact_repository import ContactRepository
+from f7hub.repositories.category_repository import CategoryRepository
 
 
 @dataclass(frozen=True)
@@ -22,9 +23,18 @@ class TicketReferenceError(ValueError):
 class TicketReferenceService:
     """Supply only the read operations needed by the ticket form."""
 
-    def __init__(self, companies: CompanyRepository, contacts: ContactRepository):
+    def __init__(self, companies: CompanyRepository, contacts: ContactRepository,
+                 categories: CategoryRepository):
         self._companies = companies
         self._contacts = contacts
+        self._categories = categories
+
+    def list_active_ticket_categories(self) -> tuple[TicketReferenceOption, ...]:
+        try:
+            return tuple(TicketReferenceOption(row.category_id, row.name)
+                         for row in self._categories.list_categories(scope="TICKET", active_only=True))
+        except sqlite3.Error as error:
+            raise TicketReferenceError("Could not load ticket categories.") from error
 
     def list_active_companies(self) -> tuple[TicketReferenceOption, ...]:
         try:

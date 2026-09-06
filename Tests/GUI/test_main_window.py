@@ -27,7 +27,7 @@ class RecordingTicketService:
             assigned_to=None, created_at="2026-09-04T15:00:00.000Z",
             updated_at="2026-09-04T15:00:00.000Z", resolved_at=None,
             closed_at=None, resolution=None,
-            company_id=None, contact_id=None,
+            company_id=None, contact_id=None, category_id=None,
         )
 
     def create_ticket(self, **values: object) -> object:
@@ -43,7 +43,7 @@ class RecordingTicketService:
 
     def get_ticket_details(self, ticket_id):
         return SimpleNamespace(ticket=self.ticket, notes=(), status_history=(), timeline_events=(),
-                               company_name=None, contact_name=None)
+                               company_name=None, contact_name=None, category_name=None)
 
     allowed_statuses = staticmethod(TicketService.allowed_statuses)
 
@@ -85,6 +85,7 @@ class MainWindowTests(unittest.TestCase):
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
         self.assertEqual(self.window.workspace.details.ticket.ticket_number, "TKT-1001")
         self.assertEqual(self.window.workspace.model.rowCount(), 1)
+        self.assertIn("Category: Not selected", self.window.workspace.summary.toPlainText())
         self.assertEqual(self.window.ticket_create_widget.subject_input.text(), "")
 
     def test_worker_keeps_event_loop_responsive_and_prevents_duplicate_submission(self):
