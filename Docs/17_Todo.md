@@ -316,13 +316,27 @@ Slice 009 — quick contact creation, verified 2026-09-06:
 - [x] Remediate post-commit company deactivation/deletion: typed unavailable-company feedback and explicit abandonment restore reference selection and ticket save, preserve the committed contact/draft, and ignore stale callbacks without duplicate insertion.
 - [x] Remediation validation: 44 focused tests; three native Windows recovery/normal-flow checks and recovery layout inspection at 1000×700.
 - [x] Complete post-remediation regression: 178 database, 40 GUI, 44 integration (262 total); integrity_check = ok, foreign_key_check = zero violations, five unchanged migrations.
-- [ ] Complete independent Slice 009 re-review before staging or beginning another slice.
+- Historical Slice 009 re-review checkpoint: superseded by the integrated baseline at 8c2ef7f (merge PR #4); this continuation did not repeat that independent review.
 
-Recommended next slice (not implemented): minimal knowledge article creation, listing and reopening through a narrow service/repository boundary and the existing relational schema. Exclude editing, search/FTS, ticket linking and broader knowledge management from that initial slice.
+The subsequent Slice 010 create/list/read implementation is recorded below; the Slice 009 checks above are historical evidence.
 
 ---
 
 # 10. P1 — Fifth Persistence Slice: Knowledge
+
+Slice 010 — first usable Knowledge Base, verified 2026-09-06:
+
+- [x] Preserve and complete the existing create/list/read implementation on feat/knowledge-base-first-slice.
+- [x] Required user-entered article code/title/body, optional summary, safe validation and duplicate-code feedback.
+- [x] DRAFT/version 1, atomic article plus initial version snapshot, rollback before commit on failure.
+- [x] Persistent deterministic list/reopen, asynchronous dialog/workspace, plain/read-only Markdown source.
+- [x] Force untrusted metadata to plain text and cover HTML-like input with a GUI regression.
+- [x] Retain supplied Database evidence: 11 focused and 189 full tests; rerun GUI 45 and Integration 46 after the display fix (280 total regression evidence).
+- [x] Native Windows synthetic create/list/read, two articles, reconstruction and ticket navigation at 1000×700; visual layout inspected.
+- [x] Five unchanged migrations, integrity_check = ok, zero foreign-key violations; rollback/retry and one successful commit independently checked.
+- [ ] Independent Slice 010 review before Git finalization.
+
+Recommended next slice only: edit a draft article's title/summary/body with atomic revision history and stale-edit protection, keeping its code stable. No Slice 011 implementation is included. Search/FTS, category/tag management, relationships, links, ticket linking, publishing/archiving, deletion and AI remain deferred.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

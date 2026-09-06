@@ -13,9 +13,11 @@ from f7hub.services.ticket_service import TicketService
 from f7hub.repositories.company_repository import CompanyRepository
 from f7hub.repositories.contact_repository import ContactRepository
 from f7hub.repositories.category_repository import CategoryRepository
+from f7hub.repositories.knowledge_repository import KnowledgeRepository
 from f7hub.services.ticket_reference_service import TicketReferenceService
 from f7hub.services.company_service import CompanyService
 from f7hub.services.contact_service import ContactService
+from f7hub.services.knowledge_service import KnowledgeService
 
 
 DEFAULT_PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -29,6 +31,8 @@ class ApplicationContext:
     bootstrap_result: BootstrapResult
     ticket_repository: TicketRepository
     ticket_service: TicketService
+    knowledge_repository: KnowledgeRepository
+    knowledge_service: KnowledgeService
     main_window: MainWindow
 
 
@@ -53,6 +57,8 @@ def bootstrap_application(
     )
     ticket_repository = TicketRepository(resolved_database_path)
     ticket_service = TicketService(ticket_repository)
+    knowledge_repository = KnowledgeRepository(resolved_database_path)
+    knowledge_service = KnowledgeService(knowledge_repository)
     companies = CompanyRepository(resolved_database_path)
     contacts = ContactRepository(resolved_database_path)
     reference_service = TicketReferenceService(
@@ -62,6 +68,7 @@ def bootstrap_application(
     main_window = MainWindow(
         ticket_service, reference_service=reference_service, company_service=CompanyService(companies),
         contact_service=ContactService(contacts, companies),
+        knowledge_service=knowledge_service,
     )
 
     return ApplicationContext(
@@ -69,5 +76,7 @@ def bootstrap_application(
         bootstrap_result=bootstrap_result,
         ticket_repository=ticket_repository,
         ticket_service=ticket_service,
+        knowledge_repository=knowledge_repository,
+        knowledge_service=knowledge_service,
         main_window=main_window,
     )

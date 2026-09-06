@@ -47,6 +47,18 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-06 — Slice 010: First Usable Knowledge Base
+
+- Resumed existing uncommitted work on feat/knowledge-base-first-slice at 8c2ef7f0aeecfa6b0d65c9e731de8eef3f399efc. Preserved the implementation, ROOT.md and the separate user-confirmed archive deletion.
+- KnowledgeRepository/Service, NewArticleDialog and KnowledgeWorkspace provide create → list → reopen/read through existing bootstrap/MainWindow navigation and ServiceTaskRunner. Code/title/body are required; summary is optional. Valid body whitespace is preserved, duplicate codes receive safe feedback and creation prevents duplicate submission.
+- DRAFT/version 1 article and initial snapshot use one transaction, reloading before commit and rolling back on version/reload failure. Category and published_at remain NULL. Five existing migrations are unchanged; no schema change.
+- Continuation review fixed one defect: metadata QLabels could interpret HTML-like text automatically. Explicit PlainText now matches the read-only Markdown-source body, covered by an added GUI regression test. No passing persistence implementation was rewritten.
+- Retained supplied prior-session evidence: 11 repository/service focused, 189 full Database, 4 original GUI focused and 2 original Integration focused tests. Fresh continuation: 5 GUI + 2 Integration focused PASS; full GUI 45 PASS; full Integration 46 PASS after the display fix. Combined regression evidence: 280 PASS (Database retained, GUI/Integration freshly run).
+- Native Windows platform: synthetic KB0001/KB0002 creation, list/read switching, application reconstruction and existing ticket navigation PASS at 1000×700. Empty/form/article captures visually inspected without clipping/overlap for these inputs. Agent checks, not user acceptance testing. Isolated integrity_check = ok; zero foreign-key violations; five migrations; one version-1 row per article. A separate trace verified rollback/retry and exactly one successful commit.
+- Synchronized features, workflows, GUI/system/Python architecture, roadmap, todo and current state. Editing, deletion, publishing/archiving, search/FTS, categories/tags, relationships, links, ticket linking and AI are not implemented. AutoHotkey NOT RUN; launcher unchanged. Independent review pending; nothing staged or committed.
+
+---
+
 # 2026-09-06 — Slice 009 remediation: unavailable-company recovery
 
 - Fixed the reviewed P2 where a company deactivated or deleted after contact commit left pending contact reconciliation permanently locked. TicketReferenceService now distinguishes authoritative company unavailability with CompanyReferenceUnavailableError; transient read failures retain retry and automatic selection.
