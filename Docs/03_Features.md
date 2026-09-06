@@ -425,6 +425,8 @@ Requirements: `FR-KB-001`, `FR-KB-002`
 
 F7Hub shall support creation and editing of structured KB articles.
 
+Slice 010 implements creation, deterministic listing and reopening/reading through Knowledge Base navigation. Input is a required user-entered article code, required title, optional summary and required Markdown body. New articles are DRAFT, version 1, with an atomic initial history snapshot. Body content is displayed as read-only Markdown source. Editing, deletion, publishing/archiving workflows, search/FTS, categories/tags, relationships, links, ticket linking and AI remain unimplemented in this slice.
+
 Possible article types:
 
 - troubleshooting guide

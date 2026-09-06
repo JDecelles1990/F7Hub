@@ -92,7 +92,7 @@ Validation and test results use `PASS`, `FAIL`, `NOT RUN`, or `BLOCKED`.
 
 # 4. Current Project Status
 
-Repository inspection and tests through 2026-09-05 verified the Python SQLite foundation, migrations through `0005_knowledge.sql`, the company/contact repositories, the ticket repository/service workflows, the PySide6 ticket creation and saved-ticket workspace, and the AutoHotkey F7 launch/focus shortcut. PowerShell and the knowledge repository do not exist yet.
+Repository inspection and tests through 2026-09-05 verified the Python SQLite foundation, migrations through `0005_knowledge.sql`, the company/contact repositories, the ticket repository/service workflows, the PySide6 ticket creation and saved-ticket workspace, and the AutoHotkey F7 launch/focus shortcut. Slice 010 adds the verified KnowledgeRepository/Service and Knowledge Base create/list/read workflow on 2026-09-06. PowerShell integration remains unimplemented.
 
 ```text
 Documentation consistency review: IN PROGRESS
@@ -116,9 +116,11 @@ Remaining application implementation: PLANNED
 
 # 5. Roadmap Layers
 
-After Slice 009, the verified product milestone is **Quick Company and Contact Creation in Ticket Workflow**. Technicians can create an active company, create its minimal active contact and save/reopen a ticket without losing the draft. Full company/contact management and category hierarchy formatting remain deferred.
+After Slice 010, the verified product milestone is **First Usable Knowledge Base: Create → List → Reopen / Read**, alongside the existing ticket and quick company/contact workflows. New articles are DRAFT with an atomic version-1 snapshot and read-only Markdown source. Validation is recorded in `Status/CURRENT_STATE.md`; independent Slice 010 review is pending.
 
-Recommended next bounded slice: create, list and reopen a minimal knowledge article using the existing relational schema and Python service/repository boundaries. This provides reusable support knowledge after the ticket intake gaps are filled. A company/contact management view adds browsing but expands administration; further ticket changes lack a comparably concrete outstanding requirement in this inspection; dashboard/navigation offers less immediate support capability; broader search/launcher work would benefit from usable knowledge content first. Exclude editing, search/FTS and ticket linking. Complete independent Slice 009 review first; no next implementation is authorized here.
+Recommended next bounded slice: **knowledge article editing with version history**. Let technicians correct an existing draft's title, summary and body, preserve the prior snapshot and reopen the saved revision. Keep article code stable and prevent stale edits from silently overwriting newer content. This addresses the immediate inability to correct saved procedures and reuses the existing repository/service/workspace without requiring search infrastructure.
+
+Compared alternatives: search/FTS improves retrieval as content grows but requires indexing and synchronization; categories/tags add organization but cannot correct content; ticket linking adds useful context but spans two workspaces and a new relationship workflow; Companies/Contacts management expands administration beyond the now-working quick-create path; dashboard/navigation changes offer less immediate utility than correcting reusable procedures. No next implementation is authorized here.
 
 The F7Hub roadmap is organized into:
 
@@ -710,7 +712,8 @@ knowledge_article_tags
 
 ```text
 0005_knowledge.sql: VERIFIED — 2026-09-04 — 11 focused tests; 90 full database tests
-KnowledgeRepository and application workflows: PLANNED
+KnowledgeRepository/Service and create/list/read workspace: VERIFIED — Slice 010
+Editing, search, publishing/archiving and relationship workflows: PLANNED
 ```
 
 Initial capabilities:

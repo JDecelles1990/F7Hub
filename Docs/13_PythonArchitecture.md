@@ -687,6 +687,16 @@ Bootstrap injects a narrow `CompanyService` using the same CompanyRepository as 
 
 CompanyRepository creation now places INSERT and record reload in one transaction on the same connection. It commits only after constructing the record; reload failure rolls back the insertion through the existing connection context. This closes retry ambiguity without changing other repository operations or the schema. Isolated tests cover successful commit and both failed/missing reload rollback.
 
+## Implemented Knowledge Boundary — Slice 010
+
+`KnowledgeService.create_article(article_code, title, summary, body)` validates required text, trims code/title/summary, maps empty summary to NULL and rejects whitespace-only bodies without stripping valid Markdown source. It supplies matching UTC timestamps and safe duplicate/persistence errors. `get_article` and `list_articles` return frozen KnowledgeArticleRecord values via KnowledgeRepository.
+
+KnowledgeRepository creates DRAFT/version 1 with NULL category/published_at and inserts the initial version snapshot in the same BEGIN IMMEDIATE transaction. Reload precedes the single commit; failed version insertion or reload rolls back the complete operation. Listing orders by updated_at DESC, knowledge_article_id DESC. No schema changes or new migrations were needed.
+
+Bootstrap injects KnowledgeService into MainWindow. KnowledgeWorkspace and NewArticleDialog call only the service using the shared ServiceTaskRunner. MainWindow disables conflicting pages/actions during work; callbacks execute on the GUI thread, and details reject results for an obsolete selection. Creation prevents repeat submits and unsafe close/cancel. Read-only QPlainTextEdit shows Markdown source; metadata QLabels explicitly use PlainText. The continuation fixed automatic rich-text interpretation of HTML-like metadata and added a regression test without rewriting the existing implementation.
+
+Validation: retained prior-session 11 repository/service focused tests and 189 full Database tests; freshly executed 5 focused GUI, 2 focused Integration, 45 full GUI and 46 full Integration tests. Native Windows input/visual checks passed at 1000×700 with synthetic articles, including reopening after application reconstruction. Search, editing, publishing and relationship workflows remain deferred.
+
 ## Implemented Quick Contact Creation — Slice 009
 
 Bootstrap shares CompanyRepository and ContactRepository between the narrow ContactService and TicketReferenceService. QuickContactDialog calls only ContactService through ServiceTaskRunner. The service requires a positive SQLite integer company ID, validates text/nonblank name and optional text email, trims surrounding whitespace, supplies matching UTC timestamps and creates active contacts. Duplicate names/emails remain allowed. Errors are translated without exposing persistence details.
@@ -3316,7 +3326,7 @@ However, full localization infrastructure should not be added until justified.
 
 # 176. Current Implementation Status
 
-Repository inspection and tests through 2026-09-05 verified the SQLite infrastructure under `Python\f7hub\infrastructure\`, migrations through the relational knowledge schema in `0005_knowledge.sql`, and the company, contact and ticket persistence boundaries. `TicketService` owns workflow validation and transactional ticket creation; its new notes/status operations extend the same boundary without a schema change. The initial PySide6 `TicketCreateWidget` delegates to that service without owning SQL or workflow rules. The thin module entry point, central application bootstrap and minimal `MainWindow` now initialize the database, compose the repository/service/widget dependency chain and enter the Qt event loop. The saved-ticket workspace now provides list/detail navigation and notes/status controls. ServiceTaskRunner executes one service call at a time in a QThread and delivers completion on the GUI thread; each repository operation owns its connection. The window disables conflicting actions and blocks closing while work is active. Initial size respects the available screen with space for window borders. Native Windows visual/input checks passed at the initial size and 1000×700 on 2026-09-05. A separate domain model, the knowledge repository and other application services remain planned.
+Repository inspection and tests through 2026-09-05 verified the SQLite infrastructure under `Python\f7hub\infrastructure\`, migrations through the relational knowledge schema in `0005_knowledge.sql`, and the company, contact and ticket persistence boundaries. `TicketService` owns workflow validation and transactional ticket creation; its new notes/status operations extend the same boundary without a schema change. The initial PySide6 `TicketCreateWidget` delegates to that service without owning SQL or workflow rules. The thin module entry point, central application bootstrap and minimal `MainWindow` now initialize the database, compose the repository/service/widget dependency chain and enter the Qt event loop. The saved-ticket workspace now provides list/detail navigation and notes/status controls. ServiceTaskRunner executes one service call at a time in a QThread and delivers completion on the GUI thread; each repository operation owns its connection. The window disables conflicting actions and blocks closing while work is active. Initial size respects the available screen with space for window borders. Native Windows visual/input checks passed at the initial size and 1000×700 on 2026-09-05. Slice 010 now adds KnowledgeRepository, KnowledgeService and the create/list/read workspace described above. A separate domain model and other application services remain planned.
 
 ```text
 Python SQLite infrastructure: VERIFIED
@@ -3330,17 +3340,17 @@ TicketCreateWidget: VERIFIED
 Application entry point, bootstrap and minimal MainWindow: VERIFIED
 Saved-ticket workspace and background service runner: VERIFIED
 Remaining Python application implementation: PLANNED
-Isolated database tests: PASS — 161 tests (2026-09-06)
-GUI tests: PASS — 30 tests (2026-09-06)
-Application and GUI integration tests: PASS — 32 tests (2026-09-06)
+Isolated database tests: PASS — 189 tests (retained prior-session Slice 010 evidence)
+GUI tests: PASS — 45 tests (fresh Slice 010 continuation, 2026-09-06)
+Application and GUI integration tests: PASS — 46 tests (fresh Slice 010 continuation, 2026-09-06)
 ```
 
 This verification does not prove that:
 
-- navigation or queues beyond the saved-ticket workspace exist
-- business repositories beyond companies, contacts and tickets exist
+- navigation or queues beyond the implemented ticket and Knowledge Base workspaces exist
+- additional business repositories beyond the inspected company, contact, category, ticket and knowledge boundaries exist
 - usability across other screen sizes, DPI settings or assistive technologies has been verified
-- application services beyond ticket workflows exist
+- additional application services beyond the implemented ticket, reference, company/contact creation and knowledge workflows exist
 - PowerShell integration exists
 - tests outside the listed suites pass
 

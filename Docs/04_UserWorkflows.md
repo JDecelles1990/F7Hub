@@ -684,6 +684,14 @@ AI may assist ranking later, but local deterministic search should remain availa
 
 # 17. Create Knowledge Article Workflow
 
+## Implemented workflow — Slice 010
+
+Open Knowledge Base → New Article → enter article code, title, optional summary and body → Create Article → select the saved article in the list → read its details. Empty databases show “No knowledge articles yet.” Both list and details reload from SQLite; articles remain available after reconstructing the application against the same database.
+
+Code and title are trimmed and required. Summary is trimmed, with blank input stored as NULL. Whitespace-only body input is rejected; valid body text is preserved exactly by the service. Duplicate codes use the existing case-insensitive schema constraint and receive safe feedback. Failed creation preserves entered values; Cancel closes an idle form without saving, and repeated submission/cancellation is blocked during a write.
+
+Creation stores a DRAFT article and its version-1 snapshot atomically. Category and published_at remain NULL. The read view shows code, title, DRAFT, summary and plain, read-only Markdown source. Editing, deletion, publishing/archiving, search/FTS, category/tag assignment, relationships, links, ticket linking and AI are deferred. The broader workflow below remains a product target.
+
 Related Features:
 
 - `FEAT-KB-001`

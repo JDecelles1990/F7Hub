@@ -81,15 +81,16 @@ The primary interaction principle is:
 
 # 4. Current Implementation Status
 
-Repository inspection and tests through 2026-09-06 verified ticket creation, quick company/contact creation and the saved-ticket workspace in the application shell.
+Repository inspection and tests through 2026-09-06 verified ticket creation, quick company/contact creation, the saved-ticket workspace and the first Knowledge Base create/list/read workflow in the application shell.
 
 ```text
 TicketCreateWidget: VERIFIED
 Application entry point, bootstrap and MainWindow: VERIFIED
 Saved-ticket list, details, notes and status controls: VERIFIED
 Remaining navigation and GUI modules: PLANNED
-GUI tests: PASS — 30 tests
-Application and GUI integration tests: PASS — 32 tests
+Knowledge Base create/list/read: VERIFIED
+GUI tests: PASS — 45 tests
+Application and GUI integration tests: PASS — 46 tests
 ```
 
 `TicketCreateWidget` provides the minimum ticket input form, inline required-field feedback, safe persistence-error presentation, input preservation, keyboard save action, service delegation and a successful-ticket signal. The main window provides New ticket and Saved tickets navigation. Successful creation opens the saved ticket. The queue supports status filtering and pages of 100 tickets; details show notes, lifecycle history and timeline events. Technicians can add notes, resolve with a summary, close and reopen using service-provided status choices.
@@ -571,6 +572,12 @@ Contact
 ---
 
 # 23. Knowledge Base
+
+Slice 010 adds Knowledge Base beside New ticket and Saved tickets in the existing toolbar/menu and stacked application shell. The workspace has New Article, a code/title/status table, a clear empty state and a read view with code, title, status, summary and read-only Markdown source. Metadata is explicitly plain text so HTML-like input remains literal.
+
+New Article collects required article code/title/body and optional summary. Creation, list refresh and detail reads use the existing background runner; conflicting pages/navigation are disabled while busy. Duplicate submission is prevented, errors preserve input and detail callbacks check the current selection. There is no rendered Markdown, editor for saved articles, publishing/archiving, search/FTS, categories/tags, relationships, links, ticket linking or AI in this slice.
+
+Native Windows agent input checks and visual inspection passed on 2026-09-06 at 1000×700 for the empty state, creation of KB0001 and KB0002, list/detail switching and return through New ticket/Saved tickets. Both articles survived application reconstruction against isolated synthetic SQLite. No clipping/overlap was observed for these inputs. These are agent checks, not user acceptance testing. The broader layouts below remain planned.
 
 Suggested layout:
 

@@ -872,6 +872,10 @@ Persistent session data should be designed in the database documentation.
 
 Knowledge should be accessed through a Knowledge Service.
 
+Slice 010 implements this boundary: NewArticleDialog / KnowledgeWorkspace → KnowledgeService → KnowledgeRepository → SQLite. Bootstrap composes the dependencies and MainWindow reuses its QStackedWidget and ServiceTaskRunner for create/list/read. GUI components contain neither SQL nor direct repository calls.
+
+KnowledgeService validates/normalizes input and translates persistence failures. KnowledgeRepository owns the short BEGIN IMMEDIATE → article INSERT → version-1 INSERT → reload → COMMIT transaction. Its connection context rolls back both rows on failure. The service coordinates this single atomic repository operation; no external work runs inside the transaction. Existing migration 0005 supplies the schema unchanged. Rendering is plain text, including read-only Markdown source. Search, editing and relationship workflows remain deferred.
+
 Conceptual flow:
 
 GUI
