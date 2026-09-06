@@ -106,6 +106,7 @@ Minimal application bootstrap and MainWindow: VERIFIED
 Saved-ticket workspace and background service runner: VERIFIED
 Reference-aware company/contact ticket creation: VERIFIED
 Ticket category selection, persistence and reopened label: VERIFIED
+Quick active-company creation from New Ticket: VERIFIED
 AutoHotkey F7 launch/focus shortcut: VERIFIED
 Relational knowledge schema migration: VERIFIED
 Remaining application implementation: PLANNED
@@ -115,7 +116,9 @@ Remaining application implementation: PLANNED
 
 # 5. Roadmap Layers
 
-After Slice 007, the verified milestone is **Ticket Creation References Complete**. Recommended next bounded user-visible slice: create an active company from New Ticket and select it immediately, reusing CompanyRepository through a service boundary. Do not expand that slice into full company/contact management. Category hierarchy formatting remains deferred; the current selector uses category names directly.
+After Slice 008, the verified milestone is **Quick Company Creation in Ticket Workflow**. A name-only service-backed dialog creates and selects an active company without losing the ticket draft. Company/contact management and category hierarchy formatting remain deferred.
+
+Recommended next bounded slice: create, list and reopen a minimal knowledge article through the existing relational knowledge schema and Python service/repository architecture. This adds reusable support knowledge alongside the established ticket workflow. Quick contact creation fills a smaller reference-entry gap; a management screen broadens scope, and dashboard/navigation changes add less immediate support capability. No next-slice implementation is authorized here.
 
 The F7Hub roadmap is organized into:
 
