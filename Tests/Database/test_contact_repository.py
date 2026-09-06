@@ -34,6 +34,17 @@ class ContactRepositoryTests(unittest.TestCase):
             updated_at=CREATED_AT,
         ).company_id
 
+    def test_creation_reload_failure_rolls_back_and_retry_commits_once(self):
+        from unittest.mock import patch
+        for failure in (None, sqlite3.OperationalError("private")):
+            patch_values = {"return_value": None} if failure is None else {"side_effect": failure}
+            with patch("f7hub.repositories.contact_repository._get_contact", **patch_values):
+                with self.assertRaises((RuntimeError, sqlite3.OperationalError)):
+                    self.repository.create_contact(display_name="Alice Example", created_at=CREATED_AT, updated_at=CREATED_AT)
+            self.assertEqual(self.repository.list_contacts(), ())
+        contact = self.repository.create_contact(display_name="Alice Example", created_at=CREATED_AT, updated_at=CREATED_AT)
+        self.assertEqual(self.repository.list_contacts(), (contact,))
+
     def test_create_and_get_standalone_and_company_contacts(self) -> None:
         standalone = self.repository.create_contact(
             display_name="Standalone Contact",

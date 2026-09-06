@@ -11,7 +11,9 @@ from f7hub.repositories.company_repository import CompanyRepository
 from f7hub.repositories.contact_repository import ContactRepository
 from f7hub.repositories.category_repository import CategoryRepository
 from f7hub.repositories.ticket_repository import TicketRepository
-from f7hub.services.ticket_reference_service import TicketReferenceService, TicketReferenceError
+from f7hub.services.ticket_reference_service import (
+    CompanyReferenceUnavailableError, TicketReferenceService, TicketReferenceError,
+)
 from f7hub.services.ticket_service import TicketService, TicketValidationError
 
 
@@ -70,6 +72,18 @@ class TicketReferenceTests(unittest.TestCase):
                 with self.assertRaises(TicketReferenceError) as caught:
                     operation()
                 self.assertNotIn("private detail", str(caught.exception))
+                self.assertNotIsInstance(caught.exception, CompanyReferenceUnavailableError)
+
+    def test_unavailable_company_has_typed_error_but_read_failure_does_not(self):
+        a, _, _, inactive, *_ = seed_references(self.path)
+        for company_id in (inactive.company_id, 999999):
+            with self.subTest(company_id=company_id), self.assertRaises(CompanyReferenceUnavailableError):
+                self.references.list_active_contacts_for_company(company_id)
+        with patch.object(self.companies, "get_company", side_effect=sqlite3.OperationalError("private")):
+            with self.assertRaises(TicketReferenceError) as caught:
+                self.references.list_active_contacts_for_company(a.company_id)
+            self.assertNotIsInstance(caught.exception, CompanyReferenceUnavailableError)
+            self.assertNotIn("private", str(caught.exception))
 
     def test_invalid_inactive_and_mismatched_references_write_nothing(self):
         a, b, empty, inactive, alice, bob, charlie = seed_references(self.path)

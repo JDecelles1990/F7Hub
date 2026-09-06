@@ -47,6 +47,29 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-06 — Slice 009 remediation: unavailable-company recovery
+
+- Fixed the reviewed P2 where a company deactivated or deleted after contact commit left pending contact reconciliation permanently locked. TicketReferenceService now distinguishes authoritative company unavailability with CompanyReferenceUnavailableError; transient read failures retain retry and automatic selection.
+- Added one explicit **Continue without this contact** action. It releases pending auto-selection, clears unsafe references and refreshes active companies without reloading categories. The committed contact and remaining ticket draft are preserved; recovery never repeats insertion. Contact-load generations ignore stale success/failure callbacks, including returning to the same company. TicketService and repository transaction code are unchanged by remediation.
+- Focused validation: PASS — `.venv\Scripts\python.exe -B -m unittest Tests.Integration.test_quick_contact_flow Tests.Database.test_ticket_references -v` (22 tests: 12 integration, 10 reference); `.venv\Scripts\python.exe -B -m unittest Tests.GUI.test_ticket_reference_widget Tests.GUI.test_quick_contact_dialog -v` (22 tests). Commands used `PYTHONPATH` containing the project Python directory and root, with bytecode disabled.
+- Post-remediation regression: PASS — 178 database, 40 GUI, 44 integration (262 total). Isolated integrity_check = ok, foreign_key_check = zero violations, migration count = 5. Schema and historical migrations unchanged.
+- Native Windows: PASS — three synthetic integration checks for deactivation recovery, deletion recovery and normal create/auto-select/save/reopen, using the windows Qt platform at 1000×700. Recovery layout visually inspected; draft preservation, responsiveness, company reselection and save after both recovery variants passed. Agent checks, not user acceptance testing.
+- Updated workflow, GUI, Python architecture, todo, changelog and current state. ROOT.md, roadmap and the separate archive deletion were preserved. No staging, commit, push, merge or Slice 010 work.
+
+---
+
+# 2026-09-06 — Slice 009: Quick Contact Creation from New Ticket
+
+- Added Quick Add Contact beside the selected company's Contact selector, exposing only required contact name and optional email. ContactService validates company identity/activity, trims text, normalizes empty email to NULL, assigns matching UTC timestamps and creates an active contact. Duplicate names/emails remain valid.
+- Reused ServiceTaskRunner for asynchronous writes, cancellation/close protection and duplicate-submit prevention. Failures retain input and expose safe messages; success reloads only contacts, selects the new ID and preserves ticket number, subject, type, priority, company, category and description.
+- Retained committed contact/company identity through failed selector refresh. Company switching, Add Company, Add Contact and ticket submission wait for contact-only reconciliation through Refresh references, without another insertion. A successful read excluding a later-unavailable contact releases pending selection with explicit feedback.
+- ContactRepository transaction review: SAME RISK — ALIGNED. Creation previously autocommitted before record reload; it now commits only after a successful reload and rolls back failed/missing reloads. A narrow transaction context and optional connection arguments on contact creation/company lookup allow service validation and insertion under the same BEGIN IMMEDIATE lock. Other contact methods and TicketService remain unchanged.
+- Focused tests: PASS — 21 database (15 service + 6 repository), 10 GUI, 8 integration. Final regression: PASS — 177 database, 40 GUI, 40 integration (257 total, up from 223). Isolated integrity_check = ok, foreign_key_check = zero violations, migration count = 5; no migration added or modified.
+- Native Windows: PASS — 18 GUI/integration tests with the windows platform plus visual inspection of New Ticket, Quick Add Contact and saved details at 1000×700. Verified validation, cancellation, creation, automatic selection, complete draft preservation, busy responsiveness, recovery, combined Add Company → Add Contact, persistence and reopening. Agent checks, not user acceptance testing. Existing notes/lifecycle regression passed; AutoHotkey NOT RUN, launcher unchanged.
+- Updated only affected workflow, GUI, Python architecture, roadmap, todo, changelog and current-state documentation. ROOT.md and dependencies are unchanged. During the run, the user deleted the previously modified archived vision document and explicitly instructed preserving that deletion; it was left untouched. No staging, commit, push, merge or next-slice implementation.
+
+---
+
 # 2026-09-06 — Slice 008: Quick Company Creation from New Ticket
 
 - Added a name-only Quick Add Company dialog and narrow CompanyService. Creation trims and validates text, supplies matching UTC timestamps and persists an active company through CompanyRepository.

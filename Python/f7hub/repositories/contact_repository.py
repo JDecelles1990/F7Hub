@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from contextlib import contextmanager
 from pathlib import Path
+from typing import Iterator
 import sqlite3
 
 from f7hub.infrastructure.database import database_connection
@@ -51,6 +53,14 @@ class ContactRepository:
     def __init__(self, database_path: str | Path) -> None:
         self._database_path = database_path
 
+    @contextmanager
+    def transaction(self) -> Iterator[sqlite3.Connection]:
+        """Keep service validation and creation in one write transaction."""
+        with database_connection(self._database_path) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            yield connection
+            connection.commit()
+
     def create_contact(
         self,
         *,
@@ -66,43 +76,57 @@ class ContactRepository:
         mobile_phone: str | None = None,
         notes: str | None = None,
         is_active: int = 1,
+        connection: sqlite3.Connection | None = None,
     ) -> ContactRecord:
-        """Insert a contact and return its database-generated identity and values."""
+        """Insert and reload atomically, or participate in the caller's transaction.
 
-        with database_connection(self._database_path) as connection:
-            cursor = connection.execute(
-                """
-                INSERT INTO contacts (
-                    company_id,
-                    display_name,
-                    first_name,
-                    last_name,
-                    job_title,
-                    email,
-                    phone,
-                    mobile_phone,
-                    notes,
-                    is_active,
-                    created_at,
-                    updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    company_id,
-                    display_name,
-                    first_name,
-                    last_name,
-                    job_title,
-                    email,
-                    phone,
-                    mobile_phone,
-                    notes,
-                    is_active,
-                    created_at,
-                    updated_at,
-                ),
-            )
-            contact = _get_contact(connection, int(cursor.lastrowid))
+        A supplied connection must be a transaction from this repository. The
+        caller owns commit/rollback and must let creation failures roll it back.
+        """
+
+        if connection is None:
+            with self.transaction() as transaction:
+                return self.create_contact(
+                    display_name=display_name, created_at=created_at, updated_at=updated_at,
+                    company_id=company_id, first_name=first_name, last_name=last_name,
+                    job_title=job_title, email=email, phone=phone, mobile_phone=mobile_phone,
+                    notes=notes, is_active=is_active, connection=transaction,
+                )
+        if not connection.in_transaction:
+            raise RuntimeError("Contact creation requires an active transaction.")
+        cursor = connection.execute(
+            """
+            INSERT INTO contacts (
+                company_id,
+                display_name,
+                first_name,
+                last_name,
+                job_title,
+                email,
+                phone,
+                mobile_phone,
+                notes,
+                is_active,
+                created_at,
+                updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                company_id,
+                display_name,
+                first_name,
+                last_name,
+                job_title,
+                email,
+                phone,
+                mobile_phone,
+                notes,
+                is_active,
+                created_at,
+                updated_at,
+            ),
+        )
+        contact = _get_contact(connection, int(cursor.lastrowid))
 
         if contact is None:
             raise RuntimeError("Inserted contact could not be reloaded.")

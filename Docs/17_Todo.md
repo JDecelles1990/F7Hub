@@ -304,6 +304,20 @@ Slice 008 — quick company creation, verified 2026-09-06:
 - [x] Verify native Windows validation, cancel, create, refresh recovery, save/reopen and 1000×700 layout with synthetic data.
 - [x] Complete regression: 161 database, 30 GUI and 32 integration tests (223 total); integrity_check = ok, foreign_key_check = zero violations, five unchanged migrations.
 
+Slice 009 — quick contact creation, verified 2026-09-06:
+
+- [x] Add company-scoped ContactService and Quick Add Contact with required name and optional email.
+- [x] Validate the active company and insert/reload within one transaction; prove rollback and single-row retry.
+- [x] Reuse ServiceTaskRunner, prevent duplicate submission and unsafe close/cancel, retain inputs on failure.
+- [x] Automatically select the created contact and preserve every unrelated ticket draft field.
+- [x] Retain committed contact/company identity during failed refresh; lock company switching and recover with contact-only reads.
+- [x] Verify existing-company and combined quick-company/contact creation, ticket persistence and reopening.
+- [x] Pass 21 focused database, 10 GUI and 8 integration tests; native Windows rerun of 18 GUI/integration tests and visual inspection at 1000×700.
+- [x] Remediate post-commit company deactivation/deletion: typed unavailable-company feedback and explicit abandonment restore reference selection and ticket save, preserve the committed contact/draft, and ignore stale callbacks without duplicate insertion.
+- [x] Remediation validation: 44 focused tests; three native Windows recovery/normal-flow checks and recovery layout inspection at 1000×700.
+- [x] Complete post-remediation regression: 178 database, 40 GUI, 44 integration (262 total); integrity_check = ok, foreign_key_check = zero violations, five unchanged migrations.
+- [ ] Complete independent Slice 009 re-review before staging or beginning another slice.
+
 Recommended next slice (not implemented): minimal knowledge article creation, listing and reopening through a narrow service/repository boundary and the existing relational schema. Exclude editing, search/FTS, ticket linking and broader knowledge management from that initial slice.
 
 ---

@@ -81,7 +81,7 @@ The primary interaction principle is:
 
 # 4. Current Implementation Status
 
-Repository inspection and tests through 2026-09-06 verified ticket creation, quick company creation and the saved-ticket workspace in the application shell.
+Repository inspection and tests through 2026-09-06 verified ticket creation, quick company/contact creation and the saved-ticket workspace in the application shell.
 
 ```text
 TicketCreateWidget: VERIFIED
@@ -101,6 +101,10 @@ Slice 007 category integration is verified on 2026-09-05. New Ticket loads activ
 Slice 008 adds a secondary **Add Company** action beside the company selector and a bounded **Quick Add Company** dialog with required name, Cancel and Create Company. It opens asynchronously, uses ServiceTaskRunner for persistence, prevents repeated submission and preserves input after errors. Successful creation refreshes only companies and contacts, selects the new company and preserves all unrelated ticket fields. A committed creation with failed refresh is reported distinctly and recovered through Refresh references without another insertion. Company code and broader company/contact management are not exposed.
 
 Native Windows Slice 008 visual/input checks passed on 2026-09-06 for validation, cancel, creation, selection, draft preservation, refresh recovery and saved-ticket reopening at 1000×700. Success feedback shares the Create Ticket action row so it does not force the window above that size. These are agent checks, not user acceptance testing.
+
+Slice 009 adds **Add Contact** beside Contact and a **Quick Add Contact** dialog containing required contact name, optional email, Cancel and Create Contact. It follows the existing asynchronous dialog/worker conventions, retains input on failure and prevents duplicate submission and unsafe close/cancel during writes. Add Contact requires a selected company and an idle runner with no pending company/contact reconciliation.
+
+Contact success refreshes only the selected company's contacts and selects the created ID without changing any other ticket draft field. After a committed write with failed refresh, the form retains contact/company identity, locks company switching and creation actions, blocks ticket submission and offers contact-only retry through Refresh references. Missing contacts after a successful authoritative reload clear pending auto-selection with explicit feedback. If an authoritative read finds the company inactive or deleted, one **Continue without this contact** button appears beside Refresh references. It releases pending auto-selection, clears company/contact choices and refreshes companies without reloading categories or changing the remaining draft. The committed contact stays stored; transient failures remain retryable. Recovery is disabled while a worker is busy, and obsolete contact-load callbacks are ignored. Native Windows input checks and visual inspection passed at 1000×700 on 2026-09-06, including combined Add Company → Add Contact → save/reopen and subsequent deactivation/deletion recovery checks. These are agent checks, not user acceptance testing.
 
 The layouts in this document represent intended product behavior.
 

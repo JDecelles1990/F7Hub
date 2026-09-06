@@ -687,6 +687,14 @@ Bootstrap injects a narrow `CompanyService` using the same CompanyRepository as 
 
 CompanyRepository creation now places INSERT and record reload in one transaction on the same connection. It commits only after constructing the record; reload failure rolls back the insertion through the existing connection context. This closes retry ambiguity without changing other repository operations or the schema. Isolated tests cover successful commit and both failed/missing reload rollback.
 
+## Implemented Quick Contact Creation — Slice 009
+
+Bootstrap shares CompanyRepository and ContactRepository between the narrow ContactService and TicketReferenceService. QuickContactDialog calls only ContactService through ServiceTaskRunner. The service requires a positive SQLite integer company ID, validates text/nonblank name and optional text email, trims surrounding whitespace, supplies matching UTC timestamps and creates active contacts. Duplicate names/emails remain allowed. Errors are translated without exposing persistence details.
+
+ContactRepository previously autocommitted INSERT before reloading the returned record: **SAME RISK — ALIGNED** with the Slice 008 correction. A narrow transaction context now provides BEGIN IMMEDIATE → INSERT → reload → COMMIT, with rollback on failed/missing reload. ContactService checks the active company using CompanyRepository.get_company(connection=...) inside that same transaction before calling ContactRepository.create_contact(connection=...). The optional connection arguments preserve existing standalone callers while preventing concurrent company mutation between validation and creation. Other contact repository methods remain unchanged. No schema or migration change is needed.
+
+TicketCreateWidget retains a committed ContactRecord during reconciliation, scopes retry to its company and reloads only contacts. It blocks company switching, creation actions and ticket submission until reconciliation completes or the technician explicitly abandons selection after the company becomes unavailable. A successful read that excludes a subsequently unavailable contact releases pending auto-selection with feedback. TicketReferenceService raises the narrow TicketReferenceError subtype CompanyReferenceUnavailableError only when a company read confirms absence or inactivity; SQLite read errors remain ordinary retryable reference errors. The GUI offers explicit abandonment for the typed unavailable-company result, clears pending identity and company/contact selections, and refreshes only companies. A contact-load generation counter invalidates obsolete success/failure callbacks on abandonment, reset and subsequent loads, including reselection of the same company. The committed contact is preserved without another insertion. Existing read filtering, repository transactions and TicketService transactional save validation remain unchanged. Tests cover service validation, timestamp/email normalization, write/read failures, locked company validation, repository rollback/retry, dialog responsiveness, cancellation, duplicate prevention, draft preservation, unavailable-company recovery, stale callbacks and both creation/save/reopen workflows.
+
 ## Implemented Category Reference Boundary — Slice 007
 
 `CategoryRepository.list_categories(scope=..., active_only=...)` owns the shared taxonomy read boundary. It returns frozen category records ordered by sort_order, case-insensitive name and category_id, using parameterized values and configured database connections. Company/contact repositories do not own shared taxonomy; TicketRepository retains only its transaction-local category validation and ticket-detail reads.
@@ -3314,6 +3322,7 @@ Repository inspection and tests through 2026-09-05 verified the SQLite infrastru
 Python SQLite infrastructure: VERIFIED
 CompanyRepository and ContactRepository: VERIFIED
 CompanyService and QuickCompanyDialog creation boundary: VERIFIED (2026-09-06)
+ContactService and QuickContactDialog creation boundary: VERIFIED (2026-09-06)
 TicketRepository and TicketService creation boundary: VERIFIED
 TicketRepository and TicketService notes/status boundary: VERIFIED
 PySide6 6.11.2 dependency and isolated environment: VERIFIED

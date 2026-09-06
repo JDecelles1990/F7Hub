@@ -116,9 +116,9 @@ Remaining application implementation: PLANNED
 
 # 5. Roadmap Layers
 
-After Slice 008, the verified milestone is **Quick Company Creation in Ticket Workflow**. A name-only service-backed dialog creates and selects an active company without losing the ticket draft. Company/contact management and category hierarchy formatting remain deferred.
+After Slice 009, the verified product milestone is **Quick Company and Contact Creation in Ticket Workflow**. Technicians can create an active company, create its minimal active contact and save/reopen a ticket without losing the draft. Full company/contact management and category hierarchy formatting remain deferred.
 
-Recommended next bounded slice: create, list and reopen a minimal knowledge article through the existing relational knowledge schema and Python service/repository architecture. This adds reusable support knowledge alongside the established ticket workflow. Quick contact creation fills a smaller reference-entry gap; a management screen broadens scope, and dashboard/navigation changes add less immediate support capability. No next-slice implementation is authorized here.
+Recommended next bounded slice: create, list and reopen a minimal knowledge article using the existing relational schema and Python service/repository boundaries. This provides reusable support knowledge after the ticket intake gaps are filled. A company/contact management view adds browsing but expands administration; further ticket changes lack a comparably concrete outstanding requirement in this inspection; dashboard/navigation offers less immediate support capability; broader search/launcher work would benefit from usable knowledge content first. Exclude editing, search/FTS and ticket linking. Complete independent Slice 009 review first; no next implementation is authorized here.
 
 The F7Hub roadmap is organized into:
 
