@@ -47,6 +47,17 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-07 — Slice 012: Ticket/Knowledge Linking
+
+- Added TicketKnowledgeService/Repository for RELATED-only links through existing ticket_knowledge_articles. Frozen lightweight identities exclude bodies; joined title/status/version reflect current article metadata.
+- BEGIN IMMEDIATE → entity/duplicate checks → RELATED insert → joined reload → commit. Typed missing/duplicate errors are safe for display; insert/reload failure rolls back. Concurrent duplicates produce one winner; all existing article statuses are eligible and FK cascades remain intact.
+- Added the saved-ticket Knowledge tab and LinkArticleDialog with async load/link, retained selection, duplicate-submit/active-close protection, and explicit saved-link feedback if refresh fails. Fixed initial code-column clipping found during native inspection.
+- TicketWorkspace emits an article-ID request. MainWindow protects unsaved ticket activity, switches pages and calls KnowledgeWorkspace.open_article_by_id using existing list/detail logic. Missing targets receive safe feedback without opening another article.
+- ACTIVITY WRITE: NONE. Only the junction is written; ticket timestamps, timeline, status and resolution are unchanged by linking. No new migration, schema or dependency change; five historical migrations are unchanged.
+- Focused validation: 24 repository/service, 24 combined Ticket/Knowledge GUI (12 new) and 7 cross-module Integration tests PASS. Full regression: 226 Database, 64 GUI, 57 Integration, 347 total (43 above baseline), exit codes 0. GUI/Integration rerun after the sizing fix.
+- Native Windows agent input and visual checks passed at 1000×700 with synthetic SQLite: empty/link/list/open, article create/edit, notes, Resolve → Close → Reopen and reconstruction. Initial code clipping was fixed and the native flow rerun. Integrity_check = ok, zero FK violations, five migrations. Evidence stayed outside the repository; agent verification, not user acceptance testing.
+- ROOT.md and the separate archive deletion remain untouched. Work remains unstaged/uncommitted for independent review. Unlink, other relationship types, search, recommendations and full relationship management are deferred. Next recommendation: RELATED unlink only; no Slice 013 work.
+
 # 2026-09-06 — Slice 011: Draft Editing with Version History
 
 - Added EditArticleDialog and extended KnowledgeWorkspace/Service/Repository for DRAFT title/summary/body revisions. Article code is immutable; current Version N is displayed. The existing implementation was preserved during completion review without refactoring passing code.

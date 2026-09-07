@@ -705,7 +705,15 @@ Historical Slice 010 validation: retained prior-session 11 repository/service fo
 
 Separate EditArticleDialog retains the original ID/version token, displays code/version as plain-text labels and submits through ServiceTaskRunner. It preserves failed input, blocks duplicate save/close during writes, disables saving after conflicts and never accepts a replacement token from workspace callbacks. KnowledgeWorkspace enables Edit only for a loaded DRAFT, displays Version N and refreshes/reselects/reloads the same article after success. Existing NewArticleDialog, bootstrap, MainWindow and worker framework are unchanged.
 
-Validation and actual fresh regression totals are recorded in `Status/CURRENT_STATE.md`. Native Windows edit/input/visual checks passed at 1000×700 with synthetic SQLite. History browsing/viewing, restore/revert, search, publishing/archiving and relationship workflows remain deferred; no schema or dependency changes.
+Validation and actual fresh regression totals are recorded in `Status/CURRENT_STATE.md`. Native Windows edit/input/visual checks passed at 1000×700 with synthetic SQLite. History browsing/viewing, restore/revert, search, publishing/archiving and richer relationship workflows remain deferred; no schema or dependency changes.
+
+## Implemented Ticket/Knowledge Boundary — Slice 012
+
+Bootstrap composes TicketKnowledgeRepository and TicketKnowledgeService. The service exposes link_related_article(ticket_id, knowledge_article_id, linked_by=None), list_linked_articles(ticket_id) and list_link_candidates(ticket_id). IDs must be positive SQLite integers, excluding bool; linked_by is optional trimmed text with blank mapped to NULL. The service supplies UTC linked_at and translates typed missing-ticket, missing-article and duplicate conditions plus generic persistence failures into safe errors. Relationship type is fixed to RELATED and absent from caller input.
+
+The repository reserves the writer with BEGIN IMMEDIATE, verifies entities and exact duplicate state, inserts the link and reloads it before commit. Its connection context rolls back on every failure. Frozen TicketKnowledgeCandidateRecord and TicketKnowledgeLinkRecord carry lightweight current article identity, ordered by code (NOCASE) then article ID. Candidate reads exclude existing RELATED links; DRAFT/PUBLISHED/ARCHIVED are all eligible. Read transactions keep ticket-existence checks and lists consistent. No full article retrieval, ticket activity writes, schema changes or new dependencies are added.
+
+TicketKnowledgeWidget and LinkArticleDialog call only this service through ServiceTaskRunner, retaining selection on failure and guarding duplicate submits, active-write close and obsolete read results. TicketWorkspace emits knowledge_article_requested with the ID; MainWindow performs draft protection and calls KnowledgeWorkspace.open_article_by_id after switching the stack. Open-by-ID refreshes/selects through existing detail-loading logic and reports vanished targets safely. Native Windows synthetic checks passed at 1000×700, including reconstruction; exact focused/full counts are in Status/CURRENT_STATE.md.
 
 ## Implemented Quick Contact Creation — Slice 009
 

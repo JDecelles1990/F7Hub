@@ -700,7 +700,15 @@ The current article update and new revision snapshot commit together. Version 1 
 
 If another editor saves first, the stale editor cannot overwrite it or add a snapshot. Its text remains available to copy, with clear feedback and Save disabled. Close the old editor, reopen the latest article, and start a new edit explicitly; a workspace refresh never replaces an open editor's original token. External changes to PUBLISHED/ARCHIVED status or deletion receive safe specific feedback with input retained. Generic persistence failures preserve input and permit retry. Cancel writes nothing; save runs in the background and blocks duplicate saves and closing during the write.
 
-History browsing, historical viewing, restore/revert, deletion, publishing/archiving, search/FTS, category/tag assignment, relationships, links, ticket linking and AI remain deferred. The broader workflow below remains a product target.
+History browsing, historical viewing, restore/revert, deletion, publishing/archiving, search/FTS, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
+
+## Implemented ticket/article linking — Slice 012
+
+Saved tickets → open a ticket → Knowledge → Link Article → select an existing article → Link Article. The ticket shows the linked code, current title, status and version. Open Article switches to Knowledge Base, selects that article and reads its current details. Refresh, Reload ticket or returning through Saved tickets refreshes linked metadata after an article edit. Relationships survive application reconstruction against the same database.
+
+An empty ticket shows “No knowledge articles linked.” The selector loads lightweight identities for DRAFT, PUBLISHED and ARCHIVED articles, excluding existing RELATED links. Cancel before saving writes nothing. Link runs in the background, blocks duplicate submission/closing during the write, and preserves selection on failure. Missing tickets/articles and duplicate links have clear feedback; an article disappearing before Open Article produces a safe missing-article message. A committed link followed by a failed list refresh remains explicitly reported as linked; use Refresh to recover.
+
+Only RELATED is supported. Linking writes the relationship alone: no ticket updated_at, timeline, status or resolution change. Unlink, relationship-type changes, APPLIED/RESOLUTION_SOURCE, search/filtering, recommendations and ticket-driven article creation/editing are deferred.
 
 Related Features:
 

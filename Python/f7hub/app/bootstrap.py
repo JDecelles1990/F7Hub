@@ -18,6 +18,8 @@ from f7hub.services.ticket_reference_service import TicketReferenceService
 from f7hub.services.company_service import CompanyService
 from f7hub.services.contact_service import ContactService
 from f7hub.services.knowledge_service import KnowledgeService
+from f7hub.repositories.ticket_knowledge_repository import TicketKnowledgeRepository
+from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
 
 
 DEFAULT_PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -33,6 +35,8 @@ class ApplicationContext:
     ticket_service: TicketService
     knowledge_repository: KnowledgeRepository
     knowledge_service: KnowledgeService
+    ticket_knowledge_repository: TicketKnowledgeRepository
+    ticket_knowledge_service: TicketKnowledgeService
     main_window: MainWindow
 
 
@@ -59,6 +63,8 @@ def bootstrap_application(
     ticket_service = TicketService(ticket_repository)
     knowledge_repository = KnowledgeRepository(resolved_database_path)
     knowledge_service = KnowledgeService(knowledge_repository)
+    ticket_knowledge_repository = TicketKnowledgeRepository(resolved_database_path)
+    ticket_knowledge_service = TicketKnowledgeService(ticket_knowledge_repository)
     companies = CompanyRepository(resolved_database_path)
     contacts = ContactRepository(resolved_database_path)
     reference_service = TicketReferenceService(
@@ -69,6 +75,7 @@ def bootstrap_application(
         ticket_service, reference_service=reference_service, company_service=CompanyService(companies),
         contact_service=ContactService(contacts, companies),
         knowledge_service=knowledge_service,
+        knowledge_link_service=ticket_knowledge_service,
     )
 
     return ApplicationContext(
@@ -78,5 +85,7 @@ def bootstrap_application(
         ticket_service=ticket_service,
         knowledge_repository=knowledge_repository,
         knowledge_service=knowledge_service,
+        ticket_knowledge_repository=ticket_knowledge_repository,
+        ticket_knowledge_service=ticket_knowledge_service,
         main_window=main_window,
     )

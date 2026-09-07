@@ -116,22 +116,22 @@ Remaining application implementation: PLANNED
 
 # 5. Roadmap Layers
 
-After Slice 011, the verified product milestone is **Knowledge Base Create → Read → Edit with Version History**, alongside the existing ticket and quick company/contact workflows. DRAFT articles can revise title/summary/body with stable codes, atomic sequential snapshots and optimistic stale-edit protection. Current Version N is displayed; history browsing and restore remain unimplemented. Fresh regression: 202 Database, 52 GUI, 50 Integration (304 total). Native Windows edit/input/visual checks passed at 1000×700. Independent Slice 011 review is the next gate; changes remain uncommitted.
+After Slice 012, the verified product milestone is **TICKETS ↔ KNOWLEDGE BASE CONNECTED**. Saved tickets can link existing articles as RELATED, list their current metadata and open their current content through Knowledge Base. The existing create/read/edit/version-snapshot and ticket activity workflows remain available. Regression: 226 Database, 64 GUI, 57 Integration (347 total). Native Windows input/visual checks passed at 1000×700 with isolated synthetic data. Independent Slice 012 review is the next gate; changes remain uncommitted.
 
-Recommended next bounded slice: **Ticket ↔ Knowledge linking**. From a saved ticket, choose an existing article, persist one RELATED link and reopen the linked article through the existing Knowledge read view. Reuse the existing ticket_knowledge_articles table and service/repository boundaries. Keep unlinking, reverse navigation, revision pinning, automatic suggestions and other relationship types outside that first slice. This connects reusable procedures to actual support work without requiring a large article library.
+Recommended next bounded slice: **Unlink a RELATED article from a saved ticket**. Let the technician correct an accidental link through the existing relationship service/repository boundary. Remove only the chosen RELATED junction row, refresh the ticket list of links and retain both entities. This provides immediate correction value at any article volume and needs no new schema. Other relationship types and broader management remain outside that proposed slice.
 
 Comparison of the six requested alternatives:
 
-| Candidate | Assessment after Slice 011 |
+| Candidate | Assessment after Slice 012 |
 |---|---|
-| A. Knowledge Base search / FTS5 | Useful as content grows; needs index synchronization and search UI. Only synthetic library volumes have been verified, so current real content volume is NOT VERIFIED. |
-| B. Version-history viewer / restore | A read-only viewer is small and reuses snapshots; restore adds a separate mutation/conflict workflow. Less cross-workflow value than linking a procedure to a ticket. |
-| C. Knowledge categories/tags | Reuses existing schema but adds assignment/filtering UI; benefits depend on library volume. |
-| D. Ticket ↔ Knowledge linking | Recommended: immediate technician context across two working modules, existing junction schema, narrowly bounded create-link/open-article behavior. Requires explicit service validation across both entities. |
-| E. Companies/Contacts management | Useful administration, but editing reference data and managing its downstream effects is broader than the proposed link workflow. |
-| F. Dashboard/navigation improvement | Existing navigation works; no measured navigation bottleneck justifies a redesign before adding reusable ticket context. |
+| A. Knowledge search / FTS5 | Valuable at larger content volumes; needs index synchronization and search UI. Actual user-library volume is NOT VERIFIED; only synthetic data was used. |
+| B. Version-history viewer | Existing snapshots make a read-only viewer coherent, but it does not correct mistaken ticket links. |
+| C. Knowledge categories/tags | Schema exists; assignment/filtering value depends on content organization and volume. |
+| D. Unlink / richer Ticket ↔ Knowledge workflow | Recommended, narrowed to RELATED unlink only: completes correction of an existing cross-module action using the established boundary and schema. Richer types remain deferred. |
+| E. Companies/Contacts management | Useful, but editing/deactivation and downstream references form a separate, broader workflow. |
+| F. Dashboard/navigation improvement | Current navigation passed native checks; no measured navigation bottleneck supports redesign now. |
 
-Recommendation only. Do not implement Slice 012 as part of Slice 011.
+Recommendation only. Do not implement Slice 013 as part of Slice 012.
 
 The F7Hub roadmap is organized into:
 
@@ -725,7 +725,8 @@ knowledge_article_tags
 0005_knowledge.sql: VERIFIED — 2026-09-04 — 11 focused tests; 90 full database tests
 KnowledgeRepository/Service and create/list/read workspace: VERIFIED — Slice 010
 DRAFT editing with atomic snapshots and stale-edit protection: VERIFIED — Slice 011
-History viewer/restore, search, publishing/archiving and relationship workflows: PLANNED
+RELATED ticket/article link/list/open: VERIFIED — Slice 012
+History viewer/restore, search, publishing/archiving and richer relationship workflows: PLANNED
 ```
 
 Initial capabilities:
@@ -782,7 +783,7 @@ Resolved Ticket
 [ ] KB article can be created
 [ ] KB article can be edited
 [ ] KB article can be searched
-[ ] Ticket can link to KB article
+[x] Ticket can link to KB article (RELATED only, Slice 012)
 [ ] Tags work if implemented
 [ ] Archived articles behave correctly
 ```
