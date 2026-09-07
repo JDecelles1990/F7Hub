@@ -361,9 +361,24 @@ Slice 012 — RELATED ticket/article linking, verified 2026-09-07:
 - [x] Full regression: Database 226 PASS, GUI 64 PASS, Integration 57 PASS; total 347, up 43 from 304.
 - [x] Native Windows 1000×700 input/visual checks for link/list/open, article create/edit, notes/status lifecycle and reconstruction. Initial code sizing corrected and rerun.
 - [x] Only junction writes; five unchanged migrations, integrity_check = ok, zero FK violations and both deletion cascades tested.
-- [ ] Independent Slice 012 review. No staging, commit, push or merge in this implementation task.
+- [x] Independent Slice 012 review approved with no defects/cleanup; integrated through PR #7 at 68aefb157c7351aa47e5f11ffd4c94cdbb8cf0ae.
 
-Recommended next slice only: unlink one RELATED article from a saved ticket, retaining the ticket and article. See 16_Roadmap.md for the six-option comparison. Do not begin Slice 013. Unlink, APPLIED/RESOLUTION_SOURCE, richer relationship management, history browsing, search/FTS, category/tag management, publishing/archiving, article deletion and AI remain deferred.
+Slice 013 — RELATED ticket/article unlink, verified 2026-09-07:
+
+- [x] Extend the existing relationship repository/service/widget; no new infrastructure or migration.
+- [x] BEGIN IMMEDIATE before ticket/article/RELATED existence checks, exact parameterized DELETE and one-row requirement; rollback on delete/commit failure.
+- [x] Preserve ticket, article, other RELATED, APPLIED and RESOLUTION_SOURCE rows; no ticket updated_at, notes, history or timeline writes.
+- [x] Safe missing-ticket, missing-article and not-linked errors; concurrent independent services produce one success and one not-linked result.
+- [x] Unlink Article with explicit plain-text confirmation, Cancel as default/escape, no write on Cancel, async execution and duplicate/context protection.
+- [x] Preserve failed selection; preserve committed-success feedback after refresh failure and recover with Refresh without repeating DELETE.
+- [x] Candidate reappearance, normal relink with a new timestamp, persisted reconstruction and exact remaining-article navigation.
+- [x] Focused tests: repository/service 42 PASS, combined Ticket/Knowledge GUI 34 PASS, Integration 16 PASS.
+- [x] Full regression: Database 244 PASS, GUI 74 PASS, Integration 66 PASS; total 384, up 37 from 347. Evidence retained during documentation-only completion.
+- [x] Native Windows 1000×700 synthetic input/visual checks: Cancel, Unlink, parent/other-link preservation, candidate/relink, exact Open Article, notes and Resolve → Close → Reopen.
+- [x] Five unchanged migrations; integrity_check = ok, foreign_key_check = zero violations; ROOT.md and separate archive deletion preserved.
+- [ ] Independent Slice 013 review before any Git finalization; nothing staged or committed.
+
+Recommended next slice only: a read-only Knowledge version-history viewer, reusing persisted snapshots. See 16_Roadmap.md for the six-option comparison. Do not begin Slice 014. Bulk unlink, APPLIED/RESOLUTION_SOURCE workflows, relationship history/undo, richer relationship management, history browsing/restore, search/FTS, category/tag management, publishing/archiving, parent deletion workflows and AI remain deferred.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

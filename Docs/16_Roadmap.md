@@ -116,22 +116,22 @@ Remaining application implementation: PLANNED
 
 # 5. Roadmap Layers
 
-After Slice 012, the verified product milestone is **TICKETS ↔ KNOWLEDGE BASE CONNECTED**. Saved tickets can link existing articles as RELATED, list their current metadata and open their current content through Knowledge Base. The existing create/read/edit/version-snapshot and ticket activity workflows remain available. Regression: 226 Database, 64 GUI, 57 Integration (347 total). Native Windows input/visual checks passed at 1000×700 with isolated synthetic data. Independent Slice 012 review is the next gate; changes remain uncommitted.
+After Slice 013, the verified product milestone is **TICKET ↔ KNOWLEDGE RELATED LINKS MANAGEABLE**. Saved tickets support Link, Open, confirmed Unlink and normal Relink of existing articles as RELATED. Unlink removes only the selected junction row; both entities, other relationships and ticket activity remain unchanged. Regression: 244 Database, 74 GUI, 66 Integration (384 total, up 37 from 347). Native Windows input/visual checks passed at 1000×700 with isolated synthetic data. These results are retained during documentation completion because implementation/tests are unchanged. Independent Slice 013 review is the next gate; changes remain uncommitted.
 
-Recommended next bounded slice: **Unlink a RELATED article from a saved ticket**. Let the technician correct an accidental link through the existing relationship service/repository boundary. Remove only the chosen RELATED junction row, refresh the ticket list of links and retain both entities. This provides immediate correction value at any article volume and needs no new schema. Other relationship types and broader management remain outside that proposed slice.
+Recommended next bounded slice: **Read-only Knowledge version-history viewer**. Select an article, list its persisted revisions and open one historical snapshot without modifying the current article. Existing knowledge_article_versions rows make this a small, schema-ready extension that helps technicians inspect earlier procedure text. Link/Open/Unlink/Relink now covers the minimal RELATED lifecycle; richer relationship semantics need separate product rules. Exclude restore/revert, revision editing, diff tools and ticket revision pinning from the proposed viewer.
 
 Comparison of the six requested alternatives:
 
-| Candidate | Assessment after Slice 012 |
+| Candidate | Assessment after Slice 013 |
 |---|---|
 | A. Knowledge search / FTS5 | Valuable at larger content volumes; needs index synchronization and search UI. Actual user-library volume is NOT VERIFIED; only synthetic data was used. |
-| B. Version-history viewer | Existing snapshots make a read-only viewer coherent, but it does not correct mistaken ticket links. |
+| B. Version-history viewer | Recommended: existing immutable snapshots support a bounded read-only workflow with value after the first edit, without a new migration or lifecycle write. It can help technicians inspect past instructions while using ticket-linked knowledge. |
 | C. Knowledge categories/tags | Schema exists; assignment/filtering value depends on content organization and volume. |
-| D. Unlink / richer Ticket ↔ Knowledge workflow | Recommended, narrowed to RELATED unlink only: completes correction of an existing cross-module action using the established boundary and schema. Richer types remain deferred. |
+| D. APPLIED / RESOLUTION_SOURCE workflow | Junction enum values exist, but applying knowledge or attributing a resolution needs defined service/workflow semantics beyond association management. Higher decision and integration risk than a read-only history viewer. |
 | E. Companies/Contacts management | Useful, but editing/deactivation and downstream references form a separate, broader workflow. |
 | F. Dashboard/navigation improvement | Current navigation passed native checks; no measured navigation bottleneck supports redesign now. |
 
-Recommendation only. Do not implement Slice 013 as part of Slice 012.
+Recommendation only. Do not implement Slice 014 as part of Slice 013.
 
 The F7Hub roadmap is organized into:
 
@@ -726,6 +726,7 @@ knowledge_article_tags
 KnowledgeRepository/Service and create/list/read workspace: VERIFIED — Slice 010
 DRAFT editing with atomic snapshots and stale-edit protection: VERIFIED — Slice 011
 RELATED ticket/article link/list/open: VERIFIED — Slice 012
+Confirmed RELATED unlink and normal relink: VERIFIED — Slice 013
 History viewer/restore, search, publishing/archiving and richer relationship workflows: PLANNED
 ```
 

@@ -590,6 +590,10 @@ List/candidate/link calls use ServiceTaskRunner. Cancel during a candidate read 
 
 Slice 012 native Windows input checks and visual inspection passed at 1000×700 with isolated synthetic SQLite: empty state, candidate selection, link, current metadata, Open Article, edit/create, notes/status lifecycle and reopening after reconstruction. The initial code-column clipping found during inspection was corrected and the native flow rerun. These are agent checks, not user acceptance testing.
 
+Slice 013 adds Unlink Article beside the existing Link Article and Open Article buttons. It is enabled only with a saved ticket, service, selected linked article and idle runner. A small plain-text confirmation identifies the article and states that both entities remain; Cancel is the default and Escape action. Confirmation cannot be reentered, and changes to ticket context or selection during confirmation prevent submission. The confirmed unlink uses the shared worker, blocks conflicting actions and ignores callbacks for another ticket. Failed persistence preserves the row/selection. Success refreshes the list; if refresh fails, “Article unlinked.” remains visible, stale rows are cleared and Refresh provides recovery without repeating the deletion.
+
+Slice 013 native Windows input checks and captured-window visual inspection passed at 1000×700: confirmation Cancel and Unlink, selected-row removal, preservation of the other link, exact KB0002 navigation, KB0001 candidate reappearance/relink, notes and Resolve → Close → Reopen. The new button and confirmation were readable with no clipping/overlap in the synthetic layouts. These are agent checks, not user acceptance testing.
+
 Native Windows agent input checks and visual inspection passed on 2026-09-06 at 1000×700 for the empty state, creation of KB0001 and KB0002, list/detail switching and return through New ticket/Saved tickets. Both articles survived application reconstruction against isolated synthetic SQLite. No clipping/overlap was observed for these inputs. These are agent checks, not user acceptance testing. The broader layouts below remain planned.
 
 Suggested layout:

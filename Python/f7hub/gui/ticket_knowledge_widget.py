@@ -5,7 +5,7 @@ import logging
 from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
-    QAbstractItemView, QDialog, QHBoxLayout, QHeaderView, QLabel,
+    QAbstractItemView, QDialog, QHBoxLayout, QHeaderView, QLabel, QMessageBox,
     QPushButton, QTableView, QVBoxLayout, QWidget,
 )
 
@@ -179,6 +179,7 @@ class TicketKnowledgeWidget(QWidget):
         self._runner = runner
         self._ticket_id = None
         self._dialog = None
+        self._confirming_unlink = False
         self.table = _ArticleIdentityTable(self)
         self.table.setAccessibleName("Linked knowledge articles")
         self.feedback = QLabel("Open a ticket to see linked articles.", self)
@@ -188,12 +189,15 @@ class TicketKnowledgeWidget(QWidget):
         self.link_button.clicked.connect(self.open_link_dialog)
         self.open_button = QPushButton("Open Article", self)
         self.open_button.clicked.connect(self.open_selected_article)
+        self.unlink_button = QPushButton("Unlink Article", self)
+        self.unlink_button.clicked.connect(self.unlink_selected_article)
         self.refresh_button = QPushButton("Refresh", self)
         self.refresh_button.clicked.connect(lambda: self.refresh_links())
         self.table.selectionModel().selectionChanged.connect(self._update_controls)
         actions = QHBoxLayout()
         actions.addWidget(self.link_button)
         actions.addWidget(self.open_button)
+        actions.addWidget(self.unlink_button)
         actions.addStretch()
         actions.addWidget(self.refresh_button)
         layout = QVBoxLayout(self)
@@ -211,10 +215,12 @@ class TicketKnowledgeWidget(QWidget):
         self._update_controls()
 
     def _update_controls(self, *_):
-        enabled = self._ticket_id is not None and self._service is not None and not self._runner.busy
+        enabled = (self._ticket_id is not None and self._service is not None
+                   and not self._runner.busy and not self._confirming_unlink)
         self.link_button.setEnabled(enabled)
         self.refresh_button.setEnabled(enabled)
         self.open_button.setEnabled(enabled and self.table.selected_article_id() is not None)
+        self.unlink_button.setEnabled(enabled and self.table.selected_article_id() is not None)
 
     def refresh_links(self, *, select_article_id=None, message=None):
         if self._ticket_id is None or self._service is None or self._runner.busy:
@@ -255,6 +261,58 @@ class TicketKnowledgeWidget(QWidget):
     def _article_linked(self, link):
         if link.ticket_id == self._ticket_id:
             self.refresh_links(select_article_id=link.knowledge_article_id, message="Article linked.")
+
+    def _confirm_unlink(self, article):
+        confirmation = QMessageBox(self)
+        confirmation.setWindowTitle("Unlink Article")
+        confirmation.setIcon(QMessageBox.Icon.Question)
+        confirmation.setTextFormat(Qt.TextFormat.PlainText)
+        confirmation.setText(f"Remove {article.article_code} from this ticket?")
+        confirmation.setInformativeText(
+            "This removes only the relationship. The ticket and knowledge article will remain."
+        )
+        unlink = confirmation.addButton("Unlink", QMessageBox.ButtonRole.DestructiveRole)
+        cancel = confirmation.addButton(QMessageBox.StandardButton.Cancel)
+        confirmation.setDefaultButton(cancel)
+        confirmation.setEscapeButton(cancel)
+        confirmation.exec()
+        accepted = confirmation.clickedButton() == unlink
+        confirmation.deleteLater()
+        return accepted
+
+    def unlink_selected_article(self):
+        article_id = self.table.selected_article_id()
+        if (self._ticket_id is None or self._service is None or self._runner.busy
+                or self._confirming_unlink or article_id is None):
+            return
+        ticket_id = self._ticket_id
+        article = next(item for item in self.table.records if item.knowledge_article_id == article_id)
+        self._confirming_unlink = True
+        self._update_controls()
+        try:
+            confirmed = self._confirm_unlink(article)
+        finally:
+            self._confirming_unlink = False
+            self._update_controls()
+        # Confirmation runs an event loop. Do not act on a changed context.
+        if (not confirmed or self._ticket_id != ticket_id or self._runner.busy
+                or self.table.selected_article_id() != article_id):
+            return
+        self.feedback.setText("Unlinking article…")
+
+        def unlinked(_result):
+            if self._ticket_id == ticket_id:
+                self.refresh_links(message="Article unlinked.")
+
+        def failed(error):
+            if self._ticket_id == ticket_id:
+                self.feedback.setText(_safe_message(
+                    error, "Could not unlink the article. Your selection is preserved. Try again.",
+                ))
+
+        self._runner.submit(
+            lambda: self._service.unlink_related_article(ticket_id, article_id), unlinked, failed,
+        )
 
     def open_selected_article(self):
         article_id = self.table.selected_article_id()
