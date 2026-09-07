@@ -820,7 +820,11 @@ AI assistance may supplement these suggestions.
 Priority: P2  
 Requirements: `FR-AHK-001`
 
-AutoHotkey v2 may provide global F7Hub shortcuts.
+AutoHotkey v2 provides the verified global `F7` launch/focus shortcut. While
+the shortcut script is active, F7 restores and focuses an existing F7Hub
+window or launches the project-local Python application when no matching
+window exists. Other global shortcuts remain planned. Detailed launcher
+behavior and boundaries belong in `11_AHKArchitecture.md`.
 
 ---
 
