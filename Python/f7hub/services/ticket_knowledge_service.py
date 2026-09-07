@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import sqlite3
 
 from f7hub.repositories.ticket_knowledge_repository import (
-    ArticleAlreadyLinkedError, LinkArticleMissingError, LinkTicketMissingError,
+    ArticleAlreadyLinkedError, ArticleNotLinkedError, LinkArticleMissingError, LinkTicketMissingError,
     TicketKnowledgeCandidateRecord, TicketKnowledgeLinkRecord, TicketKnowledgeRepository,
 )
 
@@ -23,6 +23,10 @@ class TicketKnowledgeArticleMissingError(TicketKnowledgeValidationError):
 
 class TicketKnowledgeAlreadyLinkedError(TicketKnowledgeValidationError):
     """The exact RELATED link already exists."""
+
+
+class TicketKnowledgeNotLinkedError(TicketKnowledgeValidationError):
+    """The exact RELATED link no longer exists."""
 
 
 class TicketKnowledgePersistenceError(RuntimeError):
@@ -48,6 +52,16 @@ class TicketKnowledgeService:
                 linked_by=linked_by, linked_at=timestamp,
             ),
             "Could not link the article. Your selection is preserved. Try again.",
+        )
+
+    def unlink_related_article(self, ticket_id: int, knowledge_article_id: int) -> None:
+        _positive_id(ticket_id, "Ticket ID")
+        _positive_id(knowledge_article_id, "Article ID")
+        _safe_call(
+            lambda: self._repository.unlink_related_article(
+                ticket_id=ticket_id, knowledge_article_id=knowledge_article_id,
+            ),
+            "Could not unlink the article. Your selection is preserved. Try again.",
         )
 
     def list_linked_articles(self, ticket_id: int) -> tuple[TicketKnowledgeLinkRecord, ...]:
@@ -79,5 +93,9 @@ def _safe_call(operation, fallback):
         raise TicketKnowledgeArticleMissingError("This article no longer exists.") from error
     except ArticleAlreadyLinkedError as error:
         raise TicketKnowledgeAlreadyLinkedError("This article is already linked to this ticket.") from error
+    except ArticleNotLinkedError as error:
+        raise TicketKnowledgeNotLinkedError(
+            "This article is no longer linked to this ticket. Refresh the linked articles."
+        ) from error
     except (sqlite3.Error, OSError, RuntimeError) as error:
         raise TicketKnowledgePersistenceError(fallback) from error

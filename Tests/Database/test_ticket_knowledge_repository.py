@@ -1,17 +1,20 @@
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from dataclasses import FrozenInstanceError
 from pathlib import Path
 import sqlite3
 import tempfile
+from threading import Barrier
+from types import SimpleNamespace
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from f7hub.infrastructure.database import bootstrap_database, database_connection
 from f7hub.repositories.knowledge_repository import KnowledgeRepository
 from f7hub.repositories.ticket_repository import TicketRepository
 from f7hub.repositories.ticket_knowledge_repository import (
     TicketKnowledgeRepository, LinkTicketMissingError, LinkArticleMissingError,
-    ArticleAlreadyLinkedError,
+    ArticleAlreadyLinkedError, ArticleNotLinkedError,
 )
 from f7hub.services.knowledge_service import KnowledgeService
 from f7hub.services.ticket_service import TicketService
@@ -42,6 +45,17 @@ class TicketKnowledgeRepositoryTests(unittest.TestCase):
     def count(self):
         with database_connection(self.path) as connection:
             return connection.execute("SELECT count(*) FROM ticket_knowledge_articles").fetchone()[0]
+
+    def unlink(self):
+        return self.repository.unlink_related_article(
+            ticket_id=self.ticket.ticket_id, knowledge_article_id=self.article.knowledge_article_id,
+        )
+
+    def database_rows(self):
+        with database_connection(self.path) as connection:
+            tables = [row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type = 'table'")]
+            return {table: tuple(tuple(row) for row in connection.execute(f'SELECT * FROM "{table}" ORDER BY rowid'))
+                    for table in tables}
 
     def test_link_reload_and_immutable_lightweight_identity(self):
         link = self.link()
@@ -162,3 +176,164 @@ class TicketKnowledgeRepositoryTests(unittest.TestCase):
             self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
             row = connection.execute("SELECT ticket_id, knowledge_article_id, relationship_type, linked_at FROM ticket_knowledge_articles").fetchone()
             self.assertEqual(tuple(row), (self.ticket.ticket_id, self.article.knowledge_article_id, "RELATED", "2026-09-06T18:00:00.000Z"))
+
+    def test_unlink_removes_only_exact_related_row_and_preserves_all_other_data(self):
+        self.link()
+        second = self.create_article("KB0002")
+        self.link(article_id=second.knowledge_article_id)
+        other_ticket = self.tickets.create_ticket(subject="Another synthetic ticket")
+        self.link(ticket_id=other_ticket.ticket_id)
+        with database_connection(self.path) as connection:
+            for relationship_type in ("APPLIED", "RESOLUTION_SOURCE"):
+                connection.execute(
+                    "INSERT INTO ticket_knowledge_articles VALUES (?, ?, ?, ?, ?)",
+                    (self.ticket.ticket_id, self.article.knowledge_article_id, relationship_type, None, "2026-09-07T00:00:00Z"),
+                )
+        before = self.database_rows()
+        self.assertIsNone(self.unlink())
+        after = self.database_rows()
+        expected_links = tuple(row for row in before["ticket_knowledge_articles"]
+                               if row[:3] != (self.ticket.ticket_id, self.article.knowledge_article_id, "RELATED"))
+        before["ticket_knowledge_articles"] = expected_links
+        self.assertEqual(after, before)
+        self.assertEqual(self.count(), 4)
+        with database_connection(self.path) as connection:
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
+
+    def test_unlink_ticket_deleted_distinguishes_missing_ticket(self):
+        self.link()
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM tickets WHERE ticket_id = ?", (self.ticket.ticket_id,))
+        before = self.database_rows()
+        with self.assertRaises(LinkTicketMissingError):
+            self.unlink()
+        self.assertEqual(self.database_rows(), before)
+        self.assertIsNotNone(self.knowledge.get_article(self.article.knowledge_article_id))
+
+    def test_unlink_article_deleted_distinguishes_missing_article(self):
+        self.link()
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM knowledge_articles WHERE knowledge_article_id = ?", (self.article.knowledge_article_id,))
+        before = self.database_rows()
+        with self.assertRaises(LinkArticleMissingError):
+            self.unlink()
+        self.assertEqual(self.database_rows(), before)
+        self.assertIsNotNone(self.tickets.get_ticket_details(self.ticket.ticket_id))
+
+    def test_unlink_missing_related_does_not_remove_other_type(self):
+        with database_connection(self.path) as connection:
+            connection.execute("INSERT INTO ticket_knowledge_articles VALUES (?, ?, 'APPLIED', NULL, ?)",
+                               (self.ticket.ticket_id, self.article.knowledge_article_id, "2026-09-07T00:00:00Z"))
+        before = self.database_rows()
+        with self.assertRaises(ArticleNotLinkedError):
+            self.unlink()
+        self.assertEqual(self.database_rows(), before)
+
+    def test_unlink_zero_rowcount_is_not_reported_as_success(self):
+        self.link()
+        with database_connection(self.path) as connection:
+            connection.execute("CREATE TRIGGER ignore_unlink BEFORE DELETE ON ticket_knowledge_articles BEGIN SELECT RAISE(IGNORE); END")
+        before = self.database_rows()
+        with self.assertRaises(ArticleNotLinkedError):
+            self.unlink()
+        self.assertEqual(self.database_rows(), before)
+
+    def test_unlink_excessive_rowcount_rolls_back(self):
+        self.link()
+        before = self.database_rows()
+
+        @contextmanager
+        def unexpected_rowcount(path):
+            with database_connection(path) as connection:
+                proxy = Mock(wraps=connection)
+                def execute(sql, parameters=()):
+                    cursor = connection.execute(sql, parameters)
+                    return SimpleNamespace(rowcount=2) if sql.startswith("DELETE") else cursor
+                proxy.execute.side_effect = execute
+                yield proxy
+
+        with patch("f7hub.repositories.ticket_knowledge_repository.database_connection", unexpected_rowcount):
+            with self.assertRaises(RuntimeError):
+                self.unlink()
+        self.assertEqual(self.database_rows(), before)
+
+    def test_unlink_failure_after_delete_rolls_back_and_retry_succeeds(self):
+        self.link()
+        before = self.database_rows()
+        with database_connection(self.path) as connection:
+            connection.execute("CREATE TRIGGER reject_unlink AFTER DELETE ON ticket_knowledge_articles BEGIN SELECT RAISE(FAIL, 'synthetic'); END")
+        with self.assertRaises(sqlite3.IntegrityError):
+            self.unlink()
+        self.assertEqual(self.database_rows(), before)
+        with database_connection(self.path) as connection:
+            connection.execute("DROP TRIGGER reject_unlink")
+        self.unlink()
+        self.assertEqual(self.count(), 0)
+
+    def test_unlink_commit_failure_rolls_back(self):
+        self.link()
+        before = self.database_rows()
+
+        @contextmanager
+        def failed_commit(path):
+            with database_connection(path) as connection:
+                proxy = Mock(wraps=connection)
+                proxy.commit.side_effect = sqlite3.OperationalError("synthetic commit failure")
+                yield proxy
+
+        with patch("f7hub.repositories.ticket_knowledge_repository.database_connection", failed_commit):
+            with self.assertRaises(sqlite3.OperationalError):
+                self.unlink()
+        self.assertEqual(self.database_rows(), before)
+
+    def test_concurrent_unlink_has_one_winner_and_one_not_linked(self):
+        self.link()
+        gate = Barrier(2)
+        def attempt(_):
+            repository = TicketKnowledgeRepository(self.path)
+            gate.wait(timeout=5)
+            try:
+                repository.unlink_related_article(ticket_id=self.ticket.ticket_id,
+                                                  knowledge_article_id=self.article.knowledge_article_id)
+                return "unlinked"
+            except ArticleNotLinkedError:
+                return "not linked"
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(attempt, range(2)))
+        self.assertCountEqual(results, ["unlinked", "not linked"])
+        self.assertEqual(self.count(), 0)
+        self.assertIsNotNone(self.knowledge.get_article(self.article.knowledge_article_id))
+        self.assertIsNotNone(self.tickets.get_ticket_details(self.ticket.ticket_id))
+
+    def test_unlink_reappears_in_candidates_and_can_be_relinked(self):
+        self.link()
+        self.assertEqual(self.repository.list_link_candidates(self.ticket.ticket_id), ())
+        self.unlink()
+        candidates = self.repository.list_link_candidates(self.ticket.ticket_id)
+        self.assertEqual([item.knowledge_article_id for item in candidates], [self.article.knowledge_article_id])
+        self.link()
+        self.assertEqual(self.count(), 1)
+
+    def test_unlink_transaction_reserves_writer_before_checks_and_commits_once(self):
+        self.link()
+        statements = []
+        connections = []
+
+        @contextmanager
+        def traced(path):
+            with database_connection(path) as connection:
+                connections.append(connection)
+                connection.set_trace_callback(lambda sql: statements.append(" ".join(sql.split())))
+                yield connection
+
+        with patch("f7hub.repositories.ticket_knowledge_repository.database_connection", traced):
+            self.unlink()
+        self.assertEqual(len(connections), 1)
+        self.assertEqual(statements[0], "BEGIN IMMEDIATE")
+        self.assertTrue(statements[1].startswith("SELECT 1 FROM tickets"))
+        self.assertTrue(statements[2].startswith("SELECT 1 FROM knowledge_articles"))
+        self.assertIn("JOIN knowledge_articles", statements[3])
+        self.assertTrue(statements[4].startswith("DELETE FROM ticket_knowledge_articles"))
+        self.assertEqual(statements[5:], ["COMMIT"])

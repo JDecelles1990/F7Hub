@@ -5,10 +5,12 @@ from unittest.mock import Mock
 
 from f7hub.repositories.ticket_knowledge_repository import (
     TicketKnowledgeRepository, LinkTicketMissingError, LinkArticleMissingError, ArticleAlreadyLinkedError,
+    ArticleNotLinkedError,
 )
 from f7hub.services.ticket_knowledge_service import (
     TicketKnowledgeService, TicketKnowledgeValidationError, TicketKnowledgeTicketMissingError,
     TicketKnowledgeArticleMissingError, TicketKnowledgeAlreadyLinkedError, TicketKnowledgePersistenceError,
+    TicketKnowledgeNotLinkedError,
 )
 
 
@@ -83,3 +85,48 @@ class TicketKnowledgeServiceTests(unittest.TestCase):
     def test_relationship_type_is_not_user_input(self):
         with self.assertRaises(TypeError):
             self.service.link_related_article(1, 2, relationship_type="APPLIED")
+
+    def test_unlink_delegates_exact_ids_and_returns_only_success(self):
+        self.assertIsNone(self.service.unlink_related_article(1, 2))
+        self.repository.unlink_related_article.assert_called_once_with(ticket_id=1, knowledge_article_id=2)
+
+    def test_unlink_rejects_invalid_ticket_ids(self):
+        for value in (True, False, 0, -1, 1.0, "1", None, 2**63):
+            with self.subTest(value=value), self.assertRaises(TicketKnowledgeValidationError):
+                self.service.unlink_related_article(value, 2)
+        self.repository.unlink_related_article.assert_not_called()
+
+    def test_unlink_rejects_invalid_article_ids(self):
+        for value in (True, False, 0, -1, 1.0, "1", None, 2**63):
+            with self.subTest(value=value), self.assertRaises(TicketKnowledgeValidationError):
+                self.service.unlink_related_article(1, value)
+        self.repository.unlink_related_article.assert_not_called()
+
+    def test_unlink_accepts_maximum_sqlite_ids(self):
+        self.service.unlink_related_article(2**63 - 1, 2**63 - 1)
+        self.repository.unlink_related_article.assert_called_once_with(ticket_id=2**63 - 1, knowledge_article_id=2**63 - 1)
+
+    def test_unlink_translates_missing_conditions(self):
+        for internal, public, message in (
+            (LinkTicketMissingError, TicketKnowledgeTicketMissingError, "This ticket no longer exists."),
+            (LinkArticleMissingError, TicketKnowledgeArticleMissingError, "This article no longer exists."),
+            (ArticleNotLinkedError, TicketKnowledgeNotLinkedError,
+             "This article is no longer linked to this ticket. Refresh the linked articles."),
+        ):
+            self.repository.unlink_related_article.side_effect = internal()
+            with self.subTest(public=public), self.assertRaises(public) as caught:
+                self.service.unlink_related_article(1, 2)
+            self.assertEqual(str(caught.exception), message)
+
+    def test_unlink_persistence_errors_hide_internal_details(self):
+        for error in (sqlite3.IntegrityError, sqlite3.OperationalError, OSError, RuntimeError):
+            self.repository.unlink_related_article.side_effect = error("Sensitive SQL or path")
+            with self.assertRaises(TicketKnowledgePersistenceError) as caught:
+                self.service.unlink_related_article(1, 2)
+            self.assertEqual(str(caught.exception), "Could not unlink the article. Your selection is preserved. Try again.")
+
+    def test_unlink_relationship_type_cannot_be_supplied(self):
+        for kind in ("RELATED", "APPLIED", "RESOLUTION_SOURCE"):
+            with self.assertRaises(TypeError):
+                self.service.unlink_related_article(1, 2, relationship_type=kind)
+        self.repository.unlink_related_article.assert_not_called()

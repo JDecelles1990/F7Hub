@@ -708,7 +708,15 @@ Saved tickets → open a ticket → Knowledge → Link Article → select an exi
 
 An empty ticket shows “No knowledge articles linked.” The selector loads lightweight identities for DRAFT, PUBLISHED and ARCHIVED articles, excluding existing RELATED links. Cancel before saving writes nothing. Link runs in the background, blocks duplicate submission/closing during the write, and preserves selection on failure. Missing tickets/articles and duplicate links have clear feedback; an article disappearing before Open Article produces a safe missing-article message. A committed link followed by a failed list refresh remains explicitly reported as linked; use Refresh to recover.
 
-Only RELATED is supported. Linking writes the relationship alone: no ticket updated_at, timeline, status or resolution change. Unlink, relationship-type changes, APPLIED/RESOLUTION_SOURCE, search/filtering, recommendations and ticket-driven article creation/editing are deferred.
+Only RELATED is supported. Linking writes the relationship alone: no ticket updated_at, timeline, status or resolution change. Relationship-type changes, APPLIED/RESOLUTION_SOURCE, search/filtering, recommendations and ticket-driven article creation/editing are deferred.
+
+## Implemented RELATED unlink — Slice 013
+
+Saved tickets → open a ticket → Knowledge → select KB0001 → Unlink Article → confirm Unlink. The confirmation identifies KB0001 and explains that the ticket and knowledge article remain; Cancel, Enter with the default focus and Escape cancel without a service call or write, preserving selection. On success, only KB0001's RELATED association disappears. Other linked articles remain, and Open Article still opens the exact selected current article. KB0001 reappears in Link Article candidates and can be linked again with a fresh relationship timestamp.
+
+Unlink reserves the writer before checking ticket, article and exact RELATED existence. A missing ticket takes precedence; otherwise a missing article is reported, then an already-removed relationship. Concurrent unlink produces one success and one safe not-linked result. Use Refresh to reconcile stale lists. Failed persistence preserves the displayed selection and permits retry; successful persistence followed by failed list refresh remains reported as “Article unlinked.” and Refresh retries only the read. Obsolete callbacks do not update another ticket.
+
+ACTIVITY WRITE: NONE. Unlink changes only the chosen RELATED junction row, preserving the ticket, article, other relationships, ticket updated_at, notes, status history and timeline. There is no bulk unlink, other-type unlink, undo/history or parent deletion workflow.
 
 Related Features:
 

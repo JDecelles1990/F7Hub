@@ -12,6 +12,8 @@
 
 Verified application relationship boundary — Slice 012 (2026-09-07): TicketKnowledgeRepository uses the existing ticket_knowledge_articles table for RELATED-only links. A single BEGIN IMMEDIATE transaction verifies both entities and duplicate state, inserts and reloads joined metadata before commit. Failure rolls back; the composite PK prevents duplicates and existing ON DELETE CASCADE keys remove links when either entity is deleted. Candidate and linked-list reads return current code/title/status/version without article bodies. This use case writes no ticket activity fields/events. Five historical migrations and the physical schema remain unchanged; isolated integrity_check = ok and foreign_key_check = zero violations. Full validation counts are in Status/CURRENT_STATE.md.
 
+Verified application unlink boundary — Slice 013 (2026-09-07): the same repository removes one row with ticket_id = ?, knowledge_article_id = ? and relationship_type = 'RELATED'. BEGIN IMMEDIATE precedes ticket, article and relationship checks. DELETE must affect exactly one row before commit; zero yields not-linked, unexpected counts and failures roll back. Both parent entities, other RELATED rows, synthetic APPLIED/RESOLUTION_SOURCE rows and all ticket activity remain unchanged. Independent service operations racing to unlink yield one success and one safe not-linked result. Candidate reads naturally expose the unlinked article for relinking. No physical schema change or new migration; five historical migrations remain unchanged. Isolated integrity_check = ok and foreign_key_check = zero violations after unlink.
+
 SQLite is the primary persistent data store for F7Hub.
 
 This document defines:

@@ -884,6 +884,8 @@ Slice 012 establishes the narrow cross-module boundary: TicketWorkspace / Ticket
 
 ACTIVITY WRITE: NONE. This link use case writes only ticket_knowledge_articles; current requirements do not require a timeline event or ticket updated_at change. Other ticket activity remains owned by TicketService. MainWindow mediates the TicketWorkspace article-ID signal and the public KnowledgeWorkspace.open_article_by_id operation. Workspaces do not manipulate each other's internals, and all database work reuses ServiceTaskRunner. Existing schema and FK cascades are unchanged; no generic relationship framework is introduced.
 
+Slice 013 extends the same widget/service/repository boundary with unlink_related_article. TicketKnowledgeWidget owns confirmation and presentation, TicketKnowledgeService validates IDs and translates errors, and TicketKnowledgeRepository owns one BEGIN IMMEDIATE transaction: ticket existence → article existence → exact RELATED existence → parameterized DELETE by both IDs and fixed RELATED → require one affected row → COMMIT. Zero rows is a typed not-linked result; an unexpected count or persistence failure rolls back. Missing-ticket, missing-article and not-linked conditions remain distinct. No parent entity or other relationship type is deleted. ACTIVITY WRITE remains NONE, symmetric with linking. Existing lightweight records, shared runner, refresh reconciliation and MainWindow navigation are reused; no schema, framework or ownership change.
+
 Conceptual flow:
 
 GUI

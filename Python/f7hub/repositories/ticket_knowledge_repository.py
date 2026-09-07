@@ -36,6 +36,10 @@ class ArticleAlreadyLinkedError(RuntimeError):
     """An exact RELATED relationship already exists."""
 
 
+class ArticleNotLinkedError(RuntimeError):
+    """The exact RELATED relationship no longer exists."""
+
+
 _IDENTITY_COLUMNS = """
     a.knowledge_article_id, a.article_code, a.title AS article_title,
     a.status AS article_status, a.version_number AS article_version_number
@@ -79,6 +83,30 @@ class TicketKnowledgeRepository:
                 raise RuntimeError("Inserted ticket/article link could not be reloaded.")
             connection.commit()
         return link
+
+    def unlink_related_article(self, *, ticket_id: int, knowledge_article_id: int) -> None:
+        """Remove exactly one RELATED association while preserving both entities."""
+        with database_connection(self._database_path) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            _require_ticket(connection, ticket_id)
+            if connection.execute(
+                "SELECT 1 FROM knowledge_articles WHERE knowledge_article_id = ?",
+                (knowledge_article_id,),
+            ).fetchone() is None:
+                raise LinkArticleMissingError()
+            if _get_link(connection, ticket_id, knowledge_article_id) is None:
+                raise ArticleNotLinkedError()
+            cursor = connection.execute(
+                """DELETE FROM ticket_knowledge_articles
+                   WHERE ticket_id = ? AND knowledge_article_id = ?
+                     AND relationship_type = 'RELATED'""",
+                (ticket_id, knowledge_article_id),
+            )
+            if cursor.rowcount == 0:
+                raise ArticleNotLinkedError()
+            if cursor.rowcount != 1:
+                raise RuntimeError("Unlink did not affect exactly one relationship.")
+            connection.commit()
 
     def list_linked_articles(self, ticket_id: int) -> tuple[TicketKnowledgeLinkRecord, ...]:
         with database_connection(self._database_path) as connection:

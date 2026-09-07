@@ -2,76 +2,74 @@
 
 Last verified: 2026-09-07
 
-Branch: `feat/ticket-knowledge-linking`
+Branch: `feat/ticket-knowledge-unlink`
 
-Base HEAD: `13fc1bcae44f4e36c6e6dd2fcf382874ec121508` (integrated Slice 011, PR #6). Starting main/HEAD matched, with nothing staged and only the separate deletion of Docs/Archive/DocsOLD/00_Vision.md. Slice 012 is implemented and ready for independent review. Nothing is staged or committed; no push or merge. ROOT.md, physical schema docs and historical migrations are unchanged. The user-confirmed archive deletion remains untouched.
+Base HEAD: `68aefb157c7351aa47e5f11ffd4c94cdbb8cf0ae` (Slice 012 integrated through PR #7).
 
-## Working
-
-- SQLite bootstrap, five migrations through `0005_knowledge.sql`, integrity and FK checks
-- Company/contact repositories and quick active-company/contact creation from New Ticket
-- Company/contact/category-aware ticket creation, transactional reference validation and safe refresh/recovery with draft preservation
-- Saved-ticket reopening, current reference names, notes, status history/timeline, resolution, closure and reopening
-- Knowledge Base navigation and asynchronous article create/list/read
-- DRAFT/version 1 creation with atomic initial snapshot; required code/title/body and optional summary
-- Plain-text metadata and read-only Markdown source, with valid body whitespace preserved
-- DRAFT editing with immutable code, current Version N, expected-version conflict protection and atomic sequential snapshots
-- Safe stale/non-DRAFT/missing errors, retained editor input and no-change saves without revision/timestamp updates
-- RELATED ticket/article linking through TicketKnowledgeService/Repository using the existing junction
-- Saved-ticket Knowledge tab with current code/title/status/version, Link Article, Open Article and Refresh
-- Lightweight candidates for all existing statuses, excluding already RELATED articles; safe duplicate/missing-entity feedback
-- Atomic existence/duplicate checks, insert and joined reload; rollback and concurrent duplicate protection
-- Async list/candidate/link calls, duplicate-submit/active-write close protection and retained selection on failure
-- Explicit committed-link feedback after failed list refresh and safe Refresh recovery
-- MainWindow-mediated article-ID navigation into Knowledge Base, including vanished-target feedback
-- Current linked metadata after article edits/status changes, FK cascades and persistence after reconstruction
-- AutoHotkey v2 F7 launch/focus/restore (previously verified; not rerun in Slice 012)
-
-## Partial
-
-- Company creation is name-only; full company/contact/category management remains unimplemented
-- Category hierarchy formatting is deferred; selectors display names directly
-- AutoHotkey login startup is not configured
-- Only DRAFT articles are editable; article deletion/publishing/archiving workflows are not implemented
-- Historical snapshots persist; no history viewer or restore/revert UI
-- RELATED only: no unlink, APPLIED/RESOLUTION_SOURCE workflow, type changes, link notes or bulk linking
-- No selector search/filter, FTS, tags/categories, recommendations, AI or article creation/editing from tickets
-- KnowledgeWorkspace's existing list still loads bodies; new relationship lists do not. No pagination or large-library performance validation. Real user-library volume is NOT VERIFIED; only synthetic data was used.
-
-## Not Started
-
-- PowerShell integration
+Status: Slice 013 implemented, uncommitted, ready for independent review. Starting main/HEAD matched with only the separate user-confirmed deletion of Docs/Archive/DocsOLD/00_Vision.md. Nothing staged; no commit, push or merge. ROOT.md, physical schema docs and five historical migrations are unchanged.
 
 ## Current Milestone
 
-TICKETS ↔ KNOWLEDGE BASE CONNECTED
+TICKET ↔ KNOWLEDGE RELATED LINKS MANAGEABLE
+
+## Working
+
+- SQLite bootstrap, five migrations through 0005_knowledge.sql, integrity and FK checks
+- New Ticket with company/contact/category references and transactional validation
+- Quick Company / Quick Contact creation with safe reference refresh/recovery and draft preservation
+- Saved Tickets, current reference names, notes, history/timeline, Resolve → Close → Reopen
+- Knowledge create/list/read and DRAFT editing with immutable code, current version and atomic historical snapshots
+- Stale-edit protection, safe errors, preserved input and no-change saves without extra revisions
+- Plain-text article metadata and read-only Markdown source
+- RELATED Link Article, lightweight current code/title/status/version, Open Article and Refresh
+- RELATED Unlink Article for one selected association, with explicit confirmation and Cancel as default/escape
+- Exact relationship-only deletion preserving both entities, other RELATED and APPLIED/RESOLUTION_SOURCE rows
+- Safe ticket-missing, article-missing and not-linked feedback; concurrent unlink yields one success and one not-linked result
+- Async linking/unlinking, duplicate/conflicting-action protection, confirmation/context guards and safe obsolete callbacks
+- Failed unlink preserves selection; committed unlink plus failed refresh retains success and recovers through Refresh without another DELETE
+- Unlinked articles reappear in Link Article candidates; normal relink persists one association with a fresh linked_at timestamp
+- MainWindow-mediated exact article navigation and persisted link/unlink state after application reconstruction
+
+## Deferred / Limitations
+
+- Bulk linking/unlinking, APPLIED/RESOLUTION_SOURCE workflows, relationship-type editing, relationship history/undo and generic relationship management
+- History viewer/restore, search/FTS, tags/categories, recommendations and AI
+- Article publishing/archiving/deletion and ticket-driven article creation/editing
+- Full company/contact/category management and category hierarchy formatting
+- KnowledgeWorkspace's existing list still loads bodies; relationship lists remain lightweight. No pagination or large-library validation. Real content volume is NOT VERIFIED; validation is synthetic only.
+- PowerShell integration; AutoHotkey login startup
 
 ## Validation
 
-Database: PASS — 226 tests, fresh full discovery, exit code 0
+| Suite | Result |
+|---|---|
+| Database | 244 PASS |
+| GUI | 74 PASS |
+| Integration | 66 PASS |
+| Total | 384 PASS |
 
-GUI: PASS — 64 tests, fresh full discovery after final sizing fix, exit code 0
+Pre-slice: 347 (226 / 64 / 57). Increase: 37 tests (18 Database, 10 GUI, 9 Integration); no suite decreased.
 
-Integration: PASS — 57 tests, fresh full discovery after final sizing fix, exit code 0
+Focused: repository/service 42 PASS; combined Ticket/Knowledge GUI 34 PASS; cross-module Integration 16 PASS.
 
-Total: PASS — 347 (226 + 64 + 57), up 43 from pre-slice 304 (202 + 52 + 50). No suite count decreased.
+All full suites ran after final implementation/test changes and exited 0. Only documentation changed afterward; focused/full evidence is retained during completion, with no additional application test run required.
 
-Focused Slice 012: repository/service 24 PASS; combined Ticket/Knowledge GUI 24 PASS (12 new plus 12 existing Knowledge tests); cross-module Integration 7 PASS. Full suites include these tests.
+Native Windows: PASS — windows Qt platform, 1000×700, isolated synthetic SQLite. Mouse/keyboard checks created a ticket and KB0001/KB0002, linked both, cancelled then confirmed unlink of KB0001, preserved the ticket/articles/KB0002 link, opened exact KB0002, found KB0001 in candidates and relinked it. Notes and Resolve → Close → Reopen also passed. Captured windows were visually inspected: the new control and confirmation were readable with no clipping/overlap in tested layouts. Agent verification, not user acceptance testing. Evidence retained during documentation completion; no additional native run. Harness/screenshots/databases/logs stayed outside the repository.
 
-Native Windows Slice 012: PASS — windows Qt platform, 1000×700, isolated synthetic SQLite. QTest mouse/keyboard checks created a ticket and KB0001, opened the empty Knowledge tab, selected/linked KB0001, opened its current details, edited it to Version 2, created KB0002, returned to the ticket, added a note and ran Resolve → Close → Reopen. Reconstructing the application against the same database preserved the link and opened Version 2. Empty, selector, linked, read and revised/activity screenshots were visually inspected. Initial code clipping was corrected and the native flow rerun; final identity columns were readable with no clipping/overlap in tested layouts. Agent verification, not user acceptance testing. Harnesses/screenshots/databases stayed outside the repository.
+Existing New Ticket, Quick Company, Quick Contact, references, Saved Tickets, notes/status, Knowledge create/read/edit/version snapshots and Link/Open are covered by the passing full suites. Integration also verifies persisted unlink after reconstruction and opening the remaining article's current version.
 
-Existing New Ticket, Quick Company, Quick Contact, company/contact/category references, Saved Tickets, notes/status lifecycle and Knowledge create/read/edit/version snapshots are covered by the full regression suites. Native checks additionally exercised ticket creation, notes/status and Knowledge create/edit alongside linking.
+AutoHotkey: NOT RUN in Slice 013; launcher unchanged.
 
-AutoHotkey: NOT RUN in this slice; launcher unchanged.
+## Database / Activity
 
-Database validation: integrity_check = ok; foreign_key_check = zero violations; migration count = 5. New migration: NO. Schema changes: NONE. Tests cover both deletion cascades, deletion after candidate/list reads, concurrent duplicate linking, insert/reload rollback/retry, current joined title/status/version and immutable lightweight records. Native SQLite contains the verified ticket_id/article_id/RELATED/UTC linked_at row.
+Migration count: 5. New migration: NO. Schema changes: NONE. Historical migrations unchanged. Isolated integrity_check = ok; foreign_key_check = zero violations.
 
-## Architecture / Activity Decision
+Unlink uses one BEGIN IMMEDIATE transaction with ticket, article and exact RELATED checks before DELETE and a one-row requirement before commit. Tests cover rowcount failures, rollback after DELETE/at commit, parent and other-type preservation, concurrent unlink, candidate/relink and reconstruction.
 
-TicketWorkspace / TicketKnowledgeWidget / LinkArticleDialog → TicketKnowledgeService → TicketKnowledgeRepository → SQLite. MainWindow mediates the article-ID signal and public KnowledgeWorkspace.open_article_by_id operation. Workspaces do not access each other's internals; no GUI SQL or repository calls.
+ACTIVITY WRITE: NONE — link/unlink changes only ticket_knowledge_articles. Ticket updated_at, notes, status history and timeline remain unchanged. Existing widget → service → repository → SQLite ownership and shared ServiceTaskRunner are preserved.
 
-ACTIVITY WRITE: NONE. Linking writes only ticket_knowledge_articles; current requirements do not mandate ticket updated_at or timeline events for this use case. Tests verify existing ticket details/activity remain unchanged by linking.
+## Next Gate / Candidate
 
-## Recommended Next Slice
+Independent Slice 013 review is the next gate. Do not stage, commit, push or merge during this completion task.
 
-Unlink one RELATED article from a saved ticket, retaining both entities. This corrects accidental links through the existing narrow boundary without requiring more content, new schema or richer types. See 16_Roadmap.md for the six-option comparison. Recommendation only; independent Slice 012 review is the next gate. Do not begin Slice 013.
+Recommended next slice: a read-only Knowledge version-history viewer using existing snapshots. See 16_Roadmap.md for the six-option comparison. No Slice 014 implementation.

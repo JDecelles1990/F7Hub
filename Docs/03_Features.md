@@ -429,7 +429,9 @@ Slices 010–011 implement creation, deterministic listing, reopening/reading an
 
 Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. A history browser, historical viewer, restore/revert, deletion, publishing/archiving workflows, search/FTS, categories/tags, article-to-article relationships, external links and AI remain unimplemented.
 
-Slice 012 adds RELATED ticket/article linking: open a saved ticket → Knowledge → Link Article → select an existing article → link → Open Article to read its current content in Knowledge Base. The linked list displays current code/title/status/version. All existing article statuses are eligible; already RELATED articles are excluded from candidates, and concurrent duplicate attempts receive safe feedback. Unlink, other relationship types, recommendations and creating/editing articles from the ticket remain deferred.
+Slice 012 adds RELATED ticket/article linking: open a saved ticket → Knowledge → Link Article → select an existing article → link → Open Article to read its current content in Knowledge Base. The linked list displays current code/title/status/version. All existing article statuses are eligible; already RELATED articles are excluded from candidates, and concurrent duplicate attempts receive safe feedback.
+
+Slice 013 adds Unlink Article for one selected RELATED association. Confirmation identifies the article and explains that both the ticket and article remain; Cancel is the default. Confirmed unlink removes only the exact association and refreshes the list. The article becomes a link candidate again and can be linked normally with a new linked_at timestamp. Missing entities and already-removed links produce safe feedback; a committed unlink remains reported as successful even if refresh fails. Bulk unlink, APPLIED/RESOLUTION_SOURCE workflows, relationship-type editing, history/undo, recommendations and creating/editing articles from the ticket remain deferred.
 
 Possible article types:
 

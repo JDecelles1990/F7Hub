@@ -47,6 +47,17 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-07 — Slice 013: RELATED Ticket/Knowledge Unlink
+
+- Extended TicketKnowledgeRepository/Service/Widget with one selected RELATED unlink, reusing the existing junction, lightweight identities and ServiceTaskRunner.
+- BEGIN IMMEDIATE → ticket/article/exact RELATED checks → parameterized DELETE by both IDs and fixed RELATED → require rowcount == 1 → COMMIT. Zero rows yields typed not-linked; unexpected rowcount and delete/commit failures roll back. Existing missing-entity errors are reused and persistence details remain hidden.
+- Added Unlink Article and a plain-text confirmation identifying the article and retaining both entities. Cancel is the default/escape action; cancellation makes no service call. Confirmed unlink is async, blocks duplicate/conflicting operations, guards confirmation reentry/context changes and ignores callbacks for another ticket.
+- Failed unlink preserves the selected row. Committed unlink followed by refresh failure remains acknowledged as “Article unlinked.”; Refresh retries only the read. The article reappears in candidates and normal relinking creates one new RELATED row with a fresh timestamp.
+- ACTIVITY WRITE: NONE. Only the exact RELATED row is removed. Ticket, article, other RELATED and synthetic APPLIED/RESOLUTION_SOURCE rows survive; ticket updated_at, notes, history and timeline remain unchanged. No schema/dependency change; five historical migrations unchanged, isolated integrity_check = ok and zero FK violations.
+- Focused validation: 42 repository/service (18 new), 34 combined Ticket/Knowledge GUI (10 new), 16 Integration (9 new), all PASS. Full regression: 244 Database, 74 GUI, 66 Integration = 384 PASS, up 37 from 347, all exit codes 0. These runs followed final code/test changes; evidence was retained during documentation-only completion.
+- Native Windows Qt input and captured-window visual inspection passed at 1000×700 with isolated synthetic SQLite: Cancel, confirmed unlink, parent/other-link preservation, exact KB0002 navigation, KB0001 candidate reappearance/relink, notes and Resolve → Close → Reopen. New control/confirmation readable with no clipping or overlap in tested layouts. Agent verification, not user acceptance testing; harness/captures/logs remained outside the repository.
+- Work remains unstaged/uncommitted on feat/ticket-knowledge-unlink for independent review. ROOT.md, physical schema docs and separate archive deletion remain untouched. Next recommendation: read-only Knowledge version-history viewer; no Slice 014 work.
+
 # 2026-09-07 — Slice 012: Ticket/Knowledge Linking
 
 - Added TicketKnowledgeService/Repository for RELATED-only links through existing ticket_knowledge_articles. Frozen lightweight identities exclude bodies; joined title/status/version reflect current article metadata.
