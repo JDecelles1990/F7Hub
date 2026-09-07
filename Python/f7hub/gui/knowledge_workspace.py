@@ -141,6 +141,10 @@ class KnowledgeWorkspace(QWidget):
             self._load_failed,
         )
 
+    def open_article_by_id(self, article_id: int) -> None:
+        """Reconcile the list and reuse selection-driven current detail loading."""
+        self.refresh_list(select_article_id=article_id)
+
     def _article_created(self, article) -> None:
         self.refresh_list(select_article_id=article.knowledge_article_id)
 
@@ -154,11 +158,17 @@ class KnowledgeWorkspace(QWidget):
         self.empty_state.setVisible(not self.articles)
         self.table.setVisible(bool(self.articles))
         self.feedback.setText("")
+        target_id = self._pending_selection_id
+        self._pending_selection_id = None
+        if target_id is not None and not any(
+            article.knowledge_article_id == target_id for article in self.articles
+        ):
+            self._show_article(None)
+            self.feedback.setText("The requested article no longer exists. Refresh the list and try again.")
+            return
         if not self.articles:
             self._show_article(None)
             return
-        target_id = self._pending_selection_id
-        self._pending_selection_id = None
         row = next(
             (index for index, article in enumerate(self.articles)
              if article.knowledge_article_id == target_id),

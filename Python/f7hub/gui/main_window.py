@@ -11,6 +11,7 @@ from f7hub.services.ticket_reference_service import TicketReferenceService
 from f7hub.services.company_service import CompanyService
 from f7hub.services.contact_service import ContactService
 from f7hub.services.knowledge_service import KnowledgeService
+from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
 
 from f7hub.gui.ticket_create_widget import (
     TicketCreateWidget,
@@ -29,6 +30,7 @@ class MainWindow(QMainWindow):
         company_service: CompanyService | None = None,
         contact_service: ContactService | None = None,
         knowledge_service: KnowledgeService | None = None,
+        knowledge_link_service: TicketKnowledgeService | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -44,7 +46,10 @@ class MainWindow(QMainWindow):
             contact_service=contact_service,
             task_runner=self.runner, parent=self,
         )
-        self.workspace = TicketWorkspace(ticket_service, self.runner, self)
+        self.workspace = TicketWorkspace(
+            ticket_service, self.runner, self, knowledge_link_service=knowledge_link_service,
+        )
+        self.workspace.knowledge_article_requested.connect(self.open_knowledge_article)
         self.knowledge_workspace = (
             KnowledgeWorkspace(knowledge_service, self.runner, self)
             if knowledge_service is not None
@@ -113,6 +118,15 @@ class MainWindow(QMainWindow):
             self.workspace._clear_drafts()
             self.pages.setCurrentWidget(self.knowledge_workspace)
             self.knowledge_workspace.refresh_list()
+
+    def open_knowledge_article(self, article_id):
+        if self.runner.busy or self.knowledge_workspace is None:
+            return
+        if not self.workspace.confirm_discard():
+            return
+        self.workspace._clear_drafts()
+        self.pages.setCurrentWidget(self.knowledge_workspace)
+        self.knowledge_workspace.open_article_by_id(article_id)
 
     def closeEvent(self, event):
         if self.runner.busy:

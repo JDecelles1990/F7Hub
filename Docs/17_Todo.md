@@ -349,9 +349,21 @@ Slice 011 — DRAFT editing with version history, verified 2026-09-06:
 - [x] Fresh full regression: Database 202 PASS, GUI 52 PASS, Integration 50 PASS; total 304, up from 280.
 - [x] Native Windows input/visual checks at 1000×700, isolated synthetic SQLite; retained on continuation because GUI/persistence code did not change.
 - [x] Five unchanged migrations; integrity_check = ok, foreign_key_check = zero violations; ROOT.md and separate archive deletion untouched.
-- [ ] Independent Slice 011 review before any Git finalization; nothing staged or committed.
+- Historical Slice 011 review checkpoint is superseded by integration through PR #6 at 13fc1bcae44f4e36c6e6dd2fcf382874ec121508.
 
-Recommended next slice only: link an existing article to a saved ticket and reopen it, using the current junction schema and read view. See 16_Roadmap.md for the six-option comparison. No Slice 012 implementation. History browsing/viewing, restore/revert, search/FTS, category/tag management, relationships, links, ticket linking, publishing/archiving, deletion and AI remain deferred.
+Slice 012 — RELATED ticket/article linking, verified 2026-09-07:
+
+- [x] Add narrow TicketKnowledgeService/Repository using the existing junction and lightweight joined current metadata.
+- [x] Atomically verify entities/duplicate state, insert RELATED and reload; safe typed errors, rollback and concurrent duplicate protection.
+- [x] Saved-ticket Knowledge tab, async candidate selector, Link Article, Refresh and Open Article; selection retention and duplicate/close protection.
+- [x] MainWindow-mediated article-ID navigation, current detail selection, missing-target feedback and persisted reconstruction.
+- [x] Focused repository/service 24 PASS, combined ticket/knowledge GUI 24 PASS (12 new), cross-module Integration 7 PASS.
+- [x] Full regression: Database 226 PASS, GUI 64 PASS, Integration 57 PASS; total 347, up 43 from 304.
+- [x] Native Windows 1000×700 input/visual checks for link/list/open, article create/edit, notes/status lifecycle and reconstruction. Initial code sizing corrected and rerun.
+- [x] Only junction writes; five unchanged migrations, integrity_check = ok, zero FK violations and both deletion cascades tested.
+- [ ] Independent Slice 012 review. No staging, commit, push or merge in this implementation task.
+
+Recommended next slice only: unlink one RELATED article from a saved ticket, retaining the ticket and article. See 16_Roadmap.md for the six-option comparison. Do not begin Slice 013. Unlink, APPLIED/RESOLUTION_SOURCE, richer relationship management, history browsing, search/FTS, category/tag management, publishing/archiving, article deletion and AI remain deferred.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

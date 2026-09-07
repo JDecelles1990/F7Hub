@@ -10,6 +10,8 @@
 
 # 1. Purpose
 
+Verified application relationship boundary — Slice 012 (2026-09-07): TicketKnowledgeRepository uses the existing ticket_knowledge_articles table for RELATED-only links. A single BEGIN IMMEDIATE transaction verifies both entities and duplicate state, inserts and reloads joined metadata before commit. Failure rolls back; the composite PK prevents duplicates and existing ON DELETE CASCADE keys remove links when either entity is deleted. Candidate and linked-list reads return current code/title/status/version without article bodies. This use case writes no ticket activity fields/events. Five historical migrations and the physical schema remain unchanged; isolated integrity_check = ok and foreign_key_check = zero violations. Full validation counts are in Status/CURRENT_STATE.md.
+
 SQLite is the primary persistent data store for F7Hub.
 
 This document defines:

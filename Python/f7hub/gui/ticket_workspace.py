@@ -2,7 +2,7 @@
 
 import logging
 
-from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView, QComboBox, QFormLayout, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QMessageBox, QPushButton, QSplitter, QTabWidget,
@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 )
 
 from f7hub.gui.service_task_runner import ServiceTaskRunner
+from f7hub.gui.ticket_knowledge_widget import TicketKnowledgeWidget
 from f7hub.services.ticket_service import TICKET_NOTE_TYPES, TICKET_STATUSES, TicketValidationError
 
 
@@ -52,13 +53,15 @@ def _plain_editor(parent, *, read_only=False):
 
 class TicketWorkspace(QWidget):
     PAGE_SIZE = 100
+    knowledge_article_requested = Signal(object)
 
-    def __init__(self, service, runner: ServiceTaskRunner, parent=None):
+    def __init__(self, service, runner: ServiceTaskRunner, parent=None, *, knowledge_link_service=None):
         super().__init__(parent)
         self._service = service
         self._runner = runner
         self.details = None
         self._offset = 0
+        self._knowledge_link_service = knowledge_link_service
         self._build_ui()
 
     def _build_ui(self):
@@ -121,6 +124,10 @@ class TicketWorkspace(QWidget):
         tabs.addTab(self.summary, "Details")
         tabs.addTab(self.notes_history, "Notes")
         tabs.addTab(self.timeline, "History & timeline")
+        self.knowledge_tab = TicketKnowledgeWidget(self._knowledge_link_service, self._runner, tabs)
+        self.knowledge_tab.knowledge_article_requested.connect(self.knowledge_article_requested.emit)
+        tabs.addTab(self.knowledge_tab, "Knowledge")
+        self.detail_tabs = tabs
         detail_layout.addWidget(tabs)
         self.author_input = QLineEdit(self.detail_panel)
         self.author_input.setPlaceholderText("Your name (optional)")
@@ -182,6 +189,7 @@ class TicketWorkspace(QWidget):
             self.next_button.setEnabled(len(tickets) > self.PAGE_SIZE)
             self.page_label.setText(f"Page {target // self.PAGE_SIZE + 1}")
             self.feedback.setText(message or ("No tickets match this filter." if not tickets else "Double-click a ticket or select it and press Open."))
+            self.knowledge_tab.refresh_links()
 
         self._runner.submit(
             lambda: self._service.list_tickets(status=status, limit=self.PAGE_SIZE + 1, offset=target),
@@ -223,6 +231,8 @@ class TicketWorkspace(QWidget):
                 self.status_filter.setCurrentIndex(0)
                 self.status_filter.blockSignals(False)
                 self.refresh_list(offset=0, message="Ticket created and loaded.")
+            else:
+                self.knowledge_tab.refresh_links()
 
         def load_failed(error):
             if refresh_queue:
@@ -246,6 +256,7 @@ class TicketWorkspace(QWidget):
     def _display_details(self, details):
         self.details = details
         ticket = details.ticket
+        self.knowledge_tab.set_ticket(ticket.ticket_id)
         self.heading.setText(f"{ticket.ticket_number} — {ticket.subject}\n{ticket.status} · {ticket.priority}")
         self.summary.setPlainText(
             f"{ticket.description or '(No description)'}\n\n"
