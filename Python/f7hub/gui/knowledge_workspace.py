@@ -18,6 +18,7 @@ from PySide6.QtWidgets import (
 )
 
 from f7hub.gui.new_article_dialog import NewArticleDialog
+from f7hub.gui.edit_article_dialog import EditArticleDialog
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.services.knowledge_service import KnowledgeService
 
@@ -42,10 +43,14 @@ class KnowledgeWorkspace(QWidget):
         heading.setObjectName("knowledgeHeading")
         self.new_button = QPushButton("New Article", self)
         self.new_button.clicked.connect(self.open_new_article)
+        self.edit_button = QPushButton("Edit Article", self)
+        self.edit_button.setEnabled(False)
+        self.edit_button.clicked.connect(self.open_edit_article)
         top = QHBoxLayout()
         top.addWidget(heading)
         top.addStretch()
         top.addWidget(self.new_button)
+        top.addWidget(self.edit_button)
 
         self.model = QStandardItemModel(0, 3, self)
         self.model.setHorizontalHeaderLabels(("Article code", "Title", "Status"))
@@ -71,6 +76,7 @@ class KnowledgeWorkspace(QWidget):
         self.detail_title = QLabel("", self)
         self.detail_title.setWordWrap(True)
         self.detail_status = QLabel("", self)
+        self.detail_version = QLabel("", self)
         self.detail_summary = QLabel("", self)
         self.detail_summary.setWordWrap(True)
         self.detail_body = QPlainTextEdit(self)
@@ -79,7 +85,7 @@ class KnowledgeWorkspace(QWidget):
         self.detail_body.setPlaceholderText("Select an article to read.")
         detail = QWidget(self)
         detail_layout = QVBoxLayout(detail)
-        for widget in (self.detail_code, self.detail_title, self.detail_status, self.detail_summary):
+        for widget in (self.detail_code, self.detail_title, self.detail_status, self.detail_version, self.detail_summary):
             widget.setTextFormat(Qt.TextFormat.PlainText)
             detail_layout.addWidget(widget)
         detail_layout.addWidget(self.detail_body, 1)
@@ -102,6 +108,7 @@ class KnowledgeWorkspace(QWidget):
         if self._runner.busy:
             return
         self._pending_selection_id = select_article_id
+        self._show_article(None)
         self.feedback.setText("Loading articles…")
         self._runner.submit(self._service.list_articles, self._list_loaded, self._load_failed)
 
@@ -114,9 +121,19 @@ class KnowledgeWorkspace(QWidget):
         self._new_article_dialog = dialog
         return dialog
 
+    def open_edit_article(self) -> EditArticleDialog | None:
+        if self._runner.busy or self.article is None or self.article.status != "DRAFT":
+            return None
+        dialog = EditArticleDialog(self._service, self._runner, self.article, self)
+        dialog.article_updated.connect(self._article_created)
+        dialog.open()
+        self._edit_article_dialog = dialog
+        return dialog
+
     def open_article(self, article_id: int) -> None:
         if self._runner.busy:
             return
+        self._show_article(None)
         self.feedback.setText("Loading article…")
         self._runner.submit(
             lambda: self._service.get_article(article_id),
@@ -175,16 +192,19 @@ class KnowledgeWorkspace(QWidget):
 
     def _show_article(self, article) -> None:
         self.article = article
+        self.edit_button.setEnabled(article is not None and article.status == "DRAFT")
         if article is None:
             self.detail_code.setText("Select an article to read.")
             self.detail_title.setText("")
             self.detail_status.setText("")
+            self.detail_version.setText("")
             self.detail_summary.setText("")
             self.detail_body.clear()
             return
         self.detail_code.setText(article.article_code)
         self.detail_title.setText(article.title)
         self.detail_status.setText(f"Status: {article.status}")
+        self.detail_version.setText(f"Version {article.version_number}")
         self.detail_summary.setText(
             f"Summary: {article.summary}" if article.summary else "Summary: Not provided"
         )

@@ -695,7 +695,17 @@ KnowledgeRepository creates DRAFT/version 1 with NULL category/published_at and 
 
 Bootstrap injects KnowledgeService into MainWindow. KnowledgeWorkspace and NewArticleDialog call only the service using the shared ServiceTaskRunner. MainWindow disables conflicting pages/actions during work; callbacks execute on the GUI thread, and details reject results for an obsolete selection. Creation prevents repeat submits and unsafe close/cancel. Read-only QPlainTextEdit shows Markdown source; metadata QLabels explicitly use PlainText. The continuation fixed automatic rich-text interpretation of HTML-like metadata and added a regression test without rewriting the existing implementation.
 
-Validation: retained prior-session 11 repository/service focused tests and 189 full Database tests; freshly executed 5 focused GUI, 2 focused Integration, 45 full GUI and 46 full Integration tests. Native Windows input/visual checks passed at 1000×700 with synthetic articles, including reopening after application reconstruction. Search, editing, publishing and relationship workflows remain deferred.
+Historical Slice 010 validation: retained prior-session 11 repository/service focused tests and 189 full Database tests; freshly executed 5 focused GUI, 2 focused Integration, 45 full GUI and 46 full Integration tests. Native Windows input/visual checks passed at 1000×700 with synthetic articles, including reopening after application reconstruction.
+
+## Implemented Knowledge Revision Boundary — Slice 011
+
+`KnowledgeService.update_article(article_id, expected_version_number, title, summary, body)` validates positive integer ID/version values (rejecting bool), trims required title and optional summary, maps blank summary to NULL, rejects whitespace-only bodies and preserves valid body content exactly. Article code is absent from update input. Safe typed application errors distinguish conflicts requiring reopening, no changes and retryable persistence failures; missing/non-DRAFT/stale conditions have specific messages.
+
+`KnowledgeRepository.update_draft_article` uses one connection and BEGIN IMMEDIATE before reading current state. Existence, DRAFT status and expected version are checked before comparing mutable content. The UPDATE requires matching ID/version/DRAFT and exactly one affected row. It increments version_number, changes title/summary/body/updated_at, inserts a snapshot of the NEW revision and reloads before committing. Earlier snapshots and article code remain untouched. Any snapshot/reload failure rolls back; retry produces exactly the next revision. An unchanged current draft raises a no-change condition without changing its timestamp or history.
+
+Separate EditArticleDialog retains the original ID/version token, displays code/version as plain-text labels and submits through ServiceTaskRunner. It preserves failed input, blocks duplicate save/close during writes, disables saving after conflicts and never accepts a replacement token from workspace callbacks. KnowledgeWorkspace enables Edit only for a loaded DRAFT, displays Version N and refreshes/reselects/reloads the same article after success. Existing NewArticleDialog, bootstrap, MainWindow and worker framework are unchanged.
+
+Validation and actual fresh regression totals are recorded in `Status/CURRENT_STATE.md`. Native Windows edit/input/visual checks passed at 1000×700 with synthetic SQLite. History browsing/viewing, restore/revert, search, publishing/archiving and relationship workflows remain deferred; no schema or dependency changes.
 
 ## Implemented Quick Contact Creation — Slice 009
 
@@ -3340,9 +3350,10 @@ TicketCreateWidget: VERIFIED
 Application entry point, bootstrap and minimal MainWindow: VERIFIED
 Saved-ticket workspace and background service runner: VERIFIED
 Remaining Python application implementation: PLANNED
-Isolated database tests: PASS — 189 tests (retained prior-session Slice 010 evidence)
-GUI tests: PASS — 45 tests (fresh Slice 010 continuation, 2026-09-06)
-Application and GUI integration tests: PASS — 46 tests (fresh Slice 010 continuation, 2026-09-06)
+Knowledge DRAFT revisions with atomic snapshots and stale-edit protection: VERIFIED
+Isolated database tests: PASS — 202 tests (fresh Slice 011 final regression)
+GUI tests: PASS — 52 tests (fresh Slice 011 final regression)
+Application and GUI integration tests: PASS — 50 tests (fresh Slice 011 final regression)
 ```
 
 This verification does not prove that:

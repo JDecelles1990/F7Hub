@@ -6,8 +6,12 @@ from datetime import datetime, timezone
 import sqlite3
 
 from f7hub.repositories.knowledge_repository import (
+    ArticleMissingError,
+    ArticleNotEditableError,
+    ArticleUnchangedError,
     KnowledgeArticleRecord,
     KnowledgeRepository,
+    StaleArticleVersionError,
 )
 
 
@@ -17,6 +21,18 @@ class KnowledgeValidationError(ValueError):
 
 class KnowledgeCreationError(RuntimeError):
     """Knowledge article persistence failed; safe to show to a technician."""
+
+
+class KnowledgeUpdateError(RuntimeError):
+    """A revision failed; its message is safe for presentation."""
+
+
+class KnowledgeEditConflictError(KnowledgeUpdateError):
+    """The editor must reopen the article before saving again."""
+
+
+class KnowledgeNoChangesError(KnowledgeUpdateError):
+    """No revision was needed after checking authoritative current state."""
 
 
 class KnowledgeService:
@@ -66,6 +82,48 @@ class KnowledgeService:
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgeCreationError(
                 "Could not create the article. Your entered information is preserved."
+            ) from error
+
+    def update_article(
+        self,
+        *,
+        article_id: int,
+        expected_version_number: int,
+        title: str,
+        summary: str | None,
+        body: str,
+    ) -> KnowledgeArticleRecord:
+        for value, label in (
+            (article_id, "Article ID"),
+            (expected_version_number, "Expected version"),
+        ):
+            if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+                raise KnowledgeValidationError(f"{label} must be a positive integer.")
+        title = _required_text(title, "Title")
+        body = _required_body(body)
+        if summary is not None and not isinstance(summary, str):
+            raise KnowledgeValidationError("Summary must be text.")
+        summary = (summary.strip() or None) if summary is not None else None
+        timestamp = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+        try:
+            return self._repository.update_draft_article(
+                article_id=article_id, expected_version_number=expected_version_number,
+                title=title, summary=summary, body_markdown=body, updated_at=timestamp,
+            )
+        except StaleArticleVersionError as error:
+            raise KnowledgeEditConflictError(
+                "This article changed after you opened it. Reopen the latest version "
+                "before saving your changes. Your entered information is preserved."
+            ) from error
+        except ArticleNotEditableError as error:
+            raise KnowledgeEditConflictError("Only draft articles can be edited.") from error
+        except ArticleMissingError as error:
+            raise KnowledgeEditConflictError("This article no longer exists.") from error
+        except ArticleUnchangedError as error:
+            raise KnowledgeNoChangesError("No changes to save.") from error
+        except (sqlite3.Error, OSError, RuntimeError) as error:
+            raise KnowledgeUpdateError(
+                "Could not save the revision. Your entered information is preserved."
             ) from error
 
     def list_articles(self) -> tuple[KnowledgeArticleRecord, ...]:

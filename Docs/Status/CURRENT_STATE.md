@@ -2,9 +2,9 @@
 
 Last verified: 2026-09-06
 
-Branch: `feat/knowledge-base-first-slice`
+Branch: `feat/knowledge-article-editing`
 
-Base HEAD: `8c2ef7f0aeecfa6b0d65c9e731de8eef3f399efc`; Slice 010 is uncommitted and ready for independent review. Existing partial implementation was preserved on resume. Nothing is staged. ROOT.md is unchanged; the separate user-confirmed deletion of Docs/Archive/DocsOLD/00_Vision.md remains untouched.
+Base HEAD: `04466c3c549bc809a7314c136e1d512ba403ae98` (integrated Slice 010, PR #5). Slice 011 is uncommitted and ready for independent review. Existing implementation was preserved during continuation; only documentation was changed after the resumed-state review. Nothing is staged. ROOT.md is unchanged; the separate user-confirmed deletion of Docs/Archive/DocsOLD/00_Vision.md remains untouched.
 
 ## Working
 
@@ -27,7 +27,13 @@ Base HEAD: `8c2ef7f0aeecfa6b0d65c9e731de8eef3f399efc`; Slice 010 is uncommitted 
 - DRAFT/version 1 creation with an atomic initial version snapshot, safe errors and duplicate-submit protection
 - Deterministic SQLite-backed article listing and persisted details after application reconstruction
 - Read-only Markdown source with valid body whitespace preserved; metadata displayed literally as plain text
-- AutoHotkey v2 F7 launch/focus/restore (previously verified; not rerun in Slice 010)
+- DRAFT article title/summary/body editing with immutable article code and read-only current Version N
+- Fixed expected-version token, authoritative stale-edit protection and conditional ID/version/DRAFT update
+- Atomic current-row update plus new immutable revision snapshot; sequential 1/2/3 history, complete snapshot/reload rollback and safe retry
+- Specific safe stale/non-DRAFT/missing errors, retained editor input, no raw database details and explicit reopening after conflict
+- No-change saves detected after authoritative status/version checks; no revision or timestamp change
+- Async Save Revision, duplicate-save/close protection and same-article list/detail reconciliation
+- AutoHotkey v2 F7 launch/focus/restore (previously verified; not rerun in Slice 011)
 
 ## Partial
 
@@ -35,7 +41,8 @@ Base HEAD: `8c2ef7f0aeecfa6b0d65c9e731de8eef3f399efc`; Slice 010 is uncommitted 
 - Contact creation is limited to selected companies; contact editing/deletion and contact/category management GUI are not implemented
 - Category hierarchy formatting is deferred; the selector displays category names directly
 - AutoHotkey login startup is not configured
-- Knowledge articles cannot yet be edited, deleted, published or archived through the application
+- Only DRAFT articles can be edited; deletion, publishing and archiving workflows are not implemented
+- Historical snapshots persist in SQLite; no history browser, historical viewer or restore/revert UI
 - Knowledge search/FTS, categories/tags, relationships, links, ticket linking and AI remain unimplemented
 - Knowledge listing currently loads all article records, including bodies; no pagination or large-library performance validation
 
@@ -45,21 +52,21 @@ Base HEAD: `8c2ef7f0aeecfa6b0d65c9e731de8eef3f399efc`; Slice 010 is uncommitted 
 
 ## Current Milestone
 
-FIRST USABLE KNOWLEDGE BASE — CREATE → LIST → REOPEN / READ
+KNOWLEDGE BASE CREATE → READ → EDIT WITH VERSION HISTORY
 
 ## Validation
 
-Database: PASS — 189 tests (supplied prior-session evidence retained; persistence implementation unchanged during continuation)
+Database: PASS — 202 tests, fresh final discovery, exit code 0
 
-GUI: PASS — 45 tests (fresh continuation run after the metadata plain-text fix)
+GUI: PASS — 52 tests, fresh final discovery, exit code 0
 
-Integration: PASS — 46 tests (fresh complete run and post-fix rerun; baseline was 44)
+Integration: PASS — 50 tests, fresh final discovery, exit code 0
 
-Total regression evidence: PASS — 280 tests (189 retained + 45 fresh + 46 fresh)
+Total: PASS — 304 tests (202 + 52 + 50), up 24 from the pre-slice 280 (189 + 45 + 46). No suite count decreased.
 
-Slice 010 focused tests: repository/service 11 PASS retained; original GUI 4 PASS and Integration 2 PASS retained. Fresh affected tests: GUI 5 PASS (including one added untrusted-metadata regression), Integration 2 PASS.
+Slice 011 focused tests: repository/service 24 PASS, GUI 12 PASS, Integration 6 PASS. Evidence retained on continuation because implementation/tests remained unchanged; the fresh full suites also include these tests.
 
-Native Windows Slice 010: PASS — native windows Qt platform, 1000×700, isolated synthetic SQLite. Input-event checks created KB0001 (print spooler) and KB0002 (Microsoft 365 sign-in), selected both and verified correct details, switched through New ticket/Saved tickets/Knowledge Base and reopened both articles after application reconstruction. Empty state, dialog and both article views were visually inspected; no clipping/overlap observed for the supplied examples. Agent checks, not user acceptance testing.
+Native Windows Slice 011: PASS — native windows Qt platform, 1000×700, isolated synthetic SQLite. Input-event checks created KB0001 version 1, opened Edit Article, verified read-only code/version and prefilled title/summary/body, saved revised title/body and displayed Version 2 with the same selection. Switching through New ticket/Saved tickets/Knowledge Base preserved the revised content. Creating KB0002 verified New Article still works. Editor and saved Version 2 views were visually inspected; no clipping/overlap observed for the supplied examples. Agent checks, not user acceptance testing. Evidence retained on continuation; no additional native run because GUI implementation stayed unchanged. Harness/captures were outside the repository.
 
 Existing New Ticket, Quick Company, Quick Contact, company/contact/category references, Saved Tickets, notes and Resolve → Close → Reopen are covered by the freshly passing full GUI/Integration suites.
 
@@ -67,8 +74,8 @@ AutoHotkey: NOT RUN in this slice
 
 Migration: NONE — five unchanged migrations; isolated integrity_check = ok and foreign_key_check = zero violations.
 
-Database continuation check: two article rows and two version-1 rows, one snapshot per article. A separate isolated trace proved failed reload rolls back, retry leaves one article/one snapshot and successful creation commits exactly once. Whitespace-only body with newline/tab was rejected and meaningful body whitespace survived storage unchanged.
+Database/native evidence: KB0001 snapshots 1/2 plus KB0002 version 1; integrity_check = ok, foreign_key_check = zero violations and five migrations. Repository tests additionally verify complete historical rows remain unchanged through versions 1/2/3, snapshot/reload failure rollback, unchanged timestamps on no-change saves, and retry producing exactly the next version. Real SQLite integration proves two editors conflict correctly after workspace refresh, no extra snapshot, status/deletion protection, input retention and latest content/history surviving application reconstruction.
 
 ## Recommended Next Slice
 
-Knowledge article editing with version history: correct an existing draft's title, summary and body, preserve prior revisions atomically and reject stale overwrites, keeping its article code stable. This fixes the immediate inability to correct reusable procedures and reuses the current Knowledge boundaries. See 16_Roadmap.md for the comparison with search/FTS, categories/tags, ticket linking, company/contact management and dashboard/navigation. Recommendation only; no Slice 011 work. Independent Slice 010 review remains the next gate.
+Ticket ↔ Knowledge linking: attach an existing article to a saved ticket with a RELATED link and reopen it through the current read view. This reuses the existing junction schema and gives immediate cross-workflow context without depending on a large library. Current real article volume is NOT VERIFIED; validation used synthetic data only. See 16_Roadmap.md for the comparison of search/FTS, history viewer/restore, categories/tags, ticket linking, company/contact management and dashboard/navigation. Recommendation only; no Slice 012 work. Independent Slice 011 review remains the next gate.

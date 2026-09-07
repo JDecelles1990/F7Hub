@@ -47,6 +47,18 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-06 — Slice 011: Draft Editing with Version History
+
+- Added EditArticleDialog and extended KnowledgeWorkspace/Service/Repository for DRAFT title/summary/body revisions. Article code is immutable; current Version N is displayed. The existing implementation was preserved during completion review without refactoring passing code.
+- Expected version_number is fixed when editing begins. BEGIN IMMEDIATE → load → existence/DRAFT/version checks → no-change check → conditional UPDATE → new snapshot → reload → COMMIT uses one connection. Snapshot/reload failures roll back; retry creates exactly one next revision. Historical snapshots are never changed by editing.
+- Stale editors cannot overwrite newer content or create an extra snapshot, including after the same workspace refreshes. PUBLISHED/ARCHIVED and deleted articles receive safe errors. Failed input is retained; conflicts require reopening. No-change saves leave version/timestamp/history unchanged after authoritative checks.
+- Save Revision reuses ServiceTaskRunner, blocks duplicate saves and close/cancel during writes, then refreshes/reselects/reloads the same article. Creation and ticket workflows remain functional.
+- Focused tests: repository/service 24 PASS, GUI 12 PASS, Integration 6 PASS. Fresh final discovery: Database 202 PASS, GUI 52 PASS, Integration 50 PASS; 304 total versus 280 before Slice 011. All three commands completed with exit code 0.
+- Native Windows input/visual checks: PASS at 1000×700 with isolated synthetic SQLite, edit prefill and read-only identity, Version 1 → 2, updated content, ticket navigation/reopen and another New Article. No observed clipping/overlap. Evidence retained during continuation; no duplicate native run. Harness/captures stayed outside the repository.
+- Isolated integrity_check = ok, foreign_key_check = zero violations, migration count = 5. No schema/migration changes. ROOT.md unchanged; unrelated archive deletion preserved separately. Security/integrity review found no blocking defect in the Slice 011 diff.
+- Scope excludes history browsing/viewing, restore/revert, publishing/archiving, deletion, search/FTS, categories/tags, relationships, links, ticket linking and AI. Ticket ↔ Knowledge linking is the single recommended next slice, not implemented.
+- Branch feat/knowledge-article-editing, base HEAD 04466c3c549bc809a7314c136e1d512ba403ae98. Ready for independent review; no staging, commit, push or merge performed.
+
 # 2026-09-06 — Slice 010: First Usable Knowledge Base
 
 - Resumed existing uncommitted work on feat/knowledge-base-first-slice at 8c2ef7f0aeecfa6b0d65c9e731de8eef3f399efc. Preserved the implementation, ROOT.md and the separate user-confirmed archive deletion.

@@ -12,6 +12,9 @@ from f7hub.services.knowledge_service import (
     KnowledgeCreationError,
     KnowledgeService,
     KnowledgeValidationError,
+    KnowledgeUpdateError,
+    KnowledgeEditConflictError,
+    KnowledgeNoChangesError,
 )
 
 
@@ -83,6 +86,79 @@ class KnowledgeServiceTests(unittest.TestCase):
         with patch.object(self.repository, "get_article", side_effect=RuntimeError("private")):
             with self.assertRaises(KnowledgeCreationError):
                 self.service.get_article(1)
+
+    def create_for_edit(self):
+        return self.service.create_article(article_code="KB0001", title="Title", summary=None, body="Body")
+
+    def update(self, article, **overrides):
+        return self.service.update_article(**(dict(
+            article_id=article.knowledge_article_id, expected_version_number=article.version_number,
+            title=" Revised title ", summary=" Revised summary ", body="  # Body\n\n\tStep  \n",
+        ) | overrides))
+
+    def test_valid_update_normalizes_metadata_and_preserves_body_exactly(self):
+        first = self.create_for_edit()
+        second = self.update(first)
+        self.assertEqual(second.title, "Revised title")
+        self.assertEqual(second.summary, "Revised summary")
+        self.assertEqual(second.body_markdown, "  # Body\n\n\tStep  \n")
+        self.assertEqual(second.article_code, first.article_code)
+        self.assertEqual(second.version_number, 2)
+        self.assertRegex(second.updated_at, r"Z$")
+        for summary in (" \n\t", None):
+            second = self.update(second, title=f"Title {second.version_number}", summary=summary)
+            self.assertIsNone(second.summary)
+
+    def test_update_id_and_expected_version_reject_nonpositive_and_noninteger(self):
+        first = self.create_for_edit()
+        with patch.object(self.repository, "update_draft_article") as update:
+            for field in ("article_id", "expected_version_number"):
+                for value in (True, False, 0, -1, 1.5, "1", None):
+                    with self.subTest(field=field, value=value), self.assertRaises(KnowledgeValidationError):
+                        self.update(first, **{field: value})
+            update.assert_not_called()
+
+    def test_update_text_validation_and_code_is_not_mutable_input(self):
+        first = self.create_for_edit()
+        with patch.object(self.repository, "update_draft_article") as update:
+            for field in ("title", "body"):
+                for value in (None, 7, True, "", " \n\t"):
+                    with self.subTest(field=field, value=value), self.assertRaises(KnowledgeValidationError):
+                        self.update(first, **{field: value})
+            with self.assertRaises(KnowledgeValidationError):
+                self.update(first, summary=7)
+            with self.assertRaises(TypeError):
+                self.update(first, article_code="Changed")
+            update.assert_not_called()
+
+    def test_update_condition_errors_are_safe_specific_and_typed(self):
+        from f7hub.repositories.knowledge_repository import (
+            ArticleMissingError, ArticleNotEditableError, StaleArticleVersionError, ArticleUnchangedError,
+        )
+        first = self.create_for_edit()
+        for error, expected, message in (
+            (ArticleMissingError, KnowledgeEditConflictError, "no longer exists"),
+            (ArticleNotEditableError, KnowledgeEditConflictError, "Only draft"),
+            (StaleArticleVersionError, KnowledgeEditConflictError, "Reopen the latest version"),
+            (ArticleUnchangedError, KnowledgeNoChangesError, "No changes to save"),
+            (sqlite3.OperationalError, KnowledgeUpdateError, "Could not save"),
+            (PermissionError, KnowledgeUpdateError, "Could not save"),
+            (RuntimeError, KnowledgeUpdateError, "Could not save"),
+        ):
+            with self.subTest(error=error), patch.object(self.repository, "update_draft_article", side_effect=error("private SQL path")):
+                with self.assertRaises(expected) as caught:
+                    self.update(first)
+                self.assertIn(message, str(caught.exception))
+                self.assertNotIn("private", str(caught.exception))
+
+    def test_normalized_no_change_and_stale_no_change_are_authoritative(self):
+        first = self.create_for_edit()
+        with self.assertRaises(KnowledgeNoChangesError):
+            self.update(first, title=" Title ", summary="  ", body="Body")
+        second = self.update(first)
+        with self.assertRaises(KnowledgeEditConflictError):
+            self.update(first, title=second.title, summary=second.summary, body=second.body_markdown)
+        self.assertEqual(self.service.get_article(first.knowledge_article_id), second)
 
 
 if __name__ == "__main__":

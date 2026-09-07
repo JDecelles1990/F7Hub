@@ -334,9 +334,24 @@ Slice 010 — first usable Knowledge Base, verified 2026-09-06:
 - [x] Retain supplied Database evidence: 11 focused and 189 full tests; rerun GUI 45 and Integration 46 after the display fix (280 total regression evidence).
 - [x] Native Windows synthetic create/list/read, two articles, reconstruction and ticket navigation at 1000×700; visual layout inspected.
 - [x] Five unchanged migrations, integrity_check = ok, zero foreign-key violations; rollback/retry and one successful commit independently checked.
-- [ ] Independent Slice 010 review before Git finalization.
+- Historical checkpoint: Slice 010 is now integrated through PR #5 at main HEAD 04466c3c549bc809a7314c136e1d512ba403ae98.
 
-Recommended next slice only: edit a draft article's title/summary/body with atomic revision history and stale-edit protection, keeping its code stable. No Slice 011 implementation is included. Search/FTS, category/tag management, relationships, links, ticket linking, publishing/archiving, deletion and AI remain deferred.
+Slice 011 — DRAFT editing with version history, verified 2026-09-06:
+
+- [x] Preserve the existing implementation on feat/knowledge-article-editing; no continuation refactor or behavior rewrite.
+- [x] Read-only article code/version; editable title/summary/body; current Version N in details.
+- [x] Validate positive ID/version (reject bool), normalize title/summary and preserve valid body content.
+- [x] BEGIN IMMEDIATE, authoritative existence/DRAFT/version checks, conditional UPDATE, immutable new snapshot, reload and one commit.
+- [x] Preserve snapshots 1/2/3, reject stale overwrites even after workspace refresh, roll back snapshot/reload failures and retry without skipped/duplicate revisions.
+- [x] No-change detection only after authoritative version checks; safe missing/non-DRAFT/persistence errors and retained editor input.
+- [x] Async save, duplicate/close protection, same-ID list/detail reconciliation and unchanged creation workflow.
+- [x] Focused tests: repository/service 24 PASS, GUI 12 PASS, Integration 6 PASS.
+- [x] Fresh full regression: Database 202 PASS, GUI 52 PASS, Integration 50 PASS; total 304, up from 280.
+- [x] Native Windows input/visual checks at 1000×700, isolated synthetic SQLite; retained on continuation because GUI/persistence code did not change.
+- [x] Five unchanged migrations; integrity_check = ok, foreign_key_check = zero violations; ROOT.md and separate archive deletion untouched.
+- [ ] Independent Slice 011 review before any Git finalization; nothing staged or committed.
+
+Recommended next slice only: link an existing article to a saved ticket and reopen it, using the current junction schema and read view. See 16_Roadmap.md for the six-option comparison. No Slice 012 implementation. History browsing/viewing, restore/revert, search/FTS, category/tag management, relationships, links, ticket linking, publishing/archiving, deletion and AI remain deferred.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 
