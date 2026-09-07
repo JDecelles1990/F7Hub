@@ -116,11 +116,22 @@ Remaining application implementation: PLANNED
 
 # 5. Roadmap Layers
 
-After Slice 010, the verified product milestone is **First Usable Knowledge Base: Create → List → Reopen / Read**, alongside the existing ticket and quick company/contact workflows. New articles are DRAFT with an atomic version-1 snapshot and read-only Markdown source. Validation is recorded in `Status/CURRENT_STATE.md`; independent Slice 010 review is pending.
+After Slice 011, the verified product milestone is **Knowledge Base Create → Read → Edit with Version History**, alongside the existing ticket and quick company/contact workflows. DRAFT articles can revise title/summary/body with stable codes, atomic sequential snapshots and optimistic stale-edit protection. Current Version N is displayed; history browsing and restore remain unimplemented. Fresh regression: 202 Database, 52 GUI, 50 Integration (304 total). Native Windows edit/input/visual checks passed at 1000×700. Independent Slice 011 review is the next gate; changes remain uncommitted.
 
-Recommended next bounded slice: **knowledge article editing with version history**. Let technicians correct an existing draft's title, summary and body, preserve the prior snapshot and reopen the saved revision. Keep article code stable and prevent stale edits from silently overwriting newer content. This addresses the immediate inability to correct saved procedures and reuses the existing repository/service/workspace without requiring search infrastructure.
+Recommended next bounded slice: **Ticket ↔ Knowledge linking**. From a saved ticket, choose an existing article, persist one RELATED link and reopen the linked article through the existing Knowledge read view. Reuse the existing ticket_knowledge_articles table and service/repository boundaries. Keep unlinking, reverse navigation, revision pinning, automatic suggestions and other relationship types outside that first slice. This connects reusable procedures to actual support work without requiring a large article library.
 
-Compared alternatives: search/FTS improves retrieval as content grows but requires indexing and synchronization; categories/tags add organization but cannot correct content; ticket linking adds useful context but spans two workspaces and a new relationship workflow; Companies/Contacts management expands administration beyond the now-working quick-create path; dashboard/navigation changes offer less immediate utility than correcting reusable procedures. No next implementation is authorized here.
+Comparison of the six requested alternatives:
+
+| Candidate | Assessment after Slice 011 |
+|---|---|
+| A. Knowledge Base search / FTS5 | Useful as content grows; needs index synchronization and search UI. Only synthetic library volumes have been verified, so current real content volume is NOT VERIFIED. |
+| B. Version-history viewer / restore | A read-only viewer is small and reuses snapshots; restore adds a separate mutation/conflict workflow. Less cross-workflow value than linking a procedure to a ticket. |
+| C. Knowledge categories/tags | Reuses existing schema but adds assignment/filtering UI; benefits depend on library volume. |
+| D. Ticket ↔ Knowledge linking | Recommended: immediate technician context across two working modules, existing junction schema, narrowly bounded create-link/open-article behavior. Requires explicit service validation across both entities. |
+| E. Companies/Contacts management | Useful administration, but editing reference data and managing its downstream effects is broader than the proposed link workflow. |
+| F. Dashboard/navigation improvement | Existing navigation works; no measured navigation bottleneck justifies a redesign before adding reusable ticket context. |
+
+Recommendation only. Do not implement Slice 012 as part of Slice 011.
 
 The F7Hub roadmap is organized into:
 
@@ -713,7 +724,8 @@ knowledge_article_tags
 ```text
 0005_knowledge.sql: VERIFIED — 2026-09-04 — 11 focused tests; 90 full database tests
 KnowledgeRepository/Service and create/list/read workspace: VERIFIED — Slice 010
-Editing, search, publishing/archiving and relationship workflows: PLANNED
+DRAFT editing with atomic snapshots and stale-edit protection: VERIFIED — Slice 011
+History viewer/restore, search, publishing/archiving and relationship workflows: PLANNED
 ```
 
 Initial capabilities:

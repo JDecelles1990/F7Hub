@@ -81,7 +81,7 @@ The primary interaction principle is:
 
 # 4. Current Implementation Status
 
-Repository inspection and tests through 2026-09-06 verified ticket creation, quick company/contact creation, the saved-ticket workspace and the first Knowledge Base create/list/read workflow in the application shell.
+Repository inspection and tests through 2026-09-06 verified ticket creation, quick company/contact creation, the saved-ticket workspace and Knowledge Base create/list/read plus DRAFT editing with version history in the application shell.
 
 ```text
 TicketCreateWidget: VERIFIED
@@ -89,8 +89,9 @@ Application entry point, bootstrap and MainWindow: VERIFIED
 Saved-ticket list, details, notes and status controls: VERIFIED
 Remaining navigation and GUI modules: PLANNED
 Knowledge Base create/list/read: VERIFIED
-GUI tests: PASS — 45 tests
-Application and GUI integration tests: PASS — 46 tests
+Knowledge DRAFT editing, current version and stale-edit feedback: VERIFIED
+GUI tests: PASS — 52 tests (fresh Slice 011 final regression)
+Application and GUI integration tests: PASS — 50 tests (fresh Slice 011 final regression)
 ```
 
 `TicketCreateWidget` provides the minimum ticket input form, inline required-field feedback, safe persistence-error presentation, input preservation, keyboard save action, service delegation and a successful-ticket signal. The main window provides New ticket and Saved tickets navigation. Successful creation opens the saved ticket. The queue supports status filtering and pages of 100 tickets; details show notes, lifecycle history and timeline events. Technicians can add notes, resolve with a summary, close and reopen using service-provided status choices.
@@ -575,7 +576,13 @@ Contact
 
 Slice 010 adds Knowledge Base beside New ticket and Saved tickets in the existing toolbar/menu and stacked application shell. The workspace has New Article, a code/title/status table, a clear empty state and a read view with code, title, status, summary and read-only Markdown source. Metadata is explicitly plain text so HTML-like input remains literal.
 
-New Article collects required article code/title/body and optional summary. Creation, list refresh and detail reads use the existing background runner; conflicting pages/navigation are disabled while busy. Duplicate submission is prevented, errors preserve input and detail callbacks check the current selection. There is no rendered Markdown, editor for saved articles, publishing/archiving, search/FTS, categories/tags, relationships, links, ticket linking or AI in this slice.
+New Article collects required article code/title/body and optional summary. Creation, list refresh and detail reads use the existing background runner; conflicting pages/navigation are disabled while busy. Duplicate submission is prevented, errors preserve input and detail callbacks check the current selection.
+
+Slice 011 adds Edit Article for a loaded DRAFT and a read-only Version N detail label. Edit is unavailable without loaded details, during reload or for PUBLISHED/ARCHIVED articles. A separate EditArticleDialog keeps creation and revision responsibilities explicit: code and the originally opened version are plain-text labels; title/summary/body are prefilled editable fields; actions are Cancel and Save Revision.
+
+Save uses ServiceTaskRunner, blocks duplicate submission and close/cancel during the write, and closes on success. The list refreshes, reselects the same article ID and reloads current details. Failures preserve entered text. Stale/missing/non-DRAFT conflicts disable further saves in that editor; a new editor must be opened explicitly. Workspace refreshes cannot replace its expected-version token. No-change feedback leaves the editor open and creates no revision after authoritative version checks.
+
+Native Windows input and visual verification at 1000×700 passed for edit prefill, stable code, Version 1 → 2, updated content, navigation/reopen and existing New Article. No clipping/overlap was observed in the synthetic examples; this is agent verification, not user acceptance testing. There is no rendered Markdown, history browser, historical viewer, restore/revert, publishing/archiving, search/FTS, categories/tags, relationships, links, ticket linking or AI.
 
 Native Windows agent input checks and visual inspection passed on 2026-09-06 at 1000×700 for the empty state, creation of KB0001 and KB0002, list/detail switching and return through New ticket/Saved tickets. Both articles survived application reconstruction against isolated synthetic SQLite. No clipping/overlap was observed for these inputs. These are agent checks, not user acceptance testing. The broader layouts below remain planned.
 

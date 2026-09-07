@@ -425,7 +425,9 @@ Requirements: `FR-KB-001`, `FR-KB-002`
 
 F7Hub shall support creation and editing of structured KB articles.
 
-Slice 010 implements creation, deterministic listing and reopening/reading through Knowledge Base navigation. Input is a required user-entered article code, required title, optional summary and required Markdown body. New articles are DRAFT, version 1, with an atomic initial history snapshot. Body content is displayed as read-only Markdown source. Editing, deletion, publishing/archiving workflows, search/FTS, categories/tags, relationships, links, ticket linking and AI remain unimplemented in this slice.
+Slices 010–011 implement creation, deterministic listing, reopening/reading and DRAFT article editing through Knowledge Base navigation. Creation requires a user-entered article code, title and Markdown body; summary is optional. New articles are DRAFT, version 1, with an atomic initial history snapshot. Edit Article changes title/summary/body while keeping the article code immutable. Save Revision atomically increments the current version and appends its new snapshot; earlier snapshots remain unchanged. An expected-version token rejects stale overwrites. The read view displays Version N and read-only Markdown source.
+
+Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. A history browser, historical viewer, restore/revert, deletion, publishing/archiving workflows, search/FTS, categories/tags, relationships, links, ticket linking and AI remain unimplemented.
 
 Possible article types:
 

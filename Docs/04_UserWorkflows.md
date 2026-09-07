@@ -690,7 +690,17 @@ Open Knowledge Base → New Article → enter article code, title, optional summ
 
 Code and title are trimmed and required. Summary is trimmed, with blank input stored as NULL. Whitespace-only body input is rejected; valid body text is preserved exactly by the service. Duplicate codes use the existing case-insensitive schema constraint and receive safe feedback. Failed creation preserves entered values; Cancel closes an idle form without saving, and repeated submission/cancellation is blocked during a write.
 
-Creation stores a DRAFT article and its version-1 snapshot atomically. Category and published_at remain NULL. The read view shows code, title, DRAFT, summary and plain, read-only Markdown source. Editing, deletion, publishing/archiving, search/FTS, category/tag assignment, relationships, links, ticket linking and AI are deferred. The broader workflow below remains a product target.
+Creation stores a DRAFT article and its version-1 snapshot atomically. Category and published_at remain NULL. The read view shows code, title, status, current Version N, summary and plain, read-only Markdown source.
+
+## Implemented draft editing — Slice 011
+
+Open an existing DRAFT article → Edit Article → change title, summary or body → Save Revision → the same article remains selected with updated content and Version N+1 → reopen/read the saved revision. Article code and the editor's originally opened version are read-only. Title and summary are normalized as for creation; valid body content is preserved by the service.
+
+The current article update and new revision snapshot commit together. Version 1 preserves the original content; subsequent snapshots preserve each new revision without changing earlier rows. Saving identical normalized content reports “No changes to save.” and leaves the current version and timestamp unchanged, only after the database confirms the expected version is still current.
+
+If another editor saves first, the stale editor cannot overwrite it or add a snapshot. Its text remains available to copy, with clear feedback and Save disabled. Close the old editor, reopen the latest article, and start a new edit explicitly; a workspace refresh never replaces an open editor's original token. External changes to PUBLISHED/ARCHIVED status or deletion receive safe specific feedback with input retained. Generic persistence failures preserve input and permit retry. Cancel writes nothing; save runs in the background and blocks duplicate saves and closing during the write.
+
+History browsing, historical viewing, restore/revert, deletion, publishing/archiving, search/FTS, category/tag assignment, relationships, links, ticket linking and AI remain deferred. The broader workflow below remains a product target.
 
 Related Features:
 

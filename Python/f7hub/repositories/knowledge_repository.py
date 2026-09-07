@@ -45,6 +45,22 @@ _ARTICLE_COLUMNS = """
 """
 
 
+class ArticleMissingError(RuntimeError):
+    """The article was removed before the revision could be saved."""
+
+
+class ArticleNotEditableError(RuntimeError):
+    """The current article is not a draft."""
+
+
+class StaleArticleVersionError(RuntimeError):
+    """The editor's expected version is no longer current."""
+
+
+class ArticleUnchangedError(RuntimeError):
+    """Validated current content is identical to the proposed revision."""
+
+
 class KnowledgeRepository:
     """Persist and retrieve knowledge articles through configured SQLite connections."""
 
@@ -88,6 +104,63 @@ class KnowledgeRepository:
             article = _get_article(connection, article_id)
             if article is None:
                 raise RuntimeError("Inserted knowledge article could not be reloaded.")
+            connection.commit()
+        return article
+
+    def update_draft_article(
+        self,
+        *,
+        article_id: int,
+        expected_version_number: int,
+        title: str,
+        summary: str | None,
+        body_markdown: str,
+        updated_at: str,
+    ) -> KnowledgeArticleRecord:
+        """Save current content and its new snapshot, or roll back both.
+
+        Check stale state before comparing content: even an unchanged stale
+        editor must reopen the latest version. Prior snapshots are never edited.
+        """
+        with database_connection(self._database_path) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            current = _get_article(connection, article_id)
+            if current is None:
+                raise ArticleMissingError()
+            if current.status != "DRAFT":
+                raise ArticleNotEditableError()
+            if current.version_number != expected_version_number:
+                raise StaleArticleVersionError()
+            if (current.title, current.summary, current.body_markdown) == (
+                title, summary, body_markdown
+            ):
+                raise ArticleUnchangedError()
+            next_version = current.version_number + 1
+            cursor = connection.execute(
+                """
+                UPDATE knowledge_articles
+                SET title = ?, summary = ?, body_markdown = ?,
+                    version_number = ?, updated_at = ?
+                WHERE knowledge_article_id = ? AND version_number = ?
+                    AND status = 'DRAFT'
+                """,
+                (title, summary, body_markdown, next_version, updated_at,
+                 article_id, expected_version_number),
+            )
+            if cursor.rowcount != 1:
+                raise StaleArticleVersionError()
+            connection.execute(
+                """
+                INSERT INTO knowledge_article_versions (
+                    knowledge_article_id, version_number, title, summary,
+                    body_markdown, change_summary, created_by, created_at
+                ) VALUES (?, ?, ?, ?, ?, NULL, NULL, ?)
+                """,
+                (article_id, next_version, title, summary, body_markdown, updated_at),
+            )
+            article = _get_article(connection, article_id)
+            if article is None:
+                raise RuntimeError("Updated knowledge article could not be reloaded.")
             connection.commit()
         return article
 

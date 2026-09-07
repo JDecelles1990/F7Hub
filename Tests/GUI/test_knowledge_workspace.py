@@ -19,6 +19,7 @@ class RecordingKnowledgeService:
     def __init__(self):
         self.articles = []
         self.create_calls = 0
+        self.update_calls = []
         self.error = None
         self.gate = None
 
@@ -35,12 +36,27 @@ class RecordingKnowledgeService:
             summary=values["summary"].strip() or None,
             body_markdown=values["body"].strip(),
             status="DRAFT",
+            version_number=1,
         )
         self.articles.append(article)
         return article
 
     def list_articles(self):
         return tuple(reversed(self.articles))
+
+    def update_article(self, **values):
+        self.update_calls.append((values, threading.get_ident()))
+        if self.gate:
+            self.gate.wait(3)
+        if self.error:
+            raise self.error
+        old = self.get_article(values["article_id"])
+        article = SimpleNamespace(**(vars(old) | dict(
+            title=values["title"], summary=values["summary"],
+            body_markdown=values["body"], version_number=old.version_number + 1,
+        )))
+        self.articles[self.articles.index(old)] = article
+        return article
 
     def get_article(self, article_id):
         return next((article for article in self.articles if article.knowledge_article_id == article_id), None)
@@ -63,9 +79,10 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
         if self.service.gate:
             self.service.gate.set()
         self.wait_idle()
-        dialog = getattr(self.workspace, "_new_article_dialog", None)
-        if dialog is not None:
-            dialog.close()
+        for name in ("_new_article_dialog", "_edit_article_dialog"):
+            dialog = getattr(self.workspace, name, None)
+            if dialog is not None:
+                dialog.close()
         self.workspace.close()
         self.workspace.deleteLater()
         self.runner.deleteLater()
@@ -147,6 +164,146 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
         self.assertEqual(self.workspace.detail_title.text(), "<img src='file:///synthetic.png'>Title")
         self.assertEqual(self.workspace.detail_body.toPlainText(), "<script>synthetic()</script>")
         self.assertTrue(self.workspace.detail_body.isReadOnly())
+
+    def prepare_article(self, status="DRAFT"):
+        article = self.service.create_article(
+            article_code="KB0001", title="Original title", summary="Summary", body="Original body",
+        )
+        article.status = status
+        self.workspace.refresh_list(select_article_id=article.knowledge_article_id)
+        self.wait_idle()
+        return article
+
+    def test_edit_availability_uses_loaded_detail_and_clears_during_reload(self):
+        self.assertFalse(self.workspace.edit_button.isEnabled())
+        self.assertIsNone(self.workspace.open_edit_article())
+        for status in ("DRAFT", "PUBLISHED", "ARCHIVED"):
+            self.service.articles.clear()
+            article = self.prepare_article(status)
+            self.assertEqual(self.workspace.edit_button.isEnabled(), status == "DRAFT")
+            if status != "DRAFT":
+                self.assertIsNone(self.workspace.open_edit_article())
+            self.assertEqual(self.workspace.detail_body.toPlainText(), article.body_markdown)
+        self.service.articles[0].status = "DRAFT"
+        self.workspace.open_article(article.knowledge_article_id)
+        self.assertFalse(self.workspace.edit_button.isEnabled())
+        self.wait_idle()
+        self.assertTrue(self.workspace.edit_button.isEnabled())
+
+    def test_edit_prefill_readonly_identity_and_cancel_does_not_write(self):
+        from PySide6.QtCore import Qt
+        from PySide6.QtWidgets import QLabel
+        article = self.prepare_article()
+        dialog = self.workspace.open_edit_article()
+        self.assertIsInstance(dialog.code_label, QLabel)
+        self.assertIsInstance(dialog.version_label, QLabel)
+        self.assertEqual(dialog.code_label.textFormat(), Qt.TextFormat.PlainText)
+        self.assertEqual(dialog.code_label.text(), article.article_code)
+        self.assertEqual(dialog.version_label.text(), "Version 1")
+        self.assertEqual(dialog.title_input.text(), article.title)
+        self.assertEqual(dialog.summary_input.text(), article.summary)
+        self.assertEqual(dialog.body_input.toPlainText(), article.body_markdown)
+        dialog.title_input.setText("Unsaved title")
+        dialog.cancel_button.click()
+        self.assertFalse(dialog.isVisible())
+        self.assertEqual(self.service.update_calls, [])
+
+    def test_revision_success_refreshes_same_selection_and_current_version(self):
+        article = self.prepare_article()
+        self.service.create_article(article_code="KB0002", title="Other", summary="", body="Other")
+        dialog = self.workspace.open_edit_article()
+        dialog.title_input.setText("Edited title")
+        dialog.body_input.setPlainText("Edited body")
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertFalse(dialog.isVisible())
+        self.assertEqual(self.workspace.article.knowledge_article_id, article.knowledge_article_id)
+        self.assertEqual(self.workspace.detail_title.text(), "Edited title")
+        self.assertEqual(self.workspace.detail_body.toPlainText(), "Edited body")
+        self.assertEqual(self.workspace.detail_version.text(), "Version 2")
+        self.assertEqual(self.workspace.model.item(self.workspace.table.currentIndex().row(), 0).text(), "KB0001")
+        values, _thread = self.service.update_calls[0]
+        self.assertNotIn("article_code", values)
+        self.assertEqual(values["expected_version_number"], 1)
+
+    def test_revision_runs_in_background_blocks_duplicate_and_close(self):
+        from PySide6.QtCore import QTimer
+        self.prepare_article()
+        self.service.gate = threading.Event()
+        dialog = self.workspace.open_edit_article()
+        dialog.title_input.setText("Edited")
+        dialog.submit()
+        dialog.submit()
+        dialog.reject()
+        dialog.close()
+        ticks = []
+        QTimer.singleShot(0, lambda: ticks.append(True))
+        QTest.qWait(30)
+        self.assertTrue(ticks)
+        self.assertTrue(dialog.isVisible())
+        self.assertTrue(self.runner.busy)
+        self.assertFalse(dialog.save_button.isEnabled())
+        self.assertFalse(dialog.cancel_button.isEnabled())
+        self.assertEqual(len(self.service.update_calls), 1)
+        self.assertNotEqual(self.service.update_calls[0][1], threading.get_ident())
+        self.service.gate.set()
+        self.wait_idle()
+        self.assertFalse(dialog.isVisible())
+
+    def test_stale_feedback_retains_input_and_requires_new_editor(self):
+        from f7hub.services.knowledge_service import KnowledgeEditConflictError
+        self.prepare_article()
+        self.service.error = KnowledgeEditConflictError("This article changed. Reopen the latest version.")
+        dialog = self.workspace.open_edit_article()
+        dialog.title_input.setText("My title")
+        dialog.summary_input.setText("My summary")
+        dialog.body_input.setPlainText("My body")
+        dialog.submit()
+        self.wait_idle()
+        self.assertTrue(dialog.isVisible())
+        self.assertEqual(dialog.title_input.text(), "My title")
+        self.assertEqual(dialog.summary_input.text(), "My summary")
+        self.assertEqual(dialog.body_input.toPlainText(), "My body")
+        self.assertIn("Reopen the latest version", dialog.feedback.text())
+        self.assertFalse(dialog.save_button.isEnabled())
+        self.assertTrue(dialog.body_input.isEnabled())
+        dialog.submit()
+        self.assertEqual(len(self.service.update_calls), 1)
+
+    def test_workspace_reload_does_not_replace_open_editor_token(self):
+        self.prepare_article()
+        dialog = self.workspace.open_edit_article()
+        self.service.articles[0] = SimpleNamespace(**(vars(self.service.articles[0]) | {"version_number": 2}))
+        self.workspace.refresh_list(select_article_id=1)
+        self.wait_idle()
+        self.assertEqual(self.workspace.detail_version.text(), "Version 2")
+        self.assertEqual(dialog.version_label.text(), "Version 1")
+        dialog.submit()
+        self.wait_idle()
+        self.assertEqual(self.service.update_calls[0][0]["expected_version_number"], 1)
+
+    def test_revision_failures_and_no_change_preserve_input_allow_retry(self):
+        from f7hub.services.knowledge_service import KnowledgeNoChangesError, KnowledgeValidationError
+        self.prepare_article()
+        dialog = self.workspace.open_edit_article()
+        for error, message in (
+            (RuntimeError("private database path"), "Could not save"),
+            (KnowledgeValidationError("Title is required."), "Title is required"),
+            (KnowledgeNoChangesError("No changes to save."), "No changes to save"),
+        ):
+            self.service.error = error
+            dialog.submit()
+            self.wait_idle()
+            self.assertTrue(dialog.isVisible())
+            self.assertTrue(dialog.save_button.isEnabled())
+            self.assertEqual(dialog.body_input.toPlainText(), "Original body")
+            self.assertIn(message, dialog.feedback.text())
+            self.assertNotIn("private", dialog.feedback.text())
+        self.service.error = None
+        dialog.title_input.setText("Retry")
+        dialog.submit()
+        self.wait_idle()
+        self.assertEqual(self.workspace.detail_version.text(), "Version 2")
 
     @staticmethod
     def fill(dialog, code):
