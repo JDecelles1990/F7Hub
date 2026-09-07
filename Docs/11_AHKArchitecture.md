@@ -1615,7 +1615,9 @@ Start the shortcut by opening `AutoHotkey/F7Hub.ahk` with AutoHotkey v2. Use its
 
 ```text
 F7 launch/focus: VERIFIED
-Live launcher checks with AutoHotkey 2.0.26: PASS
+Prior repository live launcher checks with AutoHotkey 2.0.26: PASS — 2026-09-05
+Manual Windows verification: PASS — 2026-09-07
+Recent isolated automated recheck: BLOCKED — shell wait timeout
 Other AutoHotkey features: PLANNED
 ```
 

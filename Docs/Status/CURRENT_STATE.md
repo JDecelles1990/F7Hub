@@ -29,6 +29,7 @@ TICKET ↔ KNOWLEDGE RELATED LINKS MANAGEABLE
 - Failed unlink preserves selection; committed unlink plus failed refresh retains success and recovers through Refresh without another DELETE
 - Unlinked articles reappear in Link Article candidates; normal relink persists one association with a fresh linked_at timestamp
 - MainWindow-mediated exact article navigation and persisted link/unlink state after application reconstruction
+- AutoHotkey F7 launch/focus: VERIFIED; manual Windows verification: PASS — 2026-09-07. Detailed launcher architecture: `Docs/11_AHKArchitecture.md`.
 
 ## Deferred / Limitations
 
@@ -58,7 +59,7 @@ Native Windows: PASS — windows Qt platform, 1000×700, isolated synthetic SQLi
 
 Existing New Ticket, Quick Company, Quick Contact, references, Saved Tickets, notes/status, Knowledge create/read/edit/version snapshots and Link/Open are covered by the passing full suites. Integration also verifies persisted unlink after reconstruction and opening the remaining article's current version.
 
-AutoHotkey: NOT RUN in Slice 013; launcher unchanged.
+AutoHotkey Slice 013 execution: NOT RUN — launcher unchanged. F7 launch/focus remains VERIFIED; the recent isolated automated recheck was BLOCKED — shell wait timeout.
 
 ## Database / Activity
 

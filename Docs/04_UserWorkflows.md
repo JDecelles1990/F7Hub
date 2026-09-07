@@ -121,13 +121,15 @@ available to other modules.
 
 The workflows in this document represent intended product behavior.
 
-Repository inspection determines whether these workflows exist:
+Repository inspection determines whether individual workflows exist:
 
 ```text
-Workflow implementation status: PLANNED
+Workflow implementation status: MIXED
 ```
 
-Repository inspection on 2026-09-02 found no implemented application workflows in the canonical source trees.
+The 2026-09-02 inspection is historical and does not describe every current
+implementation. Individual sections identify verified behavior where it is
+material to the technician workflow.
 
 A documented workflow does not prove that the corresponding functionality currently exists.
 
@@ -174,6 +176,15 @@ Ready
 ## Expected Outcome
 
 The technician reaches the main application even if optional services such as AI or Microsoft Graph are unavailable.
+
+## F7 Launch / Focus Shortcut
+
+When the AutoHotkey v2 shortcut script is active, the technician can press
+global `F7` to reach F7Hub. If the exact F7Hub window is already running, the
+shortcut restores it when minimized and focuses it. Otherwise, it starts the
+project-local Python application. The shortcut provides Windows launch/focus
+integration only; the PySide6 application remains the GUI owner. Detailed
+behavior and validation status belong in `11_AHKArchitecture.md`.
 
 ## Failure Paths
 
