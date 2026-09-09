@@ -9,7 +9,10 @@ from f7hub.repositories.knowledge_repository import (
     ArticleMissingError,
     ArticleNotEditableError,
     ArticleUnchangedError,
+    ArticleVersionMissingError,
     KnowledgeArticleRecord,
+    KnowledgeArticleVersionListRecord,
+    KnowledgeArticleVersionRecord,
     KnowledgeRepository,
     StaleArticleVersionError,
 )
@@ -33,6 +36,18 @@ class KnowledgeEditConflictError(KnowledgeUpdateError):
 
 class KnowledgeNoChangesError(KnowledgeUpdateError):
     """No revision was needed after checking authoritative current state."""
+
+
+class KnowledgeHistoryError(RuntimeError):
+    """Version-history loading failed; its message is safe for presentation."""
+
+
+class KnowledgeHistoryArticleMissingError(KnowledgeHistoryError):
+    """The current article disappeared before history could be read."""
+
+
+class KnowledgeHistoryVersionMissingError(KnowledgeHistoryError):
+    """The selected historical revision is no longer available."""
 
 
 class KnowledgeService:
@@ -140,6 +155,41 @@ class KnowledgeService:
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgeCreationError("Could not load the knowledge article.") from error
 
+    def list_article_versions(
+        self, article_id: int,
+    ) -> tuple[KnowledgeArticleVersionListRecord, ...]:
+        _positive_integer(article_id, "Article ID")
+        try:
+            return self._repository.list_article_versions(article_id)
+        except ArticleMissingError as error:
+            raise KnowledgeHistoryArticleMissingError(
+                "This article no longer exists. Close Version History and refresh the Knowledge Base."
+            ) from error
+        except (sqlite3.Error, OSError, RuntimeError) as error:
+            raise KnowledgeHistoryError(
+                "Could not load version history. Close and try again."
+            ) from error
+
+    def get_article_version(
+        self, article_id: int, version_number: int,
+    ) -> KnowledgeArticleVersionRecord:
+        _positive_integer(article_id, "Article ID")
+        _positive_integer(version_number, "Version number")
+        try:
+            return self._repository.get_article_version(article_id, version_number)
+        except ArticleMissingError as error:
+            raise KnowledgeHistoryArticleMissingError(
+                "This article no longer exists. Close Version History and refresh the Knowledge Base."
+            ) from error
+        except ArticleVersionMissingError as error:
+            raise KnowledgeHistoryVersionMissingError(
+                "This revision is no longer available. Close Version History and reopen it."
+            ) from error
+        except (sqlite3.Error, OSError, RuntimeError) as error:
+            raise KnowledgeHistoryError(
+                "Could not load the selected revision. Close and try again."
+            ) from error
+
 
 def _required_text(value: object, label: str) -> str:
     if not isinstance(value, str):
@@ -155,4 +205,10 @@ def _required_body(value: object) -> str:
         raise KnowledgeValidationError("Body must be text.")
     if not value.strip():
         raise KnowledgeValidationError("Body is required.")
+    return value
+
+
+def _positive_integer(value: object, label: str) -> int:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+        raise KnowledgeValidationError(f"{label} must be a positive integer.")
     return value

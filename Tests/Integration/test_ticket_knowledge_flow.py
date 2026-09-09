@@ -149,6 +149,15 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         workspace = self.assert_open_article(self.article.knowledge_article_id)
         self.assertEqual(workspace.detail_version.text(), "Version 2")
         self.assertEqual(workspace.detail_body.toPlainText(), "Updated synthetic procedure")
+        history_dialog = workspace.open_version_history()
+        self.wait_idle()
+        self.wait_idle()
+        self.assertEqual([version.version_number for version in history_dialog.versions], [2, 1])
+        history_dialog.table.selectRow(1)
+        self.wait_idle()
+        self.assertEqual(history_dialog.detail_body.toPlainText(), "# Synthetic procedure")
+        self.assertEqual(workspace.detail_body.toPlainText(), "Updated synthetic procedure")
+        history_dialog.close()
         self.assertEqual(self.count(), 1)
 
     def test_article_deleted_after_candidates_loaded_is_rejected(self):

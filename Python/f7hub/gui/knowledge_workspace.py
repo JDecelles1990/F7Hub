@@ -20,6 +20,7 @@ from PySide6.QtWidgets import (
 from f7hub.gui.new_article_dialog import NewArticleDialog
 from f7hub.gui.edit_article_dialog import EditArticleDialog
 from f7hub.gui.service_task_runner import ServiceTaskRunner
+from f7hub.gui.version_history_dialog import VersionHistoryDialog
 from f7hub.services.knowledge_service import KnowledgeService
 
 
@@ -46,11 +47,15 @@ class KnowledgeWorkspace(QWidget):
         self.edit_button = QPushButton("Edit Article", self)
         self.edit_button.setEnabled(False)
         self.edit_button.clicked.connect(self.open_edit_article)
+        self.version_history_button = QPushButton("Version History", self)
+        self.version_history_button.setEnabled(False)
+        self.version_history_button.clicked.connect(self.open_version_history)
         top = QHBoxLayout()
         top.addWidget(heading)
         top.addStretch()
         top.addWidget(self.new_button)
         top.addWidget(self.edit_button)
+        top.addWidget(self.version_history_button)
 
         self.model = QStandardItemModel(0, 3, self)
         self.model.setHorizontalHeaderLabels(("Article code", "Title", "Status"))
@@ -103,6 +108,7 @@ class KnowledgeWorkspace(QWidget):
         layout.addLayout(top)
         layout.addWidget(self.feedback)
         layout.addWidget(splitter, 1)
+        self._runner.busy_changed.connect(self._update_actions)
 
     def refresh_list(self, *, select_article_id: int | None = None) -> None:
         if self._runner.busy:
@@ -128,6 +134,16 @@ class KnowledgeWorkspace(QWidget):
         dialog.article_updated.connect(self._article_created)
         dialog.open()
         self._edit_article_dialog = dialog
+        return dialog
+
+    def open_version_history(self) -> VersionHistoryDialog | None:
+        if self._service is None or self._runner.busy or self.article is None:
+            return None
+        # The window owns the viewer outside the page hierarchy disabled by reads.
+        dialog = VersionHistoryDialog(self._service, self._runner, self.article, self.window())
+        dialog.open()
+        dialog.load_history()
+        self._version_history_dialog = dialog
         return dialog
 
     def open_article(self, article_id: int) -> None:
@@ -202,7 +218,7 @@ class KnowledgeWorkspace(QWidget):
 
     def _show_article(self, article) -> None:
         self.article = article
-        self.edit_button.setEnabled(article is not None and article.status == "DRAFT")
+        self._update_actions(self._runner.busy)
         if article is None:
             self.detail_code.setText("Select an article to read.")
             self.detail_title.setText("")
@@ -219,6 +235,14 @@ class KnowledgeWorkspace(QWidget):
             f"Summary: {article.summary}" if article.summary else "Summary: Not provided"
         )
         self.detail_body.setPlainText(article.body_markdown)
+
+    def _update_actions(self, busy: bool) -> None:
+        self.edit_button.setEnabled(
+            not busy and self.article is not None and self.article.status == "DRAFT"
+        )
+        self.version_history_button.setEnabled(
+            self._service is not None and not busy and self.article is not None
+        )
 
     def _load_failed(self, error: Exception) -> None:
         logging.getLogger(__name__).error("Knowledge load failed: %s", type(error).__name__)

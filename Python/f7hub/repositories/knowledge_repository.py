@@ -28,6 +28,34 @@ class KnowledgeArticleRecord:
     published_at: str | None
 
 
+@dataclass(frozen=True)
+class KnowledgeArticleVersionListRecord:
+    """Lightweight immutable revision metadata; intentionally excludes bodies."""
+
+    knowledge_article_version_id: int
+    knowledge_article_id: int
+    version_number: int
+    title: str
+    change_summary: str | None
+    created_by: str | None
+    created_at: str
+
+
+@dataclass(frozen=True)
+class KnowledgeArticleVersionRecord:
+    """One exact immutable historical revision snapshot."""
+
+    knowledge_article_version_id: int
+    knowledge_article_id: int
+    version_number: int
+    title: str
+    summary: str | None
+    body_markdown: str
+    change_summary: str | None
+    created_by: str | None
+    created_at: str
+
+
 _ARTICLE_COLUMNS = """
     knowledge_article_id,
     article_code,
@@ -59,6 +87,10 @@ class StaleArticleVersionError(RuntimeError):
 
 class ArticleUnchangedError(RuntimeError):
     """Validated current content is identical to the proposed revision."""
+
+
+class ArticleVersionMissingError(RuntimeError):
+    """The requested immutable revision does not exist for the article."""
 
 
 class KnowledgeRepository:
@@ -183,6 +215,50 @@ class KnowledgeRepository:
             ).fetchall()
         return tuple(_article_from_row(row) for row in rows)
 
+    def list_article_versions(
+        self, article_id: int,
+    ) -> tuple[KnowledgeArticleVersionListRecord, ...]:
+        """Return lightweight immutable revisions newest-first using SELECT only."""
+
+        with database_connection(self._database_path) as connection:
+            connection.execute("BEGIN")
+            if not _article_exists(connection, article_id):
+                raise ArticleMissingError()
+            rows = connection.execute(
+                """
+                SELECT knowledge_article_version_id, knowledge_article_id,
+                       version_number, title, change_summary, created_by, created_at
+                FROM knowledge_article_versions
+                WHERE knowledge_article_id = ?
+                ORDER BY version_number DESC
+                """,
+                (article_id,),
+            ).fetchall()
+        return tuple(_version_list_from_row(row) for row in rows)
+
+    def get_article_version(
+        self, article_id: int, version_number: int,
+    ) -> KnowledgeArticleVersionRecord:
+        """Return exactly one stored revision snapshot using SELECT only."""
+
+        with database_connection(self._database_path) as connection:
+            connection.execute("BEGIN")
+            if not _article_exists(connection, article_id):
+                raise ArticleMissingError()
+            row = connection.execute(
+                """
+                SELECT knowledge_article_version_id, knowledge_article_id,
+                       version_number, title, summary, body_markdown,
+                       change_summary, created_by, created_at
+                FROM knowledge_article_versions
+                WHERE knowledge_article_id = ? AND version_number = ?
+                """,
+                (article_id, version_number),
+            ).fetchone()
+        if row is None:
+            raise ArticleVersionMissingError()
+        return _version_from_row(row)
+
 
 def _get_article(
     connection: sqlite3.Connection,
@@ -197,6 +273,13 @@ def _get_article(
         (article_id,),
     ).fetchone()
     return _article_from_row(row) if row is not None else None
+
+
+def _article_exists(connection: sqlite3.Connection, article_id: int) -> bool:
+    return connection.execute(
+        "SELECT 1 FROM knowledge_articles WHERE knowledge_article_id = ?",
+        (article_id,),
+    ).fetchone() is not None
 
 
 def _article_from_row(row: sqlite3.Row) -> KnowledgeArticleRecord:
@@ -214,4 +297,30 @@ def _article_from_row(row: sqlite3.Row) -> KnowledgeArticleRecord:
         created_at=str(row["created_at"]),
         updated_at=str(row["updated_at"]),
         published_at=row["published_at"],
+    )
+
+
+def _version_list_from_row(row: sqlite3.Row) -> KnowledgeArticleVersionListRecord:
+    return KnowledgeArticleVersionListRecord(
+        knowledge_article_version_id=int(row["knowledge_article_version_id"]),
+        knowledge_article_id=int(row["knowledge_article_id"]),
+        version_number=int(row["version_number"]),
+        title=str(row["title"]),
+        change_summary=row["change_summary"],
+        created_by=row["created_by"],
+        created_at=str(row["created_at"]),
+    )
+
+
+def _version_from_row(row: sqlite3.Row) -> KnowledgeArticleVersionRecord:
+    return KnowledgeArticleVersionRecord(
+        knowledge_article_version_id=int(row["knowledge_article_version_id"]),
+        knowledge_article_id=int(row["knowledge_article_id"]),
+        version_number=int(row["version_number"]),
+        title=str(row["title"]),
+        summary=row["summary"],
+        body_markdown=str(row["body_markdown"]),
+        change_summary=row["change_summary"],
+        created_by=row["created_by"],
+        created_at=str(row["created_at"]),
     )

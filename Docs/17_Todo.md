@@ -376,9 +376,24 @@ Slice 013 — RELATED ticket/article unlink, verified 2026-09-07:
 - [x] Full regression: Database 244 PASS, GUI 74 PASS, Integration 66 PASS; total 384, up 37 from 347. Evidence retained during documentation-only completion.
 - [x] Native Windows 1000×700 synthetic input/visual checks: Cancel, Unlink, parent/other-link preservation, candidate/relink, exact Open Article, notes and Resolve → Close → Reopen.
 - [x] Five unchanged migrations; integrity_check = ok, foreign_key_check = zero violations; ROOT.md and separate archive deletion preserved.
-- [ ] Independent Slice 013 review before any Git finalization; nothing staged or committed.
+- Historical Slice 013 review checkpoint; the current Slice 014 review gate is recorded below.
 
-Recommended next slice only: a read-only Knowledge version-history viewer, reusing persisted snapshots. See 16_Roadmap.md for the six-option comparison. Do not begin Slice 014. Bulk unlink, APPLIED/RESOLUTION_SOURCE workflows, relationship history/undo, richer relationship management, history browsing/restore, search/FTS, category/tag management, publishing/archiving, parent deletion workflows and AI remain deferred.
+Slice 014 — read-only version-history viewer, remediation verified 2026-09-09:
+
+- [x] Resume and inspect all nine existing implementation/test paths; preserve correct work.
+- [x] Lightweight newest-first metadata and exact selected snapshot, with no migration or data writes.
+- [x] Safe positive-ID validation, missing article/revision and empty-history handling.
+- [x] History for DRAFT/PUBLISHED/ARCHIVED, service/busy guards, plain text and read-only body.
+- [x] Serialized detail selection; fresh real-MainWindow and native PASS for pending list + Close, list + Escape, detail + Close and detail + Escape, with late callbacks ignored.
+- [x] Scroll to both ends of a 6,132-character historical summary at 900×620; literal metadata and read-only body remain accessible, with 356-pixel native body height.
+- [x] Exact V1/V2/V3 and immutable current/history/full database state across viewing and reconstruction.
+- [x] Focused Integration fresh 29 PASS, exit 0; retained post-fix focused GUI log confirms 19 PASS. Earlier focused repository/service 31 PASS remains historical.
+- [x] Fresh sequential full regression: Database 251, GUI 81, Integration 73 = 405 PASS, all exit 0; no suite decreased.
+- [x] Fresh native Windows Qt input and inspection of all six captures, 1000×700 main / 900×620 dialog; read-only database, five migrations, integrity ok, zero FK violations.
+- [x] Preserve Docs/10 modification, archive deletion and ROOT.md; evidence remains outside repository.
+- [ ] Independent Slice 014 re-review after remediation; keep changes unstaged/uncommitted.
+
+Recommended next slice only: Knowledge Search / FTS5 for current articles. See 16_Roadmap.md for the six-option comparison. Do not begin Slice 015. Restore/revert, historical editing/deletion, compare/apply, historical status, search/AI, pagination, category/tag management, publishing/archiving and richer ticket relationship workflows remain deferred.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

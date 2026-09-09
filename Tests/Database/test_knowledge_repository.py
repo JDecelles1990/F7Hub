@@ -9,7 +9,7 @@ from unittest.mock import patch
 from f7hub.infrastructure.database import bootstrap_database, database_connection
 from f7hub.repositories.knowledge_repository import (
     KnowledgeRepository, ArticleMissingError, ArticleNotEditableError,
-    ArticleUnchangedError, StaleArticleVersionError,
+    ArticleUnchangedError, ArticleVersionMissingError, StaleArticleVersionError,
 )
 
 
@@ -217,6 +217,125 @@ class KnowledgeRepositoryTests(unittest.TestCase):
             self.update(first)
         self.assertEqual(self.repository.get_article(first.knowledge_article_id), first)
         self.assertEqual(self.history(), history)
+
+    def test_history_list_is_lightweight_newest_first_and_detail_is_exact(self):
+        first = self.create()
+        second = self.update(
+            first, title="Title B", summary="Summary B", body_markdown="Body B",
+        )
+        third = self.update(
+            second, title="Title C", summary="Summary C", body_markdown="Body C",
+        )
+        before_article = self.repository.get_article(first.knowledge_article_id)
+        before_history = self.history()
+        versions = self.repository.list_article_versions(first.knowledge_article_id)
+        self.assertEqual([version.version_number for version in versions], [3, 2, 1])
+        self.assertFalse(hasattr(versions[0], "body_markdown"))
+        self.assertEqual(
+            (versions[1].title, versions[1].change_summary, versions[1].created_by),
+            ("Title B", None, None),
+        )
+        expected = (
+            (1, first.title, first.summary, first.body_markdown),
+            (2, "Title B", "Summary B", "Body B"),
+            (3, "Title C", "Summary C", "Body C"),
+        )
+        for number, title, summary, body in expected:
+            version = self.repository.get_article_version(first.knowledge_article_id, number)
+            self.assertEqual(
+                (version.version_number, version.title, version.summary, version.body_markdown),
+                (number, title, summary, body),
+            )
+        self.assertEqual(self.repository.get_article(first.knowledge_article_id), before_article)
+        self.assertEqual(self.history(), before_history)
+        self.assertEqual(third, before_article)
+
+    def test_history_reads_execute_no_writes_and_use_existing_index(self):
+        article = self.create()
+        statements = []
+        original = database_connection
+
+        from contextlib import contextmanager
+
+        @contextmanager
+        def traced_connection(path):
+            with original(path) as connection:
+                connection.set_trace_callback(statements.append)
+                yield connection
+
+        with patch(
+            "f7hub.repositories.knowledge_repository.database_connection",
+            traced_connection,
+        ):
+            self.repository.list_article_versions(article.knowledge_article_id)
+            list_statements = tuple(statements)
+            statements.clear()
+            self.repository.get_article_version(article.knowledge_article_id, 1)
+        for trace in (list_statements, statements):
+            self.assertEqual(
+                [statement.split()[0].upper() for statement in trace],
+                ["BEGIN", "SELECT", "SELECT", "ROLLBACK"],
+            )
+        self.assertNotIn("body_markdown", " ".join(list_statements).lower())
+        self.assertIn("body_markdown", " ".join(statements).lower())
+        with database_connection(self.path) as connection:
+            plan = connection.execute(
+                "EXPLAIN QUERY PLAN SELECT knowledge_article_version_id, version_number "
+                "FROM knowledge_article_versions WHERE knowledge_article_id = ? "
+                "ORDER BY version_number DESC",
+                (article.knowledge_article_id,),
+            ).fetchall()
+        self.assertIn("idx_knowledge_versions_article_version", " ".join(str(value) for row in plan for value in row))
+
+    def test_history_distinguishes_missing_article_revision_and_empty_history(self):
+        with self.assertRaises(ArticleMissingError):
+            self.repository.list_article_versions(999)
+        article = self.create()
+        with self.assertRaises(ArticleVersionMissingError):
+            self.repository.get_article_version(article.knowledge_article_id, 999)
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "DELETE FROM knowledge_article_versions WHERE knowledge_article_id = ?",
+                (article.knowledge_article_id,),
+            )
+        self.assertEqual(self.repository.list_article_versions(article.knowledge_article_id), ())
+
+    def test_history_detail_is_scoped_to_article_and_detects_cascaded_deletion(self):
+        first = self.create()
+        second = self.create("KB0002")
+        self.update(second, title="Only second article has V2")
+        with self.assertRaises(ArticleVersionMissingError):
+            self.repository.get_article_version(first.knowledge_article_id, 2)
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "DELETE FROM knowledge_articles WHERE knowledge_article_id = ?",
+                (first.knowledge_article_id,),
+            )
+        for operation in (
+            lambda: self.repository.list_article_versions(first.knowledge_article_id),
+            lambda: self.repository.get_article_version(first.knowledge_article_id, 1),
+        ):
+            with self.assertRaises(ArticleMissingError):
+                operation()
+
+    def test_history_reads_are_available_for_every_article_status(self):
+        article = self.create()
+        for status in ("DRAFT", "PUBLISHED", "ARCHIVED"):
+            with database_connection(self.path) as connection:
+                connection.execute(
+                    "UPDATE knowledge_articles SET status = ?, published_at = ? "
+                    "WHERE knowledge_article_id = ?",
+                    (
+                        status,
+                        None if status == "DRAFT" else "2026-09-07T12:00:00.000Z",
+                        article.knowledge_article_id,
+                    ),
+                )
+            with self.subTest(status=status):
+                self.assertEqual(
+                    self.repository.list_article_versions(article.knowledge_article_id)[0].version_number,
+                    1,
+                )
 
 
 if __name__ == "__main__":

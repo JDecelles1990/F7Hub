@@ -116,22 +116,20 @@ Remaining application implementation: PLANNED
 
 # 5. Roadmap Layers
 
-After Slice 013, the verified product milestone is **TICKET ↔ KNOWLEDGE RELATED LINKS MANAGEABLE**. Saved tickets support Link, Open, confirmed Unlink and normal Relink of existing articles as RELATED. Unlink removes only the selected junction row; both entities, other relationships and ticket activity remain unchanged. Regression: 244 Database, 74 GUI, 66 Integration (384 total, up 37 from 347). Native Windows input/visual checks passed at 1000×700 with isolated synthetic data. These results are retained during documentation completion because implementation/tests are unchanged. Independent Slice 013 review is the next gate; changes remain uncommitted.
+After Slice 014, the verified milestone is **KNOWLEDGE ARTICLES HAVE READABLE IMMUTABLE HISTORY**. The read-only viewer lists persisted revisions and opens exact snapshots without changing the current article. Fresh remediation regression on 2026-09-09: Database 251, GUI 81, Integration 73 = 405 PASS (five above the 400 pre-remediation total; no suite decreased). Native Windows input and captured-window visual inspection passed for pending list/detail dismissal with both Close and Escape, plus scrollable long metadata, using a 1000×700 main window and 900×620 history dialog. Five migrations remain unchanged. Slice 014 remains unstaged and uncommitted for independent re-review.
 
-Recommended next bounded slice: **Read-only Knowledge version-history viewer**. Select an article, list its persisted revisions and open one historical snapshot without modifying the current article. Existing knowledge_article_versions rows make this a small, schema-ready extension that helps technicians inspect earlier procedure text. Link/Open/Unlink/Relink now covers the minimal RELATED lifecycle; richer relationship semantics need separate product rules. Exclude restore/revert, revision editing, diff tools and ticket revision pinning from the proposed viewer.
+Recommended next bounded slice: **Knowledge Search / FTS5 for current articles only**. Search current article text, list matching article identities and open the selected current article through existing navigation. Keep historical revisions, ticket search, recommendations and AI outside that slice. Search is an existing product requirement and fills the current browse-only retrieval gap; real library volume and performance needs remain NOT VERIFIED, so no scale claim supports this recommendation.
 
-Comparison of the six requested alternatives:
-
-| Candidate | Assessment after Slice 013 |
+| Candidate | Assessment after Slice 014 |
 |---|---|
-| A. Knowledge search / FTS5 | Valuable at larger content volumes; needs index synchronization and search UI. Actual user-library volume is NOT VERIFIED; only synthetic data was used. |
-| B. Version-history viewer | Recommended: existing immutable snapshots support a bounded read-only workflow with value after the first edit, without a new migration or lifecycle write. It can help technicians inspect past instructions while using ticket-linked knowledge. |
-| C. Knowledge categories/tags | Schema exists; assignment/filtering value depends on content organization and volume. |
-| D. APPLIED / RESOLUTION_SOURCE workflow | Junction enum values exist, but applying knowledge or attributing a resolution needs defined service/workflow semantics beyond association management. Higher decision and integration risk than a read-only history viewer. |
-| E. Companies/Contacts management | Useful, but editing/deactivation and downstream references form a separate, broader workflow. |
-| F. Dashboard/navigation improvement | Current navigation passed native checks; no measured navigation bottleneck supports redesign now. |
+| A. Knowledge Search / FTS5 | Recommended: a bounded current-article search → result → open workflow supports retrieval using existing article/service/navigation boundaries. It needs a separately reviewed FTS migration and synchronization tests. |
+| B. Knowledge categories/tags | Existing schema helps, but assignment and filtering add metadata workflows whose real content-organization needs are unverified. |
+| C. APPLIED / RESOLUTION_SOURCE | Existing enum values do not define application/resolution-attribution rules; those require separate workflow decisions. |
+| D. Companies/Contacts management | Useful but spans editing/deactivation and downstream reference behavior beyond Knowledge retrieval. |
+| E. Dashboard/navigation | Existing navigation passed regression; no measured navigation bottleneck justifies redesign now. |
+| F. Version compare/restore | Read-only history is now usable; comparison adds UI scope and restore introduces a new write/concurrency contract. |
 
-Recommendation only. Do not implement Slice 014 as part of Slice 013.
+Recommendation only. Do not implement Slice 015 during Slice 014 completion.
 
 The F7Hub roadmap is organized into:
 
@@ -727,7 +725,8 @@ KnowledgeRepository/Service and create/list/read workspace: VERIFIED — Slice 0
 DRAFT editing with atomic snapshots and stale-edit protection: VERIFIED — Slice 011
 RELATED ticket/article link/list/open: VERIFIED — Slice 012
 Confirmed RELATED unlink and normal relink: VERIFIED — Slice 013
-History viewer/restore, search, publishing/archiving and richer relationship workflows: PLANNED
+Read-only history viewer: VERIFIED — Slice 014
+Restore/revert, search, publishing/archiving and richer relationship workflows: PLANNED
 ```
 
 Initial capabilities:
