@@ -16,6 +16,8 @@ Verified application unlink boundary — Slice 013 (2026-09-07): the same reposi
 
 Verified history read boundary — Slice 014 (2026-09-08): list_article_versions checks article existence then selects revision metadata ordered by version_number DESC without summary/body. get_article_version checks existence then selects the exact snapshot by article ID and version number. Both use parameterized SELECTs in one read transaction; observed trace is BEGIN, SELECT, SELECT, ROLLBACK, with no data writes. The existing idx_knowledge_versions_article_version supports history ordering. Missing article and missing revision are distinct; an existing article can have empty history and no snapshot is synthesized. Historical status/category/updated_by/published_at are unavailable. Full database-state comparison across viewing is unchanged; isolated integrity_check = ok, foreign_key_check = zero violations, migration count = 5. No new migration or physical schema change.
 
+Verified current-article search boundary — Slice 015 (2026-09-09): `0006_knowledge_search.sql` creates external-content `knowledge_articles_fts` over article_code/title/summary/body_markdown with `unicode61`, three synchronization triggers and an initial rebuild. All current DRAFT/PUBLISHED/ARCHIVED rows are indexed; `knowledge_article_versions` is not indexed. KnowledgeRepository uses parameterized MATCH, joins back to authoritative current rows and returns lightweight identity/version metadata ordered by bm25, updated_at DESC and ID DESC. Insert, repeated update, delete, migration backfill and failed-migration rollback are covered. The five prior migrations 0001-0005 retain unchanged checksums; migration 0006 is the new Knowledge Search / FTS5 migration; fresh full Database regression is 262 PASS. Fresh isolated native validation also returned integrity_check = ok, zero foreign-key violations and a virtual-table MATCH query plan.
+
 SQLite is the primary persistent data store for F7Hub.
 
 This document defines:
@@ -918,9 +920,12 @@ Performance work should focus on measured or predictable bottlenecks rather than
 
 SQLite FTS5 should be used for domains with substantial searchable text.
 
-Likely candidates:
+Implemented first domain:
 
-- KB articles
+- current Knowledge article code, title, summary and Markdown body — VERIFIED in Slice 015
+
+Later candidates:
+
 - ticket notes
 - ticket descriptions
 - prompts
@@ -951,6 +956,8 @@ The relational table remains the source of truth.
 
 FTS provides retrieval optimization.
 
+For Slice 015, `knowledge_articles_fts` is an external-content table whose rowid maps to `knowledge_articles.knowledge_article_id`. Search joins to the current relational row before returning code, title, lifecycle status, current version and updated timestamp. Historical version rows are deliberately excluded.
+
 ---
 
 # 44. FTS Synchronization
@@ -963,7 +970,7 @@ Possible strategies include:
 - external-content FTS tables
 - justified triggers
 
-The strategy should be documented in `09_SQLSchema.md`.
+Slice 015 uses `knowledge_articles_ai`, `knowledge_articles_ad` and `knowledge_articles_au` after-row triggers plus the migration-time FTS `rebuild` command. The exact DDL is documented in `09_SQLSchema.md`.
 
 ---
 
@@ -1899,7 +1906,7 @@ Explicit review is required before:
 
 # 93. Current Implementation Status
 
-Repository inspection and tests through 2026-09-04 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migrations now create `application_metadata` through `0001_core.sql`, shared taxonomy through `0002_taxonomy.sql`, the company/contact persistence schema through `0003_companies_contacts.sql`, the ticket-core schema through `0004_tickets.sql`, and the relational knowledge schema through `0005_knowledge.sql`. `CompanyRepository`, `ContactRepository` and `TicketRepository` provide parameterized persistence through the approved Python repository boundary. `TicketService` validates and atomically coordinates ticket creation, notes, status changes, resolution, closure and reopening with their history/timeline records. Writer transactions reserve the SQLite writer before reading current state. The first ticket-creation GUI and minimal application shell delegate through that service; notes/status GUI and the knowledge repository remain planned. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and tests through 2026-09-09 verify the Python SQLite connection, migration/checksum/rollback/bootstrap infrastructure and six migrations through `0006_knowledge_search.sql`. The first five migrations own relational core, taxonomy, company/contact, ticket and Knowledge data. Migration 0006 adds only derived Knowledge FTS infrastructure. Existing rows are rebuilt into the index, and triggers synchronize current article inserts, searchable-field updates and deletes. `KnowledgeRepository.search_articles` uses a parameterized MATCH query and returns lightweight current metadata through the approved Python repository boundary. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 ```text
 SQLite migration infrastructure: VERIFIED
@@ -1908,11 +1915,13 @@ Taxonomy schema — categories and tags: VERIFIED
 Company/contact schema — companies, notes, links and contacts: VERIFIED
 Ticket-core schema — tickets, notes, status history and timeline: VERIFIED
 Knowledge schema — articles, versions, links and approved junctions: VERIFIED
+Knowledge current-article FTS5 — external-content table, backfill and triggers: VERIFIED
 Company/contact repositories: VERIFIED
 Ticket creation repository/service boundary: VERIFIED
 Ticket activity repository/service boundary: VERIFIED
+Knowledge current-article search repository/service boundary: VERIFIED
 Remaining business database implementation: PLANNED
-Isolated database tests: PASS — 129 tests
+Isolated database tests: PASS — 262 tests
 ```
 
 This document defines the intended database architecture beyond the verified infrastructure slice.
@@ -1920,10 +1929,10 @@ This document defines the intended database architecture beyond the verified inf
 It must not be interpreted as proof that:
 
 - business-domain tables beyond the knowledge slice exist
-- business-domain migrations beyond `0005_knowledge.sql` exist
+- business-domain migrations beyond `0006_knowledge_search.sql` exist
 - indexes beyond the verified migrations exist
-- FTS5 is configured
-- repositories beyond `CompanyRepository`, `ContactRepository` and `TicketRepository` exist
+- FTS5 is configured for domains other than current Knowledge articles
+- repositories beyond the inspected company, contact, ticket and Knowledge boundaries exist
 - tests outside the reported suites pass
 
 ---

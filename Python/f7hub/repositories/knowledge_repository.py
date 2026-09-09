@@ -29,6 +29,18 @@ class KnowledgeArticleRecord:
 
 
 @dataclass(frozen=True)
+class KnowledgeArticleSearchResult:
+    """Lightweight current-article identity returned by FTS5 search."""
+
+    knowledge_article_id: int
+    article_code: str
+    title: str
+    status: str
+    version_number: int
+    updated_at: str
+
+
+@dataclass(frozen=True)
 class KnowledgeArticleVersionListRecord:
     """Lightweight immutable revision metadata; intentionally excludes bodies."""
 
@@ -215,6 +227,34 @@ class KnowledgeRepository:
             ).fetchall()
         return tuple(_article_from_row(row) for row in rows)
 
+    def search_articles(
+        self, fts_query: str,
+    ) -> tuple[KnowledgeArticleSearchResult, ...]:
+        """Search the derived current-article index and return lightweight rows."""
+
+        with database_connection(self._database_path) as connection:
+            rows = connection.execute(
+                """
+                SELECT
+                    ka.knowledge_article_id,
+                    ka.article_code,
+                    ka.title,
+                    ka.status,
+                    ka.version_number,
+                    ka.updated_at
+                FROM knowledge_articles_fts
+                JOIN knowledge_articles AS ka
+                    ON ka.knowledge_article_id = knowledge_articles_fts.rowid
+                WHERE knowledge_articles_fts MATCH ?
+                ORDER BY
+                    bm25(knowledge_articles_fts),
+                    ka.updated_at DESC,
+                    ka.knowledge_article_id DESC
+                """,
+                (fts_query,),
+            ).fetchall()
+        return tuple(_search_result_from_row(row) for row in rows)
+
     def list_article_versions(
         self, article_id: int,
     ) -> tuple[KnowledgeArticleVersionListRecord, ...]:
@@ -297,6 +337,17 @@ def _article_from_row(row: sqlite3.Row) -> KnowledgeArticleRecord:
         created_at=str(row["created_at"]),
         updated_at=str(row["updated_at"]),
         published_at=row["published_at"],
+    )
+
+
+def _search_result_from_row(row: sqlite3.Row) -> KnowledgeArticleSearchResult:
+    return KnowledgeArticleSearchResult(
+        knowledge_article_id=int(row["knowledge_article_id"]),
+        article_code=str(row["article_code"]),
+        title=str(row["title"]),
+        status=str(row["status"]),
+        version_number=int(row["version_number"]),
+        updated_at=str(row["updated_at"]),
     )
 
 

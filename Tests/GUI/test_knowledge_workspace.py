@@ -25,6 +25,9 @@ class RecordingKnowledgeService:
         self.gate = None
         self.history_error = None
         self.history_gate = None
+        self.search_calls = []
+        self.search_error = None
+        self.search_gate = None
 
     def create_article(self, **values):
         self.create_calls += 1
@@ -36,7 +39,7 @@ class RecordingKnowledgeService:
             knowledge_article_id=len(self.articles) + 1,
             article_code=values["article_code"].strip(),
             title=values["title"].strip(),
-            summary=values["summary"].strip() or None,
+            summary=(values["summary"].strip() or None) if values["summary"] is not None else None,
             body_markdown=values["body"].strip(),
             status="DRAFT",
             version_number=1,
@@ -65,6 +68,36 @@ class RecordingKnowledgeService:
 
     def get_article(self, article_id):
         return next((article for article in self.articles if article.knowledge_article_id == article_id), None)
+
+    def search_articles(self, query):
+        self.search_calls.append((query, threading.get_ident()))
+        if self.search_gate:
+            self.search_gate.wait(3)
+        if self.search_error:
+            raise self.search_error
+        terms = query.casefold().split()
+        return tuple(
+            SimpleNamespace(
+                knowledge_article_id=article.knowledge_article_id,
+                article_code=article.article_code,
+                title=article.title,
+                status=article.status,
+                version_number=article.version_number,
+                updated_at="2026-09-09T12:00:00.000Z",
+            )
+            for article in reversed(self.articles)
+            if all(
+                term in " ".join(
+                    (
+                        article.article_code,
+                        article.title,
+                        article.summary or "",
+                        article.body_markdown,
+                    )
+                ).casefold()
+                for term in terms
+            )
+        )
 
     def list_article_versions(self, article_id):
         if self.history_gate:
@@ -128,6 +161,8 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
             self.service.gate.set()
         if self.service.history_gate:
             self.service.history_gate.set()
+        if self.service.search_gate:
+            self.service.search_gate.set()
         self.wait_idle()
         for name in ("_new_article_dialog", "_edit_article_dialog", "_version_history_dialog"):
             dialog = getattr(self.workspace, name, None)
@@ -176,6 +211,133 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
         self.assertEqual(self.workspace.detail_title.text(), "Article KB0001")
         self.assertEqual(self.workspace.detail_status.text(), "Status: DRAFT")
         self.assertEqual(self.workspace.detail_body.toPlainText(), "# Body")
+        published = self.service.create_article(
+            article_code="KB0002", title="A substantially longer current article title",
+            summary=None, body="Published body",
+        )
+        published.status = "PUBLISHED"
+        self.workspace.refresh_list()
+        self.wait_idle()
+        self.assertGreaterEqual(
+            self.workspace.table.columnWidth(2),
+            self.workspace.table.sizeHintForColumn(2),
+        )
+
+    def test_search_controls_return_results_and_open_authoritative_current_article(self):
+        from PySide6.QtCore import Qt
+
+        first = self.service.create_article(
+            article_code="KB0001", title="Outlook cannot send", summary="Mail", body="SMTPAUTHCHECK",
+        )
+        self.service.create_article(
+            article_code="KB0002", title="Printer", summary="Queue", body="Spooler",
+        )
+        self.workspace.refresh_list()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.rowCount(), 2)
+        self.workspace.search_input.setText("Outlook")
+        QTest.keyClick(self.workspace.search_input, Qt.Key.Key_Return)
+        self.wait_idle()
+        self.wait_idle()
+
+        self.assertEqual([call[0] for call in self.service.search_calls], ["Outlook"])
+        self.assertEqual(self.workspace.model.rowCount(), 1)
+        self.assertEqual(
+            self.workspace.model.item(0, 0).data(Qt.ItemDataRole.UserRole),
+            first.knowledge_article_id,
+        )
+        self.assertEqual(self.workspace.article.knowledge_article_id, first.knowledge_article_id)
+        self.assertEqual(self.workspace.detail_body.toPlainText(), "SMTPAUTHCHECK")
+        self.assertEqual(self.workspace.search_input.text(), "Outlook")
+        self.assertEqual(self.workspace.feedback.text(), "1 matching article.")
+
+    def test_search_is_async_and_blocks_duplicate_and_competing_actions(self):
+        from PySide6.QtCore import QTimer
+
+        self.service.create_article(
+            article_code="KB0001", title="Outlook", summary=None, body="Mail",
+        )
+        self.service.search_gate = threading.Event()
+        self.workspace.search_input.setText("Outlook")
+        self.workspace.search_button.click()
+        self.workspace.search_articles()
+        ticks = []
+        QTimer.singleShot(0, lambda: ticks.append(True))
+        QTest.qWait(30)
+
+        self.assertTrue(ticks)
+        self.assertTrue(self.runner.busy)
+        self.assertEqual(len(self.service.search_calls), 1)
+        self.assertFalse(self.workspace.search_button.isEnabled())
+        self.assertFalse(self.workspace.clear_search_button.isEnabled())
+        self.assertFalse(self.workspace.new_button.isEnabled())
+        self.assertEqual(self.workspace.feedback.text(), "Searching knowledge articles…")
+        self.service.search_gate.set()
+        self.wait_idle()
+
+    def test_search_no_results_failure_preservation_and_clear_restore_full_list(self):
+        self.service.create_article(
+            article_code="KB-OUTLOOK", title="Outlook", summary=None, body="Mail",
+        )
+        self.workspace.refresh_list()
+        self.wait_idle()
+        self.workspace.search_input.setText("NoSuchTerm")
+        self.workspace.search_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.rowCount(), 0)
+        self.assertTrue(self.workspace.empty_state.isVisible())
+        self.assertEqual(self.workspace.empty_state.text(), "No matching knowledge articles.")
+        self.assertEqual(self.workspace.feedback.text(), "No matching knowledge articles.")
+
+        self.workspace.clear_search_button.click()
+        self.wait_idle()
+        self.wait_idle()
+        self.assertEqual(self.workspace.search_input.text(), "")
+        self.assertEqual(self.workspace.model.rowCount(), 1)
+        self.assertEqual(self.workspace.article.article_code, "KB-OUTLOOK")
+        self.assertEqual(self.workspace.feedback.text(), "")
+
+        self.workspace.search_input.setText("Outlook")
+        self.workspace.search_button.click()
+        self.wait_idle()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.rowCount(), 1)
+        self.assertEqual(self.workspace.article.article_code, "KB-OUTLOOK")
+
+        self.service.search_error = RuntimeError("Sensitive SQLite detail")
+        self.workspace.search_input.setText("Printer")
+        self.workspace.search_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.search_input.text(), "Printer")
+        self.assertEqual(self.workspace.articles, ())
+        self.assertEqual(self.workspace.model.rowCount(), 0)
+        self.assertIsNone(self.workspace.article)
+        self.assertEqual(self.workspace.detail_code.text(), "Select an article to read.")
+        self.assertEqual(self.workspace.detail_title.text(), "")
+        self.assertEqual(self.workspace.detail_status.text(), "")
+        self.assertEqual(self.workspace.detail_version.text(), "")
+        self.assertEqual(self.workspace.detail_summary.text(), "")
+        self.assertEqual(self.workspace.detail_body.toPlainText(), "")
+        self.assertIn("Could not search", self.workspace.feedback.text())
+        self.assertNotIn("Sensitive", self.workspace.feedback.text())
+        self.assertTrue(self.workspace.search_button.isEnabled())
+        self.assertTrue(self.workspace.clear_search_button.isEnabled())
+
+    def test_version_history_remains_available_after_search_result_open(self):
+        article = self.service.create_article(
+            article_code="KB0001", title="Outlook", summary=None, body="Mail",
+        )
+        self.workspace.search_input.setText("Outlook")
+        self.workspace.search_button.click()
+        self.wait_idle()
+        self.wait_idle()
+        self.assertEqual(self.workspace.article.knowledge_article_id, article.knowledge_article_id)
+        dialog = self.workspace.open_version_history()
+        self.wait_idle()
+        self.wait_idle()
+        self.assertEqual([version.version_number for version in dialog.versions], [1])
+        self.assertEqual(dialog.detail_body.toPlainText(), "Mail")
+        dialog.close()
 
     def test_background_create_is_responsive_and_double_submit_is_ignored(self):
         self.service.gate = threading.Event()

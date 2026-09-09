@@ -427,7 +427,7 @@ F7Hub shall support creation and editing of structured KB articles.
 
 Slices 010–011 implement creation, deterministic listing, reopening/reading and DRAFT article editing through Knowledge Base navigation. Creation requires a user-entered article code, title and Markdown body; summary is optional. New articles are DRAFT, version 1, with an atomic initial history snapshot. Edit Article changes title/summary/body while keeping the article code immutable. Save Revision atomically increments the current version and appends its new snapshot; earlier snapshots remain unchanged. An expected-version token rejects stale overwrites. The read view displays Version N and read-only Markdown source.
 
-Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. Restore/revert, deletion, publishing/archiving workflows, search/FTS, categories/tags, article-to-article relationships, external links and AI remain unimplemented.
+Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. Restore/revert, deletion, publishing/archiving workflows, categories/tags, article-to-article relationships, external links and AI remain unimplemented.
 
 Slice 012 adds RELATED ticket/article linking: open a saved ticket → Knowledge → Link Article → select an existing article → link → Open Article to read its current content in Knowledge Base. The linked list displays current code/title/status/version. All existing article statuses are eligible; already RELATED articles are excluded from candidates, and concurrent duplicate attempts receive safe feedback.
 
@@ -435,7 +435,9 @@ Slice 013 adds Unlink Article for one selected RELATED association. Confirmation
 
 Slice 014 implements read-only version history: Knowledge Base → open an article → Version History → select a persisted revision → read its exact snapshot. History is available for loaded DRAFT, PUBLISHED and ARCHIVED articles with an available service and idle runner. The list is newest-first and excludes bodies; only the selected revision loads its summary/body. Historical version, title, summary, body, change summary, created by and stored timestamp come from knowledge_article_versions. Missing optional metadata displays Not provided. Status, category, updated_by and published_at are not snapshotted and are not presented as historical data. Article code is current immutable identity. Viewing does not change the current article, history rows, timestamps or ticket activity.
 
-Restore/revert, historical editing/deletion, comparison/apply, search/FTS and AI remain deferred. There is no historical status snapshot and no pagination for large revision lists.
+Slice 015 adds current-article Knowledge search through SQLite FTS5. Search covers article code, title, summary and current Markdown body for DRAFT, PUBLISHED and ARCHIVED articles. Plain input is converted into quoted Unicode letter/number tokens joined by implicit AND, so punctuation and operator-looking text do not expose raw FTS syntax. Results are lightweight current identities ranked by bm25 with deterministic recency/ID tie-breaking; selecting one reloads authoritative current detail through the existing read path. Historical revisions are not indexed.
+
+Restore/revert, historical editing/deletion, comparison/apply and AI remain deferred. There is no historical status snapshot and no pagination for large revision or search-result lists.
 
 Possible article types:
 
@@ -474,7 +476,9 @@ Requirements: `FR-KB-003`
 
 Knowledge content shall support fast local search.
 
-FTS5 may provide full-text indexing.
+Slice 015 implements this for current Knowledge articles with an external-content `knowledge_articles_fts` index synchronized by insert/update/delete triggers. Existing rows are backfilled during migration 0006. The relational `knowledge_articles` row remains authoritative; search results expose only article ID, code, title, status, current version and updated timestamp before the normal detail read.
+
+This slice does not implement unified search, ticket search, filters, snippets/highlighting, advanced query syntax, pagination, saved searches, recommendations or AI ranking.
 
 ---
 

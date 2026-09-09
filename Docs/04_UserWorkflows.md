@@ -656,6 +656,14 @@ Exchange shared mailbox permissions
 Intune device not compliant
 ```
 
+## Implemented current-article search — Slice 015
+
+Open Knowledge Base → enter plain text → Search (or press Enter) → select a lightweight match → read the authoritative current article. The search covers current article code, title, summary and Markdown body for DRAFT, PUBLISHED and ARCHIVED articles. Multiple letter/number tokens use implicit AND; case, Unicode text, punctuation, quotes, parentheses and operator-looking words are accepted as ordinary input rather than raw FTS syntax.
+
+Search runs through the existing background runner. While it is pending, Search, Clear Search, list interaction, New Article, Edit Article and Version History are disabled. No matches show an explicit empty result without changing the query. A safe failure keeps the query for retry. Clear Search empties the query and restores the complete deterministic article list.
+
+Selecting a result reuses the existing `get_article` path, so a changed article opens its latest persisted content and an article deleted after the search receives safe missing-article feedback. Search indexes current rows only; an earlier revision's obsolete text is not returned, while Version History remains separately available after opening a result.
+
 ---
 
 # 16. Contextual KB Workflow
@@ -711,7 +719,7 @@ The current article update and new revision snapshot commit together. Version 1 
 
 If another editor saves first, the stale editor cannot overwrite it or add a snapshot. Its text remains available to copy, with clear feedback and Save disabled. Close the old editor, reopen the latest article, and start a new edit explicitly; a workspace refresh never replaces an open editor's original token. External changes to PUBLISHED/ARCHIVED status or deletion receive safe specific feedback with input retained. Generic persistence failures preserve input and permit retry. Cancel writes nothing; save runs in the background and blocks duplicate saves and closing during the write.
 
-Restore/revert, deletion, publishing/archiving, search/FTS, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
+Restore/revert, deletion, publishing/archiving, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
 
 ## Implemented read-only version history — Slice 014
 
@@ -719,7 +727,7 @@ Slice 014 implements read-only version history: Knowledge Base → open an artic
 
 The current persisted revision is selected by version identity, with the newest returned revision as fallback. Select another row to load its exact historical content asynchronously. The body is read-only Markdown source and all metadata is plain text. Close or Escape dismisses the viewer while either the history list or selected revision read is pending; the read finishes safely without changing or reopening the dismissed viewer. All four combinations passed fresh MainWindow integration and native Windows input checks on 2026-09-09. Long metadata scrolls independently of the read-only body: the beginning and end of a 6,132-character historical summary were accessible at 900×620, with useful body space retained. Empty history and missing article/revision states receive safe feedback without substituting current content. Ticket Open Article continues to navigate to the current article; history requires a separate action.
 
-Restore/revert, historical editing/deletion, comparison/apply, search/FTS and AI remain deferred. There is no historical status snapshot and no pagination for large revision lists.
+Restore/revert, historical editing/deletion, comparison/apply and AI remain deferred. There is no historical status snapshot and no pagination for large revision or search-result lists.
 
 ## Implemented ticket/article linking — Slice 012
 

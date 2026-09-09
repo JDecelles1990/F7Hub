@@ -93,12 +93,12 @@ class KnowledgeRepositoryTests(unittest.TestCase):
             self.assertEqual(connection.execute("SELECT count(*) FROM knowledge_articles").fetchone()[0], 0)
             self.assertEqual(connection.execute("SELECT count(*) FROM knowledge_article_versions").fetchone()[0], 0)
 
-    def test_integrity_foreign_keys_and_five_migrations(self):
+    def test_integrity_foreign_keys_and_six_migrations(self):
         self.create()
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
 
     def update(self, article, **overrides):
         values = dict(
@@ -135,7 +135,7 @@ class KnowledgeRepositoryTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
 
     def test_stale_editor_cannot_overwrite_or_create_snapshot_even_if_content_matches(self):
         first = self.create()

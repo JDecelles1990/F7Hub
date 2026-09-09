@@ -878,9 +878,11 @@ KnowledgeService validates/normalizes input and translates persistence failures.
 
 Slice 011 extends the same boundary: EditArticleDialog / KnowledgeWorkspace → KnowledgeService.update_article → KnowledgeRepository.update_draft_article → SQLite. The editor stores the article ID and original expected_version_number. The service validates positive integer IDs/versions (rejecting bool), normalizes title/summary, preserves valid body text and translates typed repository conditions into safe feedback. GUI components make no repository calls and contain no SQL.
 
-Revision persistence uses one connection and one BEGIN IMMEDIATE transaction: load current article → verify existence, DRAFT status and expected version → check unchanged content → conditional UPDATE by ID/version/DRAFT → append the new version snapshot → reload → COMMIT. A zero-row update is rejected. Snapshot/reload failures roll back all changes; retry adds exactly the next version. Article code and prior snapshots are never updated. No-change detection follows concurrency checks, so it cannot hide a stale editor. Save Revision reuses ServiceTaskRunner and refreshes only the Knowledge list/detail. No migration, framework or ownership changes. Restore/revert, search, publishing/archiving and richer relationship workflows remain deferred.
+Revision persistence uses one connection and one BEGIN IMMEDIATE transaction: load current article → verify existence, DRAFT status and expected version → check unchanged content → conditional UPDATE by ID/version/DRAFT → append the new version snapshot → reload → COMMIT. A zero-row update is rejected. Snapshot/reload failures roll back all changes; retry adds exactly the next version. Article code and prior snapshots are never updated. No-change detection follows concurrency checks, so it cannot hide a stale editor. Save Revision reuses ServiceTaskRunner and refreshes only the Knowledge list/detail. No migration, framework or ownership changes. Restore/revert, publishing/archiving and richer relationship workflows remain deferred.
 
 Slice 014 extends KnowledgeWorkspace → VersionHistoryDialog → KnowledgeService → KnowledgeRepository → knowledge_article_versions. Two frozen read models separate lightweight revision metadata from one selected snapshot body. Each read uses one configured connection and a read transaction for consistent article existence and history selection. Data access is SELECT-only; BEGIN/ROLLBACK delimit the read transaction. No article, snapshot, timestamp or activity is written. Service validation and safe missing-article/revision errors stay outside the GUI; the existing ServiceTaskRunner owns async execution. There is no new schema, service, repository, framework or dependency.
+
+Slice 015 extends the existing vertical boundary without adding a universal search layer: KnowledgeWorkspace → KnowledgeService.search_articles → KnowledgeRepository.search_articles → SQLite FTS5. The GUI collects plain text and renders lightweight current identities; the service converts Unicode letter/number runs into quoted implicit-AND tokens and translates failures; the repository owns a parameterized MATCH query, bm25 ranking and the join back to authoritative `knowledge_articles`. Selecting a result calls the established current-article detail read. Migration 0006 owns the external-content table, trigger synchronization and initial rebuild. Historical snapshots and ticket activity remain outside the index and workflow.
 
 Slice 012 establishes the narrow cross-module boundary: TicketWorkspace / TicketKnowledgeWidget / LinkArticleDialog → TicketKnowledgeService → TicketKnowledgeRepository → SQLite. The repository owns ticket_knowledge_articles and lightweight joined current identities; neither TicketService nor KnowledgeService acquires relationship ownership. BEGIN IMMEDIATE precedes ticket/article existence and duplicate checks; RELATED insert and joined reload commit together, with rollback on failure. Service input validation, UTC timestamps and typed safe errors remain outside the GUI.
 
@@ -898,7 +900,7 @@ KnowledgeRepository
  ↓
 SQLite
 
-Searchable KB content may additionally use FTS5.
+Current Knowledge article code/title/summary/body uses FTS5 through this boundary. Broader universal search remains planned.
 
 Knowledge relationships may include:
 

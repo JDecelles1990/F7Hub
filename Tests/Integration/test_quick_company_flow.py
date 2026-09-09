@@ -107,7 +107,7 @@ class QuickCompanyFlowTests(unittest.TestCase):
             self.assertEqual(tuple(row), (company_id, None, 31))
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
         self.window.show_new_ticket()
         self.window.show_tickets()
         self.wait_idle()

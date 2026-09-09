@@ -391,9 +391,23 @@ Slice 014 — read-only version-history viewer, remediation verified 2026-09-09:
 - [x] Fresh sequential full regression: Database 251, GUI 81, Integration 73 = 405 PASS, all exit 0; no suite decreased.
 - [x] Fresh native Windows Qt input and inspection of all six captures, 1000×700 main / 900×620 dialog; read-only database, five migrations, integrity ok, zero FK violations.
 - [x] Preserve Docs/10 modification, archive deletion and ROOT.md; evidence remains outside repository.
-- [ ] Independent Slice 014 re-review after remediation; keep changes unstaged/uncommitted.
+- Historical Slice 014 review gate is superseded by the Slice 015 base on `main` at `d584fd10902b0a3c361208412130462499c0a27b`.
 
-Recommended next slice only: Knowledge Search / FTS5 for current articles. See 16_Roadmap.md for the six-option comparison. Do not begin Slice 015. Restore/revert, historical editing/deletion, compare/apply, historical status, search/AI, pagination, category/tag management, publishing/archiving and richer ticket relationship workflows remain deferred.
+Slice 015 — Knowledge Search / FTS5 for current articles, verified 2026-09-09:
+
+- [x] Create `0006_knowledge_search.sql` with external-content `knowledge_articles_fts`, article code/title/summary/body, `unicode61`, three synchronization triggers and existing-row rebuild.
+- [x] Preserve migrations 0001–0005 byte-for-byte; verify ordered history, checksum recording, idempotency and complete rollback of a failing 0006.
+- [x] Search all current DRAFT/PUBLISHED/ARCHIVED rows with parameterized MATCH and deterministic bm25 → updated_at DESC → article-ID DESC ordering; return lightweight identity/version metadata only.
+- [x] Convert plain input into quoted Unicode letter/number tokens with implicit AND; empty/punctuation-only input performs no MATCH and operator-looking punctuation does not raise syntax errors.
+- [x] Keep historical revisions out of FTS while preserving exact Version History snapshots; verify insert, repeated edit/update and delete synchronization.
+- [x] Add asynchronous Search/Enter/Clear Search to KnowledgeWorkspace with stable IDs, explicit count/empty/failure states and duplicate/competing-action protection.
+- [x] Preserve current detail, New Article, Edit Article, Version History, ticket Open Article and application reconstruction workflows.
+- [x] Focused evidence: 11 new migration/search Database tests, 42 relevant repository/service/migration tests, 23 Knowledge GUI tests and 4 targeted Integration tests PASS.
+- [x] Fresh sequential regression after visual sizing correction: Database 262, GUI 85, Integration 77 = 424 PASS, all exit 0; strengthened full-migration rollback/retry test then reran Database 262 PASS.
+- [x] Fresh native Windows 1000×700 workflow: 10 checks PASS; nine post-fix captures inspected; six migrations, eight FTS objects, virtual-table MATCH plan, integrity ok and zero FK violations.
+- [x] Keep evidence outside the repository; preserve Docs/10 user modification, archive deletion and ROOT.md; leave all Slice 015 work unstaged/uncommitted.
+
+Recommended next slice only: Slice 016 — publish one DRAFT Knowledge article through an explicit DRAFT → PUBLISHED transition that atomically sets `published_at`. Do not implement Slice 016 here. Archiving/unpublishing, restore/revert, historical editing/deletion, compare/apply, historical status, pagination, categories/tags, unified/ticket search, recommendations, AI and richer relationship workflows remain deferred.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

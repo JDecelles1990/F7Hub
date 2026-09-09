@@ -95,6 +95,147 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         self.wait_idle(self.window.runner)
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
 
+    def test_search_create_title_body_code_punctuation_clear_and_reconstruction(self):
+        self.window.show_knowledge()
+        self.wait_idle(self.window.runner)
+        self.create_through_dialog(
+            "KB-001",
+            "Outlook cannot send mail",
+            body="General mail steps with C++ diagnostics.",
+        )
+        self.create_through_dialog(
+            "KB0002",
+            "Body-only diagnostic",
+            body="Run SMTPAUTHCHECK before retrying.",
+        )
+        workspace = self.window.knowledge_workspace
+
+        cases = (
+            ("Outlook send", "KB-001"),
+            ("SMTPAUTHCHECK", "KB0002"),
+            ("kb-001", "KB-001"),
+            ('"OUTLOOK" (send)*', "KB-001"),
+            ("C++", "KB-001"),
+        )
+        for query, expected_code in cases:
+            with self.subTest(query=query):
+                workspace.search_input.setText(query)
+                workspace.search_button.click()
+                self.wait_idle(self.window.runner)
+                self.wait_idle(self.window.runner)
+                self.assertEqual(workspace.model.rowCount(), 1)
+                self.assertEqual(workspace.article.article_code, expected_code)
+                self.assertEqual(workspace.search_input.text(), query)
+
+        workspace.search_input.setText("NO-SUCH-ARTICLE")
+        workspace.search_button.click()
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.model.rowCount(), 0)
+        self.assertEqual(workspace.feedback.text(), "No matching knowledge articles.")
+        workspace.clear_search_button.click()
+        self.wait_idle(self.window.runner)
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.search_input.text(), "")
+        self.assertEqual(workspace.model.rowCount(), 2)
+
+        reconstructed = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.path)
+        restored = reconstructed.main_window
+        restored.resize(1000, 700)
+        restored.show()
+        try:
+            restored.show_knowledge()
+            self.wait_idle(restored.runner)
+            self.wait_idle(restored.runner)
+            restored_workspace = restored.knowledge_workspace
+            restored_workspace.search_input.setText("SMTPAUTHCHECK")
+            restored_workspace.search_button.click()
+            self.wait_idle(restored.runner)
+            self.wait_idle(restored.runner)
+            self.assertEqual(restored_workspace.article.article_code, "KB0002")
+            self.assertEqual(restored_workspace.detail_body.toPlainText(), "Run SMTPAUTHCHECK before retrying.")
+        finally:
+            restored.close()
+            restored.deleteLater()
+            self.application.processEvents()
+
+    def test_search_edit_sync_excludes_history_and_history_remains_readable(self):
+        self.window.show_knowledge()
+        self.wait_idle(self.window.runner)
+        self.create_through_dialog(
+            "KB0001",
+            "Search synchronization",
+            body="LEGACYSEARCHTOKEN",
+        )
+        workspace = self.window.knowledge_workspace
+        workspace.search_input.setText("LEGACYSEARCHTOKEN")
+        workspace.search_button.click()
+        self.wait_idle(self.window.runner)
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.article.article_code, "KB0001")
+
+        editor = workspace.open_edit_article()
+        editor.body_input.setPlainText("CURRENTSEARCHTOKEN")
+        editor.submit()
+        self.wait_idle(self.window.runner)
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.detail_version.text(), "Version 2")
+
+        workspace.search_input.setText("LEGACYSEARCHTOKEN")
+        workspace.search_button.click()
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.model.rowCount(), 0)
+        workspace.search_input.setText("CURRENTSEARCHTOKEN")
+        workspace.search_button.click()
+        self.wait_idle(self.window.runner)
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.article.knowledge_article_id, 1)
+        self.assertEqual(workspace.detail_body.toPlainText(), "CURRENTSEARCHTOKEN")
+
+        history = workspace.open_version_history()
+        self.wait_idle(self.window.runner)
+        self.wait_idle(self.window.runner)
+        self.assertEqual([version.version_number for version in history.versions], [2, 1])
+        history.table.selectRow(1)
+        self.wait_idle(self.window.runner)
+        self.assertEqual(history.detail_body.toPlainText(), "LEGACYSEARCHTOKEN")
+        self.assertEqual(workspace.detail_body.toPlainText(), "CURRENTSEARCHTOKEN")
+        history.close()
+
+    def test_deleted_search_result_opens_safely_without_stale_content(self):
+        service = self.context.knowledge_service
+        first = service.create_article(
+            article_code="KB0001", title="Stale result one", summary=None, body="Shared target",
+        )
+        second = service.create_article(
+            article_code="KB0002", title="Stale result two", summary=None, body="Shared target",
+        )
+        self.window.show_knowledge()
+        self.wait_idle(self.window.runner)
+        self.wait_idle(self.window.runner)
+        workspace = self.window.knowledge_workspace
+        workspace.search_input.setText("Shared target")
+        workspace.search_button.click()
+        self.wait_idle(self.window.runner)
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.model.rowCount(), 2)
+        target = first if workspace.article.knowledge_article_id == second.knowledge_article_id else second
+        row = next(
+            index
+            for index, result in enumerate(workspace.articles)
+            if result.knowledge_article_id == target.knowledge_article_id
+        )
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "DELETE FROM knowledge_articles WHERE knowledge_article_id = ?",
+                (target.knowledge_article_id,),
+            )
+        workspace.table.selectRow(row)
+        self.wait_idle(self.window.runner)
+        self.assertIsNone(workspace.article)
+        self.assertEqual(workspace.detail_body.toPlainText(), "")
+        self.assertIn("no longer exists", workspace.feedback.text())
+        self.assertEqual(workspace.search_input.text(), "Shared target")
+
     def history(self):
         with database_connection(self.path) as connection:
             return [tuple(row) for row in connection.execute(
@@ -301,7 +442,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
             self.assertEqual(tuple(connection.iterdump()), dump_before)
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
 
         reconstructed = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.path)
         restored = reconstructed.main_window
@@ -475,12 +616,19 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         finally:
             dialog.close()
 
-    def create_through_dialog(self, code, title):
+    def create_through_dialog(
+        self,
+        code,
+        title,
+        *,
+        summary="Synthetic summary",
+        body="# Synthetic body\n\n1. Synthetic step.",
+    ):
         dialog = self.window.knowledge_workspace.open_new_article()
         dialog.code_input.setText(code)
         dialog.title_input.setText(title)
-        dialog.summary_input.setText("Synthetic summary")
-        dialog.body_input.setPlainText("# Synthetic body\n\n1. Synthetic step.")
+        dialog.summary_input.setText(summary)
+        dialog.body_input.setPlainText(body)
         dialog.submit()
         self.wait_idle(self.window.runner)
         self.wait_idle(self.window.runner)
