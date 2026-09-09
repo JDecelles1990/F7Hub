@@ -3,12 +3,15 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import tempfile
+import threading
 import time
 import unittest
+from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt, QPoint
 from PySide6.QtWidgets import QApplication
 
 from f7hub.app.bootstrap import bootstrap_application
@@ -240,6 +243,237 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         self.wait_idle(self.window.runner)
         self.assertEqual(workspace.detail_version.text(), "Version 2")
         self.assertEqual(len(self.history()), 2)
+
+    def test_read_only_history_exact_snapshots_and_reconstruction(self):
+        self.window.show_knowledge()
+        self.wait_idle(self.window.runner)
+        self.create_through_dialog("KB0001", "Title A")
+        workspace = self.window.knowledge_workspace
+        first = workspace.article
+        initial = workspace.open_version_history()
+        self.wait_idle(self.window.runner)
+        self.assertEqual([version.version_number for version in initial.versions], [1])
+        first_snapshot = initial.version
+        self.assertEqual(first_snapshot.body_markdown, first.body_markdown)
+        initial.close()
+        editor = workspace.open_edit_article()
+        editor.title_input.setText("Title B")
+        editor.summary_input.setText("Summary B")
+        editor.body_input.setPlainText("Body B")
+        editor.submit()
+        self.wait_idle(self.window.runner)
+        editor = workspace.open_edit_article()
+        editor.title_input.setText("Title C")
+        editor.summary_input.setText("Summary C")
+        editor.body_input.setPlainText("Body C")
+        editor.submit()
+        self.wait_idle(self.window.runner)
+        current_before = self.context.knowledge_service.get_article(first.knowledge_article_id)
+        history_before = self.history()
+        with database_connection(self.path) as connection:
+            dump_before = tuple(connection.iterdump())
+
+        dialog = workspace.open_version_history()
+        self.wait_idle(self.window.runner)
+        self.wait_idle(self.window.runner)
+        self.assertEqual([version.version_number for version in dialog.versions], [3, 2, 1])
+        self.assertEqual(dialog.version.version_number, 3)
+        expected = {
+            1: ("Title A", "Synthetic summary", "# Synthetic body\n\n1. Synthetic step."),
+            2: ("Title B", "Summary B", "Body B"),
+            3: ("Title C", "Summary C", "Body C"),
+        }
+        for row, number in enumerate((3, 2, 1)):
+            dialog.table.selectRow(row)
+            self.wait_idle(self.window.runner)
+            self.assertEqual(
+                (dialog.version.title, dialog.version.summary, dialog.version.body_markdown),
+                expected[number],
+            )
+        dialog.close()
+        self.assertEqual(self.context.knowledge_service.get_article(first.knowledge_article_id), current_before)
+        self.assertEqual(self.history(), history_before)
+        self.assertEqual(
+            self.context.knowledge_service.get_article_version(first.knowledge_article_id, 1),
+            first_snapshot,
+        )
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), dump_before)
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
+
+        reconstructed = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.path)
+        restored = reconstructed.main_window
+        restored.resize(1000, 700)
+        restored.show()
+        try:
+            self.wait_idle(restored.runner)
+            restored.show_knowledge()
+            self.wait_idle(restored.runner)
+            self.wait_idle(restored.runner)
+            restored_workspace = restored.knowledge_workspace
+            restored_workspace.open_article_by_id(first.knowledge_article_id)
+            self.wait_idle(restored.runner)
+            self.wait_idle(restored.runner)
+            self.assertEqual(restored_workspace.detail_version.text(), "Version 3")
+            reopened = restored_workspace.open_version_history()
+            self.wait_idle(restored.runner)
+            self.wait_idle(restored.runner)
+            self.assertEqual([version.version_number for version in reopened.versions], [3, 2, 1])
+            reopened.table.selectRow(2)
+            self.wait_idle(restored.runner)
+            self.assertEqual(reopened.detail_body.toPlainText(), expected[1][2])
+            reopened.close()
+        finally:
+            restored.close()
+            restored.deleteLater()
+            self.application.processEvents()
+
+    def test_history_real_missing_revision_and_article_show_safe_feedback(self):
+        self.window.show_knowledge()
+        self.wait_idle(self.window.runner)
+        self.create_through_dialog("KB0001", "Original")
+        workspace = self.window.knowledge_workspace
+        dialog = workspace.open_version_history()
+        self.wait_idle(self.window.runner)
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM knowledge_article_versions WHERE knowledge_article_id = 1")
+        dialog._load_version(1)
+        self.wait_idle(self.window.runner)
+        self.assertIn("revision is no longer available", dialog.feedback.text())
+        self.assertEqual(dialog.detail_body.toPlainText(), "")
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM knowledge_articles WHERE knowledge_article_id = 1")
+        dialog._load_version(1)
+        self.wait_idle(self.window.runner)
+        self.assertIn("article no longer exists", dialog.feedback.text())
+        self.assertEqual(dialog.detail_body.toPlainText(), "")
+        dialog.close()
+        dialog = workspace.open_version_history()
+        self.wait_idle(self.window.runner)
+        self.assertIn("article no longer exists", dialog.feedback.text())
+        self.assertEqual(dialog.model.rowCount(), 0)
+        dialog.close()
+
+    def test_pending_history_list_close_in_main_window(self):
+        self.check_pending_history_dismissal("list_article_versions", "close")
+
+    def test_pending_history_list_escape_in_main_window(self):
+        self.check_pending_history_dismissal("list_article_versions", "escape")
+
+    def test_pending_history_detail_close_in_main_window(self):
+        self.check_pending_history_dismissal("get_article_version", "close")
+
+    def test_pending_history_detail_escape_in_main_window(self):
+        self.check_pending_history_dismissal("get_article_version", "escape")
+
+    def check_pending_history_dismissal(self, method, action):
+        self.window.show_knowledge()
+        self.wait_idle(self.window.runner)
+        self.create_through_dialog("KBPENDING", "Original")
+        workspace = self.window.knowledge_workspace
+        current = workspace.article
+        with database_connection(self.path) as connection:
+            before = tuple(connection.iterdump())
+        service = self.context.knowledge_service
+        original = getattr(service, method)
+        entered, release = threading.Event(), threading.Event()
+
+        def delayed(*args):
+            entered.set()
+            if not release.wait(10):
+                raise RuntimeError("Test read gate timed out")
+            return original(*args)
+
+        try:
+            with patch.object(service, method, side_effect=delayed) as read:
+                QTest.mouseClick(workspace.version_history_button, Qt.MouseButton.LeftButton)
+                dialog = workspace._version_history_dialog
+                deadline = time.monotonic() + 5
+                while not entered.is_set() and time.monotonic() < deadline:
+                    QTest.qWait(10)
+                self.assertTrue(entered.is_set())
+                self.assertTrue(self.window.runner.busy)
+                self.assertFalse(self.window.pages.isEnabled())
+                self.assertFalse(self.window.knowledge_action.isEnabled())
+                self.assertFalse(workspace.new_button.isEnabled())
+                self.assertFalse(workspace.edit_button.isEnabled())
+                self.assertFalse(workspace.version_history_button.isEnabled())
+                self.assertIsNone(workspace.open_version_history())
+                self.assertFalse(dialog.table.isEnabled())
+                self.assertTrue(dialog.close_button.isEnabled())
+                if action == "close":
+                    QTest.mouseClick(dialog.close_button, Qt.MouseButton.LeftButton)
+                else:
+                    QTest.keyClick(dialog, Qt.Key.Key_Escape)
+                self.assertFalse(dialog.isVisible())
+                self.assertTrue(self.window.runner.busy)
+                self.assertIsNone(workspace.open_version_history())
+                rows, feedback = dialog.model.rowCount(), dialog.feedback.text()
+                release.set()
+                self.wait_idle(self.window.runner)
+                self.assertEqual(read.call_count, 1)
+                self.assertFalse(dialog.isVisible())
+                self.assertEqual(dialog.model.rowCount(), rows)
+                self.assertEqual(dialog.feedback.text(), feedback)
+                self.assertIsNone(dialog.version)
+                self.assertEqual(dialog.detail_body.toPlainText(), "")
+                self.assertEqual(workspace.article, current)
+                self.assertTrue(self.window.pages.isEnabled())
+                with database_connection(self.path) as connection:
+                    self.assertEqual(tuple(connection.iterdump()), before)
+        finally:
+            release.set()
+            self.wait_idle(self.window.runner)
+            if hasattr(workspace, "_version_history_dialog"):
+                workspace._version_history_dialog.close()
+
+    def test_long_historical_metadata_scrolls_to_end_with_body_visible(self):
+        service = self.context.knowledge_service
+        summary = 'START-OF-LONG-SUMMARY\n' + '<tag> & "quotes" **literal** ' * 210 + '\nEND-OF-LONG-SUMMARY'
+        first = service.create_article(
+            article_code="KBLONG", title="Historical title", summary=summary, body="Historical body",
+        )
+        service.update_article(
+            article_id=first.knowledge_article_id, expected_version_number=1,
+            title="Current title", summary="Short current summary", body="Current body",
+        )
+        self.window.show_knowledge()
+        self.wait_idle(self.window.runner)
+        workspace = self.window.knowledge_workspace
+        workspace.open_article_by_id(first.knowledge_article_id)
+        self.wait_idle(self.window.runner)
+        dialog = workspace.open_version_history()
+        self.wait_idle(self.window.runner)
+        dialog.resize(900, 620)
+        dialog.table.selectRow(1)
+        self.wait_idle(self.window.runner)
+        try:
+            self.assertEqual(dialog.detail_summary.text(), "Summary: " + summary)
+            self.assertEqual(dialog.detail_summary.textFormat(), Qt.TextFormat.PlainText)
+            self.assertTrue(dialog.detail_body.isReadOnly())
+            scroll = dialog.metadata_scroll
+            bar = scroll.verticalScrollBar()
+            self.assertGreater(bar.maximum(), 0)
+            bar.setValue(0)
+            QTest.qWait(30)
+            label = dialog.detail_summary
+            self.assertGreaterEqual(label.height(), label.heightForWidth(label.width()))
+            start = label.mapTo(scroll.viewport(), QPoint(0, 0))
+            self.assertTrue(scroll.viewport().rect().contains(start))
+            bar.setValue(bar.maximum())
+            QTest.qWait(30)
+            end = label.mapTo(scroll.viewport(), QPoint(0, label.height() - 1))
+            self.assertTrue(scroll.viewport().rect().contains(end))
+            self.assertGreaterEqual(dialog.detail_body.height(), 150)
+            self.assertTrue(dialog.detail_body.isVisible())
+            self.assertEqual(dialog.detail_body.toPlainText(), "Historical body")
+            self.assertLess(scroll.geometry().bottom(), dialog.detail_body.geometry().top())
+            self.assertEqual((dialog.width(), dialog.height()), (900, 620))
+            self.assertEqual(workspace.detail_body.toPlainText(), "Current body")
+        finally:
+            dialog.close()
 
     def create_through_dialog(self, code, title):
         dialog = self.window.knowledge_workspace.open_new_article()

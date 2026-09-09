@@ -15,6 +15,9 @@ from f7hub.services.knowledge_service import (
     KnowledgeUpdateError,
     KnowledgeEditConflictError,
     KnowledgeNoChangesError,
+    KnowledgeHistoryArticleMissingError,
+    KnowledgeHistoryError,
+    KnowledgeHistoryVersionMissingError,
 )
 
 
@@ -159,6 +162,48 @@ class KnowledgeServiceTests(unittest.TestCase):
         with self.assertRaises(KnowledgeEditConflictError):
             self.update(first, title=second.title, summary=second.summary, body=second.body_markdown)
         self.assertEqual(self.service.get_article(first.knowledge_article_id), second)
+
+    def test_history_validates_positive_ids_and_rejects_bool(self):
+        article = self.create_for_edit()
+        with patch.object(self.repository, "list_article_versions") as list_versions, patch.object(
+            self.repository, "get_article_version"
+        ) as get_version:
+            for value in (True, False, 0, -1, 1.5, "1", None):
+                with self.subTest(article_id=value), self.assertRaises(KnowledgeValidationError):
+                    self.service.list_article_versions(value)
+                with self.subTest(detail_article_id=value), self.assertRaises(KnowledgeValidationError):
+                    self.service.get_article_version(value, 1)
+                with self.subTest(version_number=value), self.assertRaises(KnowledgeValidationError):
+                    self.service.get_article_version(article.knowledge_article_id, value)
+            list_versions.assert_not_called()
+            get_version.assert_not_called()
+
+    def test_history_returns_records_and_translates_failures_safely(self):
+        from f7hub.repositories.knowledge_repository import ArticleMissingError, ArticleVersionMissingError
+
+        article = self.create_for_edit()
+        self.assertEqual(self.service.list_article_versions(article.knowledge_article_id)[0].version_number, 1)
+        self.assertEqual(
+            self.service.get_article_version(article.knowledge_article_id, 1).body_markdown,
+            "Body",
+        )
+        cases = (
+            ("list_article_versions", ArticleMissingError("private"), KnowledgeHistoryArticleMissingError),
+            ("list_article_versions", sqlite3.OperationalError("private"), KnowledgeHistoryError),
+            ("get_article_version", ArticleMissingError("private"), KnowledgeHistoryArticleMissingError),
+            ("get_article_version", ArticleVersionMissingError("private"), KnowledgeHistoryVersionMissingError),
+            ("get_article_version", PermissionError("private"), KnowledgeHistoryError),
+        )
+        for method, error, expected in cases:
+            with self.subTest(method=method, error=type(error).__name__), patch.object(
+                self.repository, method, side_effect=error
+            ):
+                with self.assertRaises(expected) as caught:
+                    if method == "list_article_versions":
+                        self.service.list_article_versions(article.knowledge_article_id)
+                    else:
+                        self.service.get_article_version(article.knowledge_article_id, 1)
+                self.assertNotIn("private", str(caught.exception))
 
 
 if __name__ == "__main__":

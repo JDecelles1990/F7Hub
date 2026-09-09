@@ -47,6 +47,25 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-09 — Slice 014 remediation resumed and verified
+
+- Preserved the interrupted remediation in KnowledgeWorkspace, VersionHistoryDialog and test_knowledge_base_flow.py; no further implementation/test correction was needed. Real source had no duplicate imports or function declarations; explicit py_compile passed.
+- Top-level window ownership keeps Close/Escape interactive while MainWindow pages remain disabled. All four pending list/detail × Close/Escape cases passed, with competing reads blocked, dismissed callbacks ignored and current article/database unchanged. Qt parent-destruction cleanup was separately verified.
+- Scrollable historical metadata exposes both markers of a 6,132-character literal summary at 900×620. Fresh Windows captures showed no overlap and a usable read-only body 356 pixels high.
+- Fresh focused Integration: 29 PASS (118.030s test time; 120.656s process elapsed), exit 0. Retained post-fix focused GUI log: 19 PASS. Fresh sequential regression: Database 251, GUI 81, Integration 73 = 405 PASS, all exit 0; five more than pre-remediation, no suite decreased.
+- Existing TEMP native harness reused: all four dismissal combinations, long summary and read-only checks PASS. All six screenshots inspected. SQL trace: 18 SELECT, nine BEGIN and nine ROLLBACK statements; full database dump unchanged; five migrations, integrity ok, zero FK violations.
+- Corrected workflow and current validation claims only after fresh validation. Protected Docs/10 bytes match the saved pre-remediation hash; archive deletion remains unstaged; ROOT.md, schema, migrations, MainWindow, ServiceTaskRunner and repository/service implementation were untouched by remediation. Evidence remains outside the repository. Unstaged/uncommitted; ready for independent re-review, no Slice 015 work.
+
+# 2026-09-08 — Slice 014: Read-only Knowledge Version History
+
+- Resumed all nine existing Slice 014 implementation/test paths at 4871fd4a1b1ceec8d99dca4247d1407d3e95dc44 on feat/knowledge-version-history-viewer. Preserved correct implementation; added the missing History service-availability guard and strengthened repository/GUI/integration coverage.
+- Extended existing KnowledgeService/Repository with lightweight newest-first metadata and one exact selected snapshot. Parameterized SELECTs run in read transactions; trace contains only BEGIN/SELECT/ROLLBACK. No current article, snapshot, timestamp or activity changes; full database-state comparison passes.
+- VersionHistoryDialog uses ServiceTaskRunner, stable revision identities, safe dismissal/callback handling and plain-text read-only content. History is available for every loaded status. Missing article/revision and empty history are handled without substituting current content. Historical status/category/updated_by/published_at are not snapshotted.
+- Fresh focused: repository/service 31, GUI 19, Integration 24 PASS. Sequential full regression: Database 251, GUI 81, Integration 68 = 400 PASS, up 16 from 384 (7 Database, 7 GUI, 2 Integration). All exit 0; commands use the existing .venv because the supplied ..venv path does not exist.
+- Fresh native windows Qt mouse/keyboard workflow and captured-window visual inspection PASS at 1000×700: creation through V3, exact V1/V2/V3, newest-first/current initial selection, unchanged current content, reopen, New/Edit and PUBLISHED/ARCHIVED history. Table titles can elide; full selected titles, body and controls were readable. Agent verification, not user acceptance testing.
+- No migration/schema/dependency change. Five historical migrations unchanged; isolated integrity_check = ok and zero foreign-key violations. ROOT.md, physical schema docs, protected Docs/10 modification and archive deletion remain untouched. Harnesses, synthetic databases, captures and logs remain outside the repository.
+- Restore/revert, historical editing/deletion, comparison/apply, search/FTS, AI and large-history pagination remain deferred. Unstaged/uncommitted for independent review; recommendation only: current-article Knowledge Search / FTS5. No Slice 015 implementation.
+
 # 2026-09-07 — Slice 013: RELATED Ticket/Knowledge Unlink
 
 - Extended TicketKnowledgeRepository/Service/Widget with one selected RELATED unlink, reusing the existing junction, lightweight identities and ServiceTaskRunner.

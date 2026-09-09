@@ -1,16 +1,16 @@
 # F7Hub Current State
 
-Last verified: 2026-09-07
+Last verified: 2026-09-09
 
-Branch: `feat/ticket-knowledge-unlink`
+Branch: `feat/knowledge-version-history-viewer`
 
-Base HEAD: `68aefb157c7351aa47e5f11ffd4c94cdbb8cf0ae` (Slice 012 integrated through PR #7).
+Base HEAD: `4871fd4a1b1ceec8d99dca4247d1407d3e95dc44`
 
-Status: Slice 013 implemented, uncommitted, ready for independent review. Starting main/HEAD matched with only the separate user-confirmed deletion of Docs/Archive/DocsOLD/00_Vision.md. Nothing staged; no commit, push or merge. ROOT.md, physical schema docs and five historical migrations are unchanged.
+Status: Slice 014 remediation verified, uncommitted, ready for independent re-review. Resumed and preserved the two interrupted GUI fixes and five added integration tests. Fresh verification required no further implementation/test changes. No accidental source duplication or unexpected unrelated paths. Nothing staged; no commit, push or merge. Protected Docs/10 modification and archive deletion remain exactly preserved; ROOT.md, physical schema docs and five historical migrations are unchanged.
 
 ## Current Milestone
 
-TICKET ↔ KNOWLEDGE RELATED LINKS MANAGEABLE
+KNOWLEDGE ARTICLES HAVE READABLE IMMUTABLE HISTORY
 
 ## Working
 
@@ -21,6 +21,7 @@ TICKET ↔ KNOWLEDGE RELATED LINKS MANAGEABLE
 - Knowledge create/list/read and DRAFT editing with immutable code, current version and atomic historical snapshots
 - Stale-edit protection, safe errors, preserved input and no-change saves without extra revisions
 - Plain-text article metadata and read-only Markdown source
+- Read-only Version History: newest-first metadata, exact selected immutable snapshot, safe missing/empty states and dismissal
 - RELATED Link Article, lightweight current code/title/status/version, Open Article and Refresh
 - RELATED Unlink Article for one selected association, with explicit confirmation and Cancel as default/escape
 - Exact relationship-only deletion preserving both entities, other RELATED and APPLIED/RESOLUTION_SOURCE rows
@@ -31,46 +32,60 @@ TICKET ↔ KNOWLEDGE RELATED LINKS MANAGEABLE
 - MainWindow-mediated exact article navigation and persisted link/unlink state after application reconstruction
 - AutoHotkey F7 launch/focus: VERIFIED; manual Windows verification: PASS — 2026-09-07. Detailed launcher architecture: `Docs/11_AHKArchitecture.md`.
 
+## Historical Data Contract
+
+Knowledge Base → open current article → Version History → select a revision → read its stored snapshot. DRAFT/PUBLISHED/ARCHIVED are all eligible when a service and loaded article are available and the runner is idle. List metadata excludes summary/body; selected detail loads one version using article ID plus version number. Version, title, summary, body, change summary, created by and created at come only from knowledge_article_versions. NULL metadata displays Not provided; timestamps remain as stored. Article code is current immutable identity, not a versioned field. Status, category, updated_by and published_at are not historical snapshots.
+
+VersionHistoryDialog renders plain text, disables row interaction during async reads, checks revision identity/generation and ignores callbacks after dismissal. Top-level window ownership keeps Close/Escape enabled outside the disabled page hierarchy, with Qt cleanup on window destruction. Metadata scrolls independently while reserving useful read-only body space. Current article content is never substituted. Missing article, missing revision and empty history have safe distinct feedback. Ticket Open Article still opens the current article; history is an explicit separate action.
+
 ## Deferred / Limitations
 
-- Bulk linking/unlinking, APPLIED/RESOLUTION_SOURCE workflows, relationship-type editing, relationship history/undo and generic relationship management
-- History viewer/restore, search/FTS, tags/categories, recommendations and AI
-- Article publishing/archiving/deletion and ticket-driven article creation/editing
-- Full company/contact/category management and category hierarchy formatting
-- KnowledgeWorkspace's existing list still loads bodies; relationship lists remain lightweight. No pagination or large-library validation. Real content volume is NOT VERIFIED; validation is synthetic only.
-- PowerShell integration; AutoHotkey login startup
+- Restore/revert, historical editing/deletion, compare/apply, historical status snapshots, search/FTS and AI.
+- No pagination or large-history performance validation; actual user library volume is NOT VERIFIED.
+- Table titles may use ellipsis; the selected detail displays the complete title.
+- Bulk linking/unlinking, APPLIED/RESOLUTION_SOURCE workflows, relationship-type editing and relationship history/undo.
+- Article publishing/archiving/deletion, categories/tags and ticket-driven article creation/editing.
+- Full company/contact/category management, PowerShell integration and AutoHotkey login startup.
+- Existing current-article list still loads bodies; history and relationship lists are lightweight.
 
 ## Validation
 
-| Suite | Result |
-|---|---|
-| Database | 244 PASS |
-| GUI | 74 PASS |
-| Integration | 66 PASS |
-| Total | 384 PASS |
+Fresh results after the preserved remediation, 2026-09-09:
 
-Pre-slice: 347 (226 / 64 / 57). Increase: 37 tests (18 Database, 10 GUI, 9 Integration); no suite decreased.
+| Scope | Count | Test duration | Process elapsed | Exit |
+|---|---:|---:|---:|---:|
+| Focused Integration | 29 PASS | 118.030s | 120.656s | 0 |
+| Full Database | 251 PASS | 10.345s | 10.587s | 0 |
+| Full GUI | 81 PASS | 9.678s | 10.105s | 0 |
+| Full Integration | 73 PASS | 273.218s | 273.625s | 0 |
 
-Focused: repository/service 42 PASS; combined Ticket/Knowledge GUI 34 PASS; cross-module Integration 16 PASS.
+Full suites ran sequentially: **405 PASS**, five above the 400 pre-remediation total (251 / 81 / 68). No suite decreased. The five additions cover the four pending-read dismissal combinations through the real MainWindow hierarchy and long-summary accessibility. Full regression covers New Ticket, Quick Company/Contact, saved tickets, notes/status, Knowledge create/read/edit and RELATED Link/Open/Unlink/Relink. GUI/Integration suites used offscreen Qt.
 
-All full suites ran after final implementation/test changes and exited 0. Only documentation changed afterward; focused/full evidence is retained during completion, with no additional application test run required.
+Retained evidence: post-fix focused GUI log on 2026-09-09 confirms 19 PASS in 3.871s, exit 0; GUI implementation was unchanged during this resume and is also covered by the fresh full GUI suite. Earlier focused repository/service 31 PASS is historical, not rerun as a separate focused command. Explicit py_compile and AST duplicate import/function checks passed. A separate real-MainWindow ownership check verified the workspace reference, dismissal guard and Qt cleanup on window destruction. Only documentation changed after validation.
 
-Native Windows: PASS — windows Qt platform, 1000×700, isolated synthetic SQLite. Mouse/keyboard checks created a ticket and KB0001/KB0002, linked both, cancelled then confirmed unlink of KB0001, preserved the ticket/articles/KB0002 link, opened exact KB0002, found KB0001 in candidates and relinked it. Notes and Resolve → Close → Reopen also passed. Captured windows were visually inspected: the new control and confirmation were readable with no clipping/overlap in tested layouts. Agent verification, not user acceptance testing. Evidence retained during documentation completion; no additional native run. Harness/screenshots/databases/logs stayed outside the repository.
+Fresh focused Integration and full regression commands used the existing `.venv\Scripts\python.exe`, with `PYTHONPATH=$PWD\Python;$PWD`, `PYTHONDONTWRITEBYTECODE=1`, and `QT_QPA_PLATFORM=offscreen`:
 
-Existing New Ticket, Quick Company, Quick Contact, references, Saved Tickets, notes/status, Knowledge create/read/edit/version snapshots and Link/Open are covered by the passing full suites. Integration also verifies persisted unlink after reconstruction and opening the remaining article's current version.
+```powershell
+.venv\Scripts\python.exe -B -m unittest Tests.Integration.test_knowledge_base_flow Tests.Integration.test_ticket_knowledge_flow -v
+.venv\Scripts\python.exe -B -m unittest discover -s Tests/Database -p "test_*.py" -v
+.venv\Scripts\python.exe -B -m unittest discover -s Tests/GUI -p "test_*.py" -v
+.venv\Scripts\python.exe -B -m unittest discover -s Tests/Integration -p "test_*.py" -v
+```
 
-AutoHotkey Slice 013 execution: NOT RUN — launcher unchanged. F7 launch/focus remains VERIFIED; the recent isolated automated recheck was BLOCKED — shell wait timeout.
+Native Windows remediation: PASS — fresh on 2026-09-09 using the existing TEMP native.py, windows Qt, isolated synthetic SQLite, 1000×700 main window and 900×620 history dialog. Pending list + Close, list + Escape, detail + Close and detail + Escape all passed before reads completed; competing actions stayed blocked, late callbacks did not mutate/resurrect dismissed state and current article/database remained unchanged. A 6,132-character summary displayed literal tag/Markdown-like text; scrolling via keyboard reached END-OF-LONG-SUMMARY, with a 356-pixel read-only body. All six captures were inspected: four pending states plus summary start/end, with accessible markers and no overlap. Trace contained 18 SELECTs with nine BEGIN/ROLLBACK pairs; no data writes. Agent verification, not user acceptance testing. Evidence folder: `C:\Users\Jo\AppData\Local\Temp\f7hub-slice014-remediation-f3870f277a904aa4b26fd1c639ec1e23`.
 
-## Database / Activity
+Historical native validation recorded on 2026-09-08 (not a fresh repetition of those broader checks): Created KB0001 V1 → V2 → V3, checked initial V3/newest-first 3/2/1, exact V1/V2/V3 title/summary/body, close with current V3 unchanged, and reopened history. Created KB0002 and saved another edit; PUBLISHED/ARCHIVED history remained available with Edit disabled. Captured windows were visually inspected: selected detail/body and controls readable without overlap in tested layouts; table titles use ellipsis as needed. Agent verification, not user acceptance testing. Harnesses, captures, SQL trace, databases and logs stayed outside the repository.
+
+AutoHotkey: NOT RUN during Slice 014 — unchanged. The earlier manual launcher PASS of 2026-09-07 remains historical evidence, not a fresh check.
+
+## Database / No-write Evidence
 
 Migration count: 5. New migration: NO. Schema changes: NONE. Historical migrations unchanged. Isolated integrity_check = ok; foreign_key_check = zero violations.
 
-Unlink uses one BEGIN IMMEDIATE transaction with ticket, article and exact RELATED checks before DELETE and a one-row requirement before commit. Tests cover rowcount failures, rollback after DELETE/at commit, parent and other-type preservation, concurrent unlink, candidate/relink and reconstruction.
-
-ACTIVITY WRITE: NONE — link/unlink changes only ticket_knowledge_articles. Ticket updated_at, notes, status history and timeline remain unchanged. Existing widget → service → repository → SQLite ownership and shared ServiceTaskRunner are preserved.
+History list/detail SQL trace: BEGIN → SELECT article existence → SELECT requested history metadata/detail → ROLLBACK on connection cleanup. SELECT-only data access; no INSERT/UPDATE/DELETE. The list query excludes body_markdown and selected detail includes exactly one body. Existing idx_knowledge_versions_article_version supports newest-first reads; no redundant index added. Full logical database dump, current row and history rows are unchanged across opening, selecting and closing the viewer. Prior V1 remains exact after V2/V3 edits and application reconstruction.
 
 ## Next Gate / Candidate
 
-Independent Slice 013 review is the next gate. Do not stage, commit, push or merge during this completion task.
+Independent Slice 014 re-review is next. Keep changes unstaged and uncommitted; do not push or merge.
 
-Recommended next slice: a read-only Knowledge version-history viewer using existing snapshots. See 16_Roadmap.md for the six-option comparison. No Slice 014 implementation.
+Recommend exactly one next slice: Knowledge Search / FTS5 for current articles only, with result → open through existing navigation. See 16_Roadmap.md for the six-option assessment and scope limits. Recommendation only; no Slice 015 implementation.

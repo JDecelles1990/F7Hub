@@ -18,10 +18,13 @@ from f7hub.gui.service_task_runner import ServiceTaskRunner
 class RecordingKnowledgeService:
     def __init__(self):
         self.articles = []
+        self.histories = {}
         self.create_calls = 0
         self.update_calls = []
         self.error = None
         self.gate = None
+        self.history_error = None
+        self.history_gate = None
 
     def create_article(self, **values):
         self.create_calls += 1
@@ -39,6 +42,7 @@ class RecordingKnowledgeService:
             version_number=1,
         )
         self.articles.append(article)
+        self.histories[article.knowledge_article_id] = [self._snapshot(article)]
         return article
 
     def list_articles(self):
@@ -56,10 +60,54 @@ class RecordingKnowledgeService:
             body_markdown=values["body"], version_number=old.version_number + 1,
         )))
         self.articles[self.articles.index(old)] = article
+        self.histories[article.knowledge_article_id].append(self._snapshot(article))
         return article
 
     def get_article(self, article_id):
         return next((article for article in self.articles if article.knowledge_article_id == article_id), None)
+
+    def list_article_versions(self, article_id):
+        if self.history_gate:
+            self.history_gate.wait(3)
+        if self.history_error:
+            raise self.history_error
+        return tuple(
+            SimpleNamespace(
+                knowledge_article_version_id=version.version_number,
+                knowledge_article_id=article_id,
+                version_number=version.version_number,
+                title=version.title,
+                change_summary=version.change_summary,
+                created_by=version.created_by,
+                created_at=version.created_at,
+            )
+            for version in reversed(self.histories.get(article_id, []))
+        )
+
+    def get_article_version(self, article_id, version_number):
+        if self.history_gate:
+            self.history_gate.wait(3)
+        if self.history_error:
+            raise self.history_error
+        return next(
+            version
+            for version in self.histories.get(article_id, [])
+            if version.version_number == version_number
+        )
+
+    @staticmethod
+    def _snapshot(article):
+        return SimpleNamespace(
+            knowledge_article_version_id=article.version_number,
+            knowledge_article_id=article.knowledge_article_id,
+            version_number=article.version_number,
+            title=article.title,
+            summary=article.summary,
+            body_markdown=article.body_markdown,
+            change_summary=None,
+            created_by=None,
+            created_at=f"2026-09-07T12:0{article.version_number}:00.000Z",
+        )
 
 
 class KnowledgeWorkspaceTests(unittest.TestCase):
@@ -78,8 +126,10 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
     def tearDown(self) -> None:
         if self.service.gate:
             self.service.gate.set()
+        if self.service.history_gate:
+            self.service.history_gate.set()
         self.wait_idle()
-        for name in ("_new_article_dialog", "_edit_article_dialog"):
+        for name in ("_new_article_dialog", "_edit_article_dialog", "_version_history_dialog"):
             dialog = getattr(self.workspace, name, None)
             if dialog is not None:
                 dialog.close()
@@ -304,6 +354,158 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
         dialog.submit()
         self.wait_idle()
         self.assertEqual(self.workspace.detail_version.text(), "Version 2")
+
+    def test_history_button_availability_for_all_statuses_and_busy_state(self):
+        self.assertFalse(self.workspace.version_history_button.isEnabled())
+        self.assertIsNone(self.workspace.open_version_history())
+        for status in ("DRAFT", "PUBLISHED", "ARCHIVED"):
+            self.service.articles.clear()
+            self.service.histories.clear()
+            self.prepare_article(status)
+            with self.subTest(status=status):
+                self.assertTrue(self.workspace.version_history_button.isEnabled())
+        self.service.gate = threading.Event()
+        self.workspace.open_article(self.workspace.article.knowledge_article_id)
+        QTest.qWait(20)
+        self.assertTrue(self.runner.busy)
+        self.assertFalse(self.workspace.version_history_button.isEnabled())
+        self.service.gate.set()
+        self.wait_idle()
+
+    def test_history_requires_available_service(self):
+        self.prepare_article()
+        self.workspace._service = None
+        self.workspace._update_actions(False)
+        self.assertFalse(self.workspace.version_history_button.isEnabled())
+        self.assertIsNone(self.workspace.open_version_history())
+
+    def test_history_loads_newest_first_selects_current_and_displays_exact_plain_text(self):
+        from PySide6.QtCore import Qt
+
+        self.prepare_article()
+        first = self.service.histories[1][0]
+        first.title = "<tags> & 'V1'"
+        first.summary = "Summary\nV1"
+        first.body_markdown = "# V1\n<script>literal</script> & text"
+        article = self.service.update_article(
+            article_id=1, expected_version_number=1, title="V2", summary=None, body="Body V2",
+        )
+        self.service.update_article(
+            article_id=1, expected_version_number=article.version_number,
+            title="V3", summary="Summary V3", body="Body V3",
+        )
+        self.workspace.refresh_list(select_article_id=1)
+        self.wait_idle()
+        dialog = self.workspace.open_version_history()
+        self.wait_idle()
+        self.wait_idle()
+        self.assertEqual([version.version_number for version in dialog.versions], [3, 2, 1])
+        self.assertEqual(dialog.version.version_number, 3)
+        self.assertEqual(dialog.detail_body.toPlainText(), "Body V3")
+        dialog.table.selectRow(1)
+        self.wait_idle()
+        self.assertEqual(dialog.detail_title.text(), "V2")
+        self.assertEqual(dialog.detail_summary.text(), "Summary: Not provided")
+        self.assertEqual(dialog.detail_body.toPlainText(), "Body V2")
+        dialog.table.selectRow(2)
+        self.wait_idle()
+        self.assertEqual(dialog.version.version_number, 1)
+        self.assertEqual(dialog.detail_title.text(), "<tags> & 'V1'")
+        self.assertEqual(dialog.detail_summary.text(), "Summary: Summary\nV1")
+        self.assertEqual(dialog.detail_body.toPlainText(), "# V1\n<script>literal</script> & text")
+        self.assertEqual(dialog.detail_title.textFormat(), Qt.TextFormat.PlainText)
+        self.assertTrue(dialog.detail_body.isReadOnly())
+        self.assertEqual(dialog.detail_created_by.text(), "Created by: Not provided")
+        self.assertEqual(dialog.detail_change_summary.text(), "Change summary: Not provided")
+        self.assertEqual(
+            [button.text() for button in dialog.findChildren(type(dialog.close_button))],
+            ["Close"],
+        )
+        self.assertEqual(dialog.detail_created_at.text(), "Created at: 2026-09-07T12:01:00.000Z")
+
+    def test_history_detail_serializes_selection_and_ignores_completion_after_escape(self):
+        from PySide6.QtCore import Qt
+
+        self.prepare_article()
+        self.service.update_article(
+            article_id=1, expected_version_number=1, title="V2", summary="S2", body="B2",
+        )
+        self.workspace.refresh_list(select_article_id=1)
+        self.wait_idle()
+        dialog = self.workspace.open_version_history()
+        self.wait_idle()
+        self.service.history_gate = threading.Event()
+        dialog.table.selectRow(1)
+        self.assertTrue(self.runner.busy)
+        self.assertFalse(dialog.table.isEnabled())
+        QTest.keyClick(dialog.table, Qt.Key.Key_Up)
+        self.assertEqual(dialog.table.currentIndex().row(), 1)
+        self.assertEqual(dialog.detail_body.toPlainText(), "")
+        QTest.keyClick(dialog, Qt.Key.Key_Escape)
+        self.assertFalse(dialog.isVisible())
+        self.service.history_gate.set()
+        self.wait_idle()
+        self.assertIsNone(dialog.version)
+        self.assertEqual(dialog.detail_body.toPlainText(), "")
+
+    def test_history_unexpected_list_and_detail_errors_are_safe(self):
+        self.prepare_article()
+        self.service.history_error = RuntimeError("private database path")
+        dialog = self.workspace.open_version_history()
+        self.wait_idle()
+        self.assertIn("Could not load version history", dialog.feedback.text())
+        self.assertNotIn("private", dialog.feedback.text())
+        dialog.close()
+        self.service.history_error = None
+        dialog = self.workspace.open_version_history()
+        self.wait_idle()
+        self.service.history_error = RuntimeError("private database path")
+        dialog._load_version(1)
+        self.wait_idle()
+        self.assertIn("Could not load the selected revision", dialog.feedback.text())
+        self.assertNotIn("private", dialog.feedback.text())
+        self.assertEqual(dialog.detail_body.toPlainText(), "")
+
+    def test_history_empty_and_safe_typed_failures_do_not_show_stale_detail(self):
+        from f7hub.services.knowledge_service import (
+            KnowledgeHistoryArticleMissingError,
+            KnowledgeHistoryVersionMissingError,
+        )
+
+        self.prepare_article()
+        self.service.histories[1] = []
+        dialog = self.workspace.open_version_history()
+        self.wait_idle()
+        self.assertIn("No version history", dialog.feedback.text())
+        self.assertEqual(dialog.model.rowCount(), 0)
+        dialog.reject()
+        self.service.histories[1] = [self.service._snapshot(self.workspace.article)]
+        self.service.history_error = KnowledgeHistoryArticleMissingError("This article no longer exists.")
+        dialog = self.workspace.open_version_history()
+        self.wait_idle()
+        self.assertIn("no longer exists", dialog.feedback.text())
+        self.assertEqual(dialog.detail_body.toPlainText(), "")
+        dialog.reject()
+        self.service.history_error = None
+        dialog = self.workspace.open_version_history()
+        self.wait_idle()
+        self.service.history_error = KnowledgeHistoryVersionMissingError("This revision is no longer available.")
+        dialog._load_version(1)
+        self.wait_idle()
+        self.assertIn("no longer available", dialog.feedback.text())
+        self.assertEqual(dialog.detail_body.toPlainText(), "")
+
+    def test_history_close_during_background_read_ignores_late_callback(self):
+        self.prepare_article()
+        self.service.history_gate = threading.Event()
+        dialog = self.workspace.open_version_history()
+        QTest.qWait(20)
+        self.assertTrue(self.runner.busy)
+        dialog.close()
+        self.assertFalse(dialog.isVisible())
+        self.service.history_gate.set()
+        self.wait_idle()
+        self.assertEqual(dialog.model.rowCount(), 0)
 
     @staticmethod
     def fill(dialog, code):

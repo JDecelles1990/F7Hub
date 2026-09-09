@@ -711,7 +711,15 @@ The current article update and new revision snapshot commit together. Version 1 
 
 If another editor saves first, the stale editor cannot overwrite it or add a snapshot. Its text remains available to copy, with clear feedback and Save disabled. Close the old editor, reopen the latest article, and start a new edit explicitly; a workspace refresh never replaces an open editor's original token. External changes to PUBLISHED/ARCHIVED status or deletion receive safe specific feedback with input retained. Generic persistence failures preserve input and permit retry. Cancel writes nothing; save runs in the background and blocks duplicate saves and closing during the write.
 
-History browsing, historical viewing, restore/revert, deletion, publishing/archiving, search/FTS, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
+Restore/revert, deletion, publishing/archiving, search/FTS, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
+
+## Implemented read-only version history — Slice 014
+
+Slice 014 implements read-only version history: Knowledge Base → open an article → Version History → select a persisted revision → read its exact snapshot. History is available for loaded DRAFT, PUBLISHED and ARCHIVED articles with an available service and idle runner. The list is newest-first and excludes bodies; only the selected revision loads its summary/body. Historical version, title, summary, body, change summary, created by and stored timestamp come from knowledge_article_versions. Missing optional metadata displays Not provided. Status, category, updated_by and published_at are not snapshotted and are not presented as historical data. Article code is current immutable identity. Viewing does not change the current article, history rows, timestamps or ticket activity.
+
+The current persisted revision is selected by version identity, with the newest returned revision as fallback. Select another row to load its exact historical content asynchronously. The body is read-only Markdown source and all metadata is plain text. Close or Escape dismisses the viewer while either the history list or selected revision read is pending; the read finishes safely without changing or reopening the dismissed viewer. All four combinations passed fresh MainWindow integration and native Windows input checks on 2026-09-09. Long metadata scrolls independently of the read-only body: the beginning and end of a 6,132-character historical summary were accessible at 900×620, with useful body space retained. Empty history and missing article/revision states receive safe feedback without substituting current content. Ticket Open Article continues to navigate to the current article; history requires a separate action.
+
+Restore/revert, historical editing/deletion, comparison/apply, search/FTS and AI remain deferred. There is no historical status snapshot and no pagination for large revision lists.
 
 ## Implemented ticket/article linking — Slice 012
 
