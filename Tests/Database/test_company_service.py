@@ -80,10 +80,10 @@ class CompanyServiceTests(unittest.TestCase):
                 self.service.create_company(name="Contoso Test Support")
         self.assertNotIn("private path", str(caught.exception))
 
-    def test_integrity_foreign_keys_and_five_migrations(self):
+    def test_integrity_foreign_keys_and_six_migrations(self):
         self.service.create_company(name="Fabrikam Demo Systems")
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
             self.assertEqual(connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)

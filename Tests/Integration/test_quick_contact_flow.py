@@ -112,7 +112,7 @@ class QuickContactFlowTests(unittest.TestCase):
             self.assertEqual(tuple(row), (company_id, contact_name, 1, "alice@example.invalid"))
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
         self.window.show_new_ticket()
         self.window.show_tickets()
         self.wait_idle()
@@ -301,7 +301,7 @@ class QuickContactFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 5)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
 
     def test_inactive_company_after_commit_recovers_and_saves(self):
         self.unavailable_company_recovery()

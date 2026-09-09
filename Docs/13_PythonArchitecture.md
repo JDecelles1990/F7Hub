@@ -705,13 +705,21 @@ Historical Slice 010 validation: retained prior-session 11 repository/service fo
 
 Separate EditArticleDialog retains the original ID/version token, displays code/version as plain-text labels and submits through ServiceTaskRunner. It preserves failed input, blocks duplicate save/close during writes, disables saving after conflicts and never accepts a replacement token from workspace callbacks. KnowledgeWorkspace enables Edit only for a loaded DRAFT, displays Version N and refreshes/reselects/reloads the same article after success. Existing NewArticleDialog, bootstrap, MainWindow and worker framework are unchanged.
 
-Validation and actual fresh regression totals are recorded in `Status/CURRENT_STATE.md`. Native Windows edit/input/visual checks passed at 1000×700 with synthetic SQLite. Restore/revert, search, publishing/archiving and richer relationship workflows remain deferred; no schema or dependency changes.
+Validation and actual fresh regression totals are recorded in `Status/CURRENT_STATE.md`. Native Windows edit/input/visual checks passed at 1000×700 with synthetic SQLite. Restore/revert, publishing/archiving and richer relationship workflows remain deferred.
 
 ## Implemented Knowledge History Reads — Slice 014
 
 KnowledgeRepository.list_article_versions returns frozen KnowledgeArticleVersionListRecord values without summary/body. get_article_version returns one KnowledgeArticleVersionRecord from the snapshot table by article ID and version number. Each method opens one read transaction and checks authoritative article existence. ArticleMissingError and ArticleVersionMissingError distinguish absent parents from absent revisions.
 
 KnowledgeService exposes the same narrow read methods, validates positive integer IDs/versions excluding bool, and translates failures into KnowledgeHistoryError, KnowledgeHistoryArticleMissingError or KnowledgeHistoryVersionMissingError with safe messages. VersionHistoryDialog uses the existing runner, stable version identities, plain-text metadata and a read-only body. Generation/active guards ignore dismissed callbacks; disabled row interaction serializes detail reads. KnowledgeWorkspace enables the action for every loaded status when service is available and runner idle. No restore or mutation API is introduced. The history dialog is parented to the top-level window so MainWindow page disabling does not disable dismissal; Qt ownership and the workspace reference remain intact, and window destruction cleans up the viewer. Scrollable metadata reserves separate body space without rendering markup. Fresh remediation automation and native evidence is recorded in Status/CURRENT_STATE.md.
+
+## Implemented Knowledge Search Boundary — Slice 015
+
+`KnowledgeService.search_articles(query)` accepts plain text, identifies Unicode letter/number/private-use runs and builds quoted tokens joined by implicit AND. Empty or punctuation-only input returns no rows without executing MATCH. This prevents quotes, parentheses, asterisks and operator-looking words from becoming raw FTS syntax. Repository/runtime failures become a safe `KnowledgeSearchError`.
+
+`KnowledgeRepository.search_articles` executes one parameterized MATCH against `knowledge_articles_fts`, joins rowid to the authoritative current article and returns frozen lightweight records containing ID, code, title, status, current version and updated timestamp. Ordering is bm25, then updated_at DESC and article ID DESC. Migration 0006 owns the external-content FTS schema, rebuild and insert/update/delete triggers; no historical snapshot or ticket content is indexed.
+
+KnowledgeWorkspace submits Search/Enter through the existing ServiceTaskRunner, renders matches in its existing table and uses the existing `get_article` read when a result is selected. Clear Search restores the complete list. Search, list, New, Edit and Version History controls are serialized while work is pending; no-result and safe failure states preserve a truthful UI. Stable article IDs and normal current-detail navigation handle edits or deletion after the result list was produced.
 
 ## Implemented Ticket/Knowledge Boundary — Slice 012
 
@@ -1403,7 +1411,7 @@ Python\f7hub\search\
 
 Purpose:
 
-Implement universal search orchestration.
+Implement universal search orchestration. This package remains planned; Slice 015 keeps its bounded domain-specific search in KnowledgeService/KnowledgeRepository.
 
 Potential structure:
 
@@ -1481,6 +1489,8 @@ FTS5 should be accessed through repository/search infrastructure.
 The GUI should never interact with FTS tables directly.
 
 Relational records remain the source of truth.
+
+Slice 015 verifies this rule for current Knowledge articles through KnowledgeRepository. Ticket and universal search remain planned.
 
 ---
 
@@ -3354,7 +3364,7 @@ However, full localization infrastructure should not be added until justified.
 
 # 176. Current Implementation Status
 
-Repository inspection and tests through 2026-09-05 verified the SQLite infrastructure under `Python\f7hub\infrastructure\`, migrations through the relational knowledge schema in `0005_knowledge.sql`, and the company, contact and ticket persistence boundaries. `TicketService` owns workflow validation and transactional ticket creation; its new notes/status operations extend the same boundary without a schema change. The initial PySide6 `TicketCreateWidget` delegates to that service without owning SQL or workflow rules. The thin module entry point, central application bootstrap and minimal `MainWindow` now initialize the database, compose the repository/service/widget dependency chain and enter the Qt event loop. The saved-ticket workspace now provides list/detail navigation and notes/status controls. ServiceTaskRunner executes one service call at a time in a QThread and delivers completion on the GUI thread; each repository operation owns its connection. The window disables conflicting actions and blocks closing while work is active. Initial size respects the available screen with space for window borders. Native Windows visual/input checks passed at the initial size and 1000×700 on 2026-09-05. Slice 010 now adds KnowledgeRepository, KnowledgeService and the create/list/read workspace described above. A separate domain model and other application services remain planned.
+Repository inspection and tests through 2026-09-09 verify the SQLite infrastructure, migrations through `0006_knowledge_search.sql`, and the existing company/contact, ticket and Knowledge boundaries. Slice 015 extends KnowledgeRepository/KnowledgeService/KnowledgeWorkspace with current-article FTS5 search while preserving GUI → service → repository → SQLite ownership. ServiceTaskRunner executes search off the GUI thread and delivers completion on the GUI thread. A universal-search package and other application services remain planned.
 
 ```text
 Python SQLite infrastructure: VERIFIED
@@ -3369,9 +3379,11 @@ Application entry point, bootstrap and minimal MainWindow: VERIFIED
 Saved-ticket workspace and background service runner: VERIFIED
 Remaining Python application implementation: PLANNED
 Knowledge DRAFT revisions with atomic snapshots and stale-edit protection: VERIFIED
-Isolated database tests: PASS — 202 tests (fresh Slice 011 final regression)
-GUI tests: PASS — 52 tests (fresh Slice 011 final regression)
-Application and GUI integration tests: PASS — 50 tests (fresh Slice 011 final regression)
+Knowledge read-only immutable history: VERIFIED
+Knowledge current-article FTS5 search: VERIFIED
+Isolated database tests: PASS — 262 tests (fresh Slice 015 regression)
+GUI tests: PASS — 85 tests (fresh Slice 015 regression)
+Application and GUI integration tests: PASS — 77 tests (fresh Slice 015 regression)
 ```
 
 This verification does not prove that:

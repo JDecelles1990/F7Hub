@@ -47,6 +47,15 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-09 — Slice 015: Current Knowledge Search / FTS5
+
+- Added `0006_knowledge_search.sql`: an external-content `knowledge_articles_fts` index over current article code/title/summary/body, `unicode61`, insert/update/delete synchronization triggers and migration-time rebuild for existing rows. Historical revisions remain outside FTS. Migrations 0001–0005 remain byte-for-byte unchanged.
+- Extended KnowledgeRepository/KnowledgeService with parameterized MATCH, lightweight current result records, bm25 plus deterministic tie-breaking, safe error translation and literal Unicode letter/number token construction with implicit AND. DRAFT/PUBLISHED/ARCHIVED are searchable; empty/punctuation-only queries perform no MATCH and operator-looking input stays plain.
+- Added asynchronous Search/Enter/Clear Search to KnowledgeWorkspace using the existing ServiceTaskRunner and current-detail navigation. Explicit loading/count/no-result/failure states, stable IDs, re-entry/competing-action guards, failure query preservation and Clear-to-full-list behavior are covered. New/Edit/History and ticket Open Article remain intact.
+- Added migration, repository/service, GUI and Integration coverage for FTS5 availability, backfill, synchronization, complete schema/trigger rollback plus clean retry, current-versus-history semantics, punctuation/Unicode/case/C++, all statuses, deterministic ordering/query plan, deletion races and application reconstruction. Fresh sequential regression: Database 262, GUI 85, Integration 77 = 424 PASS; Database remained 262 PASS after the rollback/retry assertion was strengthened.
+- Native Windows 1000×700 workflow passed 10 checks against fresh isolated SQLite. Visual inspection found and corrected full-list status elision by recalculating identity column widths; all nine post-fix captures were then inspected with readable controls/states and no remaining overlap. Six migrations, eight expected FTS objects, virtual-table MATCH plan, integrity ok and zero FK violations.
+- Updated only canonical owners for search/schema/workflow/status. Protected Docs/10 and archive deletion remain exactly preserved; ROOT.md is unchanged. Evidence is outside the repository. Work remains unstaged/uncommitted; no commit, push or merge.
+
 # 2026-09-09 — Slice 014 remediation resumed and verified
 
 - Preserved the interrupted remediation in KnowledgeWorkspace, VersionHistoryDialog and test_knowledge_base_flow.py; no further implementation/test correction was needed. Real source had no duplicate imports or function declarations; explicit py_compile passed.

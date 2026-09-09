@@ -1475,6 +1475,7 @@ knowledge_articles
       │
       ├────< knowledge_article_versions
       ├────< knowledge_article_links
+      ├──── knowledge_articles_fts (derived current-content index)
       │
       ├────< knowledge_article_tags >──── tags
       │
@@ -1811,7 +1812,7 @@ knowledge_articles
 knowledge_articles_fts
 ```
 
-The relational entity remains the source of truth.
+Slice 015 verifies this exact mapping. `knowledge_articles_fts.rowid` maps to `knowledge_articles.knowledge_article_id` and derives article code, title, summary and current body. Insert/update/delete triggers keep the index synchronized, and migration 0006 rebuilds pre-existing current rows. All current lifecycle statuses participate; `knowledge_article_versions` has no FTS relationship. The relational entity remains the source of truth.
 
 ---
 
@@ -1922,6 +1923,7 @@ Canonical conceptual inventory:
 | Knowledge | knowledge_article_relationships | Article-to-article links | VERIFIED |
 | Knowledge | ticket_knowledge_articles | Ticket/KB junction | VERIFIED |
 | Knowledge | knowledge_article_tags | KB/tag junction | VERIFIED |
+| Search | knowledge_articles_fts | Derived current Knowledge content index | VERIFIED |
 | Knowledge | knowledge_article_scripts | KB/script junction | PLANNED |
 | Automation | scripts | Script registry | PLANNED |
 | Automation | script_parameters | Script input definitions | PLANNED |
@@ -2003,13 +2005,15 @@ The relational knowledge slice is verified:
 Status: VERIFIED — 0005_knowledge.sql — 2026-09-04 — 11 focused tests; 90 full database tests
 ```
 
+The first derived search slice is also verified:
+
+```text
+Status: VERIFIED — 0006_knowledge_search.sql — 2026-09-09 — current Knowledge article FTS5 only
+```
+
 Later slices should introduce, in dependency order:
 
 ```text
-Knowledge
-↓
-Search / FTS5
-↓
 Script registry and execution history
 ↓
 Diagnostics

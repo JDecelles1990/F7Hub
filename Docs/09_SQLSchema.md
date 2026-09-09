@@ -151,15 +151,17 @@ TAXONOMY MIGRATION: VERIFIED — 0002_taxonomy.sql
 COMPANY/CONTACT MIGRATION: VERIFIED — 0003_companies_contacts.sql
 TICKET-CORE MIGRATION: VERIFIED — 0004_tickets.sql
 KNOWLEDGE MIGRATION: VERIFIED — 0005_knowledge.sql
+KNOWLEDGE SEARCH MIGRATION: VERIFIED — 0006_knowledge_search.sql
 REMAINING BUSINESS-DOMAIN MIGRATIONS: PLANNED
 COMPANY/CONTACT REPOSITORIES: VERIFIED
 TICKET REPOSITORY/SERVICE CREATION BOUNDARY: VERIFIED
 TICKET NOTES/STATUS/RESOLUTION/REOPENING SERVICE BOUNDARY: VERIFIED
+KNOWLEDGE CURRENT-ARTICLE SEARCH BOUNDARY: VERIFIED
 REMAINING REPOSITORIES: PLANNED
-ISOLATED DATABASE TESTS: PASS — 129 tests
+ISOLATED DATABASE TESTS: PASS — 262 tests
 ```
 
-Repository inspection and tests through 2026-09-04 verified the Python SQLite connection, path-resolution, migration, checksum, rollback, bootstrap and integrity infrastructure. Versioned migration `0001_core.sql` creates only `application_metadata`, `0002_taxonomy.sql` creates shared taxonomy, `0003_companies_contacts.sql` creates the canonical company/contact tables and indexes, `0004_tickets.sql` creates the canonical ticket-core tables and indexes, and `0005_knowledge.sql` creates the canonical relational knowledge tables and indexes. `CompanyRepository`, `ContactRepository` and `TicketRepository` implement approved Python persistence boundaries. `TicketService` validates and transactionally coordinates ticket creation, initial status history and the initial timeline event. The tested ticket-creation GUI and minimal application shell use this boundary; no knowledge repository was added. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
+Repository inspection and tests through 2026-09-09 verified the Python SQLite connection, migration/checksum/rollback/bootstrap infrastructure and migrations through `0006_knowledge_search.sql`. Migration 0006 adds the external-content current-article FTS5 table, three synchronization triggers and initial rebuild documented below. It does not alter relational Knowledge tables or historical revisions. KnowledgeRepository provides the parameterized MATCH query through the approved boundary. The existing `Database\SQLite\F7Hub.db` file remains a zero-byte legacy scaffold and was not used by the tests.
 
 The documented `CREATE` blocks were executed in order against a fresh in-memory SQLite database on 2026-09-02. All 71 DDL blocks executed successfully; `PRAGMA integrity_check` returned `ok` and `PRAGMA foreign_key_check` returned zero violations. This validates the documented DDL only, not application migrations or runtime behavior.
 
@@ -643,6 +645,7 @@ Example:
 0003_companies_contacts.sql
 0004_tickets.sql
 0005_knowledge.sql
+0006_knowledge_search.sql
 ```
 
 ---
@@ -3863,7 +3866,7 @@ Search flow:
 ```text
 User Query
     ↓
-SearchService
+KnowledgeService (current Knowledge slice)
     ↓
 FTS5
     ↓
@@ -3874,11 +3877,13 @@ Join relational source
 Unified Result
 ```
 
+A future cross-domain SearchService may compose additional providers. Slice 015 does not introduce that abstraction.
+
 ---
 
 # 119. FTS5 Runtime Requirement
 
-Before enabling the FTS migration, the application should verify FTS5 capability.
+The bundled application runtime was verified to support FTS5 before migration 0006 was introduced. A runtime without FTS5 fails migration application; the surrounding migration transaction removes partial FTS tables, triggers and the version-6 history record so relational data remains intact and a capable runtime can retry cleanly.
 
 Failure should be reported clearly.
 
@@ -3891,6 +3896,7 @@ Core relational data must remain intact even if search infrastructure fails.
 ```sql
 CREATE VIRTUAL TABLE knowledge_articles_fts
 USING fts5(
+    article_code,
     title,
     summary,
     body_markdown,
@@ -3898,11 +3904,11 @@ USING fts5(
     content = 'knowledge_articles',
     content_rowid = 'knowledge_article_id',
 
-    tokenize = 'unicode61 remove_diacritics 2'
+    tokenize = 'unicode61'
 );
 ```
 
-`unicode61` with diacritic normalization supports practical English/French technician searching.
+This external-content table indexes only the current `knowledge_articles` row. All current DRAFT, PUBLISHED and ARCHIVED articles participate. Immutable rows in `knowledge_article_versions` are intentionally excluded.
 
 ---
 
@@ -3914,12 +3920,14 @@ AFTER INSERT ON knowledge_articles
 BEGIN
     INSERT INTO knowledge_articles_fts(
         rowid,
+        article_code,
         title,
         summary,
         body_markdown
     )
     VALUES (
         new.knowledge_article_id,
+        new.article_code,
         new.title,
         new.summary,
         new.body_markdown
@@ -3938,6 +3946,7 @@ BEGIN
     INSERT INTO knowledge_articles_fts(
         knowledge_articles_fts,
         rowid,
+        article_code,
         title,
         summary,
         body_markdown
@@ -3945,6 +3954,7 @@ BEGIN
     VALUES (
         'delete',
         old.knowledge_article_id,
+        old.article_code,
         old.title,
         old.summary,
         old.body_markdown
@@ -3958,11 +3968,12 @@ END;
 
 ```sql
 CREATE TRIGGER knowledge_articles_au
-AFTER UPDATE ON knowledge_articles
+AFTER UPDATE OF article_code, title, summary, body_markdown ON knowledge_articles
 BEGIN
     INSERT INTO knowledge_articles_fts(
         knowledge_articles_fts,
         rowid,
+        article_code,
         title,
         summary,
         body_markdown
@@ -3970,6 +3981,7 @@ BEGIN
     VALUES (
         'delete',
         old.knowledge_article_id,
+        old.article_code,
         old.title,
         old.summary,
         old.body_markdown
@@ -3977,18 +3989,29 @@ BEGIN
 
     INSERT INTO knowledge_articles_fts(
         rowid,
+        article_code,
         title,
         summary,
         body_markdown
     )
     VALUES (
         new.knowledge_article_id,
+        new.article_code,
         new.title,
         new.summary,
         new.body_markdown
     );
 END;
 ```
+
+Migration 0006 finishes with:
+
+```sql
+INSERT INTO knowledge_articles_fts(knowledge_articles_fts)
+VALUES ('rebuild');
+```
+
+This backfills articles that existed before the FTS table was created.
 
 ---
 
@@ -4458,24 +4481,21 @@ SELECT
     ka.knowledge_article_id,
     ka.article_code,
     ka.title,
-    ka.summary,
     ka.status,
-    bm25(knowledge_articles_fts) AS rank
+    ka.version_number,
+    ka.updated_at
 FROM knowledge_articles_fts
 JOIN knowledge_articles AS ka
     ON ka.knowledge_article_id =
        knowledge_articles_fts.rowid
 WHERE knowledge_articles_fts MATCH ?
-  AND ka.status = 'PUBLISHED'
-ORDER BY rank
-LIMIT ?;
+ORDER BY
+    bm25(knowledge_articles_fts),
+    ka.updated_at DESC,
+    ka.knowledge_article_id DESC;
 ```
 
-The query is parameterized.
-
-However, FTS query syntax is still meaningful input.
-
-`SearchService` should normalize or safely construct the FTS expression rather than blindly exposing advanced FTS syntax to ordinary search users.
+The query is parameterized and searches every current article status. `KnowledgeService` turns ordinary input into quoted Unicode letter/number tokens joined by implicit AND. Empty or punctuation-only input performs no MATCH. Raw advanced FTS syntax is not exposed to ordinary users.
 
 ---
 
@@ -4755,7 +4775,7 @@ Never use real customer data in committed seed files.
 
 # 152. Migration Sequence
 
-Recommended planned migration sequence:
+Implemented migration sequence:
 
 ```text
 0001_core.sql
@@ -4763,16 +4783,10 @@ Recommended planned migration sequence:
 0003_companies_contacts.sql
 0004_tickets.sql
 0005_knowledge.sql
-0006_scripts.sql
-0007_diagnostics.sql
-0008_prompts_clipboard.sql
-0009_workspaces_audit.sql
-0010_fts.sql
+0006_knowledge_search.sql
 ```
 
-This is a recommended logical sequence.
-
-Do not create all ten immediately just because they appear here.
+Future domain migration numbers are intentionally unassigned until each bounded slice is approved.
 
 ---
 
@@ -4788,13 +4802,14 @@ The planned sequence begins:
 0003_companies_contacts.sql
 0004_tickets.sql
 0005_knowledge.sql
+0006_knowledge_search.sql
 ```
 
 This list is a dependency map, not the scope of the first coding task. The first completed task was limited to the bootstrap and migration infrastructure defined in Section 202.
 
 ---
 
-# 154. Why FTS Is Later
+# 154. Why Additional FTS Is Later
 
 FTS should be introduced after relational source entities work correctly.
 
@@ -4814,7 +4829,7 @@ SearchService
 Search tests
 ```
 
-Search infrastructure must not complicate the first ticket persistence slice.
+This sequence is complete for current Knowledge articles in Slice 015. Ticket, script, prompt and universal search remain later work.
 
 ---
 
@@ -5123,6 +5138,15 @@ rebuild FTS
 
 French accented text
 → expected normalized search behavior
+
+existing article before migration
+→ included by rebuild
+
+historical-only article text
+→ not searchable
+
+operator-looking punctuation
+→ treated as plain input without MATCH syntax errors
 ```
 
 ---

@@ -92,7 +92,7 @@ Validation and test results use `PASS`, `FAIL`, `NOT RUN`, or `BLOCKED`.
 
 # 4. Current Project Status
 
-Repository inspection and tests through 2026-09-05 verified the Python SQLite foundation, migrations through `0005_knowledge.sql`, the company/contact repositories, the ticket repository/service workflows, the PySide6 ticket creation and saved-ticket workspace, and the AutoHotkey F7 launch/focus shortcut. Slice 010 adds the verified KnowledgeRepository/Service and Knowledge Base create/list/read workflow on 2026-09-06. PowerShell integration remains unimplemented.
+Repository inspection and tests through 2026-09-09 verify the Python SQLite foundation, migrations through `0006_knowledge_search.sql`, the company/contact and ticket workflows, and Knowledge create/read/edit/history/link/unlink/search. PowerShell integration remains unimplemented.
 
 ```text
 Documentation consistency review: IN PROGRESS
@@ -109,6 +109,7 @@ Ticket category selection, persistence and reopened label: VERIFIED
 Quick active-company creation from New Ticket: VERIFIED
 AutoHotkey F7 launch/focus shortcut: VERIFIED
 Relational knowledge schema migration: VERIFIED
+Knowledge current-article FTS5 migration and search: VERIFIED
 Remaining application implementation: PLANNED
 ```
 
@@ -116,20 +117,9 @@ Remaining application implementation: PLANNED
 
 # 5. Roadmap Layers
 
-After Slice 014, the verified milestone is **KNOWLEDGE ARTICLES HAVE READABLE IMMUTABLE HISTORY**. The read-only viewer lists persisted revisions and opens exact snapshots without changing the current article. Fresh remediation regression on 2026-09-09: Database 251, GUI 81, Integration 73 = 405 PASS (five above the 400 pre-remediation total; no suite decreased). Native Windows input and captured-window visual inspection passed for pending list/detail dismissal with both Close and Escape, plus scrollable long metadata, using a 1000×700 main window and 900×620 history dialog. Five migrations remain unchanged. Slice 014 remains unstaged and uncommitted for independent re-review.
+After Slice 015, the verified milestone is **CURRENT KNOWLEDGE ARTICLES ARE SEARCHABLE AND OPEN AUTHORITATIVELY**. Migration 0006 indexes current article code/title/summary/body, backfills existing rows and synchronizes insert/update/delete. Plain input is safely tokenized, lightweight ranked results open through the existing current-detail boundary, and history remains separately readable. Fresh sequential regression on 2026-09-09: Database 262, GUI 85, Integration 77 = 424 PASS. Native Windows workflow and all nine post-fix captures passed at 1000×700 against isolated SQLite.
 
-Recommended next bounded slice: **Knowledge Search / FTS5 for current articles only**. Search current article text, list matching article identities and open the selected current article through existing navigation. Keep historical revisions, ticket search, recommendations and AI outside that slice. Search is an existing product requirement and fills the current browse-only retrieval gap; real library volume and performance needs remain NOT VERIFIED, so no scale claim supports this recommendation.
-
-| Candidate | Assessment after Slice 014 |
-|---|---|
-| A. Knowledge Search / FTS5 | Recommended: a bounded current-article search → result → open workflow supports retrieval using existing article/service/navigation boundaries. It needs a separately reviewed FTS migration and synchronization tests. |
-| B. Knowledge categories/tags | Existing schema helps, but assignment and filtering add metadata workflows whose real content-organization needs are unverified. |
-| C. APPLIED / RESOLUTION_SOURCE | Existing enum values do not define application/resolution-attribution rules; those require separate workflow decisions. |
-| D. Companies/Contacts management | Useful but spans editing/deactivation and downstream reference behavior beyond Knowledge retrieval. |
-| E. Dashboard/navigation | Existing navigation passed regression; no measured navigation bottleneck justifies redesign now. |
-| F. Version compare/restore | Read-only history is now usable; comparison adds UI scope and restore introduces a new write/concurrency contract. |
-
-Recommendation only. Do not implement Slice 015 during Slice 014 completion.
+Recommended next bounded slice: **Slice 016 — publish a DRAFT Knowledge article**. Add one explicit DRAFT → PUBLISHED transition through the existing GUI/service/repository boundary, set `published_at` atomically, preserve current content/history and verify search/list/link behavior afterward. Archiving, unpublishing, restore/revert, categories/tags and broader lifecycle management remain outside that slice. Recommendation only; do not implement Slice 016 here.
 
 The F7Hub roadmap is organized into:
 
@@ -726,7 +716,8 @@ DRAFT editing with atomic snapshots and stale-edit protection: VERIFIED — Slic
 RELATED ticket/article link/list/open: VERIFIED — Slice 012
 Confirmed RELATED unlink and normal relink: VERIFIED — Slice 013
 Read-only history viewer: VERIFIED — Slice 014
-Restore/revert, search, publishing/archiving and richer relationship workflows: PLANNED
+Current-article FTS5 search/result/open: VERIFIED — Slice 015
+Restore/revert, publishing/archiving and richer relationship workflows: PLANNED
 ```
 
 Initial capabilities:
@@ -780,9 +771,9 @@ Resolved Ticket
 # 36. Phase 5 Acceptance Criteria
 
 ```text
-[ ] KB article can be created
-[ ] KB article can be edited
-[ ] KB article can be searched
+[x] KB article can be created
+[x] KB article can be edited
+[x] KB article can be searched (current article content, Slice 015)
 [x] Ticket can link to KB article (RELATED only, Slice 012)
 [ ] Tags work if implemented
 [ ] Archived articles behave correctly
@@ -824,7 +815,7 @@ diagnostics
 Implement FTS5 where justified for:
 
 ```text
-knowledge article text
+knowledge article current code/title/summary/body — VERIFIED, Slice 015
 ticket text
 ```
 

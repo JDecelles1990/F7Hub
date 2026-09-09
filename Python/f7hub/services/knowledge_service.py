@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 import sqlite3
+import unicodedata
 
 from f7hub.repositories.knowledge_repository import (
     ArticleMissingError,
@@ -11,6 +12,7 @@ from f7hub.repositories.knowledge_repository import (
     ArticleUnchangedError,
     ArticleVersionMissingError,
     KnowledgeArticleRecord,
+    KnowledgeArticleSearchResult,
     KnowledgeArticleVersionListRecord,
     KnowledgeArticleVersionRecord,
     KnowledgeRepository,
@@ -48,6 +50,10 @@ class KnowledgeHistoryArticleMissingError(KnowledgeHistoryError):
 
 class KnowledgeHistoryVersionMissingError(KnowledgeHistoryError):
     """The selected historical revision is no longer available."""
+
+
+class KnowledgeSearchError(RuntimeError):
+    """Knowledge search failed; its message is safe for presentation."""
 
 
 class KnowledgeService:
@@ -155,6 +161,23 @@ class KnowledgeService:
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgeCreationError("Could not load the knowledge article.") from error
 
+    def search_articles(
+        self, query: str,
+    ) -> tuple[KnowledgeArticleSearchResult, ...]:
+        """Search current articles using a safe literal FTS expression."""
+
+        if not isinstance(query, str):
+            raise KnowledgeValidationError("Search query must be text.")
+        fts_query = _literal_fts_query(query)
+        if not fts_query:
+            return ()
+        try:
+            return self._repository.search_articles(fts_query)
+        except (sqlite3.Error, OSError, RuntimeError) as error:
+            raise KnowledgeSearchError(
+                "Could not search knowledge articles. Check the query and try again."
+            ) from error
+
     def list_article_versions(
         self, article_id: int,
     ) -> tuple[KnowledgeArticleVersionListRecord, ...]:
@@ -212,3 +235,20 @@ def _positive_integer(value: object, label: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < 1:
         raise KnowledgeValidationError(f"{label} must be a positive integer.")
     return value
+
+
+def _literal_fts_query(query: str) -> str:
+    """Turn plain text into implicitly-ANDed quoted unicode61 tokens."""
+
+    tokens: list[str] = []
+    token_characters: list[str] = []
+    for character in query:
+        category = unicodedata.category(character)
+        if category[0] in {"L", "N"} or category == "Co":
+            token_characters.append(character)
+        elif token_characters:
+            tokens.append("".join(token_characters))
+            token_characters.clear()
+    if token_characters:
+        tokens.append("".join(token_characters))
+    return " ".join(f'"{token}"' for token in tokens)
