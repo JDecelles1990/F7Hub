@@ -427,7 +427,7 @@ F7Hub shall support creation and editing of structured KB articles.
 
 Slices 010–011 implement creation, deterministic listing, reopening/reading and DRAFT article editing through Knowledge Base navigation. Creation requires a user-entered article code, title and Markdown body; summary is optional. New articles are DRAFT, version 1, with an atomic initial history snapshot. Edit Article changes title/summary/body while keeping the article code immutable. Save Revision atomically increments the current version and appends its new snapshot; earlier snapshots remain unchanged. An expected-version token rejects stale overwrites. The read view displays Version N and read-only Markdown source.
 
-Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. Restore/revert, deletion, publishing/archiving workflows, categories/tags, article-to-article relationships, external links and AI remain unimplemented.
+Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. Restore/revert, deletion, unpublishing/archiving workflows, categories/tags, article-to-article relationships, external links and AI remain unimplemented.
 
 Slice 012 adds RELATED ticket/article linking: open a saved ticket → Knowledge → Link Article → select an existing article → link → Open Article to read its current content in Knowledge Base. The linked list displays current code/title/status/version. All existing article statuses are eligible; already RELATED articles are excluded from candidates, and concurrent duplicate attempts receive safe feedback.
 
@@ -498,12 +498,18 @@ Knowledge articles may be linked to:
 
 ---
 
+## Implemented publication — Slice 016
+
+Knowledge Base → open DRAFT article → Publish → explicit confirmation → PUBLISHED. Confirmation identifies code/title as plain text, explains preserved content/history and the current restriction on editing published articles. Cancel is the default and Escape action; cancelling makes no service call or write. Publication requires the exact loaded version still to be current.
+
+Publish and DRAFT → PUBLISHED: IMPLEMENTED. published_at: IMPLEMENTED, with the same UTC timestamp as updated_at. Content revision on publish: NO. Version increment on publish: NO. Content, immutable history and links remain intact. Search finds the current PUBLISHED article. Unpublish: NOT IMPLEMENTED. Archive: NOT IMPLEMENTED.
+
 ## FEAT-KB-005 — Knowledge Lifecycle
 
 Priority: P2  
 Requirements: `FR-KB-007`
 
-Knowledge articles may use states such as:
+The current physical states are DRAFT, PUBLISHED and ARCHIVED. The broader target states below remain planned:
 
 ```text
 DRAFT

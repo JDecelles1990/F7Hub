@@ -119,7 +119,9 @@ Remaining application implementation: PLANNED
 
 After Slice 015, the verified milestone is **CURRENT KNOWLEDGE ARTICLES ARE SEARCHABLE AND OPEN AUTHORITATIVELY**. Migration 0006 indexes current article code/title/summary/body, backfills existing rows and synchronizes insert/update/delete. Plain input is safely tokenized, lightweight ranked results open through the existing current-detail boundary, and history remains separately readable. Fresh sequential regression on 2026-09-09: Database 262, GUI 85, Integration 77 = 424 PASS. Native Windows workflow and all nine post-fix captures passed at 1000×700 against isolated SQLite.
 
-Recommended next bounded slice: **Slice 016 — publish a DRAFT Knowledge article**. Add one explicit DRAFT → PUBLISHED transition through the existing GUI/service/repository boundary, set `published_at` atomically, preserve current content/history and verify search/list/link behavior afterward. Archiving, unpublishing, restore/revert, categories/tags and broader lifecycle management remain outside that slice. Recommendation only; do not implement Slice 016 here.
+Slice 016 implements and verifies **ONE REVIEWED DRAFT CAN BE PUBLISHED WITHOUT CHANGING CONTENT HISTORY**. Publish requires explicit Cancel-default confirmation and the exact loaded version. Matching UTC published_at/updated_at commit atomically; version/content/history/links remain unchanged. Current PUBLISHED content remains searchable and readable, with Edit/Publish unavailable and Version History available. No migration was added. Fresh evidence is recorded in Status/CURRENT_STATE.md.
+
+Next bounded candidate: archive one PUBLISHED Knowledge article with explicit confirmation. Compared with unpublish (which reopens content editing) and restore/revert (which creates a content revision), archival can remain a narrow metadata transition. Recommendation only; archive, unpublish and restore/revert are NOT IMPLEMENTED. Independent Slice 016 review is the immediate next gate.
 
 The F7Hub roadmap is organized into:
 
@@ -717,7 +719,8 @@ RELATED ticket/article link/list/open: VERIFIED — Slice 012
 Confirmed RELATED unlink and normal relink: VERIFIED — Slice 013
 Read-only history viewer: VERIFIED — Slice 014
 Current-article FTS5 search/result/open: VERIFIED — Slice 015
-Restore/revert, publishing/archiving and richer relationship workflows: PLANNED
+Confirmed DRAFT publication without content revision: VERIFIED — Slice 016
+Restore/revert, unpublishing/archiving and richer relationship workflows: PLANNED
 ```
 
 Initial capabilities:

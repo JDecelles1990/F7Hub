@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-09 — Slice 016: Publish One Draft Knowledge Article
+
+Implemented Publish for one loaded DRAFT with explicit Cancel-default plain-text confirmation. The existing service generates one UTC timestamp and rejects invalid ID/version inputs. The existing repository checks authoritative existence/DRAFT/version inside BEGIN IMMEDIATE, conditionally updates lifecycle metadata, verifies one affected row, reloads and commits. Missing, stale, non-DRAFT and persistence failures receive safe feedback; injected post-update reload failure rolls back.
+
+Successful publication sets PUBLISHED and matching published_at/updated_at. It leaves content, version number, immutable history and relationships unchanged; no new snapshot or migration. ServiceTaskRunner serializes the write, then the normal list/detail reload reselects the current PUBLISHED article. Edit/Publish are disabled; Version History, search and ticket Open Article remain usable. Unpublish and Archive remain NOT IMPLEMENTED.
+
+Focused repository/service/GUI: 68 PASS. Focused Knowledge and ticket-link Integration: 36 PASS. Fresh native Windows 1000×700 workflow passed and all nine captures were inspected. Six migrations, unchanged schema, SQLite/FTS integrity and zero foreign-key violations were verified. Final sequential regression: Database 271, GUI 90, Integration 80 = 441 PASS (baseline 424); all exit 0. Commands and evidence are recorded in Status/CURRENT_STATE.md. Work remains unstaged/uncommitted for independent review; protected Docs/10 modification and archive deletion remain intact, with ROOT unchanged.
+
 # 2026-09-09 — Slice 015: Current Knowledge Search / FTS5
 
 - Added `0006_knowledge_search.sql`: an external-content `knowledge_articles_fts` index over current article code/title/summary/body, `unicode61`, insert/update/delete synchronization triggers and migration-time rebuild for existing rows. Historical revisions remain outside FTS. Migrations 0001–0005 remain byte-for-byte unchanged.

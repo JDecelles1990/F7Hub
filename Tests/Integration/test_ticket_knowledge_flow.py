@@ -11,7 +11,8 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QTimer
+from PySide6.QtWidgets import QApplication, QMessageBox
 
 from f7hub.app.bootstrap import bootstrap_application
 from f7hub.infrastructure.database import database_connection
@@ -22,6 +23,110 @@ from f7hub.services.ticket_knowledge_service import (
 
 
 class TicketKnowledgeFlowTests(unittest.TestCase):
+    def confirm_publish(self, workspace, *, accept=True):
+        def answer():
+            box = QApplication.activeModalWidget()
+            if accept:
+                next(button for button in box.buttons() if button.text() == "Publish").click()
+            else:
+                box.button(QMessageBox.StandardButton.Cancel).click()
+        QTimer.singleShot(30, answer)
+        workspace.publish_button.click()
+        self.wait_idle()
+
+    def test_publish_v2_preserves_history_search_link_and_reconstructed_application(self):
+        self.link()
+        workspace = self.assert_open_article(self.article.knowledge_article_id)
+        editor = workspace.open_edit_article()
+        editor.body_input.setPlainText("# Reviewed publication procedure V2")
+        editor.submit()
+        self.wait_idle()
+        service = self.context.knowledge_service
+        article_id = self.article.knowledge_article_id
+        draft = service.get_article(article_id)
+        history = tuple(service.get_article_version(article_id, n) for n in (2, 1))
+        self.assertEqual([v.version_number for v in service.list_article_versions(article_id)], [2, 1])
+        with database_connection(self.path) as connection:
+            links = [tuple(row) for row in connection.execute("SELECT * FROM ticket_knowledge_articles WHERE knowledge_article_id = ?", (article_id,))]
+        with patch.object(service, "publish_article", wraps=service.publish_article) as publish:
+            self.confirm_publish(workspace, accept=False)
+            publish.assert_not_called()
+        self.assertEqual(service.get_article(article_id), draft)
+        workspace.search_input.setText("publication procedure")
+        workspace.search_button.click()
+        self.wait_idle()
+        self.assertEqual(workspace.model.item(0, 2).text(), "DRAFT")
+        self.confirm_publish(workspace)
+        published = service.get_article(article_id)
+        self.assertEqual(workspace.article, published)
+        self.assertEqual((published.status, published.version_number), ("PUBLISHED", 2))
+        self.assertEqual(published.body_markdown, draft.body_markdown)
+        self.assertEqual(published.published_at, published.updated_at)
+        self.assertEqual(datetime.fromisoformat(published.published_at).utcoffset().total_seconds(), 0)
+        self.assertFalse(workspace.edit_button.isEnabled())
+        self.assertFalse(workspace.publish_button.isEnabled())
+        self.assertTrue(workspace.version_history_button.isEnabled())
+        self.assertIsNone(workspace.open_edit_article())
+        self.assertEqual(tuple(service.get_article_version(article_id, n) for n in (2, 1)), history)
+        viewer = workspace.open_version_history()
+        self.wait_idle()
+        self.assertEqual([v.version_number for v in viewer.versions], [2, 1])
+        self.assertEqual(viewer.detail_body.toPlainText(), draft.body_markdown)
+        viewer.close()
+        workspace.search_input.setText("publication procedure")
+        workspace.search_button.click()
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 1)
+        self.assertEqual(workspace.model.item(0, 2).text(), "PUBLISHED")
+        self.assertEqual(workspace.article, published)
+        self.open_ticket()
+        self.assertEqual(self.panel.table.records[0].article_status, "PUBLISHED")
+        self.assertEqual(self.assert_open_article(article_id).article, published)
+        with database_connection(self.path) as connection:
+            self.assertEqual([tuple(row) for row in connection.execute("SELECT * FROM ticket_knowledge_articles WHERE knowledge_article_id = ?", (article_id,))], links)
+        self.close_window()
+        self.boot()
+        self.open_ticket()
+        self.assertEqual(self.assert_open_article(article_id).article, published)
+
+    def test_stale_publish_through_real_window_rejects_external_revision(self):
+        workspace = self.window.knowledge_workspace
+        self.window.show_knowledge()
+        self.wait_idle()
+        latest = self.context.knowledge_service.update_article(
+            article_id=self.article.knowledge_article_id, expected_version_number=1,
+            title="Externally reviewed", summary=None, body="Concurrent V2",
+        )
+        self.assertEqual(workspace.article.version_number, 1)
+        self.confirm_publish(workspace)
+        self.assertIn("Reopen the latest version before publishing", workspace.feedback.text())
+        self.assertEqual(workspace.article.status, "DRAFT")
+        self.assertEqual(self.context.knowledge_service.get_article(latest.knowledge_article_id), latest)
+        self.assertIsNone(latest.published_at)
+        self.assertEqual([v.version_number for v in self.context.knowledge_service.list_article_versions(latest.knowledge_article_id)], [2, 1])
+        workspace.open_article_by_id(latest.knowledge_article_id)
+        self.wait_idle()
+        self.assertEqual(workspace.article, latest)
+
+    def test_publish_failure_rolls_back_with_existing_link_and_all_history(self):
+        from f7hub.repositories.knowledge_repository import _get_article
+        from f7hub.services.knowledge_service import KnowledgePublishError
+        self.link()
+        with database_connection(self.path) as connection:
+            before = tuple(connection.iterdump())
+        calls = 0
+        def fail_after_update(connection, article_id):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                raise RuntimeError("Synthetic failure after UPDATE")
+            return _get_article(connection, article_id)
+        with patch("f7hub.repositories.knowledge_repository._get_article", side_effect=fail_after_update):
+            with self.assertRaises(KnowledgePublishError):
+                self.context.knowledge_service.publish_article(self.article.knowledge_article_id, 1)
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+
     @classmethod
     def setUpClass(cls):
         cls.application = QApplication.instance() or QApplication([])

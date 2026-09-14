@@ -705,13 +705,19 @@ Historical Slice 010 validation: retained prior-session 11 repository/service fo
 
 Separate EditArticleDialog retains the original ID/version token, displays code/version as plain-text labels and submits through ServiceTaskRunner. It preserves failed input, blocks duplicate save/close during writes, disables saving after conflicts and never accepts a replacement token from workspace callbacks. KnowledgeWorkspace enables Edit only for a loaded DRAFT, displays Version N and refreshes/reselects/reloads the same article after success. Existing NewArticleDialog, bootstrap, MainWindow and worker framework are unchanged.
 
-Validation and actual fresh regression totals are recorded in `Status/CURRENT_STATE.md`. Native Windows edit/input/visual checks passed at 1000×700 with synthetic SQLite. Restore/revert, publishing/archiving and richer relationship workflows remain deferred.
+Validation and actual fresh regression totals are recorded in `Status/CURRENT_STATE.md`. Native Windows edit/input/visual checks passed at 1000×700 with synthetic SQLite. Restore/revert, unpublishing/archiving and richer relationship workflows remain deferred.
 
 ## Implemented Knowledge History Reads — Slice 014
 
 KnowledgeRepository.list_article_versions returns frozen KnowledgeArticleVersionListRecord values without summary/body. get_article_version returns one KnowledgeArticleVersionRecord from the snapshot table by article ID and version number. Each method opens one read transaction and checks authoritative article existence. ArticleMissingError and ArticleVersionMissingError distinguish absent parents from absent revisions.
 
 KnowledgeService exposes the same narrow read methods, validates positive integer IDs/versions excluding bool, and translates failures into KnowledgeHistoryError, KnowledgeHistoryArticleMissingError or KnowledgeHistoryVersionMissingError with safe messages. VersionHistoryDialog uses the existing runner, stable version identities, plain-text metadata and a read-only body. Generation/active guards ignore dismissed callbacks; disabled row interaction serializes detail reads. KnowledgeWorkspace enables the action for every loaded status when service is available and runner idle. No restore or mutation API is introduced. The history dialog is parented to the top-level window so MainWindow page disabling does not disable dismissal; Qt ownership and the workspace reference remain intact, and window destruction cleans up the viewer. Scrollable metadata reserves separate body space without rendering markup. Fresh remediation automation and native evidence is recorded in Status/CURRENT_STATE.md.
+
+## Implemented Knowledge Publish Boundary — Slice 016
+
+KnowledgeService.publish_article(article_id, expected_version_number) reuses positive-integer validation, rejects bool, generates one UTC timestamp and returns the authoritative KnowledgeArticleRecord. KnowledgePublishError carries safe missing/non-DRAFT/stale/persistence feedback. Existing ArticleMissingError and StaleArticleVersionError are reused; ArticleNotPublishableError distinguishes the lifecycle invariant without overloading edit errors.
+
+KnowledgeRepository.publish_draft_article loads and guards the current DRAFT inside BEGIN IMMEDIATE, conditionally updates only status/published_at/updated_at with parameters, checks rowcount==1, reloads and commits. It adds no content revision. Failed reload rolls back the operation. KnowledgeWorkspace confirms with a Cancel-default PlainText QMessageBox, captures the loaded version and submits through ServiceTaskRunner. Success refreshes/reselects/reloads, including when initiated from search. No new architecture layer, migration or FTS rewrite is introduced.
 
 ## Implemented Knowledge Search Boundary — Slice 015
 

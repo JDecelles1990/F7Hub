@@ -407,7 +407,18 @@ Slice 015 — Knowledge Search / FTS5 for current articles, verified 2026-09-09:
 - [x] Fresh native Windows 1000×700 workflow: 10 checks PASS; nine post-fix captures inspected; six migrations, eight FTS objects, virtual-table MATCH plan, integrity ok and zero FK violations.
 - [x] Keep evidence outside the repository; preserve Docs/10 user modification, archive deletion and ROOT.md; leave all Slice 015 work unstaged/uncommitted.
 
-Recommended next slice only: Slice 016 — publish one DRAFT Knowledge article through an explicit DRAFT → PUBLISHED transition that atomically sets `published_at`. Do not implement Slice 016 here. Archiving/unpublishing, restore/revert, historical editing/deletion, compare/apply, historical status, pagination, categories/tags, unified/ticket search, recommendations, AI and richer relationship workflows remain deferred.
+Slice 016 — publish one reviewed DRAFT, implemented 2026-09-09:
+
+- [x] Publish action, explicit plain-text confirmation and Cancel default/Enter/Escape; Cancel makes zero service calls or writes.
+- [x] Async GUI → existing service → existing repository; positive integer IDs, safe errors and exact loaded-version guard.
+- [x] BEGIN IMMEDIATE, authoritative checks, parameterized conditional update, rowcount check, reload and commit; post-update failure rolls back.
+- [x] DRAFT → PUBLISHED and matching UTC published_at/updated_at; no version increment or content snapshot.
+- [x] Preserve content/history, RELATED ticket link and Open Article, searchable content/current status and application reconstruction.
+- [x] Native Windows 1000×700 verification; nine captures inspected outside the repository.
+- [x] Six unchanged migrations; schema unchanged, SQLite/FTS integrity and foreign keys verified. Final regression evidence is in Status/CURRENT_STATE.md.
+- [ ] Independent review of unstaged/uncommitted Slice 016.
+
+Recommended next candidate only: archive one PUBLISHED article with explicit confirmation. Unpublish and Archive: NOT IMPLEMENTED. Restore/revert, historical editing/deletion, compare/apply, historical status, pagination, categories/tags, unified/ticket search, recommendations, AI and richer relationship workflows remain deferred. Do not start Slice 017 here.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

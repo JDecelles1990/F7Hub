@@ -9,6 +9,7 @@ import unicodedata
 from f7hub.repositories.knowledge_repository import (
     ArticleMissingError,
     ArticleNotEditableError,
+    ArticleNotPublishableError,
     ArticleUnchangedError,
     ArticleVersionMissingError,
     KnowledgeArticleRecord,
@@ -52,6 +53,10 @@ class KnowledgeHistoryVersionMissingError(KnowledgeHistoryError):
     """The selected historical revision is no longer available."""
 
 
+class KnowledgePublishError(RuntimeError):
+    """Publishing failed; its message is safe for presentation."""
+
+
 class KnowledgeSearchError(RuntimeError):
     """Knowledge search failed; its message is safe for presentation."""
 
@@ -61,6 +66,28 @@ class KnowledgeService:
 
     def __init__(self, repository: KnowledgeRepository) -> None:
         self._repository = repository
+
+    def publish_article(
+        self, article_id: int, expected_version_number: int,
+    ) -> KnowledgeArticleRecord:
+        article_id = _positive_integer(article_id, "Article ID")
+        expected_version_number = _positive_integer(expected_version_number, "Expected version")
+        timestamp = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+        try:
+            return self._repository.publish_draft_article(
+                article_id=article_id, expected_version_number=expected_version_number,
+                published_at=timestamp,
+            )
+        except ArticleMissingError as error:
+            raise KnowledgePublishError("This article no longer exists.") from error
+        except ArticleNotPublishableError as error:
+            raise KnowledgePublishError("Only draft articles can be published.") from error
+        except StaleArticleVersionError as error:
+            raise KnowledgePublishError(
+                "This article changed after you opened it. Reopen the latest version before publishing."
+            ) from error
+        except (sqlite3.Error, OSError, RuntimeError) as error:
+            raise KnowledgePublishError("Could not publish the article. Try again.") from error
 
     def create_article(
         self,
