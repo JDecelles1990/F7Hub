@@ -719,7 +719,15 @@ The current article update and new revision snapshot commit together. Version 1 
 
 If another editor saves first, the stale editor cannot overwrite it or add a snapshot. Its text remains available to copy, with clear feedback and Save disabled. Close the old editor, reopen the latest article, and start a new edit explicitly; a workspace refresh never replaces an open editor's original token. External changes to PUBLISHED/ARCHIVED status or deletion receive safe specific feedback with input retained. Generic persistence failures preserve input and permit retry. Cancel writes nothing; save runs in the background and blocks duplicate saves and closing during the write.
 
-Restore/revert, deletion, unpublishing/archiving, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
+Restore/revert, deletion, unpublishing/unarchiving, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
+
+## Implemented archive workflow — Slice 017
+
+Open one PUBLISHED article and choose Archive. Review its code/title and the notice that content, Version History and existing ticket relationships remain, with no Unarchive workflow. Cancel, default Enter and Escape leave the article untouched with zero service calls or writes.
+
+Confirm Archive to run the guarded transition asynchronously. The reviewed article/version is retained across confirmation; a changed context cannot archive another article. Success refreshes the normal list, reselects the same article and reloads ARCHIVED details. Edit/Publish/Archive become disabled; Version History stays available. Search still finds current content as ARCHIVED, and a linked ticket still opens the authoritative article. Failure never optimistically changes status; stale feedback directs the technician to reopen the latest version.
+
+The original published_at remains intact; updated_at records the archive time in UTC. Content version and historical snapshots do not change. Unarchive, Unpublish and DRAFT → ARCHIVED are NOT IMPLEMENTED.
 
 ## Implemented draft publication — Slice 016
 
@@ -727,7 +735,7 @@ Open a DRAFT article → Publish → review its code/title and consequences → 
 
 Confirmed publication runs asynchronously and requires the loaded content version still to be current. A stale draft receives instructions to reopen the latest version before publishing. Success refreshes the normal list, selects the same article and reloads PUBLISHED details; Edit and Publish are disabled while Version History remains available. Publishing from search returns to the normal list; a subsequent search finds current PUBLISHED content. Existing ticket links and Open Article continue to work.
 
-Publication assigns matching UTC published_at/updated_at timestamps without incrementing the version or creating a content snapshot. No optimistic status change occurs before persistence succeeds. Unpublish and Archive remain NOT IMPLEMENTED.
+Publication assigns matching UTC published_at/updated_at timestamps without incrementing the version or creating a content snapshot. No optimistic status change occurs before persistence succeeds. Unpublish and Unarchive remain NOT IMPLEMENTED; PUBLISHED archive is implemented in Slice 017.
 
 ## Implemented read-only version history — Slice 014
 

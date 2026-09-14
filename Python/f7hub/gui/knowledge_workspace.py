@@ -23,7 +23,7 @@ from f7hub.gui.new_article_dialog import NewArticleDialog
 from f7hub.gui.edit_article_dialog import EditArticleDialog
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.version_history_dialog import VersionHistoryDialog
-from f7hub.services.knowledge_service import KnowledgePublishError, KnowledgeService
+from f7hub.services.knowledge_service import KnowledgeArchiveError, KnowledgePublishError, KnowledgeService
 
 
 class KnowledgeWorkspace(QWidget):
@@ -41,6 +41,7 @@ class KnowledgeWorkspace(QWidget):
         self._pending_selection_id = None
         self._search_active = False
         self._confirming_publish = False
+        self._confirming_archive = False
         self.articles = ()
         self.article = None
 
@@ -53,6 +54,8 @@ class KnowledgeWorkspace(QWidget):
         self.edit_button.clicked.connect(self.open_edit_article)
         self.publish_button = QPushButton("Publish", self)
         self.publish_button.clicked.connect(self.publish_article)
+        self.archive_button = QPushButton("Archive", self)
+        self.archive_button.clicked.connect(self.archive_article)
         self.version_history_button = QPushButton("Version History", self)
         self.version_history_button.setEnabled(False)
         self.version_history_button.clicked.connect(self.open_version_history)
@@ -62,6 +65,7 @@ class KnowledgeWorkspace(QWidget):
         top.addWidget(self.new_button)
         top.addWidget(self.edit_button)
         top.addWidget(self.publish_button)
+        top.addWidget(self.archive_button)
         top.addWidget(self.version_history_button)
 
         self.search_input = QLineEdit(self)
@@ -207,7 +211,7 @@ class KnowledgeWorkspace(QWidget):
         return accepted
 
     def publish_article(self) -> None:
-        if (self._service is None or self._runner.busy or self._confirming_publish
+        if (self._service is None or self._runner.busy or self._confirming_publish or self._confirming_archive
                 or self.article is None or self.article.status != "DRAFT"):
             return
         article = self.article
@@ -235,6 +239,56 @@ class KnowledgeWorkspace(QWidget):
         self.feedback.setText(
             str(error) if isinstance(error, KnowledgePublishError)
             else "Could not publish the article. Try again."
+        )
+
+    def _confirm_archive(self, article) -> bool:
+        confirmation = QMessageBox(self)
+        confirmation.setWindowTitle("Archive Article")
+        confirmation.setIcon(QMessageBox.Icon.Question)
+        confirmation.setTextFormat(Qt.TextFormat.PlainText)
+        confirmation.setText(f"Archive {article.article_code}: {article.title}?")
+        confirmation.setInformativeText(
+            "The article will become ARCHIVED. Content and version history are preserved. "
+            "Existing ticket relationships remain. This workflow does not provide Unarchive."
+        )
+        archive = confirmation.addButton("Archive", QMessageBox.ButtonRole.AcceptRole)
+        cancel = confirmation.addButton(QMessageBox.StandardButton.Cancel)
+        confirmation.setDefaultButton(cancel)
+        confirmation.setEscapeButton(cancel)
+        confirmation.exec()
+        accepted = confirmation.clickedButton() == archive
+        confirmation.deleteLater()
+        return accepted
+
+    def archive_article(self) -> None:
+        if (self._service is None or self._runner.busy or self._confirming_archive or self._confirming_publish
+                or self.article is None or self.article.status != "PUBLISHED"):
+            return
+        article = self.article
+        self._confirming_archive = True
+        self._update_actions(self._runner.busy)
+        try:
+            confirmed = self._confirm_archive(article)
+        finally:
+            self._confirming_archive = False
+            self._update_actions(self._runner.busy)
+        # The modal confirmation runs an event loop; retain the reviewed token.
+        if not confirmed or self._runner.busy or self.article is not article:
+            return
+        self.feedback.setText("Archiving article…")
+        self._runner.submit(
+            lambda: self._service.archive_article(
+                article.knowledge_article_id, article.version_number,
+            ),
+            self._article_created,
+            self._archive_failed,
+        )
+
+    def _archive_failed(self, error: Exception) -> None:
+        logging.getLogger(__name__).error("Knowledge archive failed: %s", type(error).__name__)
+        self.feedback.setText(
+            str(error) if isinstance(error, KnowledgeArchiveError)
+            else "Could not archive the article. Try again."
         )
 
     def open_version_history(self) -> VersionHistoryDialog | None:
@@ -362,7 +416,7 @@ class KnowledgeWorkspace(QWidget):
         self.detail_body.setPlainText(article.body_markdown)
 
     def _update_actions(self, busy: bool) -> None:
-        busy = busy or self._confirming_publish
+        busy = busy or self._confirming_publish or self._confirming_archive
         self.new_button.setEnabled(not busy)
         self.search_input.setEnabled(not busy)
         self.search_button.setEnabled(not busy)
@@ -379,6 +433,11 @@ class KnowledgeWorkspace(QWidget):
         self.publish_button.setEnabled(
             self._service is not None and not busy
             and self.article is not None and self.article.status == "DRAFT"
+        )
+
+        self.archive_button.setEnabled(
+            self._service is not None and not busy
+            and self.article is not None and self.article.status == "PUBLISHED"
         )
 
     def _load_failed(self, error: Exception) -> None:

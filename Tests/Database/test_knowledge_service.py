@@ -9,11 +9,12 @@ from unittest.mock import patch
 
 from f7hub.infrastructure.database import bootstrap_database
 from f7hub.repositories.knowledge_repository import (
-    KnowledgeRepository, ArticleMissingError, ArticleNotPublishableError, StaleArticleVersionError,
+    KnowledgeRepository, ArticleNotArchivableError, ArticleMissingError, ArticleNotPublishableError, StaleArticleVersionError,
 )
 from f7hub.services.knowledge_service import (
     KnowledgeCreationError,
     KnowledgePublishError,
+    KnowledgeArchiveError,
     KnowledgeService,
     KnowledgeValidationError,
     KnowledgeUpdateError,
@@ -63,6 +64,44 @@ class KnowledgeServiceTests(unittest.TestCase):
             with self.subTest(error=error), patch.object(self.repository, "publish_draft_article", side_effect=error):
                 with self.assertRaises(KnowledgePublishError) as caught:
                     self.service.publish_article(1, 1)
+                self.assertEqual(str(caught.exception), message)
+
+    def test_archive_validates_positive_ids_without_repository_call(self):
+        with patch.object(self.repository, "archive_published_article") as archive:
+            for invalid in (True, False, 0, -1, "1", 1.5, None):
+                for args in ((invalid, 1), (1, invalid)):
+                    with self.subTest(args=args), self.assertRaises(KnowledgeValidationError):
+                        self.service.archive_article(*args)
+            archive.assert_not_called()
+
+    def test_archive_generates_one_utc_timestamp_and_returns_authoritative_record(self):
+        draft = self.create_for_edit()
+        article = self.service.publish_article(draft.knowledge_article_id, 1)
+        instant = datetime(2026, 9, 14, 16, 30, tzinfo=timezone.utc)
+        with patch("f7hub.services.knowledge_service.datetime") as clock:
+            clock.now.return_value = instant
+            with patch.object(self.repository, "archive_published_article", wraps=self.repository.archive_published_article) as archive:
+                result = self.service.archive_article(article.knowledge_article_id, 1)
+            clock.now.assert_called_once_with(timezone.utc)
+        archive.assert_called_once_with(article_id=article.knowledge_article_id, expected_version_number=1, archived_at="2026-09-14T16:30:00.000Z")
+        self.assertEqual(result, self.service.get_article(article.knowledge_article_id))
+        self.assertEqual(result.status, "ARCHIVED")
+        self.assertEqual(result.published_at, article.published_at)
+        self.assertEqual(result.updated_at, "2026-09-14T16:30:00.000Z")
+
+    def test_archive_translates_distinct_failures_and_sanitizes_persistence(self):
+        cases = (
+            (ArticleMissingError(), "This article no longer exists."),
+            (ArticleNotArchivableError(), "Only published articles can be archived."),
+            (StaleArticleVersionError(), "This article changed after you opened it. Reopen the latest version before archiving."),
+            (sqlite3.OperationalError("private SQLite detail"), "Could not archive the article. Try again."),
+            (RuntimeError("private"), "Could not archive the article. Try again."),
+            (OSError("private"), "Could not archive the article. Try again."),
+        )
+        for error, message in cases:
+            with self.subTest(error=error), patch.object(self.repository, "archive_published_article", side_effect=error):
+                with self.assertRaises(KnowledgeArchiveError) as caught:
+                    self.service.archive_article(1, 1)
                 self.assertEqual(str(caught.exception), message)
 
     def setUp(self) -> None:

@@ -11,7 +11,7 @@ from f7hub.infrastructure.database import bootstrap_database, database_connectio
 from f7hub.repositories.knowledge_repository import (
     KnowledgeRepository, ArticleMissingError, ArticleNotEditableError,
     ArticleUnchangedError, ArticleVersionMissingError, StaleArticleVersionError,
-    ArticleNotPublishableError,
+    ArticleNotPublishableError, ArticleNotArchivableError,
 )
 
 
@@ -97,6 +97,86 @@ class KnowledgeRepositoryTests(unittest.TestCase):
             connection.execute("CREATE TRIGGER skip_publish BEFORE UPDATE OF status ON knowledge_articles BEGIN SELECT RAISE(IGNORE); END")
         with self.assertRaises(StaleArticleVersionError):
             self.publish(article)
+        self.assertEqual(self.repository.get_article(article.knowledge_article_id), article)
+
+    def archive(self, article, **overrides):
+        return self.repository.archive_published_article(**(dict(
+            article_id=article.knowledge_article_id,
+            expected_version_number=article.version_number,
+            archived_at="2026-09-14T16:00:00.000Z",
+        ) | overrides))
+
+    def test_archive_preserves_publication_content_history_search_and_schema(self):
+        first = self.create()
+        revised = self.repository.update_draft_article(
+            article_id=first.knowledge_article_id, expected_version_number=1,
+            title="Reviewed title", summary="Reviewed summary", body_markdown="Reviewed body",
+            updated_at="2026-09-08T12:00:00.000Z",
+        )
+        published = self.publish(revised)
+        with database_connection(self.path) as connection:
+            schema = tuple(connection.execute("SELECT type, name, sql FROM sqlite_schema ORDER BY name"))
+            history = tuple(connection.execute("SELECT * FROM knowledge_article_versions ORDER BY version_number"))
+        self.assertEqual(self.repository.search_articles('"Reviewed"')[0].status, "PUBLISHED")
+        archived = self.archive(published)
+        self.assertEqual(archived, replace(published, status="ARCHIVED", updated_at="2026-09-14T16:00:00.000Z"))
+        self.assertGreater(archived.updated_at, archived.published_at)
+        self.assertEqual(self.repository.get_article(archived.knowledge_article_id), archived)
+        self.assertEqual([v.version_number for v in self.repository.list_article_versions(archived.knowledge_article_id)], [2, 1])
+        results = self.repository.search_articles('"Reviewed"')
+        self.assertEqual([(r.knowledge_article_id, r.status) for r in results], [(archived.knowledge_article_id, "ARCHIVED")])
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.execute("SELECT * FROM knowledge_article_versions ORDER BY version_number")), history)
+            self.assertEqual(tuple(connection.execute("SELECT type, name, sql FROM sqlite_schema ORDER BY name")), schema)
+            connection.execute("INSERT INTO knowledge_articles_fts(knowledge_articles_fts, rank) VALUES ('integrity-check', 1)")
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
+
+    def test_archive_missing_is_distinct(self):
+        with self.assertRaises(ArticleMissingError):
+            self.repository.archive_published_article(article_id=999, expected_version_number=1, archived_at="2026-09-14T16:00:00.000Z")
+
+    def test_archive_rejects_draft_and_archived_without_changes(self):
+        for status in ("DRAFT", "ARCHIVED"):
+            article = self.create(status)
+            if status == "ARCHIVED":
+                article = self.archive(self.publish(article))
+            with database_connection(self.path) as connection:
+                before = tuple(connection.iterdump())
+            with self.assertRaises(ArticleNotArchivableError):
+                self.archive(article, archived_at="2026-09-15T16:00:00.000Z")
+            with database_connection(self.path) as connection:
+                self.assertEqual(tuple(connection.iterdump()), before)
+
+    def test_archive_rejects_external_version_change_without_writes(self):
+        reviewed = self.publish(self.create())
+        with database_connection(self.path) as connection:
+            connection.execute("UPDATE knowledge_articles SET version_number = 2 WHERE knowledge_article_id = ?", (reviewed.knowledge_article_id,))
+            before = tuple(connection.iterdump())
+        with self.assertRaises(StaleArticleVersionError):
+            self.archive(reviewed)
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+
+    def test_archive_reload_failure_rolls_back_all_data(self):
+        article = self.publish(self.create())
+        with database_connection(self.path) as connection:
+            before = tuple(connection.iterdump())
+        for failure in (None, sqlite3.OperationalError("synthetic reload failure")):
+            with self.subTest(failure=failure):
+                with patch("f7hub.repositories.knowledge_repository._get_article", side_effect=[article, failure]):
+                    with self.assertRaises((RuntimeError, sqlite3.Error)):
+                        self.archive(article)
+                with database_connection(self.path) as connection:
+                    self.assertEqual(tuple(connection.iterdump()), before)
+
+    def test_archive_zero_row_update_rejects_and_preserves_published(self):
+        article = self.publish(self.create())
+        with database_connection(self.path) as connection:
+            connection.execute("CREATE TRIGGER skip_archive BEFORE UPDATE OF status ON knowledge_articles BEGIN SELECT RAISE(IGNORE); END")
+        with self.assertRaises(StaleArticleVersionError):
+            self.archive(article)
         self.assertEqual(self.repository.get_article(article.knowledge_article_id), article)
 
     def setUp(self) -> None:

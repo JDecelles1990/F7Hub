@@ -97,6 +97,10 @@ class ArticleNotPublishableError(RuntimeError):
     """Only a current draft can be published."""
 
 
+class ArticleNotArchivableError(RuntimeError):
+    """Only a current published article can be archived."""
+
+
 class StaleArticleVersionError(RuntimeError):
     """The editor's expected version is no longer current."""
 
@@ -239,6 +243,36 @@ class KnowledgeRepository:
             article = _get_article(connection, article_id)
             if article is None:
                 raise RuntimeError("Published knowledge article could not be reloaded.")
+            connection.commit()
+        return article
+
+    def archive_published_article(
+        self, *, article_id: int, expected_version_number: int, archived_at: str,
+    ) -> KnowledgeArticleRecord:
+        """Archive the reviewed published article without changing content or snapshots."""
+        with database_connection(self._database_path) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            current = _get_article(connection, article_id)
+            if current is None:
+                raise ArticleMissingError()
+            if current.status != "PUBLISHED":
+                raise ArticleNotArchivableError()
+            if current.version_number != expected_version_number:
+                raise StaleArticleVersionError()
+            cursor = connection.execute(
+                """
+                UPDATE knowledge_articles
+                SET status = 'ARCHIVED', updated_at = ?
+                WHERE knowledge_article_id = ? AND status = 'PUBLISHED'
+                    AND version_number = ?
+                """,
+                (archived_at, article_id, expected_version_number),
+            )
+            if cursor.rowcount != 1:
+                raise StaleArticleVersionError()
+            article = _get_article(connection, article_id)
+            if article is None:
+                raise RuntimeError("Archived knowledge article could not be reloaded.")
             connection.commit()
         return article
 

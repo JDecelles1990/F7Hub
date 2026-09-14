@@ -582,7 +582,7 @@ Slice 011 adds Edit Article for a loaded DRAFT and a read-only Version N detail 
 
 Save uses ServiceTaskRunner, blocks duplicate submission and close/cancel during the write, and closes on success. The list refreshes, reselects the same article ID and reloads current details. Failures preserve entered text. Stale/missing/non-DRAFT conflicts disable further saves in that editor; a new editor must be opened explicitly. Workspace refreshes cannot replace its expected-version token. No-change feedback leaves the editor open and creates no revision after authoritative version checks.
 
-Native Windows input and visual verification at 1000×700 passed for edit prefill, stable code, Version 1 → 2, updated content, navigation/reopen and existing New Article. No clipping/overlap was observed in the synthetic examples; this is agent verification, not user acceptance testing. There is no rendered Markdown, restore/revert, unpublishing/archiving, categories/tags, article-to-article relationships, external links or AI.
+Native Windows input and visual verification at 1000×700 passed for edit prefill, stable code, Version 1 → 2, updated content, navigation/reopen and existing New Article. No clipping/overlap was observed in the synthetic examples; this is agent verification, not user acceptance testing. There is no rendered Markdown, restore/revert, unpublishing/unarchiving, categories/tags, article-to-article relationships, external links or AI.
 
 Slice 015 adds a single-line Search field, Search button and Clear Search button beside the Knowledge list. Enter submits. Search reuses the article table and current-detail read path; result rows retain stable article IDs rather than display text as identity. Empty and failed searches have distinct feedback, failures retain the query, and Clear Search restores the full list. The shared ServiceTaskRunner keeps MATCH work off the GUI thread and disables search/list/create/edit/history actions while any Knowledge operation is active. Search results remain usable with Edit Article and Version History after authoritative detail has loaded.
 
@@ -624,9 +624,15 @@ Suggested layout:
 
 ---
 
+## Implemented Archive action — Slice 017
+
+Action order: New Article, Edit Article, Publish, Archive, Version History. Archive requires an available service, idle runner and loaded PUBLISHED article. The PlainText Archive Article confirmation identifies code/title, explains ARCHIVED status and preserved content/history/ticket links, and states that Unarchive is unavailable. Archive/Cancel buttons use Cancel as default and Escape; Enter respects the default. Confirmation disables workspace actions and retains the reviewed article token.
+
+ServiceTaskRunner performs the write asynchronously. Busy state disables competing actions in the containing MainWindow. Success refreshes/reselects/reloads authoritative ARCHIVED details without changing content/version; Edit/Publish/Archive disable and Version History remains enabled. Safe failure preserves the displayed article without an optimistic status mutation. Archive from search returns to the normal list; a new search finds the ARCHIVED current row. Native windows verification and visual inspection at 1000×700 passed; see Status/CURRENT_STATE.md for evidence and limits.
+
 ## Implemented Publish action — Slice 016
 
-The action order is New Article, Edit Article, Publish, Version History. Publish requires an available service, idle runner and loaded DRAFT. A QMessageBox displays code/title with PlainText and explains the PUBLISHED transition, preserved content/history and unavailable editing afterward. Its buttons are Publish and Cancel; default/Enter and Escape select Cancel. Confirmation reentry and changed article context cannot submit.
+The action order is New Article, Edit Article, Publish, Archive, Version History (Archive added in Slice 017). Publish requires an available service, idle runner and loaded DRAFT. A QMessageBox displays code/title with PlainText and explains the PUBLISHED transition, preserved content/history and unavailable editing afterward. Its buttons are Publish and Cancel; default/Enter and Escape select Cancel. Confirmation reentry and changed article context cannot submit.
 
 Confirmed publication uses ServiceTaskRunner and the loaded expected_version_number. Busy policy disables competing actions; no status is mutated optimistically. Success returns to the normal list, reselects the article and reloads authoritative PUBLISHED details. Edit/Publish become unavailable; Version History stays available. Safe failure feedback preserves the visible article; stale feedback requires reopening and reviewing the latest version. Cancel calls no service and performs no refresh.
 
