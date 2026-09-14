@@ -18,6 +18,10 @@ Verified history read boundary — Slice 014 (2026-09-08): list_article_versions
 
 Verified current-article search boundary — Slice 015 (2026-09-09): `0006_knowledge_search.sql` creates external-content `knowledge_articles_fts` over article_code/title/summary/body_markdown with `unicode61`, three synchronization triggers and an initial rebuild. All current DRAFT/PUBLISHED/ARCHIVED rows are indexed; `knowledge_article_versions` is not indexed. KnowledgeRepository uses parameterized MATCH, joins back to authoritative current rows and returns lightweight identity/version metadata ordered by bm25, updated_at DESC and ID DESC. Insert, repeated update, delete, migration backfill and failed-migration rollback are covered. The five prior migrations 0001-0005 retain unchanged checksums; migration 0006 is the new Knowledge Search / FTS5 migration; fresh full Database regression is 262 PASS. Fresh isolated native validation also returned integrity_check = ok, zero foreign-key violations and a virtual-table MATCH query plan.
 
+Implemented publication boundary — Slice 016: publish_draft_article uses one BEGIN IMMEDIATE transaction and validates the authoritative row's existence, DRAFT status and expected version. The conditional parameterized UPDATE requires article ID, DRAFT and expected version, updates exactly one row, and assigns status=PUBLISHED plus matching UTC published_at/updated_at. Reload precedes COMMIT. Injected post-update reload failure rolls back lifecycle metadata, content, history and existing ticket links.
+
+Publication does not increment version_number or insert immutable content snapshots. The six migrations and schema remain unchanged. The FTS content-update trigger is not activated by lifecycle-only fields; no reindex is needed, and search joins current PUBLISHED status from knowledge_articles. Native synthetic validation returned six migration records, unchanged schema objects, integrity_check=ok, zero foreign-key violations and successful external-content FTS integrity checking.
+
 SQLite is the primary persistent data store for F7Hub.
 
 This document defines:

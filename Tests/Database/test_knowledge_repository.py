@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from dataclasses import replace
 import sqlite3
 import tempfile
 import unittest
@@ -10,6 +11,7 @@ from f7hub.infrastructure.database import bootstrap_database, database_connectio
 from f7hub.repositories.knowledge_repository import (
     KnowledgeRepository, ArticleMissingError, ArticleNotEditableError,
     ArticleUnchangedError, ArticleVersionMissingError, StaleArticleVersionError,
+    ArticleNotPublishableError,
 )
 
 
@@ -18,6 +20,85 @@ MIGRATIONS = PROJECT_ROOT / "Database" / "Migrations"
 
 
 class KnowledgeRepositoryTests(unittest.TestCase):
+    def publish(self, article, **overrides):
+        return self.repository.publish_draft_article(**(dict(
+            article_id=article.knowledge_article_id,
+            expected_version_number=article.version_number,
+            published_at="2026-09-09T16:00:00.000Z",
+        ) | overrides))
+
+    def test_publish_changes_only_lifecycle_metadata_and_preserves_history_and_search(self):
+        first = self.create()
+        article = self.repository.update_draft_article(
+            article_id=first.knowledge_article_id, expected_version_number=1,
+            title="Reviewed title", summary="Reviewed summary", body_markdown="Reviewed body",
+            updated_at="2026-09-08T12:00:00.000Z",
+        )
+        history = tuple(self.repository.get_article_version(article.knowledge_article_id, n) for n in (2, 1))
+        self.assertEqual(self.repository.search_articles('"Reviewed"')[0].status, "DRAFT")
+        published = self.publish(article)
+        self.assertEqual(published, replace(article, status="PUBLISHED",
+            published_at="2026-09-09T16:00:00.000Z", updated_at="2026-09-09T16:00:00.000Z"))
+        self.assertEqual(self.repository.get_article(article.knowledge_article_id), published)
+        self.assertEqual([v.version_number for v in self.repository.list_article_versions(article.knowledge_article_id)], [2, 1])
+        self.assertEqual(tuple(self.repository.get_article_version(article.knowledge_article_id, n) for n in (2, 1)), history)
+        results = self.repository.search_articles('"Reviewed"')
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].status, "PUBLISHED")
+        with database_connection(self.path) as connection:
+            connection.execute("INSERT INTO knowledge_articles_fts(knowledge_articles_fts, rank) VALUES ('integrity-check', 1)")
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
+
+    def test_publish_missing_is_distinct(self):
+        with self.assertRaises(ArticleMissingError):
+            self.repository.publish_draft_article(article_id=999, expected_version_number=1, published_at="2026-09-09T16:00:00.000Z")
+
+    def test_publish_rejects_published_and_archived_without_any_changes(self):
+        for status in ("PUBLISHED", "ARCHIVED"):
+            with self.subTest(status=status):
+                article = self.publish(self.create(status))
+                with database_connection(self.path) as connection:
+                    connection.execute("UPDATE knowledge_articles SET status = ? WHERE knowledge_article_id = ?", (status, article.knowledge_article_id))
+                before = self.repository.get_article(article.knowledge_article_id)
+                history = self.repository.list_article_versions(article.knowledge_article_id)
+                with self.assertRaises(ArticleNotPublishableError):
+                    self.publish(before, published_at="2026-09-10T16:00:00.000Z")
+                self.assertEqual(self.repository.get_article(article.knowledge_article_id), before)
+                self.assertEqual(self.repository.list_article_versions(article.knowledge_article_id), history)
+
+    def test_stale_publish_leaves_current_draft_and_versions_intact(self):
+        article = self.create()
+        latest = self.repository.update_draft_article(
+            article_id=article.knowledge_article_id, expected_version_number=1,
+            title="Changed", summary=None, body_markdown="New body", updated_at="2026-09-09T12:00:00.000Z",
+        )
+        with self.assertRaises(StaleArticleVersionError):
+            self.publish(article)
+        self.assertEqual(self.repository.get_article(article.knowledge_article_id), latest)
+        self.assertIsNone(latest.published_at)
+        self.assertEqual([v.version_number for v in self.repository.list_article_versions(article.knowledge_article_id)], [2, 1])
+
+    def test_publish_reload_failure_rolls_back_lifecycle_update(self):
+        article = self.create()
+        history = self.repository.list_article_versions(article.knowledge_article_id)
+        for failure in (None, sqlite3.OperationalError("synthetic reload failure")):
+            with self.subTest(failure=failure):
+                with patch("f7hub.repositories.knowledge_repository._get_article", side_effect=[article, failure]):
+                    with self.assertRaises((RuntimeError, sqlite3.Error)):
+                        self.publish(article)
+                self.assertEqual(self.repository.get_article(article.knowledge_article_id), article)
+                self.assertEqual(self.repository.list_article_versions(article.knowledge_article_id), history)
+
+    def test_publish_zero_row_update_rejects_and_preserves_draft(self):
+        article = self.create()
+        with database_connection(self.path) as connection:
+            connection.execute("CREATE TRIGGER skip_publish BEFORE UPDATE OF status ON knowledge_articles BEGIN SELECT RAISE(IGNORE); END")
+        with self.assertRaises(StaleArticleVersionError):
+            self.publish(article)
+        self.assertEqual(self.repository.get_article(article.knowledge_article_id), article)
+
     def setUp(self) -> None:
         self.temporary_directory = tempfile.TemporaryDirectory()
         self.path = Path(self.temporary_directory.name) / "knowledge.db"

@@ -719,7 +719,15 @@ The current article update and new revision snapshot commit together. Version 1 
 
 If another editor saves first, the stale editor cannot overwrite it or add a snapshot. Its text remains available to copy, with clear feedback and Save disabled. Close the old editor, reopen the latest article, and start a new edit explicitly; a workspace refresh never replaces an open editor's original token. External changes to PUBLISHED/ARCHIVED status or deletion receive safe specific feedback with input retained. Generic persistence failures preserve input and permit retry. Cancel writes nothing; save runs in the background and blocks duplicate saves and closing during the write.
 
-Restore/revert, deletion, publishing/archiving, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
+Restore/revert, deletion, unpublishing/archiving, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
+
+## Implemented draft publication — Slice 016
+
+Open a DRAFT article → Publish → review its code/title and consequences → Publish or Cancel. Cancel is the default; Enter without changing the selection and Escape both cancel. Cancel leaves the view and database unchanged.
+
+Confirmed publication runs asynchronously and requires the loaded content version still to be current. A stale draft receives instructions to reopen the latest version before publishing. Success refreshes the normal list, selects the same article and reloads PUBLISHED details; Edit and Publish are disabled while Version History remains available. Publishing from search returns to the normal list; a subsequent search finds current PUBLISHED content. Existing ticket links and Open Article continue to work.
+
+Publication assigns matching UTC published_at/updated_at timestamps without incrementing the version or creating a content snapshot. No optimistic status change occurs before persistence succeeds. Unpublish and Archive remain NOT IMPLEMENTED.
 
 ## Implemented read-only version history — Slice 014
 

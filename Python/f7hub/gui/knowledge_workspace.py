@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
+    QMessageBox,
     QPlainTextEdit,
     QPushButton,
     QSplitter,
@@ -22,7 +23,7 @@ from f7hub.gui.new_article_dialog import NewArticleDialog
 from f7hub.gui.edit_article_dialog import EditArticleDialog
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.version_history_dialog import VersionHistoryDialog
-from f7hub.services.knowledge_service import KnowledgeService
+from f7hub.services.knowledge_service import KnowledgePublishError, KnowledgeService
 
 
 class KnowledgeWorkspace(QWidget):
@@ -39,6 +40,7 @@ class KnowledgeWorkspace(QWidget):
         self._runner = runner
         self._pending_selection_id = None
         self._search_active = False
+        self._confirming_publish = False
         self.articles = ()
         self.article = None
 
@@ -49,6 +51,8 @@ class KnowledgeWorkspace(QWidget):
         self.edit_button = QPushButton("Edit Article", self)
         self.edit_button.setEnabled(False)
         self.edit_button.clicked.connect(self.open_edit_article)
+        self.publish_button = QPushButton("Publish", self)
+        self.publish_button.clicked.connect(self.publish_article)
         self.version_history_button = QPushButton("Version History", self)
         self.version_history_button.setEnabled(False)
         self.version_history_button.clicked.connect(self.open_version_history)
@@ -57,6 +61,7 @@ class KnowledgeWorkspace(QWidget):
         top.addStretch()
         top.addWidget(self.new_button)
         top.addWidget(self.edit_button)
+        top.addWidget(self.publish_button)
         top.addWidget(self.version_history_button)
 
         self.search_input = QLineEdit(self)
@@ -181,6 +186,56 @@ class KnowledgeWorkspace(QWidget):
         dialog.open()
         self._edit_article_dialog = dialog
         return dialog
+
+    def _confirm_publish(self, article) -> bool:
+        confirmation = QMessageBox(self)
+        confirmation.setWindowTitle("Publish Article")
+        confirmation.setIcon(QMessageBox.Icon.Question)
+        confirmation.setTextFormat(Qt.TextFormat.PlainText)
+        confirmation.setText(f"Publish {article.article_code}: {article.title}?")
+        confirmation.setInformativeText(
+            "The article will become PUBLISHED. Content and version history are preserved. "
+            "Published articles are not editable in the current workflow."
+        )
+        publish = confirmation.addButton("Publish", QMessageBox.ButtonRole.AcceptRole)
+        cancel = confirmation.addButton(QMessageBox.StandardButton.Cancel)
+        confirmation.setDefaultButton(cancel)
+        confirmation.setEscapeButton(cancel)
+        confirmation.exec()
+        accepted = confirmation.clickedButton() == publish
+        confirmation.deleteLater()
+        return accepted
+
+    def publish_article(self) -> None:
+        if (self._service is None or self._runner.busy or self._confirming_publish
+                or self.article is None or self.article.status != "DRAFT"):
+            return
+        article = self.article
+        self._confirming_publish = True
+        self._update_actions(self._runner.busy)
+        try:
+            confirmed = self._confirm_publish(article)
+        finally:
+            self._confirming_publish = False
+            self._update_actions(self._runner.busy)
+        # The modal confirmation runs an event loop; retain the reviewed token.
+        if not confirmed or self._runner.busy or self.article is not article:
+            return
+        self.feedback.setText("Publishing article…")
+        self._runner.submit(
+            lambda: self._service.publish_article(
+                article.knowledge_article_id, article.version_number,
+            ),
+            self._article_created,
+            self._publish_failed,
+        )
+
+    def _publish_failed(self, error: Exception) -> None:
+        logging.getLogger(__name__).error("Knowledge publish failed: %s", type(error).__name__)
+        self.feedback.setText(
+            str(error) if isinstance(error, KnowledgePublishError)
+            else "Could not publish the article. Try again."
+        )
 
     def open_version_history(self) -> VersionHistoryDialog | None:
         if self._service is None or self._runner.busy or self.article is None:
@@ -307,6 +362,7 @@ class KnowledgeWorkspace(QWidget):
         self.detail_body.setPlainText(article.body_markdown)
 
     def _update_actions(self, busy: bool) -> None:
+        busy = busy or self._confirming_publish
         self.new_button.setEnabled(not busy)
         self.search_input.setEnabled(not busy)
         self.search_button.setEnabled(not busy)
@@ -319,6 +375,10 @@ class KnowledgeWorkspace(QWidget):
         )
         self.version_history_button.setEnabled(
             self._service is not None and not busy and self.article is not None
+        )
+        self.publish_button.setEnabled(
+            self._service is not None and not busy
+            and self.article is not None and self.article.status == "DRAFT"
         )
 
     def _load_failed(self, error: Exception) -> None:

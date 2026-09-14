@@ -1,15 +1,19 @@
 from __future__ import annotations
 
 from pathlib import Path
+from datetime import datetime, timezone
 import sqlite3
 import tempfile
 import unittest
 from unittest.mock import patch
 
 from f7hub.infrastructure.database import bootstrap_database
-from f7hub.repositories.knowledge_repository import KnowledgeRepository
+from f7hub.repositories.knowledge_repository import (
+    KnowledgeRepository, ArticleMissingError, ArticleNotPublishableError, StaleArticleVersionError,
+)
 from f7hub.services.knowledge_service import (
     KnowledgeCreationError,
+    KnowledgePublishError,
     KnowledgeService,
     KnowledgeValidationError,
     KnowledgeUpdateError,
@@ -25,6 +29,42 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class KnowledgeServiceTests(unittest.TestCase):
+    def test_publish_validates_positive_ids_without_repository_call(self):
+        with patch.object(self.repository, "publish_draft_article") as publish:
+            for invalid in (True, False, 0, -1, "1", 1.5, None):
+                for args in ((invalid, 1), (1, invalid)):
+                    with self.subTest(args=args), self.assertRaises(KnowledgeValidationError):
+                        self.service.publish_article(*args)
+            publish.assert_not_called()
+
+    def test_publish_generates_one_utc_timestamp_and_returns_authoritative_record(self):
+        article = self.create_for_edit()
+        instant = datetime(2026, 9, 9, 16, 30, tzinfo=timezone.utc)
+        with patch("f7hub.services.knowledge_service.datetime") as clock:
+            clock.now.return_value = instant
+            with patch.object(self.repository, "publish_draft_article", wraps=self.repository.publish_draft_article) as publish:
+                result = self.service.publish_article(article.knowledge_article_id, 1)
+            clock.now.assert_called_once_with(timezone.utc)
+        publish.assert_called_once_with(article_id=article.knowledge_article_id, expected_version_number=1, published_at="2026-09-09T16:30:00.000Z")
+        self.assertEqual(result, self.service.get_article(article.knowledge_article_id))
+        self.assertEqual(result.status, "PUBLISHED")
+        self.assertEqual(result.published_at, result.updated_at)
+
+    def test_publish_translates_distinct_failures_and_sanitizes_persistence(self):
+        cases = (
+            (ArticleMissingError(), "This article no longer exists."),
+            (ArticleNotPublishableError(), "Only draft articles can be published."),
+            (StaleArticleVersionError(), "This article changed after you opened it. Reopen the latest version before publishing."),
+            (sqlite3.OperationalError("private SQLite detail"), "Could not publish the article. Try again."),
+            (RuntimeError("private"), "Could not publish the article. Try again."),
+            (OSError("private"), "Could not publish the article. Try again."),
+        )
+        for error, message in cases:
+            with self.subTest(error=error), patch.object(self.repository, "publish_draft_article", side_effect=error):
+                with self.assertRaises(KnowledgePublishError) as caught:
+                    self.service.publish_article(1, 1)
+                self.assertEqual(str(caught.exception), message)
+
     def setUp(self) -> None:
         self.temporary_directory = tempfile.TemporaryDirectory()
         self.path = Path(self.temporary_directory.name) / "knowledge-service.db"

@@ -1,104 +1,104 @@
 # F7Hub Current State
 
-Last verified: 2026-09-09
+Last verified: 2026-09-09 (America/Toronto)
 
-Branch: `feat/knowledge-search-fts5`
+Branch: `feat/knowledge-publish-draft`
 
-Base HEAD: `d584fd10902b0a3c361208412130462499c0a27b`
+Base HEAD: `426341c5d82a0ccc0bcc060829096cfc0294e8af`
 
-Status: Slice 015 implemented and verified, unstaged and uncommitted, ready for independent review. No commit, push or merge. Protected `Docs/10_FolderStructure.md` modification and `Docs/Archive/DocsOLD/00_Vision.md` deletion remain preserved; `ROOT.md` is unchanged.
+Status: PASS — Slice 016 implemented and verified, ready for independent review. Work is unstaged and uncommitted. Protected `Docs/10_FolderStructure.md` modification and `Docs/Archive/DocsOLD/00_Vision.md` deletion remain preserved; `ROOT.md` is unchanged.
 
 ## Current Milestone
 
-CURRENT KNOWLEDGE ARTICLES ARE SEARCHABLE AND OPEN AUTHORITATIVELY
+ONE REVIEWED DRAFT CAN BE PUBLISHED WITHOUT CHANGING CONTENT HISTORY
 
 ## Working
 
 - SQLite bootstrap and six ordered migrations through `0006_knowledge_search.sql`
-- Existing New Ticket, Saved Tickets, Quick Company/Contact, notes/status and reference workflows
-- Knowledge create/list/read, DRAFT revision editing and immutable Version History
+- Existing ticket creation, quick company/contact, saved tickets, notes/status and reference workflows
+- Knowledge create/list/read, DRAFT content editing, immutable Version History and current-article FTS5 search
 - RELATED ticket/article Link, Open, Unlink and Relink
-- Current Knowledge search across article code, title, summary and Markdown body
-- DRAFT, PUBLISHED and ARCHIVED current rows are searchable; historical version rows are not indexed
-- Lightweight ranked results expose ID/code/title/status/current version/updated timestamp, then reload authoritative current detail
-- Search button and Enter submission, result count, no-result state, safe failure with retained query and Clear Search to the full list
-- Search/list/New/Edit/Version History actions are serialized through the existing `ServiceTaskRunner`
-- Insert, repeated searchable-field update and delete synchronize FTS automatically; existing rows are backfilled during migration
+- Publish one loaded DRAFT through explicit plain-text confirmation identifying article code/title
+- Cancel as default, Enter without changed selection and Escape; zero service calls, writes or refresh on Cancel
+- Async Publish with the loaded expected-version token; busy policy blocks duplicate and competing actions
+- DRAFT → PUBLISHED with matching UTC published_at/updated_at; authoritative current/list refresh and same-article selection
+- Edit/Publish disabled after publication; Version History, current-content search and ticket Open Article remain available
 
-## Search Contract
+## Publish Contract
 
-`KnowledgeWorkspace → KnowledgeService.search_articles → KnowledgeRepository.search_articles → SQLite FTS5` preserves the GUI/service/repository boundary. The service converts plain text into quoted `unicode61` letter/number/private-use tokens joined by implicit AND. Empty or punctuation-only input performs no MATCH. Quotes, parentheses, asterisks and operator-looking text do not expose raw FTS syntax.
+`KnowledgeWorkspace → KnowledgeService.publish_article → KnowledgeRepository.publish_draft_article → SQLite` reuses the existing layers and ServiceTaskRunner. The service validates positive integer ID/version inputs (rejecting bool), generates one UTC timestamp and translates typed missing/non-DRAFT/stale errors plus persistence failures into safe feedback.
 
-The repository executes a parameterized MATCH, joins `knowledge_articles_fts.rowid` to the authoritative `knowledge_articles` row and orders by `bm25`, `updated_at DESC`, then `knowledge_article_id DESC`. Selection uses the existing `get_article` path, so an edited result opens current persisted content and a result deleted before opening receives safe missing-article feedback.
+One BEGIN IMMEDIATE transaction loads authoritative state, checks existence/DRAFT/expected version, conditionally updates by article ID/DRAFT/version, checks exactly one affected row, reloads and commits. Only status, published_at and updated_at change. Content/version/category/identity/creation metadata/history/relationships remain unchanged. Injected post-update reload failure rolls back; a zero-row update rejects safely.
 
-Migration 0006 owns only derived search infrastructure: the external-content virtual table, its four shadow tables, three triggers and initial `rebuild`. Relational Knowledge rows and immutable history remain owned by migration 0005.
+Publish: IMPLEMENTED. DRAFT → PUBLISHED: IMPLEMENTED. published_at: IMPLEMENTED. Content revision on publish: NO. Version increment on publish: NO. Unpublish: NOT IMPLEMENTED. Archive: NOT IMPLEMENTED.
 
-## Deferred / Limitations
+Publication of a stale V1 after another editor creates V2 is rejected; current state remains DRAFT V2 with NULL published_at and exactly V2/V1 history. Already-PUBLISHED and ARCHIVED articles reject publication without timestamp overwrite. No optimistic GUI status change occurs before success.
 
-- Historical-revision search, historical status snapshots, restore/revert, historical editing/deletion and compare/apply
-- Search filters, result snippets/highlighting, pagination, saved searches, advanced query syntax and large-library performance claims
-- Unified search, ticket search, provider abstraction, recommendations and AI ranking
-- Article publishing/archiving/deletion, categories/tags and ticket-driven article creation/editing
-- Bulk relationship operations, APPLIED/RESOLUTION_SOURCE workflows and relationship history/undo
-- Full company/contact/category management, PowerShell integration and AutoHotkey login startup
-- Actual user library volume, other screen sizes, DPI modes and assistive-technology coverage are NOT VERIFIED
+## Search / History / Relationships
+
+Migration 0006 is unchanged. Its FTS update trigger covers only article_code/title/summary/body_markdown, so lifecycle metadata does not require reindexing. Search joins the relational row for current status; the same query returns one PUBLISHED result after publication. Historical snapshots remain separate and unchanged. Ticket RELATED rows survive exact value comparison, linked metadata shows PUBLISHED, and Open Article navigates to the current article. Application reconstruction preserves published_at and PUBLISHED status.
 
 ## Validation
 
-Fresh focused evidence during Slice 015:
-
-| Scope | Result |
-|---|---:|
-| New migration + search Database tests | 11 PASS |
-| Relevant repository/service/migration tests | 42 PASS |
-| Knowledge GUI module | 23 PASS |
-| Targeted new Integration cases | 4 PASS |
-| Post-visual-fix GUI sizing case | 1 PASS |
-
-Fresh final suite evidence after the native visual correction and strengthened migration rollback/retry assertion:
-
-| Suite | Count | Test duration | Exit |
-|---|---:|---:|---:|
-| Database | 262 PASS | 14.345s | 0 |
-| GUI | 85 PASS | 10.560s | 0 |
-| Integration | 77 PASS | 313.633s | 0 |
-
-Total: **424 PASS**. Database → GUI → Integration ran sequentially after the final product-code correction. The later Database-only test strengthening was rerun independently; no product, GUI or Integration code changed afterward. Commands used `.venv\Scripts\python.exe`, `PYTHONPATH=$PWD\Python;$PWD`, `-B`, and offscreen Qt for GUI/Integration automation.
+Fresh focused commands, with `PYTHONPATH=$PWD\Python;$PWD`, `PYTHONDONTWRITEBYTECODE=1` and `QT_QPA_PLATFORM=offscreen`:
 
 ```powershell
-.venv\Scripts\python.exe -B -m unittest discover -s Tests/Database -p "test_*.py" -v
-.venv\Scripts\python.exe -B -m unittest discover -s Tests/GUI -p "test_*.py" -v
-.venv\Scripts\python.exe -B -m unittest discover -s Tests/Integration -p "test_*.py" -v
+.\.venv\Scripts\python.exe -B -m unittest Tests.Database.test_knowledge_repository Tests.Database.test_knowledge_service Tests.GUI.test_knowledge_workspace -v
+.\.venv\Scripts\python.exe -B -m unittest Tests.Integration.test_ticket_knowledge_flow Tests.Integration.test_knowledge_base_flow -v
 ```
 
-FTS5 runtime probe: PASS with SQLite 3.50.4; `ENABLE_FTS5` is present and a temporary FTS5 virtual table was created successfully.
+- Repository 25, service 15 and Knowledge GUI 28: combined 68 PASS, 7.378s.
+- Knowledge Integration 16 and ticket-link Integration 20: combined 36 PASS, 170.012s.
+- Initial new integration assertion used `status` instead of the existing `article_status`; corrected test and final focused rerun passed.
+
+Final regression runs sequentially, using the same environment:
+
+```powershell
+.\.venv\Scripts\python.exe -B -m unittest discover -s Tests/Database -p "test_*.py" -v
+.\.venv\Scripts\python.exe -B -m unittest discover -s Tests/GUI -p "test_*.py" -v
+.\.venv\Scripts\python.exe -B -m unittest discover -s Tests/Integration -p "test_*.py" -v
+```
+
+| Suite | Result | Duration | Exit |
+|---|---:|---:|---:|
+| Database | 271 PASS | 13.481s | 0 |
+| GUI | 90 PASS | 10.849s | 0 |
+| Integration | 80 PASS | 314.166s | 0 |
+
+Pre-slice baseline: 424 (262 Database, 85 GUI, 77 Integration). Final total: **441 PASS**, an increase of 17 tests (9 Database, 5 GUI, 3 Integration); no suite decreased. Product and test code did not change after the focused runs and before/after final regression.
 
 ## Native Windows Evidence
 
-PASS — fresh after the final code change on 2026-09-09 with Qt platform `windows`, isolated `slice015-native-postfix.db` and a 1000×700 main window. Ten deterministic checks covered pending async state and competing-action blocking; title/body/code/mixed-case/punctuation/C++ searches; every current lifecycle status; no results; safe failure/query retention; Clear Search; edit synchronization/current-only indexing; exact immutable V1 history; New Article; ticket Open Article; and database/FTS integrity.
+PASS with Qt platform `windows`, isolated synthetic SQLite and MainWindow 1000×700. Native Qt input checks covered creation/load, Publish enabled, explicit confirmation, Cancel with unchanged DRAFT/NULL published_at, V2 publication, PUBLISHED status, Edit/Publish disabled, history V2/V1, search/current PUBLISHED result, ticket link/Open Article and application reconstruction. SQLite and FTS integrity, six migrations and unchanged schema objects also passed.
 
-All nine final captures were inspected. Controls, result counts, empty/failure states, current article details, history and regression workflows were readable without overlap. Initial inspection found full-list PUBLISHED/ARCHIVED status elision after a longer New Article title; identity columns now recalculate after each population, and the final capture shows complete values. Agent verification, not user acceptance testing.
+All nine captured images were actually inspected: draft, Cancel confirmation, cancelled draft, Publish confirmation, PUBLISHED details, history, published search, linked ticket and ticket Open Article. Actions and lifecycle status fit without clipping/overlap; confirmation is readable and HTML-like article text remains literal. Existing table-title ellipsis remains. This is agent verification, not user acceptance testing.
 
-Evidence folder: `C:\Users\Jo\AppData\Local\Temp\f7hub-slice015-native-051ce7bd8ade436399219a33358a1983`
+Evidence folder: `C:\Users\Jo\AppData\Local\Temp\f7hub-slice016-validation`. It contains native.py, native.log, native-synthetic.db, nine PNG captures and focused/full regression logs. No evidence artifacts are placed in the repository.
 
 ## Database Evidence
 
-- Migration history: six ordered entries, ending in logical name `knowledge_search`
-- FTS objects: `knowledge_articles_fts`, four standard shadow tables and triggers `knowledge_articles_ai`, `knowledge_articles_ad`, `knowledge_articles_au`
-- Query plan: `SCAN knowledge_articles_fts VIRTUAL TABLE INDEX 0:M4`, followed by the relational integer-primary-key lookup
-- `PRAGMA integrity_check`: `ok`
-- `PRAGMA foreign_key_check`: zero violations
-- Failed migration 0006: virtual table, shadow tables, triggers and history record all roll back; retry applies once
-- Migration hashes:
-  - 0001: `84596d21bbae32c05cf92cb3512674eb5e598d3400210af6b67871aac71931da`
-  - 0002: `46d3f6383e0463ee4130449d23ee87144012e972ac7c6c55c65018e2f5ac1864`
-  - 0003: `6a6b01f2cc0be0855e6ae1794ee4db8a1518c0fb6d0cdeb40b7a3c51a2d16a24`
-  - 0004: `7168f94abe6fd03429475f87c4851344653bb917a7b5838cabbcc3a9acf282d9`
-  - 0005: `7e976210c37c7c6d46b1dae24c88e578b259449a02d1c58e48f9e9b53c354572`
-  - 0006: `7d1488daa57ece75d1faa3ac87f455f099a82e94aa558f0b6fb055c6e7d2841d`
+- Migration count: 6; no 0007, no schema objects added or changed by publication.
+- Historical migrations 0001–0006 unchanged; compare against base HEAD and initial file hashes.
+- PRAGMA integrity_check: ok.
+- PRAGMA foreign_key_check: zero rows.
+- FTS external-content integrity-check with rank=1: PASS.
+- Publication preserves both current content revisions and exact RELATED rows; rollback preserves the full synthetic database dump.
+
+## Limitations / Deferred
+
+- Unpublish, Archive, bulk/scheduled publish, approvals, permissions, publication actors/notes and notifications are NOT IMPLEMENTED.
+- Publication is lifecycle metadata, with no historical status reconstruction, new content version or audit subsystem.
+- Published articles cannot be edited in the current workflow.
+- Publishing from search returns to the normal list; search-state preservation is intentionally outside this slice.
+- Historical search, restore/revert, categories/tags, richer relationships, unified search and AI remain deferred.
+- Actual user-library scale, other screen sizes/DPI and assistive-technology coverage are NOT VERIFIED.
+
+## Documentation / Protected Work
+
+Updated owner documents: 03 Features, 04 Workflows, 05 GUI, 06 System Architecture, 07 Database, 13 Python Architecture, 16 Roadmap, 17 Todo, 18 ChangeLog and this status file. Product requirements were inspected; the bounded user-approved publication contract needs no requirements rewrite. 08 ERD, 09 SQL Schema and ROOT remain unchanged. Protected Docs/10 content and the archive deletion are retained exactly.
 
 ## Next Gate / Candidate
 
-Independent Slice 015 review is next. Keep changes unstaged and uncommitted; do not push or merge.
+Stop for independent Slice 016 review. Final sequential regression, native capture inspection, self-review and Git preservation checks passed. Do not stage, commit, push or merge.
 
-Recommend exactly one next bounded slice: **Slice 016 — publish one DRAFT Knowledge article** through an explicit DRAFT → PUBLISHED transition that atomically sets `published_at`, preserves current content/history and verifies search/list/link behavior. Recommendation only; Slice 016 is not implemented.
+Recommend one next bounded candidate: archive one PUBLISHED Knowledge article with explicit confirmation and preserved content/history/links. Compared with unpublish (which reopens editing) and restore/revert (which creates a content revision), this can remain a narrow lifecycle-metadata transition. Recommendation only; Slice 017 is not started.
