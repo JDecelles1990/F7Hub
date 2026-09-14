@@ -416,9 +416,19 @@ Slice 016 — publish one reviewed DRAFT, implemented 2026-09-09:
 - [x] Preserve content/history, RELATED ticket link and Open Article, searchable content/current status and application reconstruction.
 - [x] Native Windows 1000×700 verification; nine captures inspected outside the repository.
 - [x] Six unchanged migrations; schema unchanged, SQLite/FTS integrity and foreign keys verified. Final regression evidence is in Status/CURRENT_STATE.md.
-- [ ] Independent review of unstaged/uncommitted Slice 016.
+- [x] Slice 016 integrated in the user-specified main baseline `1f8b418`; prior independent-review evidence is not reasserted here.
 
-Recommended next candidate only: archive one PUBLISHED article with explicit confirmation. Unpublish and Archive: NOT IMPLEMENTED. Restore/revert, historical editing/deletion, compare/apply, historical status, pagination, categories/tags, unified/ticket search, recommendations, AI and richer relationship workflows remain deferred. Do not start Slice 017 here.
+Slice 017 — archive one reviewed PUBLISHED article, implemented 2026-09-14:
+
+- [x] Archive action with PlainText code/title and preserved content/history/links notice; Unarchive unavailable.
+- [x] Cancel default/Enter/Escape; cancellation performs zero service calls or writes.
+- [x] Async expected-version archive with authoritative PUBLISHED check and atomic rollback.
+- [x] Preserve original published_at; set updated_at to archive UTC time; no version increment or snapshot.
+- [x] Preserve search, history and ticket relationships/Open Article; reconstruct persisted ARCHIVED state.
+- [x] Six unchanged migrations; no schema or dependency changes.
+- [ ] Independent review of unstaged/uncommitted Slice 017.
+
+Recommended next candidate only: Unarchive one ARCHIVED article to PUBLISHED with explicit confirmation. Unarchive and Unpublish: NOT IMPLEMENTED. Restore/revert, historical editing/deletion, compare/apply, historical status, pagination, categories/tags, unified/ticket search, recommendations, AI and richer relationship workflows remain deferred. Do not begin Slice 018 here.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

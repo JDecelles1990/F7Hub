@@ -10,6 +10,7 @@ from f7hub.repositories.knowledge_repository import (
     ArticleMissingError,
     ArticleNotEditableError,
     ArticleNotPublishableError,
+    ArticleNotArchivableError,
     ArticleUnchangedError,
     ArticleVersionMissingError,
     KnowledgeArticleRecord,
@@ -57,6 +58,10 @@ class KnowledgePublishError(RuntimeError):
     """Publishing failed; its message is safe for presentation."""
 
 
+class KnowledgeArchiveError(RuntimeError):
+    """Archiving failed; its message is safe for presentation."""
+
+
 class KnowledgeSearchError(RuntimeError):
     """Knowledge search failed; its message is safe for presentation."""
 
@@ -88,6 +93,28 @@ class KnowledgeService:
             ) from error
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgePublishError("Could not publish the article. Try again.") from error
+
+    def archive_article(
+        self, article_id: int, expected_version_number: int,
+    ) -> KnowledgeArticleRecord:
+        article_id = _positive_integer(article_id, "Article ID")
+        expected_version_number = _positive_integer(expected_version_number, "Expected version")
+        timestamp = datetime.now(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+        try:
+            return self._repository.archive_published_article(
+                article_id=article_id, expected_version_number=expected_version_number,
+                archived_at=timestamp,
+            )
+        except ArticleMissingError as error:
+            raise KnowledgeArchiveError("This article no longer exists.") from error
+        except ArticleNotArchivableError as error:
+            raise KnowledgeArchiveError("Only published articles can be archived.") from error
+        except StaleArticleVersionError as error:
+            raise KnowledgeArchiveError(
+                "This article changed after you opened it. Reopen the latest version before archiving."
+            ) from error
+        except (sqlite3.Error, OSError, RuntimeError) as error:
+            raise KnowledgeArchiveError("Could not archive the article. Try again.") from error
 
     def create_article(
         self,

@@ -127,6 +127,167 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(tuple(connection.iterdump()), before)
 
+    def confirm_archive(self, workspace, *, accept=True):
+        def answer():
+            box = QApplication.activeModalWidget()
+            if accept:
+                next(button for button in box.buttons() if button.text() == "Archive").click()
+            else:
+                box.button(QMessageBox.StandardButton.Cancel).click()
+        QTimer.singleShot(30, answer)
+        workspace.archive_button.click()
+        self.wait_idle()
+
+    def test_archive_v2_preserves_publication_history_search_link_and_reconstruction(self):
+        self.link()
+        workspace = self.assert_open_article(self.article.knowledge_article_id)
+        editor = workspace.open_edit_article()
+        editor.body_input.setPlainText("# Reviewed archive procedure V2")
+        editor.submit()
+        self.wait_idle()
+        with patch("f7hub.services.knowledge_service.datetime") as clock:
+            clock.now.return_value = datetime(2026, 9, 14, 16, 30, tzinfo=timezone.utc)
+            self.confirm_publish(workspace)
+        service = self.context.knowledge_service
+        article_id = self.article.knowledge_article_id
+        published = service.get_article(article_id)
+        history = tuple(service.get_article_version(article_id, n) for n in (2, 1))
+        self.assertEqual((published.status, published.version_number), ("PUBLISHED", 2))
+        with database_connection(self.path) as connection:
+            before = tuple(connection.iterdump())
+            links = [tuple(row) for row in connection.execute("SELECT * FROM ticket_knowledge_articles")]
+        with patch.object(service, "archive_article", wraps=service.archive_article) as archive:
+            self.confirm_archive(workspace, accept=False)
+            archive.assert_not_called()
+        self.assertEqual(workspace.article, published)
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+        instant = datetime(2026, 9, 15, 16, 30, tzinfo=timezone.utc)
+        with patch("f7hub.services.knowledge_service.datetime") as clock:
+            clock.now.return_value = instant
+            self.confirm_archive(workspace)
+        archived = service.get_article(article_id)
+        from dataclasses import replace
+        self.assertEqual(archived, replace(published, status="ARCHIVED", updated_at="2026-09-15T16:30:00.000Z"))
+        self.assertGreaterEqual(archived.updated_at, published.published_at)
+        self.assertEqual(workspace.article, archived)
+        for button in (workspace.edit_button, workspace.publish_button, workspace.archive_button):
+            self.assertFalse(button.isEnabled())
+        self.assertTrue(workspace.version_history_button.isEnabled())
+        self.assertEqual(tuple(service.get_article_version(article_id, n) for n in (2, 1)), history)
+        viewer = workspace.open_version_history()
+        self.wait_idle()
+        self.assertEqual([v.version_number for v in viewer.versions], [2, 1])
+        self.assertEqual(viewer.detail_body.toPlainText(), published.body_markdown)
+        viewer.close()
+        workspace.search_input.setText("archive procedure")
+        workspace.search_button.click()
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 1)
+        self.assertEqual(workspace.model.item(0, 2).text(), "ARCHIVED")
+        self.assertEqual(workspace.article, archived)
+        self.open_ticket()
+        self.assertEqual(self.panel.table.records[0].article_status, "ARCHIVED")
+        self.assertEqual(self.assert_open_article(article_id).article, archived)
+        with database_connection(self.path) as connection:
+            self.assertEqual([tuple(row) for row in connection.execute("SELECT * FROM ticket_knowledge_articles")], links)
+        self.close_window()
+        self.boot()
+        self.open_ticket()
+        self.assertEqual(self.assert_open_article(article_id).article, archived)
+        self.assertEqual(tuple(self.context.knowledge_service.get_article_version(article_id, n) for n in (2, 1)), history)
+
+    def test_archive_real_window_rejects_external_version_or_state_change(self):
+        service = self.context.knowledge_service
+        published = service.publish_article(self.article.knowledge_article_id, 1)
+        self.window.show_knowledge()
+        self.wait_idle()
+        workspace = self.window.knowledge_workspace
+        for sql, message in (
+            ("UPDATE knowledge_articles SET version_number = 2", "Reopen the latest version before archiving"),
+            ("UPDATE knowledge_articles SET status = 'ARCHIVED'", "Only published articles"),
+        ):
+            with database_connection(self.path) as connection:
+                connection.execute(sql)
+                before = tuple(connection.iterdump())
+            self.assertEqual(workspace.article, published)
+            self.confirm_archive(workspace)
+            self.assertIn(message, workspace.feedback.text())
+            self.assertEqual(workspace.article, published)
+            with database_connection(self.path) as connection:
+                self.assertEqual(tuple(connection.iterdump()), before)
+        workspace.open_article_by_id(published.knowledge_article_id)
+        self.wait_idle()
+        self.assertEqual(workspace.article.status, "ARCHIVED")
+        self.assertFalse(workspace.archive_button.isEnabled())
+
+    def test_archive_busy_in_real_main_window_blocks_competing_actions(self):
+        import threading
+        service = self.context.knowledge_service
+        published = service.publish_article(self.article.knowledge_article_id, 1)
+        self.window.show_knowledge()
+        self.wait_idle()
+        workspace = self.window.knowledge_workspace
+        entered, release = threading.Event(), threading.Event()
+        calls = []
+        original = service.archive_article
+        def delayed(article_id, version):
+            calls.append((article_id, version, threading.get_ident()))
+            entered.set()
+            if not release.wait(10):
+                raise RuntimeError("Archive test gate timed out")
+            return original(article_id, version)
+        try:
+            with patch.object(service, "archive_article", side_effect=delayed):
+                with patch.object(workspace, "_confirm_archive", return_value=True):
+                    workspace.archive_button.click()
+                    deadline = time.monotonic() + 5
+                    while not entered.is_set() and time.monotonic() < deadline:
+                        QTest.qWait(10)
+                    self.assertTrue(entered.is_set())
+                    self.assertFalse(self.window.pages.isEnabled())
+                    self.assertFalse(self.window.knowledge_action.isEnabled())
+                    for button in (workspace.edit_button, workspace.publish_button, workspace.archive_button,
+                                   workspace.new_button, workspace.version_history_button, workspace.search_button):
+                        self.assertFalse(button.isEnabled())
+                    workspace.archive_article()
+                    workspace.publish_article()
+                    self.assertIsNone(workspace.open_edit_article())
+                    self.assertEqual(workspace.article, published)
+                    self.assertEqual(service.get_article(published.knowledge_article_id), published)
+                    release.set()
+                    self.wait_idle()
+            self.assertEqual(len(calls), 1)
+            self.assertEqual(calls[0][:2], (published.knowledge_article_id, 1))
+            self.assertNotEqual(calls[0][2], threading.get_ident())
+            self.assertEqual(workspace.article.status, "ARCHIVED")
+            self.assertTrue(self.window.pages.isEnabled())
+            self.assertTrue(workspace.version_history_button.isEnabled())
+        finally:
+            release.set()
+            self.wait_idle()
+
+    def test_archive_failure_rolls_back_with_existing_link_and_history(self):
+        from f7hub.repositories.knowledge_repository import _get_article
+        from f7hub.services.knowledge_service import KnowledgeArchiveError
+        self.link()
+        self.context.knowledge_service.publish_article(self.article.knowledge_article_id, 1)
+        with database_connection(self.path) as connection:
+            before = tuple(connection.iterdump())
+        calls = 0
+        def fail_after_update(connection, article_id):
+            nonlocal calls
+            calls += 1
+            if calls == 2:
+                self.assertEqual(_get_article(connection, article_id).status, "ARCHIVED")
+                raise RuntimeError("Synthetic failure after UPDATE")
+            return _get_article(connection, article_id)
+        with patch("f7hub.repositories.knowledge_repository._get_article", side_effect=fail_after_update):
+            with self.assertRaises(KnowledgeArchiveError):
+                self.context.knowledge_service.archive_article(self.article.knowledge_article_id, 1)
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+
     @classmethod
     def setUpClass(cls):
         cls.application = QApplication.instance() or QApplication([])

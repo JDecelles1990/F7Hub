@@ -47,6 +47,22 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-14 — Slice 017: Archive One Published Knowledge Article
+
+Implemented PUBLISHED → ARCHIVED through the existing KnowledgeWorkspace, KnowledgeService and KnowledgeRepository. Archive requires explicit PlainText confirmation identifying code/title and preserved content/history/ticket relationships, with Cancel as default and Escape. Enter respects the safe default; cancellation performs zero service calls or writes. Unarchive is explicitly unavailable.
+
+The service validates positive integer article/version inputs (rejecting bool), generates one UTC timestamp and sanitizes missing/non-PUBLISHED/stale/persistence failures. One BEGIN IMMEDIATE transaction loads authoritative state, checks status/version, conditionally updates only status and updated_at, requires exactly one affected row, reloads and commits. Original published_at, content/version/history and ticket links remain unchanged. Injected post-update reload failure rolls back the complete database state. No migration, schema object, FTS rewrite or dependency is added.
+
+ServiceTaskRunner performs the archive asynchronously, blocks competing actions in the real MainWindow and retains the reviewed token across confirmation. Success refreshes/reselects/reloads the authoritative ARCHIVED current article. Edit/Publish/Archive disable; Version History, search and linked-ticket Open Article remain usable. No optimistic status mutation occurs.
+
+Validation: focused repository/service/GUI 82 PASS (31/18/33); Knowledge Base integration 16 PASS; ticket-Knowledge integration 23 PASS, followed by two final focused checks covering real-window busy state and deterministic V2 timestamps. Full sequential regression: Database 280 PASS, GUI 95 PASS, Integration 84 PASS; **459 total**, up 18 from 441, with zero failures/errors/skips. An initial confirmation-copy assertion was corrected before the successful focused and full runs. An incomplete combined integration attempt was superseded by completed separate runs; a diagnostic timer in the ticket run captured slow progress, and that run completed successfully.
+
+Native Windows: PASS with Qt windows, isolated synthetic SQLite and MainWindow 1000×700. Creation/edit/publication, Archive Cancel/default Enter/Escape, confirmed archive, unchanged V2/V1 history, archived search, ticket link/Open Article and reconstruction passed. All 14 captures were visually inspected. SQLite integrity=ok, foreign-key violations=0, FTS integrity=PASS and schema identity were verified. Agent validation, not independent review or user acceptance testing.
+
+Updated affected owner documents and CURRENT_STATE; requirements, documentation routing, ERD, SQL schema and ROOT require no changes. Six migration blobs and protected ROOT/Docs/10 hashes match their baselines; the protected archived-vision deletion remains. Evidence is outside the repository at `C:\Users\Jo\AppData\Local\Temp\f7hub-slice017-validation`. Work remains unstaged/uncommitted for independent Slice 017 review. Slice 018 was not started; Unarchive and Unpublish remain NOT IMPLEMENTED.
+
+---
+
 # 2026-09-09 — Slice 016: Publish One Draft Knowledge Article
 
 Implemented Publish for one loaded DRAFT with explicit Cancel-default plain-text confirmation. The existing service generates one UTC timestamp and rejects invalid ID/version inputs. The existing repository checks authoritative existence/DRAFT/version inside BEGIN IMMEDIATE, conditionally updates lifecycle metadata, verifies one affected row, reloads and commits. Missing, stale, non-DRAFT and persistence failures receive safe feedback; injected post-update reload failure rolls back.

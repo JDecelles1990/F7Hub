@@ -121,7 +121,9 @@ After Slice 015, the verified milestone is **CURRENT KNOWLEDGE ARTICLES ARE SEAR
 
 Slice 016 implements and verifies **ONE REVIEWED DRAFT CAN BE PUBLISHED WITHOUT CHANGING CONTENT HISTORY**. Publish requires explicit Cancel-default confirmation and the exact loaded version. Matching UTC published_at/updated_at commit atomically; version/content/history/links remain unchanged. Current PUBLISHED content remains searchable and readable, with Edit/Publish unavailable and Version History available. No migration was added. Fresh evidence is recorded in Status/CURRENT_STATE.md.
 
-Next bounded candidate: archive one PUBLISHED Knowledge article with explicit confirmation. Compared with unpublish (which reopens content editing) and restore/revert (which creates a content revision), archival can remain a narrow metadata transition. Recommendation only; archive, unpublish and restore/revert are NOT IMPLEMENTED. Independent Slice 016 review is the immediate next gate.
+Slice 017 implements **ONE PUBLISHED ARTICLE CAN BE ARCHIVED WITH PUBLICATION AND CONTENT HISTORY PRESERVED**. Explicit Cancel-default confirmation and expected-version validation guard PUBLISHED → ARCHIVED. updated_at records archive UTC time; original published_at, version, history, search content and ticket links remain intact. No migration is added. Independent Slice 017 review is the next gate; fresh validation is recorded in Status/CURRENT_STATE.md.
+
+Recommend one next bounded candidate: Unarchive one ARCHIVED article to PUBLISHED, with explicit confirmation and preserved content/history. It would make this lifecycle step reversible without reopening content editing (Unpublish) or creating a new content revision (restore/revert). Recommendation only; Unarchive, Unpublish and restore/revert are NOT IMPLEMENTED.
 
 The F7Hub roadmap is organized into:
 
@@ -720,7 +722,8 @@ Confirmed RELATED unlink and normal relink: VERIFIED — Slice 013
 Read-only history viewer: VERIFIED — Slice 014
 Current-article FTS5 search/result/open: VERIFIED — Slice 015
 Confirmed DRAFT publication without content revision: VERIFIED — Slice 016
-Restore/revert, unpublishing/archiving and richer relationship workflows: PLANNED
+Archive one PUBLISHED article without content revision: IMPLEMENTED — Slice 017
+Restore/revert, unpublishing/unarchiving and richer relationship workflows: PLANNED
 ```
 
 Initial capabilities:

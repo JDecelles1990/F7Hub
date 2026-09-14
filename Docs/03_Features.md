@@ -427,7 +427,7 @@ F7Hub shall support creation and editing of structured KB articles.
 
 Slices 010–011 implement creation, deterministic listing, reopening/reading and DRAFT article editing through Knowledge Base navigation. Creation requires a user-entered article code, title and Markdown body; summary is optional. New articles are DRAFT, version 1, with an atomic initial history snapshot. Edit Article changes title/summary/body while keeping the article code immutable. Save Revision atomically increments the current version and appends its new snapshot; earlier snapshots remain unchanged. An expected-version token rejects stale overwrites. The read view displays Version N and read-only Markdown source.
 
-Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. Restore/revert, deletion, unpublishing/archiving workflows, categories/tags, article-to-article relationships, external links and AI remain unimplemented.
+Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. Restore/revert, deletion, unpublishing/unarchiving workflows, categories/tags, article-to-article relationships, external links and AI remain unimplemented.
 
 Slice 012 adds RELATED ticket/article linking: open a saved ticket → Knowledge → Link Article → select an existing article → link → Open Article to read its current content in Knowledge Base. The linked list displays current code/title/status/version. All existing article statuses are eligible; already RELATED articles are excluded from candidates, and concurrent duplicate attempts receive safe feedback.
 
@@ -498,11 +498,17 @@ Knowledge articles may be linked to:
 
 ---
 
+## Implemented archive of one published article — Slice 017
+
+Knowledge Base → open PUBLISHED article → Archive → explicit confirmation → ARCHIVED. Only an available service, idle runner and loaded PUBLISHED article enable Archive. Cancel is the default and Escape action; Enter respects that default. Confirmation identifies code/title as plain text and explains preserved content, Version History, ticket relationships and unavailable Unarchive.
+
+PUBLISHED → ARCHIVED: IMPLEMENTED. Original published_at: PRESERVED. updated_at: archive UTC timestamp. Version increment: NO. History snapshot: NO. Content, identity, category and relationships are unchanged. Archived current content remains searchable/readable; Edit, Publish and Archive are disabled and Version History remains available. DRAFT archive, Unarchive and Unpublish are NOT IMPLEMENTED.
+
 ## Implemented publication — Slice 016
 
 Knowledge Base → open DRAFT article → Publish → explicit confirmation → PUBLISHED. Confirmation identifies code/title as plain text, explains preserved content/history and the current restriction on editing published articles. Cancel is the default and Escape action; cancelling makes no service call or write. Publication requires the exact loaded version still to be current.
 
-Publish and DRAFT → PUBLISHED: IMPLEMENTED. published_at: IMPLEMENTED, with the same UTC timestamp as updated_at. Content revision on publish: NO. Version increment on publish: NO. Content, immutable history and links remain intact. Search finds the current PUBLISHED article. Unpublish: NOT IMPLEMENTED. Archive: NOT IMPLEMENTED.
+Publish and DRAFT → PUBLISHED: IMPLEMENTED. published_at: IMPLEMENTED, with the same UTC timestamp as updated_at. Content revision on publish: NO. Version increment on publish: NO. Content, immutable history and links remain intact. Search finds the current PUBLISHED article. Unpublish: NOT IMPLEMENTED. Archive PUBLISHED: IMPLEMENTED (Slice 017). Unarchive: NOT IMPLEMENTED.
 
 ## FEAT-KB-005 — Knowledge Lifecycle
 

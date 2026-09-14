@@ -12,7 +12,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 from PySide6.QtTest import QTest
 from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication, QMessageBox
-from f7hub.services.knowledge_service import KnowledgePublishError
+from f7hub.services.knowledge_service import KnowledgeArchiveError, KnowledgePublishError
 
 from f7hub.gui.knowledge_workspace import KnowledgeWorkspace
 from f7hub.gui.service_task_runner import ServiceTaskRunner
@@ -32,6 +32,7 @@ class RecordingKnowledgeService:
         self.search_error = None
         self.search_gate = None
         self.publish_calls = []
+        self.archive_calls = []
 
     def publish_article(self, article_id, expected_version_number):
         self.publish_calls.append((article_id, expected_version_number, threading.get_ident()))
@@ -41,6 +42,17 @@ class RecordingKnowledgeService:
             raise self.error
         old = self.get_article(article_id)
         article = SimpleNamespace(**(vars(old) | {"status": "PUBLISHED"}))
+        self.articles[self.articles.index(old)] = article
+        return article
+
+    def archive_article(self, article_id, expected_version_number):
+        self.archive_calls.append((article_id, expected_version_number, threading.get_ident()))
+        if self.gate:
+            self.gate.wait(3)
+        if self.error:
+            raise self.error
+        old = self.get_article(article_id)
+        article = SimpleNamespace(**(vars(old) | {"status": "ARCHIVED"}))
         self.articles[self.articles.index(old)] = article
         return article
 
@@ -254,6 +266,105 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
             self.workspace.publish_article()
         confirm.assert_called_once_with(article)
         self.assertEqual(self.service.publish_calls, [])
+
+    def published_for_archive(self):
+        article = self.service.create_article(article_code="KB<1>", title="<b>Review & publish</b>", summary=None, body="Literal body")
+        article = self.service.publish_article(article.knowledge_article_id, 1)
+        self.workspace.refresh_list(select_article_id=article.knowledge_article_id)
+        self.wait_idle()
+        return article
+
+    def test_archive_action_requires_service_idle_loaded_published(self):
+        self.assertEqual(self.workspace.archive_button.text(), "Archive")
+        self.assertFalse(self.workspace.archive_button.isEnabled())
+        article = self.published_for_archive()
+        self.assertTrue(self.workspace.archive_button.isEnabled())
+        for status in ("DRAFT", "ARCHIVED"):
+            self.workspace._show_article(SimpleNamespace(**(vars(article) | {"status": status})))
+            self.assertFalse(self.workspace.archive_button.isEnabled())
+        self.workspace._show_article(article)
+        self.workspace._update_actions(True)
+        self.assertFalse(self.workspace.archive_button.isEnabled())
+        self.workspace._service = None
+        self.workspace._update_actions(False)
+        self.assertFalse(self.workspace.archive_button.isEnabled())
+
+    def test_archive_confirmation_plain_text_cancel_default_enter_escape_and_cancel_no_call(self):
+        article = self.published_for_archive()
+        for action in ("enter", "escape", "cancel"):
+            observed = []
+            def cancel():
+                box = QApplication.activeModalWidget()
+                observed.append((box.textFormat(), box.text(), box.informativeText(),
+                    box.defaultButton() == box.button(QMessageBox.StandardButton.Cancel),
+                    box.escapeButton() == box.button(QMessageBox.StandardButton.Cancel)))
+                if action == "cancel":
+                    box.button(QMessageBox.StandardButton.Cancel).click()
+                else:
+                    QTest.keyClick(box, Qt.Key.Key_Return if action == "enter" else Qt.Key.Key_Escape)
+            QTimer.singleShot(30, cancel)
+            self.workspace.archive_button.click()
+            self.assertEqual(observed[0][0], Qt.TextFormat.PlainText)
+            self.assertIn(article.article_code, observed[0][1])
+            self.assertIn(article.title, observed[0][1])
+            self.assertIn("Unarchive", observed[0][2])
+            self.assertIn("ticket relationships remain", observed[0][2])
+            self.assertIn("Content and version history are preserved", observed[0][2])
+            self.assertEqual(observed[0][3:], (True, True))
+            self.assertEqual(self.service.archive_calls, [])
+            self.assertIs(self.workspace.article, article)
+
+    def test_confirm_archive_is_async_blocks_competition_and_reloads_current(self):
+        article = self.published_for_archive()
+        self.service.gate = threading.Event()
+        def accept():
+            box = QApplication.activeModalWidget()
+            next(button for button in box.buttons() if button.text() == "Archive").click()
+        QTimer.singleShot(30, accept)
+        self.workspace.archive_button.click()
+        self.assertTrue(self.runner.busy)
+        for button in (self.workspace.archive_button, self.workspace.publish_button, self.workspace.edit_button,
+                self.workspace.new_button, self.workspace.search_button, self.workspace.version_history_button):
+            self.assertFalse(button.isEnabled())
+        self.workspace.archive_article()
+        self.assertEqual(self.workspace.article.status, "PUBLISHED")
+        self.service.gate.set()
+        self.wait_idle()
+        self.assertEqual(len(self.service.archive_calls), 1)
+        self.assertEqual(self.service.archive_calls[0][:2], (article.knowledge_article_id, 1))
+        self.assertNotEqual(self.service.archive_calls[0][2], threading.get_ident())
+        self.assertEqual(self.workspace.article.status, "ARCHIVED")
+        self.assertEqual(self.workspace.detail_body.toPlainText(), article.body_markdown)
+        self.assertFalse(self.workspace.edit_button.isEnabled())
+        self.assertFalse(self.workspace.archive_button.isEnabled())
+        self.assertTrue(self.workspace.version_history_button.isEnabled())
+        self.assertEqual(self.workspace.model.item(0, 2).text(), "ARCHIVED")
+
+    def test_archive_failure_is_safe_no_false_status_and_retry_possible(self):
+        article = self.published_for_archive()
+        for error in (RuntimeError("private SQLite error"), KnowledgeArchiveError(
+                "This article changed after you opened it. Reopen the latest version before archiving.")):
+            self.service.error = error
+            with patch.object(self.workspace, "_confirm_archive", return_value=True):
+                self.workspace.archive_article()
+            self.wait_idle()
+            self.assertIs(self.workspace.article, article)
+            self.assertEqual(self.workspace.detail_status.text(), "Status: PUBLISHED")
+            self.assertTrue(self.workspace.archive_button.isEnabled())
+            self.assertNotIn("private", self.workspace.feedback.text())
+            if isinstance(error, KnowledgeArchiveError):
+                self.assertIn("Reopen the latest version", self.workspace.feedback.text())
+
+    def test_archive_confirmation_reentry_or_changed_context_cannot_submit(self):
+        article = self.published_for_archive()
+        def reenter(_article):
+            self.workspace.archive_article()
+            self.workspace._show_article(None)
+            return True
+        with patch.object(self.workspace, "_confirm_archive", side_effect=reenter) as confirm:
+            self.workspace.archive_article()
+        confirm.assert_called_once_with(article)
+        self.assertEqual(self.service.archive_calls, [])
 
     @classmethod
     def setUpClass(cls) -> None:
