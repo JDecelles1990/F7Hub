@@ -99,6 +99,15 @@ class KnowledgeWorkspace(QWidget):
         self.category_filter.currentIndexChanged.connect(self._filter_changed)
         search_row.addWidget(QLabel("Category:", self))
         search_row.addWidget(self.category_filter)
+        self.status_filter = QComboBox(self)
+        self.status_filter.setAccessibleName("Filter knowledge articles by status")
+        self.status_filter.addItem("All statuses", None)
+        self.status_filter.addItem("Draft", "DRAFT")
+        self.status_filter.addItem("Published", "PUBLISHED")
+        self.status_filter.addItem("Archived", "ARCHIVED")
+        self.status_filter.currentIndexChanged.connect(self._filter_changed)
+        search_row.addWidget(QLabel("Status:", self))
+        search_row.addWidget(self.status_filter)
         self.filter_feedback = QLabel(self)
         self.filter_feedback.setTextFormat(Qt.TextFormat.PlainText)
         self.filter_feedback.setWordWrap(True)
@@ -196,14 +205,25 @@ class KnowledgeWorkspace(QWidget):
         self._update_actions(self._runner.busy)
 
     def _filter_arguments(self) -> dict:
+        arguments = {}
         if self.category_filter.currentIndex() == 1:
-            return {"uncategorized_only": True}
-        category_id = self.category_filter.currentData()
-        return {} if category_id is None else {"category_id": category_id}
+            arguments["uncategorized_only"] = True
+        else:
+            category_id = self.category_filter.currentData()
+            if category_id is not None:
+                arguments["category_id"] = category_id
+        status = self.status_filter.currentData()
+        if status is not None:
+            arguments["status"] = status
+        return arguments
 
     def _reset_category_filter(self) -> None:
         with QSignalBlocker(self.category_filter):
             self.category_filter.setCurrentIndex(0)
+
+    def _reset_status_filter(self) -> None:
+        with QSignalBlocker(self.status_filter):
+            self.status_filter.setCurrentIndex(0)
 
     def _filter_changed(self, _index) -> None:
         if self._runner.busy:
@@ -439,6 +459,7 @@ class KnowledgeWorkspace(QWidget):
         if self._runner.busy:
             return
         self._reset_category_filter()
+        self._reset_status_filter()
         self.refresh_list(select_article_id=article_id)
 
     def _article_created(self, article) -> None:
@@ -446,6 +467,8 @@ class KnowledgeWorkspace(QWidget):
         if ((arguments.get("uncategorized_only") and article.category_id is not None)
                 or ("category_id" in arguments and arguments["category_id"] != article.category_id)):
             self._reset_category_filter()
+        if arguments.get("status") not in (None, article.status):
+            self._reset_status_filter()
         self.refresh_list(select_article_id=article.knowledge_article_id)
 
     def _list_loaded(self, articles) -> None:
@@ -455,6 +478,15 @@ class KnowledgeWorkspace(QWidget):
             empty_text = "No uncategorized knowledge articles."
         elif self.category_filter.currentIndex() > 1:
             empty_text = "No knowledge articles in this category."
+        status = self.status_filter.currentData()
+        if status is not None:
+            lifecycle = status.lower()
+            if self.category_filter.currentIndex() == 1:
+                empty_text = f"No uncategorized {lifecycle} knowledge articles."
+            elif self.category_filter.currentIndex() > 1:
+                empty_text = f"No {lifecycle} knowledge articles in this category."
+            else:
+                empty_text = f"No {lifecycle} knowledge articles."
         self._populate_articles(articles, empty_text)
 
     def _search_loaded(self, articles) -> None:
@@ -561,6 +593,7 @@ class KnowledgeWorkspace(QWidget):
         self.search_input.setEnabled(not busy)
         self.search_button.setEnabled(not busy)
         self.category_filter.setEnabled(not busy and self._filter_options_loaded and not self.filter_loading)
+        self.status_filter.setEnabled(not busy)
         self.clear_search_button.setEnabled(
             not busy and (self._search_active or bool(self.search_input.text()))
         )

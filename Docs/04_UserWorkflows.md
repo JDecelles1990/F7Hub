@@ -8,13 +8,13 @@
 
 ---
 
-## Read-only category filtering — Slice 019
+## Read-only Knowledge status filtering — Slice 020
 
-Knowledge Base → Category filter → All categories / Not selected / active KNOWLEDGE category → current list. Search runs within that filter; changing category during search reruns the executed query. Clear Search removes the query while retaining category. Empty lists clear details and explain whether the category, uncategorized list or search has no results.
+Knowledge Base → Status filter → All statuses / Draft / Published / Archived → current list. Category and status are independent: either or both constrain normal lists and FTS results. Changing either filter during search reruns the last executed query rather than unsubmitted text. Clear Search removes the query while retaining both filters. Empty or failed replacements clear stale rows/details and retain filter selections for retry.
 
-Category… remains the separate DRAFT mutation action. A successful category move reconciles the current filter and search, selecting another result when available. New articles that fall outside the selected category reveal under All categories. Edit, Publish and Archive preserve compatible category filters while returning to the normal list. Ticket Open Article explicitly clears search and resets All categories before selecting the requested current article.
+Category… remains the separate DRAFT mutation action and normally preserves status. A new DRAFT resets status only when the current lifecycle filter excludes it, and resets category only when needed to reveal its uncategorized result. Publishing under Draft and archiving under Published reset Status to All statuses, preserve a compatible category, and reveal the authoritative new state. Ticket Open Article clears search and resets both Category and Status to All before selecting the requested current article.
 
-Category choices load asynchronously without blocking article reads. Failure keeps All categories usable with safe feedback; reopening Knowledge Base or refreshing the list retries. Successfully loaded choices are retained for the workspace lifetime. Filtering changes no stored article, history, lifecycle, timestamp or ticket relationship.
+Status choices are static lifecycle values and require no reference query or worker. Category choices retain their existing asynchronous load/retry behavior. Filtering changes no stored article, category, content, lifecycle, timestamp, version/history, FTS content or ticket relationship.
 
 ---
 

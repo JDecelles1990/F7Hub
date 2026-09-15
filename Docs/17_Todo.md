@@ -451,7 +451,18 @@ Slice 019 — read-only Knowledge category filtering:
 - [x] Final sequential regression: 304 Database + 113 GUI + 88 Integration = 505 PASS; no suite decreased.
 - [ ] Independent Slice 019 review; see Status/CURRENT_STATE.md for evidence.
 
-Recommended next candidate only after review: read-only status filtering. Saved filters add persistence and broader UX, so defer them. Status filtering, Unarchive, Unpublish, tags, category administration/history and richer relationship workflows remain unimplemented. Do not begin Slice 020 here.
+Slice 020 — read-only Knowledge status filtering:
+
+- [x] All statuses, DRAFT, PUBLISHED and ARCHIVED for normal lists and current FTS results.
+- [x] Compose status with All/specific/Not selected category modes using validated, bound repository values.
+- [x] Clear Search preserves both filters; active filter changes reuse the executed query.
+- [x] Reconcile selection, create, edit, category mutation, publish, archive and Ticket Open Article truthfully.
+- [x] Preserve six migrations, schema, MATCH/ranking and all article/history/link data; filtering writes nothing.
+- [x] Focused repository/service/GUI/integration coverage and native Windows 1000×700 verification.
+- [x] Full sequential regression recorded in Status/CURRENT_STATE.md.
+- [ ] Independent Slice 020 review.
+
+Recommended next candidate after review: one bounded read-only enhancement such as tag filtering only after its taxonomy/query semantics are specified. Saved filters add persistence and broader UX, so remain deferred with date filtering, pagination, Unarchive, Unpublish, category administration/history and richer relationship workflows. Do not begin Slice 021 here.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

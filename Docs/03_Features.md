@@ -8,9 +8,11 @@
 
 ---
 
-## Read-only Knowledge category filtering — Slice 019
+## Read-only Knowledge status filtering — Slice 020
 
-Category filtering, All categories, Not selected, active KNOWLEDGE category selection, combined category + FTS search, and Clear Search preserving category: IMPLEMENTED. All categories includes every lifecycle status, uncategorized articles and inactive assigned categories. Specific choices contain active KNOWLEDGE references only. Category administration, status filtering, tags/filtering and saved filters: NOT IMPLEMENTED. No migration. Validation: Status/CURRENT_STATE.md.
+All statuses, DRAFT, PUBLISHED and ARCHIVED filtering for current Knowledge lists and FTS search: IMPLEMENTED. Status composes independently with the Slice 019 category modes, remains selected when category changes, and is preserved with category by Clear Search. Explicit Ticket Open Article resets search and both filters before revealing the requested current article. Create, Publish and Archive reset only incompatible filter dimensions so their authoritative results remain visible; compatible category/status filters remain selected.
+
+Filtering is read-only and uses the existing repository/service/workspace path. Saved filters, tag/date filtering, multi-select/custom statuses, pagination and advanced search: NOT IMPLEMENTED. No migration or schema/index/ranking change. Validation: Status/CURRENT_STATE.md.
 
 ---
 

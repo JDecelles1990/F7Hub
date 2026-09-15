@@ -71,6 +71,9 @@ class KnowledgeSearchError(RuntimeError):
     """Knowledge search failed; its message is safe for presentation."""
 
 
+KNOWLEDGE_STATUSES = frozenset({"DRAFT", "PUBLISHED", "ARCHIVED"})
+
+
 @dataclass(frozen=True)
 class KnowledgeCategoryOption:
     """Only the category identity and display name needed by the selector."""
@@ -272,12 +275,18 @@ class KnowledgeService:
 
     def list_articles(
         self, *, category_id: int | None = None, uncategorized_only: bool = False,
+        status: str | None = None,
     ) -> tuple[KnowledgeArticleRecord, ...]:
         _validate_category_filter(category_id, uncategorized_only)
+        _validate_status_filter(status)
         try:
-            return self._repository.list_articles(
-                category_id=category_id, uncategorized_only=uncategorized_only,
-            )
+            arguments = {
+                "category_id": category_id,
+                "uncategorized_only": uncategorized_only,
+            }
+            if status is not None:
+                arguments["status"] = status
+            return self._repository.list_articles(**arguments)
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgeCreationError("Could not load knowledge articles.") from error
 
@@ -291,20 +300,25 @@ class KnowledgeService:
 
     def search_articles(
         self, query: str, *, category_id: int | None = None,
-        uncategorized_only: bool = False,
+        uncategorized_only: bool = False, status: str | None = None,
     ) -> tuple[KnowledgeArticleSearchResult, ...]:
         """Search current articles using a safe literal FTS expression."""
 
         _validate_category_filter(category_id, uncategorized_only)
+        _validate_status_filter(status)
         if not isinstance(query, str):
             raise KnowledgeValidationError("Search query must be text.")
         fts_query = _literal_fts_query(query)
         if not fts_query:
             return ()
         try:
-            return self._repository.search_articles(
-                fts_query, category_id=category_id, uncategorized_only=uncategorized_only,
-            )
+            arguments = {
+                "category_id": category_id,
+                "uncategorized_only": uncategorized_only,
+            }
+            if status is not None:
+                arguments["status"] = status
+            return self._repository.search_articles(fts_query, **arguments)
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgeSearchError(
                 "Could not search knowledge articles. Check the query and try again."
@@ -353,6 +367,15 @@ def _validate_category_filter(category_id: int | None, uncategorized_only: bool)
         _positive_integer(category_id, "Category ID")
         if uncategorized_only:
             raise KnowledgeValidationError("Choose one category filter mode.")
+
+
+def _validate_status_filter(status: str | None) -> None:
+    if status is not None and (
+        not isinstance(status, str) or status not in KNOWLEDGE_STATUSES
+    ):
+        raise KnowledgeValidationError(
+            "Status filter must be DRAFT, PUBLISHED, ARCHIVED, or All statuses."
+        )
 
 
 def _required_text(value: object, label: str) -> str:
