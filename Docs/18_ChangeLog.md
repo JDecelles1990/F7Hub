@@ -47,6 +47,16 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-15 — Slice 020: Read-only Knowledge Status Filtering
+
+Implemented static All statuses, Draft, Published and Archived filtering for current Knowledge lists and FTS search. Status composes with All/specific/Not selected category modes. Filter changes during search reuse the executed query; Clear Search preserves both filters. Replacement failures clear stale rows/details while retaining selections.
+
+Extended existing KnowledgeRepository/KnowledgeService reads with optional validated status. Repository queries bind external values and compose only static predicate fragments; MATCH, indexed columns, bm25/list ordering and current-result records are unchanged. Filtering is SELECT-only. No migration, schema, index, worker, service layer, MainWindow change or dependency was added.
+
+Create, Publish and Archive reset only incompatible filter dimensions and reveal authoritative results. Category mutation and content edit preserve status. Explicit Ticket Open Article clears search and resets both filters before revealing linked articles regardless of lifecycle/category. Focused/full/native validation and exact evidence are recorded in Status/CURRENT_STATE.md. Work remains unstaged/uncommitted for independent review; saved/tag/date filters, pagination, advanced search and Slice 021 remain unimplemented.
+
+---
+
 # 2026-09-15 — Slice 019: Read-only Knowledge Category Filtering
 
 Implemented All categories, Not selected and active KNOWLEDGE category filtering for current article lists and FTS search. Clear Search retains category; filter changes rerun the executed search. Explicit Ticket Open Article clears search and resets All. Successful category moves reconcile filtered rows/details; new articles outside the filter reveal under All, while edit/publish/archive preserve compatible categories.

@@ -870,9 +870,9 @@ Persistent session data should be designed in the database documentation.
 
 # 30. Knowledge Base Architecture
 
-Slice 019 extends KnowledgeWorkspace → KnowledgeService.list_articles/search_articles → KnowledgeRepository with optional category_id and uncategorized_only. The service validates three exclusive read-only modes. CategoryRepository remains the single reference reader via list_active_knowledge_categories. No filter service, schema change or indexing change is introduced.
+Slice 020 extends the same KnowledgeWorkspace → KnowledgeService.list_articles/search_articles → KnowledgeRepository read path with optional status. The service accepts only None, DRAFT, PUBLISHED or ARCHIVED and continues validating the independent category modes. Repository queries compose static category/status predicate fragments with bound values. No filter service, schema change, migration or indexing change is introduced.
 
-The shared runner serializes list/search/detail and writes. A separate workspace-owned ServiceTaskRunner loads independent filter references without blocking article reads; MainWindow prevents close until that worker completes. Reference failure does not invalidate article results. Category predicates use relational SELECTs; lifecycle and category mutation retain existing transaction boundaries.
+The shared runner serializes list/search/detail and writes. The existing workspace-owned ServiceTaskRunner continues to load category references only; fixed status choices need no worker or database read. Status/category predicates are read-only relational conditions beside MATCH, while lifecycle and category mutation retain existing transaction boundaries. MainWindow and ServiceTaskRunner are unchanged.
 
 Knowledge should be accessed through a Knowledge Service.
 

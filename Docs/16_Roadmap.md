@@ -125,7 +125,7 @@ Slice 018 implements **ONE DRAFT KNOWLEDGE ARTICLE CAN ASSIGN, CHANGE OR REMOVE 
 
 Slice 017 implements **ONE PUBLISHED ARTICLE CAN BE ARCHIVED WITH PUBLICATION AND CONTENT HISTORY PRESERVED**. Explicit Cancel-default confirmation and expected-version validation guard PUBLISHED → ARCHIVED. updated_at records archive UTC time; original published_at, version, history, search content and ticket links remain intact. No migration is added. Slice 017 is the supplied baseline for Slice 018; its historical validation is retained in the changelog.
 
-Slice 019 implements read-only Knowledge category filtering for lists and FTS search, with Clear Search retaining category and explicit Ticket Open Article resetting All. No migration. Independent Slice 019 review is the next gate. After review, recommend read-only Knowledge status filtering as one narrow candidate; saved filters require additional persistence/UX decisions. Status filtering, saved filters, Unarchive, Unpublish and restore/revert are NOT IMPLEMENTED. No subsequent slice is started.
+Slice 019 implements read-only Knowledge category filtering for lists and FTS search. Slice 020 adds the orthogonal All/DRAFT/PUBLISHED/ARCHIVED filter, composes both filters with current FTS, preserves both through Clear Search, and reconciles create/publish/archive plus explicit Ticket Open Article without stale details. Filtering remains SELECT-only and uses six unchanged migrations. Saved filters require persistence/UX decisions and remain deferred with tag/date filtering, pagination, Unarchive, Unpublish and restore/revert. Independent Slice 020 review is the next gate; no subsequent slice is started.
 
 The F7Hub roadmap is organized into:
 

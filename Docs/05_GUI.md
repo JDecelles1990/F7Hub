@@ -8,13 +8,13 @@
 
 ---
 
-## Implemented category filter — Slice 019
+## Implemented Knowledge status filter — Slice 020
 
-A compact Category: combo sits beside Search/Clear Search; its accessibility name identifies read-only article filtering. Category… stays beside current detail metadata. All categories is the default; Not selected means NULL assignment; remaining choices are active KNOWLEDGE categories in repository order. Population blocks signals and issues no redundant article request.
+A compact Status: combo sits beside the existing Search and Category controls. Its accessible name is “Filter knowledge articles by status”; item data is None, DRAFT, PUBLISHED or ARCHIVED, independent of display text. All statuses is the default. Choices are populated synchronously from the fixed lifecycle domain, so no database query or additional ServiceTaskRunner is used.
 
-Article list/search uses the existing shared ServiceTaskRunner and disables the filter while busy. A separate workspace-owned ServiceTaskRunner loads category options so article list/search remains usable during that read. MainWindow refuses close while this worker finishes. Reference failure has a separate plain-text message, disables the selector and allows All-category reads plus later retry.
+Article list/search continues through the shared ServiceTaskRunner and disables Status while the request is busy. Status remains usable while only the category-reference worker is pending. Category loading/failure behavior and MainWindow close protection are unchanged.
 
-Replacement list/search requests clear old rows and details before dispatch. Compatible selection is a preference; explicit Ticket Open Article resets search/category before reveal. Clear Search retains category. Category writes reconcile filtered rows; creation resets to All only when needed to reveal the new article. Native Windows 1000×700 workflow and six inspected captures passed; no control overlap or horizontal clipping observed. See Status/CURRENT_STATE.md.
+Replacement list/search requests clear old rows and details before dispatch. Compatible selection remains a preference. Clear Search retains category and status; explicit Ticket Open Article resets search and both filters before reveal. Create/Publish/Archive reset only incompatible dimensions and show the authoritative result. Category mutation and content edit preserve status. Native Windows 1000×700 evidence is recorded in Status/CURRENT_STATE.md.
 
 ---
 

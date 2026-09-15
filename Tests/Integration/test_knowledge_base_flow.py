@@ -136,6 +136,97 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(tuple(connection.iterdump()), before)
 
+    def test_category_status_search_matrix_and_clear_are_read_only(self):
+        from Tests.Database.test_knowledge_categories import seed_knowledge_categories
+
+        seed_knowledge_categories(self.path)
+        service = self.context.knowledge_service
+        seeded = {}
+        for code, category_id, status in (
+            ("A", 11, "DRAFT"),
+            ("B", 11, "PUBLISHED"),
+            ("C", 22, "PUBLISHED"),
+            ("D", None, "ARCHIVED"),
+        ):
+            article = service.create_article(
+                article_code=code, title="DNS shared matrix", summary=None, body="DNS"
+            )
+            if category_id is not None:
+                article = service.set_article_category(
+                    article.knowledge_article_id, article.version_number,
+                    article.updated_at, category_id,
+                )
+            if status != "DRAFT":
+                with database_connection(self.path) as connection:
+                    connection.execute(
+                        "UPDATE knowledge_articles SET status = ?, published_at = ? "
+                        "WHERE knowledge_article_id = ?",
+                        (status, "2026-09-15T12:00:00.000Z",
+                         article.knowledge_article_id),
+                    )
+            seeded[code] = article.knowledge_article_id
+
+        with database_connection(self.path) as connection:
+            before = tuple(connection.iterdump())
+        self.window.show_knowledge()
+        workspace = self.window.knowledge_workspace
+        self.wait_idle(self.window.runner)
+        self.wait_idle(workspace._filter_runner)
+
+        def category(value):
+            index = (0 if value == "ALL" else 1 if value is None
+                     else workspace.category_filter.findData(value))
+            workspace.category_filter.setCurrentIndex(index)
+            self.wait_idle(self.window.runner)
+
+        def status(value):
+            workspace.status_filter.setCurrentIndex(
+                0 if value is None else workspace.status_filter.findData(value)
+            )
+            self.wait_idle(self.window.runner)
+
+        def codes():
+            return {article.article_code for article in workspace.articles}
+
+        self.assertEqual(codes(), {"A", "B", "C", "D"})
+        category(11)
+        self.assertEqual(codes(), {"A", "B"})
+        category("ALL")
+        status("PUBLISHED")
+        self.assertEqual(codes(), {"B", "C"})
+        category(11)
+        self.assertEqual(codes(), {"B"})
+        category(22)
+        self.assertEqual(codes(), {"C"})
+        category(None)
+        status("ARCHIVED")
+        self.assertEqual(codes(), {"D"})
+
+        category(11)
+        status("PUBLISHED")
+        workspace.search_input.setText("DNS")
+        workspace.search_button.click()
+        self.wait_idle(self.window.runner)
+        self.assertEqual(codes(), {"B"})
+        category("ALL")
+        self.assertEqual(codes(), {"B", "C"})
+        category(None)
+        status("ARCHIVED")
+        self.assertEqual(codes(), {"D"})
+
+        category(11)
+        status("PUBLISHED")
+        self.assertEqual(codes(), {"B"})
+        workspace.clear_search_button.click()
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.category_filter.currentData(), 11)
+        self.assertEqual(workspace.status_filter.currentData(), "PUBLISHED")
+        self.assertEqual(workspace.search_input.text(), "")
+        self.assertEqual(codes(), {"B"})
+        self.assertEqual(workspace.article.knowledge_article_id, seeded["B"])
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+
     def test_search_create_title_body_code_punctuation_clear_and_reconstruction(self):
         self.window.show_knowledge()
         self.wait_idle(self.window.runner)

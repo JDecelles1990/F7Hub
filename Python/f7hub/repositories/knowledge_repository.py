@@ -334,18 +334,23 @@ class KnowledgeRepository:
 
     def list_articles(
         self, *, category_id: int | None = None, uncategorized_only: bool = False,
+        status: str | None = None,
     ) -> tuple[KnowledgeArticleRecord, ...]:
         """Return all statuses, newest update first with a stable ID tie-breaker."""
 
         if category_id is not None and uncategorized_only:
             raise ValueError("Choose one category filter mode.")
-        predicate = ""
-        parameters = ()
+        predicates = []
+        parameters = []
         if uncategorized_only:
-            predicate = "WHERE category_id IS NULL"
+            predicates.append("category_id IS NULL")
         elif category_id is not None:
-            predicate = "WHERE category_id = ?"
-            parameters = (category_id,)
+            predicates.append("category_id = ?")
+            parameters.append(category_id)
+        if status is not None:
+            predicates.append("status = ?")
+            parameters.append(status)
+        predicate = f"WHERE {' AND '.join(predicates)}" if predicates else ""
         with database_connection(self._database_path) as connection:
             rows = connection.execute(
                 f"""
@@ -355,25 +360,29 @@ class KnowledgeRepository:
                 FROM knowledge_articles
                 {predicate}
                 ORDER BY updated_at DESC, knowledge_article_id DESC
-                """, parameters,
+                """, tuple(parameters),
             ).fetchall()
         return tuple(_article_from_row(row) for row in rows)
 
     def search_articles(
         self, fts_query: str, *, category_id: int | None = None,
-        uncategorized_only: bool = False,
+        uncategorized_only: bool = False, status: str | None = None,
     ) -> tuple[KnowledgeArticleSearchResult, ...]:
         """Search the derived current-article index and return lightweight rows."""
 
         if category_id is not None and uncategorized_only:
             raise ValueError("Choose one category filter mode.")
-        predicate = ""
-        parameters = (fts_query,)
+        predicates = []
+        parameters = [fts_query]
         if uncategorized_only:
-            predicate = "AND ka.category_id IS NULL"
+            predicates.append("ka.category_id IS NULL")
         elif category_id is not None:
-            predicate = "AND ka.category_id = ?"
-            parameters = (fts_query, category_id)
+            predicates.append("ka.category_id = ?")
+            parameters.append(category_id)
+        if status is not None:
+            predicates.append("ka.status = ?")
+            parameters.append(status)
+        predicate = "".join(f"\n                AND {item}" for item in predicates)
         with database_connection(self._database_path) as connection:
             rows = connection.execute(
                 f"""
@@ -394,7 +403,7 @@ class KnowledgeRepository:
                     ka.updated_at DESC,
                     ka.knowledge_article_id DESC
                 """,
-                parameters,
+                tuple(parameters),
             ).fetchall()
         return tuple(_search_result_from_row(row) for row in rows)
 
