@@ -429,7 +429,7 @@ Slice 018 — DRAFT Knowledge category metadata, implemented 2026-09-14 and comp
 - [x] Execute native Windows workflow and inspect captures; evidence in Status/CURRENT_STATE.md.
 - [x] Slice 018 is present in the user-specified integrated baseline 223b54ab; prior independent-review evidence is not reasserted here.
 
-PUBLISHED/ARCHIVED category mutation, tags, category history and administration: NOT IMPLEMENTED.
+PUBLISHED/ARCHIVED category mutation, category history and category administration: NOT IMPLEMENTED. Existing global-tag assignment is implemented separately in Slice 021.
 
 Slice 017 — archive one reviewed PUBLISHED article, implemented 2026-09-14:
 
@@ -462,7 +462,17 @@ Slice 020 — read-only Knowledge status filtering:
 - [x] Full sequential regression recorded in Status/CURRENT_STATE.md.
 - [ ] Independent Slice 020 review.
 
-Recommended next candidate after review: one bounded read-only enhancement such as tag filtering only after its taxonomy/query semantics are specified. Saved filters add persistence and broader UX, so remain deferred with date filtering, pagination, Unarchive, Unpublish, category administration/history and richer relationship workflows. Do not begin Slice 021 here.
+Slice 021 — existing global tags on DRAFT Knowledge articles:
+
+- [x] Add explicit global TagRepository reads and inject it into KnowledgeService.
+- [x] Display deterministic current tag names and manage zero/one/multiple existing tags through an asynchronous Tags… dialog.
+- [x] Replace the exact set atomically under DRAFT, expected-version and expected-updated-at guards.
+- [x] Preserve content version/history, category/status, publication time, FTS and ticket relationships; add no migration.
+- [x] Cover tag/category/content races, no-op, rollback, filters, lifecycle, ticket navigation and reconstruction.
+- [x] Complete 318 Database + 123 GUI + 91 Integration tests and native Windows 1000×700 validation with six inspected captures.
+- [ ] Independent Slice 021 review.
+
+Recommended next candidate after review: **Slice 022 — read-only Knowledge tag filtering**, after precise single-tag/Untagged semantics are approved. Saved filters remain deferred with date filtering, pagination, Unarchive, Unpublish, category/tag administration/history and richer relationship workflows. Do not implement Slice 022 here.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

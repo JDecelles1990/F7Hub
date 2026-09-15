@@ -733,6 +733,12 @@ set_article_category validates positive integer article/version/category IDs exc
 
 KnowledgeRepository.set_draft_category checks both tokens and category eligibility inside BEGIN IMMEDIATE, conditionally updates category_id/updated_at, requires one row, reloads and commits. KnowledgeArticleRecord adds nullable category_name resolved on current reads. ArticleCategoryDialog uses the shared runner, the original reviewed record and a current-context guard. MainWindow ownership permits Cancel/Escape during reads; active-state guards ignore dismissed callbacks. Writes prevent dismissal until completion and update current detail only from the committed authoritative result. No history, migration, lifecycle or FTS behavior changes.
 
+## Implemented Knowledge Tag Metadata Boundary — Slice 021
+
+`TagRepository` reads existing global tags and current article tags in deterministic name/ID order. `KnowledgeService` validates tag IDs, rejects bools, duplicates and missing tags, and converts persistence failures into safe tag-specific errors. `KnowledgeRepository.set_draft_tags` uses `BEGIN IMMEDIATE`, dual version/updated-at tokens, differential bridge INSERT/DELETE operations and a guarded metadata UPDATE before reloading and committing. The set is exact; an empty set removes all tags and a no-op changes nothing. Tags remain current metadata: no version increment, history snapshot, migration or FTS change.
+
+`ArticleTagsDialog` loads choices and current checks asynchronously through `ServiceTaskRunner`; it is parented outside the disabled workspace hierarchy so Cancel/Escape remain available while references load. The workspace displays authoritative tag names and enables Tags… only for an idle loaded DRAFT. Bootstrap injects the explicit shared `TagRepository` dependency.
+
 ## Implemented Knowledge Archive Boundary — Slice 017
 
 KnowledgeService.archive_article(article_id, expected_version_number) reuses positive-integer validation, rejecting bool, generates one UTC timestamp and returns the authoritative KnowledgeArticleRecord. KnowledgeArchiveError carries safe missing/non-PUBLISHED/stale/persistence messages. ArticleMissingError and StaleArticleVersionError are reused; ArticleNotArchivableError is the only new repository condition.

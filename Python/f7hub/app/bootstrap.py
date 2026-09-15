@@ -13,6 +13,7 @@ from f7hub.services.ticket_service import TicketService
 from f7hub.repositories.company_repository import CompanyRepository
 from f7hub.repositories.contact_repository import ContactRepository
 from f7hub.repositories.category_repository import CategoryRepository
+from f7hub.repositories.tag_repository import TagRepository
 from f7hub.repositories.knowledge_repository import KnowledgeRepository
 from f7hub.services.ticket_reference_service import TicketReferenceService
 from f7hub.services.company_service import CompanyService
@@ -63,7 +64,8 @@ def bootstrap_application(
     ticket_service = TicketService(ticket_repository)
     knowledge_repository = KnowledgeRepository(resolved_database_path)
     categories = CategoryRepository(resolved_database_path)
-    knowledge_service = KnowledgeService(knowledge_repository, categories)
+    tags = TagRepository(resolved_database_path)
+    knowledge_service = KnowledgeService(knowledge_repository, categories, tags)
     ticket_knowledge_repository = TicketKnowledgeRepository(resolved_database_path)
     ticket_knowledge_service = TicketKnowledgeService(ticket_knowledge_repository)
     companies = CompanyRepository(resolved_database_path)

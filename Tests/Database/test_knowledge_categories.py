@@ -10,6 +10,7 @@ from unittest.mock import patch
 
 from f7hub.infrastructure.database import bootstrap_database, database_connection
 from f7hub.repositories.category_repository import CategoryRepository
+from f7hub.repositories.tag_repository import TagRepository
 from f7hub.repositories.knowledge_repository import (
     ArticleCategoryUnavailableError, ArticleMissingError, ArticleNotEditableError,
     ArticleUnchangedError, KnowledgeRepository, StaleArticleMetadataError, StaleArticleVersionError,
@@ -47,7 +48,7 @@ class CategoryFixture:
         seed_knowledge_categories(self.path)
         self.repository = KnowledgeRepository(self.path)
         self.categories = CategoryRepository(self.path)
-        self.service = KnowledgeService(self.repository, self.categories)
+        self.service = KnowledgeService(self.repository, self.categories, TagRepository(self.path))
         self.article = self.repository.create_article(
             article_code='KB-CAT', title='Synthetic Outlook', summary='Summary', body_markdown='Mail repair',
             created_at='2026-09-14T12:00:00.000Z', updated_at='2026-09-14T12:00:00.000Z',

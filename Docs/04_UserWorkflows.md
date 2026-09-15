@@ -729,7 +729,7 @@ The current article update and new revision snapshot commit together. Version 1 
 
 If another editor saves first, the stale editor cannot overwrite it or add a snapshot. Its text remains available to copy, with clear feedback and Save disabled. Close the old editor, reopen the latest article, and start a new edit explicitly; a workspace refresh never replaces an open editor's original token. External changes to PUBLISHED/ARCHIVED status or deletion receive safe specific feedback with input retained. Generic persistence failures preserve input and permit retry. Cancel writes nothing; save runs in the background and blocks duplicate saves and closing during the write.
 
-Restore/revert, deletion, unpublishing/unarchiving, category/tag assignment, article-to-article relationships, external links and AI remain deferred. The broader workflow below remains a product target.
+Restore/revert, deletion, unpublishing/unarchiving, category/tag administration, article-to-article relationships, external links and AI remain deferred. DRAFT category assignment and existing global-tag assignment are implemented by Slices 018 and 021. The broader workflow below remains a product target.
 
 ## Implemented archive workflow — Slice 017
 
@@ -750,6 +750,10 @@ Publication assigns matching UTC published_at/updated_at timestamps without incr
 ## DRAFT category assignment — Slice 018
 
 Knowledge Base → open DRAFT article → Category… → select an active KNOWLEDGE category or Not selected → Save → authoritative current category displays. Assign, change and remove are implemented for DRAFT only. PUBLISHED and ARCHIVED articles display their category but cannot change it.
+
+## Existing global-tag assignment — Slice 021
+
+Knowledge Base → open DRAFT article → Tags… → select zero, one or multiple existing global tags → Save → authoritative current tags display. Cancel and Escape make no change. PUBLISHED and ARCHIVED articles display tags but cannot change them; tag sets are current metadata and are not reconstructed in Version History. Tag creation/administration, filtering and historical tag reconstruction remain unimplemented.
 
 The selector loads independently in the background. Cancel, default Enter and Escape dismiss without a mutation or refresh; cancellation also works during category reads. Failed reference loading leaves the article readable and offers Refresh categories. An inactive assigned name remains visible as current, with active replacement or explicit clearing available. Saving disables duplicate submission and dismissal until completion. Failed writes keep the old truthful article visible; stale saves require closing and reopening the latest article. Category changes create no content revision or historical snapshot.
 

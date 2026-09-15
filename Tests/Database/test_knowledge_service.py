@@ -12,6 +12,7 @@ from f7hub.repositories.knowledge_repository import (
     KnowledgeRepository, ArticleNotArchivableError, ArticleMissingError, ArticleNotPublishableError, StaleArticleVersionError,
 )
 from f7hub.repositories.category_repository import CategoryRepository
+from f7hub.repositories.tag_repository import TagRepository
 from f7hub.services.knowledge_service import (
     KnowledgeCreationError,
     KnowledgePublishError,
@@ -110,7 +111,7 @@ class KnowledgeServiceTests(unittest.TestCase):
         self.path = Path(self.temporary_directory.name) / "knowledge-service.db"
         bootstrap_database(self.path, PROJECT_ROOT / "Database" / "Migrations")
         self.repository = KnowledgeRepository(self.path)
-        self.service = KnowledgeService(self.repository, CategoryRepository(self.path))
+        self.service = KnowledgeService(self.repository, CategoryRepository(self.path), TagRepository(self.path))
 
     def tearDown(self) -> None:
         self.temporary_directory.cleanup()

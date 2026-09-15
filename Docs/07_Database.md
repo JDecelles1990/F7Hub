@@ -24,6 +24,8 @@ Verified current-article search boundary — Slice 015 (2026-09-09): `0006_knowl
 
 Implemented category boundary — Slice 018: set_draft_category reserves the writer with BEGIN IMMEDIATE and checks article existence, DRAFT, expected_version_number and exact expected_updated_at. A non-NULL category must exist with scope KNOWLEDGE and is_active=1 inside that same transaction. No-op follows stale/eligibility checks. A parameterized UPDATE changes only category_id/updated_at with ID/DRAFT/version/updated_at predicates; exactly one row and authoritative reload are required before commit. Failure rolls back, including post-update reload failure with existing ticket links. A reused updated_at token is rejected.
 
+Implemented tag metadata boundary — Slice 021: existing rows in the global `tags` table are selectable for DRAFT articles through the existing `knowledge_article_tags` bridge. `set_draft_tags` reserves the writer with BEGIN IMMEDIATE; validates article status, version, updated-at token and every distinct positive non-bool tag ID; calculates additions/removals; updates the bridge differentially; and conditionally advances only `knowledge_articles.updated_at`. Exact no-op sets write nothing. Version/content/history/category/lifecycle/publication/ticket relationships and FTS remain unchanged. Any bridge, token-update or reload failure rolls back the complete set replacement. No migration or schema change is introduced.
+
 The existing nullable FK and ON DELETE SET NULL remain unchanged. Category metadata does not increment content version or insert/update history. Current record reads resolve category names even when inactive. FTS indexes only content, so category writes do not trigger its content-update trigger. All six migrations and schema objects remain unchanged; isolated integrity/FK/FTS and lifecycle/link continuity are covered in Status/CURRENT_STATE.md.
 
 Implemented archive boundary — Slice 017: archive_published_article uses BEGIN IMMEDIATE, authoritative existence/PUBLISHED/expected-version checks, a parameterized conditional UPDATE by ID/PUBLISHED/version, exactly-one-row validation, reload and COMMIT. It changes only status=ARCHIVED and updated_at (one archive UTC timestamp). It never assigns published_at: the original publication time is preserved. Version, content, history, identity, creation metadata, category and relationships remain unchanged. Failed post-update reload rolls back the complete transition, including with existing ticket links.
@@ -705,6 +707,8 @@ Tags:
 Do not create separate tag systems for each subsystem unless domain behavior genuinely differs.
 
 Reuse shared taxonomy infrastructure where appropriate.
+
+Slice 021 implements current DRAFT Knowledge relationships to existing global tags. Zero, one and multiple tags are valid; an empty set removes all relationships. PUBLISHED/ARCHIVED mutation, tag administration, tag filtering and historical tag-set reconstruction remain unimplemented.
 
 ---
 
