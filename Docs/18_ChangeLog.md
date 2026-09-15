@@ -47,6 +47,20 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-15 — Slice 019: Read-only Knowledge Category Filtering
+
+Implemented All categories, Not selected and active KNOWLEDGE category filtering for current article lists and FTS search. Clear Search retains category; filter changes rerun the executed search. Explicit Ticket Open Article clears search and resets All. Successful category moves reconcile filtered rows/details; new articles outside the filter reveal under All, while edit/publish/archive preserve compatible categories.
+
+Extended existing repository/service read APIs with validated category_id and uncategorized_only arguments. Parameters remain bound; list ordering, literal MATCH generation, bm25 ranking, indexed fields and search records are unchanged. Filtering performs SELECT only. CategoryRepository supplies active Knowledge options through the existing service method. A separate ServiceTaskRunner loads choices without blocking article reads; MainWindow close protection covers its lifetime. Reference failures retain All-category browsing and permit retry; stale list/search results clear before replacement requests.
+
+Focused validation: 35 + 45 Database repository/service tests, 73 GUI tests, 9 repeated focused filter GUI tests after selection cleanup, and 44 Integration tests: PASS. Final sequential regression: Database 304 PASS (15.064s), GUI 113 PASS (47.018s), Integration 88 PASS (400.029s), total **505 PASS** versus 484 baseline. No failures/errors/skips and no suite decrease.
+
+Native Windows MainWindow 1000×700 on isolated synthetic SQLite: All/Not selected/specific category, search/filter/clear, detail/category display, Category… reconciliation, edit, Publish, Archive, Version History and Ticket Open Article: PASS. Six captures were actually opened and inspected; no horizontal control clipping or important overlap observed. Full evidence paths and exact commands are in Status/CURRENT_STATE.md.
+
+Six unchanged migrations, unchanged schema, integrity_check=ok, zero foreign-key violations and FTS integrity PASS. Query-only reads and complete dump comparison confirm no filtering writes. Protected local document modification/deletion are preserved; ROOT, ERD and physical schema documentation are unchanged. Work is unstaged/uncommitted on feat/knowledge-category-filter at 223b54ab. Independent review remains pending. Status filtering, tags, category administration and saved filters remain NOT IMPLEMENTED; Slice 020 was not started.
+
+---
+
 # 2026-09-15 — Slice 018: DRAFT Knowledge Category Metadata
 
 Implemented assign/change/remove for one DRAFT article using active KNOWLEDGE reference data or NULL. Bootstrap explicitly shares CategoryRepository with KnowledgeService and TicketReferenceService. Current article reads resolve category names including inactive assigned references. The small asynchronous ArticleCategoryDialog offers Not selected, active choices, independent reference retry and safe cancellation. Category… sits beside the current category name; keeping it out of the top toolbar preserves the 1000×700 window under the tested styles.

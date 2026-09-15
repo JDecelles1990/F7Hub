@@ -2,10 +2,11 @@
 
 import logging
 
-from PySide6.QtCore import QItemSelectionModel, Qt
+from PySide6.QtCore import QItemSelectionModel, QSignalBlocker, Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
     QAbstractItemView,
+    QComboBox,
     QHBoxLayout,
     QHeaderView,
     QLabel,
@@ -39,8 +40,12 @@ class KnowledgeWorkspace(QWidget):
         super().__init__(parent)
         self._service = service
         self._runner = runner
+        self._filter_runner = ServiceTaskRunner(self)
+        self._filter_options_loaded = False
         self._pending_selection_id = None
+        self._preferred_selection_id = None
         self._search_active = False
+        self._search_query = ""
         self._confirming_publish = False
         self._confirming_archive = False
         self._category_dialog = None
@@ -85,6 +90,19 @@ class KnowledgeWorkspace(QWidget):
         search_row.addWidget(self.search_input, 1)
         search_row.addWidget(self.search_button)
         search_row.addWidget(self.clear_search_button)
+        self.category_filter = QComboBox(self)
+        self.category_filter.setAccessibleName("Filter knowledge articles by category")
+        self.category_filter.setMinimumContentsLength(16)
+        self.category_filter.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
+        self.category_filter.addItem("All categories", None)
+        self.category_filter.addItem("Not selected", None)
+        self.category_filter.currentIndexChanged.connect(self._filter_changed)
+        search_row.addWidget(QLabel("Category:", self))
+        search_row.addWidget(self.category_filter)
+        self.filter_feedback = QLabel(self)
+        self.filter_feedback.setTextFormat(Qt.TextFormat.PlainText)
+        self.filter_feedback.setWordWrap(True)
+        self.filter_feedback.hide()
 
         self.model = QStandardItemModel(0, 3, self)
         self.model.setHorizontalHeaderLabels(("Article code", "Title", "Status"))
@@ -144,20 +162,77 @@ class KnowledgeWorkspace(QWidget):
         layout = QVBoxLayout(self)
         layout.addLayout(top)
         layout.addLayout(search_row)
+        layout.addWidget(self.filter_feedback)
         layout.addWidget(self.feedback)
         layout.addWidget(splitter, 1)
         self._runner.busy_changed.connect(self._update_actions)
+        self._filter_runner.busy_changed.connect(lambda _busy: self._update_actions(self._runner.busy))
         self._update_actions(False)
+
+    @property
+    def filter_loading(self) -> bool:
+        return self._filter_runner.busy
+
+    def _load_filter_options(self) -> None:
+        if self._filter_options_loaded or self._filter_runner.busy:
+            return
+        self._filter_runner.submit(
+            self._service.list_active_knowledge_categories,
+            self._filter_options_ready, self._filter_options_failed,
+        )
+
+    def _filter_options_ready(self, categories) -> None:
+        with QSignalBlocker(self.category_filter):
+            for category in categories:
+                self.category_filter.addItem(category.name, category.category_id)
+        self._filter_options_loaded = True
+        self.filter_feedback.hide()
+        self._update_actions(self._runner.busy)
+
+    def _filter_options_failed(self, error) -> None:
+        logging.getLogger(__name__).error("Knowledge filter options failed: %s", type(error).__name__)
+        self.filter_feedback.setText("Could not load category filters. All categories remain available. Reopen Knowledge Base to retry.")
+        self.filter_feedback.show()
+        self._update_actions(self._runner.busy)
+
+    def _filter_arguments(self) -> dict:
+        if self.category_filter.currentIndex() == 1:
+            return {"uncategorized_only": True}
+        category_id = self.category_filter.currentData()
+        return {} if category_id is None else {"category_id": category_id}
+
+    def _reset_category_filter(self) -> None:
+        with QSignalBlocker(self.category_filter):
+            self.category_filter.setCurrentIndex(0)
+
+    def _filter_changed(self, _index) -> None:
+        if self._runner.busy:
+            return
+        selected_id = self.article.knowledge_article_id if self.article else None
+        if self._search_active:
+            self.search_input.setText(self._search_query)
+            self.search_articles()
+        else:
+            self.refresh_list()
+        # A previous selection is a preference, not an explicit reveal request.
+        self._preferred_selection_id = selected_id
 
     def refresh_list(self, *, select_article_id: int | None = None) -> None:
         if self._runner.busy:
             return
         self._search_active = False
+        self._search_query = ""
         self.search_input.clear()
         self._pending_selection_id = select_article_id
         self._show_article(None)
+        self.articles = ()
+        self.model.removeRows(0, self.model.rowCount())
+        self.empty_state.setVisible(False)
+        self.table.setVisible(True)
         self.feedback.setText("Loading articles…")
-        self._runner.submit(self._service.list_articles, self._list_loaded, self._load_failed)
+        arguments = self._filter_arguments()
+        self._runner.submit(lambda: self._service.list_articles(**arguments), self._list_loaded, self._load_failed)
+        self._load_filter_options()
 
     def search_articles(self) -> None:
         if self._runner.busy:
@@ -167,6 +242,7 @@ class KnowledgeWorkspace(QWidget):
             self.clear_search()
             return
         self._search_active = True
+        self._search_query = query
         self._pending_selection_id = None
         self._show_article(None)
         self.articles = ()
@@ -174,8 +250,9 @@ class KnowledgeWorkspace(QWidget):
         self.empty_state.setVisible(False)
         self.table.setVisible(True)
         self.feedback.setText("Searching knowledge articles…")
+        arguments = self._filter_arguments()
         self._runner.submit(
-            lambda: self._service.search_articles(query),
+            lambda: self._service.search_articles(query, **arguments),
             self._search_loaded,
             self._search_failed,
         )
@@ -228,8 +305,11 @@ class KnowledgeWorkspace(QWidget):
 
     def _category_updated(self, article):
         # The repository already reloaded this record before committing.
-        self._show_article(article)
-        self.feedback.setText("Article category saved.")
+        if self.category_filter.currentIndex() == 0:
+            self._show_article(article)
+            self.feedback.setText("Article category saved.")
+        else:
+            self._filter_changed(self.category_filter.currentIndex())
 
     def _confirm_publish(self, article) -> bool:
         confirmation = QMessageBox(self)
@@ -356,14 +436,26 @@ class KnowledgeWorkspace(QWidget):
 
     def open_article_by_id(self, article_id: int) -> None:
         """Reconcile the list and reuse selection-driven current detail loading."""
+        if self._runner.busy:
+            return
+        self._reset_category_filter()
         self.refresh_list(select_article_id=article_id)
 
     def _article_created(self, article) -> None:
+        arguments = self._filter_arguments()
+        if ((arguments.get("uncategorized_only") and article.category_id is not None)
+                or ("category_id" in arguments and arguments["category_id"] != article.category_id)):
+            self._reset_category_filter()
         self.refresh_list(select_article_id=article.knowledge_article_id)
 
     def _list_loaded(self, articles) -> None:
         self.feedback.setText("")
-        self._populate_articles(articles, "No knowledge articles yet.")
+        empty_text = "No knowledge articles yet."
+        if self.category_filter.currentIndex() == 1:
+            empty_text = "No uncategorized knowledge articles."
+        elif self.category_filter.currentIndex() > 1:
+            empty_text = "No knowledge articles in this category."
+        self._populate_articles(articles, empty_text)
 
     def _search_loaded(self, articles) -> None:
         self._search_active = True
@@ -394,6 +486,8 @@ class KnowledgeWorkspace(QWidget):
         self.table.setVisible(bool(self.articles))
         target_id = self._pending_selection_id
         self._pending_selection_id = None
+        preferred_id = self._preferred_selection_id
+        self._preferred_selection_id = None
         if target_id is not None and not any(
             article.knowledge_article_id == target_id for article in self.articles
         ):
@@ -403,6 +497,8 @@ class KnowledgeWorkspace(QWidget):
         if not self.articles:
             self._show_article(None)
             return
+        if target_id is None:
+            target_id = preferred_id
         row = next(
             (index for index, article in enumerate(self.articles)
              if article.knowledge_article_id == target_id),
@@ -464,6 +560,7 @@ class KnowledgeWorkspace(QWidget):
         self.new_button.setEnabled(not busy)
         self.search_input.setEnabled(not busy)
         self.search_button.setEnabled(not busy)
+        self.category_filter.setEnabled(not busy and self._filter_options_loaded and not self.filter_loading)
         self.clear_search_button.setEnabled(
             not busy and (self._search_active or bool(self.search_input.text()))
         )

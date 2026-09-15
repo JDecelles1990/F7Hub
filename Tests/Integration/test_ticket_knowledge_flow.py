@@ -143,6 +143,58 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         self.assertEqual(self.assert_open_article(article_id).article, archived)
         self.assertEqual(tuple(self.context.knowledge_service.get_article_version(article_id, n) for n in (2, 1)), history)
 
+    def test_filter_lifecycle_and_ticket_open_outside_filter(self):
+        from Tests.Database.test_knowledge_categories import seed_knowledge_categories
+        seed_knowledge_categories(self.path)
+        service = self.context.knowledge_service
+        self.link()
+        workspace = self.assert_open_article(self.article.knowledge_article_id)
+        deadline = time.monotonic() + 5
+        while workspace.filter_loading and time.monotonic() < deadline:
+            QTest.qWait(10)
+        self.assertFalse(workspace.filter_loading)
+        with database_connection(self.path) as connection:
+            links = tuple(tuple(row) for row in connection.execute('SELECT * FROM ticket_knowledge_articles'))
+        dialog = workspace.open_category()
+        self.wait_idle()
+        dialog.category_input.setCurrentIndex(dialog.category_input.findData(11))
+        dialog.submit()
+        self.wait_idle()
+        workspace.category_filter.setCurrentIndex(workspace.category_filter.findData(11))
+        self.wait_idle()
+        self.assertEqual(workspace.article.knowledge_article_id, self.article.knowledge_article_id)
+        editor = workspace.open_edit_article()
+        editor.body_input.setPlainText('DNS filtered lifecycle')
+        editor.submit()
+        self.wait_idle()
+        history = tuple(service.get_article_version(self.article.knowledge_article_id, n) for n in (2, 1))
+        self.assertEqual(workspace.category_filter.currentData(), 11)
+        self.confirm_publish(workspace)
+        self.assertEqual(workspace.category_filter.currentData(), 11)
+        self.confirm_archive(workspace)
+        self.assertEqual(workspace.category_filter.currentData(), 11)
+        workspace.search_input.setText('DNS')
+        workspace.search_articles()
+        self.wait_idle()
+        self.assertEqual(workspace.article.status, 'ARCHIVED')
+        viewer = workspace.open_version_history()
+        self.wait_idle()
+        self.assertEqual([v.version_number for v in viewer.versions], [2, 1])
+        viewer.close()
+        # Ticket's category A article is outside the current category B filter.
+        workspace.category_filter.setCurrentIndex(workspace.category_filter.findData(22))
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 0)
+        self.open_ticket()
+        self.assert_open_article(self.article.knowledge_article_id)
+        self.assertEqual(workspace.category_filter.currentText(), 'All categories')
+        self.assertEqual(workspace.search_input.text(), '')
+        self.assertEqual(workspace.article.status, 'ARCHIVED')
+        self.assertNotIn('no longer exists', workspace.feedback.text())
+        self.assertEqual(tuple(service.get_article_version(self.article.knowledge_article_id, n) for n in (2, 1)), history)
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(tuple(row) for row in connection.execute('SELECT * FROM ticket_knowledge_articles')), links)
+
     def test_category_same_version_external_update_rejects_reviewed_metadata_token(self):
         from Tests.Database.test_knowledge_categories import seed_knowledge_categories
         from f7hub.repositories.category_repository import CategoryRepository

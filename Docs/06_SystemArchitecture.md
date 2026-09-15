@@ -870,6 +870,10 @@ Persistent session data should be designed in the database documentation.
 
 # 30. Knowledge Base Architecture
 
+Slice 019 extends KnowledgeWorkspace → KnowledgeService.list_articles/search_articles → KnowledgeRepository with optional category_id and uncategorized_only. The service validates three exclusive read-only modes. CategoryRepository remains the single reference reader via list_active_knowledge_categories. No filter service, schema change or indexing change is introduced.
+
+The shared runner serializes list/search/detail and writes. A separate workspace-owned ServiceTaskRunner loads independent filter references without blocking article reads; MainWindow prevents close until that worker completes. Reference failure does not invalidate article results. Category predicates use relational SELECTs; lifecycle and category mutation retain existing transaction boundaries.
+
 Knowledge should be accessed through a Knowledge Service.
 
 Slice 010 implements this boundary: NewArticleDialog / KnowledgeWorkspace → KnowledgeService → KnowledgeRepository → SQLite. Bootstrap composes the dependencies and MainWindow reuses its QStackedWidget and ServiceTaskRunner for create/list/read. GUI components contain neither SQL nor direct repository calls.

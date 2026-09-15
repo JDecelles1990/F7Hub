@@ -8,6 +8,12 @@
 
 ---
 
+## Read-only Knowledge category filtering — Slice 019
+
+Category filtering, All categories, Not selected, active KNOWLEDGE category selection, combined category + FTS search, and Clear Search preserving category: IMPLEMENTED. All categories includes every lifecycle status, uncategorized articles and inactive assigned categories. Specific choices contain active KNOWLEDGE references only. Category administration, status filtering, tags/filtering and saved filters: NOT IMPLEMENTED. No migration. Validation: Status/CURRENT_STATE.md.
+
+---
+
 # 1. Purpose
 
 This document defines the major features planned for F7Hub.
@@ -502,7 +508,7 @@ Knowledge articles may be linked to:
 
 Knowledge category assignment, change and removal: IMPLEMENTED FOR DRAFT. Category… offers Not selected and active KNOWLEDGE categories, with the current active category selected. Current details display the category name, including an assigned category that later becomes inactive. An unavailable current choice can be replaced or cleared.
 
-Only category_id and updated_at change. Content version, immutable content history, lifecycle, publication timestamp, search content and ticket relationships remain intact. Both reviewed version_number and updated_at protect against stale saves. PUBLISHED/ARCHIVED category mutation, tags, category filtering, category history and category administration: NOT IMPLEMENTED. Validation evidence is in Status/CURRENT_STATE.md.
+Only category_id and updated_at change. Content version, immutable content history, lifecycle, publication timestamp, search content and ticket relationships remain intact. Both reviewed version_number and updated_at protect against stale saves. PUBLISHED/ARCHIVED category mutation, tags, category history and category administration: NOT IMPLEMENTED. Validation evidence is in Status/CURRENT_STATE.md.
 
 ## Implemented archive of one published article — Slice 017
 

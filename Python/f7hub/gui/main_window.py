@@ -129,7 +129,7 @@ class MainWindow(QMainWindow):
         self.knowledge_workspace.open_article_by_id(article_id)
 
     def closeEvent(self, event):
-        if self.runner.busy:
+        if self.runner.busy or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading):
             self.statusBar().showMessage("An operation is finishing. Please close again when it completes.")
             event.ignore()
             return
