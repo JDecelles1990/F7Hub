@@ -22,6 +22,7 @@ from PySide6.QtWidgets import (
 
 from f7hub.gui.new_article_dialog import NewArticleDialog
 from f7hub.gui.article_category_dialog import ArticleCategoryDialog
+from f7hub.gui.article_tags_dialog import ArticleTagsDialog
 from f7hub.gui.edit_article_dialog import EditArticleDialog
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.version_history_dialog import VersionHistoryDialog
@@ -49,6 +50,7 @@ class KnowledgeWorkspace(QWidget):
         self._confirming_publish = False
         self._confirming_archive = False
         self._category_dialog = None
+        self._tags_dialog = None
         self.articles = ()
         self.article = None
 
@@ -65,6 +67,8 @@ class KnowledgeWorkspace(QWidget):
         self.archive_button.clicked.connect(self.archive_article)
         self.category_button = QPushButton("Category…", self)
         self.category_button.clicked.connect(self.open_category)
+        self.tags_button = QPushButton("Tags…", self)
+        self.tags_button.clicked.connect(self.open_tags)
         self.version_history_button = QPushButton("Version History", self)
         self.version_history_button.setEnabled(False)
         self.version_history_button.clicked.connect(self.open_version_history)
@@ -140,6 +144,8 @@ class KnowledgeWorkspace(QWidget):
         self.detail_version = QLabel("", self)
         self.detail_category = QLabel("", self)
         self.detail_category.setWordWrap(True)
+        self.detail_tags = QLabel("", self)
+        self.detail_tags.setWordWrap(True)
         self.detail_summary = QLabel("", self)
         self.detail_summary.setWordWrap(True)
         self.detail_body = QPlainTextEdit(self)
@@ -148,13 +154,18 @@ class KnowledgeWorkspace(QWidget):
         self.detail_body.setPlaceholderText("Select an article to read.")
         detail = QWidget(self)
         detail_layout = QVBoxLayout(detail)
-        for widget in (self.detail_code, self.detail_title, self.detail_status, self.detail_version, self.detail_category, self.detail_summary):
+        for widget in (self.detail_code, self.detail_title, self.detail_status, self.detail_version, self.detail_category, self.detail_tags, self.detail_summary):
             widget.setTextFormat(Qt.TextFormat.PlainText)
             if widget is self.detail_category:
                 category_row = QHBoxLayout()
                 category_row.addWidget(widget, 1)
                 category_row.addWidget(self.category_button)
                 detail_layout.addLayout(category_row)
+            elif widget is self.detail_tags:
+                tags_row = QHBoxLayout()
+                tags_row.addWidget(widget, 1)
+                tags_row.addWidget(self.tags_button)
+                detail_layout.addLayout(tags_row)
             else:
                 detail_layout.addWidget(widget)
         detail_layout.addWidget(self.detail_body, 1)
@@ -283,7 +294,7 @@ class KnowledgeWorkspace(QWidget):
         self.refresh_list()
 
     def open_new_article(self) -> NewArticleDialog | None:
-        if self._runner.busy or self._category_dialog is not None:
+        if self._runner.busy or self._category_dialog is not None or self._tags_dialog is not None:
             return None
         dialog = NewArticleDialog(self._service, self._runner, self)
         dialog.article_created.connect(self._article_created)
@@ -292,7 +303,7 @@ class KnowledgeWorkspace(QWidget):
         return dialog
 
     def open_edit_article(self) -> EditArticleDialog | None:
-        if self._runner.busy or self._category_dialog is not None or self.article is None or self.article.status != "DRAFT":
+        if self._runner.busy or self._category_dialog is not None or self._tags_dialog is not None or self.article is None or self.article.status != "DRAFT":
             return None
         dialog = EditArticleDialog(self._service, self._runner, self.article, self)
         dialog.article_updated.connect(self._article_created)
@@ -301,7 +312,7 @@ class KnowledgeWorkspace(QWidget):
         return dialog
 
     def open_category(self) -> ArticleCategoryDialog | None:
-        if (self._service is None or self._runner.busy or self._category_dialog is not None
+        if (self._service is None or self._runner.busy or self._category_dialog is not None or self._tags_dialog is not None
                 or self._confirming_publish or self._confirming_archive
                 or self.article is None or self.article.status != "DRAFT"):
             return None
@@ -331,6 +342,34 @@ class KnowledgeWorkspace(QWidget):
         else:
             self._filter_changed(self.category_filter.currentIndex())
 
+    def open_tags(self) -> ArticleTagsDialog | None:
+        if (self._service is None or self._runner.busy or self._category_dialog is not None or self._tags_dialog is not None
+                or self._confirming_publish or self._confirming_archive
+                or self.article is None or self.article.status != "DRAFT"):
+            return None
+        article = self.article
+        dialog = ArticleTagsDialog(
+            self._service, self._runner, article,
+            context_is_current=lambda: self.article is article,
+            parent=self.window(),
+        )
+        self._tags_dialog = dialog
+        dialog.finished.connect(self._tags_closed)
+        dialog.article_updated.connect(self._tags_updated)
+        self._update_actions(self._runner.busy)
+        dialog.open()
+        dialog.load_tags()
+        return dialog
+
+    def _tags_closed(self, _result):
+        self._tags_dialog = None
+        self._update_actions(self._runner.busy)
+
+    def _tags_updated(self, article):
+        # The repository reloaded the current tag set before its transaction committed.
+        self._show_article(article)
+        self.feedback.setText("Article tags saved.")
+
     def _confirm_publish(self, article) -> bool:
         confirmation = QMessageBox(self)
         confirmation.setWindowTitle("Publish Article")
@@ -352,7 +391,7 @@ class KnowledgeWorkspace(QWidget):
 
     def publish_article(self) -> None:
         if (self._service is None or self._runner.busy or self._confirming_publish or self._confirming_archive
-                or self._category_dialog is not None
+                or self._category_dialog is not None or self._tags_dialog is not None
                 or self.article is None or self.article.status != "DRAFT"):
             return
         article = self.article
@@ -403,7 +442,7 @@ class KnowledgeWorkspace(QWidget):
 
     def archive_article(self) -> None:
         if (self._service is None or self._runner.busy or self._confirming_archive or self._confirming_publish
-                or self._category_dialog is not None
+                or self._category_dialog is not None or self._tags_dialog is not None
                 or self.article is None or self.article.status != "PUBLISHED"):
             return
         article = self.article
@@ -574,6 +613,7 @@ class KnowledgeWorkspace(QWidget):
             self.detail_status.setText("")
             self.detail_version.setText("")
             self.detail_category.setText("")
+            self.detail_tags.setText("")
             self.detail_summary.setText("")
             self.detail_body.clear()
             return
@@ -582,13 +622,15 @@ class KnowledgeWorkspace(QWidget):
         self.detail_status.setText(f"Status: {article.status}")
         self.detail_version.setText(f"Version {article.version_number}")
         self.detail_category.setText(f"Category: {article.category_name or 'Not selected'}")
+        tag_names = getattr(article, "tag_names", ())
+        self.detail_tags.setText(f"Tags: {', '.join(tag_names) if tag_names else 'None'}")
         self.detail_summary.setText(
             f"Summary: {article.summary}" if article.summary else "Summary: Not provided"
         )
         self.detail_body.setPlainText(article.body_markdown)
 
     def _update_actions(self, busy: bool) -> None:
-        busy = busy or self._confirming_publish or self._confirming_archive or self._category_dialog is not None
+        busy = busy or self._confirming_publish or self._confirming_archive or self._category_dialog is not None or self._tags_dialog is not None
         self.new_button.setEnabled(not busy)
         self.search_input.setEnabled(not busy)
         self.search_button.setEnabled(not busy)
@@ -602,6 +644,10 @@ class KnowledgeWorkspace(QWidget):
             not busy and self.article is not None and self.article.status == "DRAFT"
         )
         self.category_button.setEnabled(
+            self._service is not None and not busy
+            and self.article is not None and self.article.status == "DRAFT"
+        )
+        self.tags_button.setEnabled(
             self._service is not None and not busy
             and self.article is not None and self.article.status == "DRAFT"
         )

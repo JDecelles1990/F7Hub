@@ -435,7 +435,7 @@ F7Hub shall support creation and editing of structured KB articles.
 
 Slices 010–011 implement creation, deterministic listing, reopening/reading and DRAFT article editing through Knowledge Base navigation. Creation requires a user-entered article code, title and Markdown body; summary is optional. New articles are DRAFT, version 1, with an atomic initial history snapshot. Edit Article changes title/summary/body while keeping the article code immutable. Save Revision atomically increments the current version and appends its new snapshot; earlier snapshots remain unchanged. An expected-version token rejects stale overwrites. The read view displays Version N and read-only Markdown source.
 
-Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. Restore/revert, deletion, unpublishing/unarchiving workflows, category administration/tags, article-to-article relationships, external links and AI remain unimplemented.
+Only DRAFT articles are editable; PUBLISHED/ARCHIVED articles remain readable. Failed saves preserve input. No-change saves create no revision after authoritative status/version checks. Restore/revert, deletion, unpublishing/unarchiving workflows, category/tag administration, article-to-article relationships, external links and AI remain unimplemented. Assignment of existing global tags to DRAFT articles is implemented in Slice 021.
 
 Slice 012 adds RELATED ticket/article linking: open a saved ticket → Knowledge → Link Article → select an existing article → link → Open Article to read its current content in Knowledge Base. The linked list displays current code/title/status/version. All existing article statuses are eligible; already RELATED articles are excluded from candidates, and concurrent duplicate attempts receive safe feedback.
 
@@ -510,7 +510,9 @@ Knowledge articles may be linked to:
 
 Knowledge category assignment, change and removal: IMPLEMENTED FOR DRAFT. Category… offers Not selected and active KNOWLEDGE categories, with the current active category selected. Current details display the category name, including an assigned category that later becomes inactive. An unavailable current choice can be replaced or cleared.
 
-Only category_id and updated_at change. Content version, immutable content history, lifecycle, publication timestamp, search content and ticket relationships remain intact. Both reviewed version_number and updated_at protect against stale saves. PUBLISHED/ARCHIVED category mutation, tags, category history and category administration: NOT IMPLEMENTED. Validation evidence is in Status/CURRENT_STATE.md.
+Existing global tag assignment, replacement and removal: IMPLEMENTED FOR DRAFT. Tags… selects zero, one or multiple existing global tags; an empty selection removes all current tags. Tags are current article metadata only: they update `updated_at` under both version and metadata tokens, but do not create a content version or historical snapshot. Tag administration, tag filtering and historical tag reconstruction remain deferred.
+
+Only category_id and updated_at change. Content version, immutable content history, lifecycle, publication timestamp, search content and ticket relationships remain intact. Both reviewed version_number and updated_at protect against stale saves. PUBLISHED/ARCHIVED category mutation, category history and category administration: NOT IMPLEMENTED. Existing-tag assignment is separately implemented for DRAFT articles in Slice 021. Validation evidence is in Status/CURRENT_STATE.md.
 
 ## Implemented archive of one published article — Slice 017
 

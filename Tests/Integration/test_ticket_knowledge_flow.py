@@ -11,12 +11,16 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtTest import QTest
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import Qt, QTimer
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from f7hub.app.bootstrap import bootstrap_application
 from f7hub.infrastructure.database import database_connection
+from f7hub.repositories.category_repository import CategoryRepository
+from f7hub.repositories.knowledge_repository import KnowledgeRepository
+from f7hub.repositories.tag_repository import TagRepository
 from f7hub.repositories.ticket_knowledge_repository import TicketKnowledgeRepository
+from f7hub.services.knowledge_service import KnowledgeService
 from f7hub.services.ticket_knowledge_service import (
     TicketKnowledgeAlreadyLinkedError, TicketKnowledgeNotLinkedError, TicketKnowledgeService,
 )
@@ -211,9 +215,6 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
 
     def test_category_same_version_external_update_rejects_reviewed_metadata_token(self):
         from Tests.Database.test_knowledge_categories import seed_knowledge_categories
-        from f7hub.repositories.category_repository import CategoryRepository
-        from f7hub.repositories.knowledge_repository import KnowledgeRepository
-        from f7hub.services.knowledge_service import KnowledgeService
         seed_knowledge_categories(self.path)
         service = self.context.knowledge_service
         current = service.update_article(article_id=self.article.knowledge_article_id,
@@ -223,7 +224,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         workspace = self.window.knowledge_workspace
         dialog = workspace.open_category()
         self.wait_idle()
-        external = KnowledgeService(KnowledgeRepository(self.path), CategoryRepository(self.path))
+        external = KnowledgeService(KnowledgeRepository(self.path), CategoryRepository(self.path), TagRepository(self.path))
         latest = external.set_article_category(current.knowledge_article_id, 2, current.updated_at, 22)
         with database_connection(self.path) as connection:
             before = tuple(connection.iterdump())
@@ -441,6 +442,91 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
                 self.context.knowledge_service.archive_article(self.article.knowledge_article_id, 1)
         with database_connection(self.path) as connection:
             self.assertEqual(tuple(connection.iterdump()), before)
+
+    def test_tag_lifecycle_filters_ticket_open_and_reconstruction(self):
+        from Tests.Database.test_knowledge_categories import seed_knowledge_categories
+
+        seed_knowledge_categories(self.path)
+        with database_connection(self.path) as connection:
+            connection.executemany(
+                "INSERT INTO tags (name, slug, created_at) VALUES (?, ?, ?)",
+                (("Alpha", "alpha", "2026-09-15T10:00:00Z"),
+                 ("Beta", "beta", "2026-09-15T10:00:00Z"),
+                 ("Gamma", "gamma", "2026-09-15T10:00:00Z")),
+            )
+        self.link()
+        workspace = self.assert_open_article(self.article.knowledge_article_id)
+        service = self.context.knowledge_service
+        article_id = self.article.knowledge_article_id
+
+        category_dialog = workspace.open_category()
+        self.wait_idle()
+        category_dialog.category_input.setCurrentIndex(
+            category_dialog.category_input.findData(11)
+        )
+        category_dialog.submit()
+        self.wait_idle()
+
+        tags_dialog = workspace.open_tags()
+        self.wait_idle()
+        for index in (0, 1):
+            tags_dialog.tag_list.item(index).setCheckState(Qt.CheckState.Checked)
+        tags_dialog.submit()
+        self.wait_idle()
+        self.assertEqual(workspace.article.tag_names, ("Alpha", "Beta"))
+
+        editor = workspace.open_edit_article()
+        editor.body_input.setPlainText("Tag lifecycle searchable V2")
+        editor.submit()
+        self.wait_idle()
+        self.assertEqual((workspace.article.version_number, workspace.article.tag_names), (2, ("Alpha", "Beta")))
+        history = tuple(service.get_article_version(article_id, number) for number in (2, 1))
+
+        deadline = time.monotonic() + 5
+        while workspace.filter_loading and time.monotonic() < deadline:
+            QTest.qWait(10)
+        workspace.category_filter.setCurrentIndex(workspace.category_filter.findData(11))
+        self.wait_idle()
+        workspace.status_filter.setCurrentIndex(workspace.status_filter.findData("DRAFT"))
+        self.wait_idle()
+
+        tags_dialog = workspace.open_tags()
+        self.wait_idle()
+        for index in range(tags_dialog.tag_list.count()):
+            tags_dialog.tag_list.item(index).setCheckState(
+                Qt.CheckState.Checked if tags_dialog.tag_list.item(index).text() in {"Beta", "Gamma"}
+                else Qt.CheckState.Unchecked
+            )
+        tags_dialog.submit()
+        self.wait_idle()
+        self.assertEqual(workspace.article.tag_names, ("Beta", "Gamma"))
+        self.assertEqual(workspace.category_filter.currentData(), 11)
+        self.assertEqual(workspace.status_filter.currentData(), "DRAFT")
+        self.assertEqual(workspace.model.rowCount(), 1)
+        self.assertEqual(tuple(service.get_article_version(article_id, number) for number in (2, 1)), history)
+
+        workspace.search_input.setText("lifecycle searchable")
+        workspace.search_articles()
+        self.wait_idle()
+        self.assertEqual(workspace.article.tag_names, ("Beta", "Gamma"))
+        self.confirm_publish(workspace)
+        self.assertEqual(workspace.article.tag_names, ("Beta", "Gamma"))
+        self.assertFalse(workspace.tags_button.isEnabled())
+        self.confirm_archive(workspace)
+        archived = workspace.article
+        self.assertEqual((archived.status, archived.version_number, archived.tag_names), ("ARCHIVED", 2, ("Beta", "Gamma")))
+        self.assertFalse(workspace.tags_button.isEnabled())
+        self.assertEqual(tuple(service.get_article_version(article_id, number) for number in (2, 1)), history)
+
+        self.open_ticket()
+        reopened = self.assert_open_article(article_id)
+        self.assertEqual(reopened.detail_tags.text(), "Tags: Beta, Gamma")
+        self.close_window()
+        self.boot()
+        self.open_ticket()
+        reconstructed = self.assert_open_article(article_id)
+        self.assertEqual((reconstructed.article.status, reconstructed.article.tag_names), ("ARCHIVED", ("Beta", "Gamma")))
+        self.assertEqual(reconstructed.detail_tags.text(), "Tags: Beta, Gamma")
 
     @classmethod
     def setUpClass(cls):

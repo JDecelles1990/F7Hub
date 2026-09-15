@@ -20,7 +20,8 @@ from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.infrastructure.database import database_connection
 from f7hub.repositories.knowledge_repository import KnowledgeRepository
 from f7hub.repositories.category_repository import CategoryRepository
-from f7hub.services.knowledge_service import KnowledgeService
+from f7hub.repositories.tag_repository import TagRepository
+from f7hub.services.knowledge_service import KnowledgeService, KnowledgeTagConflictError
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -75,7 +76,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
 
         runner = ServiceTaskRunner()
         reopened = KnowledgeWorkspace(
-            KnowledgeService(KnowledgeRepository(self.path), CategoryRepository(self.path)), runner
+            KnowledgeService(KnowledgeRepository(self.path), CategoryRepository(self.path), TagRepository(self.path)), runner
         )
         reopened.show()
         reopened.refresh_list(select_article_id=workspace.article.knowledge_article_id)
@@ -95,6 +96,58 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         self.window.show_tickets()
         self.wait_idle(self.window.runner)
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
+
+    def test_tag_and_category_metadata_races_reject_stale_tokens(self):
+        from Tests.Database.test_knowledge_categories import seed_knowledge_categories
+
+        seed_knowledge_categories(self.path)
+        with database_connection(self.path) as connection:
+            connection.executemany(
+                "INSERT INTO tags (tag_id, name, slug, created_at) VALUES (?, ?, ?, ?)",
+                ((701, "Alpha", "alpha", "2026-09-15T10:00:00Z"),
+                 (702, "Beta", "beta", "2026-09-15T10:00:00Z"),
+                 (703, "Gamma", "gamma", "2026-09-15T10:00:00Z")),
+            )
+        service = self.context.knowledge_service
+        external = KnowledgeService(
+            KnowledgeRepository(self.path), CategoryRepository(self.path),
+            TagRepository(self.path),
+        )
+
+        tag_article = service.create_article(
+            article_code="TAG-RACE", title="Tag race", summary=None, body="V1"
+        )
+        tag_article = service.update_article(
+            article_id=tag_article.knowledge_article_id,
+            expected_version_number=1, title="Tag race", summary=None, body="V2",
+        )
+        winner = external.set_article_tags(
+            tag_article.knowledge_article_id, 2, tag_article.updated_at, (701, 702)
+        )
+        with self.assertRaisesRegex(KnowledgeTagConflictError, "Reopen the latest"):
+            service.set_article_tags(
+                tag_article.knowledge_article_id, 2, tag_article.updated_at, (703,)
+            )
+        self.assertEqual(service.get_article(tag_article.knowledge_article_id), winner)
+
+        category_article = service.create_article(
+            article_code="CATEGORY-RACE", title="Category race", summary=None, body="V1"
+        )
+        category_article = service.update_article(
+            article_id=category_article.knowledge_article_id,
+            expected_version_number=1, title="Category race", summary=None, body="V2",
+        )
+        category_winner = external.set_article_category(
+            category_article.knowledge_article_id, 2,
+            category_article.updated_at, 22,
+        )
+        with self.assertRaisesRegex(KnowledgeTagConflictError, "Reopen the latest"):
+            service.set_article_tags(
+                category_article.knowledge_article_id, 2,
+                category_article.updated_at, (701,),
+            )
+        self.assertEqual(service.get_article(category_article.knowledge_article_id), category_winner)
+        self.assertEqual(service.list_article_tags(category_article.knowledge_article_id), ())
 
     def test_category_search_clear_and_all_are_read_only(self):
         from Tests.Database.test_knowledge_categories import seed_knowledge_categories

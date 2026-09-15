@@ -47,6 +47,16 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-15 — Slice 021: Existing Global Tags on DRAFT Knowledge Articles
+
+Implemented Tags… for an idle loaded DRAFT article using existing rows from the global `tags` table. The checkable selector supports zero, one or multiple tags, preselects the authoritative current set, and treats Save as exact replacement. Cancel/Escape make no mutation; reference and persistence failures remain safe and truthful. Current tag names remain visible after edit, publish, archive, reconstruction and Ticket Open Article, while PUBLISHED/ARCHIVED mutation is unavailable.
+
+Added explicit TagRepository injection and `KnowledgeRepository.set_draft_tags`. The write transaction uses BEGIN IMMEDIATE, authoritative DRAFT/version/updated-at checks, submitted-tag validation, differential bridge changes, a conditional metadata-token update, exact row-count verification and authoritative reload before commit. No-op sets write nothing. Only `knowledge_article_tags` and `knowledge_articles.updated_at` may change; content version/history, category/status, published_at, ticket links and FTS remain unchanged. No migration or schema change.
+
+Validation: focused Slice 021 set 13 PASS; full Database 318, GUI 123 and Integration 91 = **532 PASS**, zero failures/errors/skips. Native Windows MainWindow 1000×700 passed the zero/one/multiple/replace/remove/remove-all workflow, filters/search, edit, publish/archive, Version History, Ticket Open Article and reconstruction; six external captures were inspected with no horizontal clipping or important overlap. Six unchanged migrations, integrity_check=ok, zero foreign-key violations, FTS integrity PASS and no duplicate bridge pairs. Work remains unstaged/uncommitted for independent review; protected Docs/10 modification and archived-vision deletion remain untouched. Tag creation/admin, tag filtering and historical tag reconstruction remain unimplemented.
+
+---
+
 # 2026-09-15 — Slice 020: Read-only Knowledge Status Filtering
 
 Implemented static All statuses, Draft, Published and Archived filtering for current Knowledge lists and FTS search. Status composes with All/specific/Not selected category modes. Filter changes during search reuse the executed query; Clear Search preserves both filters. Replacement failures clear stale rows/details while retaining selections.

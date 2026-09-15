@@ -8,6 +8,7 @@ import sqlite3
 import unicodedata
 
 from f7hub.repositories.category_repository import CategoryRepository
+from f7hub.repositories.tag_repository import TagRecord, TagRepository
 
 from f7hub.repositories.knowledge_repository import (
     ArticleMissingError,
@@ -24,6 +25,7 @@ from f7hub.repositories.knowledge_repository import (
     StaleArticleVersionError,
     StaleArticleMetadataError,
     ArticleCategoryUnavailableError,
+    ArticleTagUnavailableError,
 )
 
 
@@ -90,12 +92,62 @@ class KnowledgeCategoryConflictError(KnowledgeCategoryError):
     """Reopen current article state before trying another category write."""
 
 
+class KnowledgeTagError(RuntimeError):
+    """Tag loading or saving failed; safe to show to a technician."""
+
+
+class KnowledgeTagConflictError(KnowledgeTagError):
+    """Reopen current article state before trying another tag write."""
+
+
 class KnowledgeService:
     """Validate and coordinate the narrow create/list/read use cases."""
 
-    def __init__(self, repository: KnowledgeRepository, categories: CategoryRepository) -> None:
+    def __init__(self, repository: KnowledgeRepository, categories: CategoryRepository, tags: TagRepository) -> None:
         self._repository = repository
         self._categories = categories
+        self._tags = tags
+
+    def list_available_tags(self) -> tuple[TagRecord, ...]:
+        try:
+            return self._tags.list_tags()
+        except (sqlite3.Error, OSError, RuntimeError) as error:
+            raise KnowledgeTagError("Could not load existing tags. Refresh tags and try again.") from error
+
+    def list_article_tags(self, article_id: int) -> tuple[TagRecord, ...]:
+        article_id = _positive_integer(article_id, "Article ID")
+        try:
+            return self._tags.list_article_tags(article_id)
+        except (sqlite3.Error, OSError, RuntimeError) as error:
+            raise KnowledgeTagError("Could not load article tags. Refresh tags and try again.") from error
+
+    def set_article_tags(self, article_id: int, expected_version_number: int, expected_updated_at: str, tag_ids) -> KnowledgeArticleRecord:
+        article_id = _positive_integer(article_id, "Article ID")
+        expected_version_number = _positive_integer(expected_version_number, "Expected version")
+        _required_text(expected_updated_at, "Expected update time")
+        if not isinstance(tag_ids, (tuple, list)):
+            raise KnowledgeValidationError("Tag IDs must be a collection of positive integers.")
+        normalized = tuple(_positive_integer(tag_id, "Tag ID") for tag_id in tag_ids)
+        if len(set(normalized)) != len(normalized):
+            raise KnowledgeValidationError("Tag IDs must not contain duplicates.")
+        timestamp = _next_metadata_timestamp(expected_updated_at)
+        try:
+            return self._repository.set_draft_tags(
+                article_id=article_id, expected_version_number=expected_version_number,
+                expected_updated_at=expected_updated_at, tag_ids=normalized, updated_at=timestamp,
+            )
+        except ArticleMissingError as error:
+            raise KnowledgeTagConflictError("This article no longer exists.") from error
+        except ArticleNotEditableError as error:
+            raise KnowledgeTagConflictError("Only draft articles can change tags.") from error
+        except (StaleArticleVersionError, StaleArticleMetadataError) as error:
+            raise KnowledgeTagConflictError("This article changed after you opened it. Reopen the latest article before changing its tags.") from error
+        except ArticleTagUnavailableError as error:
+            raise KnowledgeTagError("One selected tag is no longer available. Refresh tags and try again.") from error
+        except ArticleUnchangedError as error:
+            raise KnowledgeTagError("Tags are already selected.") from error
+        except (sqlite3.Error, OSError, RuntimeError, OverflowError) as error:
+            raise KnowledgeTagError("Could not update article tags. Try again.") from error
 
     def list_active_knowledge_categories(self) -> tuple[KnowledgeCategoryOption, ...]:
         try:
@@ -113,15 +165,7 @@ class KnowledgeService:
         _required_text(expected_updated_at, "Expected update time")
         if category_id is not None:
             category_id = _positive_integer(category_id, "Category ID")
-        # A repeated or backward-moving clock must not reuse a metadata token.
-        now = datetime.now(timezone.utc)
-        try:
-            previous = datetime.fromisoformat(expected_updated_at.replace("Z", "+00:00"))
-        except ValueError:
-            previous = None
-        if previous is not None and previous.tzinfo is not None and now <= previous:
-            now = previous + timedelta(microseconds=1)
-        timestamp = now.astimezone(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
+        timestamp = _next_metadata_timestamp(expected_updated_at)
         try:
             return self._repository.set_draft_category(
                 article_id=article_id, expected_version_number=expected_version_number,
@@ -399,6 +443,18 @@ def _positive_integer(value: object, label: str) -> int:
     if isinstance(value, bool) or not isinstance(value, int) or value < 1:
         raise KnowledgeValidationError(f"{label} must be a positive integer.")
     return value
+
+
+def _next_metadata_timestamp(expected_updated_at: str) -> str:
+    """Generate one strictly newer UTC metadata token from one clock read."""
+    now = datetime.now(timezone.utc)
+    try:
+        previous = datetime.fromisoformat(expected_updated_at.replace("Z", "+00:00"))
+    except ValueError:
+        previous = None
+    if previous is not None and previous.tzinfo is not None and now <= previous:
+        now = previous + timedelta(microseconds=1)
+    return now.astimezone(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
 def _literal_fts_query(query: str) -> str:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 import sqlite3
 
@@ -27,6 +27,7 @@ class KnowledgeArticleRecord:
     updated_at: str
     published_at: str | None
     category_name: str | None = None
+    tag_names: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -120,6 +121,10 @@ class StaleArticleMetadataError(RuntimeError):
 
 class ArticleCategoryUnavailableError(RuntimeError):
     """The requested category is not active Knowledge reference data."""
+
+
+class ArticleTagUnavailableError(RuntimeError):
+    """One submitted global tag no longer exists."""
 
 
 class KnowledgeRepository:
@@ -266,6 +271,67 @@ class KnowledgeRepository:
             connection.commit()
         return article
 
+    def set_draft_tags(
+        self, *, article_id: int, expected_version_number: int, expected_updated_at: str,
+        tag_ids: tuple[int, ...], updated_at: str,
+    ) -> KnowledgeArticleRecord:
+        """Atomically replace current draft tag relationships with a guarded set."""
+        if any(isinstance(tag_id, bool) or not isinstance(tag_id, int) or tag_id < 1 for tag_id in tag_ids):
+            raise ValueError("Tag IDs must be positive integers.")
+        if len(set(tag_ids)) != len(tag_ids):
+            raise ValueError("Tag IDs must not contain duplicates.")
+        with database_connection(self._database_path) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            current = _get_article(connection, article_id)
+            if current is None:
+                raise ArticleMissingError()
+            if current.status != "DRAFT":
+                raise ArticleNotEditableError()
+            if current.version_number != expected_version_number:
+                raise StaleArticleVersionError()
+            if current.updated_at != expected_updated_at:
+                raise StaleArticleMetadataError()
+            if tag_ids:
+                placeholders = ", ".join("?" for _ in tag_ids)
+                count = connection.execute(
+                    f"SELECT count(*) FROM tags WHERE tag_id IN ({placeholders})", tag_ids,
+                ).fetchone()[0]
+                if count != len(tag_ids):
+                    raise ArticleTagUnavailableError()
+            existing = {int(row[0]) for row in connection.execute(
+                "SELECT tag_id FROM knowledge_article_tags WHERE knowledge_article_id = ?", (article_id,)
+            )}
+            requested = set(tag_ids)
+            if requested == existing:
+                raise ArticleUnchangedError()
+            if updated_at == current.updated_at:
+                raise RuntimeError("Tag update requires a new metadata token.")
+            removals, additions = existing - requested, requested - existing
+            if removals:
+                connection.executemany(
+                    "DELETE FROM knowledge_article_tags WHERE knowledge_article_id = ? AND tag_id = ?",
+                    ((article_id, tag_id) for tag_id in removals),
+                )
+            if additions:
+                connection.executemany(
+                    "INSERT INTO knowledge_article_tags (knowledge_article_id, tag_id, created_at) VALUES (?, ?, ?)",
+                    ((article_id, tag_id, updated_at) for tag_id in additions),
+                )
+            cursor = connection.execute(
+                """
+                UPDATE knowledge_articles SET updated_at = ?
+                WHERE knowledge_article_id = ? AND status = 'DRAFT'
+                    AND version_number = ? AND updated_at = ?
+                """, (updated_at, article_id, expected_version_number, expected_updated_at),
+            )
+            if cursor.rowcount != 1:
+                raise StaleArticleMetadataError()
+            article = _get_article(connection, article_id)
+            if article is None:
+                raise RuntimeError("Updated knowledge article could not be reloaded.")
+            connection.commit()
+        return article
+
     def publish_draft_article(
         self, *, article_id: int, expected_version_number: int, published_at: str,
     ) -> KnowledgeArticleRecord:
@@ -362,7 +428,15 @@ class KnowledgeRepository:
                 ORDER BY updated_at DESC, knowledge_article_id DESC
                 """, tuple(parameters),
             ).fetchall()
-        return tuple(_article_from_row(row) for row in rows)
+            return tuple(
+                replace(
+                    _article_from_row(row),
+                    tag_names=_get_article_tag_names(
+                        connection, int(row["knowledge_article_id"])
+                    ),
+                )
+                for row in rows
+            )
 
     def search_articles(
         self, fts_query: str, *, category_id: int | None = None,
@@ -466,7 +540,28 @@ def _get_article(
         """,
         (article_id,),
     ).fetchone()
-    return _article_from_row(row) if row is not None else None
+    if row is None:
+        return None
+    return replace(
+        _article_from_row(row),
+        tag_names=_get_article_tag_names(connection, article_id),
+    )
+
+
+def _get_article_tag_names(
+    connection: sqlite3.Connection, article_id: int,
+) -> tuple[str, ...]:
+    rows = connection.execute(
+        """
+        SELECT t.name
+        FROM knowledge_article_tags AS kat
+        JOIN tags AS t ON t.tag_id = kat.tag_id
+        WHERE kat.knowledge_article_id = ?
+        ORDER BY t.name COLLATE NOCASE, t.tag_id
+        """,
+        (article_id,),
+    ).fetchall()
+    return tuple(str(row["name"]) for row in rows)
 
 
 def _article_exists(connection: sqlite3.Connection, article_id: int) -> bool:
