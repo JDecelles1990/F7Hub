@@ -270,9 +270,14 @@ class KnowledgeService:
                 "Could not save the revision. Your entered information is preserved."
             ) from error
 
-    def list_articles(self) -> tuple[KnowledgeArticleRecord, ...]:
+    def list_articles(
+        self, *, category_id: int | None = None, uncategorized_only: bool = False,
+    ) -> tuple[KnowledgeArticleRecord, ...]:
+        _validate_category_filter(category_id, uncategorized_only)
         try:
-            return self._repository.list_articles()
+            return self._repository.list_articles(
+                category_id=category_id, uncategorized_only=uncategorized_only,
+            )
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgeCreationError("Could not load knowledge articles.") from error
 
@@ -285,17 +290,21 @@ class KnowledgeService:
             raise KnowledgeCreationError("Could not load the knowledge article.") from error
 
     def search_articles(
-        self, query: str,
+        self, query: str, *, category_id: int | None = None,
+        uncategorized_only: bool = False,
     ) -> tuple[KnowledgeArticleSearchResult, ...]:
         """Search current articles using a safe literal FTS expression."""
 
+        _validate_category_filter(category_id, uncategorized_only)
         if not isinstance(query, str):
             raise KnowledgeValidationError("Search query must be text.")
         fts_query = _literal_fts_query(query)
         if not fts_query:
             return ()
         try:
-            return self._repository.search_articles(fts_query)
+            return self._repository.search_articles(
+                fts_query, category_id=category_id, uncategorized_only=uncategorized_only,
+            )
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgeSearchError(
                 "Could not search knowledge articles. Check the query and try again."
@@ -335,6 +344,15 @@ class KnowledgeService:
             raise KnowledgeHistoryError(
                 "Could not load the selected revision. Close and try again."
             ) from error
+
+
+def _validate_category_filter(category_id: int | None, uncategorized_only: bool) -> None:
+    if not isinstance(uncategorized_only, bool):
+        raise KnowledgeValidationError("Uncategorized filter must be a boolean.")
+    if category_id is not None:
+        _positive_integer(category_id, "Category ID")
+        if uncategorized_only:
+            raise KnowledgeValidationError("Choose one category filter mode.")
 
 
 def _required_text(value: object, label: str) -> str:

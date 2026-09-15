@@ -96,6 +96,46 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         self.wait_idle(self.window.runner)
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
 
+    def test_category_search_clear_and_all_are_read_only(self):
+        from Tests.Database.test_knowledge_categories import seed_knowledge_categories
+        seed_knowledge_categories(self.path)
+        service = self.context.knowledge_service
+        for code, category in (('A1', 11), ('A2', 22), ('A3', None)):
+            article = service.create_article(article_code=code, title='DNS', summary=None, body='DNS')
+            if category:
+                service.set_article_category(article.knowledge_article_id, 1, article.updated_at, category)
+        with database_connection(self.path) as connection:
+            before = tuple(connection.iterdump())
+        self.window.show_knowledge()
+        workspace = self.window.knowledge_workspace
+        self.wait_idle(self.window.runner)
+        self.wait_idle(workspace._filter_runner)
+        def choose(index):
+            workspace.category_filter.setCurrentIndex(index)
+            self.wait_idle(self.window.runner)
+        def codes():
+            return [a.article_code for a in workspace.articles]
+        choose(workspace.category_filter.findData(11))
+        workspace.search_input.setText('DNS')
+        workspace.search_button.click()
+        self.wait_idle(self.window.runner)
+        self.assertEqual(codes(), ['A1'])
+        workspace.clear_search_button.click()
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.category_filter.currentData(), 11)
+        self.assertEqual(codes(), ['A1'])
+        choose(1)
+        self.assertEqual(codes(), ['A3'])
+        workspace.search_input.setText('DNS')
+        workspace.search_button.click()
+        self.wait_idle(self.window.runner)
+        self.assertEqual(codes(), ['A3'])
+        choose(0)
+        self.assertEqual(codes(), [a.article_code for a in service.search_articles('DNS')])
+        self.assertEqual(set(codes()), {'A1', 'A2', 'A3'})
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+
     def test_search_create_title_body_code_punctuation_clear_and_reconstruction(self):
         self.window.show_knowledge()
         self.wait_idle(self.window.runner)

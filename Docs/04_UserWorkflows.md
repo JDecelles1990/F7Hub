@@ -8,6 +8,16 @@
 
 ---
 
+## Read-only category filtering — Slice 019
+
+Knowledge Base → Category filter → All categories / Not selected / active KNOWLEDGE category → current list. Search runs within that filter; changing category during search reruns the executed query. Clear Search removes the query while retaining category. Empty lists clear details and explain whether the category, uncategorized list or search has no results.
+
+Category… remains the separate DRAFT mutation action. A successful category move reconciles the current filter and search, selecting another result when available. New articles that fall outside the selected category reveal under All categories. Edit, Publish and Archive preserve compatible category filters while returning to the normal list. Ticket Open Article explicitly clears search and resets All categories before selecting the requested current article.
+
+Category choices load asynchronously without blocking article reads. Failure keeps All categories usable with safe feedback; reopening Knowledge Base or refreshing the list retries. Successfully loaded choices are retained for the workspace lifetime. Filtering changes no stored article, history, lifecycle, timestamp or ticket relationship.
+
+---
+
 # 1. Purpose
 
 This document defines the principal user workflows of F7Hub.

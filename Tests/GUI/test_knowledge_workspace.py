@@ -79,6 +79,9 @@ class RecordingKnowledgeService:
     def list_articles(self):
         return tuple(reversed(self.articles))
 
+    def list_active_knowledge_categories(self):
+        return ()
+
     def update_article(self, **values):
         self.update_calls.append((values, threading.get_ident()))
         if self.gate:

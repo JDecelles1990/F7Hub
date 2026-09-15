@@ -427,9 +427,9 @@ Slice 018 — DRAFT Knowledge category metadata, implemented 2026-09-14 and comp
 - [x] Preserve content/history, lifecycle, search and ticket relationships; add no migration.
 - [x] Add focused repository/service/real-window GUI and lifecycle/race integration coverage.
 - [x] Execute native Windows workflow and inspect captures; evidence in Status/CURRENT_STATE.md.
-- [ ] Independent review of unstaged/uncommitted Slice 018.
+- [x] Slice 018 is present in the user-specified integrated baseline 223b54ab; prior independent-review evidence is not reasserted here.
 
-PUBLISHED/ARCHIVED category mutation, tags, category filtering, category history and administration: NOT IMPLEMENTED.
+PUBLISHED/ARCHIVED category mutation, tags, category history and administration: NOT IMPLEMENTED.
 
 Slice 017 — archive one reviewed PUBLISHED article, implemented 2026-09-14:
 
@@ -442,7 +442,16 @@ Slice 017 — archive one reviewed PUBLISHED article, implemented 2026-09-14:
 
 Slice 017 is the supplied integrated baseline for Slice 018.
 
-Recommended next candidate only: read-only Knowledge category filtering. Unarchive, Unpublish, tags, category administration/history and richer relationship workflows remain deferred. Do not begin Slice 019 here.
+Slice 019 — read-only Knowledge category filtering:
+
+- [x] All categories, Not selected and active KNOWLEDGE selection for normal lists and FTS.
+- [x] Clear Search retains category; Ticket Open Article resets All and search.
+- [x] Async reference loading/failure retry, stale detail clearing, category mutation and new-article reconciliation.
+- [x] Focused repository/service/GUI tests and native Windows 1000×700 workflow with inspected captures.
+- [x] Final sequential regression: 304 Database + 113 GUI + 88 Integration = 505 PASS; no suite decreased.
+- [ ] Independent Slice 019 review; see Status/CURRENT_STATE.md for evidence.
+
+Recommended next candidate only after review: read-only status filtering. Saved filters add persistence and broader UX, so defer them. Status filtering, Unarchive, Unpublish, tags, category administration/history and richer relationship workflows remain unimplemented. Do not begin Slice 020 here.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

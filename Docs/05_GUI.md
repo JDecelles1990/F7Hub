@@ -8,6 +8,16 @@
 
 ---
 
+## Implemented category filter — Slice 019
+
+A compact Category: combo sits beside Search/Clear Search; its accessibility name identifies read-only article filtering. Category… stays beside current detail metadata. All categories is the default; Not selected means NULL assignment; remaining choices are active KNOWLEDGE categories in repository order. Population blocks signals and issues no redundant article request.
+
+Article list/search uses the existing shared ServiceTaskRunner and disables the filter while busy. A separate workspace-owned ServiceTaskRunner loads category options so article list/search remains usable during that read. MainWindow refuses close while this worker finishes. Reference failure has a separate plain-text message, disables the selector and allows All-category reads plus later retry.
+
+Replacement list/search requests clear old rows and details before dispatch. Compatible selection is a preference; explicit Ticket Open Article resets search/category before reveal. Clear Search retains category. Category writes reconcile filtered rows; creation resets to All only when needed to reveal the new article. Native Windows 1000×700 workflow and six inspected captures passed; no control overlap or horizontal clipping observed. See Status/CURRENT_STATE.md.
+
+---
+
 # 1. Purpose
 
 This document defines how F7Hub should present its features to the technician.
@@ -574,7 +584,7 @@ Contact
 
 # 23. Knowledge Base
 
-Slice 018 adds Category… beside the plain-text Category name in current details. Keeping this action out of the top toolbar preserves the 1000×700 window minimum across tested styles. The action requires a service, idle runner and loaded DRAFT. ArticleCategoryDialog contains Not selected, active KNOWLEDGE names, current-category context, Refresh categories, Cancel and Save. Active current selection is prefilled; inactive assigned names stay visible but are excluded from choices. PUBLISHED/ARCHIVED metadata editing, tags, category filters and administration remain unimplemented.
+Slice 018 adds Category… beside the plain-text Category name in current details. Keeping this action out of the top toolbar preserves the 1000×700 window minimum across tested styles. The action requires a service, idle runner and loaded DRAFT. ArticleCategoryDialog contains Not selected, active KNOWLEDGE names, current-category context, Refresh categories, Cancel and Save. Active current selection is prefilled; inactive assigned names stay visible but are excluded from choices. PUBLISHED/ARCHIVED metadata editing, tags and administration remain unimplemented; read-only category filtering is implemented in Slice 019.
 
 The main window owns this modal outside the disabled pages hierarchy. Reference reads remain dismissible; late callbacks after dismissal are ignored. Save retains the original version/updated_at tokens and rejects changed workspace context. Competing actions and repeat submits are disabled. After the repository reloads and commits, the returned authoritative record updates the displayed category with safe success feedback. Failure preserves current detail and permits retry or reopening as appropriate. Native 1000×700 workflow and captures are recorded in Status/CURRENT_STATE.md.
 
