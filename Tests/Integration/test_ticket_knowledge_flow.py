@@ -89,6 +89,94 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         self.open_ticket()
         self.assertEqual(self.assert_open_article(article_id).article, published)
 
+    def test_category_v1_v2_lifecycle_search_link_and_reconstruction(self):
+        from Tests.Database.test_knowledge_categories import seed_knowledge_categories
+        seed_knowledge_categories(self.path)
+        self.link()
+        workspace = self.assert_open_article(self.article.knowledge_article_id)
+        service = self.context.knowledge_service
+        article_id = self.article.knowledge_article_id
+        with database_connection(self.path) as connection:
+            schema = tuple(tuple(row) for row in connection.execute('SELECT * FROM sqlite_master ORDER BY name'))
+            links = tuple(tuple(row) for row in connection.execute('SELECT * FROM ticket_knowledge_articles'))
+        def category(category_id):
+            dialog = workspace.open_category()
+            self.wait_idle()
+            dialog.category_input.setCurrentIndex(dialog.category_input.findData(category_id))
+            dialog.submit()
+            self.wait_idle()
+            self.assertEqual(workspace.article.category_id, category_id)
+        category(11)
+        self.assertEqual((workspace.article.status, workspace.article.version_number), ('DRAFT', 1))
+        self.assertEqual([v.version_number for v in service.list_article_versions(article_id)], [1])
+        editor = workspace.open_edit_article()
+        editor.body_input.setPlainText('Category integration procedure V2')
+        editor.submit()
+        self.wait_idle()
+        self.assertEqual(workspace.article.category_id, 11)
+        history = tuple(service.get_article_version(article_id, n) for n in (2, 1))
+        category(22)
+        self.assertEqual(workspace.article.version_number, 2)
+        self.confirm_publish(workspace)
+        self.assertEqual(workspace.article.category_id, 22)
+        self.assertFalse(workspace.category_button.isEnabled())
+        self.confirm_archive(workspace)
+        archived = workspace.article
+        self.assertEqual((archived.category_id, archived.version_number, archived.status), (22, 2, 'ARCHIVED'))
+        self.assertFalse(workspace.category_button.isEnabled())
+        workspace.search_input.setText('Category integration')
+        workspace.search_articles()
+        self.wait_idle()
+        self.assertEqual(workspace.article, archived)
+        self.assertEqual(workspace.model.rowCount(), 1)
+        self.open_ticket()
+        self.assertEqual(self.assert_open_article(article_id).article, archived)
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(tuple(row) for row in connection.execute('SELECT * FROM ticket_knowledge_articles')), links)
+            self.assertEqual(tuple(tuple(row) for row in connection.execute('SELECT * FROM sqlite_master ORDER BY name')), schema)
+            connection.execute("INSERT INTO knowledge_articles_fts(knowledge_articles_fts, rank) VALUES ('integrity-check', 1)")
+            self.assertEqual(connection.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
+            self.assertEqual(connection.execute('PRAGMA foreign_key_check').fetchall(), [])
+        self.close_window()
+        self.boot()
+        self.open_ticket()
+        self.assertEqual(self.assert_open_article(article_id).article, archived)
+        self.assertEqual(tuple(self.context.knowledge_service.get_article_version(article_id, n) for n in (2, 1)), history)
+
+    def test_category_same_version_external_update_rejects_reviewed_metadata_token(self):
+        from Tests.Database.test_knowledge_categories import seed_knowledge_categories
+        from f7hub.repositories.category_repository import CategoryRepository
+        from f7hub.repositories.knowledge_repository import KnowledgeRepository
+        from f7hub.services.knowledge_service import KnowledgeService
+        seed_knowledge_categories(self.path)
+        service = self.context.knowledge_service
+        current = service.update_article(article_id=self.article.knowledge_article_id,
+            expected_version_number=1, title='V2', summary=None, body='Metadata race')
+        self.window.show_knowledge()
+        self.wait_idle()
+        workspace = self.window.knowledge_workspace
+        dialog = workspace.open_category()
+        self.wait_idle()
+        external = KnowledgeService(KnowledgeRepository(self.path), CategoryRepository(self.path))
+        latest = external.set_article_category(current.knowledge_article_id, 2, current.updated_at, 22)
+        with database_connection(self.path) as connection:
+            before = tuple(connection.iterdump())
+        dialog.category_input.setCurrentIndex(dialog.category_input.findData(11))
+        dialog.submit()
+        self.wait_idle()
+        self.assertIn('Reopen the latest article', dialog.feedback.text())
+        self.assertFalse(dialog.save_button.isEnabled())
+        self.assertEqual(workspace.article, current)
+        self.assertEqual(service.get_article(current.knowledge_article_id), latest)
+        self.assertEqual(latest.version_number, 2)
+        self.assertEqual([v.version_number for v in service.list_article_versions(current.knowledge_article_id)], [2, 1])
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+        dialog.reject()
+        workspace.open_article_by_id(current.knowledge_article_id)
+        self.wait_idle()
+        self.assertEqual(workspace.article, latest)
+
     def test_stale_publish_through_real_window_rejects_external_revision(self):
         workspace = self.window.knowledge_workspace
         self.window.show_knowledge()

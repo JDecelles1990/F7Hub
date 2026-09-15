@@ -19,6 +19,7 @@ from f7hub.gui.knowledge_workspace import KnowledgeWorkspace
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.infrastructure.database import database_connection
 from f7hub.repositories.knowledge_repository import KnowledgeRepository
+from f7hub.repositories.category_repository import CategoryRepository
 from f7hub.services.knowledge_service import KnowledgeService
 
 
@@ -74,7 +75,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
 
         runner = ServiceTaskRunner()
         reopened = KnowledgeWorkspace(
-            KnowledgeService(KnowledgeRepository(self.path)), runner
+            KnowledgeService(KnowledgeRepository(self.path), CategoryRepository(self.path)), runner
         )
         reopened.show()
         reopened.refresh_list(select_article_id=workspace.article.knowledge_article_id)

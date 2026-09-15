@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 from f7hub.infrastructure.database import bootstrap_database, database_connection
 from f7hub.repositories.knowledge_repository import KnowledgeRepository
+from f7hub.repositories.category_repository import CategoryRepository
 from f7hub.services.knowledge_service import (
     KnowledgeSearchError,
     KnowledgeService,
@@ -25,7 +26,7 @@ class KnowledgeSearchTests(unittest.TestCase):
         self.database_path = Path(self._temporary_directory.name) / "knowledge-search.db"
         bootstrap_database(self.database_path, MIGRATIONS)
         self.repository = KnowledgeRepository(self.database_path)
-        self.service = KnowledgeService(self.repository)
+        self.service = KnowledgeService(self.repository, CategoryRepository(self.database_path))
 
     def tearDown(self) -> None:
         self._temporary_directory.cleanup()

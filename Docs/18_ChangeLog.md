@@ -47,6 +47,20 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-15 — Slice 018: DRAFT Knowledge Category Metadata
+
+Implemented assign/change/remove for one DRAFT article using active KNOWLEDGE reference data or NULL. Bootstrap explicitly shares CategoryRepository with KnowledgeService and TicketReferenceService. Current article reads resolve category names including inactive assigned references. The small asynchronous ArticleCategoryDialog offers Not selected, active choices, independent reference retry and safe cancellation. Category… sits beside the current category name; keeping it out of the top toolbar preserves the 1000×700 window under the tested styles.
+
+KnowledgeRepository.set_draft_category uses BEGIN IMMEDIATE, authoritative DRAFT/version/updated_at checks, category eligibility in the same transaction, no-op detection and a parameterized conditional UPDATE with exactly-one-row validation. Only category_id/updated_at change; reload precedes commit. Metadata races with unchanged content version reject safely. Timestamp generation reads UTC once and advances beyond a repeated/backward clock token. Version/content/history, publication state/time, FTS and ticket links remain unchanged. No schema or migration change.
+
+Retained focused validation: 117 PASS. Fresh resumed focused validation: 82 PASS (search 7, service 18, category repository/service 14, Knowledge GUI 33, category GUI 9, affected quick-company integration 1). The original full Database attempt failed seven tests due to an undefined Mock in the search constructor fixture; it now explicitly supplies CategoryRepository(self.database_path), with no search behavior or assertion change. The first completed Integration run failed nine 1000×700 checks because the added toolbar action forced a 1038-pixel minimum; relocating that action corrected the production layout. Final sequential regression: Database 294 PASS (14.860s), GUI 104 PASS (19.331s), Integration 86 PASS (373.145s): **484 PASS**, up 25 from the 459 baseline, zero failures/errors/skips. Detailed evidence is recorded in Status/CURRENT_STATE.md.
+
+Native validation: retained complete workflow PASS with 21 inspected captures; fresh bounded layout/selector/assignment/published-state verification PASS with four inspected captures. The fresh captures supersede the old toolbar placement; category/persistence behavior is unchanged. Six migration blobs remain unchanged, schema matches a fresh reference, integrity=ok, foreign-key violations=0 and FTS integrity=PASS. Agent validation only; independent review remains pending.
+
+Updated the affected feature/workflow/GUI/architecture/database/planning owners and CURRENT_STATE. ERD, physical schema and ROOT remain unchanged. Protected Docs/10 content and archived-vision deletion are preserved. All evidence is outside the repository at `C:\Users\Jo\AppData\Local\Temp\f7hub-slice018-validation`. Work remains unstaged and uncommitted. PUBLISHED/ARCHIVED category mutation, tags, category history/filtering/administration and Slice 019 are not implemented here.
+
+---
+
 # 2026-09-14 — Slice 017: Archive One Published Knowledge Article
 
 Implemented PUBLISHED → ARCHIVED through the existing KnowledgeWorkspace, KnowledgeService and KnowledgeRepository. Archive requires explicit PlainText confirmation identifying code/title and preserved content/history/ticket relationships, with Cancel as default and Escape. Enter respects the safe default; cancellation performs zero service calls or writes. Unarchive is explicitly unavailable.

@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
 import sqlite3
 import unicodedata
+
+from f7hub.repositories.category_repository import CategoryRepository
 
 from f7hub.repositories.knowledge_repository import (
     ArticleMissingError,
@@ -19,6 +22,8 @@ from f7hub.repositories.knowledge_repository import (
     KnowledgeArticleVersionRecord,
     KnowledgeRepository,
     StaleArticleVersionError,
+    StaleArticleMetadataError,
+    ArticleCategoryUnavailableError,
 )
 
 
@@ -66,11 +71,75 @@ class KnowledgeSearchError(RuntimeError):
     """Knowledge search failed; its message is safe for presentation."""
 
 
+@dataclass(frozen=True)
+class KnowledgeCategoryOption:
+    """Only the category identity and display name needed by the selector."""
+
+    category_id: int
+    name: str
+
+
+class KnowledgeCategoryError(RuntimeError):
+    """Category loading or saving failed; safe to show to a technician."""
+
+
+class KnowledgeCategoryConflictError(KnowledgeCategoryError):
+    """Reopen current article state before trying another category write."""
+
+
 class KnowledgeService:
     """Validate and coordinate the narrow create/list/read use cases."""
 
-    def __init__(self, repository: KnowledgeRepository) -> None:
+    def __init__(self, repository: KnowledgeRepository, categories: CategoryRepository) -> None:
         self._repository = repository
+        self._categories = categories
+
+    def list_active_knowledge_categories(self) -> tuple[KnowledgeCategoryOption, ...]:
+        try:
+            return tuple(KnowledgeCategoryOption(row.category_id, row.name)
+                         for row in self._categories.list_categories(scope="KNOWLEDGE", active_only=True))
+        except (sqlite3.Error, OSError, RuntimeError) as error:
+            raise KnowledgeCategoryError("Could not load Knowledge categories. Refresh categories and try again.") from error
+
+    def set_article_category(
+        self, article_id: int, expected_version_number: int,
+        expected_updated_at: str, category_id: int | None,
+    ) -> KnowledgeArticleRecord:
+        article_id = _positive_integer(article_id, "Article ID")
+        expected_version_number = _positive_integer(expected_version_number, "Expected version")
+        _required_text(expected_updated_at, "Expected update time")
+        if category_id is not None:
+            category_id = _positive_integer(category_id, "Category ID")
+        # A repeated or backward-moving clock must not reuse a metadata token.
+        now = datetime.now(timezone.utc)
+        try:
+            previous = datetime.fromisoformat(expected_updated_at.replace("Z", "+00:00"))
+        except ValueError:
+            previous = None
+        if previous is not None and previous.tzinfo is not None and now <= previous:
+            now = previous + timedelta(microseconds=1)
+        timestamp = now.astimezone(timezone.utc).isoformat(timespec="microseconds").replace("+00:00", "Z")
+        try:
+            return self._repository.set_draft_category(
+                article_id=article_id, expected_version_number=expected_version_number,
+                expected_updated_at=expected_updated_at, category_id=category_id, updated_at=timestamp,
+            )
+        except ArticleMissingError as error:
+            raise KnowledgeCategoryConflictError("This article no longer exists.") from error
+        except ArticleNotEditableError as error:
+            raise KnowledgeCategoryConflictError("Only draft articles can change category.") from error
+        except (StaleArticleVersionError, StaleArticleMetadataError) as error:
+            raise KnowledgeCategoryConflictError(
+                "This article changed after you opened it. Reopen the latest article before changing its category."
+            ) from error
+        except ArticleCategoryUnavailableError as error:
+            raise KnowledgeCategoryError(
+                "The selected Knowledge category is no longer available. Refresh categories and try again."
+            ) from error
+        except ArticleUnchangedError as error:
+            raise KnowledgeCategoryError("Category is already selected.") from error
+        except (sqlite3.Error, OSError, RuntimeError, OverflowError) as error:
+            raise KnowledgeCategoryError("Could not update the article category. Try again.") from error
 
     def publish_article(
         self, article_id: int, expected_version_number: int,

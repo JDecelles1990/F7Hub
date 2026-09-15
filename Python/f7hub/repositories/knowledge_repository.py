@@ -26,6 +26,7 @@ class KnowledgeArticleRecord:
     created_at: str
     updated_at: str
     published_at: str | None
+    category_name: str | None = None
 
 
 @dataclass(frozen=True)
@@ -111,6 +112,14 @@ class ArticleUnchangedError(RuntimeError):
 
 class ArticleVersionMissingError(RuntimeError):
     """The requested immutable revision does not exist for the article."""
+
+
+class StaleArticleMetadataError(RuntimeError):
+    """The reviewed current metadata token is no longer current."""
+
+
+class ArticleCategoryUnavailableError(RuntimeError):
+    """The requested category is not active Knowledge reference data."""
 
 
 class KnowledgeRepository:
@@ -216,6 +225,47 @@ class KnowledgeRepository:
             connection.commit()
         return article
 
+    def set_draft_category(
+        self, *, article_id: int, expected_version_number: int,
+        expected_updated_at: str, category_id: int | None, updated_at: str,
+    ) -> KnowledgeArticleRecord:
+        """Change current metadata only, guarded by content and metadata tokens."""
+        with database_connection(self._database_path) as connection:
+            connection.execute("BEGIN IMMEDIATE")
+            current = _get_article(connection, article_id)
+            if current is None:
+                raise ArticleMissingError()
+            if current.status != "DRAFT":
+                raise ArticleNotEditableError()
+            if current.version_number != expected_version_number:
+                raise StaleArticleVersionError()
+            if current.updated_at != expected_updated_at:
+                raise StaleArticleMetadataError()
+            if category_id is not None and connection.execute(
+                "SELECT 1 FROM categories WHERE category_id = ? "
+                "AND scope = 'KNOWLEDGE' AND is_active = 1", (category_id,),
+            ).fetchone() is None:
+                raise ArticleCategoryUnavailableError()
+            if current.category_id == category_id:
+                raise ArticleUnchangedError()
+            if updated_at == current.updated_at:
+                raise RuntimeError("Category update requires a new metadata token.")
+            cursor = connection.execute(
+                """
+                UPDATE knowledge_articles SET category_id = ?, updated_at = ?
+                WHERE knowledge_article_id = ? AND status = 'DRAFT'
+                    AND version_number = ? AND updated_at = ?
+                """,
+                (category_id, updated_at, article_id, expected_version_number, expected_updated_at),
+            )
+            if cursor.rowcount != 1:
+                raise StaleArticleMetadataError()
+            article = _get_article(connection, article_id)
+            if article is None:
+                raise RuntimeError("Updated knowledge article could not be reloaded.")
+            connection.commit()
+        return article
+
     def publish_draft_article(
         self, *, article_id: int, expected_version_number: int, published_at: str,
     ) -> KnowledgeArticleRecord:
@@ -288,7 +338,9 @@ class KnowledgeRepository:
         with database_connection(self._database_path) as connection:
             rows = connection.execute(
                 f"""
-                SELECT {_ARTICLE_COLUMNS}
+                SELECT {_ARTICLE_COLUMNS},
+                    (SELECT name FROM categories WHERE categories.category_id =
+                        knowledge_articles.category_id) AS category_name
                 FROM knowledge_articles
                 ORDER BY updated_at DESC, knowledge_article_id DESC
                 """
@@ -374,7 +426,9 @@ def _get_article(
 ) -> KnowledgeArticleRecord | None:
     row = connection.execute(
         f"""
-        SELECT {_ARTICLE_COLUMNS}
+        SELECT {_ARTICLE_COLUMNS},
+            (SELECT name FROM categories WHERE categories.category_id =
+                knowledge_articles.category_id) AS category_name
         FROM knowledge_articles
         WHERE knowledge_article_id = ?
         """,
@@ -405,6 +459,7 @@ def _article_from_row(row: sqlite3.Row) -> KnowledgeArticleRecord:
         created_at=str(row["created_at"]),
         updated_at=str(row["updated_at"]),
         published_at=row["published_at"],
+        category_name=row["category_name"],
     )
 
 

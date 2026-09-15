@@ -16,6 +16,7 @@ from f7hub.repositories.ticket_knowledge_repository import (
     TicketKnowledgeRepository, LinkTicketMissingError, LinkArticleMissingError,
     ArticleAlreadyLinkedError, ArticleNotLinkedError,
 )
+from f7hub.repositories.category_repository import CategoryRepository
 from f7hub.services.knowledge_service import KnowledgeService
 from f7hub.services.ticket_service import TicketService
 
@@ -27,7 +28,7 @@ class TicketKnowledgeRepositoryTests(unittest.TestCase):
         self.path = Path(self.temp.name) / "links.db"
         bootstrap_database(self.path, Path(__file__).resolve().parents[2] / "Database/Migrations")
         self.tickets = TicketService(TicketRepository(self.path))
-        self.knowledge = KnowledgeService(KnowledgeRepository(self.path))
+        self.knowledge = KnowledgeService(KnowledgeRepository(self.path), CategoryRepository(self.path))
         self.ticket = self.tickets.create_ticket(subject="Synthetic ticket")
         self.article = self.create_article("KB0001")
         self.repository = TicketKnowledgeRepository(self.path)

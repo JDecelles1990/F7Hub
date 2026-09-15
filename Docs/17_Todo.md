@@ -418,6 +418,19 @@ Slice 016 — publish one reviewed DRAFT, implemented 2026-09-09:
 - [x] Six unchanged migrations; schema unchanged, SQLite/FTS integrity and foreign keys verified. Final regression evidence is in Status/CURRENT_STATE.md.
 - [x] Slice 016 integrated in the user-specified main baseline `1f8b418`; prior independent-review evidence is not reasserted here.
 
+Slice 018 — DRAFT Knowledge category metadata, implemented 2026-09-14 and completed 2026-09-15:
+
+- [x] Reuse active KNOWLEDGE reads from CategoryRepository with explicit service injection.
+- [x] Display current category names, including inactive assigned references.
+- [x] Assign/change/remove through an asynchronous modal with Cancel and reference-only retry.
+- [x] Validate DRAFT, eligibility, expected version and expected updated_at inside the write transaction.
+- [x] Preserve content/history, lifecycle, search and ticket relationships; add no migration.
+- [x] Add focused repository/service/real-window GUI and lifecycle/race integration coverage.
+- [x] Execute native Windows workflow and inspect captures; evidence in Status/CURRENT_STATE.md.
+- [ ] Independent review of unstaged/uncommitted Slice 018.
+
+PUBLISHED/ARCHIVED category mutation, tags, category filtering, category history and administration: NOT IMPLEMENTED.
+
 Slice 017 — archive one reviewed PUBLISHED article, implemented 2026-09-14:
 
 - [x] Archive action with PlainText code/title and preserved content/history/links notice; Unarchive unavailable.
@@ -426,9 +439,10 @@ Slice 017 — archive one reviewed PUBLISHED article, implemented 2026-09-14:
 - [x] Preserve original published_at; set updated_at to archive UTC time; no version increment or snapshot.
 - [x] Preserve search, history and ticket relationships/Open Article; reconstruct persisted ARCHIVED state.
 - [x] Six unchanged migrations; no schema or dependency changes.
-- [ ] Independent review of unstaged/uncommitted Slice 017.
 
-Recommended next candidate only: Unarchive one ARCHIVED article to PUBLISHED with explicit confirmation. Unarchive and Unpublish: NOT IMPLEMENTED. Restore/revert, historical editing/deletion, compare/apply, historical status, pagination, categories/tags, unified/ticket search, recommendations, AI and richer relationship workflows remain deferred. Do not begin Slice 018 here.
+Slice 017 is the supplied integrated baseline for Slice 018.
+
+Recommended next candidate only: read-only Knowledge category filtering. Unarchive, Unpublish, tags, category administration/history and richer relationship workflows remain deferred. Do not begin Slice 019 here.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 
