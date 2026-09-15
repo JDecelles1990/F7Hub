@@ -121,9 +121,11 @@ After Slice 015, the verified milestone is **CURRENT KNOWLEDGE ARTICLES ARE SEAR
 
 Slice 016 implements and verifies **ONE REVIEWED DRAFT CAN BE PUBLISHED WITHOUT CHANGING CONTENT HISTORY**. Publish requires explicit Cancel-default confirmation and the exact loaded version. Matching UTC published_at/updated_at commit atomically; version/content/history/links remain unchanged. Current PUBLISHED content remains searchable and readable, with Edit/Publish unavailable and Version History available. No migration was added. Fresh evidence is recorded in Status/CURRENT_STATE.md.
 
-Slice 017 implements **ONE PUBLISHED ARTICLE CAN BE ARCHIVED WITH PUBLICATION AND CONTENT HISTORY PRESERVED**. Explicit Cancel-default confirmation and expected-version validation guard PUBLISHED → ARCHIVED. updated_at records archive UTC time; original published_at, version, history, search content and ticket links remain intact. No migration is added. Independent Slice 017 review is the next gate; fresh validation is recorded in Status/CURRENT_STATE.md.
+Slice 018 implements **ONE DRAFT KNOWLEDGE ARTICLE CAN ASSIGN, CHANGE OR REMOVE ITS CATEGORY** using active KNOWLEDGE reference data and both content-version/metadata-time concurrency tokens. This is current metadata only; content/history, lifecycle, FTS and ticket links are preserved. Independent Slice 018 review is the next gate. A possible subsequent bounded slice is read-only Knowledge category filtering; it is not implemented here. Evidence is in Status/CURRENT_STATE.md.
 
-Recommend one next bounded candidate: Unarchive one ARCHIVED article to PUBLISHED, with explicit confirmation and preserved content/history. It would make this lifecycle step reversible without reopening content editing (Unpublish) or creating a new content revision (restore/revert). Recommendation only; Unarchive, Unpublish and restore/revert are NOT IMPLEMENTED.
+Slice 017 implements **ONE PUBLISHED ARTICLE CAN BE ARCHIVED WITH PUBLICATION AND CONTENT HISTORY PRESERVED**. Explicit Cancel-default confirmation and expected-version validation guard PUBLISHED → ARCHIVED. updated_at records archive UTC time; original published_at, version, history, search content and ticket links remain intact. No migration is added. Slice 017 is the supplied baseline for Slice 018; its historical validation is retained in the changelog.
+
+Recommend one next bounded candidate after independent review: read-only Knowledge category filtering. Category filtering, Unarchive, Unpublish and restore/revert are NOT IMPLEMENTED.
 
 The F7Hub roadmap is organized into:
 

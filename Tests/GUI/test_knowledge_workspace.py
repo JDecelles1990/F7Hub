@@ -69,6 +69,7 @@ class RecordingKnowledgeService:
             summary=(values["summary"].strip() or None) if values["summary"] is not None else None,
             body_markdown=values["body"].strip(),
             status="DRAFT",
+            category_id=None, category_name=None, updated_at="2026-09-14T12:00:00.000Z",
             version_number=1,
         )
         self.articles.append(article)

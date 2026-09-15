@@ -62,14 +62,15 @@ def bootstrap_application(
     ticket_repository = TicketRepository(resolved_database_path)
     ticket_service = TicketService(ticket_repository)
     knowledge_repository = KnowledgeRepository(resolved_database_path)
-    knowledge_service = KnowledgeService(knowledge_repository)
+    categories = CategoryRepository(resolved_database_path)
+    knowledge_service = KnowledgeService(knowledge_repository, categories)
     ticket_knowledge_repository = TicketKnowledgeRepository(resolved_database_path)
     ticket_knowledge_service = TicketKnowledgeService(ticket_knowledge_repository)
     companies = CompanyRepository(resolved_database_path)
     contacts = ContactRepository(resolved_database_path)
     reference_service = TicketReferenceService(
         companies, contacts,
-        CategoryRepository(resolved_database_path),
+        categories,
     )
     main_window = MainWindow(
         ticket_service, reference_service=reference_service, company_service=CompanyService(companies),

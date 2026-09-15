@@ -737,6 +737,12 @@ Confirmed publication runs asynchronously and requires the loaded content versio
 
 Publication assigns matching UTC published_at/updated_at timestamps without incrementing the version or creating a content snapshot. No optimistic status change occurs before persistence succeeds. Unpublish and Unarchive remain NOT IMPLEMENTED; PUBLISHED archive is implemented in Slice 017.
 
+## DRAFT category assignment — Slice 018
+
+Knowledge Base → open DRAFT article → Category… → select an active KNOWLEDGE category or Not selected → Save → authoritative current category displays. Assign, change and remove are implemented for DRAFT only. PUBLISHED and ARCHIVED articles display their category but cannot change it.
+
+The selector loads independently in the background. Cancel, default Enter and Escape dismiss without a mutation or refresh; cancellation also works during category reads. Failed reference loading leaves the article readable and offers Refresh categories. An inactive assigned name remains visible as current, with active replacement or explicit clearing available. Saving disables duplicate submission and dismissal until completion. Failed writes keep the old truthful article visible; stale saves require closing and reopening the latest article. Category changes create no content revision or historical snapshot.
+
 ## Implemented read-only version history — Slice 014
 
 Slice 014 implements read-only version history: Knowledge Base → open an article → Version History → select a persisted revision → read its exact snapshot. History is available for loaded DRAFT, PUBLISHED and ARCHIVED articles with an available service and idle runner. The list is newest-first and excludes bodies; only the selected revision loads its summary/body. Historical version, title, summary, body, change summary, created by and stored timestamp come from knowledge_article_versions. Missing optional metadata displays Not provided. Status, category, updated_by and published_at are not snapshotted and are not presented as historical data. Article code is current immutable identity. Viewing does not change the current article, history rows, timestamps or ticket activity.
