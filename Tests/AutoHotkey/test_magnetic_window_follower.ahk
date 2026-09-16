@@ -1,6 +1,9 @@
 #Requires AutoHotkey v2.0
 #Include ..\..\AutoHotkey\Helpers\MagneticWindowFollower.ahk
 
+resultPath := A_Temp "\F7Hub-test_magnetic_window_follower.txt"
+try FileDelete resultPath
+
 follower := MagneticWindowFollower()
 testExitCode := 0
 window := 0
@@ -16,8 +19,9 @@ try {
     Assert(follower.Running, "Follower running state was not set")
     Assert(follower.Hwnd == hwnd, "Follower did not retain the target window")
 
-    Sleep 80
+    Sleep 120
     Assert(WinExist(hwnd), "Follower destroyed the target window")
+    Assert(follower.LastError == "", "Follower timer failed: " follower.LastError)
 
     follower.Stop()
     Assert(!follower.Running, "Follower did not stop")
@@ -28,9 +32,9 @@ try {
     Assert(follower.Clamp(-5, 0, 10) == 0, "Clamp failed the lower boundary")
     Assert(follower.Clamp(15, 0, 10) == 10, "Clamp failed the upper boundary")
 
-    FileAppend "PASS: invalid target rejection, start/stop lifecycle, safe timer tick, velocity reset and clamp boundaries.`n", "*"
+    Report("PASS: invalid target rejection, start/stop lifecycle, safe timer tick, velocity reset and clamp boundaries.")
 } catch Error as testError {
-    FileAppend "FAIL: " testError.Message "`n", "*"
+    Report("FAIL: " testError.Message " | What=" testError.What " | Line=" testError.Line)
     testExitCode := 1
 } finally {
     follower.Stop()
@@ -43,4 +47,9 @@ ExitApp testExitCode
 Assert(condition, message) {
     if !condition
         throw Error(message)
+}
+
+Report(message) {
+    global resultPath
+    FileAppend message "`n", resultPath, "UTF-8"
 }
