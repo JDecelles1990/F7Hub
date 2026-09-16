@@ -12,6 +12,7 @@ class MagneticWindowFollower {
         this.VelocityX := 0.0
         this.VelocityY := 0.0
         this.Running := false
+        this.LastError := ""
         this.TickCallback := ObjBindMethod(this, "Tick")
     }
 
@@ -19,12 +20,15 @@ class MagneticWindowFollower {
         if !hwnd || !WinExist(hwnd)
             return false
 
-        if WinGetMinMax(hwnd) == -1
+        ; A maximized or minimized window cannot provide useful visible chase
+        ; behavior. Restore it before movement begins.
+        if WinGetMinMax(hwnd) != 0
             WinRestore hwnd
 
         this.Hwnd := hwnd
         this.VelocityX := 0.0
         this.VelocityY := 0.0
+        this.LastError := ""
         this.Running := true
         SetTimer this.TickCallback, this.IntervalMs
         return true
@@ -51,14 +55,17 @@ class MagneticWindowFollower {
         }
 
         try {
-            if WinGetMinMax(hwnd) == -1 {
+            ; WinMove normally applies AutoHotkey's window-operation delay.
+            ; This timer is already rate-limited, so remove that extra delay to
+            ; avoid visible stutter/flicker while following the pointer.
+            SetWinDelay -1
+            CoordMode "Mouse", "Screen"
+
+            if WinGetMinMax(hwnd) != 0 {
                 this.Stop()
                 return
             }
 
-            ; Timer callbacks are separate AHK threads, so set screen coordinates
-            ; explicitly before reading the pointer position.
-            CoordMode "Mouse", "Screen"
             MouseGetPos &mouseX, &mouseY
             WinGetPos &winX, &winY, &winWidth, &winHeight, hwnd
 
@@ -97,8 +104,10 @@ class MagneticWindowFollower {
             nextX := this.Clamp(winX + this.VelocityX, workLeft, Max(workLeft, workRight - winWidth))
             nextY := this.Clamp(winY + this.VelocityY, workTop, Max(workTop, workBottom - winHeight))
             WinMove Round(nextX), Round(nextY), , , hwnd
-        } catch TargetError {
-            ; The window may disappear between WinExist and a subsequent call.
+        } catch Error as movementError {
+            ; Desktop state can change between existence checks and a Win32
+            ; operation. Never let a timer exception destabilize the shortcut.
+            this.LastError := movementError.Message
             this.Stop()
         }
     }
