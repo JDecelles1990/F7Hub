@@ -319,10 +319,12 @@ class KnowledgeService:
 
     def list_articles(
         self, *, category_id: int | None = None, uncategorized_only: bool = False,
-        status: str | None = None,
+        status: str | None = None, tag_id: int | None = None,
+        untagged_only: bool = False,
     ) -> tuple[KnowledgeArticleRecord, ...]:
         _validate_category_filter(category_id, uncategorized_only)
         _validate_status_filter(status)
+        _validate_tag_filter(tag_id, untagged_only)
         try:
             arguments = {
                 "category_id": category_id,
@@ -330,6 +332,10 @@ class KnowledgeService:
             }
             if status is not None:
                 arguments["status"] = status
+            if tag_id is not None:
+                arguments["tag_id"] = tag_id
+            if untagged_only:
+                arguments["untagged_only"] = True
             return self._repository.list_articles(**arguments)
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgeCreationError("Could not load knowledge articles.") from error
@@ -345,11 +351,13 @@ class KnowledgeService:
     def search_articles(
         self, query: str, *, category_id: int | None = None,
         uncategorized_only: bool = False, status: str | None = None,
+        tag_id: int | None = None, untagged_only: bool = False,
     ) -> tuple[KnowledgeArticleSearchResult, ...]:
         """Search current articles using a safe literal FTS expression."""
 
         _validate_category_filter(category_id, uncategorized_only)
         _validate_status_filter(status)
+        _validate_tag_filter(tag_id, untagged_only)
         if not isinstance(query, str):
             raise KnowledgeValidationError("Search query must be text.")
         fts_query = _literal_fts_query(query)
@@ -362,6 +370,10 @@ class KnowledgeService:
             }
             if status is not None:
                 arguments["status"] = status
+            if tag_id is not None:
+                arguments["tag_id"] = tag_id
+            if untagged_only:
+                arguments["untagged_only"] = True
             return self._repository.search_articles(fts_query, **arguments)
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise KnowledgeSearchError(
@@ -420,6 +432,15 @@ def _validate_status_filter(status: str | None) -> None:
         raise KnowledgeValidationError(
             "Status filter must be DRAFT, PUBLISHED, ARCHIVED, or All statuses."
         )
+
+
+def _validate_tag_filter(tag_id: int | None, untagged_only: bool) -> None:
+    if not isinstance(untagged_only, bool):
+        raise KnowledgeValidationError("Untagged filter must be a boolean.")
+    if tag_id is not None:
+        _positive_integer(tag_id, "Tag ID")
+        if untagged_only:
+            raise KnowledgeValidationError("Choose one tag filter mode.")
 
 
 def _required_text(value: object, label: str) -> str:

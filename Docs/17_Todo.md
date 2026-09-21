@@ -472,7 +472,17 @@ Slice 021 — existing global tags on DRAFT Knowledge articles:
 - [x] Complete 318 Database + 123 GUI + 91 Integration tests and native Windows 1000×700 validation with six inspected captures.
 - [ ] Independent Slice 021 review.
 
-Recommended next candidate after review: **Slice 022 — read-only Knowledge tag filtering**, after precise single-tag/Untagged semantics are approved. Saved filters remain deferred with date filtering, pagination, Unarchive, Unpublish, category/tag administration/history and richer relationship workflows. Do not implement Slice 022 here.
+Slice 022 — read-only Knowledge tag filtering:
+
+- [x] Add All tags, Untagged and one specific existing global tag for normal lists and FTS.
+- [x] Compose Tag with Category and Status while preserving MATCH, bm25/list ordering and one row per article.
+- [x] Reuse TagRepository through KnowledgeService; validate one mutually exclusive tag mode and perform SELECT-only reads.
+- [x] Load tag/category references independently, preserve filters through Clear Search, and reconcile mutations/lifecycle/navigation.
+- [x] Preserve six migrations and the physical schema; do not index tags in FTS.
+- [x] Add repository/service/GUI/integration coverage and native Windows 1000×700 verification.
+- [ ] Independent Slice 022 review.
+
+Recommended next candidate after Slice 022 review: **manual Knowledge filter-reference refresh**, reloading category and global-tag choices independently while preserving valid selections and resetting only unavailable selections. Keep it read-only and add no polling, tag administration, saved filters or multi-tag expressions.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

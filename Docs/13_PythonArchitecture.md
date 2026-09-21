@@ -719,6 +719,12 @@ KnowledgeService.list_articles/search_articles accept status=None and validate o
 
 KnowledgeWorkspace adds one static QComboBox whose item data carries the service value. The existing filter-state method sends current category and status to normal list/search requests, while filter changes during active search reuse the last executed query. Clear Search retains both. Explicit Ticket Open Article resets both; create/publish/archive reset only dimensions that exclude the authoritative result. Category writes and content edits preserve status when still eligible. The shared article runner handles all reads; no status loader, service layer, MainWindow change or new dependency is introduced. See Status/CURRENT_STATE.md for Slice 020 validation.
 
+## Implemented Knowledge Tag Filtering — Slice 022
+
+`KnowledgeService.list_articles/search_articles` accept one optional positive non-bool `tag_id` or a boolean `untagged_only`, reject contradictions, and forward only active tag modes. `KnowledgeRepository` correlates `EXISTS`/`NOT EXISTS` on current article identity, so many-to-many relationships never duplicate list or ranked FTS rows. Category/status arguments, literal query construction, MATCH, ordering and record models remain unchanged.
+
+`KnowledgeWorkspace` stores explicit All/Untagged/specific item data, loads global choices through `list_available_tags()`, and keeps tag-reference execution independent from the category runner. The two reference runners contribute to `filter_loading`; the shared article runner still serializes list/search/detail and mutations. Active search uses the executed query, Clear Search retains all filters, and authoritative reconciliation handles selection, tag writes, new articles, lifecycle changes and cross-workspace reveal. No MainWindow, migration or new service/repository class is required.
+
 ## Implemented Knowledge Category Filtering — Slice 019
 
 Slice 019 adds read-only category filtering to KnowledgeService.list_articles/search_articles: positive integer category_id excluding bool, boolean uncategorized_only, and mutually exclusive modes. Defaults preserve All behavior. Service errors remain safely translated and literal FTS tokenization is unchanged. Repository queries bind category values and use only internal constant predicate fragments.

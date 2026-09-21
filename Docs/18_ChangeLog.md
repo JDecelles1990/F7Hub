@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-15 — Slice 022: Read-only Knowledge Tag Filtering
+
+Implemented All tags, Untagged and one-specific-global-tag filtering for current Knowledge lists and FTS search. Tag composes with Category and Status, active changes reuse the last executed query, Clear Search preserves all three filters, and explicit Ticket Open Article resets all filters before reveal. Tag mutation, new article, edit, Publish and Archive reconcile against authoritative current state.
+
+KnowledgeRepository uses correlated `EXISTS`/`NOT EXISTS` predicates on `knowledge_article_tags`, preventing duplicate rows for multi-tag articles while preserving normal ordering and FTS MATCH/bm25 ordering. KnowledgeService validates the single-tag contract. KnowledgeWorkspace reuses global TagRepository options through an independent asynchronous reference runner; MainWindow is unchanged. Filtering is SELECT-only. Six migrations, schema, indexed FTS content and triggers are unchanged. Multi-tag AND/OR, tag administration, saved/date filters and historical tag filtering remain unimplemented.
+
+Validation evidence and actual regression/native results are recorded in `Status/CURRENT_STATE.md`. Work remains unstaged/uncommitted for independent review.
+
 # 2026-09-15 — Slice 021: Existing Global Tags on DRAFT Knowledge Articles
 
 Implemented Tags… for an idle loaded DRAFT article using existing rows from the global `tags` table. The checkable selector supports zero, one or multiple tags, preselects the authoritative current set, and treats Save as exact replacement. Cancel/Escape make no mutation; reference and persistence failures remain safe and truthful. Current tag names remain visible after edit, publish, archive, reconstruction and Ticket Open Article, while PUBLISHED/ARCHIVED mutation is unavailable.

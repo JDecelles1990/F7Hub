@@ -29,6 +29,10 @@ from f7hub.gui.version_history_dialog import VersionHistoryDialog
 from f7hub.services.knowledge_service import KnowledgeArchiveError, KnowledgePublishError, KnowledgeService
 
 
+_TAG_FILTER_ALL = ("all", None)
+_TAG_FILTER_UNTAGGED = ("untagged", None)
+
+
 class KnowledgeWorkspace(QWidget):
     """A deliberately small Knowledge Base list/detail workspace."""
 
@@ -42,7 +46,11 @@ class KnowledgeWorkspace(QWidget):
         self._service = service
         self._runner = runner
         self._filter_runner = ServiceTaskRunner(self)
+        self._tag_filter_runner = ServiceTaskRunner(self)
         self._filter_options_loaded = False
+        self._filter_options_ready = False
+        self._tag_filter_options_loaded = False
+        self._tag_filter_options_ready = False
         self._pending_selection_id = None
         self._preferred_selection_id = None
         self._search_active = False
@@ -94,6 +102,7 @@ class KnowledgeWorkspace(QWidget):
         search_row.addWidget(self.search_input, 1)
         search_row.addWidget(self.search_button)
         search_row.addWidget(self.clear_search_button)
+        filter_row = QHBoxLayout()
         self.category_filter = QComboBox(self)
         self.category_filter.setAccessibleName("Filter knowledge articles by category")
         self.category_filter.setMinimumContentsLength(16)
@@ -101,8 +110,8 @@ class KnowledgeWorkspace(QWidget):
         self.category_filter.addItem("All categories", None)
         self.category_filter.addItem("Not selected", None)
         self.category_filter.currentIndexChanged.connect(self._filter_changed)
-        search_row.addWidget(QLabel("Category:", self))
-        search_row.addWidget(self.category_filter)
+        filter_row.addWidget(QLabel("Category:", self))
+        filter_row.addWidget(self.category_filter, 1)
         self.status_filter = QComboBox(self)
         self.status_filter.setAccessibleName("Filter knowledge articles by status")
         self.status_filter.addItem("All statuses", None)
@@ -110,12 +119,27 @@ class KnowledgeWorkspace(QWidget):
         self.status_filter.addItem("Published", "PUBLISHED")
         self.status_filter.addItem("Archived", "ARCHIVED")
         self.status_filter.currentIndexChanged.connect(self._filter_changed)
-        search_row.addWidget(QLabel("Status:", self))
-        search_row.addWidget(self.status_filter)
+        filter_row.addWidget(QLabel("Status:", self))
+        filter_row.addWidget(self.status_filter, 1)
+        self.tag_filter = QComboBox(self)
+        self.tag_filter.setAccessibleName("Filter knowledge articles by tag")
+        self.tag_filter.setMinimumContentsLength(12)
+        self.tag_filter.setSizeAdjustPolicy(
+            QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
+        )
+        self.tag_filter.addItem("All tags", _TAG_FILTER_ALL)
+        self.tag_filter.addItem("Untagged", _TAG_FILTER_UNTAGGED)
+        self.tag_filter.currentIndexChanged.connect(self._filter_changed)
+        filter_row.addWidget(QLabel("Tag:", self))
+        filter_row.addWidget(self.tag_filter, 1)
         self.filter_feedback = QLabel(self)
         self.filter_feedback.setTextFormat(Qt.TextFormat.PlainText)
         self.filter_feedback.setWordWrap(True)
         self.filter_feedback.hide()
+        self.tag_filter_feedback = QLabel(self)
+        self.tag_filter_feedback.setTextFormat(Qt.TextFormat.PlainText)
+        self.tag_filter_feedback.setWordWrap(True)
+        self.tag_filter_feedback.hide()
 
         self.model = QStandardItemModel(0, 3, self)
         self.model.setHorizontalHeaderLabels(("Article code", "Title", "Status"))
@@ -182,30 +206,41 @@ class KnowledgeWorkspace(QWidget):
         layout = QVBoxLayout(self)
         layout.addLayout(top)
         layout.addLayout(search_row)
+        layout.addLayout(filter_row)
         layout.addWidget(self.filter_feedback)
+        layout.addWidget(self.tag_filter_feedback)
         layout.addWidget(self.feedback)
         layout.addWidget(splitter, 1)
         self._runner.busy_changed.connect(self._update_actions)
         self._filter_runner.busy_changed.connect(lambda _busy: self._update_actions(self._runner.busy))
+        self._tag_filter_runner.busy_changed.connect(lambda _busy: self._update_actions(self._runner.busy))
         self._update_actions(False)
 
     @property
     def filter_loading(self) -> bool:
-        return self._filter_runner.busy
+        return self._filter_runner.busy or self._tag_filter_runner.busy
 
     def _load_filter_options(self) -> None:
-        if self._filter_options_loaded or self._filter_runner.busy:
+        if not self._filter_options_loaded and not self._filter_runner.busy:
+            self._filter_options_ready = False
+            self._filter_runner.submit(
+                self._service.list_active_knowledge_categories,
+                self._filter_options_succeeded, self._filter_options_failed,
+            )
+        if self._tag_filter_options_loaded or self._tag_filter_runner.busy:
             return
-        self._filter_runner.submit(
-            self._service.list_active_knowledge_categories,
-            self._filter_options_ready, self._filter_options_failed,
+        self._tag_filter_options_ready = False
+        self._tag_filter_runner.submit(
+            self._service.list_available_tags,
+            self._tag_filter_options_succeeded, self._tag_filter_options_failed,
         )
 
-    def _filter_options_ready(self, categories) -> None:
+    def _filter_options_succeeded(self, categories) -> None:
         with QSignalBlocker(self.category_filter):
             for category in categories:
                 self.category_filter.addItem(category.name, category.category_id)
         self._filter_options_loaded = True
+        self._filter_options_ready = True
         self.filter_feedback.hide()
         self._update_actions(self._runner.busy)
 
@@ -213,6 +248,28 @@ class KnowledgeWorkspace(QWidget):
         logging.getLogger(__name__).error("Knowledge filter options failed: %s", type(error).__name__)
         self.filter_feedback.setText("Could not load category filters. All categories remain available. Reopen Knowledge Base to retry.")
         self.filter_feedback.show()
+        self._filter_options_ready = True
+        self._update_actions(self._runner.busy)
+
+    def _tag_filter_options_succeeded(self, tags) -> None:
+        with QSignalBlocker(self.tag_filter):
+            for tag in tags:
+                self.tag_filter.addItem(tag.name, ("tag", tag.tag_id))
+        self._tag_filter_options_loaded = True
+        self._tag_filter_options_ready = True
+        self.tag_filter_feedback.hide()
+        self._update_actions(self._runner.busy)
+
+    def _tag_filter_options_failed(self, error) -> None:
+        logging.getLogger(__name__).error(
+            "Knowledge tag filter options failed: %s", type(error).__name__
+        )
+        self.tag_filter_feedback.setText(
+            "Could not load specific tag filters. All tags and Untagged remain available. "
+            "Reopen Knowledge Base to retry."
+        )
+        self.tag_filter_feedback.show()
+        self._tag_filter_options_ready = True
         self._update_actions(self._runner.busy)
 
     def _filter_arguments(self) -> dict:
@@ -226,6 +283,11 @@ class KnowledgeWorkspace(QWidget):
         status = self.status_filter.currentData()
         if status is not None:
             arguments["status"] = status
+        tag_mode, tag_id = self.tag_filter.currentData()
+        if tag_mode == "untagged":
+            arguments["untagged_only"] = True
+        elif tag_mode == "tag":
+            arguments["tag_id"] = tag_id
         return arguments
 
     def _reset_category_filter(self) -> None:
@@ -235,6 +297,19 @@ class KnowledgeWorkspace(QWidget):
     def _reset_status_filter(self) -> None:
         with QSignalBlocker(self.status_filter):
             self.status_filter.setCurrentIndex(0)
+
+    def _reset_tag_filter(self) -> None:
+        with QSignalBlocker(self.tag_filter):
+            self.tag_filter.setCurrentIndex(0)
+
+    def _article_matches_tag_filter(self, article) -> bool:
+        tag_mode, _tag_id = self.tag_filter.currentData()
+        tag_names = getattr(article, "tag_names", ())
+        if tag_mode == "untagged":
+            return not tag_names
+        if tag_mode == "tag":
+            return self.tag_filter.currentText() in tag_names
+        return True
 
     def _filter_changed(self, _index) -> None:
         if self._runner.busy:
@@ -367,8 +442,11 @@ class KnowledgeWorkspace(QWidget):
 
     def _tags_updated(self, article):
         # The repository reloaded the current tag set before its transaction committed.
-        self._show_article(article)
-        self.feedback.setText("Article tags saved.")
+        if self.tag_filter.currentData() == _TAG_FILTER_ALL:
+            self._show_article(article)
+            self.feedback.setText("Article tags saved.")
+        else:
+            self._filter_changed(self.tag_filter.currentIndex())
 
     def _confirm_publish(self, article) -> bool:
         confirmation = QMessageBox(self)
@@ -499,6 +577,7 @@ class KnowledgeWorkspace(QWidget):
             return
         self._reset_category_filter()
         self._reset_status_filter()
+        self._reset_tag_filter()
         self.refresh_list(select_article_id=article_id)
 
     def _article_created(self, article) -> None:
@@ -508,6 +587,8 @@ class KnowledgeWorkspace(QWidget):
             self._reset_category_filter()
         if arguments.get("status") not in (None, article.status):
             self._reset_status_filter()
+        if not self._article_matches_tag_filter(article):
+            self._reset_tag_filter()
         self.refresh_list(select_article_id=article.knowledge_article_id)
 
     def _list_loaded(self, articles) -> None:
@@ -526,6 +607,11 @@ class KnowledgeWorkspace(QWidget):
                 empty_text = f"No {lifecycle} knowledge articles in this category."
             else:
                 empty_text = f"No {lifecycle} knowledge articles."
+        tag_mode, _tag_id = self.tag_filter.currentData()
+        if tag_mode == "untagged":
+            empty_text = "No untagged knowledge articles."
+        elif tag_mode == "tag":
+            empty_text = "No knowledge articles with this tag."
         self._populate_articles(articles, empty_text)
 
     def _search_loaded(self, articles) -> None:
@@ -634,8 +720,13 @@ class KnowledgeWorkspace(QWidget):
         self.new_button.setEnabled(not busy)
         self.search_input.setEnabled(not busy)
         self.search_button.setEnabled(not busy)
-        self.category_filter.setEnabled(not busy and self._filter_options_loaded and not self.filter_loading)
+        self.category_filter.setEnabled(
+            not busy and self._filter_options_ready and not self._filter_runner.busy
+        )
         self.status_filter.setEnabled(not busy)
+        self.tag_filter.setEnabled(
+            not busy and self._tag_filter_options_ready and not self._tag_filter_runner.busy
+        )
         self.clear_search_button.setEnabled(
             not busy and (self._search_active or bool(self.search_input.text()))
         )

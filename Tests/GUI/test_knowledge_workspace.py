@@ -70,7 +70,7 @@ class RecordingKnowledgeService:
             body_markdown=values["body"].strip(),
             status="DRAFT",
             category_id=None, category_name=None, updated_at="2026-09-14T12:00:00.000Z",
-            version_number=1,
+            version_number=1, tag_names=(),
         )
         self.articles.append(article)
         self.histories[article.knowledge_article_id] = [self._snapshot(article)]
@@ -80,6 +80,9 @@ class RecordingKnowledgeService:
         return tuple(reversed(self.articles))
 
     def list_active_knowledge_categories(self):
+        return ()
+
+    def list_available_tags(self):
         return ()
 
     def update_article(self, **values):
