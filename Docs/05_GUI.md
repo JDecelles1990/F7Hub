@@ -8,6 +8,14 @@
 
 ---
 
+## Implemented Knowledge tag filter — Slice 022
+
+Search remains on its own row. A compact filter row contains Category, Status and Tag so the actual MainWindow remains usable at 1000×700. Tag defaults to All tags, includes static Untagged, and appends every existing global tag in deterministic name/ID order. Item data carries explicit modes and IDs; display labels are not parsed.
+
+Category and tag references use independent workspace-owned `ServiceTaskRunner` instances. Each selector remains independently usable after the other reference source fails, while `filter_loading` covers either runner for existing MainWindow close protection. Signal-blocked population does not issue article requests. List/search replacement, selection/detail reconciliation, Clear Search, tag mutation, create/lifecycle reveal and Ticket Open Article follow the same authoritative reload path. No GUI SQL or MainWindow modification is introduced.
+
+---
+
 ## Implemented Knowledge status filter — Slice 020
 
 A compact Status: combo sits beside the existing Search and Category controls. Its accessible name is “Filter knowledge articles by status”; item data is None, DRAFT, PUBLISHED or ARCHIVED, independent of display text. All statuses is the default. Choices are populated synchronously from the fixed lifecycle domain, so no database query or additional ServiceTaskRunner is used.
@@ -586,7 +594,7 @@ Contact
 
 Slice 018 adds Category… beside the plain-text Category name in current details. Keeping this action out of the top toolbar preserves the 1000×700 window minimum across tested styles. The action requires a service, idle runner and loaded DRAFT. ArticleCategoryDialog contains Not selected, active KNOWLEDGE names, current-category context, Refresh categories, Cancel and Save. Active current selection is prefilled; inactive assigned names stay visible but are excluded from choices. PUBLISHED/ARCHIVED category editing and category administration remain unimplemented; read-only category filtering is implemented in Slice 019.
 
-Slice 021 adds a plain-text Tags detail and adjacent Tags… action for an idle loaded DRAFT. ArticleTagsDialog asynchronously loads every existing global tag and the current article set, presents a simple checkable list, supports zero/one/multiple selections and keeps Cancel as the default/Escape action. Save submits the complete set once and updates detail only from the authoritative committed record. Reference/save failures retain truthful article detail; stale context cannot submit. PUBLISHED and ARCHIVED articles retain visible tags with Tags… disabled. Tag creation/admin and tag filtering are not part of this dialog.
+Slice 021 adds a plain-text Tags detail and adjacent Tags… action for an idle loaded DRAFT. ArticleTagsDialog asynchronously loads every existing global tag and the current article set, presents a simple checkable list, supports zero/one/multiple selections and keeps Cancel as the default/Escape action. Save submits the complete set once and updates detail only from the authoritative committed record. Reference/save failures retain truthful article detail; stale context cannot submit. PUBLISHED and ARCHIVED articles retain visible tags with Tags… disabled. Tag creation/admin are not part of this dialog; read-only tag filtering is a separate Slice 022 control.
 
 The main window owns this modal outside the disabled pages hierarchy. Reference reads remain dismissible; late callbacks after dismissal are ignored. Save retains the original version/updated_at tokens and rejects changed workspace context. Competing actions and repeat submits are disabled. After the repository reloads and commits, the returned authoritative record updates the displayed category with safe success feedback. Failure preserves current detail and permits retry or reopening as appropriate. Native 1000×700 workflow and captures are recorded in Status/CURRENT_STATE.md.
 
@@ -598,7 +606,7 @@ Slice 011 adds Edit Article for a loaded DRAFT and a read-only Version N detail 
 
 Save uses ServiceTaskRunner, blocks duplicate submission and close/cancel during the write, and closes on success. The list refreshes, reselects the same article ID and reloads current details. Failures preserve entered text. Stale/missing/non-DRAFT conflicts disable further saves in that editor; a new editor must be opened explicitly. Workspace refreshes cannot replace its expected-version token. No-change feedback leaves the editor open and creates no revision after authoritative version checks.
 
-Native Windows input and visual verification at 1000×700 passed through Slice 021 for zero/multiple tag display and selection, edit, filters/search, publish/archive, Version History and Ticket Open Article. Six current captures were inspected with no horizontal clipping or important overlap. This is agent verification, not user acceptance testing. There is no rendered Markdown, restore/revert, unpublishing/unarchiving, category/tag administration, tag filtering, article-to-article relationships, external links or AI.
+Native Windows input and visual verification at 1000×700 passed through Slice 021 for zero/multiple tag display and selection, edit, filters/search, publish/archive, Version History and Ticket Open Article. Six current captures were inspected with no horizontal clipping or important overlap. Slice 022 separately implements read-only tag filtering. This is agent verification, not user acceptance testing. There is no rendered Markdown, restore/revert, unpublishing/unarchiving, category/tag administration, multi-tag expression filtering, article-to-article relationships, external links or AI.
 
 Slice 015 adds a single-line Search field, Search button and Clear Search button beside the Knowledge list. Enter submits. Search reuses the article table and current-detail read path; result rows retain stable article IDs rather than display text as identity. Empty and failed searches have distinct feedback, failures retain the query, and Clear Search restores the full list. The shared ServiceTaskRunner keeps MATCH work off the GUI thread and disables search/list/create/edit/history actions while any Knowledge operation is active. Search results remain usable with Edit Article and Version History after authoritative detail has loaded.
 

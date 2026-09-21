@@ -2,95 +2,71 @@
 
 Last verified: 2026-09-15 (America/Toronto)
 
-Branch: `feat/knowledge-tag-assignment`
+Branch: `feat/knowledge-tag-filter`
 
-Base and current HEAD: `5256b6625940e60dbf0641c824ffca48fc99cc62`
+Base and current HEAD: `7cc6fe06e854c93d95b8b801c547c2a59c876f11`
 
-Status: PASS — READY FOR INDEPENDENT REVIEW. Slice 021 implementation, focused tests, full regression, database validation and native verification are complete. Work remains unstaged and uncommitted. Independent review is NOT complete; Slice 022 has NOT started.
+Status: PASS — READY FOR INDEPENDENT REVIEW. Slice 022 implementation, focused tests, full regression, database validation and native Windows verification are complete. Work remains unstaged and uncommitted. Independent review is NOT complete.
 
 ## Current Milestone
 
-EXISTING GLOBAL TAGS CAN BE MANAGED ATOMICALLY ON DRAFT KNOWLEDGE ARTICLES
+CURRENT KNOWLEDGE ARTICLES SUPPORT READ-ONLY SINGLE-TAG FILTERING
 
-## Slice 021 Working Behavior and Boundaries
+## Slice 022 Working Behavior and Boundaries
 
-DRAFT existing-tag assignment/replacement/removal: IMPLEMENTED. Zero, one and multiple global tags are valid; empty removes all. Tags… loads choices/current checks asynchronously, defaults to Cancel, and Escape writes nothing. PUBLISHED and ARCHIVED articles retain readable tags but cannot mutate them.
+Tag filter modes: All tags, Untagged and one specific existing global tag are IMPLEMENTED for normal current-article lists and FTS results. All tags adds no tag predicate. Untagged means zero `knowledge_article_tags` relationships. A specific tag matches any article related to that tag even when other tags are also assigned.
 
-Tag changes update only `knowledge_article_tags` and `knowledge_articles.updated_at`. Version/content/history, category/status, created/published timestamps, ticket relationships and FTS remain unchanged. Both expected version and expected updated-at tokens reject tag, category and content races. No-op saves write nothing; bridge or token-update failures roll back completely.
+Category, Status and Tag compose independently. Active-search filter changes rerun the last executed query, not unsubmitted input. Clear Search clears text/mode and preserves all three filters. Default All tags behavior equals the prior list/search behavior. Filtering is SELECT-only.
 
-Tag creation/admin, PUBLISHED/ARCHIVED tag editing, tag filtering and historical tag reconstruction: NOT IMPLEMENTED. Tags are global under the unchanged current schema. Migration: NONE.
-
-Fresh validation: focused 13 PASS; Database 318 PASS; GUI 123 PASS; Integration 91 PASS; total 532 PASS versus 519 baseline. Native Windows actual MainWindow 1000×700: PASS; six screenshots in `C:\Users\Jo\AppData\Local\Temp\f7-s021-native-12c5730cbfb747f6aaf65e2d3a6c78c5` were opened and inspected. No clipping/important overlap. Migration count 6, integrity_check=ok, zero foreign-key violations, FTS integrity PASS and zero duplicate article/tag pairs.
-
-## Existing Filter Behavior
-
-All statuses, DRAFT, PUBLISHED and ARCHIVED filtering: IMPLEMENTED for normal Knowledge lists and current-article FTS results.
-
-- Status and category are orthogonal. All/specific/Not selected category modes compose with all four status modes.
-- Changing either filter during search reruns the last executed query, not unsubmitted text. Clear Search clears text/mode and preserves both filters.
-- Replacement requests clear rows and all details before dispatch. Empty/failure states are truthful and retain filters for retry.
-- New DRAFT articles reset status/category only when needed to reveal the authoritative uncategorized result.
-- Publishing under DRAFT and archiving under PUBLISHED reset Status to All statuses, preserve a compatible category, and reveal the authoritative new state.
-- Category mutation and content editing preserve status. Version History remains available for selected DRAFT/PUBLISHED/ARCHIVED records.
-- Ticket Open Article clears search and resets Category/Status to All before explicit ID reveal; existing relationships remain unchanged.
-
-Saved filters, tag/date filtering, multi-select/custom statuses, pagination, advanced search, Unpublish and Unarchive: NOT IMPLEMENTED. Existing-tag assignment is implemented but tags are not search or filter input. No migration, schema, index, ranking or lifecycle mutation change.
+Multi-tag AND/OR, negation, tag expressions, saved/date filters, tag counts, tag FTS indexing, historical tag filtering and tag administration: NOT IMPLEMENTED. PUBLISHED/ARCHIVED tag mutation remains unavailable. Migration: NONE.
 
 ## Architecture and Queries
 
-TagRepository reads global choices and per-article relationships in case-insensitive name/ID order. KnowledgeService requires explicit KnowledgeRepository, CategoryRepository and TagRepository dependencies; every Python/Test constructor was updated. The service validates positive non-bool IDs, rejects duplicate IDs, produces one strictly advancing UTC metadata token and translates failures safely.
+`TagRepository.list_tags()` remains the single global option source in deterministic case-insensitive name/ID order. `KnowledgeService.list_available_tags()` is reused; no filter repository/service or duplicate tag query exists. Service list/search accepts `tag_id` or `untagged_only`, validates positive non-bool IDs, requires a boolean flag and rejects contradictory modes before repository access.
 
-KnowledgeRepository.set_draft_tags owns one BEGIN IMMEDIATE transaction: authoritative article load, DRAFT/version/updated-at validation, submitted-tag existence validation, current-set read, no-op check, differential DELETE/INSERT, conditional updated-at UPDATE by ID/DRAFT/version/token, exact row-count check, authoritative reload and commit. Current record reads resolve tag names exactly without delimiter encoding. ArticleTagsDialog and KnowledgeWorkspace use ServiceTaskRunner and contain no SQL.
+`KnowledgeRepository.list_articles()` and `search_articles()` use correlated `EXISTS` for a specific tag and `NOT EXISTS` for Untagged. The FTS predicate correlates on authoritative `ka.knowledge_article_id`. Multi-tag articles appear once; no direct many-to-many join, `DISTINCT` or `GROUP BY` is used. Normal order remains updated-at descending then ID descending. FTS remains MATCH then bm25, updated-at descending and ID descending. Tags are not added to MATCH or indexed content.
+
+`KnowledgeWorkspace` adds explicit-mode item data for All/Untagged/specific choices and a compact Category/Status/Tag row. Category and tag choices load through independent workspace-owned `ServiceTaskRunner` instances. `filter_loading` reflects either runner so existing MainWindow close protection remains sufficient; MainWindow is unchanged. Static All/Untagged and All/Not selected modes remain usable after their respective reference failure, and the other reference source continues independently.
+
+## State Reconciliation
+
+Normal list and active search replacement clear stale rows/details before dispatch and preserve the current article only as a preference. A tag write that removes active-filter membership reloads the authoritative result set; retaining the selected tag keeps the article eligible. Untagged-to-tagged mutation removes the row truthfully.
+
+New DRAFT articles reset only incompatible Category/Status/Tag dimensions. Untagged is retained for a new untagged article; a specific tag resets to All tags. Content/category mutation preserves a compatible tag filter. Publish and Archive preserve tag relationships and the compatible Tag selection while existing Status reconciliation reveals the new lifecycle state. Ticket Open Article clears search and resets Category, Status and Tag to All before explicit ID reveal; ticket relationships remain unchanged.
+
+Successfully loaded category/tag options are cached for the workspace lifetime. External taxonomy changes require workspace reconstruction/reopen; no polling or live-refresh control is implemented.
 
 ## Focused Validation
 
-Environment: existing `.venv/Scripts/python.exe`, PYTHONPATH=Python plus repository root, PYTHONDONTWRITEBYTECODE=1; GUI/Integration use QT_QPA_PLATFORM=offscreen.
+Environment: existing `.venv\Scripts\python.exe`, `PYTHONPATH=$PWD\Python;$PWD`, `PYTHONDONTWRITEBYTECODE=1`, with GUI/Integration focused tests using `QT_QPA_PLATFORM=offscreen`.
 
-Fresh focused Slice 021 run: 13 PASS in 18.842s. It covers global/reference reads, exact replacement and remove-all, duplicate/missing/non-DRAFT validation, no-op, strictly advancing timestamps, tag/content/category races, rollback after bridge and token-update failures, async dialog behavior, stale-detail clearing, filters, lifecycle, ticket navigation and reconstruction.
+Fresh focused affected set: **158 PASS** in 357.432s. Coverage includes list/FTS matrices, service validation/forwarding, query-only/dump equality, deterministic global options, independent reference failures, busy/close safety, last-executed search, Clear Search, selection/detail reconciliation, tag mutation removal/retention, Untagged mutation, compatible/incompatible creation, lifecycle preservation, Version History, Ticket Open Article and reconstruction.
 
 ## Full Sequential Regression
 
-Commands, each run sequentially with the prescribed environment:
+- Database: **323 PASS** in 18.216s.
+- GUI: **128 PASS** in 107.371s.
+- Integration: **91 PASS** in 429.931s.
+- Total: **542 PASS** versus the supplied 532 baseline; zero failures/errors/skips and no suite decrease.
 
-```powershell
-.venv\Scripts\python.exe -B -m unittest discover -s Tests/Database -p "test_*.py" -v
-.venv\Scripts\python.exe -B -m unittest discover -s Tests/GUI -p "test_*.py" -v
-.venv\Scripts\python.exe -B -m unittest discover -s Tests/Integration -p "test_*.py" -v
-```
+## Native Windows Verification
 
-| Suite | Result | Duration |
-|---|---:|---:|
-| Database | 318 PASS | 17.828s |
-| GUI | 123 PASS | 80.947s |
-| Integration | 91 PASS | 432.985s |
+`QT_QPA_PLATFORM=windows`: **6 PASS** in 35.761s using real MainWindow hierarchies. Covered all/specific/Untagged, Category/Status/Tag composition, FTS and Clear Search, tag mutation removal/retention, new-article reveal, Publish/Archive preservation, Version History, Ticket Open Article reset/reconstruction, independent reference failure and close protection.
 
-Slice 021 baseline: 311 Database / 119 GUI / 89 Integration = 519. Final total: **532 PASS**, an increase of 13, with zero failures/errors/skips and all three process exits 0.
+An actual MainWindow at exactly 1000×700 used isolated synthetic SQLite. Five captures in `C:\Users\Jo\AppData\Local\Temp\f7-s022-validation-codex` were opened and inspected: All tags, Untagged, VPN, Category+Status+Tag+FTS and Clear Search preserving filters. Controls, table, details and actions were readable with no forced oversize, horizontal clipping, important overlap or status elision. This is agent verification, not user acceptance testing.
 
-## Native Windows Evidence
+## Database Validation
 
-PASS: QT_QPA_PLATFORM=windows, actual MainWindow at 1000×700, isolated synthetic SQLite. Verified zero/one/multiple tags, current preselection, Cancel/Escape, replace/remove/remove-all/final set, Category/Status filters, FTS search, edit persistence, Publish/Archive preservation and disabled mutation, Version History, Ticket Open Article and reconstruction.
+Six migration files and six applied records. `Database/Migrations/0001–0006`, schema owners `Docs/08_ERD.md` and `Docs/09_SQLSchema.md`, and `ROOT.md` have no Slice 022 diff. Fresh isolated validation: `integrity_check=ok`, zero foreign-key violations, FTS integrity PASS, zero duplicate article/tag pairs and zero orphan article/tag bridge references. Query-only trace plus before/after dump equality proves tag-filter list/search operations write nothing.
 
-Six captures were opened and inspected: zero tags, zero-current selector, multiple preselected, filtered/searched DRAFT V2, PUBLISHED and ticket-open ARCHIVED. The dialog checklist and MainWindow details/actions are readable; no horizontal clipping or important overlap was observed. This is agent verification, not independent review or user acceptance.
+## Documentation and Git Safety
 
-Evidence outside the repository:
+Updated owners: 03 Features, 04 User Workflows, 05 GUI, 06 System Architecture, 07 Database, 13 Python Architecture, 16 Roadmap, 17 Todo, 18 ChangeLog and this current-state report. Product requirements already authorize tag filtering and need no behavioral change. ERD, physical schema, folder-structure owner and ROOT require no Slice 022 update.
 
-- `C:\Users\Jo\AppData\Local\Temp\f7-s021-native-12c5730cbfb747f6aaf65e2d3a6c78c5`: six screenshots and synthetic.db.
-- `C:\Users\Jo\AppData\Local\Temp\f7-s021-native.py`: native harness.
+Protected user work remains present and unstaged: modified `Docs/10_FolderStructure.md` (SHA-256 `7DE1EAACB0F833AF5B26A29D8DF163E48F3D10765DD4471E325EC54224B9D258`) and deleted `Docs/Archive/DocsOLD/00_Vision.md`. Neither was edited, restored, staged, stashed, reset, cleaned or committed. ROOT working hash matches HEAD blob `77e6b012d15e30e05cd4148cce15dbf6bea6fc54`. No validation/native artifact is stored in the repository.
 
-## Database and Preservation
+## Risks and Next Gate
 
-Six migration files and six records. Database/Migrations/0001–0006, schema owners Docs/08_ERD.md and Docs/09_SQLSchema.md, and ROOT.md have no Slice 021 diff. Native synthetic integrity_check=ok, foreign_key_check=zero rows, external-content FTS integrity-check PASS and zero duplicate article/tag pairs. Foreign keys prove all bridge references valid.
+Verified limitation: filter option lists are workspace-lifetime snapshots, so external category/tag additions or deletions do not appear until reconstruction/reopen. Native evidence covers the tested 1000×700 Windows environment and synthetic text, not every DPI/display configuration.
 
-Protected `Docs/10_FolderStructure.md` SHA256 remains `7DE1EAACB0F833AF5B26A29D8DF163E48F3D10765DD4471E325EC54224B9D258`. `Docs/Archive/DocsOLD/00_Vision.md` remains deleted. Neither protected path was edited, staged, restored, stashed or committed. No validation artifacts are in the repository.
-
-## Documentation Impact and Self-Review
-
-Affected owners: 03 Features, 04 User Workflows, 05 GUI, 06 System Architecture, 07 Database, 13 Python Architecture, 16 Roadmap, 17 Todo, 18 ChangeLog and this current-state report. ERD, physical schema and ROOT require no Slice 021 change because the existing global tags and bridge are reused.
-
-Self-review: PASS for global taxonomy semantics, DRAFT-only exact-set mutation, validation/no-op, dual concurrency tokens, tag/category/content races, rollback, timestamp advancement, unchanged version/history/category/status/ticket links/FTS, filter preservation, async GUI, Cancel/Escape, authoritative display, native layout, migration preservation and scope control.
-
-Verified limitations: tag creation/admin, PUBLISHED/ARCHIVED tag editing, tag filtering and historical tag reconstruction are not implemented. Native evidence covers the tested 1000×700 environment and synthetic text, not every DPI/display configuration.
-
-Next gate: independent review of Slice 021. Recommend one next candidate only: **Slice 022 — read-only Knowledge tag filtering**, after precise single-tag/Untagged semantics are approved. Slice 022 is not implemented.
-
-Final Git verification is recorded in the completion report. Work must remain unstaged/uncommitted.
+Next gate: independent review of Slice 022. Recommended next candidate only: **manual Knowledge filter-reference refresh**, independently reloading category and tag choices while preserving valid selections and resetting only unavailable selections. Do not add polling, administration, saved filters or multi-tag expressions in that slice.

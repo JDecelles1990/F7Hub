@@ -127,7 +127,9 @@ Slice 017 implements **ONE PUBLISHED ARTICLE CAN BE ARCHIVED WITH PUBLICATION AN
 
 Slice 019 implements read-only Knowledge category filtering for lists and FTS search. Slice 020 adds the orthogonal All/DRAFT/PUBLISHED/ARCHIVED filter, composes both filters with current FTS, preserves both through Clear Search, and reconciles create/publish/archive plus explicit Ticket Open Article without stale details. Filtering remains SELECT-only and uses six unchanged migrations. Saved filters remain deferred with tag/date filtering, pagination, Unarchive, Unpublish and restore/revert. Slice 020 is the supplied baseline for Slice 021.
 
-Slice 021 implements exact assignment of zero, one or multiple existing global tags to DRAFT Knowledge articles. Tag relationships and `updated_at` change atomically under version and metadata tokens; content version/history, category/status, ticket links and FTS remain unchanged. PUBLISHED/ARCHIVED tag editing, tag administration, tag filtering and historical tag reconstruction remain deferred. Validation is recorded in Status/CURRENT_STATE.md; independent Slice 021 review is the next gate.
+Slice 021 implements exact assignment of zero, one or multiple existing global tags to DRAFT Knowledge articles. Tag relationships and `updated_at` change atomically under version and metadata tokens; content version/history, category/status, ticket links and FTS remain unchanged. PUBLISHED/ARCHIVED tag editing, tag administration and historical tag reconstruction remain deferred. Its verified baseline supports Slice 022's separate read-only filter.
+
+Slice 022 implements read-only All tags, Untagged and one-specific-global-tag filtering for normal Knowledge lists and current FTS results. The tag predicate composes with category/status, preserves MATCH/ranking, prevents many-to-many duplicates and writes nothing. Independent reference loading and result reconciliation cover tag writes, creation/lifecycle and Ticket Open Article. Multi-tag AND/OR, saved/date filters, administration and historical tag filtering remain deferred.
 
 The F7Hub roadmap is organized into:
 

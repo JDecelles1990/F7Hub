@@ -8,6 +8,14 @@
 
 ---
 
+## Read-only Knowledge tag filtering — Slice 022
+
+Knowledge Base → Tag filter → All tags / Untagged / one existing global tag → current list. Category, Status and Tag are independent and apply to both normal lists and FTS results. A specific tag includes multi-tag articles once; Untagged includes only articles with no tag relationships. Changing a filter during search reruns the last submitted query, while Clear Search clears only search text/mode and preserves all three filters.
+
+Tag choices load asynchronously and independently from category choices. A failed tag-reference read leaves All tags and Untagged usable; a category failure does not prevent specific-tag choices. Tag mutation reconciles the active result set, new-article reveal resets only excluding dimensions, and Publish/Archive preserve a compatible Tag filter. Ticket Open Article clears search and resets Category, Status and Tag to All before revealing the requested article. Filtering performs no write.
+
+---
+
 ## Read-only Knowledge status filtering — Slice 020
 
 Knowledge Base → Status filter → All statuses / Draft / Published / Archived → current list. Category and status are independent: either or both constrain normal lists and FTS results. Changing either filter during search reruns the last executed query rather than unsubmitted text. Clear Search removes the query while retaining both filters. Empty or failed replacements clear stale rows/details and retain filter selections for retry.
@@ -753,7 +761,7 @@ Knowledge Base → open DRAFT article → Category… → select an active KNOWL
 
 ## Existing global-tag assignment — Slice 021
 
-Knowledge Base → open DRAFT article → Tags… → select zero, one or multiple existing global tags → Save → authoritative current tags display. Cancel and Escape make no change. PUBLISHED and ARCHIVED articles display tags but cannot change them; tag sets are current metadata and are not reconstructed in Version History. Tag creation/administration, filtering and historical tag reconstruction remain unimplemented.
+Knowledge Base → open DRAFT article → Tags… → select zero, one or multiple existing global tags → Save → authoritative current tags display. Cancel and Escape make no change. PUBLISHED and ARCHIVED articles display tags but cannot change them; tag sets are current metadata and are not reconstructed in Version History. Read-only All/Untagged/single-tag filtering is implemented separately in Slice 022. Tag creation/administration, multi-tag expressions and historical tag reconstruction remain unimplemented.
 
 The selector loads independently in the background. Cancel, default Enter and Escape dismiss without a mutation or refresh; cancellation also works during category reads. Failed reference loading leaves the article readable and offers Refresh categories. An inactive assigned name remains visible as current, with active replacement or explicit clearing available. Saving disables duplicate submission and dismissal until completion. Failed writes keep the old truthful article visible; stale saves require closing and reopening the latest article. Category changes create no content revision or historical snapshot.
 

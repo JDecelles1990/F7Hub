@@ -489,6 +489,13 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         self.wait_idle()
         workspace.status_filter.setCurrentIndex(workspace.status_filter.findData("DRAFT"))
         self.wait_idle()
+        beta_filter = next(
+            index for index in range(workspace.tag_filter.count())
+            if workspace.tag_filter.itemText(index) == "Beta"
+        )
+        workspace.tag_filter.setCurrentIndex(beta_filter)
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 1)
 
         tags_dialog = workspace.open_tags()
         self.wait_idle()
@@ -502,31 +509,69 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         self.assertEqual(workspace.article.tag_names, ("Beta", "Gamma"))
         self.assertEqual(workspace.category_filter.currentData(), 11)
         self.assertEqual(workspace.status_filter.currentData(), "DRAFT")
+        self.assertEqual(workspace.tag_filter.currentText(), "Beta")
         self.assertEqual(workspace.model.rowCount(), 1)
         self.assertEqual(tuple(service.get_article_version(article_id, number) for number in (2, 1)), history)
+
+        tags_dialog = workspace.open_tags()
+        self.wait_idle()
+        for index in range(tags_dialog.tag_list.count()):
+            tags_dialog.tag_list.item(index).setCheckState(
+                Qt.CheckState.Checked if tags_dialog.tag_list.item(index).text() == "Gamma"
+                else Qt.CheckState.Unchecked
+            )
+        tags_dialog.submit()
+        self.wait_idle()
+        self.assertEqual(workspace.tag_filter.currentText(), "Beta")
+        self.assertEqual(workspace.model.rowCount(), 0)
+        self.assertIsNone(workspace.article)
+
+        gamma_filter = next(
+            index for index in range(workspace.tag_filter.count())
+            if workspace.tag_filter.itemText(index) == "Gamma"
+        )
+        workspace.tag_filter.setCurrentIndex(gamma_filter)
+        self.wait_idle()
+        self.assertEqual(workspace.article.tag_names, ("Gamma",))
 
         workspace.search_input.setText("lifecycle searchable")
         workspace.search_articles()
         self.wait_idle()
-        self.assertEqual(workspace.article.tag_names, ("Beta", "Gamma"))
+        self.assertEqual(workspace.article.tag_names, ("Gamma",))
         self.confirm_publish(workspace)
-        self.assertEqual(workspace.article.tag_names, ("Beta", "Gamma"))
+        self.assertEqual(workspace.article.tag_names, ("Gamma",))
+        self.assertEqual(workspace.tag_filter.currentText(), "Gamma")
         self.assertFalse(workspace.tags_button.isEnabled())
         self.confirm_archive(workspace)
         archived = workspace.article
-        self.assertEqual((archived.status, archived.version_number, archived.tag_names), ("ARCHIVED", 2, ("Beta", "Gamma")))
+        self.assertEqual((archived.status, archived.version_number, archived.tag_names), ("ARCHIVED", 2, ("Gamma",)))
+        self.assertEqual(workspace.tag_filter.currentText(), "Gamma")
         self.assertFalse(workspace.tags_button.isEnabled())
         self.assertEqual(tuple(service.get_article_version(article_id, number) for number in (2, 1)), history)
 
+        alpha_filter = next(
+            index for index in range(workspace.tag_filter.count())
+            if workspace.tag_filter.itemText(index) == "Alpha"
+        )
+        workspace.tag_filter.setCurrentIndex(alpha_filter)
+        self.wait_idle()
+        workspace.search_input.setText("lifecycle searchable")
+        workspace.search_articles()
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 0)
         self.open_ticket()
         reopened = self.assert_open_article(article_id)
-        self.assertEqual(reopened.detail_tags.text(), "Tags: Beta, Gamma")
+        self.assertEqual(reopened.category_filter.currentText(), "All categories")
+        self.assertEqual(reopened.status_filter.currentText(), "All statuses")
+        self.assertEqual(reopened.tag_filter.currentText(), "All tags")
+        self.assertEqual(reopened.search_input.text(), "")
+        self.assertEqual(reopened.detail_tags.text(), "Tags: Gamma")
         self.close_window()
         self.boot()
         self.open_ticket()
         reconstructed = self.assert_open_article(article_id)
-        self.assertEqual((reconstructed.article.status, reconstructed.article.tag_names), ("ARCHIVED", ("Beta", "Gamma")))
-        self.assertEqual(reconstructed.detail_tags.text(), "Tags: Beta, Gamma")
+        self.assertEqual((reconstructed.article.status, reconstructed.article.tag_names), ("ARCHIVED", ("Gamma",)))
+        self.assertEqual(reconstructed.detail_tags.text(), "Tags: Gamma")
 
     @classmethod
     def setUpClass(cls):
