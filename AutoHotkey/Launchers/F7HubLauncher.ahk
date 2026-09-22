@@ -1,37 +1,51 @@
 #Requires AutoHotkey v2.0
 
 class F7HubLauncher {
-    __New(projectRoot, databasePath := "") {
+    __New(projectRoot, databasePath := "", pythonPath := "") {
         this.ProjectRoot := projectRoot
         this.DatabasePath := databasePath
+        this.PythonPath := pythonPath != "" ? pythonPath : projectRoot "\.venv\Scripts\pythonw.exe"
         this.PendingPid := 0
     }
 
     FindWindow() {
         ; Exact title plus Qt/Python identity avoids matching editors or browsers
         ; whose document titles happen to contain F7Hub.
-        for hwnd in WinGetList("F7Hub") {
-            try {
-                if WinGetTitle(hwnd) == "F7Hub"
-                    && RegExMatch(WinGetClass(hwnd), "^Qt.*QWindowIcon$")
-                    && RegExMatch(WinGetProcessName(hwnd), "i)^pythonw?\.exe$")
+        previousDetectHiddenWindows := A_DetectHiddenWindows
+        try {
+            DetectHiddenWindows true
+            for hwnd in WinGetList("F7Hub") {
+                if this.IsF7HubWindow(hwnd)
                     return hwnd
-            } catch TargetError {
-                ; The window may close during enumeration.
-                continue
             }
+        } finally {
+            DetectHiddenWindows previousDetectHiddenWindows
         }
         return 0
     }
 
-    LaunchOrFocus(timeoutSeconds := 15) {
+    IsF7HubWindow(hwnd) {
+        if !hwnd || !WinExist(hwnd)
+            return false
+
+        try {
+            return WinGetTitle(hwnd) == "F7Hub"
+                && RegExMatch(WinGetClass(hwnd), "^Qt.*QWindowIcon$")
+                && RegExMatch(WinGetProcessName(hwnd), "i)^pythonw?\.exe$")
+        } catch Error {
+            ; The window may close while its identity is inspected.
+            return false
+        }
+    }
+
+    LaunchOrFind(timeoutSeconds := 15) {
         if hwnd := this.FindWindow()
-            return this.Focus(hwnd)
+            return this.EnsureVisible(hwnd)
 
         ; Retain an unfinished launch after timeout. Another F7 must not start
         ; a second process while the original is still initializing.
         if !this.PendingPid || !ProcessExist(this.PendingPid) {
-            python := this.ProjectRoot "\.venv\Scripts\pythonw.exe"
+            python := this.PythonPath
             entry := this.ProjectRoot "\Python\f7hub\__main__.py"
             if !FileExist(python) || !FileExist(entry)
                 throw Error("F7Hub is not ready to launch. Check the project .venv and Python files; see ROOT.md for setup.")
@@ -56,8 +70,10 @@ class F7HubLauncher {
 
         deadline := A_TickCount + timeoutSeconds * 1000
         loop {
-            if hwnd := this.FindWindow()
-                return this.Focus(hwnd)
+            if hwnd := this.FindWindow() {
+                this.PendingPid := 0
+                return this.EnsureVisible(hwnd)
+            }
             if !ProcessExist(this.PendingPid) {
                 this.PendingPid := 0
                 throw Error("F7Hub exited before its window opened. Run the development launch command in ROOT.md to inspect the startup error.")
@@ -68,9 +84,23 @@ class F7HubLauncher {
         }
     }
 
+    LaunchOrFocus(timeoutSeconds := 15) {
+        return this.Focus(this.LaunchOrFind(timeoutSeconds))
+    }
+
+    EnsureVisible(hwnd) {
+        if !this.IsF7HubWindow(hwnd)
+            throw Error("The F7Hub window is no longer available.")
+
+        ; Showing/restoring is separate from foreground activation so magnetic
+        ; movement can work without asking Windows to transfer keyboard focus.
+        if !(WinGetStyle(hwnd) & 0x10000000) || WinGetMinMax(hwnd) != 0
+            DllCall("ShowWindow", "Ptr", hwnd, "Int", 4) ; SW_SHOWNOACTIVATE
+        return hwnd
+    }
+
     Focus(hwnd) {
-        if WinGetMinMax(hwnd) == -1
-            WinRestore hwnd
+        this.EnsureVisible(hwnd)
         WinActivate hwnd
         if !WinWaitActive(hwnd, , 2)
             throw Error("F7Hub is running, but Windows did not allow it to take focus. Select its window from the taskbar.")

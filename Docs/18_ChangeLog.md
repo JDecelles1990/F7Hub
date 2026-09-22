@@ -47,6 +47,28 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-21 — Magnetic Follow Review Corrections
+
+- Corrected destination-boundary snapping that bypassed the per-tick speed cap. Only the target is clamped to the cursor monitor; intermediate movement remains bounded and cannot overshoot the target. A short approach outside the destination finishes before dead-zone settling. Oversized axes align to the destination start edge without resizing.
+- Corrected same-press HOLD restart after follower self-stop or startup failure. `WAIT_RELEASE` consumes the attempt until key-up; repeats schedule no new hold timer or launch. TAP and the 180 ms threshold are retained.
+- Follower regression: PASS, exit 0, console-independent temporary result file. Six geometries exercise 600 actual native movement ticks each. The review's approximately 1733.18 px first step is now 32.557641 px, below 32 + 0.707107 px rounding tolerance. All geometries settle within normal bounds or the oversized start-edge fallback.
+- Controller regressions: PASS for self-stop, launcher/lookup failure and follower-start rejection. Self-stop keeps counts at one launch/one start until release; the next press advances both to two. Full live launcher regression: PASS, exit 0, with app/shortcut/database cleanup verified. The corrected test fixture keeps its focus-check decoy under the cursor; Windows settings and production focus behavior are unchanged. Subsequent fresh user physical validation of the unchanged corrected implementation: PASS for magnetic follow, cross-monitor smoothness and multi-monitor movement. No other-PC compatibility is claimed.
+- `Docs/11_AHKArchitecture.md` remains canonical; this supplemental note does not replace it. No integration was performed in the feature worktree.
+
+---
+
+# 2026-09-16 — F7 Tap/Hold Magnetic Window Follow
+
+Implemented an explicit 180 ms F7 tap/hold state machine in the AutoHotkey v2 integration layer. TAP retains launch/restore/focus behavior. HOLD now uses a separate find/launch/show path, validates the exact F7Hub Qt/Python window, restores without activation, and starts one 16 ms magnetic movement timer. Physical F7 release, invalid identity, window disappearance and movement errors stop the timer and reset HWND/velocity state.
+
+The follower accelerates and damps toward a cursor-offset target, clamps maximum vector speed, applies a dead zone, suppresses unchanged integer-pixel `WinMove` calls and clamps to the cursor monitor's work area, including negative multi-monitor coordinates. Normal TAP focus errors remain visible; HOLD no longer requires `WinActivate` or `WinWaitActive`. The minimized HOLD path uses `ShowWindow(SW_SHOWNOACTIVATE)` to avoid the activation caused by `WinRestore`.
+
+Both focused AutoHotkey tests use console-independent result files. Live automated Windows validation passed cold launch, controller TAP focus, non-focusing HOLD, release stop, minimized restore, rapid reuse, decoy rejection, cleanup and three-monitor work-area movement; the follower lifecycle/helper suite also passed. User-reported physical Windows acceptance on 2026-09-21 passed all eight required scenarios: tap while closed, tap while existing, hold/follow/release, focus separation, minimized HOLD, rapid use, multi-monitor movement and interactive visual/flicker validation. The dedicated release-stop and dead-zone stability checks also passed.
+
+No Python, PowerShell, database, migration, Slice 022 or primary-recovery-repository file was changed by the magnetic feature.
+
+---
+
 # 2026-09-15 — Slice 022: Read-only Knowledge Tag Filtering
 
 Implemented All tags, Untagged and one-specific-global-tag filtering for current Knowledge lists and FTS search. Tag composes with Category and Status, active changes reuse the last executed query, Clear Search preserves all three filters, and explicit Ticket Open Article resets all filters before reveal. Tag mutation, new article, edit, Publish and Archive reconcile against authoritative current state.

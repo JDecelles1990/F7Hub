@@ -2,14 +2,21 @@
 #SingleInstance Ignore
 #MaxThreadsPerHotkey 1
 #Include Launchers\F7HubLauncher.ahk
+#Include Helpers\MagneticWindowFollower.ahk
+#Include Hotkeys\F7HotkeyController.ahk
 
 SplitPath A_ScriptDir, , &projectRoot
 launcher := F7HubLauncher(projectRoot)
-A_IconTip := "F7Hub - press F7 to launch or focus"
+follower := MagneticWindowFollower(ObjBindMethod(launcher, "IsF7HubWindow"))
+f7Controller := F7HotkeyController(launcher, follower)
+A_IconTip := "F7Hub - tap F7 to launch/focus, hold F7 to follow mouse"
 
 F7:: {
-    global launcher
-    try launcher.LaunchOrFocus()
-    catch Error as launchError
-        MsgBox launchError.Message, "F7Hub launcher", "Icon!"
+    global f7Controller
+    f7Controller.OnDown()
+}
+
+F7 up:: {
+    global f7Controller
+    f7Controller.OnUp()
 }
