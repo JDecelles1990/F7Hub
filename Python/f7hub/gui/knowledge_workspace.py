@@ -16,6 +16,7 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSplitter,
     QTableView,
+    QToolButton,
     QVBoxLayout,
     QWidget,
 )
@@ -51,6 +52,11 @@ class KnowledgeWorkspace(QWidget):
         self._filter_options_ready = False
         self._tag_filter_options_loaded = False
         self._tag_filter_options_ready = False
+        self._manual_filter_refresh_active = False
+        self._manual_filter_refresh_pending = set()
+        self._manual_filter_refresh_reset = False
+        self._manual_category_filter_selection = None
+        self._manual_tag_filter_selection = None
         self._pending_selection_id = None
         self._preferred_selection_id = None
         self._search_active = False
@@ -105,7 +111,7 @@ class KnowledgeWorkspace(QWidget):
         filter_row = QHBoxLayout()
         self.category_filter = QComboBox(self)
         self.category_filter.setAccessibleName("Filter knowledge articles by category")
-        self.category_filter.setMinimumContentsLength(16)
+        self.category_filter.setMinimumContentsLength(10)
         self.category_filter.setSizeAdjustPolicy(QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon)
         self.category_filter.addItem("All categories", None)
         self.category_filter.addItem("Not selected", None)
@@ -123,7 +129,7 @@ class KnowledgeWorkspace(QWidget):
         filter_row.addWidget(self.status_filter, 1)
         self.tag_filter = QComboBox(self)
         self.tag_filter.setAccessibleName("Filter knowledge articles by tag")
-        self.tag_filter.setMinimumContentsLength(12)
+        self.tag_filter.setMinimumContentsLength(8)
         self.tag_filter.setSizeAdjustPolicy(
             QComboBox.SizeAdjustPolicy.AdjustToMinimumContentsLengthWithIcon
         )
@@ -132,6 +138,12 @@ class KnowledgeWorkspace(QWidget):
         self.tag_filter.currentIndexChanged.connect(self._filter_changed)
         filter_row.addWidget(QLabel("Tag:", self))
         filter_row.addWidget(self.tag_filter, 1)
+        self.refresh_filters_button = QToolButton(self)
+        self.refresh_filters_button.setText("Refresh filters")
+        self.refresh_filters_button.setAccessibleName("Refresh knowledge filter choices")
+        self.refresh_filters_button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.refresh_filters_button.clicked.connect(self.refresh_filter_options)
+        filter_row.addWidget(self.refresh_filters_button)
         self.filter_feedback = QLabel(self)
         self.filter_feedback.setTextFormat(Qt.TextFormat.PlainText)
         self.filter_feedback.setWordWrap(True)
@@ -235,42 +247,163 @@ class KnowledgeWorkspace(QWidget):
             self._tag_filter_options_succeeded, self._tag_filter_options_failed,
         )
 
+    def _category_filter_selection(self) -> tuple[str, int | None]:
+        if self.category_filter.currentIndex() == 1:
+            return ("uncategorized", None)
+        category_id = self.category_filter.currentData()
+        if category_id is None:
+            return ("all", None)
+        return ("category", category_id)
+
+    def refresh_filter_options(self) -> None:
+        if self._runner.busy or self.filter_loading or self._manual_filter_refresh_active:
+            return
+        self._manual_filter_refresh_active = True
+        self._manual_filter_refresh_pending = {"category", "tag"}
+        self._manual_filter_refresh_reset = False
+        self._manual_category_filter_selection = self._category_filter_selection()
+        self._manual_tag_filter_selection = self.tag_filter.currentData()
+        self._update_actions(self._runner.busy)
+        self._filter_runner.submit(
+            self._service.list_active_knowledge_categories,
+            self._filter_options_succeeded, self._filter_options_failed,
+        )
+        self._tag_filter_runner.submit(
+            self._service.list_available_tags,
+            self._tag_filter_options_succeeded, self._tag_filter_options_failed,
+        )
+
     def _filter_options_succeeded(self, categories) -> None:
+        manual = (
+            self._manual_filter_refresh_active
+            and "category" in self._manual_filter_refresh_pending
+        )
+        selection = (
+            self._manual_category_filter_selection
+            if manual else self._category_filter_selection()
+        )
         with QSignalBlocker(self.category_filter):
+            self.category_filter.clear()
+            self.category_filter.addItem("All categories", None)
+            self.category_filter.addItem("Not selected", None)
             for category in categories:
                 self.category_filter.addItem(category.name, category.category_id)
+            mode, category_id = selection
+            if mode == "uncategorized":
+                self.category_filter.setCurrentIndex(1)
+            elif mode == "category":
+                index = self.category_filter.findData(category_id)
+                self.category_filter.setCurrentIndex(index if index >= 0 else 0)
+            else:
+                self.category_filter.setCurrentIndex(0)
         self._filter_options_loaded = True
         self._filter_options_ready = True
         self.filter_feedback.hide()
+        if manual:
+            self._manual_filter_source_settled(
+                "category", selection_reset=mode == "category" and index < 0
+            )
         self._update_actions(self._runner.busy)
 
     def _filter_options_failed(self, error) -> None:
         logging.getLogger(__name__).error("Knowledge filter options failed: %s", type(error).__name__)
-        self.filter_feedback.setText("Could not load category filters. All categories remain available. Reopen Knowledge Base to retry.")
+        manual = (
+            self._manual_filter_refresh_active
+            and "category" in self._manual_filter_refresh_pending
+        )
+        self.filter_feedback.setText(
+            "Could not refresh category filters. Existing choices were retained. Try again."
+            if manual else
+            "Could not load category filters. All categories remain available. Select Refresh filters to retry."
+        )
         self.filter_feedback.show()
         self._filter_options_ready = True
+        if manual:
+            self._manual_filter_source_settled("category")
         self._update_actions(self._runner.busy)
 
     def _tag_filter_options_succeeded(self, tags) -> None:
+        manual = (
+            self._manual_filter_refresh_active
+            and "tag" in self._manual_filter_refresh_pending
+        )
+        selection = (
+            self._manual_tag_filter_selection
+            if manual else self.tag_filter.currentData()
+        )
         with QSignalBlocker(self.tag_filter):
+            self.tag_filter.clear()
+            self.tag_filter.addItem("All tags", _TAG_FILTER_ALL)
+            self.tag_filter.addItem("Untagged", _TAG_FILTER_UNTAGGED)
             for tag in tags:
                 self.tag_filter.addItem(tag.name, ("tag", tag.tag_id))
+            mode, tag_id = selection
+            if mode == "tag":
+                index = next(
+                    (
+                        item_index
+                        for item_index in range(self.tag_filter.count())
+                        if self.tag_filter.itemData(item_index) == ("tag", tag_id)
+                    ),
+                    -1,
+                )
+                self.tag_filter.setCurrentIndex(index if index >= 0 else 0)
+            elif mode == "untagged":
+                self.tag_filter.setCurrentIndex(1)
+            else:
+                self.tag_filter.setCurrentIndex(0)
         self._tag_filter_options_loaded = True
         self._tag_filter_options_ready = True
         self.tag_filter_feedback.hide()
+        if manual:
+            self._manual_filter_source_settled(
+                "tag", selection_reset=mode == "tag" and index < 0
+            )
         self._update_actions(self._runner.busy)
 
     def _tag_filter_options_failed(self, error) -> None:
         logging.getLogger(__name__).error(
             "Knowledge tag filter options failed: %s", type(error).__name__
         )
+        manual = (
+            self._manual_filter_refresh_active
+            and "tag" in self._manual_filter_refresh_pending
+        )
         self.tag_filter_feedback.setText(
+            "Could not refresh tag filters. Existing choices were retained. Try again."
+            if manual else
             "Could not load specific tag filters. All tags and Untagged remain available. "
-            "Reopen Knowledge Base to retry."
+            "Select Refresh filters to retry."
         )
         self.tag_filter_feedback.show()
         self._tag_filter_options_ready = True
+        if manual:
+            self._manual_filter_source_settled("tag")
         self._update_actions(self._runner.busy)
+
+    def _manual_filter_source_settled(
+        self, source: str, *, selection_reset: bool = False,
+    ) -> None:
+        self._manual_filter_refresh_reset |= selection_reset
+        self._manual_filter_refresh_pending.discard(source)
+        if self._manual_filter_refresh_pending:
+            return
+        reload_results = self._manual_filter_refresh_reset
+        self._manual_filter_refresh_active = False
+        self._manual_filter_refresh_reset = False
+        self._manual_category_filter_selection = None
+        self._manual_tag_filter_selection = None
+        self._update_actions(self._runner.busy)
+        if reload_results:
+            self._reload_results_after_filter_refresh()
+
+    def _reload_results_after_filter_refresh(self) -> None:
+        selected_id = self.article.knowledge_article_id if self.article else None
+        if self._search_active:
+            self.search_articles(query=self._search_query)
+        else:
+            self.refresh_list(load_filter_options=False, preserve_search_input=True)
+        self._preferred_selection_id = selected_id
 
     def _filter_arguments(self) -> dict:
         arguments = {}
@@ -323,12 +456,16 @@ class KnowledgeWorkspace(QWidget):
         # A previous selection is a preference, not an explicit reveal request.
         self._preferred_selection_id = selected_id
 
-    def refresh_list(self, *, select_article_id: int | None = None) -> None:
+    def refresh_list(
+        self, *, select_article_id: int | None = None,
+        load_filter_options: bool = True, preserve_search_input: bool = False,
+    ) -> None:
         if self._runner.busy:
             return
         self._search_active = False
         self._search_query = ""
-        self.search_input.clear()
+        if not preserve_search_input:
+            self.search_input.clear()
         self._pending_selection_id = select_article_id
         self._show_article(None)
         self.articles = ()
@@ -338,12 +475,14 @@ class KnowledgeWorkspace(QWidget):
         self.feedback.setText("Loading articles…")
         arguments = self._filter_arguments()
         self._runner.submit(lambda: self._service.list_articles(**arguments), self._list_loaded, self._load_failed)
-        self._load_filter_options()
+        if load_filter_options:
+            self._load_filter_options()
 
-    def search_articles(self) -> None:
+    def search_articles(self, *, query: str | None = None) -> None:
         if self._runner.busy:
             return
-        query = self.search_input.text()
+        if query is None:
+            query = self.search_input.text()
         if not query.strip():
             self.clear_search()
             return
@@ -716,7 +855,7 @@ class KnowledgeWorkspace(QWidget):
         self.detail_body.setPlainText(article.body_markdown)
 
     def _update_actions(self, busy: bool) -> None:
-        busy = busy or self._confirming_publish or self._confirming_archive or self._category_dialog is not None or self._tags_dialog is not None
+        busy = busy or self._manual_filter_refresh_active or self._confirming_publish or self._confirming_archive or self._category_dialog is not None or self._tags_dialog is not None
         self.new_button.setEnabled(not busy)
         self.search_input.setEnabled(not busy)
         self.search_button.setEnabled(not busy)
@@ -726,6 +865,9 @@ class KnowledgeWorkspace(QWidget):
         self.status_filter.setEnabled(not busy)
         self.tag_filter.setEnabled(
             not busy and self._tag_filter_options_ready and not self._tag_filter_runner.busy
+        )
+        self.refresh_filters_button.setEnabled(
+            self._service is not None and not busy and not self.filter_loading
         )
         self.clear_search_button.setEnabled(
             not busy and (self._search_active or bool(self.search_input.text()))

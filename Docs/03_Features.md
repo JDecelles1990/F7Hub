@@ -8,6 +8,14 @@
 
 ---
 
+## Manual Knowledge filter-reference refresh — Slice 023
+
+The Knowledge filter row now provides **Refresh filters** to reload active KNOWLEDGE categories and global tags without reconstructing the workspace. One activation starts exactly one existing category read and one existing tag read through their independent task runners. Successful sources replace their dynamic choices; failed sources retain the last successfully loaded choices and remain retryable.
+
+All/Not selected and All tags/Untagged modes survive refresh. Specific selections are reconciled by stable ID, so renamed references stay selected with their new labels. An inactive/deleted selected category resets only Category; a deleted selected tag resets only Tag. After both reads settle, one or both resets cause exactly one authoritative normal-list or FTS reload. Valid selections cause no redundant result query. The last executed search query is reused without submitting newer text in the input. Refresh is SELECT-only and adds no polling, repository/service/schema/FTS change or dependency. Validation: `Status/CURRENT_STATE.md`.
+
+---
+
 ## Read-only Knowledge tag filtering — Slice 022
 
 All tags, Untagged and one specific existing global tag are implemented for current Knowledge lists and FTS search. The tag dimension composes independently with Category and Status; Clear Search preserves all three filters, active filter changes reuse the last executed query, and Ticket Open Article resets all filters before explicit reveal.

@@ -124,6 +124,10 @@ class KnowledgeTagFilterGuiTests(unittest.TestCase):
     def codes(self):
         return [article.article_code for article in self.workspace.articles]
 
+    def refresh_filters(self):
+        self.workspace.refresh_filters_button.click()
+        self.wait_idle()
+
     def test_options_default_order_population_is_signal_blocked_and_layout_fits(self):
         with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
             self.show()
@@ -135,17 +139,169 @@ class KnowledgeTagFilterGuiTests(unittest.TestCase):
             ["All tags", "Untagged", "Security", "Unused", "VPN", "Windows"],
         )
         self.assertEqual(combo.accessibleName(), "Filter knowledge articles by tag")
+        self.assertEqual(self.workspace.refresh_filters_button.text(), "Refresh filters")
+        self.assertEqual(
+            self.workspace.refresh_filters_button.accessibleName(),
+            "Refresh knowledge filter choices",
+        )
         self.assertEqual((self.window.width(), self.window.height()), (1000, 700))
         for control in (
             self.workspace.search_input, self.workspace.search_button,
             self.workspace.clear_search_button, self.workspace.category_filter,
             self.workspace.status_filter, self.workspace.tag_filter,
+            self.workspace.refresh_filters_button,
         ):
             self.assertTrue(control.isVisible())
             top_left = control.mapTo(self.workspace, control.rect().topLeft())
             bottom_right = control.mapTo(self.workspace, control.rect().bottomRight())
             self.assertTrue(self.workspace.rect().contains(top_left))
             self.assertTrue(self.workspace.rect().contains(bottom_right))
+
+    def test_manual_refresh_adds_and_renames_tag_by_id_without_result_query(self):
+        self.show()
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "INSERT INTO tags (tag_id, name, slug, created_at) VALUES (55, 'Fresh', 'fresh', ?)",
+                ("2026-09-22T12:00:00Z",),
+            )
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_not_called()
+        self.assertIn(
+            ("tag", 55),
+            [self.workspace.tag_filter.itemData(index)
+             for index in range(self.workspace.tag_filter.count())],
+        )
+
+        self.choose_category(11)
+        self.choose_status("PUBLISHED")
+        self.choose_tag("VPN")
+        self.workspace.search_input.setText("typed but not submitted")
+        with database_connection(self.path) as connection:
+            connection.execute("UPDATE tags SET name = 'Remote access' WHERE tag_id = 11")
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing, \
+                patch.object(self.service, "search_articles", wraps=self.service.search_articles) as search:
+            self.refresh_filters()
+            listing.assert_not_called()
+            search.assert_not_called()
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("tag", 11))
+        self.assertEqual(self.workspace.tag_filter.currentText(), "Remote access")
+        self.assertEqual(self.workspace.category_filter.currentData(), 11)
+        self.assertEqual(self.workspace.status_filter.currentData(), "PUBLISHED")
+        self.assertEqual(self.workspace.search_input.text(), "typed but not submitted")
+
+    def test_manual_refresh_deleted_tag_resets_only_tag_and_lists_once(self):
+        self.show()
+        self.choose_category(11)
+        self.choose_status("PUBLISHED")
+        self.choose_tag("VPN")
+        self.workspace.search_input.setText("typed but not submitted")
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM tags WHERE tag_id = 11")
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_called_once_with(category_id=11, status="PUBLISHED")
+        self.assertEqual(self.workspace.tag_filter.currentText(), "All tags")
+        self.assertEqual(self.workspace.category_filter.currentData(), 11)
+        self.assertEqual(self.workspace.status_filter.currentData(), "PUBLISHED")
+        self.assertEqual(self.workspace.search_input.text(), "typed but not submitted")
+
+    def test_manual_refresh_both_specific_filters_removed_lists_exactly_once(self):
+        self.show()
+        self.choose_category(11)
+        self.choose_status("PUBLISHED")
+        self.choose_tag("VPN")
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "UPDATE categories SET is_active = 0, updated_at = ? WHERE category_id = 11",
+                ("2026-09-22T12:01:00Z",),
+            )
+            connection.execute("DELETE FROM tags WHERE tag_id = 11")
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_called_once_with(status="PUBLISHED")
+        self.assertEqual(self.workspace.category_filter.currentText(), "All categories")
+        self.assertEqual(self.workspace.tag_filter.currentText(), "All tags")
+        self.assertEqual(self.workspace.status_filter.currentData(), "PUBLISHED")
+
+    def test_manual_refresh_deleted_tag_reruns_last_search_without_submitted_text(self):
+        self.show()
+        self.choose_tag("VPN")
+        self.workspace.search_input.setText("DNS")
+        self.workspace.search_articles()
+        self.wait_idle()
+        self.workspace.search_input.setText("unsubmitted text")
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM tags WHERE tag_id = 11")
+        with patch.object(self.service, "search_articles", wraps=self.service.search_articles) as search, \
+                patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            search.assert_called_once_with("DNS")
+            listing.assert_not_called()
+        self.assertEqual(self.workspace.tag_filter.currentText(), "All tags")
+        self.assertTrue(self.workspace._search_active)
+        self.assertEqual(self.workspace._search_query, "DNS")
+        self.assertEqual(self.workspace.search_input.text(), "unsubmitted text")
+
+    def test_manual_refresh_preserves_all_and_untagged_static_modes(self):
+        self.show()
+        self.choose_tag("Untagged")
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_not_called()
+        self.assertEqual(self.workspace.tag_filter.currentText(), "Untagged")
+
+        self.choose_tag("All tags")
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_not_called()
+        self.assertEqual(self.workspace.tag_filter.currentText(), "All tags")
+
+    def test_manual_both_source_failure_retains_cached_options_and_retry_succeeds(self):
+        self.show()
+        self.choose_category(11)
+        self.choose_tag("VPN")
+        category_cache = [
+            (self.workspace.category_filter.itemText(index),
+             self.workspace.category_filter.itemData(index))
+            for index in range(self.workspace.category_filter.count())
+        ]
+        tag_cache = [
+            (self.workspace.tag_filter.itemText(index),
+             self.workspace.tag_filter.itemData(index))
+            for index in range(self.workspace.tag_filter.count())
+        ]
+        with patch.object(
+            self.service, "list_active_knowledge_categories",
+            side_effect=RuntimeError("private category"),
+        ), patch.object(
+            self.service, "list_available_tags", side_effect=RuntimeError("private tag"),
+        ), patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_not_called()
+        self.assertEqual(
+            [(self.workspace.category_filter.itemText(index),
+              self.workspace.category_filter.itemData(index))
+             for index in range(self.workspace.category_filter.count())],
+            category_cache,
+        )
+        self.assertEqual(
+            [(self.workspace.tag_filter.itemText(index),
+              self.workspace.tag_filter.itemData(index))
+             for index in range(self.workspace.tag_filter.count())],
+            tag_cache,
+        )
+        self.assertEqual(self.workspace.category_filter.currentData(), 11)
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("tag", 11))
+        self.assertNotIn("private category", self.workspace.filter_feedback.text())
+        self.assertNotIn("private tag", self.workspace.tag_filter_feedback.text())
+        self.assertTrue(self.workspace.refresh_filters_button.isEnabled())
+
+        self.refresh_filters()
+        self.assertFalse(self.workspace.filter_feedback.isVisible())
+        self.assertFalse(self.workspace.tag_filter_feedback.isVisible())
+        self.assertEqual(self.workspace.category_filter.currentData(), 11)
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("tag", 11))
 
     def test_normal_search_composition_last_query_and_clear_preserves_all_filters(self):
         self.show()

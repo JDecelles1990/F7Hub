@@ -213,6 +213,124 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(tuple(tuple(row) for row in connection.execute('SELECT * FROM ticket_knowledge_articles')), links)
 
+    def test_manual_filter_reference_refresh_reconciles_external_changes_read_only(self):
+        from Tests.Database.test_knowledge_categories import seed_knowledge_categories
+
+        seed_knowledge_categories(self.path)
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "INSERT INTO tags (tag_id, name, slug, created_at) VALUES (101, 'Existing tag', 'existing-tag', ?)",
+                ("2026-09-22T12:00:00Z",),
+            )
+        self.window.show_knowledge()
+        self.wait_idle()
+        workspace = self.window.knowledge_workspace
+
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "INSERT INTO categories (category_id, scope, name, is_active, sort_order, slug, created_at, updated_at) "
+                "VALUES (77, 'KNOWLEDGE', 'External category', 1, 5, 'external-category', ?, ?)",
+                ("2026-09-22T12:01:00Z", "2026-09-22T12:01:00Z"),
+            )
+            connection.execute(
+                "INSERT INTO tags (tag_id, name, slug, created_at) VALUES (202, 'External tag', 'external-tag', ?)",
+                ("2026-09-22T12:01:00Z",),
+            )
+            before_refresh = tuple(connection.iterdump())
+        workspace.refresh_filters_button.click()
+        self.wait_idle()
+        self.assertGreaterEqual(workspace.category_filter.findData(77), 0)
+        self.assertIn(
+            ("tag", 202),
+            [workspace.tag_filter.itemData(index)
+             for index in range(workspace.tag_filter.count())],
+        )
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before_refresh)
+
+        workspace.category_filter.setCurrentIndex(workspace.category_filter.findData(77))
+        self.wait_idle()
+        external_tag_index = next(
+            index for index in range(workspace.tag_filter.count())
+            if workspace.tag_filter.itemData(index) == ("tag", 202)
+        )
+        workspace.tag_filter.setCurrentIndex(external_tag_index)
+        self.wait_idle()
+        workspace.status_filter.setCurrentIndex(workspace.status_filter.findData("DRAFT"))
+        self.wait_idle()
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "UPDATE categories SET name = 'Renamed category', updated_at = ? WHERE category_id = 77",
+                ("2026-09-22T12:02:00Z",),
+            )
+            connection.execute("UPDATE tags SET name = 'Renamed tag' WHERE tag_id = 202")
+            before_refresh = tuple(connection.iterdump())
+        with patch.object(
+            self.context.knowledge_service, "list_articles",
+            wraps=self.context.knowledge_service.list_articles,
+        ) as listing:
+            workspace.refresh_filters_button.click()
+            self.wait_idle()
+            listing.assert_not_called()
+        self.assertEqual(workspace.category_filter.currentData(), 77)
+        self.assertEqual(workspace.category_filter.currentText(), "Renamed category")
+        self.assertEqual(workspace.tag_filter.currentData(), ("tag", 202))
+        self.assertEqual(workspace.tag_filter.currentText(), "Renamed tag")
+        self.assertEqual(workspace.status_filter.currentData(), "DRAFT")
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before_refresh)
+
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "UPDATE categories SET name = 'Mixed success category', updated_at = ? "
+                "WHERE category_id = 77",
+                ("2026-09-22T12:03:00Z",),
+            )
+            before_refresh = tuple(connection.iterdump())
+        with patch.object(
+            self.context.knowledge_service, "list_available_tags",
+            side_effect=RuntimeError("private mixed failure"),
+        ), patch.object(
+            self.context.knowledge_service, "list_articles",
+            wraps=self.context.knowledge_service.list_articles,
+        ) as listing:
+            workspace.refresh_filters_button.click()
+            self.wait_idle()
+            listing.assert_not_called()
+        self.assertEqual(workspace.category_filter.currentData(), 77)
+        self.assertEqual(workspace.category_filter.currentText(), "Mixed success category")
+        self.assertEqual(workspace.tag_filter.currentData(), ("tag", 202))
+        self.assertNotIn("private mixed failure", workspace.tag_filter_feedback.text())
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before_refresh)
+
+        workspace.refresh_filters_button.click()
+        self.wait_idle()
+        self.assertFalse(workspace.tag_filter_feedback.isVisible())
+        self.assertEqual(workspace.tag_filter.currentData(), ("tag", 202))
+
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "UPDATE categories SET is_active = 0, updated_at = ? WHERE category_id = 77",
+                ("2026-09-22T12:04:00Z",),
+            )
+            connection.execute("DELETE FROM tags WHERE tag_id = 202")
+            before_refresh = tuple(connection.iterdump())
+        with patch.object(
+            self.context.knowledge_service, "list_articles",
+            wraps=self.context.knowledge_service.list_articles,
+        ) as listing:
+            workspace.refresh_filters_button.click()
+            self.wait_idle()
+            listing.assert_called_once_with(status="DRAFT")
+        self.assertEqual(workspace.category_filter.currentText(), "All categories")
+        self.assertEqual(workspace.tag_filter.currentText(), "All tags")
+        self.assertEqual(workspace.status_filter.currentData(), "DRAFT")
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before_refresh)
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
     def test_category_same_version_external_update_rejects_reviewed_metadata_token(self):
         from Tests.Database.test_knowledge_categories import seed_knowledge_categories
         seed_knowledge_categories(self.path)
@@ -610,10 +728,18 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
     def wait_idle(self):
         deadline = time.monotonic() + 5
         self.application.processEvents()
-        while self.window.runner.busy and time.monotonic() < deadline:
+        while (
+            self.window.runner.busy
+            or (
+                self.window.knowledge_workspace is not None
+                and self.window.knowledge_workspace.filter_loading
+            )
+        ) and time.monotonic() < deadline:
             QTest.qWait(10)
         self.application.processEvents()
         self.assertFalse(self.window.runner.busy)
+        if self.window.knowledge_workspace is not None:
+            self.assertFalse(self.window.knowledge_workspace.filter_loading)
 
     def open_ticket(self):
         self.window.show_tickets()

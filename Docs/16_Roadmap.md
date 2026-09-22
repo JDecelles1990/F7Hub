@@ -131,6 +131,8 @@ Slice 021 implements exact assignment of zero, one or multiple existing global t
 
 Slice 022 implements read-only All tags, Untagged and one-specific-global-tag filtering for normal Knowledge lists and current FTS results. The tag predicate composes with category/status, preserves MATCH/ranking, prevents many-to-many duplicates and writes nothing. Independent reference loading and result reconciliation cover tag writes, creation/lifecycle and Ticket Open Article. Multi-tag AND/OR, saved/date filters, administration and historical tag filtering remain deferred.
 
+Slice 023 implements manual read-only refresh of the existing category and global-tag filter references. It reuses both independent service runners, preserves static modes and valid stable IDs, updates renamed labels, retains failed-source caches, and coalesces unavailable selections into one authoritative list/search reload after both reads settle. External reference changes no longer require workspace reconstruction. Polling/watchers, administration, saved/date filters and multi-tag expressions remain deferred.
+
 The F7Hub roadmap is organized into:
 
 ```text

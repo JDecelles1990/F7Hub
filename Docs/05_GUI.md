@@ -8,6 +8,14 @@
 
 ---
 
+## Implemented manual Knowledge filter-reference refresh — Slice 023
+
+The compact Category/Status/Tag row includes a keyboard-reachable **Refresh filters** tool button with the accessible name “Refresh knowledge filter choices”. It remains visible at 1000×700 and is disabled while the manual cycle or another filter-reference read is active. The existing `filter_loading` close guard remains authoritative.
+
+Category and tag reads continue through their existing independent `ServiceTaskRunner` instances. Each successful callback replaces only that source's dynamic options under signal blocking and restores static mode or stable ID; a failed callback leaves its combo untouched and shows safe source-specific feedback. Minimal cycle state waits for both callbacks, coalesces one or two missing selections into one list/search reload, and issues no result request when both selections remain valid. During active search the stored executed query is submitted directly without replacing unsubmitted field text. No GUI SQL, new dialog or MainWindow change is introduced.
+
+---
+
 ## Implemented Knowledge tag filter — Slice 022
 
 Search remains on its own row. A compact filter row contains Category, Status and Tag so the actual MainWindow remains usable at 1000×700. Tag defaults to All tags, includes static Untagged, and appends every existing global tag in deterministic name/ID order. Item data carries explicit modes and IDs; display labels are not parsed.
@@ -595,6 +603,8 @@ Contact
 Slice 018 adds Category… beside the plain-text Category name in current details. Keeping this action out of the top toolbar preserves the 1000×700 window minimum across tested styles. The action requires a service, idle runner and loaded DRAFT. ArticleCategoryDialog contains Not selected, active KNOWLEDGE names, current-category context, Refresh categories, Cancel and Save. Active current selection is prefilled; inactive assigned names stay visible but are excluded from choices. PUBLISHED/ARCHIVED category editing and category administration remain unimplemented; read-only category filtering is implemented in Slice 019.
 
 Slice 021 adds a plain-text Tags detail and adjacent Tags… action for an idle loaded DRAFT. ArticleTagsDialog asynchronously loads every existing global tag and the current article set, presents a simple checkable list, supports zero/one/multiple selections and keeps Cancel as the default/Escape action. Save submits the complete set once and updates detail only from the authoritative committed record. Reference/save failures retain truthful article detail; stale context cannot submit. PUBLISHED and ARCHIVED articles retain visible tags with Tags… disabled. Tag creation/admin are not part of this dialog; read-only tag filtering is a separate Slice 022 control.
+
+Slice 023 adds Refresh filters to the existing compact filter row. It preserves static modes and stable-ID selections, displays renamed choices, retains cached options on source-specific failure, and coalesces unavailable category/tag resets into one authoritative result reload. Automated and native Windows 1000×700 evidence is recorded in Status/CURRENT_STATE.md.
 
 The main window owns this modal outside the disabled pages hierarchy. Reference reads remain dismissible; late callbacks after dismissal are ignored. Save retains the original version/updated_at tokens and rejects changed workspace context. Competing actions and repeat submits are disabled. After the repository reloads and commits, the returned authoritative record updates the displayed category with safe success feedback. Failure preserves current detail and permits retry or reopening as appropriate. Native 1000×700 workflow and captures are recorded in Status/CURRENT_STATE.md.
 
