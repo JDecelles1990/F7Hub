@@ -135,7 +135,7 @@ class TicketsMigrationTests(unittest.TestCase):
             records = list_applied_migrations(connection)
 
         expected_checksums = tuple(
-            hashlib.sha256(path.read_bytes()).hexdigest()
+            hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
             for path in copied_migrations
         )
         expected_history = (

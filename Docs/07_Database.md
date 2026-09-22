@@ -1063,6 +1063,16 @@ The authoritative migration record is the dedicated `schema_migrations` table de
 
 `schema_migrations` is owned by the migration bootstrap infrastructure and is created before versioned migrations are evaluated. Versioned migration `0001_core.sql` therefore does not recreate it; `0001_core.sql` owns the first versioned application-schema object, `application_metadata`.
 
+## Migration Checksum Portability
+
+Migration discovery reads each UTF-8 source once. Let R be the raw bytes, N be R with only CRLF pairs replaced by LF, and W be N with LF replaced by CRLF. New migration records store SHA-256(N). Pending SQL executes from N decoded strictly with `utf-8-sig`, so supported LF/CRLF source differences cannot change the executed string data.
+
+History validation accepts only SHA-256(N), SHA-256(W), or SHA-256(R), deduplicated and derived from that currently loaded migration. This supports historical LF and uniform CRLF checksums, plus an exact unchanged raw representation. Validation never rewrites existing history fields, timestamps, or execution durations. Unknown checksums fail before pending migrations execute; version, name, missing-file, ordering, transaction, and rollback rules remain in force.
+
+Only CRLF-to-LF canonicalization is allowed. Lone CR bytes, spaces, tabs, comments, blank-line counts, final-newline presence, Unicode bytes, and any UTF-8 BOM remain part of checksum identity. There is no trimming, Unicode normalization, SQL reformatting, or global checksum allowlist. A BOM is removed only by decoding executable SQL, never before hashing. Invalid UTF-8 fails discovery.
+
+Future SQL that needs exact CR/LF data should use explicit expressions such as `char(13)` and `char(10)` instead of depending on source-file newlines. Arbitrary historical mixed-ending layouts cannot be inferred from a digest; unmatched history remains an error. Older raw-byte runners may reject newly recorded canonical hashes from CRLF checkouts. No automatic history repair, schema migration, Git configuration, or attributes change is part of this correction.
+
 ---
 
 # 49. Migration Rules

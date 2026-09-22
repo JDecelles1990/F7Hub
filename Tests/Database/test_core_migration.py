@@ -70,7 +70,7 @@ class CoreMigrationTests(unittest.TestCase):
             }
             records = list_applied_migrations(connection)
 
-        expected_checksum = hashlib.sha256(copied_migration.read_bytes()).hexdigest()
+        expected_checksum = hashlib.sha256(copied_migration.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
         self.assertEqual(tables, {"schema_migrations", "application_metadata"})
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0].version, 1)

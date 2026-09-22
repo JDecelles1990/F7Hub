@@ -1148,6 +1148,10 @@ Start Application
 
 Migration implementation must align with `07_Database.md` and `09_SQLSchema.md`.
 
+`infrastructure/migrations.py` owns checksum portability. Discovery reads raw bytes once, replaces only CRLF pairs with LF, strictly decodes the canonical bytes with `utf-8-sig`, and constructs the canonical checksum/SQL plus immutable, deduplicated checksum candidates for canonical LF, reconstructed CRLF, and exact raw bytes. History validation uses only candidates derived from the current source and performs no history updates. Pending migrations execute canonical SQL and record its canonical byte checksum in the existing per-migration transaction.
+
+BOM bytes remain in checksum identity even though SQL decoding removes the BOM. Lone CR, other whitespace, comments, and Unicode are not normalized. Unknown checksums and existing version/name/order errors still fail before pending execution. The migration model retains exact-checksum validation for direct callers that do not provide compatibility candidates. No new service, schema, dependency, or GUI responsibility is introduced.
+
 ---
 
 # 49. infrastructure Package
