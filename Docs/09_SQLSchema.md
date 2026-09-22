@@ -676,7 +676,7 @@ Once a migration has been applied to a released database, do not silently edit i
 
 Each migration should record a checksum.
 
-If a previously applied migration file changes, migration validation should fail visibly.
+If a previously applied migration file changes beyond the supported LF/CRLF representation equivalence, migration validation fails visibly. Discovery preserves all other bytes, including lone CR and BOM, in checksum identity. Existing history rows are never rewritten. The precise byte and compatibility contract is owned by `07_Database.md`, Migration Checksum Portability.
 
 Preferred flow:
 
@@ -901,7 +901,7 @@ Record immutable database migration history.
 |---|---|---:|---|---|
 | `version` | INTEGER | Yes | PK | Numeric migration sequence |
 | `name` | TEXT | Yes | | Migration description |
-| `checksum_sha256` | TEXT | Yes | | Migration file checksum |
+| `checksum_sha256` | TEXT | Yes | | SHA-256 of canonical source bytes (CRLF pairs replaced by LF) for new records; existing legacy raw-byte values retained and validated against source-derived LF/CRLF/exact-raw candidates |
 | `applied_at` | TEXT | Yes | | UTC application time |
 | `execution_ms` | INTEGER | Yes | | Migration execution duration |
 

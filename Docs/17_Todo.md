@@ -30,6 +30,15 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
+## Migration Checksum Portability - 2026-09-22
+
+- [x] Canonical LF checksum and pending SQL execution; source-derived LF/CRLF/exact-raw legacy compatibility.
+- [x] Preserve existing history, all six migration SQL files, schema, dependencies, and Git settings.
+- [x] Verify deterministic portability, tampering, UTF-8/BOM, lone-CR, idempotency, and mixed-history behavior.
+- [x] Run 9 focused portability and 80 migration tests; full regression: 332 Database, 128 GUI, 91 Integration tests (551 total), zero failures/errors/skips.
+- [x] Validate the existing development history read-only from LF and CRLF fixtures; all six rows and database file bytes unchanged.
+- [ ] Independent migration portability review; changes remain unstaged and uncommitted.
+
 Repository inspection and tests through 2026-09-05 confirmed:
 
 ```text

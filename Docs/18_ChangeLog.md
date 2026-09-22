@@ -47,6 +47,18 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-22 — Migration Checksum Portability
+
+Corrected raw-byte checksum failures across LF/CRLF checkouts. Discovery now hashes canonical bytes formed by replacing only CRLF pairs with LF and executes pending SQL decoded from those same bytes. New history records use the canonical hash. Existing records accept only canonical LF, reconstructed CRLF, or exact-raw hashes derived from the current migration source; no global allowlist or historical-row rewrite is used.
+
+Preserved strict UTF-8 decoding, BOM checksum identity, lone CR, all other whitespace/content, version/name/order validation, and per-migration transaction/rollback behavior. Unknown checksums still fail before pending execution. All six migration SQL files remain byte-for-byte unchanged. No schema, migration, dependency, Git configuration, attributes, AHK, or GUI behavior change was made.
+
+Validation: 9 focused portability tests PASS; 80 migration tests PASS; full Database 332 PASS (17.912s), GUI 128 PASS (119.560s), Integration 91 PASS (451.043s). Full regression totals 551 tests with zero failures, errors, or skips; focused runs overlap the full Database suite. Tests used `C:/Dev/F7Hub/.venv/Scripts/python.exe -B` with PYTHONPATH pointing to this worktree because this checkout has no local virtual environment. The existing development database was opened read-only/query-only: LF and CRLF fixtures both validated all six mixed-history rows, with zero changes and identical before/after database file hashes.
+
+Legacy hash constants were retained as historical evidence and are exercised separately from new canonical-record expectations. Unsupported historical mixed-ending digests still fail unless the exact raw source is present; old raw-byte runners retain their downgrade/checkout limitation. Independent review is pending; this entry does not claim integration or release.
+
+---
+
 # 2026-09-21 — Magnetic Follow Review Corrections
 
 - Corrected destination-boundary snapping that bypassed the per-tick speed cap. Only the target is clamped to the cursor monitor; intermediate movement remains bounded and cannot overshoot the target. A short approach outside the destination finishes before dead-zone settling. Oversized axes align to the destination start edge without resizing.

@@ -61,13 +61,18 @@ class MigrationRollbackError(MigrationApplicationError):
 
 @dataclass(frozen=True)
 class Migration:
-    """A validated migration loaded from disk."""
+    """Canonical checksum/SQL and source-derived legacy validation candidates.
+
+    An empty candidate set retains exact-checksum validation for callers that
+    construct a Migration directly instead of using discovery.
+    """
 
     version: int
     name: str
     path: Path
     checksum_sha256: str
     sql: str
+    compatible_checksums_sha256: frozenset[str] = frozenset()
 
 
 @dataclass(frozen=True)
@@ -132,7 +137,9 @@ def discover_migrations(migrations_dir: str | Path) -> tuple[Migration, ...]:
 
         try:
             migration_bytes = migration_path.read_bytes()
-            migration_sql = migration_bytes.decode("utf-8-sig")
+            # Preserve lone CR, BOM, and every other byte in checksum identity.
+            canonical_bytes = migration_bytes.replace(b"\r\n", b"\n")
+            migration_sql = canonical_bytes.decode("utf-8-sig")
         except (OSError, UnicodeError) as error:
             raise MigrationDiscoveryError(
                 f"Could not read UTF-8 migration file: {migration_path}"
@@ -142,8 +149,16 @@ def discover_migrations(migrations_dir: str | Path) -> tuple[Migration, ...]:
             version=version,
             name=filename_match.group("name"),
             path=migration_path,
-            checksum_sha256=hashlib.sha256(migration_bytes).hexdigest(),
+            checksum_sha256=hashlib.sha256(canonical_bytes).hexdigest(),
             sql=migration_sql,
+            compatible_checksums_sha256=frozenset(
+                hashlib.sha256(representation).hexdigest()
+                for representation in (
+                    canonical_bytes,
+                    canonical_bytes.replace(b"\n", b"\r\n"),
+                    migration_bytes,
+                )
+            ),
         )
 
     return tuple(
@@ -240,7 +255,11 @@ def _validate_migration_history(
                 "Applied migration name changed for version "
                 f"{applied_migration.version:04d}."
             )
-        if migration.checksum_sha256 != applied_migration.checksum_sha256:
+        if (
+            applied_migration.checksum_sha256 != migration.checksum_sha256
+            and applied_migration.checksum_sha256
+            not in migration.compatible_checksums_sha256
+        ):
             raise MigrationChecksumError(
                 "Applied migration checksum changed for version "
                 f"{applied_migration.version:04d}."

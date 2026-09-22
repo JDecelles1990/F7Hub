@@ -187,7 +187,7 @@ class KnowledgeMigrationTests(unittest.TestCase):
         self.assertEqual(
             tuple(record.checksum_sha256 for record in records),
             tuple(
-                hashlib.sha256(path.read_bytes()).hexdigest()
+                hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
                 for path in copied_migrations
             ),
         )

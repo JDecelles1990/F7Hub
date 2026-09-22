@@ -85,7 +85,10 @@ class KnowledgeSearchMigrationTests(unittest.TestCase):
         self.assertEqual(first.migration_result.applied_versions, (1, 2, 3, 4, 5, 6))
         self.assertEqual(second.migration_result.applied_versions, ())
         for filename, expected_hash in EXISTING_MIGRATION_HASHES.items():
-            actual = hashlib.sha256((PRODUCTION_MIGRATIONS / filename).read_bytes()).hexdigest()
+            canonical = (PRODUCTION_MIGRATIONS / filename).read_bytes().replace(b"\r\n", b"\n")
+            # Preserve the historical LF (0001-0004) / CRLF (0005) evidence.
+            historical = canonical.replace(b"\n", b"\r\n") if filename.startswith("0005_") else canonical
+            actual = hashlib.sha256(historical).hexdigest()
             self.assertEqual(actual, expected_hash, filename)
 
         with database_connection(self.database_path) as connection:
@@ -136,6 +139,33 @@ class KnowledgeSearchMigrationTests(unittest.TestCase):
                 ("knowledge_articles_au", "trigger"),
             },
         )
+
+    def test_historical_hashes_validate_without_rewriting_history(self) -> None:
+        self.copy_migrations()
+        bootstrap_database(self.database_path, self.migrations_dir)
+        with database_connection(self.database_path) as connection:
+            for migration in self.migrations_dir.glob("*.sql"):
+                canonical = migration.read_bytes().replace(b"\r\n", b"\n")
+                recorded = connection.execute(
+                    "SELECT checksum_sha256 FROM schema_migrations WHERE version=?",
+                    (int(migration.name[:4]),),
+                ).fetchone()[0]
+                self.assertEqual(recorded, hashlib.sha256(canonical).hexdigest())
+            for filename, historical_hash in EXISTING_MIGRATION_HASHES.items():
+                connection.execute(
+                    "UPDATE schema_migrations SET checksum_sha256=? WHERE version=?",
+                    (historical_hash, int(filename[:4])),
+                )
+            before = list_applied_migrations(connection)
+        for newline in (b"\n", b"\r\n"):
+            with self.subTest(newline=newline):
+                for migration in self.migrations_dir.glob("*.sql"):
+                    canonical = migration.read_bytes().replace(b"\r\n", b"\n")
+                    migration.write_bytes(canonical.replace(b"\n", newline))
+                result = bootstrap_database(self.database_path, self.migrations_dir)
+                self.assertEqual(result.migration_result.applied_versions, ())
+                with database_connection(self.database_path) as connection:
+                    self.assertEqual(list_applied_migrations(connection), before)
 
     def test_existing_rows_are_backfilled_when_0006_is_applied(self) -> None:
         self.copy_migrations(5)

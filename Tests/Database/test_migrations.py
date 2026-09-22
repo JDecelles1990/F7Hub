@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import hashlib
 import sqlite3
 import tempfile
 import unittest
@@ -11,6 +12,7 @@ from f7hub.infrastructure.migrations import (
     InvalidMigrationFilenameError,
     MigrationApplicationError,
     MigrationChecksumError,
+    MigrationDiscoveryError,
     MigrationHistoryError,
     discover_migrations,
     initialize_migration_table,
@@ -512,6 +514,163 @@ class MigrationTests(unittest.TestCase):
                 "SELECT name FROM item_audit"
             ).fetchone()[0]
         self.assertEqual(audit_name, "created")
+
+
+class MigrationPortabilityTests(unittest.TestCase):
+    LF = b"-- immutable fixture\n\nCREATE TABLE sample (value TEXT);\nINSERT INTO sample VALUES ('caf\xc3\xa9\nnext');\n"
+
+    def setUp(self) -> None:
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.root = Path(temporary.name)
+        self.sources = self.root / "migrations"
+        self.sources.mkdir()
+        self.path = self.sources / "0001_sample.sql"
+        self.database = self.root / "test.db"
+
+    def seed_history(self, sources: tuple[bytes, ...]) -> None:
+        # Model the old raw-byte runner without using production hash helpers.
+        with database_connection(self.database) as connection:
+            initialize_migration_table(connection)
+            for version, source in enumerate(sources, 1):
+                connection.execute(
+                    "INSERT INTO schema_migrations VALUES (?, ?, ?, ?, ?)",
+                    (version, "sample", hashlib.sha256(source).hexdigest(),
+                     "2026-09-01T00:00:00.000Z", 17 + version),
+                )
+
+    def history(self) -> tuple:
+        with database_connection(self.database) as connection:
+            return tuple(tuple(row) for row in connection.execute(
+                "SELECT * FROM schema_migrations ORDER BY version"
+            ))
+
+    def test_legacy_matrix_is_read_only_and_idempotent(self) -> None:
+        crlf = self.LF.replace(b"\n", b"\r\n")
+        for stored in (self.LF, crlf):
+            for current in (self.LF, crlf):
+                with self.subTest(stored_crlf=stored == crlf, current_crlf=current == crlf):
+                    self.database = self.root / f"{stored == crlf}-{current == crlf}.db"
+                    self.path.write_bytes(current)
+                    self.seed_history((stored,))
+                    before = self.history()
+                    with database_connection(self.database) as connection:
+                        connection.execute("PRAGMA query_only=ON")
+                        for _ in range(2):
+                            result = run_migrations(connection, discover_migrations(self.sources))
+                            self.assertEqual(result.applied_versions, ())
+                        self.assertEqual(connection.total_changes, 0)
+                    self.assertEqual(self.history(), before)
+
+    def test_fresh_checksum_and_execution_are_canonical(self) -> None:
+        for index, source in enumerate((self.LF, self.LF.replace(b"\n", b"\r\n"))):
+            with self.subTest(index=index):
+                self.database = self.root / f"fresh-{index}.db"
+                self.path.write_bytes(source)
+                result = bootstrap_database(self.database, self.sources)
+                self.assertEqual(result.integrity_results, ("ok",))
+                self.assertEqual(result.foreign_key_violations, ())
+                self.assertEqual(self.history()[0][2], hashlib.sha256(self.LF).hexdigest())
+                with database_connection(self.database) as connection:
+                    self.assertEqual(connection.execute("SELECT value FROM sample").fetchone()[0], "caf\u00e9\nnext")
+                self.assertEqual(bootstrap_database(self.database, self.sources).migration_result.applied_versions, ())
+
+    def test_mixed_history_preserved_before_canonical_increment(self) -> None:
+        for crlf in (False, True):
+            with self.subTest(crlf=crlf):
+                self.database = self.root / f"mixed-{crlf}.db"
+                for version in range(1, 7):
+                    source = f"SELECT {version};\n".encode()
+                    (self.sources / f"{version:04d}_sample.sql").write_bytes(
+                        source.replace(b"\n", b"\r\n") if crlf else source
+                    )
+                legacy = tuple(
+                    f"SELECT {version};".encode() + (b"\n" if version <= 4 else b"\r\n")
+                    for version in range(1, 7)
+                )
+                self.seed_history(legacy)
+                before = self.history()
+                pending = self.sources / "0007_pending.sql"
+                pending.write_bytes(b"CREATE TABLE pending (id INTEGER);\r\n")
+                result = bootstrap_database(self.database, self.sources)
+                self.assertEqual(result.migration_result.applied_versions, (7,))
+                self.assertEqual(self.history()[:6], before)
+                self.assertEqual(self.history()[6][2], hashlib.sha256(b"CREATE TABLE pending (id INTEGER);\n").hexdigest())
+                self.assertEqual(result.integrity_results, ("ok",))
+                self.assertEqual(result.foreign_key_violations, ())
+
+    def test_non_newline_changes_rejected_before_pending_execution(self) -> None:
+        bom = b"\xef\xbb\xbf"
+        cases = {
+            "SQL token": (self.LF, self.LF.replace(b"TEXT", b"BLOB")),
+            "comment": (self.LF, self.LF.replace(b"fixture", b"changed")),
+            "space": (self.LF, self.LF.replace(b"CREATE TABLE", b"CREATE  TABLE")),
+            "tab": (self.LF, self.LF.replace(b"CREATE TABLE", b"CREATE\tTABLE")),
+            "added blank": (self.LF, self.LF + b"\n"),
+            "removed blank": (self.LF, self.LF.replace(b"\n\n", b"\n")),
+            "added final newline": (self.LF[:-1], self.LF),
+            "removed final newline": (self.LF, self.LF[:-1]),
+            "added BOM": (self.LF, bom + self.LF),
+            "removed BOM": (bom + self.LF, self.LF),
+            "Unicode normalization": (self.LF, self.LF.replace(b"\xc3\xa9", b"e\xcc\x81")),
+            "lone CR": (self.LF, self.LF.replace(b"\n", b"\r")),
+        }
+        pending = self.sources / "0002_pending.sql"
+        pending.write_bytes(b"CREATE TABLE must_not_exist (id INTEGER);\n")
+        for index, (label, (original, changed)) in enumerate(cases.items()):
+            for legacy_crlf in (False, True):
+                with self.subTest(change=label, legacy_crlf=legacy_crlf):
+                    self.database = self.root / f"tamper-{index}-{legacy_crlf}.db"
+                    self.seed_history((original.replace(b"\n", b"\r\n") if legacy_crlf else original,))
+                    before = self.history()
+                    self.path.write_bytes(changed)
+                    with self.assertRaises(MigrationChecksumError):
+                        bootstrap_database(self.database, self.sources)
+                    self.assertEqual(self.history(), before)
+                    with database_connection(self.database) as connection:
+                        self.assertIsNone(connection.execute("SELECT name FROM sqlite_master WHERE name='must_not_exist'").fetchone())
+
+    def test_unknown_digest_and_unavailable_mixed_raw_history_rejected(self) -> None:
+        for index, checksum in enumerate(("0" * 64, hashlib.sha256(self.LF.replace(b"\n", b"\r\n", 1)).hexdigest())):
+            with self.subTest(index=index):
+                self.database = self.root / f"unknown-{index}.db"
+                self.seed_history((self.LF,))
+                with database_connection(self.database) as connection:
+                    connection.execute("UPDATE schema_migrations SET checksum_sha256=?", (checksum,))
+                before = self.history()
+                self.path.write_bytes(self.LF)
+                (self.sources / "0002_pending.sql").write_bytes(b"CREATE TABLE pending (id INTEGER);\n")
+                with self.assertRaises(MigrationChecksumError):
+                    bootstrap_database(self.database, self.sources)
+                self.assertEqual(self.history(), before)
+                with database_connection(self.database) as connection:
+                    self.assertIsNone(connection.execute("SELECT name FROM sqlite_master WHERE name='pending'").fetchone())
+
+    def test_exact_raw_mixed_and_lone_cr_history_remains_accepted(self) -> None:
+        for index, raw in enumerate((self.LF.replace(b"\n", b"\r\n", 1), b"SELECT 'a\rb';\n")):
+            with self.subTest(index=index):
+                self.database = self.root / f"raw-{index}.db"
+                self.path.write_bytes(raw)
+                self.seed_history((raw,))
+                before = self.history()
+                bootstrap_database(self.database, self.sources)
+                self.assertEqual(self.history(), before)
+                if index == 1:
+                    self.path.write_bytes(b"SELECT 'a\nb';\n")
+                    with self.assertRaises(MigrationChecksumError):
+                        bootstrap_database(self.database, self.sources)
+
+    def test_bom_is_hashed_but_not_executed(self) -> None:
+        canonical = b"\xef\xbb\xbf" + self.LF
+        self.path.write_bytes(canonical.replace(b"\n", b"\r\n"))
+        bootstrap_database(self.database, self.sources)
+        self.assertEqual(self.history()[0][2], hashlib.sha256(canonical).hexdigest())
+
+    def test_invalid_utf8_fails_before_database_creation(self) -> None:
+        self.path.write_bytes(b"SELECT '\xff';\r\n")
+        with self.assertRaises(MigrationDiscoveryError):
+            bootstrap_database(self.database, self.sources)
+        self.assertFalse(self.database.exists())
 
 
 if __name__ == "__main__":
