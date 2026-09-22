@@ -489,9 +489,20 @@ Slice 022 — read-only Knowledge tag filtering:
 - [x] Load tag/category references independently, preserve filters through Clear Search, and reconcile mutations/lifecycle/navigation.
 - [x] Preserve six migrations and the physical schema; do not index tags in FTS.
 - [x] Add repository/service/GUI/integration coverage and native Windows 1000×700 verification.
-- [ ] Independent Slice 022 review.
+- [x] Preserve Slice 022 as the integrated baseline on `main` for Slice 023.
 
-Recommended next candidate after Slice 022 review: **manual Knowledge filter-reference refresh**, reloading category and global-tag choices independently while preserving valid selections and resetting only unavailable selections. Keep it read-only and add no polling, tag administration, saved filters or multi-tag expressions.
+Slice 023 — manual Knowledge filter-reference refresh, verified 2026-09-22:
+
+- [x] Add one accessible Refresh filters control to the existing 1000×700 filter row.
+- [x] Reuse the independent category/tag runners for exactly one read per source and block duplicate activation/unsafe close.
+- [x] Preserve static modes and valid IDs, update renamed labels, and retain failed-source cached options with retry.
+- [x] Reset only unavailable category/tag dimensions and coalesce one or two resets into exactly one authoritative result reload.
+- [x] Preserve Status and unsubmitted input; rerun active search with only the last executed query.
+- [x] Prove SELECT-only behavior with isolated before/after database dumps, integrity and foreign-key checks.
+- [x] Complete 332 Database + 140 GUI + 92 Integration = 564 regression tests and native Windows 1000×700 validation with six inspected captures.
+- [ ] Independent Slice 023 review.
+
+Do not start Slice 024 from this worktree. Polling/watchers, category/tag administration, saved/date filters and multi-tag expressions remain deferred.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

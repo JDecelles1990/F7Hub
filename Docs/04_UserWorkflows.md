@@ -8,6 +8,14 @@
 
 ---
 
+## Manual Knowledge filter-reference refresh — Slice 023
+
+Knowledge Base → **Refresh filters** → active category choices and global tag choices reload independently. The technician can continue using the workspace after either source fails: the failed source retains its cached choices and selection with safe source-specific feedback, while a successful source applies its new choices. Duplicate activation and closing are guarded until both reads finish.
+
+All categories, Not selected, All tags and Untagged remain selected when active. A specific category/tag is matched by ID, not label, so a rename updates its visible label without changing active filtering or issuing an article query. An inactive/deleted selected category resets Category only; a deleted selected tag resets Tag only. After both reads settle, all required resets are applied before exactly one result reload. Normal mode reloads the filtered list; active search reruns its last executed query while preserving unsubmitted input text. Status, compatible filters and current selection/detail preference remain intact. The workflow performs no database write and does not poll automatically.
+
+---
+
 ## Read-only Knowledge tag filtering — Slice 022
 
 Knowledge Base → Tag filter → All tags / Untagged / one existing global tag → current list. Category, Status and Tag are independent and apply to both normal lists and FTS results. A specific tag includes multi-tag articles once; Untagged includes only articles with no tag relationships. Changing a filter during search reruns the last submitted query, while Clear Search clears only search text/mode and preserves all three filters.

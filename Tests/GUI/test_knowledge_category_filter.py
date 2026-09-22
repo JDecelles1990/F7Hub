@@ -14,6 +14,7 @@ from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication
 
 from f7hub.app.bootstrap import bootstrap_application
+from f7hub.infrastructure.database import database_connection
 from Tests.Database.test_knowledge_categories import seed_knowledge_categories
 
 
@@ -71,6 +72,10 @@ class KnowledgeCategoryFilterGuiTests(unittest.TestCase):
     def codes(self):
         return [a.article_code for a in self.workspace.articles]
 
+    def refresh_filters(self):
+        self.workspace.refresh_filters_button.click()
+        self.wait_idle()
+
     def test_options_default_order_population_does_not_request_redundant_list(self):
         with patch.object(self.service, 'list_articles', wraps=self.service.list_articles) as listing:
             self.show()
@@ -79,6 +84,192 @@ class KnowledgeCategoryFilterGuiTests(unittest.TestCase):
         self.assertEqual(combo.currentText(), 'All categories')
         self.assertEqual([combo.itemData(i) for i in range(combo.count())], [None, None, 22, 66, 11])
         self.assertEqual(combo.itemText(1), 'Not selected')
+        self.assertEqual(self.workspace.refresh_filters_button.text(), 'Refresh filters')
+        self.assertEqual(
+            self.workspace.refresh_filters_button.accessibleName(),
+            'Refresh knowledge filter choices',
+        )
+        self.assertTrue(
+            self.workspace.refresh_filters_button.focusPolicy() & Qt.FocusPolicy.TabFocus
+        )
+        self.assertTrue(self.workspace.refresh_filters_button.isEnabled())
+
+    def test_manual_refresh_requests_both_sources_once_adds_category_and_preserves_static_modes(self):
+        self.show()
+        self.workspace.category_filter.setCurrentIndex(1)
+        self.wait_idle()
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "INSERT INTO categories (category_id, scope, name, is_active, sort_order, slug, created_at, updated_at) "
+                "VALUES (77, 'KNOWLEDGE', 'Fresh category', 1, 5, 'fresh-category', ?, ?)",
+                ('2026-09-22T12:00:00Z', '2026-09-22T12:00:00Z'),
+            )
+        with patch.object(
+            self.service, 'list_active_knowledge_categories',
+            wraps=self.service.list_active_knowledge_categories,
+        ) as categories, patch.object(
+            self.service, 'list_available_tags', wraps=self.service.list_available_tags,
+        ) as tags, patch.object(
+            self.service, 'list_articles', wraps=self.service.list_articles,
+        ) as listing:
+            self.refresh_filters()
+            categories.assert_called_once_with()
+            tags.assert_called_once_with()
+            listing.assert_not_called()
+        self.assertEqual(self.workspace.category_filter.currentText(), 'Not selected')
+        self.assertGreaterEqual(self.workspace.category_filter.findData(77), 0)
+
+        self.workspace.category_filter.setCurrentIndex(0)
+        self.wait_idle()
+        with patch.object(self.service, 'list_articles', wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_not_called()
+        self.assertEqual(self.workspace.category_filter.currentText(), 'All categories')
+
+    def test_manual_refresh_preserves_specific_id_rename_status_and_unsubmitted_input(self):
+        self.show()
+        self.choose(11)
+        self.workspace.status_filter.setCurrentIndex(
+            self.workspace.status_filter.findData('DRAFT')
+        )
+        self.wait_idle()
+        self.workspace.search_input.setText('typed but not submitted')
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "UPDATE categories SET name = 'Renamed networking', updated_at = ? "
+                "WHERE category_id = 11",
+                ('2026-09-22T12:01:00Z',),
+            )
+        with patch.object(self.service, 'list_articles', wraps=self.service.list_articles) as listing, \
+                patch.object(self.service, 'search_articles', wraps=self.service.search_articles) as search:
+            self.refresh_filters()
+            listing.assert_not_called()
+            search.assert_not_called()
+        self.assertEqual(self.workspace.category_filter.currentData(), 11)
+        self.assertEqual(self.workspace.category_filter.currentText(), 'Renamed networking')
+        self.assertEqual(self.workspace.status_filter.currentData(), 'DRAFT')
+        self.assertEqual(self.workspace.search_input.text(), 'typed but not submitted')
+
+    def test_manual_refresh_deactivated_category_resets_only_category_and_lists_once(self):
+        self.show()
+        self.choose(11)
+        self.workspace.status_filter.setCurrentIndex(
+            self.workspace.status_filter.findData('DRAFT')
+        )
+        self.wait_idle()
+        self.workspace.search_input.setText('typed but not submitted')
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "UPDATE categories SET is_active = 0, updated_at = ? WHERE category_id = 11",
+                ('2026-09-22T12:02:00Z',),
+            )
+        with patch.object(self.service, 'list_articles', wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_called_once_with(status='DRAFT')
+        self.assertEqual(self.workspace.category_filter.currentText(), 'All categories')
+        self.assertEqual(self.workspace.status_filter.currentData(), 'DRAFT')
+        self.assertEqual(self.workspace.tag_filter.currentText(), 'All tags')
+        self.assertEqual(self.workspace.search_input.text(), 'typed but not submitted')
+
+    def test_manual_refresh_deleted_category_resets_category_and_lists_once(self):
+        self.show()
+        self.choose(66)
+        with database_connection(self.path) as connection:
+            connection.execute('DELETE FROM categories WHERE category_id = 66')
+        with patch.object(self.service, 'list_articles', wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_called_once_with()
+        self.assertEqual(self.workspace.category_filter.currentText(), 'All categories')
+
+    def test_manual_refresh_both_completion_orders_block_duplicates_and_close(self):
+        self.show()
+        original_categories = self.service.list_active_knowledge_categories
+        original_tags = self.service.list_available_tags
+        for first_source in ('tag', 'category'):
+            with self.subTest(first_source=first_source):
+                category_gate = threading.Event()
+                tag_gate = threading.Event()
+                with patch.object(
+                    self.service, 'list_active_knowledge_categories',
+                    side_effect=lambda: (category_gate.wait(3), original_categories())[1],
+                ) as categories, patch.object(
+                    self.service, 'list_available_tags',
+                    side_effect=lambda: (tag_gate.wait(3), original_tags())[1],
+                ) as tags:
+                    try:
+                        self.workspace.refresh_filters_button.click()
+                        deadline = time.monotonic() + 3
+                        while (
+                            (categories.call_count < 1 or tags.call_count < 1)
+                            and time.monotonic() < deadline
+                        ):
+                            QTest.qWait(10)
+                        self.workspace.refresh_filter_options()
+                        self.assertTrue(self.workspace.filter_loading)
+                        self.assertFalse(self.workspace.refresh_filters_button.isEnabled())
+                        self.assertFalse(self.window.close())
+                        categories.assert_called_once_with()
+                        tags.assert_called_once_with()
+
+                        first_gate = tag_gate if first_source == 'tag' else category_gate
+                        first_runner = (
+                            self.workspace._tag_filter_runner
+                            if first_source == 'tag' else self.workspace._filter_runner
+                        )
+                        second_runner = (
+                            self.workspace._filter_runner
+                            if first_source == 'tag' else self.workspace._tag_filter_runner
+                        )
+                        first_gate.set()
+                        deadline = time.monotonic() + 3
+                        while first_runner.busy and time.monotonic() < deadline:
+                            QTest.qWait(10)
+                        self.assertFalse(first_runner.busy)
+                        self.assertTrue(second_runner.busy)
+                        self.assertFalse(self.workspace.refresh_filters_button.isEnabled())
+                    finally:
+                        category_gate.set()
+                        tag_gate.set()
+                    self.wait_idle()
+                self.assertTrue(self.workspace.refresh_filters_button.isEnabled())
+
+    def test_manual_category_failure_retains_cache_while_tag_succeeds_and_retry_works(self):
+        self.show()
+        self.choose(11)
+        cached = [
+            (self.workspace.category_filter.itemText(index),
+             self.workspace.category_filter.itemData(index))
+            for index in range(self.workspace.category_filter.count())
+        ]
+        with database_connection(self.path) as connection:
+            connection.execute(
+                "INSERT INTO tags (tag_id, name, slug, created_at) VALUES (77, 'Fresh tag', 'fresh-tag', ?)",
+                ('2026-09-22T12:03:00Z',),
+            )
+        with patch.object(
+            self.service, 'list_active_knowledge_categories',
+            side_effect=RuntimeError('private category failure'),
+        ), patch.object(self.service, 'list_articles', wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_not_called()
+        self.assertEqual(
+            [(self.workspace.category_filter.itemText(index),
+              self.workspace.category_filter.itemData(index))
+             for index in range(self.workspace.category_filter.count())],
+            cached,
+        )
+        self.assertEqual(self.workspace.category_filter.currentData(), 11)
+        self.assertIn(
+            ('tag', 77),
+            [self.workspace.tag_filter.itemData(index)
+             for index in range(self.workspace.tag_filter.count())],
+        )
+        self.assertNotIn('private category failure', self.workspace.filter_feedback.text())
+        self.assertIn('retained', self.workspace.filter_feedback.text())
+
+        self.refresh_filters()
+        self.assertFalse(self.workspace.filter_feedback.isVisible())
+        self.assertEqual(self.workspace.category_filter.currentData(), 11)
 
     def test_filter_one_async_call_busy_state_and_detail_reconciliation(self):
         self.show()

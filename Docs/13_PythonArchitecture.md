@@ -725,6 +725,12 @@ KnowledgeWorkspace adds one static QComboBox whose item data carries the service
 
 `KnowledgeWorkspace` stores explicit All/Untagged/specific item data, loads global choices through `list_available_tags()`, and keeps tag-reference execution independent from the category runner. The two reference runners contribute to `filter_loading`; the shared article runner still serializes list/search/detail and mutations. Active search uses the executed query, Clear Search retains all filters, and authoritative reconciliation handles selection, tag writes, new articles, lifecycle changes and cross-workspace reveal. No MainWindow, migration or new service/repository class is required.
 
+## Implemented Manual Filter-Reference Refresh — Slice 023
+
+`KnowledgeWorkspace.refresh_filter_options()` snapshots category mode/ID and tag mode/ID, then submits exactly one call to `KnowledgeService.list_active_knowledge_categories()` and one call to `KnowledgeService.list_available_tags()` through the existing independent reference runners. Callbacks replace a source only after successful completion, reconcile by stable ID under `QSignalBlocker`, and retain cached options on failure. The existing repository/service SELECT paths remain the only data sources.
+
+Minimal per-cycle state records pending sources and whether either successful result invalidated an active specific selection. Only the final callback may request result reconciliation: no reset means no article query; one or two resets mean one shared-runner list/search request with the final controls. Active search passes the stored executed query without changing the input field; normal reload preserves unsubmitted input. `filter_loading` and MainWindow close protection remain unchanged. No repository, service, domain, migration, schema, FTS, dependency or cross-language change is introduced.
+
 ## Implemented Knowledge Category Filtering — Slice 019
 
 Slice 019 adds read-only category filtering to KnowledgeService.list_articles/search_articles: positive integer category_id excluding bool, boolean uncategorized_only, and mutually exclusive modes. Defaults preserve All behavior. Service errors remain safely translated and literal FTS tokenization is unchanged. Repository queries bind category values and use only internal constant predicate fragments.

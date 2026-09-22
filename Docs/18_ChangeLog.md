@@ -47,6 +47,16 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-22 — Slice 023: Manual Knowledge Filter-Reference Refresh
+
+Added one compact, accessible **Refresh filters** control to the existing Knowledge Category/Status/Tag row. One activation submits exactly one active-category read and one global-tag read through the existing independent runners. Successful sources replace dynamic choices; failed sources keep their cached options and selection with safe, retryable source-specific feedback. Duplicate activation is blocked and existing `filter_loading` close protection remains sufficient.
+
+Static modes and valid specific IDs survive refresh; renamed choices display their new labels. An inactive/deleted selected category resets only Category, and a deleted selected tag resets only Tag. Coordination waits for both reads and issues no article query when selections remain valid or exactly one authoritative list/search request when either/both reset. Active search reuses the last executed query while preserving unsubmitted input. No repository, service, database, migration, schema, FTS, AHK, PowerShell or dependency change was made.
+
+Validation: focused Slice 023 set 27 PASS; full Database 332, GUI 140 and Integration 92 = **564 PASS**, zero failures/errors/skips. Isolated real-SQLite before/after dumps proved refresh and reconciliation reads write nothing; `integrity_check=ok` and foreign-key violations=0. Native Windows representative set: 6 PASS. Six actual 1000×700 MainWindow captures covering idle, busy, updated options, partial failure, unavailable reset and active-search reconciliation were manually inspected with no clipping, forced oversize, overlap, hidden control or broken detail view. Work remains unstaged/uncommitted for independent review.
+
+---
+
 # 2026-09-22 — Migration Checksum Portability
 
 Corrected raw-byte checksum failures across LF/CRLF checkouts. Discovery now hashes canonical bytes formed by replacing only CRLF pairs with LF and executes pending SQL decoded from those same bytes. New history records use the canonical hash. Existing records accept only canonical LF, reconstructed CRLF, or exact-raw hashes derived from the current migration source; no global allowlist or historical-row rewrite is used.
