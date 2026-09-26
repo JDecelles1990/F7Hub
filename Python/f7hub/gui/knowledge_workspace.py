@@ -184,6 +184,8 @@ class KnowledgeWorkspace(QWidget):
         self.detail_title.setWordWrap(True)
         self.detail_status = QLabel("", self)
         self.detail_version = QLabel("", self)
+        self.detail_dates = QLabel("", self)
+        self.detail_dates.setWordWrap(True)
         self.detail_category = QLabel("", self)
         self.detail_category.setWordWrap(True)
         self.detail_tags = QLabel("", self)
@@ -196,7 +198,7 @@ class KnowledgeWorkspace(QWidget):
         self.detail_body.setPlaceholderText("Select an article to read.")
         detail = QWidget(self)
         detail_layout = QVBoxLayout(detail)
-        for widget in (self.detail_code, self.detail_title, self.detail_status, self.detail_version, self.detail_category, self.detail_tags, self.detail_summary):
+        for widget in (self.detail_code, self.detail_title, self.detail_status, self.detail_version, self.detail_dates, self.detail_category, self.detail_tags, self.detail_summary):
             widget.setTextFormat(Qt.TextFormat.PlainText)
             if widget is self.detail_category:
                 category_row = QHBoxLayout()
@@ -938,6 +940,7 @@ class KnowledgeWorkspace(QWidget):
             self.detail_title.setText("")
             self.detail_status.setText("")
             self.detail_version.setText("")
+            self.detail_dates.setText("")
             self.detail_category.setText("")
             self.detail_tags.setText("")
             self.detail_summary.setText("")
@@ -947,6 +950,9 @@ class KnowledgeWorkspace(QWidget):
         self.detail_title.setText(article.title)
         self.detail_status.setText(f"Status: {article.status}")
         self.detail_version.setText(f"Version {article.version_number}")
+        self.detail_dates.setText(
+            f"Created: {article.created_at} · Last updated: {article.updated_at}"
+        )
         self.detail_category.setText(f"Category: {article.category_name or 'Not selected'}")
         tag_names = getattr(article, "tag_names", ())
         self.detail_tags.setText(f"Tags: {', '.join(tag_names) if tag_names else 'None'}")

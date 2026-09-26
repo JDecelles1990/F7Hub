@@ -861,6 +861,10 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         workspace = self.assert_open_article(self.article.knowledge_article_id)
         self.assertEqual(workspace.detail_body.toPlainText(), "# Synthetic procedure")
         self.assertEqual(workspace.detail_version.text(), "Version 1")
+        self.assertEqual(
+            workspace.detail_dates.text(),
+            f"Created: {self.article.created_at} · Last updated: {self.article.updated_at}",
+        )
         second = self.context.knowledge_service.create_article(article_code="KB0002", title="Second", summary=None, body="Second body")
         self.link(second.knowledge_article_id)
         self.assertEqual(self.count(), 2)
