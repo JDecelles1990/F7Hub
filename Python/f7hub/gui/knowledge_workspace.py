@@ -1,6 +1,7 @@
 """Create, list, and read workspace for knowledge articles."""
 
 import logging
+from html import escape
 
 from PySide6.QtCore import QItemSelectionModel, QSignalBlocker, Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
@@ -24,6 +25,7 @@ from PySide6.QtWidgets import (
 from f7hub.gui.new_article_dialog import NewArticleDialog
 from f7hub.gui.article_category_dialog import ArticleCategoryDialog
 from f7hub.gui.article_tags_dialog import ArticleTagsDialog
+from f7hub.gui.knowledge_tag_filter_dialog import KnowledgeTagFilterDialog
 from f7hub.gui.edit_article_dialog import EditArticleDialog
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.version_history_dialog import VersionHistoryDialog
@@ -32,6 +34,7 @@ from f7hub.services.knowledge_service import KnowledgeArchiveError, KnowledgePub
 
 _TAG_FILTER_ALL = ("all", None)
 _TAG_FILTER_UNTAGGED = ("untagged", None)
+_TAG_FILTER_CHOOSE = ("choose", None)
 
 
 class KnowledgeWorkspace(QWidget):
@@ -65,6 +68,9 @@ class KnowledgeWorkspace(QWidget):
         self._confirming_archive = False
         self._category_dialog = None
         self._tags_dialog = None
+        self._tag_filter_dialog = None
+        self._available_filter_tags = ()
+        self._selected_tag_filter = _TAG_FILTER_ALL
         self.articles = ()
         self.article = None
 
@@ -135,7 +141,7 @@ class KnowledgeWorkspace(QWidget):
         )
         self.tag_filter.addItem("All tags", _TAG_FILTER_ALL)
         self.tag_filter.addItem("Untagged", _TAG_FILTER_UNTAGGED)
-        self.tag_filter.currentIndexChanged.connect(self._filter_changed)
+        self.tag_filter.currentIndexChanged.connect(self._tag_filter_changed)
         filter_row.addWidget(QLabel("Tag:", self))
         filter_row.addWidget(self.tag_filter, 1)
         self.refresh_filters_button = QToolButton(self)
@@ -256,7 +262,8 @@ class KnowledgeWorkspace(QWidget):
         return ("category", category_id)
 
     def refresh_filter_options(self) -> None:
-        if self._runner.busy or self.filter_loading or self._manual_filter_refresh_active:
+        if (self._runner.busy or self.filter_loading or self._manual_filter_refresh_active
+                or self._tag_filter_dialog is not None):
             return
         self._manual_filter_refresh_active = True
         self._manual_filter_refresh_pending = {"category", "tag"}
@@ -331,35 +338,101 @@ class KnowledgeWorkspace(QWidget):
             self._manual_tag_filter_selection
             if manual else self.tag_filter.currentData()
         )
+        self._available_filter_tags = tuple(tags)
+        mode, value = selection
+        selected_ids = ((value,) if mode == "tag" else value if mode == "any" else ())
+        available_ids = {tag.tag_id for tag in tags}
+        surviving_ids = tuple(tag_id for tag_id in selected_ids if tag_id in available_ids)
+        selection_reset = len(surviving_ids) != len(selected_ids)
+        if mode in ("tag", "any"):
+            selection = self._selection_for_tag_ids(surviving_ids)
+        self._set_tag_filter_selection(selection)
+        self._tag_filter_options_loaded = True
+        self._tag_filter_options_ready = True
+        if selection_reset:
+            self.tag_filter_feedback.setText(
+                "Unavailable tags were removed from the filter."
+                if surviving_ids else "Selected tags are unavailable. Showing All tags."
+            )
+            self.tag_filter_feedback.show()
+        else:
+            self.tag_filter_feedback.hide()
+        if manual:
+            self._manual_filter_source_settled("tag", selection_reset=selection_reset)
+        self._update_actions(self._runner.busy)
+
+    @staticmethod
+    def _selection_for_tag_ids(tag_ids: tuple[int, ...]) -> tuple:
+        tag_ids = tuple(sorted(tag_ids))
+        if not tag_ids:
+            return _TAG_FILTER_ALL
+        if len(tag_ids) == 1:
+            return ("tag", tag_ids[0])
+        return ("any", tag_ids)
+
+    def _set_tag_filter_selection(self, selection: tuple) -> None:
+        """Rebuild cached shortcuts without submitting a result request."""
         with QSignalBlocker(self.tag_filter):
             self.tag_filter.clear()
             self.tag_filter.addItem("All tags", _TAG_FILTER_ALL)
             self.tag_filter.addItem("Untagged", _TAG_FILTER_UNTAGGED)
-            for tag in tags:
+            for tag in self._available_filter_tags:
                 self.tag_filter.addItem(tag.name, ("tag", tag.tag_id))
-            mode, tag_id = selection
-            if mode == "tag":
-                index = next(
-                    (
-                        item_index
-                        for item_index in range(self.tag_filter.count())
-                        if self.tag_filter.itemData(item_index) == ("tag", tag_id)
-                    ),
-                    -1,
-                )
-                self.tag_filter.setCurrentIndex(index if index >= 0 else 0)
-            elif mode == "untagged":
-                self.tag_filter.setCurrentIndex(1)
-            else:
-                self.tag_filter.setCurrentIndex(0)
-        self._tag_filter_options_loaded = True
-        self._tag_filter_options_ready = True
-        self.tag_filter_feedback.hide()
-        if manual:
-            self._manual_filter_source_settled(
-                "tag", selection_reset=mode == "tag" and index < 0
+            mode, value = selection
+            if mode == "any":
+                self.tag_filter.addItem(f"Any of {len(value)} tags", selection)
+            self.tag_filter.addItem("Choose tags…", _TAG_FILTER_CHOOSE)
+            index = next(
+                (item_index for item_index in range(self.tag_filter.count())
+                 if self.tag_filter.itemData(item_index) == selection), -1,
             )
+            self.tag_filter.setCurrentIndex(index if index >= 0 else 0)
+            self._selected_tag_filter = self.tag_filter.currentData()
+        selected_names = (
+            [tag.name for tag in self._available_filter_tags if tag.tag_id in value]
+            if mode == "any" else []
+        )
+        self.tag_filter.setToolTip(
+            "<qt>" + escape("Match any selected tag: " + ", ".join(selected_names)) + "</qt>"
+            if selected_names else ""
+        )
+
+    def _tag_filter_changed(self, index: int) -> None:
+        selection = self.tag_filter.currentData()
+        if selection == _TAG_FILTER_CHOOSE:
+            self._set_tag_filter_selection(self._selected_tag_filter)
+            self.open_tag_filter()
+            return
+        self._selected_tag_filter = selection
+        self._filter_changed(index)
+
+    def open_tag_filter(self) -> KnowledgeTagFilterDialog | None:
+        if (self._runner.busy or self.filter_loading or self._manual_filter_refresh_active
+                or self._tag_filter_dialog is not None or self._category_dialog is not None
+                or self._tags_dialog is not None or self._confirming_publish
+                or self._confirming_archive or not self._tag_filter_options_ready):
+            return None
+        mode, value = self._selected_tag_filter
+        selected_ids = (value,) if mode == "tag" else value if mode == "any" else ()
+        dialog = KnowledgeTagFilterDialog(
+            self._available_filter_tags, selected_ids, self.window()
+        )
+        self._tag_filter_dialog = dialog
+        dialog.finished.connect(self._tag_filter_closed)
         self._update_actions(self._runner.busy)
+        dialog.open()
+        return dialog
+
+    def _tag_filter_closed(self, result: int) -> None:
+        dialog = self._tag_filter_dialog
+        self._tag_filter_dialog = None
+        self._update_actions(self._runner.busy)
+        if result == KnowledgeTagFilterDialog.DialogCode.Accepted:
+            selection = self._selection_for_tag_ids(dialog.selected_ids())
+            if selection != self._selected_tag_filter:
+                self._set_tag_filter_selection(selection)
+                self._reload_results_after_filter_refresh()
+        dialog.deleteLater()
 
     def _tag_filter_options_failed(self, error) -> None:
         logging.getLogger(__name__).error(
@@ -421,6 +494,8 @@ class KnowledgeWorkspace(QWidget):
             arguments["untagged_only"] = True
         elif tag_mode == "tag":
             arguments["tag_id"] = tag_id
+        elif tag_mode == "any":
+            arguments["tag_ids"] = tag_id
         return arguments
 
     def _reset_category_filter(self) -> None:
@@ -432,16 +507,17 @@ class KnowledgeWorkspace(QWidget):
             self.status_filter.setCurrentIndex(0)
 
     def _reset_tag_filter(self) -> None:
-        with QSignalBlocker(self.tag_filter):
-            self.tag_filter.setCurrentIndex(0)
+        self._set_tag_filter_selection(_TAG_FILTER_ALL)
 
     def _article_matches_tag_filter(self, article) -> bool:
-        tag_mode, _tag_id = self.tag_filter.currentData()
-        tag_names = getattr(article, "tag_names", ())
+        tag_mode, selected = self.tag_filter.currentData()
+        tag_ids = getattr(article, "tag_ids", ())
         if tag_mode == "untagged":
-            return not tag_names
+            return not tag_ids
         if tag_mode == "tag":
-            return self.tag_filter.currentText() in tag_names
+            return selected in tag_ids
+        if tag_mode == "any":
+            return bool(set(selected).intersection(tag_ids))
         return True
 
     def _filter_changed(self, _index) -> None:
@@ -449,8 +525,7 @@ class KnowledgeWorkspace(QWidget):
             return
         selected_id = self.article.knowledge_article_id if self.article else None
         if self._search_active:
-            self.search_input.setText(self._search_query)
-            self.search_articles()
+            self.search_articles(query=self._search_query)
         else:
             self.refresh_list()
         # A previous selection is a preference, not an explicit reveal request.
@@ -751,6 +826,8 @@ class KnowledgeWorkspace(QWidget):
             empty_text = "No untagged knowledge articles."
         elif tag_mode == "tag":
             empty_text = "No knowledge articles with this tag."
+        elif tag_mode == "any":
+            empty_text = "No knowledge articles with any selected tag."
         self._populate_articles(articles, empty_text)
 
     def _search_loaded(self, articles) -> None:
@@ -855,7 +932,10 @@ class KnowledgeWorkspace(QWidget):
         self.detail_body.setPlainText(article.body_markdown)
 
     def _update_actions(self, busy: bool) -> None:
-        busy = busy or self._manual_filter_refresh_active or self._confirming_publish or self._confirming_archive or self._category_dialog is not None or self._tags_dialog is not None
+        busy = (busy or self._tag_filter_dialog is not None
+                or self._manual_filter_refresh_active or self._confirming_publish
+                or self._confirming_archive or self._category_dialog is not None
+                or self._tags_dialog is not None)
         self.new_button.setEnabled(not busy)
         self.search_input.setEnabled(not busy)
         self.search_button.setEnabled(not busy)

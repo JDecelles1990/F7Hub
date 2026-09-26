@@ -8,6 +8,12 @@
 
 ---
 
+## Read-only any-tag filtering — Slice 024
+
+Knowledge lists and current FTS results can match any of two or more selected existing global tags. Selecting none returns All tags; selecting one uses the existing single-tag mode. The result has each article once and composes with Category and Status without changing MATCH or ranking. Filter selections use stable tag IDs, including after reference refresh. AND and expression filtering, saved/date filters, tag administration and historical tag filtering remain deferred.
+
+---
+
 ## Manual Knowledge filter-reference refresh — Slice 023
 
 The Knowledge filter row now provides **Refresh filters** to reload active KNOWLEDGE categories and global tags without reconstructing the workspace. One activation starts exactly one existing category read and one existing tag read through their independent task runners. Successful sources replace their dynamic choices; failed sources retain the last successfully loaded choices and remain retryable.
@@ -20,7 +26,7 @@ All/Not selected and All tags/Untagged modes survive refresh. Specific selection
 
 All tags, Untagged and one specific existing global tag are implemented for current Knowledge lists and FTS search. The tag dimension composes independently with Category and Status; Clear Search preserves all three filters, active filter changes reuse the last executed query, and Ticket Open Article resets all filters before explicit reveal.
 
-Specific matching means the article has the selected tag and may have others. Untagged means zero `knowledge_article_tags` rows. Filtering is SELECT-only and returns every article at most once. Multi-tag AND/OR expressions, tag administration, saved filters and historical tag filtering are not implemented. No migration, schema, FTS content or ranking change is introduced. Validation: `Status/CURRENT_STATE.md`.
+Specific matching means the article has the selected tag and may have others. Untagged means zero `knowledge_article_tags` rows. Filtering is SELECT-only and returns every article at most once. Any of selected tags is added separately in Slice 024; AND and custom boolean expressions, tag administration, saved filters and historical tag filtering are not implemented. No migration, schema, FTS content or ranking change is introduced. Validation: `Status/CURRENT_STATE.md`.
 
 ---
 
@@ -28,7 +34,7 @@ Specific matching means the article has the selected tag and may have others. Un
 
 All statuses, DRAFT, PUBLISHED and ARCHIVED filtering for current Knowledge lists and FTS search: IMPLEMENTED. Status composes independently with the Slice 019 category modes, remains selected when category changes, and is preserved with category by Clear Search. Explicit Ticket Open Article resets search and both filters before revealing the requested current article. Create, Publish and Archive reset only incompatible filter dimensions so their authoritative results remain visible; compatible category/status filters remain selected.
 
-Filtering is read-only and uses the existing repository/service/workspace path. Single-tag/Untagged filtering is implemented separately in Slice 022. Saved/date filters, multi-tag expressions, multi-select/custom statuses, pagination and advanced search: NOT IMPLEMENTED. No migration or schema/index/ranking change. Validation: Status/CURRENT_STATE.md.
+Filtering is read-only and uses the existing repository/service/workspace path. Single-tag/Untagged filtering is implemented in Slice 022 and Any of selected tags in Slice 024. Saved/date filters, AND/custom tag expressions, multi-select/custom statuses, pagination and advanced search: NOT IMPLEMENTED. No migration or schema/index/ranking change. Validation: Status/CURRENT_STATE.md.
 
 ---
 
@@ -526,7 +532,7 @@ Knowledge articles may be linked to:
 
 Knowledge category assignment, change and removal: IMPLEMENTED FOR DRAFT. Category… offers Not selected and active KNOWLEDGE categories, with the current active category selected. Current details display the category name, including an assigned category that later becomes inactive. An unavailable current choice can be replaced or cleared.
 
-Existing global tag assignment, replacement and removal: IMPLEMENTED FOR DRAFT. Tags… selects zero, one or multiple existing global tags; an empty selection removes all current tags. Tags are current article metadata only: they update `updated_at` under both version and metadata tokens, but do not create a content version or historical snapshot. Read-only All/Untagged/single-tag filtering is implemented in Slice 022. Tag administration, multi-tag filtering and historical tag reconstruction remain deferred.
+Existing global tag assignment, replacement and removal: IMPLEMENTED FOR DRAFT. Tags… selects zero, one or multiple existing global tags; an empty selection removes all current tags. Tags are current article metadata only: they update `updated_at` under both version and metadata tokens, but do not create a content version or historical snapshot. Read-only All/Untagged/single-tag filtering is implemented in Slice 022 and Any of selected tags in Slice 024. Tag administration, AND/custom expression filtering and historical tag reconstruction remain deferred.
 
 Only category_id and updated_at change. Content version, immutable content history, lifecycle, publication timestamp, search content and ticket relationships remain intact. Both reviewed version_number and updated_at protect against stale saves. PUBLISHED/ARCHIVED category mutation, category history and category administration: NOT IMPLEMENTED. Existing-tag assignment is separately implemented for DRAFT articles in Slice 021. Validation evidence is in Status/CURRENT_STATE.md.
 

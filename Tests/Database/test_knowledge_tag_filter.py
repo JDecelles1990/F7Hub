@@ -154,6 +154,60 @@ class KnowledgeTagFilterTests(unittest.TestCase):
             [(33, "Security"), (44, "Unused"), (11, "VPN"), (22, "Windows")],
         )
 
+    def test_any_selected_tags_compose_without_duplicates_or_writes(self):
+        before = self.dump()
+        selected = (11, 33)
+        self.assertEqual(
+            self.codes(self.service.list_articles(tag_ids=selected)),
+            ["E", "C", "B", "A"],
+        )
+        self.assertEqual(
+            self.codes(self.service.list_articles(
+                category_id=11, status="ARCHIVED", tag_ids=selected,
+            )), ["E"],
+        )
+        all_search = self.service.search_articles("DNS")
+        filtered = self.service.search_articles("DNS", tag_ids=selected)
+        self.assertEqual(
+            self.codes(filtered),
+            [row.article_code for row in all_search if row.article_code in {"A", "B", "C", "E"}],
+        )
+        self.assertEqual(len(filtered), len({row.knowledge_article_id for row in filtered}))
+        self.assertEqual(self.codes(self.service.list_articles(tag_ids=())),
+                         self.codes(self.service.list_articles()))
+        self.assertEqual(self.dump(), before)
+        with database_connection(self.path) as connection:
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+        self.assertEqual(self.rows["A"].tag_ids, (11, 22))
+
+    def test_any_tag_validation_precedes_repository_calls(self):
+        invalid = (
+            {"tag_ids": [11, 33]}, {"tag_ids": (True, 11)},
+            {"tag_ids": (0, 11)}, {"tag_ids": (11, 11)},
+            {"tag_ids": (11,), "tag_id": 11},
+            {"tag_ids": (), "untagged_only": True},
+        )
+        with patch.object(self.repository, "list_articles") as listing, patch.object(
+            self.repository, "search_articles"
+        ) as searching:
+            for arguments in invalid:
+                with self.subTest(arguments=arguments):
+                    with self.assertRaises(KnowledgeValidationError):
+                        self.service.list_articles(**arguments)
+                    with self.assertRaises(KnowledgeValidationError):
+                        self.service.search_articles("DNS", **arguments)
+            listing.assert_not_called()
+            searching.assert_not_called()
+        for operation in (
+            self.repository.list_articles,
+            lambda **arguments: self.repository.search_articles('"DNS"', **arguments),
+        ):
+            for arguments in invalid:
+                with self.subTest(operation=operation, arguments=arguments):
+                    with self.assertRaises(ValueError):
+                        operation(**arguments)
+
     def test_repository_rejects_contradiction_and_filtered_reads_write_nothing(self):
         for operation in (
             self.repository.list_articles,
@@ -175,6 +229,7 @@ class KnowledgeTagFilterTests(unittest.TestCase):
         with patch("f7hub.repositories.knowledge_repository.database_connection", read_only):
             for arguments in (
                 {}, {"tag_id": 11}, {"untagged_only": True},
+                {"tag_ids": (11, 33)},
                 {"category_id": 11, "tag_id": 11},
                 {"status": "ARCHIVED", "tag_id": 33},
                 {"category_id": 11, "status": "ARCHIVED", "tag_id": 11},
