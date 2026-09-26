@@ -751,6 +751,8 @@ Code and title are trimmed and required. Summary is trimmed, with blank input st
 
 Creation stores a DRAFT article and its version-1 snapshot atomically. Category and published_at remain NULL. The read view shows code, title, status, current Version N, summary and plain, read-only Markdown source.
 
+Slice 026 also shows `Created: <created_at> · Last updated: <updated_at>` below Version whenever current article detail loads, including selection, search and Ticket Open Article. These are the persisted current-article values exactly as stored, without timezone conversion. Empty, missing or failed detail clears the line; viewing makes no database write.
+
 ## Implemented draft editing — Slice 011
 
 Open an existing DRAFT article → Edit Article → change title, summary or body → Save Revision → the same article remains selected with updated content and Version N+1 → reopen/read the saved revision. Article code and the editor's originally opened version are read-only. Title and summary are normalized as for creation; valid body content is preserved by the service.

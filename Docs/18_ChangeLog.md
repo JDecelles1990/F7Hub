@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-26 — Slice 026: Current Knowledge Article Dates
+
+The Knowledge detail now shows the current article's persisted Created and Last updated values below Version, using the existing authoritative record. Values are displayed exactly without timezone conversion. Empty, missing and failed detail clears the line. No query, service API, database write, schema change, migration or dependency was added.
+
+Fresh candidate validation: focused GUI and real-SQLite checks passed; Database **336 PASS**, GUI **153 PASS**, Integration **95 PASS** = **584 PASS**, all exit 0. A native Windows 1000×700 MainWindow capture was opened and inspected; the date line and body were readable. The candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-26 — Slice 025: Read-only All Selected Knowledge Tags
 
 The existing tag choice dialog now offers Any or All for two or more selected global tags. All mode requires every selected current tag relationship in both normal lists and FTS results; zero/one choices collapse to the existing modes. Service and repository validation reject invalid modes before reads. Category/Status composition, ordering, MATCH/bm25 ranking, one row per article, executed-query state, refresh reconciliation and Ticket Open Article reset remain intact. No schema, migration, index, FTS object, tag write or dependency changed.

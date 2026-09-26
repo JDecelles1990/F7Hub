@@ -2,6 +2,40 @@
 
 Last verified: 2026-09-26 (America/Toronto).
 
+Current candidate: **Slice 026 — Show current Knowledge article dates**, `feature/knowledge-article-dates-s026` in `C:\Dev\F7Hub`. Base and current HEAD: `c9a1a85a3b04afbf4a856379f3f0485dbf5d4351`, equal to live `origin/main` at the implementation baseline gate. Initial tree, index and untracked scope were clean. Slice 025 is CLOSED on this base. The preserved `recovery/pre-s024-protected-work` branch remains read-only at `002a494735f30e1488f61e21ea98740ae6371d4d`.
+
+Status: **PASS — READY_FOR_REVIEW**. The user authorized IMPLEMENT → TEST → DOCUMENT only. No staging, commit, push, PR or integration occurred; independent Slice 026 review is pending.
+
+## Slice 026 Result and Scope
+
+KnowledgeWorkspace shows one wrapping plain-text line below Version: `Created: <created_at> · Last updated: <updated_at>`. The values come directly from the existing authoritative current-article record and are cleared with empty, missing or failed detail. They are displayed exactly as persisted, with no timezone conversion or timestamp semantics change. Selection, search and Ticket Open Article use the existing detail path. Production changes are confined to `Python/f7hub/gui/knowledge_workspace.py`; focused GUI and real-SQLite integration tests changed. No repository query, service API, database write, schema change, migration or dependency was added. Author, publication date, history comparison, restore/revert, date filters and relationship work remain outside this slice.
+
+## Slice 026 Fresh Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration tests used `QT_QPA_PLATFORM=offscreen`; native validation used `windows`.
+
+| Suite | Command | Fresh result |
+|---|---|---|
+| Focused GUI | `python -B -m unittest Tests.GUI.test_knowledge_workspace.KnowledgeWorkspaceTests.test_current_article_dates_follow_selection_without_extra_read Tests.GUI.test_knowledge_workspace.KnowledgeWorkspaceTests.test_current_article_dates_clear_on_missing_failed_and_empty_detail` | PASS — 2 tests, exit 0 |
+| Focused real SQLite | `python -B -m unittest Tests.Integration.test_knowledge_base_flow.KnowledgeBaseFlowTests.test_current_dates_match_persisted_article_through_updates_and_search Tests.Integration.test_ticket_knowledge_flow.TicketKnowledgeFlowTests.test_link_read_and_second_article_navigation` | PASS — 2 tests, exit 0 |
+| Database | `python -B -m unittest discover -s Tests\Database -p 'test_*.py'` | PASS — 336 tests, exit 0, 22.152s |
+| GUI | `python -B -m unittest discover -s Tests\GUI -p 'test_*.py'` | PASS — 153 tests, exit 0, 158.013s |
+| Integration | `python -B -m unittest discover -s Tests\Integration -p 'test_*.py'` | PASS — 95 tests, exit 0, 244.387s |
+
+Full regression: **584 PASS**, zero failures. Focused results overlap the full suites. Real-SQLite checks compare the displayed values with `knowledge_articles` after creation, content revision, category assignment and publication, then reopen through FTS and compare before/after database dumps for viewing. The existing Ticket Open Article workflow now asserts the displayed current values. GUI checks cover selection changes, exact plain text, no extra detail read, and empty/missing/failed clearing.
+
+Native Windows: PASS — actual 1000×700 MainWindow with a persisted and revised synthetic article, `QT_QPA_PLATFORM=windows`. The [MainWindow capture](C:/Users/Jo/AppData/Local/Temp/f7-s026-native-kavuy1ap/main-dates.png) was opened and inspected. The added line is readable, there is no observed clipping or overlap around it, and the body remains visible at 272 px high. This verifies the tested Windows environment, not every display scale. The first temporary harness attempt called `show_knowledge` while the initial main-window load was busy and failed before selecting an article; waiting for that load fixed the harness, with no candidate change.
+
+## Slice 026 Delivery Gate and Skill v0.1 Observations
+
+Self-review found no blocking defect; the next gate is independent read-only review of the exact unstaged candidate. The v0.1 baseline and scope gates prevented starting from stale handoff prose: live Git verification established the approved Slice 025 merged base while the old CURRENT_STATE/Todo still described its pre-review candidate. Its phase examples still name Slice 024. Focused and full tests remained separate, and native inspection caught a harness sequencing assumption before validating layout. Across Slices 024–026, full regressions took several minutes each; a v0.2 skill evaluation should consider this runtime and the value of native evidence. No skill change or Slice 027 work is part of this candidate.
+
+---
+
+## Prior Slice 025 handoff snapshot (historical; Slice 025 later closed on `main`)
+
+Last verified: 2026-09-26 (America/Toronto).
+
 Current candidate: **Slice 025 — All of selected Knowledge tags**, `feature/knowledge-all-selected-tags-s025` in `C:\Dev\F7Hub`. Base and current HEAD: `1c684a38d6b50a040f31c4b420e0bab9152d8c66`, equal to freshly fetched `origin/main` at the implementation baseline gate. Initial tree/index/untracked scope was clean. The preserved `recovery/pre-s024-protected-work` branch at `002a494735f30e1488f61e21ea98740ae6371d4d` was read-only evidence and remains untouched.
 
 Status: **PASS — READY_FOR_REVIEW**. The user approved the Slice 025 plan and IMPLEMENT → TEST → DOCUMENT only. No staging, commit, push, PR or integration occurred. Independent review is pending.

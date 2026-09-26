@@ -69,7 +69,9 @@ class RecordingKnowledgeService:
             summary=(values["summary"].strip() or None) if values["summary"] is not None else None,
             body_markdown=values["body"].strip(),
             status="DRAFT",
-            category_id=None, category_name=None, updated_at="2026-09-14T12:00:00.000Z",
+            category_id=None, category_name=None,
+            created_at="2026-09-13T10:11:12.345Z",
+            updated_at="2026-09-14T12:00:00.000Z",
             version_number=1, tag_names=(),
         )
         self.articles.append(article)
@@ -452,6 +454,56 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
             self.workspace.table.sizeHintForColumn(2),
         )
 
+    def test_current_article_dates_follow_selection_without_extra_read(self):
+        first = self.service.create_article(
+            article_code="KB0001", title="First", summary=None, body="First body",
+        )
+        second = self.service.create_article(
+            article_code="KB0002", title="Second", summary=None, body="Second body",
+        )
+        second.created_at = "2026-09-12T01:02:03.456Z"
+        second.updated_at = "2026-09-15T04:05:06.789Z"
+        with patch.object(self.service, "get_article", wraps=self.service.get_article) as read:
+            self.workspace.refresh_list(select_article_id=first.knowledge_article_id)
+            self.wait_idle()
+            self.assertEqual(read.call_count, 1)
+            self.assertEqual(
+                self.workspace.detail_dates.text(),
+                "Created: 2026-09-13T10:11:12.345Z · Last updated: 2026-09-14T12:00:00.000Z",
+            )
+            row = next(index for index, article in enumerate(self.workspace.articles)
+                       if article.knowledge_article_id == second.knowledge_article_id)
+            self.workspace.table.selectRow(row)
+            self.wait_idle()
+            self.assertEqual(read.call_count, 2)
+        self.assertEqual(
+            self.workspace.detail_dates.text(),
+            "Created: 2026-09-12T01:02:03.456Z · Last updated: 2026-09-15T04:05:06.789Z",
+        )
+        self.assertEqual(self.workspace.detail_dates.textFormat(), Qt.TextFormat.PlainText)
+        self.assertTrue(self.workspace.detail_dates.wordWrap())
+
+    def test_current_article_dates_clear_on_missing_failed_and_empty_detail(self):
+        article = self.prepare_article()
+        self.assertIn(article.created_at, self.workspace.detail_dates.text())
+        with patch.object(self.service, "get_article", side_effect=RuntimeError("private path")):
+            self.workspace.open_article(article.knowledge_article_id)
+            self.wait_idle()
+        self.assertIsNone(self.workspace.article)
+        self.assertEqual(self.workspace.detail_dates.text(), "")
+        self.assertNotIn("private", self.workspace.feedback.text())
+
+        self.workspace.open_article(article.knowledge_article_id)
+        self.wait_idle()
+        self.service.articles.clear()
+        self.workspace.open_article(article.knowledge_article_id)
+        self.wait_idle()
+        self.assertIsNone(self.workspace.article)
+        self.assertEqual(self.workspace.detail_dates.text(), "")
+        self.workspace.refresh_list()
+        self.wait_idle()
+        self.assertEqual(self.workspace.detail_dates.text(), "")
+
     def test_search_controls_return_results_and_open_authoritative_current_article(self):
         from PySide6.QtCore import Qt
 
@@ -545,6 +597,7 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
         self.assertEqual(self.workspace.detail_title.text(), "")
         self.assertEqual(self.workspace.detail_status.text(), "")
         self.assertEqual(self.workspace.detail_version.text(), "")
+        self.assertEqual(self.workspace.detail_dates.text(), "")
         self.assertEqual(self.workspace.detail_summary.text(), "")
         self.assertEqual(self.workspace.detail_body.toPlainText(), "")
         self.assertIn("Could not search", self.workspace.feedback.text())

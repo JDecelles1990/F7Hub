@@ -88,6 +88,59 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         reopened.deleteLater()
         runner.deleteLater()
 
+    def test_current_dates_match_persisted_article_through_updates_and_search(self):
+        from Tests.Database.test_knowledge_categories import seed_knowledge_categories
+
+        seed_knowledge_categories(self.path)
+        service = self.context.knowledge_service
+        article = service.create_article(
+            article_code="DATE-001", title="Date display", summary=None, body="Original body",
+        )
+        self.window.show_knowledge()
+        workspace = self.window.knowledge_workspace
+
+        def assert_current_dates(current):
+            workspace.refresh_list(select_article_id=current.knowledge_article_id)
+            self.wait_idle(self.window.runner)
+            self.wait_idle(self.window.runner)
+            with database_connection(self.path) as connection:
+                row = connection.execute(
+                    "SELECT created_at, updated_at FROM knowledge_articles "
+                    "WHERE knowledge_article_id = ?", (current.knowledge_article_id,),
+                ).fetchone()
+            self.assertEqual((workspace.article.created_at, workspace.article.updated_at), tuple(row))
+            self.assertEqual(
+                workspace.detail_dates.text(),
+                f"Created: {row[0]} · Last updated: {row[1]}",
+            )
+
+        assert_current_dates(article)
+        article = service.update_article(
+            article_id=article.knowledge_article_id, expected_version_number=1,
+            title="Date display", summary=None, body="Revised searchable body",
+        )
+        assert_current_dates(article)
+        article = service.set_article_category(
+            article.knowledge_article_id, article.version_number, article.updated_at, 11,
+        )
+        assert_current_dates(article)
+        article = service.publish_article(article.knowledge_article_id, article.version_number)
+        assert_current_dates(article)
+
+        with database_connection(self.path) as connection:
+            before_view = tuple(connection.iterdump())
+        workspace.search_input.setText("searchable")
+        workspace.search_button.click()
+        self.wait_idle(self.window.runner)
+        self.wait_idle(self.window.runner)
+        self.assertEqual(workspace.article.knowledge_article_id, article.knowledge_article_id)
+        self.assertEqual(
+            workspace.detail_dates.text(),
+            f"Created: {article.created_at} · Last updated: {article.updated_at}",
+        )
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before_view)
+
     def test_existing_ticket_navigation_remains_available(self):
         self.window.show_knowledge()
         self.wait_idle(self.window.runner)

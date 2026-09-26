@@ -516,7 +516,14 @@ Slice 025 — read-only All of selected Knowledge tags, implemented and validate
 - [x] Add Any/All choices to the existing dialog; zero/one choices use All tags/specific-tag modes.
 - [x] Preserve search, Category/Status, refresh reconciliation, mutation and Ticket Open Article behavior.
 - [x] Validate Database 336, GUI 151, Integration 94 and native Windows 1000×700 captures.
-- [ ] Independent Slice 025 review; the candidate is unstaged and uncommitted.
+- [x] Independently review and integrate Slice 025; closed on `main` at `c9a1a85a`.
+
+Slice 026 — show current Knowledge article dates, implemented and validated 2026-09-26:
+
+- [x] Display persisted current `created_at` and `updated_at` below Version through the existing detail read, with no conversion or write.
+- [x] Clear dates with empty, missing or failed detail; verify selection, updates, search and Ticket Open Article.
+- [x] Validate focused GUI/real-SQLite cases, Database 336 + GUI 153 + Integration 95 = 584 full regression tests, and native Windows 1000×700 capture.
+- [ ] Independent Slice 026 review; the candidate is unstaged and uncommitted.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 
