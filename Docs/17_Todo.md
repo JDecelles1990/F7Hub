@@ -508,9 +508,17 @@ Slice 024 — read-only Any of selected Knowledge tags, implemented and validate
 - [x] Add a cached-choice dialog to the Tag filter; zero/one/multiple choices map to All/specific/Any.
 - [x] Preserve executed search, unsubmitted input, Category/Status, stable IDs and refresh failure/retry behavior.
 - [x] Validate Database 334, GUI 146, Integration 93 and native Windows 1000×700 captures.
-- [ ] Independent Slice 024 review. No staging, commit, push or integration is authorized by implementation.
+- [x] Slice 024 integrated on `main` through PR #24 at `1c684a38`; its pre-review CURRENT_STATE snapshot is retained as historical evidence.
 
-Multi-tag AND/expression filtering, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
+Slice 025 — read-only All of selected Knowledge tags, implemented and validated 2026-09-26:
+
+- [x] Extend current list/FTS reads with validated All-mode IDs and a bound correlated bridge count; preserve ordering, one row per article and SELECT-only behavior.
+- [x] Add Any/All choices to the existing dialog; zero/one choices use All tags/specific-tag modes.
+- [x] Preserve search, Category/Status, refresh reconciliation, mutation and Ticket Open Article behavior.
+- [x] Validate Database 336, GUI 151, Integration 94 and native Windows 1000×700 captures.
+- [ ] Independent Slice 025 review; the candidate is unstaged and uncommitted.
+
+Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 

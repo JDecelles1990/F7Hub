@@ -403,12 +403,13 @@ class KnowledgeRepository:
         self, *, category_id: int | None = None, uncategorized_only: bool = False,
         status: str | None = None, tag_id: int | None = None,
         untagged_only: bool = False, tag_ids: tuple[int, ...] | None = None,
+        match_all_tags: bool = False,
     ) -> tuple[KnowledgeArticleRecord, ...]:
         """Return all statuses, newest update first with a stable ID tie-breaker."""
 
         if category_id is not None and uncategorized_only:
             raise ValueError("Choose one category filter mode.")
-        tag_ids = _validate_filter_tag_ids(tag_ids, tag_id, untagged_only)
+        tag_ids = _validate_filter_tag_ids(tag_ids, tag_id, untagged_only, match_all_tags)
         predicates = []
         parameters = []
         if uncategorized_only:
@@ -427,12 +428,21 @@ class KnowledgeRepository:
         elif tag_id is not None or tag_ids:
             selected_ids = (tag_id,) if tag_id is not None else tag_ids
             placeholders = ", ".join("?" for _ in selected_ids)
-            predicates.append(
-                "EXISTS (SELECT 1 FROM knowledge_article_tags AS kat "
-                "WHERE kat.knowledge_article_id = knowledge_articles.knowledge_article_id "
-                f"AND kat.tag_id IN ({placeholders}))"
-            )
+            if match_all_tags:
+                predicates.append(
+                    "(SELECT COUNT(*) FROM knowledge_article_tags AS kat "
+                    "WHERE kat.knowledge_article_id = knowledge_articles.knowledge_article_id "
+                    f"AND kat.tag_id IN ({placeholders})) = ?"
+                )
+            else:
+                predicates.append(
+                    "EXISTS (SELECT 1 FROM knowledge_article_tags AS kat "
+                    "WHERE kat.knowledge_article_id = knowledge_articles.knowledge_article_id "
+                    f"AND kat.tag_id IN ({placeholders}))"
+                )
             parameters.extend(selected_ids)
+            if match_all_tags:
+                parameters.append(len(selected_ids))
         predicate = f"WHERE {' AND '.join(predicates)}" if predicates else ""
         with database_connection(self._database_path) as connection:
             rows = connection.execute(
@@ -455,12 +465,13 @@ class KnowledgeRepository:
         uncategorized_only: bool = False, status: str | None = None,
         tag_id: int | None = None, untagged_only: bool = False,
         tag_ids: tuple[int, ...] | None = None,
+        match_all_tags: bool = False,
     ) -> tuple[KnowledgeArticleSearchResult, ...]:
         """Search the derived current-article index and return lightweight rows."""
 
         if category_id is not None and uncategorized_only:
             raise ValueError("Choose one category filter mode.")
-        tag_ids = _validate_filter_tag_ids(tag_ids, tag_id, untagged_only)
+        tag_ids = _validate_filter_tag_ids(tag_ids, tag_id, untagged_only, match_all_tags)
         predicates = []
         parameters = [fts_query]
         if uncategorized_only:
@@ -479,12 +490,21 @@ class KnowledgeRepository:
         elif tag_id is not None or tag_ids:
             selected_ids = (tag_id,) if tag_id is not None else tag_ids
             placeholders = ", ".join("?" for _ in selected_ids)
-            predicates.append(
-                "EXISTS (SELECT 1 FROM knowledge_article_tags AS kat "
-                "WHERE kat.knowledge_article_id = ka.knowledge_article_id "
-                f"AND kat.tag_id IN ({placeholders}))"
-            )
+            if match_all_tags:
+                predicates.append(
+                    "(SELECT COUNT(*) FROM knowledge_article_tags AS kat "
+                    "WHERE kat.knowledge_article_id = ka.knowledge_article_id "
+                    f"AND kat.tag_id IN ({placeholders})) = ?"
+                )
+            else:
+                predicates.append(
+                    "EXISTS (SELECT 1 FROM knowledge_article_tags AS kat "
+                    "WHERE kat.knowledge_article_id = ka.knowledge_article_id "
+                    f"AND kat.tag_id IN ({placeholders}))"
+                )
             parameters.extend(selected_ids)
+            if match_all_tags:
+                parameters.append(len(selected_ids))
         predicate = "".join(f"\n                AND {item}" for item in predicates)
         with database_connection(self._database_path) as connection:
             rows = connection.execute(
@@ -659,7 +679,12 @@ def _version_from_row(row: sqlite3.Row) -> KnowledgeArticleVersionRecord:
 
 def _validate_filter_tag_ids(
     tag_ids: tuple[int, ...] | None, tag_id: int | None, untagged_only: bool,
+    match_all_tags: bool,
 ) -> tuple[int, ...] | None:
+    if not isinstance(match_all_tags, bool):
+        raise ValueError("Tag match mode must be a boolean.")
+    if match_all_tags and (tag_ids is None or not isinstance(tag_ids, tuple) or len(tag_ids) < 2):
+        raise ValueError("Choose at least two tags for All of selected tags.")
     if tag_id is not None and untagged_only:
         raise ValueError("Choose one tag filter mode.")
     if tag_ids is None:

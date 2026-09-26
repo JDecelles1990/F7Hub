@@ -723,6 +723,10 @@ KnowledgeWorkspace adds one static QComboBox whose item data carries the service
 
 KnowledgeService list/search reads validate an optional `tag_ids` tuple of distinct positive non-bool IDs, exclusive with `tag_id` and `untagged_only`; KnowledgeRepository binds the IDs inside the existing correlated bridge `EXISTS`. Empty `tag_ids` means All. `KnowledgeArticleRecord` carries both display names and stable IDs from the same tag read. KnowledgeWorkspace reuses the cached tag-reference runner and shared article runner; a small `KnowledgeTagFilterDialog` selects IDs without a new query. Zero/one/multiple choices map to All/specific/Any, and reference refresh trims deleted IDs while preserving surviving selections. No new service/repository layer, schema, FTS, or dependency is introduced.
 
+## Implemented All-Selected-Tag Filtering — Slice 025
+
+The existing list/search service and repository calls add `match_all_tags: bool = False`. True requires at least two distinct positive IDs in `tag_ids`; contradictory modes fail before reads. The repository's correlated bridge count equals the number of selected IDs when an article has every tag, using bound values and the existing bridge primary key. KnowledgeTagFilterDialog adds Any/All radio choices; KnowledgeWorkspace stores `all_selected` with stable IDs and reuses the existing runners, refresh reconciliation, search state and Ticket Open Article reset. Zero/one choices collapse to existing modes. No new layer, migration, FTS object or dependency is added.
+
 ## Implemented Knowledge Tag Filtering — Slice 022
 
 `KnowledgeService.list_articles/search_articles` accept one optional positive non-bool `tag_id` or a boolean `untagged_only`, reject contradictions, and forward only active tag modes. `KnowledgeRepository` correlates `EXISTS`/`NOT EXISTS` on current article identity, so many-to-many relationships never duplicate list or ranked FTS rows. Category/status arguments, literal query construction, MATCH and ordering remain unchanged. Slice 024 later adds stable IDs to current article records.

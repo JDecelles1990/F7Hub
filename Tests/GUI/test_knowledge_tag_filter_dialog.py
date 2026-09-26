@@ -29,6 +29,7 @@ class KnowledgeTagFilterDialogTests(unittest.TestCase):
         self.app.processEvents()
         self.assertEqual(dialog.tag_list.item(0).text(), literal)
         self.assertEqual(dialog.selected_ids(), (11,))
+        self.assertFalse(dialog.matches_all())
         dialog.tag_list.setCurrentRow(0)
         dialog.tag_list.setFocus()
         QTest.keyClick(dialog.tag_list, Qt.Key.Key_Space)
@@ -40,6 +41,28 @@ class KnowledgeTagFilterDialogTests(unittest.TestCase):
             ))
         QTest.mouseClick(dialog.apply_button, Qt.MouseButton.LeftButton)
         self.assertEqual(dialog.result(), QDialog.DialogCode.Accepted)
+
+    def test_all_mode_is_keyboard_selectable_and_keeps_cached_ids(self):
+        dialog = KnowledgeTagFilterDialog((
+            SimpleNamespace(tag_id=22, name="Security"),
+            SimpleNamespace(tag_id=11, name="VPN"),
+        ), (11, 22), match_all_tags=True)
+        self.addCleanup(dialog.deleteLater)
+        dialog.show()
+        self.app.processEvents()
+        self.assertTrue(dialog.matches_all())
+        self.assertEqual(dialog.selected_ids(), (11, 22))
+        dialog.any_button.setFocus()
+        QTest.keyClick(dialog.any_button, Qt.Key.Key_Space)
+        self.assertFalse(dialog.matches_all())
+        dialog.all_button.setFocus()
+        QTest.keyClick(dialog.all_button, Qt.Key.Key_Space)
+        self.assertTrue(dialog.matches_all())
+        for control in (dialog.any_button, dialog.all_button):
+            self.assertTrue(control.isVisible())
+            self.assertTrue(dialog.rect().contains(
+                control.mapTo(dialog, control.rect().bottomRight())
+            ))
 
     def test_empty_choices_and_escape(self):
         dialog = KnowledgeTagFilterDialog(())

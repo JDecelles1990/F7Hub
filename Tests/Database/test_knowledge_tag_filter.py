@@ -181,6 +181,67 @@ class KnowledgeTagFilterTests(unittest.TestCase):
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
         self.assertEqual(self.rows["A"].tag_ids, (11, 22))
 
+    def test_all_selected_tags_require_every_tag_and_preserve_search_order(self):
+        before = self.dump()
+        baseline = self.service.search_articles("DNS")
+        for selected, accepted in (
+            ((11, 22), {"A", "E"}),
+            ((11, 33), {"E"}),
+            ((11, 22, 33), {"E"}),
+            ((11, 44), set()),
+        ):
+            with self.subTest(selected=selected):
+                arguments = {"tag_ids": selected, "match_all_tags": True}
+                self.assertEqual(
+                    self.codes(self.service.list_articles(**arguments)),
+                    [code for code in "EDCBA" if code in accepted],
+                )
+                self.assertEqual(
+                    self.codes(self.service.search_articles("DNS", **arguments)),
+                    [row.article_code for row in baseline if row.article_code in accepted],
+                )
+        self.assertEqual(self.codes(self.service.list_articles(
+            category_id=11, status="DRAFT", tag_ids=(11, 22), match_all_tags=True,
+        )), ["A"])
+        self.assertEqual(self.codes(self.service.search_articles(
+            "DNS", category_id=11, status="ARCHIVED",
+            tag_ids=(11, 22), match_all_tags=True,
+        )), ["E"])
+        self.assertEqual(self.dump(), before)
+        with database_connection(self.path) as connection:
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
+    def test_all_mode_validation_precedes_reads(self):
+        invalid = (
+            {"match_all_tags": True},
+            {"tag_ids": (), "match_all_tags": True},
+            {"tag_ids": (11,), "match_all_tags": True},
+            {"tag_ids": (11, 22), "match_all_tags": 1},
+            {"tag_ids": (11, 11), "match_all_tags": True},
+            {"tag_ids": (11, 22), "match_all_tags": True, "tag_id": 11},
+            {"tag_ids": (11, 22), "match_all_tags": True, "untagged_only": True},
+        )
+        with patch.object(self.repository, "list_articles") as listing, patch.object(
+            self.repository, "search_articles"
+        ) as searching:
+            for arguments in invalid:
+                with self.subTest(arguments=arguments):
+                    with self.assertRaises(KnowledgeValidationError):
+                        self.service.list_articles(**arguments)
+                    with self.assertRaises(KnowledgeValidationError):
+                        self.service.search_articles("DNS", **arguments)
+            listing.assert_not_called()
+            searching.assert_not_called()
+        for operation in (
+            self.repository.list_articles,
+            lambda **arguments: self.repository.search_articles('"DNS"', **arguments),
+        ):
+            for arguments in invalid:
+                with self.subTest(operation=operation, arguments=arguments):
+                    with self.assertRaises(ValueError):
+                        operation(**arguments)
+
     def test_any_tag_validation_precedes_repository_calls(self):
         invalid = (
             {"tag_ids": [11, 33]}, {"tag_ids": (True, 11)},
@@ -230,6 +291,7 @@ class KnowledgeTagFilterTests(unittest.TestCase):
             for arguments in (
                 {}, {"tag_id": 11}, {"untagged_only": True},
                 {"tag_ids": (11, 33)},
+                {"tag_ids": (11, 22), "match_all_tags": True},
                 {"category_id": 11, "tag_id": 11},
                 {"status": "ARCHIVED", "tag_id": 33},
                 {"category_id": 11, "status": "ARCHIVED", "tag_id": 11},

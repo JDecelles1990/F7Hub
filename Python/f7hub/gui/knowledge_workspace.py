@@ -340,12 +340,17 @@ class KnowledgeWorkspace(QWidget):
         )
         self._available_filter_tags = tuple(tags)
         mode, value = selection
-        selected_ids = ((value,) if mode == "tag" else value if mode == "any" else ())
+        selected_ids = (
+            (value,) if mode == "tag" else value
+            if mode in ("any", "all_selected") else ()
+        )
         available_ids = {tag.tag_id for tag in tags}
         surviving_ids = tuple(tag_id for tag_id in selected_ids if tag_id in available_ids)
         selection_reset = len(surviving_ids) != len(selected_ids)
-        if mode in ("tag", "any"):
-            selection = self._selection_for_tag_ids(surviving_ids)
+        if mode in ("tag", "any", "all_selected"):
+            selection = self._selection_for_tag_ids(
+                surviving_ids, match_all_tags=mode == "all_selected"
+            )
         self._set_tag_filter_selection(selection)
         self._tag_filter_options_loaded = True
         self._tag_filter_options_ready = True
@@ -362,13 +367,15 @@ class KnowledgeWorkspace(QWidget):
         self._update_actions(self._runner.busy)
 
     @staticmethod
-    def _selection_for_tag_ids(tag_ids: tuple[int, ...]) -> tuple:
+    def _selection_for_tag_ids(
+        tag_ids: tuple[int, ...], *, match_all_tags: bool = False,
+    ) -> tuple:
         tag_ids = tuple(sorted(tag_ids))
         if not tag_ids:
             return _TAG_FILTER_ALL
         if len(tag_ids) == 1:
             return ("tag", tag_ids[0])
-        return ("any", tag_ids)
+        return ("all_selected" if match_all_tags else "any", tag_ids)
 
     def _set_tag_filter_selection(self, selection: tuple) -> None:
         """Rebuild cached shortcuts without submitting a result request."""
@@ -379,8 +386,9 @@ class KnowledgeWorkspace(QWidget):
             for tag in self._available_filter_tags:
                 self.tag_filter.addItem(tag.name, ("tag", tag.tag_id))
             mode, value = selection
-            if mode == "any":
-                self.tag_filter.addItem(f"Any of {len(value)} tags", selection)
+            if mode in ("any", "all_selected"):
+                label = "All of" if mode == "all_selected" else "Any of"
+                self.tag_filter.addItem(f"{label} {len(value)} tags", selection)
             self.tag_filter.addItem("Choose tags…", _TAG_FILTER_CHOOSE)
             index = next(
                 (item_index for item_index in range(self.tag_filter.count())
@@ -390,10 +398,13 @@ class KnowledgeWorkspace(QWidget):
             self._selected_tag_filter = self.tag_filter.currentData()
         selected_names = (
             [tag.name for tag in self._available_filter_tags if tag.tag_id in value]
-            if mode == "any" else []
+            if mode in ("any", "all_selected") else []
         )
+        matching = "all" if mode == "all_selected" else "any"
         self.tag_filter.setToolTip(
-            "<qt>" + escape("Match any selected tag: " + ", ".join(selected_names)) + "</qt>"
+            "<qt>" + escape(
+                f"Match {matching} selected tags: " + ", ".join(selected_names)
+            ) + "</qt>"
             if selected_names else ""
         )
 
@@ -413,9 +424,13 @@ class KnowledgeWorkspace(QWidget):
                 or self._confirming_archive or not self._tag_filter_options_ready):
             return None
         mode, value = self._selected_tag_filter
-        selected_ids = (value,) if mode == "tag" else value if mode == "any" else ()
+        selected_ids = (
+            (value,) if mode == "tag" else value
+            if mode in ("any", "all_selected") else ()
+        )
         dialog = KnowledgeTagFilterDialog(
-            self._available_filter_tags, selected_ids, self.window()
+            self._available_filter_tags, selected_ids,
+            match_all_tags=mode == "all_selected", parent=self.window(),
         )
         self._tag_filter_dialog = dialog
         dialog.finished.connect(self._tag_filter_closed)
@@ -428,7 +443,9 @@ class KnowledgeWorkspace(QWidget):
         self._tag_filter_dialog = None
         self._update_actions(self._runner.busy)
         if result == KnowledgeTagFilterDialog.DialogCode.Accepted:
-            selection = self._selection_for_tag_ids(dialog.selected_ids())
+            selection = self._selection_for_tag_ids(
+                dialog.selected_ids(), match_all_tags=dialog.matches_all()
+            )
             if selection != self._selected_tag_filter:
                 self._set_tag_filter_selection(selection)
                 self._reload_results_after_filter_refresh()
@@ -496,6 +513,9 @@ class KnowledgeWorkspace(QWidget):
             arguments["tag_id"] = tag_id
         elif tag_mode == "any":
             arguments["tag_ids"] = tag_id
+        elif tag_mode == "all_selected":
+            arguments["tag_ids"] = tag_id
+            arguments["match_all_tags"] = True
         return arguments
 
     def _reset_category_filter(self) -> None:
@@ -518,6 +538,8 @@ class KnowledgeWorkspace(QWidget):
             return selected in tag_ids
         if tag_mode == "any":
             return bool(set(selected).intersection(tag_ids))
+        if tag_mode == "all_selected":
+            return set(selected).issubset(tag_ids)
         return True
 
     def _filter_changed(self, _index) -> None:
@@ -828,6 +850,8 @@ class KnowledgeWorkspace(QWidget):
             empty_text = "No knowledge articles with this tag."
         elif tag_mode == "any":
             empty_text = "No knowledge articles with any selected tag."
+        elif tag_mode == "all_selected":
+            empty_text = "No knowledge articles with all selected tags."
         self._populate_articles(articles, empty_text)
 
     def _search_loaded(self, articles) -> None:
