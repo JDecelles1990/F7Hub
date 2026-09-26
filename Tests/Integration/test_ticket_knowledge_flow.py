@@ -728,6 +728,41 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(tuple(connection.iterdump()), before)
 
+    def test_all_tag_filter_ticket_open_resets_and_reveals_authoritative_article(self):
+        with database_connection(self.path) as connection:
+            connection.executemany(
+                "INSERT INTO tags (tag_id, name, slug, created_at) VALUES (?, ?, ?, ?)",
+                ((11, "VPN", "vpn", "2026-09-26T12:00:00Z"),
+                 (22, "Security", "security", "2026-09-26T12:00:00Z")),
+            )
+        service = self.context.knowledge_service
+        self.article = service.set_article_tags(
+            self.article.knowledge_article_id, self.article.version_number,
+            self.article.updated_at, (11,),
+        )
+        self.link()
+        workspace = self.assert_open_article(self.article.knowledge_article_id)
+        workspace.refresh_filter_options()
+        self.wait_idle()
+        dialog = workspace.open_tag_filter()
+        self.assertIsNotNone(dialog)
+        dialog.all_button.setChecked(True)
+        for index in range(dialog.tag_list.count()):
+            dialog.tag_list.item(index).setCheckState(Qt.CheckState.Checked)
+        dialog.apply_button.click()
+        self.wait_idle()
+        self.assertEqual(workspace.tag_filter.currentData(), ("all_selected", (11, 22)))
+        self.assertEqual(workspace.model.rowCount(), 0)
+        with database_connection(self.path) as connection:
+            before = tuple(connection.iterdump())
+        self.open_ticket()
+        reopened = self.assert_open_article(self.article.knowledge_article_id)
+        self.assertEqual(reopened.tag_filter.currentText(), "All tags")
+        self.assertEqual(reopened.article.tag_ids, (11,))
+        self.assertEqual(reopened.article.knowledge_article_id, self.article.knowledge_article_id)
+        with database_connection(self.path) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+
     @classmethod
     def setUpClass(cls):
         cls.application = QApplication.instance() or QApplication([])

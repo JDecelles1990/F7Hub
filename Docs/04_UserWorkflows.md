@@ -8,11 +8,17 @@
 
 ---
 
+## All selected Knowledge tags — Slice 025
+
+Knowledge Base → Tag filter → Choose tags… → select **Match all selected tags** and at least two cached global tags → Apply. The list or last executed search now shows only articles carrying every chosen tag. Switching Any/All with the same IDs reruns the results; Cancel or unchanged Apply does not. Zero or one selected tag uses the existing All tags or specific-tag mode. Clear Search retains the choice; Ticket Open Article resets it before revealing the current article. Refresh keeps the All mode while at least two selected IDs survive, collapses to specific or All tags when fewer survive, and retains cached choices after a failed tag read.
+
+---
+
 ## Any selected Knowledge tags — Slice 024
 
 Knowledge Base → Tag filter → Choose tags… → check zero or more cached global tags → Apply. None selects All tags, one selects the existing specific-tag mode, and two or more match articles carrying at least one selected tag. Cancel or Apply with the same selection leaves results untouched. The filter applies to normal lists and the last executed FTS query; unsubmitted search text remains intact. Clear Search retains the Tag selection, while Ticket Open Article resets it to All before reveal.
 
-Refresh filters preserves selected IDs across renames, removes unavailable IDs after a successful tag read, and requests at most one final result reload after both reference reads settle. A failed tag read keeps cached choices for retry. The workflow is read-only; AND/expression filters remain deferred.
+Refresh filters preserves selected IDs across renames, removes unavailable IDs after a successful tag read, and requests at most one final result reload after both reference reads settle. A failed tag read keeps cached choices for retry. The workflow is read-only; custom expression filters remain deferred.
 
 ---
 
@@ -777,7 +783,7 @@ Knowledge Base → open DRAFT article → Category… → select an active KNOWL
 
 ## Existing global-tag assignment — Slice 021
 
-Knowledge Base → open DRAFT article → Tags… → select zero, one or multiple existing global tags → Save → authoritative current tags display. Cancel and Escape make no change. PUBLISHED and ARCHIVED articles display tags but cannot change them; tag sets are current metadata and are not reconstructed in Version History. Read-only All/Untagged/single-tag filtering is implemented in Slice 022 and Any of selected tags in Slice 024. Tag creation/administration, AND/custom tag expressions and historical tag reconstruction remain unimplemented.
+Knowledge Base → open DRAFT article → Tags… → select zero, one or multiple existing global tags → Save → authoritative current tags display. Cancel and Escape make no change. PUBLISHED and ARCHIVED articles display tags but cannot change them; tag sets are current metadata and are not reconstructed in Version History. Read-only All/Untagged/single-tag filtering is implemented in Slice 022, Any in Slice 024 and All-selected matching in Slice 025. Tag creation/administration, custom tag expressions and historical tag reconstruction remain unimplemented.
 
 The selector loads independently in the background. Cancel, default Enter and Escape dismiss without a mutation or refresh; cancellation also works during category reads. Failed reference loading leaves the article readable and offers Refresh categories. An inactive assigned name remains visible as current, with active replacement or explicit clearing available. Saving disables duplicate submission and dismissal until completion. Failed writes keep the old truthful article visible; stale saves require closing and reopening the latest article. Category changes create no content revision or historical snapshot.
 

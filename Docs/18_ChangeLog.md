@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-26 — Slice 025: Read-only All Selected Knowledge Tags
+
+The existing tag choice dialog now offers Any or All for two or more selected global tags. All mode requires every selected current tag relationship in both normal lists and FTS results; zero/one choices collapse to the existing modes. Service and repository validation reject invalid modes before reads. Category/Status composition, ordering, MATCH/bm25 ranking, one row per article, executed-query state, refresh reconciliation and Ticket Open Article reset remain intact. No schema, migration, index, FTS object, tag write or dependency changed.
+
+Fresh candidate validation: Database **336 PASS**, GUI **151 PASS**, Integration **94 PASS** = **581 PASS**, all exit 0. Query-only and unchanged-dump checks, integrity and foreign-key checks passed. Native Windows 1000×700 MainWindow and dialog captures were opened and inspected after applying All of two tags; controls and detail remained visible. Candidate is unstaged/uncommitted for independent review. Custom expressions and restore/revert remain deferred.
+
+---
+
 # 2026-09-26 — Slice 024: Read-only Any Selected Knowledge Tags
 
 Added a cached-choice Tag filter dialog for Any of selected global tags. Zero and one choices use existing All/specific modes; multiple choices filter current Knowledge lists and FTS results through validated, bound IDs in a correlated `EXISTS`. Category/Status composition, list order, MATCH/bm25 ranking, one-row-per-article behavior, Clear Search, Ticket Open Article and authoritative refresh are preserved. Current article records include stable tag IDs for reconciliation. No schema, migration, index, FTS object, tag mutation or dependency changed.

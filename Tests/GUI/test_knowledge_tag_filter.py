@@ -128,9 +128,10 @@ class KnowledgeTagFilterGuiTests(unittest.TestCase):
         self.workspace.refresh_filters_button.click()
         self.wait_idle()
 
-    def choose_any(self, selected_ids):
+    def choose_tags(self, selected_ids, *, match_all=False):
         dialog = self.workspace.open_tag_filter()
         self.assertIsNotNone(dialog)
+        (dialog.all_button if match_all else dialog.any_button).setChecked(True)
         for index in range(dialog.tag_list.count()):
             item = dialog.tag_list.item(index)
             item.setCheckState(
@@ -140,6 +141,12 @@ class KnowledgeTagFilterGuiTests(unittest.TestCase):
             )
         dialog.apply_button.click()
         self.wait_idle()
+
+    def choose_any(self, selected_ids):
+        self.choose_tags(selected_ids)
+
+    def choose_all(self, selected_ids):
+        self.choose_tags(selected_ids, match_all=True)
 
     def test_options_default_order_population_is_signal_blocked_and_layout_fits(self):
         with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
@@ -192,6 +199,148 @@ class KnowledgeTagFilterGuiTests(unittest.TestCase):
         self.workspace.clear_search_button.click()
         self.wait_idle()
         self.assertEqual(self.workspace.tag_filter.currentData(), ("any", (11, 22)))
+
+    def test_all_selection_composes_and_switches_modes_without_losing_query(self):
+        self.show()
+        self.choose_all((11, 22))
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("all_selected", (11, 22)))
+        self.assertEqual(self.workspace.tag_filter.currentText(), "All of 2 tags")
+        self.assertEqual(set(self.codes()), {"A", "E"})
+        self.choose_category(11)
+        self.choose_status("ARCHIVED")
+        self.assertEqual(self.codes(), ["E"])
+        self.choose_status(None)
+        self.workspace.search_input.setText("DNS")
+        self.workspace.search_button.click()
+        self.wait_idle()
+        self.workspace.search_input.setText("unsubmitted")
+        with patch.object(self.service, "search_articles", wraps=self.service.search_articles) as search:
+            self.choose_any((11, 22))
+            search.assert_called_once_with(
+                "DNS", category_id=11, tag_ids=(11, 22),
+            )
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("any", (11, 22)))
+        self.assertEqual(self.workspace.search_input.text(), "unsubmitted")
+        self.choose_all((11, 22))
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("all_selected", (11, 22)))
+        self.workspace.clear_search_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("all_selected", (11, 22)))
+        self.choose_all((11,))
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("tag", 11))
+        self.choose_all(())
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("all", None))
+
+    def test_all_cancel_unchanged_refresh_and_failed_retry(self):
+        self.show()
+        self.choose_all((11, 22, 33))
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            dialog = self.workspace.open_tag_filter()
+            self.assertTrue(dialog.matches_all())
+            dialog.cancel_button.click()
+            self.app.processEvents()
+            dialog = self.workspace.open_tag_filter()
+            dialog.apply_button.click()
+            self.app.processEvents()
+            listing.assert_not_called()
+        with database_connection(self.path) as connection:
+            connection.execute("UPDATE tags SET name = 'Remote VPN' WHERE tag_id = 11")
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_not_called()
+        self.assertEqual(self.workspace.tag_filter.currentData(),
+                         ("all_selected", (11, 22, 33)))
+        self.assertIn("Remote VPN", self.workspace.tag_filter.toolTip())
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM tags WHERE tag_id = 33")
+        with patch.object(self.service, "list_available_tags", side_effect=RuntimeError("offline")):
+            with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+                self.refresh_filters()
+                listing.assert_not_called()
+        self.assertEqual(self.workspace.tag_filter.currentData(),
+                         ("all_selected", (11, 22, 33)))
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_called_once()
+        self.assertEqual(self.workspace.tag_filter.currentData(),
+                         ("all_selected", (11, 22)))
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM tags WHERE tag_id = 22")
+        self.refresh_filters()
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("tag", 11))
+
+    def test_all_refresh_waits_for_both_callback_orders_and_partial_failure(self):
+        self.show()
+        for order in (("category", "tag"), ("tag", "category")):
+            for tag_fails in (False, True):
+                with self.subTest(order=order, tag_fails=tag_fails):
+                    self.workspace._filter_options_succeeded(
+                        self.service.list_active_knowledge_categories()
+                    )
+                    self.workspace._tag_filter_options_succeeded(
+                        self.service.list_available_tags()
+                    )
+                    self.choose_category(11)
+                    self.choose_all((11, 22, 33))
+                    callbacks = {}
+
+                    def capture(source):
+                        def submit(_operation, succeeded, rejected):
+                            callbacks[source] = (succeeded, rejected)
+                            return True
+                        return submit
+
+                    with patch.object(self.workspace._filter_runner, "submit",
+                                      side_effect=capture("category")), patch.object(
+                        self.workspace._tag_filter_runner, "submit",
+                        side_effect=capture("tag"),
+                    ), patch.object(self.service, "list_articles",
+                                    wraps=self.service.list_articles) as listing:
+                        self.workspace.refresh_filter_options()
+                        self.assertIsNone(self.workspace.open_tag_filter())
+                        for source in order:
+                            succeeded, rejected = callbacks[source]
+                            if source == "category":
+                                succeeded(tuple(
+                                    category for category in
+                                    self.service.list_active_knowledge_categories()
+                                    if category.category_id != 11
+                                ))
+                            elif tag_fails:
+                                rejected(RuntimeError("private"))
+                            else:
+                                succeeded(tuple(
+                                    tag for tag in self.service.list_available_tags()
+                                    if tag.tag_id != 33
+                                ))
+                            if source == order[0]:
+                                listing.assert_not_called()
+                        self.wait_idle()
+                        listing.assert_called_once()
+                    self.assertIsNone(self.workspace.category_filter.currentData())
+                    self.assertEqual(
+                        self.workspace.tag_filter.currentData(),
+                        ("all_selected", (11, 22, 33) if tag_fails else (11, 22)),
+                    )
+
+    def test_all_filter_reconciles_article_tag_mutation(self):
+        self.show()
+        self.choose_all((11, 22))
+        row = next(index for index, article in enumerate(self.workspace.articles)
+                   if article.article_code == "A")
+        self.workspace.table.selectRow(row)
+        self.wait_idle()
+        article = self.workspace.article
+        updated = self.service.set_article_tags(
+            article.knowledge_article_id, article.version_number,
+            article.updated_at, (11,),
+        )
+        self.workspace._tags_updated(updated)
+        self.wait_idle()
+        self.assertEqual(self.workspace.tag_filter.currentData(),
+                         ("all_selected", (11, 22)))
+        self.assertNotIn("A", self.codes())
+        self.assertNotEqual(self.workspace.article.article_code, "A")
 
     def test_any_cancel_unchanged_and_zero_or_one_selection(self):
         self.show()

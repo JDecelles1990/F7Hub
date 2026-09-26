@@ -1,5 +1,43 @@
 # F7Hub Current State
 
+Last verified: 2026-09-26 (America/Toronto).
+
+Current candidate: **Slice 025 — All of selected Knowledge tags**, `feature/knowledge-all-selected-tags-s025` in `C:\Dev\F7Hub`. Base and current HEAD: `1c684a38d6b50a040f31c4b420e0bab9152d8c66`, equal to freshly fetched `origin/main` at the implementation baseline gate. Initial tree/index/untracked scope was clean. The preserved `recovery/pre-s024-protected-work` branch at `002a494735f30e1488f61e21ea98740ae6371d4d` was read-only evidence and remains untouched.
+
+Status: **PASS — READY_FOR_REVIEW**. The user approved the Slice 025 plan and IMPLEMENT → TEST → DOCUMENT only. No staging, commit, push, PR or integration occurred. Independent review is pending.
+
+## Slice 025 Result and Scope
+
+The existing cached tag dialog now offers **Match any selected tag** and **Match all selected tags**. Two or more IDs use the chosen mode; zero and one collapse to All tags or the specific tag. `KnowledgeService.list_articles/search_articles` and `KnowledgeRepository` add `match_all_tags: bool = False`. True requires at least two distinct positive IDs in `tag_ids`, with contradictory modes rejected before querying. The All predicate counts only bridge rows for the bound selected IDs and compares that count with the selection size; the bridge primary key prevents duplicate relationships. Normal list order, current FTS MATCH/bm25 ranking and one row per article remain intact.
+
+The workspace retains All mode through valid reference renames and partial deletion while at least two IDs survive, collapses to specific/All when fewer remain, and preserves cached choices after a failed tag read. Switching Any/All reruns the current list or last executed search without submitting unsubmitted input. Category/Status, Clear Search, tag mutation reconciliation and Ticket Open Article reset use existing paths. No migration, schema, FTS object, tag write, dependency or new service/repository layer was added. Custom tag expressions and revision restore/revert remain deferred.
+
+Production changes are limited to `Python/f7hub/{gui/knowledge_tag_filter_dialog.py,gui/knowledge_workspace.py,repositories/knowledge_repository.py,services/knowledge_service.py}`. Focused tests changed `Tests/Database/test_knowledge_tag_filter.py`, `Tests/GUI/{test_knowledge_tag_filter.py,test_knowledge_tag_filter_dialog.py}` and `Tests/Integration/test_ticket_knowledge_flow.py`. No files were created or deleted. Documentation owners updated: Features, User Workflows, GUI, Database, Python Architecture, Roadmap, Todo, ChangeLog and this report. `Docs/09_SQLSchema.md`, ERD, AHK and PowerShell owners are unaffected.
+
+## Slice 025 Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration suites used `QT_QPA_PLATFORM=offscreen`; the native check used `windows`.
+
+| Suite | Command | Fresh result |
+|---|---|---|
+| Database | `python -B -m unittest discover -s Tests\Database -p 'test_*.py'` | PASS — 336 tests, exit 0, 28.247s |
+| GUI | `python -B -m unittest discover -s Tests\GUI -p 'test_*.py'` | PASS — 151 tests, exit 0, 160.494s |
+| Integration | `python -B -m unittest discover -s Tests\Integration -p 'test_*.py'` | PASS — 94 tests, exit 0, 247.539s |
+
+Total full regression: **581 PASS**, zero failures. Focused new-path checks also passed: Database tag-filter module 9 tests, GUI tag-dialog module 3, workspace tag-filter module 17, new ticket-open test 1, and later callback-order/mutation tests 2; these overlap the full suites. Database tests cover partial/full/no intersections, Category/Status composition, FTS relative ranking, direct/service validation, query-only reads, unchanged dumps, `integrity_check = ok` and zero foreign-key violations. GUI/Integration tests cover mode switching, Cancel/unchanged Apply, zero/one collapse, keyboard controls, both refresh callback orders, partial failure/retry, tag mutation and Ticket Open Article reset.
+
+Native Windows: PASS — actual 1000×700 MainWindow, All of 2 tags, one matching synthetic article and visible dialog actions. The [dialog capture](C:/Users/Jo/AppData/Local/Temp/f7-s025-native-ad8r8erf/dialog-all.png) and [MainWindow capture](C:/Users/Jo/AppData/Local/Temp/f7-s025-native-ad8r8erf/main-all.png) were opened and visually inspected. The filter row, list/detail, radio choices, check list and Cancel/Apply fit without observed clipping or overlap. This verifies the tested Windows environment, not every DPI configuration. The first native harness attempt lacked `PYTHONPATH` and exited before app construction; the corrected harness passed without a production change.
+
+## Slice 025 Delivery Gate and Skill v0.1 Observations
+
+Self-review found no remaining blocking defect. The final candidate must still be audited against the exact unstaged diff and reviewed independently; this report does not grant approval. The next gate is an independent read-only review of this candidate. The recovery branch is excluded from candidate scope.
+
+The v0.1 baseline gate caught no drift: fresh origin, branch, HEAD, index and untracked checks matched the approved plan before branch creation. The explicit test gate kept focused and full results separate; full suite runtime was about 436 seconds across three suites. The native gate required actual Windows captures after offscreen tests. The stale pre-review Slice 024 wording in this file and Todo needed direct correction in the current handoff, while historical changelog evidence stayed labeled by its date. One harness setup failure exposed a missing `PYTHONPATH`, then passed after correction. Propose a v0.2 skill review after Slices 024–026 as the skill requests; do not change the skill or begin Slice 026 here.
+
+---
+
+## Prior Slice 024 handoff snapshot (historical; Slice 024 later merged into `main` through PR #24)
+
 Last verified: 2026-09-26 (America/Toronto)
 
 Current candidate: Slice 024, `feature/knowledge-any-tag-filter-s024` in isolated `C:\Dev\F7Hub-S024`.
