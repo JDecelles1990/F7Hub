@@ -128,6 +128,19 @@ class KnowledgeTagFilterGuiTests(unittest.TestCase):
         self.workspace.refresh_filters_button.click()
         self.wait_idle()
 
+    def choose_any(self, selected_ids):
+        dialog = self.workspace.open_tag_filter()
+        self.assertIsNotNone(dialog)
+        for index in range(dialog.tag_list.count()):
+            item = dialog.tag_list.item(index)
+            item.setCheckState(
+                Qt.CheckState.Checked
+                if item.data(Qt.ItemDataRole.UserRole) in selected_ids
+                else Qt.CheckState.Unchecked
+            )
+        dialog.apply_button.click()
+        self.wait_idle()
+
     def test_options_default_order_population_is_signal_blocked_and_layout_fits(self):
         with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
             self.show()
@@ -136,7 +149,8 @@ class KnowledgeTagFilterGuiTests(unittest.TestCase):
         self.assertEqual(combo.currentText(), "All tags")
         self.assertEqual(
             [combo.itemText(i) for i in range(combo.count())],
-            ["All tags", "Untagged", "Security", "Unused", "VPN", "Windows"],
+            ["All tags", "Untagged", "Security", "Unused", "VPN", "Windows",
+             "Choose tags…"],
         )
         self.assertEqual(combo.accessibleName(), "Filter knowledge articles by tag")
         self.assertEqual(self.workspace.refresh_filters_button.text(), "Refresh filters")
@@ -156,6 +170,78 @@ class KnowledgeTagFilterGuiTests(unittest.TestCase):
             bottom_right = control.mapTo(self.workspace, control.rect().bottomRight())
             self.assertTrue(self.workspace.rect().contains(top_left))
             self.assertTrue(self.workspace.rect().contains(bottom_right))
+
+    def test_any_selection_composes_and_preserves_executed_search(self):
+        self.show()
+        self.choose_any((11, 33))
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("any", (11, 33)))
+        self.assertEqual(self.codes(), ["E", "C", "B", "A"])
+        self.choose_category(11)
+        self.choose_status("ARCHIVED")
+        self.assertEqual(self.codes(), ["E"])
+        self.choose_status(None)
+        self.workspace.search_input.setText("DNS")
+        self.workspace.search_button.click()
+        self.wait_idle()
+        self.workspace.search_input.setText("unsubmitted text")
+        self.choose_any((11, 22))
+        self.assertTrue(self.workspace._search_active)
+        self.assertEqual(self.workspace._search_query, "DNS")
+        self.assertEqual(self.workspace.search_input.text(), "unsubmitted text")
+        self.assertEqual(set(self.codes()), {"A", "B", "E"})
+        self.workspace.clear_search_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("any", (11, 22)))
+
+    def test_any_cancel_unchanged_and_zero_or_one_selection(self):
+        self.show()
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            dialog = self.workspace.open_tag_filter()
+            dialog.cancel_button.click()
+            self.app.processEvents()
+            listing.assert_not_called()
+            dialog = self.workspace.open_tag_filter()
+            dialog.apply_button.click()
+            self.app.processEvents()
+            listing.assert_not_called()
+        self.choose_any((11,))
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("tag", 11))
+        self.choose_any(())
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("all", None))
+
+    def test_any_refresh_reconciles_by_id_and_coalesces_reload(self):
+        self.show()
+        self.choose_any((11, 33))
+        with database_connection(self.path) as connection:
+            connection.execute("UPDATE tags SET name = 'Remote access' WHERE tag_id = 11")
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_not_called()
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("any", (11, 33)))
+        with database_connection(self.path) as connection:
+            connection.execute("DELETE FROM knowledge_article_tags WHERE tag_id = 33")
+            connection.execute("DELETE FROM tags WHERE tag_id = 33")
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_called_once()
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("tag", 11))
+        self.assertEqual(self.codes(), ["E", "B", "A"])
+
+    def test_any_failed_tag_refresh_keeps_cached_ids_until_retry(self):
+        self.show()
+        self.choose_any((11, 33))
+        before = self.codes()
+        with patch.object(self.service, "list_available_tags", side_effect=RuntimeError("offline")):
+            with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+                self.refresh_filters()
+                listing.assert_not_called()
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("any", (11, 33)))
+        self.assertEqual(self.codes(), before)
+        self.assertIn("Existing choices were retained", self.workspace.tag_filter_feedback.text())
+        with patch.object(self.service, "list_articles", wraps=self.service.list_articles) as listing:
+            self.refresh_filters()
+            listing.assert_not_called()
+        self.assertEqual(self.workspace.tag_filter.currentData(), ("any", (11, 33)))
 
     def test_manual_refresh_adds_and_renames_tag_by_id_without_result_query(self):
         self.show()

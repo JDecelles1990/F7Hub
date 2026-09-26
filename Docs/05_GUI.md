@@ -8,6 +8,12 @@
 
 ---
 
+## Any-tag filter selection — Slice 024
+
+The existing Tag combo adds Choose tags… and shows Any of N tags when two or more cached global tags are selected. The small selection dialog has a keyboard-usable check list and Cancel/Apply; it performs no reference query or write. Zero/one selections collapse to the existing All/specific modes. The workspace disables conflicting actions while the dialog is open, applies changed choices through its shared asynchronous list/search runner, and keeps current search input distinct from the last executed query. Stable IDs drive reference and article reconciliation. Native Windows 1000×700 MainWindow and dialog captures were inspected; evidence is in Status/CURRENT_STATE.md.
+
+---
+
 ## Implemented manual Knowledge filter-reference refresh — Slice 023
 
 The compact Category/Status/Tag row includes a keyboard-reachable **Refresh filters** tool button with the accessible name “Refresh knowledge filter choices”. It remains visible at 1000×700 and is disabled while the manual cycle or another filter-reference read is active. The existing `filter_loading` close guard remains authoritative.
@@ -616,7 +622,7 @@ Slice 011 adds Edit Article for a loaded DRAFT and a read-only Version N detail 
 
 Save uses ServiceTaskRunner, blocks duplicate submission and close/cancel during the write, and closes on success. The list refreshes, reselects the same article ID and reloads current details. Failures preserve entered text. Stale/missing/non-DRAFT conflicts disable further saves in that editor; a new editor must be opened explicitly. Workspace refreshes cannot replace its expected-version token. No-change feedback leaves the editor open and creates no revision after authoritative version checks.
 
-Native Windows input and visual verification at 1000×700 passed through Slice 021 for zero/multiple tag display and selection, edit, filters/search, publish/archive, Version History and Ticket Open Article. Six current captures were inspected with no horizontal clipping or important overlap. Slice 022 separately implements read-only tag filtering. This is agent verification, not user acceptance testing. There is no rendered Markdown, restore/revert, unpublishing/unarchiving, category/tag administration, multi-tag expression filtering, article-to-article relationships, external links or AI.
+Native Windows input and visual verification at 1000×700 passed through Slice 021 for zero/multiple tag display and selection, edit, filters/search, publish/archive, Version History and Ticket Open Article. Six captures were inspected with no horizontal clipping or important overlap. Slice 022 separately implements read-only single-tag filtering; Slice 024 adds Any of selected tags with separate native evidence above. This is agent verification, not user acceptance testing. There is no rendered Markdown, restore/revert, unpublishing/unarchiving, category/tag administration, AND/custom tag expression filtering, article-to-article relationships, external links or AI.
 
 Slice 015 adds a single-line Search field, Search button and Clear Search button beside the Knowledge list. Enter submits. Search reuses the article table and current-detail read path; result rows retain stable article IDs rather than display text as identity. Empty and failed searches have distinct feedback, failures retain the query, and Clear Search restores the full list. The shared ServiceTaskRunner keeps MATCH work off the GUI thread and disables search/list/create/edit/history actions while any Knowledge operation is active. Search results remain usable with Edit Article and Version History after authoritative detail has loaded.
 

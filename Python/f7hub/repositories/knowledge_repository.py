@@ -28,6 +28,7 @@ class KnowledgeArticleRecord:
     published_at: str | None
     category_name: str | None = None
     tag_names: tuple[str, ...] = ()
+    tag_ids: tuple[int, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -401,14 +402,13 @@ class KnowledgeRepository:
     def list_articles(
         self, *, category_id: int | None = None, uncategorized_only: bool = False,
         status: str | None = None, tag_id: int | None = None,
-        untagged_only: bool = False,
+        untagged_only: bool = False, tag_ids: tuple[int, ...] | None = None,
     ) -> tuple[KnowledgeArticleRecord, ...]:
         """Return all statuses, newest update first with a stable ID tie-breaker."""
 
         if category_id is not None and uncategorized_only:
             raise ValueError("Choose one category filter mode.")
-        if tag_id is not None and untagged_only:
-            raise ValueError("Choose one tag filter mode.")
+        tag_ids = _validate_filter_tag_ids(tag_ids, tag_id, untagged_only)
         predicates = []
         parameters = []
         if uncategorized_only:
@@ -424,13 +424,15 @@ class KnowledgeRepository:
                 "NOT EXISTS (SELECT 1 FROM knowledge_article_tags AS kat "
                 "WHERE kat.knowledge_article_id = knowledge_articles.knowledge_article_id)"
             )
-        elif tag_id is not None:
+        elif tag_id is not None or tag_ids:
+            selected_ids = (tag_id,) if tag_id is not None else tag_ids
+            placeholders = ", ".join("?" for _ in selected_ids)
             predicates.append(
                 "EXISTS (SELECT 1 FROM knowledge_article_tags AS kat "
                 "WHERE kat.knowledge_article_id = knowledge_articles.knowledge_article_id "
-                "AND kat.tag_id = ?)"
+                f"AND kat.tag_id IN ({placeholders}))"
             )
-            parameters.append(tag_id)
+            parameters.extend(selected_ids)
         predicate = f"WHERE {' AND '.join(predicates)}" if predicates else ""
         with database_connection(self._database_path) as connection:
             rows = connection.execute(
@@ -444,12 +446,7 @@ class KnowledgeRepository:
                 """, tuple(parameters),
             ).fetchall()
             return tuple(
-                replace(
-                    _article_from_row(row),
-                    tag_names=_get_article_tag_names(
-                        connection, int(row["knowledge_article_id"])
-                    ),
-                )
+                _with_article_tags(connection, _article_from_row(row))
                 for row in rows
             )
 
@@ -457,13 +454,13 @@ class KnowledgeRepository:
         self, fts_query: str, *, category_id: int | None = None,
         uncategorized_only: bool = False, status: str | None = None,
         tag_id: int | None = None, untagged_only: bool = False,
+        tag_ids: tuple[int, ...] | None = None,
     ) -> tuple[KnowledgeArticleSearchResult, ...]:
         """Search the derived current-article index and return lightweight rows."""
 
         if category_id is not None and uncategorized_only:
             raise ValueError("Choose one category filter mode.")
-        if tag_id is not None and untagged_only:
-            raise ValueError("Choose one tag filter mode.")
+        tag_ids = _validate_filter_tag_ids(tag_ids, tag_id, untagged_only)
         predicates = []
         parameters = [fts_query]
         if uncategorized_only:
@@ -479,13 +476,15 @@ class KnowledgeRepository:
                 "NOT EXISTS (SELECT 1 FROM knowledge_article_tags AS kat "
                 "WHERE kat.knowledge_article_id = ka.knowledge_article_id)"
             )
-        elif tag_id is not None:
+        elif tag_id is not None or tag_ids:
+            selected_ids = (tag_id,) if tag_id is not None else tag_ids
+            placeholders = ", ".join("?" for _ in selected_ids)
             predicates.append(
                 "EXISTS (SELECT 1 FROM knowledge_article_tags AS kat "
                 "WHERE kat.knowledge_article_id = ka.knowledge_article_id "
-                "AND kat.tag_id = ?)"
+                f"AND kat.tag_id IN ({placeholders}))"
             )
-            parameters.append(tag_id)
+            parameters.extend(selected_ids)
         predicate = "".join(f"\n                AND {item}" for item in predicates)
         with database_connection(self._database_path) as connection:
             rows = connection.execute(
@@ -572,26 +571,27 @@ def _get_article(
     ).fetchone()
     if row is None:
         return None
-    return replace(
-        _article_from_row(row),
-        tag_names=_get_article_tag_names(connection, article_id),
-    )
+    return _with_article_tags(connection, _article_from_row(row))
 
 
-def _get_article_tag_names(
-    connection: sqlite3.Connection, article_id: int,
-) -> tuple[str, ...]:
+def _with_article_tags(
+    connection: sqlite3.Connection, article: KnowledgeArticleRecord,
+) -> KnowledgeArticleRecord:
     rows = connection.execute(
         """
-        SELECT t.name
+        SELECT t.tag_id, t.name
         FROM knowledge_article_tags AS kat
         JOIN tags AS t ON t.tag_id = kat.tag_id
         WHERE kat.knowledge_article_id = ?
         ORDER BY t.name COLLATE NOCASE, t.tag_id
         """,
-        (article_id,),
+        (article.knowledge_article_id,),
     ).fetchall()
-    return tuple(str(row["name"]) for row in rows)
+    return replace(
+        article,
+        tag_names=tuple(str(row["name"]) for row in rows),
+        tag_ids=tuple(sorted(int(row["tag_id"]) for row in rows)),
+    )
 
 
 def _article_exists(connection: sqlite3.Connection, article_id: int) -> bool:
@@ -655,3 +655,22 @@ def _version_from_row(row: sqlite3.Row) -> KnowledgeArticleVersionRecord:
         created_by=row["created_by"],
         created_at=str(row["created_at"]),
     )
+
+
+def _validate_filter_tag_ids(
+    tag_ids: tuple[int, ...] | None, tag_id: int | None, untagged_only: bool,
+) -> tuple[int, ...] | None:
+    if tag_id is not None and untagged_only:
+        raise ValueError("Choose one tag filter mode.")
+    if tag_ids is None:
+        return None
+    if tag_id is not None or untagged_only:
+        raise ValueError("Choose one tag filter mode.")
+    if not isinstance(tag_ids, tuple) or any(
+        isinstance(value, bool) or not isinstance(value, int) or value < 1
+        for value in tag_ids
+    ):
+        raise ValueError("Tag IDs must be a tuple of positive integers.")
+    if len(tag_ids) != len(set(tag_ids)):
+        raise ValueError("Tag IDs must not contain duplicates.")
+    return tuple(sorted(tag_ids))

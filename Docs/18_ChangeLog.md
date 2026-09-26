@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-26 — Slice 024: Read-only Any Selected Knowledge Tags
+
+Added a cached-choice Tag filter dialog for Any of selected global tags. Zero and one choices use existing All/specific modes; multiple choices filter current Knowledge lists and FTS results through validated, bound IDs in a correlated `EXISTS`. Category/Status composition, list order, MATCH/bm25 ranking, one-row-per-article behavior, Clear Search, Ticket Open Article and authoritative refresh are preserved. Current article records include stable tag IDs for reconciliation. No schema, migration, index, FTS object, tag mutation or dependency changed.
+
+Validation on the isolated Slice 024 candidate: Database **334 PASS**, GUI **146 PASS**, Integration **93 PASS**, total **573 PASS** with zero failures. Native Windows MainWindow 1000×700 and selection dialog captures were inspected after applying two tags; controls and detail remained visible without clipping. The branch remains unstaged and uncommitted for independent review. AND/expression filtering and restore/revert remain deferred.
+
+---
+
 # 2026-09-22 — Slice 023: Manual Knowledge Filter-Reference Refresh
 
 Added one compact, accessible **Refresh filters** control to the existing Knowledge Category/Status/Tag row. One activation submits exactly one active-category read and one global-tag read through the existing independent runners. Successful sources replace dynamic choices; failed sources keep their cached options and selection with safe, retryable source-specific feedback. Duplicate activation is blocked and existing `filter_loading` close protection remains sufficient.

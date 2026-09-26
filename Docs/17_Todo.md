@@ -500,9 +500,17 @@ Slice 023 — manual Knowledge filter-reference refresh, verified 2026-09-22:
 - [x] Preserve Status and unsubmitted input; rerun active search with only the last executed query.
 - [x] Prove SELECT-only behavior with isolated before/after database dumps, integrity and foreign-key checks.
 - [x] Complete 332 Database + 140 GUI + 92 Integration = 564 regression tests and native Windows 1000×700 validation with six inspected captures.
-- [ ] Independent Slice 023 review.
+- [x] Slice 023 integrated on `main` in PR #22; its pre-review CURRENT_STATE snapshot is retained as historical evidence.
 
-Do not start Slice 024 from this worktree. Polling/watchers, category/tag administration, saved/date filters and multi-tag expressions remain deferred.
+Slice 024 — read-only Any of selected Knowledge tags, implemented and validated 2026-09-26:
+
+- [x] Extend current list/FTS reads with validated, bound any-tag IDs; preserve ordering, deduplication and SELECT-only behavior.
+- [x] Add a cached-choice dialog to the Tag filter; zero/one/multiple choices map to All/specific/Any.
+- [x] Preserve executed search, unsubmitted input, Category/Status, stable IDs and refresh failure/retry behavior.
+- [x] Validate Database 334, GUI 146, Integration 93 and native Windows 1000×700 captures.
+- [ ] Independent Slice 024 review. No staging, commit, push or integration is authorized by implementation.
+
+Multi-tag AND/expression filtering, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 
 The schema-only relational knowledge slice was completed and verified on 2026-09-04:
 
