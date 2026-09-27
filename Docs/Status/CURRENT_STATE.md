@@ -2,6 +2,39 @@
 
 Last verified: 2026-09-27 (America/Toronto).
 
+Current candidate: **Slice 034 — Search Saved Tickets by Subject**, on feature/ticket-subject-search-s034 in C:\Dev\F7Hub. Before editing, a fresh fetch confirmed clean main with HEAD and origin/main at 6041bae3eba521cd92c2a4bcf535e541ec15b40d. The feature branch starts at that exact base. The protected recovery/pre-s024-protected-work ref remains 002a494735f30e1488f61e21ea98740ae6371d4d; other worktrees were not changed.
+
+Status: **PASS — READY_FOR_REVIEW** after implementation, testing, native Windows inspection, documentation and self-review. All candidate changes remain unstaged and uncommitted; no push, PR or integration was performed. The Slice 033 review/integration request retained in the prior snapshot is **STALE HANDOFF METADATA**: live main contains its PR #34 merge at 6041bae. That report is historical evidence.
+
+## Slice 034 Result and Scope
+
+TicketService.list_tickets accepts optional subject_query, rejects non-text before repository access, trims surrounding whitespace and maps blank text to no constraint. TicketRepository adds a bound literal-substring LIKE predicate with an explicit escape clause for percent signs, underscores and backslashes. Search composes with Status, Priority and Type in the same SELECT, retaining updated-time/ID order and bounded paging. TicketWorkspace provides Search subjects, Search and Clear; Enter submits. It keeps draft text separate from the submitted query. Search and Clear start at page 1; Refresh, paging and filter changes reuse the submitted query. Failed reads retain previous rows, detail, activity drafts and requested query/page for retry. Exact-number opening preserves search and queue state. A committed subject edit may remove the row from the active search while the updated detail stays open. No database write, schema, migration, index, FTS, dependency or other ticket editor was added.
+
+## Slice 034 Validation
+
+Environment: repository .venv\Scripts\python.exe -B, PYTHONPATH=$PWD\Python;$PWD from C:\Dev\F7Hub. Automated GUI/Integration used QT_QPA_PLATFORM=offscreen; native validation used windows and isolated synthetic SQLite.
+
+| Suite | Command | Final-candidate result |
+|---|---|---|
+| Focused ticket reads/workspace | python -B -m unittest Tests.Database.test_ticket_reads Tests.Integration.test_ticket_workspace_flow -q | PASS — 65 tests, exit 0; original fixture |
+| Affected ticket set | python -B -m unittest Tests.Database.test_ticket_reads Tests.Database.test_ticket_service Tests.Database.test_ticket_repository Tests.GUI.test_main_window Tests.Integration.test_ticket_workspace_flow -q | PASS — 82 tests, exit 0; original fixture |
+| Final focused ticket reads | python -B -m unittest Tests.Database.test_ticket_reads -q | PASS — 26 tests, exit 0; wildcard lookalike fixture added |
+| Database | python -B -m unittest discover -s Tests\Database -p 'test_*.py' -q | PASS — 358 tests, exit 0; final fixture |
+| GUI | python -B -m unittest discover -s Tests\GUI -p 'test_*.py' -q | PASS — 154 tests, exit 0; executable inputs unchanged after final Database-only test refinement |
+| Integration | python -B -m unittest discover -s Tests\Integration -p 'test_*.py' -q | PASS — 125 tests, exit 0; executable inputs unchanged after final Database-only test refinement |
+
+Full regression: **637 PASS**, zero failures/errors on completed suites. The Database suite was rerun after the final Database-only fixture refinement; GUI and Integration results remain applicable because their production code, own tests, configuration, dependencies and schema did not change. Expected injected error-path logs had successful unittest counts and exit 0. Isolated SQLite checks cover None/blank/invalid queries, literal percent/underscore/backslash and combined input, lookalike exclusions, case-insensitive ASCII matching, filter composition, ordering, paging/lookahead, unchanged database dump, integrity_check = ok and zero foreign-key violations. Worker-backed integration covers draft versus submitted input, Enter/Search/Clear, filter and page retention, exact-number opening, failed search/Refresh/paging and retry, busy protection, subject-edit result exit and one subject write.
+
+Native Windows: PASS — actual windows Qt platform at 1000×700 after observable worker idle. Isolated synthetic tickets exercised Enter search, Clear, injected failed search, Refresh retry and subject editing out of active results with its updated detail and note draft retained. The initial, Enter search, Clear, failure, recovery and subject-exit captures under the external f7-s034-native-captures directory were opened and inspected without observed clipping, overlap or inaccessible search, queue or detail controls. This validates the tested Windows environment, not every display scale.
+
+## Slice 034 Delivery Gate
+
+Production scope is the ticket repository, service and Saved Tickets workspace; tests are ticket reads and workspace flow. Affected canonical owners are Features, User Workflows, GUI, Database architecture, Python architecture, Roadmap, Todo, ChangeLog and this report. Physical SQL Schema, ERD, system architecture, AHK and PowerShell remain unaffected. The next gate is independent read-only review of the exact unstaged candidate; self-review does not grant integration approval.
+
+---
+
+## Prior Slice 033 handoff snapshot (historical; Slice 033 later merged through PR #34)
+
 Current candidate: **Slice 033 — Edit a Saved Ticket Type**, on `feature/ticket-type-edit-s033` in `C:\Dev\F7Hub`. Before editing, a fresh fetch confirmed clean `main`, HEAD and `origin/main` at `9f3ddab19ba4d54d619d9ce21c2887beae6558db`. The feature branch starts at that exact base. The protected `recovery/pre-s024-protected-work` ref remains `002a494735f30e1488f61e21ea98740ae6371d4d`; other worktrees were not changed.
 
 Status: **PASS — READY_FOR_REVIEW** after implementation, testing, native Windows inspection, documentation and self-review. All candidate changes remain unstaged and uncommitted; no push, PR or integration was performed. The earlier Slice 032 review/integration request, retained in the prior snapshot below, is **STALE HANDOFF METADATA**: live `main` contains its PR #33 merge at `9f3ddab`; the prior report remains historical evidence.

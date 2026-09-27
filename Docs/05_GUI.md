@@ -459,6 +459,8 @@ Suggested layout:
 
 # 15. Ticket Queue
 
+Slice 034 adds a Search subjects row with a text field, Search and Clear buttons. The field accepts Enter. The submitted query is separate from unsubmitted input, composes with Status/Priority/Type and uses the existing asynchronous queue replacement, paging and Refresh path. Clear removes only subject search. During a queue worker operation the search controls are disabled; failed reads keep the previous rows, current detail and drafts with retry feedback. A subject edit can remove the row from the active search without closing the updated detail. Native Windows 1000×700 evidence is recorded in Status/CURRENT_STATE.md.
+
 The ticket list should support:
 
 - search

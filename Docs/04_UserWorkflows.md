@@ -302,6 +302,8 @@ Slice 032 adds **Edit description** for a loaded saved ticket. The multiline dia
 
 Slice 033 adds **Edit type** for a loaded saved ticket. The dialog preselects its current type from Incident, Service request, Problem and Task. Cancel and a true no-op write nothing; stale type or update time requires Reload ticket even when the requested value matches the current row. Failed saves retain the choice. A committed change refreshes details and queue, preserving save acknowledgment and retry guidance if a later read fails. When the ticket leaves the selected Type filter, its row disappears while the new authoritative type remains visible in details; the selected filters, page and activity drafts remain.
 
+Slice 034 adds **Search subjects** to Saved Tickets. Enter or Search submits trimmed text as a literal, case-insensitive subject substring and starts at page 1. Typing without submitting leaves the queue unchanged. Status, Priority and Type continue to compose with the submitted query; Refresh and paging reuse it without submitting later draft text. Clear removes the subject constraint and resets to page 1 while keeping the three filters. Open number leaves the submitted query, draft text, filters and page intact. Failed reads retain the previous queue, open detail and activity drafts for Refresh retry. Editing a matching ticket's subject may remove its queue row while the saved, updated detail stays open.
+
 ## Related Resources May Include
 
 - related tickets

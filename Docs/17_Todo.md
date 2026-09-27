@@ -572,12 +572,20 @@ Slice 032 — edit one saved-ticket description, implemented and validated 2026-
 - [x] Validate focused 50, affected 66, and full Database 352 + GUI 153 + Integration 116 = 621 tests; inspect native Windows 1000×700 captures.
 - [x] Independently review and integrate Slice 032; merged on `main` through PR #33 at `9f3ddab`. The preceding candidate report is historical.
 
-Slice 033 — edit one saved-ticket type, implemented and self-validated 2026-09-27:
+Slice 033 — edit one saved-ticket type, integrated and closed 2026-09-27:
 
 - [x] Validate type and loaded update time before no-op; atomically update only type/activity time and add one value-free timeline event.
 - [x] Add an asynchronous Edit type dialog sourced directly from `TICKET_TYPES`; show the authoritative type in saved details and retain drafts, filters, page and post-commit recovery feedback.
 - [x] Verify Type-filter exit while the updated detail stays open; validate focused 65, affected 76, and full Database 356 + GUI 154 + Integration 121 = 631 tests, plus native Windows 1000×700 captures.
-- [ ] Independent read-only review of the exact unstaged Slice 033 candidate; no staging, commit, push, PR or integration is authorized.
+- [x] Independently review and integrate Slice 033; merged on main through PR #34 at 6041bae. The preceding candidate report is historical.
+
+Slice 034 — search Saved Tickets by subject, implemented and self-validated 2026-09-27:
+
+- [x] Add literal, case-insensitive subject substring matching with bound SQL, escaping percent signs, underscores and backslashes; compose with Status, Priority, Type, ordering and paging without writes.
+- [x] Add Search subjects, Search, Clear and Enter using separate draft and submitted query state. Preserve filters, page, open detail and drafts through Refresh, exact-number opening and failed reads.
+- [x] Verify that a subject edit may remove the row from search results while updated detail stays open; inspect native Windows at 1000×700.
+- [x] Validate focused 65, affected 82, and full Database 358 + GUI 154 + Integration 125 = 637 tests; native Windows Enter, Clear, failure/retry and subject-exit captures passed.
+- [ ] Independent read-only review of the exact unstaged Slice 034 candidate; no staging, commit, push, PR or integration is authorized.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 
