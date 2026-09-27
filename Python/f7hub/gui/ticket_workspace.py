@@ -4,7 +4,7 @@ import logging
 
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt, Signal
 from PySide6.QtWidgets import (
-    QAbstractItemView, QComboBox, QFormLayout, QHBoxLayout, QHeaderView,
+    QAbstractItemView, QComboBox, QFormLayout, QGridLayout, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QMessageBox, QPushButton, QSplitter, QTabWidget,
     QTableView, QTextEdit, QVBoxLayout, QWidget,
 )
@@ -12,6 +12,7 @@ from PySide6.QtWidgets import (
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.edit_ticket_subject_dialog import EditTicketSubjectDialog
 from f7hub.gui.edit_ticket_priority_dialog import EditTicketPriorityDialog
+from f7hub.gui.edit_ticket_description_dialog import EditTicketDescriptionDialog
 from f7hub.gui.ticket_knowledge_widget import TicketKnowledgeWidget
 from f7hub.services.ticket_service import (
     TICKET_NOTE_TYPES, TICKET_PRIORITIES, TICKET_STATUSES, TICKET_TYPES,
@@ -70,6 +71,7 @@ class TicketWorkspace(QWidget):
         self._knowledge_link_service = knowledge_link_service
         self._edit_subject_dialog = None
         self._edit_priority_dialog = None
+        self._edit_description_dialog = None
         self._build_ui()
 
     def _build_ui(self):
@@ -209,10 +211,13 @@ class TicketWorkspace(QWidget):
         self.edit_subject_button.clicked.connect(self.open_edit_subject)
         self.edit_priority_button = QPushButton("Edit priority", self.detail_panel)
         self.edit_priority_button.clicked.connect(self.open_edit_priority)
-        detail_actions = QHBoxLayout()
-        detail_actions.addWidget(self.edit_subject_button)
-        detail_actions.addWidget(self.edit_priority_button)
-        detail_actions.addWidget(self.reload_button)
+        self.edit_description_button = QPushButton("Edit description", self.detail_panel)
+        self.edit_description_button.clicked.connect(self.open_edit_description)
+        detail_actions = QGridLayout()
+        detail_actions.addWidget(self.edit_subject_button, 0, 0)
+        detail_actions.addWidget(self.edit_priority_button, 0, 1)
+        detail_actions.addWidget(self.edit_description_button, 1, 0)
+        detail_actions.addWidget(self.reload_button, 1, 1)
         detail_layout.addLayout(detail_actions)
         self.detail_panel.setEnabled(False)
         splitter.setSizes([460, 620])
@@ -396,7 +401,8 @@ class TicketWorkspace(QWidget):
     def open_edit_subject(self):
         if (self.details is None or self._runner.busy
                 or self._edit_subject_dialog is not None
-                or self._edit_priority_dialog is not None):
+                or self._edit_priority_dialog is not None
+                or self._edit_description_dialog is not None):
             return None
         ticket = self.details.ticket
         dialog = EditTicketSubjectDialog(self._service, self._runner, ticket, self)
@@ -416,7 +422,8 @@ class TicketWorkspace(QWidget):
     def open_edit_priority(self):
         if (self.details is None or self._runner.busy
                 or self._edit_priority_dialog is not None
-                or self._edit_subject_dialog is not None):
+                or self._edit_subject_dialog is not None
+                or self._edit_description_dialog is not None):
             return None
         ticket = self.details.ticket
         dialog = EditTicketPriorityDialog(self._service, self._runner, ticket, self)
@@ -432,6 +439,29 @@ class TicketWorkspace(QWidget):
             self.feedback.setText("Priority unchanged.")
             return
         self._reload_after_save(updated.ticket_id, "Priority saved.")
+
+    def open_edit_description(self):
+        if (self.details is None or self._runner.busy
+                or self._edit_description_dialog is not None
+                or self._edit_subject_dialog is not None
+                or self._edit_priority_dialog is not None):
+            return None
+        ticket = self.details.ticket
+        dialog = EditTicketDescriptionDialog(self._service, self._runner, ticket, self)
+        self._edit_description_dialog = dialog
+        dialog.finished.connect(lambda _result: setattr(self, "_edit_description_dialog", None))
+        dialog.description_updated.connect(
+            lambda updated: self._description_updated(ticket, updated)
+        )
+        dialog.open()
+        return dialog
+
+    def _description_updated(self, previous, updated):
+        if (updated.description == previous.description
+                and updated.updated_at == previous.updated_at):
+            self.feedback.setText("Description unchanged.")
+            return
+        self._reload_after_save(updated.ticket_id, "Description saved.")
 
     def add_note(self):
         if self.details is None or self._runner.busy:

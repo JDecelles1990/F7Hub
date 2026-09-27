@@ -561,7 +561,16 @@ Slice 031 — edit one saved-ticket priority, implemented and validated 2026-09-
 - [x] Add asynchronous Edit priority dialog with authoritative choices, stale reload instruction, retained selection, busy protection and committed-save recovery after failed reads.
 - [x] Preserve Status/Priority/Type filters and open detail when a priority edit removes the row from its active queue filter.
 - [x] Validate focused 42, affected 58, and full Database 349 + GUI 153 + Integration 111 = 613 tests; inspect native Windows 1000×700 captures.
-- [ ] Independent read-only review of the exact unstaged Slice 031 candidate; no staging, commit, push, PR or integration is authorized.
+- [x] Independently review and integrate Slice 031; merged on `main` through PR #32 at `8ff62f9`. The preceding candidate report is historical.
+
+Slice 032 — edit one saved-ticket description, implemented and validated 2026-09-27:
+
+- [x] Normalize optional multiline input through the existing creation rule; guard exact nullable description and update time before no-op.
+- [x] Atomically update only description/activity time, add one text-free timeline event, and roll back update/event/reload failures.
+- [x] Add a multiline asynchronous dialog with draft preservation, stale guidance, busy protection and committed-save recovery after failed reads.
+- [x] Preserve queue filters, paging, open detail and activity drafts; keep all four detail actions usable at 1000×700.
+- [x] Validate focused 50, affected 66, and full Database 352 + GUI 153 + Integration 116 = 621 tests; inspect native Windows 1000×700 captures.
+- [ ] Independent read-only review of the exact unstaged Slice 032 candidate; no staging, commit, push, PR or integration is authorized.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 

@@ -26,6 +26,8 @@ TICKET_SUBJECT_CHANGED_EVENT_TYPE = "SUBJECT_CHANGED"
 TICKET_SUBJECT_CHANGED_EVENT_TITLE = "Ticket subject changed"
 TICKET_PRIORITY_CHANGED_EVENT_TYPE = "PRIORITY_CHANGED"
 TICKET_PRIORITY_CHANGED_EVENT_TITLE = "Ticket priority changed"
+TICKET_DESCRIPTION_CHANGED_EVENT_TYPE = "DESCRIPTION_CHANGED"
+TICKET_DESCRIPTION_CHANGED_EVENT_TITLE = "Ticket description changed"
 TICKET_NOTE_TYPES = frozenset({"INTERNAL", "PUBLIC", "WORKLOG", "RESOLUTION"})
 TICKET_STATUS_TRANSITIONS = {
     "NEW": frozenset({"OPEN", "IN_PROGRESS", "WAITING", "RESOLVED", "CANCELLED"}),
@@ -285,6 +287,49 @@ class TicketService:
                 return updated
         except sqlite3.Error as error:
             raise TicketUpdateError("F7Hub could not update the ticket priority.") from error
+
+    def update_ticket_description(
+        self, ticket_id: int, *, expected_description: str | None,
+        expected_updated_at: str, description: str | None,
+    ) -> TicketRecord:
+        """Correct a loaded description without replacing other ticket fields."""
+
+        _validate_ticket_id(ticket_id)
+        if expected_description is not None and not isinstance(expected_description, str):
+            raise TicketValidationError("expected_description must be text or None.")
+        _required_text(expected_updated_at, "expected_updated_at")
+        clean_description = _optional_text(description, "description")
+        try:
+            with self._ticket_repository.transaction() as transaction:
+                current = _require_ticket(transaction.get_ticket(ticket_id))
+                if (current.description != expected_description
+                        or current.updated_at != expected_updated_at):
+                    raise TicketEditConflictError(
+                        "This ticket changed. Reload it before editing the description again."
+                    )
+                if current.description == clean_description:
+                    return current
+                timestamp = _next_ticket_timestamp(self._clock(), current.updated_at)
+                if not transaction.update_ticket_description(
+                    ticket_id, expected_description=expected_description,
+                    expected_updated_at=expected_updated_at,
+                    description=clean_description, updated_at=timestamp,
+                ):
+                    raise TicketEditConflictError(
+                        "This ticket changed. Reload it before editing the description again."
+                    )
+                transaction.create_timeline_event(
+                    ticket_id=ticket_id,
+                    event_type=TICKET_DESCRIPTION_CHANGED_EVENT_TYPE,
+                    title=TICKET_DESCRIPTION_CHANGED_EVENT_TITLE,
+                    occurred_at=timestamp,
+                )
+                updated = transaction.get_ticket(ticket_id)
+                if updated is None:
+                    raise TicketUpdateError("F7Hub could not reload the updated ticket.")
+                return updated
+        except sqlite3.Error as error:
+            raise TicketUpdateError("F7Hub could not update the ticket description.") from error
 
     @staticmethod
     def allowed_statuses(status: str) -> tuple[str, ...]:

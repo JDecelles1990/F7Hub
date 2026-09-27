@@ -265,6 +265,8 @@ Slice 030 implements the first bounded ticket edit: a technician can correct the
 
 Slice 031 adds a separate correction for a loaded ticket's priority. The four existing priority values are selectable; a changed value advances activity time and records one priority-change event. Stale details are rejected before no-op, and a ticket may leave the current priority-filtered queue while its saved detail stays open. Description and other ticket fields remain outside this slice.
 
+Slice 032 adds correction of the loaded ticket's optional plain-text description. Blank input clears it to NULL; multiline content retains internal line breaks. A real change advances activity time and records one description-change event without copying description text. Stale details are rejected before no-op. Other editable fields remain separate work.
+
 ---
 
 ## FEAT-TICKET-002 — Ticket Workspace

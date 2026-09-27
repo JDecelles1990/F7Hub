@@ -145,6 +145,8 @@ Slice 030 begins the P0 ticket-edit requirement with one subject correction work
 
 Slice 031 adds one priority correction workflow on the same writer, timeline and GUI worker path. The existing priority domain and queue filter remain authoritative; a changed ticket can leave the filtered queue without losing its open detail. Description and other ticket edits and ticket search remain separate future work; no migration or dependency is added.
 
+Slice 032 adds one optional multiline description correction workflow on the existing writer, timeline and GUI worker path. Blank input clears the description; stale loaded state is rejected before no-op, and post-commit read failures retain the saved acknowledgment. Other ticket edits and ticket search remain separate work; no migration or dependency is added.
+
 The F7Hub roadmap is organized into:
 
 ```text

@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-from f7hub.infrastructure.database import bootstrap_database
+from f7hub.infrastructure.database import bootstrap_database, database_connection
 from f7hub.repositories.ticket_repository import TicketRepository
 from f7hub.repositories.ticket_repository import TicketRepositoryTransaction
 from f7hub.repositories.knowledge_repository import KnowledgeRepository
@@ -228,6 +228,189 @@ class TicketReadTests(unittest.TestCase):
                 self.service.update_ticket_subject(ticket.ticket_id, **args)
         with closing(sqlite3.connect(self.path)) as connection:
             self.assertEqual(tuple(connection.iterdump()), before)
+
+    def test_description_edit_normalizes_multiline_clears_and_preserves_relationships(self):
+        timestamp = "2026-09-27T12:00:00.000Z"
+        with database_connection(self.path) as connection:
+            company_id = connection.execute(
+                "INSERT INTO companies (name, created_at, updated_at) VALUES (?, ?, ?)",
+                ("Example Company", timestamp, timestamp),
+            ).lastrowid
+            contact_id = connection.execute(
+                "INSERT INTO contacts (company_id, display_name, created_at, updated_at) "
+                "VALUES (?, ?, ?, ?)",
+                (company_id, "Example Contact", timestamp, timestamp),
+            ).lastrowid
+            category_id = connection.execute(
+                "INSERT INTO categories (scope, name, slug, created_at, updated_at) "
+                "VALUES ('TICKET', ?, ?, ?, ?)",
+                ("Printing", "printing-s032", timestamp, timestamp),
+            ).lastrowid
+        ticket = self.service.create_ticket(
+            subject="Printer offline", ticket_type="TASK", priority="HIGH",
+            description="Initial description", assigned_to="Technician", source="Manual",
+            company_id=company_id, contact_id=contact_id, category_id=category_id,
+        )
+        self.service.add_note(ticket.ticket_id, note_text="Existing note")
+        self.service.change_status(ticket.ticket_id, new_status="RESOLVED", resolution="Fixed")
+        self.service.change_status(ticket.ticket_id, new_status="CLOSED")
+        article = KnowledgeRepository(self.path).create_article(
+            article_code="KB-DESCRIPTION-32", title="Guide", summary=None,
+            body_markdown="Body", created_at=ticket.created_at, updated_at=ticket.updated_at,
+        )
+        current = self.repo.get_ticket(ticket.ticket_id)
+        with closing(sqlite3.connect(self.path)) as connection:
+            connection.execute(
+                "INSERT INTO ticket_knowledge_articles "
+                "(ticket_id, knowledge_article_id, linked_at) VALUES (?, ?, ?)",
+                (ticket.ticket_id, article.knowledge_article_id, current.updated_at),
+            )
+            connection.commit()
+        original_details = self.service.get_ticket_details(ticket.ticket_id)
+        for entered, expected in (
+            ("  Line one\n  Line two\n", "Line one\n  Line two"),
+            (" \n  ", None),
+            ("  One line  ", "One line"),
+        ):
+            with self.subTest(entered=entered):
+                previous = current
+                current = self.service.update_ticket_description(
+                    ticket.ticket_id, expected_description=previous.description,
+                    expected_updated_at=previous.updated_at, description=entered,
+                )
+                self.assertEqual(current, replace(previous, description=expected,
+                                                  updated_at=current.updated_at))
+                self.assertGreater(current.updated_at, previous.updated_at)
+        details = self.service.get_ticket_details(ticket.ticket_id)
+        self.assertEqual(details.ticket, current)
+        self.assertEqual(details.notes, original_details.notes)
+        self.assertEqual(details.status_history, original_details.status_history)
+        events = [event for event in details.timeline_events
+                  if event.event_type == "DESCRIPTION_CHANGED"]
+        self.assertEqual(len(events), 3)
+        self.assertTrue(all(event.details is None and event.metadata_json is None
+                            and event.title == "Ticket description changed" for event in events))
+        self.assertTrue(all("Line one" not in str(event) and "One line" not in str(event)
+                            for event in events))
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(connection.execute(
+                "SELECT description FROM tickets WHERE ticket_id = ?", (ticket.ticket_id,),
+            ).fetchone(), ("One line",))
+            self.assertEqual(connection.execute(
+                "SELECT COUNT(*) FROM ticket_knowledge_articles WHERE ticket_id = ?",
+                (ticket.ticket_id,),
+            ).fetchone(), (1,))
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
+    def test_description_edit_validates_stale_state_before_null_and_text_no_op(self):
+        ticket = self.service.create_ticket(subject="Original")
+        args = dict(expected_description=None, expected_updated_at=ticket.updated_at)
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        for value in (0, -1, True, None):
+            with self.subTest(ticket_id=value), self.assertRaises(TicketValidationError):
+                self.service.update_ticket_description(value, description="Text", **args)
+        for value in (True, 42, []):
+            with self.subTest(description=value), self.assertRaises(TicketValidationError):
+                self.service.update_ticket_description(ticket.ticket_id, description=value, **args)
+            with self.subTest(expected=value), self.assertRaises(TicketValidationError):
+                self.service.update_ticket_description(
+                    ticket.ticket_id, expected_description=value,
+                    expected_updated_at=ticket.updated_at, description="Text",
+                )
+        with self.assertRaises(TicketNotFoundError):
+            self.service.update_ticket_description(999, description="Text", **args)
+        for expected in (args | {"expected_description": "stale"},
+                         args | {"expected_updated_at": "2020-01-01T00:00:00.000Z"}):
+            with self.subTest(expected=expected), self.assertRaises(TicketEditConflictError):
+                self.service.update_ticket_description(
+                    ticket.ticket_id, description=" \n ", **expected,
+                )
+        self.assertEqual(self.service.update_ticket_description(
+            ticket.ticket_id, description=" \n ", **args,
+        ), ticket)
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+        current = self.service.update_ticket_description(
+            ticket.ticket_id, description="Text", **args,
+        )
+        self.assertEqual(current.description, "Text")
+        with closing(sqlite3.connect(self.path)) as connection:
+            after_change = tuple(connection.iterdump())
+        for expected in (
+            dict(expected_description=None, expected_updated_at=current.updated_at),
+            dict(expected_description="Text", expected_updated_at=ticket.updated_at),
+        ):
+            with self.subTest(expected=expected), self.assertRaises(TicketEditConflictError):
+                self.service.update_ticket_description(
+                    ticket.ticket_id, description=" Text ", **expected,
+                )
+        self.assertEqual(self.service.update_ticket_description(
+            ticket.ticket_id, expected_description="Text",
+            expected_updated_at=current.updated_at, description=" Text ",
+        ), current)
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), after_change)
+        with self.repo.transaction() as transaction:
+            self.assertFalse(transaction.update_ticket_description(
+                ticket.ticket_id, expected_description=None,
+                expected_updated_at=current.updated_at, description="Wrong", updated_at="later",
+            ))
+
+    def test_description_edit_advances_same_millisecond_and_rolls_back_failures(self):
+        ticket = self.service.create_ticket(subject="Original")
+        from datetime import datetime
+        fixed = datetime.fromisoformat(ticket.updated_at.replace("Z", "+00:00"))
+        service = TicketService(self.repo, clock=lambda: fixed)
+        args = dict(expected_description=None, expected_updated_at=ticket.updated_at,
+                    description="Replacement")
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        with patch.object(TicketRepositoryTransaction, "update_ticket_description",
+                          side_effect=sqlite3.OperationalError("private")):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_description(ticket.ticket_id, **args)
+        with patch.object(TicketRepositoryTransaction, "update_ticket_description", return_value=False):
+            with self.assertRaises(TicketEditConflictError):
+                service.update_ticket_description(ticket.ticket_id, **args)
+        with patch.object(TicketRepositoryTransaction, "create_timeline_event",
+                          side_effect=sqlite3.OperationalError("private")):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_description(ticket.ticket_id, **args)
+        original_get = TicketRepositoryTransaction.get_ticket
+        reads = 0
+
+        def fail_second_read(transaction, ticket_id):
+            nonlocal reads
+            reads += 1
+            if reads == 2:
+                raise sqlite3.OperationalError("private")
+            return original_get(transaction, ticket_id)
+
+        with patch.object(TicketRepositoryTransaction, "get_ticket", fail_second_read):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_description(ticket.ticket_id, **args)
+        reads = 0
+
+        def lose_second_read(transaction, ticket_id):
+            nonlocal reads
+            reads += 1
+            if reads == 2:
+                return None
+            return original_get(transaction, ticket_id)
+
+        with patch.object(TicketRepositoryTransaction, "get_ticket", lose_second_read):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_description(ticket.ticket_id, **args)
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+        edited = service.update_ticket_description(ticket.ticket_id, **args)
+        self.assertGreater(edited.updated_at, ticket.updated_at)
+        self.assertEqual(edited.description, "Replacement")
+        self.assertEqual([event.event_type for event in
+                          self.repo.list_timeline_events(ticket.ticket_id)].count(
+                              "DESCRIPTION_CHANGED"), 1)
 
     def test_priority_edit_transitions_preserve_other_data_and_relationships(self):
         ticket = self.service.create_ticket(

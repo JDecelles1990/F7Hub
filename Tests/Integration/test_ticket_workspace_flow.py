@@ -602,6 +602,202 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         self.assertEqual(self.workspace.feedback.text(), "Invalid queue filter.")
         self.assertEqual(self.workspace.model.tickets, previous_rows)
 
+    def test_description_dialog_null_prefill_cancel_multiline_save_and_clear(self):
+        ticket = self.workspace.details.ticket
+        self.assertIsNone(ticket.description)
+        self.workspace.note_input.setPlainText("Keep note draft")
+        cancelled = self.workspace.open_edit_description()
+        self.assertEqual(cancelled.description_input.toPlainText(), "")
+        cancelled.description_input.setPlainText("Unsaved draft")
+        cancelled.cancel_button.click()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id), ticket)
+        unchanged = self.workspace.open_edit_description()
+        unchanged.description_input.setPlainText(" \n ")
+        unchanged.save_button.click()
+        self.wait_idle()
+        self.assertIn("Description unchanged", self.workspace.feedback.text())
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id), ticket)
+        dialog = self.workspace.open_edit_description()
+        dialog.description_input.setPlainText("  First line\n  Second line\n")
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id).description,
+                         "First line\n  Second line")
+        self.assertEqual(self.workspace.details.ticket.description, "First line\n  Second line")
+        self.assertIn("First line\n  Second line", self.workspace.summary.toPlainText())
+        self.assertIn("Description saved", self.workspace.feedback.text())
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep note draft")
+        self.assertEqual([e.event_type for e in self.repository.list_timeline_events(ticket.ticket_id)]
+                         .count("DESCRIPTION_CHANGED"), 1)
+        clear = self.workspace.open_edit_description()
+        self.assertEqual(clear.description_input.toPlainText(), "First line\n  Second line")
+        clear.description_input.setPlainText(" \n ")
+        clear.save_button.click()
+        self.wait_idle()
+        self.assertIsNone(self.repository.get_ticket(ticket.ticket_id).description)
+        self.assertIn("(No description)", self.workspace.summary.toPlainText())
+
+    def test_description_dialog_stale_and_failures_preserve_multiline_draft(self):
+        ticket = self.workspace.details.ticket
+        dialog = self.workspace.open_edit_description()
+        wanted = "Wanted\n  multiline draft"
+        dialog.description_input.setPlainText(wanted)
+        self.service.update_ticket_description(
+            ticket.ticket_id, expected_description=None,
+            expected_updated_at=ticket.updated_at, description="External change",
+        )
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertIn("Reload", dialog.feedback.text())
+        self.assertFalse(dialog.save_button.isEnabled())
+        self.assertEqual(dialog.description_input.toPlainText(), wanted)
+        dialog.cancel_button.click()
+        self.workspace.reload_button.click()
+        self.wait_idle()
+        failed = self.workspace.open_edit_description()
+        self.assertEqual(failed.description_input.toPlainText(), "External change")
+        failed.description_input.setPlainText(wanted)
+        with patch.object(self.service, "update_ticket_description",
+                          side_effect=TicketValidationError("Invalid description.")):
+            failed.save_button.click()
+            self.wait_idle()
+        self.assertEqual(failed.description_input.toPlainText(), wanted)
+        self.assertIn("Invalid description", failed.feedback.text())
+        with patch.object(self.service, "update_ticket_description",
+                          side_effect=RuntimeError("private")):
+            failed.save_button.click()
+            self.wait_idle()
+        self.assertEqual(failed.description_input.toPlainText(), wanted)
+        self.assertIn("Could not save the description", failed.feedback.text())
+        self.assertNotIn("private", failed.feedback.text())
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id).description,
+                         "External change")
+        failed.cancel_button.click()
+
+    def test_description_dialog_blocks_duplicate_save_and_close_while_busy(self):
+        dialog = self.workspace.open_edit_description()
+        dialog.description_input.setPlainText("Delayed\nupdate")
+        started = threading.Event()
+        release = threading.Event()
+        original = self.service.update_ticket_description
+        calls = []
+
+        def delayed_update(*args, **kwargs):
+            calls.append(kwargs["description"])
+            started.set()
+            if not release.wait(5):
+                raise TimeoutError("Update gate timed out")
+            return original(*args, **kwargs)
+
+        try:
+            with patch.object(self.service, "update_ticket_description", side_effect=delayed_update):
+                dialog.save_button.click()
+                self.assertTrue(started.wait(5))
+                self.assertFalse(dialog.save_button.isEnabled())
+                self.assertFalse(dialog.cancel_button.isEnabled())
+                dialog.submit()
+                dialog.reject()
+                self.assertTrue(dialog.isVisible())
+                release.set()
+                self.wait_idle()
+        finally:
+            release.set()
+        self.assertEqual(calls, ["Delayed\nupdate"])
+        self.assertEqual(self.repository.get_ticket(self.ticket_id).description,
+                         "Delayed\nupdate")
+
+    def test_committed_description_edit_survives_refresh_failures_and_preserves_filters(self):
+        ticket = self.workspace.details.ticket
+        self.workspace.note_input.setPlainText("Keep note draft")
+        self.workspace.reason_input.setText("Keep reason")
+        self.workspace.status_filter.setCurrentIndex(
+            self.workspace.status_filter.findData("NEW")
+        )
+        self.wait_idle()
+        self.workspace.priority_filter.setCurrentIndex(
+            self.workspace.priority_filter.findData("MEDIUM")
+        )
+        self.wait_idle()
+        self.workspace.type_filter.setCurrentIndex(
+            self.workspace.type_filter.findData("INCIDENT")
+        )
+        self.wait_idle()
+        first = self.workspace.open_edit_description()
+        first.description_input.setPlainText("Saved despite detail failure")
+        with patch.object(self.service, "get_ticket_details", side_effect=RuntimeError("private")):
+            first.save_button.click()
+            self.wait_idle()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id).description,
+                         "Saved despite detail failure")
+        self.assertIn("Description saved", self.workspace.feedback.text())
+        self.assertIn("Reload ticket", self.workspace.feedback.text())
+        self.assertNotIn("private", self.workspace.feedback.text())
+        self.workspace.reload_button.click()
+        self.wait_idle()
+        errors = (
+            RuntimeError("private"),
+            TicketValidationError("Invalid queue filter."),
+            TicketReadError("F7Hub could not load the ticket list."),
+        )
+        for index, error in enumerate(errors, start=1):
+            with self.subTest(error=type(error).__name__):
+                description = f"Saved despite queue failure {index}\nMore detail"
+                dialog = self.workspace.open_edit_description()
+                dialog.description_input.setPlainText(description)
+                original_update = self.service.update_ticket_description
+                with patch.object(self.service, "update_ticket_description",
+                                  wraps=original_update) as update:
+                    with patch.object(self.service, "list_tickets", side_effect=error):
+                        dialog.save_button.click()
+                        self.wait_idle()
+                self.assertEqual(update.call_count, 1)
+                self.assertEqual(self.repository.get_ticket(ticket.ticket_id).description,
+                                 description)
+                self.assertEqual(self.workspace.details.ticket.description, description)
+                self.assertIn("Description saved", self.workspace.feedback.text())
+                self.assertIn("Could not refresh tickets", self.workspace.feedback.text())
+                self.assertIn("Refresh to retry", self.workspace.feedback.text())
+                if isinstance(error, TicketValidationError):
+                    self.assertIn(str(error), self.workspace.feedback.text())
+                else:
+                    self.assertNotIn("private", self.workspace.feedback.text())
+                event_count = [e.event_type for e in
+                               self.repository.list_timeline_events(ticket.ticket_id)]
+                self.workspace.refresh_button.click()
+                self.wait_idle()
+                self.assertEqual(self.workspace.model.tickets[0].description, description)
+                self.assertEqual([e.event_type for e in
+                                  self.repository.list_timeline_events(ticket.ticket_id)],
+                                 event_count)
+        self.assertEqual(self.workspace.status_filter.currentData(), "NEW")
+        self.assertEqual(self.workspace.priority_filter.currentData(), "MEDIUM")
+        self.assertEqual(self.workspace.type_filter.currentData(), "INCIDENT")
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep note draft")
+        self.assertEqual(self.workspace.reason_input.text(), "Keep reason")
+
+    def test_description_save_keeps_current_queue_page_and_open_detail(self):
+        for index in range(self.workspace.PAGE_SIZE + 1):
+            self.repository.create_ticket(
+                ticket_number=f"PAGE-32-{index}", subject=f"Older ticket {index}",
+                created_at="2026-09-01T00:00:00.000Z",
+                updated_at="2026-09-01T00:00:00.000Z",
+            )
+        self.workspace.refresh_list(offset=self.workspace.PAGE_SIZE)
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.assertEqual(self.workspace._offset, self.workspace.PAGE_SIZE)
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        dialog = self.workspace.open_edit_description()
+        dialog.description_input.setPlainText("Saved while on page two")
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.assertEqual(self.workspace._offset, self.workspace.PAGE_SIZE)
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace.details.ticket.description,
+                         "Saved while on page two")
+        self.assertIn("Description saved", self.workspace.feedback.text())
+
     def test_priority_dialog_choices_cancel_no_op_and_success(self):
         ticket = self.workspace.details.ticket
         self.workspace.note_input.setPlainText("Keep note draft")
