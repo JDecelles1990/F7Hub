@@ -290,6 +290,8 @@ Display Ticket Workspace
 
 Slice 027 adds **Open number** to Saved Tickets. Enter a complete ticket number or press Enter to load its current details asynchronously; surrounding whitespace is ignored and matching is case-insensitive. The queue page and status filter stay in place, so the opened ticket may be absent from the visible queue. Blank input makes no query. Missing tickets and read failures leave the current detail and activity drafts intact; the entered number remains for retry. If the lookup would switch away from a ticket with unsaved activity, the existing discard confirmation applies. Cancel keeps the current detail and drafts. Broader ticket-text and universal search remain planned.
 
+Slice 028 adds **Priority** to the Saved Tickets queue. All priorities shows the unfiltered priority set; one of Critical, High, Medium or Low narrows the list together with Status. Changing either filter starts at page 1. Refresh and Previous/Next keep both selections and the current page; Open number keeps the filters and page even for a ticket outside the queue. The two filter controls are unavailable during a worker read. If that read fails, the previous rows, open detail and activity drafts remain visible, both selections remain for retry, and no ticket is changed. Refresh retries the requested page, including page 1 after a failed filter change from a later page.
+
 ## Related Resources May Include
 
 - related tickets

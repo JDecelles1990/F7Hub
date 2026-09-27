@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-27 — Slice 028: Saved Tickets Priority Filter
+
+Saved Tickets now filters its read-only queue by All priorities, Critical, High, Medium or Low, composed with Status. The optional service argument reuses the existing priority vocabulary; the repository binds both values and preserves newest-updated ordering and paging. Filter changes start at page 1; Refresh, paging and exact-number opening retain selections. Failed reads keep prior rows, detail and drafts for retry. No schema, migration, index, write or dependency changed.
+
+Fresh final-candidate validation: focused **22 PASS**, affected **38 PASS**, full Database **340 PASS**, GUI **153 PASS**, Integration **100 PASS** = **593 PASS**, all exit 0. An isolated SQLite dump was unchanged across filtered reads, integrity and foreign-key checks passed, and a native Windows 1000×700 High/Open capture was opened and inspected. An initial full GUI run found the added selector widened the window to 1176px; placing Priority on its own row resolved this, and the affected layout checks and full GUI suite passed on the corrected candidate. This candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-26 — Slice 027: Open a Saved Ticket by Number
 
 Saved Tickets now opens an exact ticket number through the existing case-insensitive repository lookup and authoritative detail read. Enter and Open number share one asynchronous action. Blank input issues no query; missing/read-failure/disappearing-ticket and cancelled draft-discard paths preserve current detail and activity drafts. The entered number, queue page and status filter remain in place. Lookup is read-only. No new exception hierarchy, repository query, schema, migration or dependency was added.

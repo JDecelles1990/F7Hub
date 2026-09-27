@@ -11,7 +11,9 @@ from PySide6.QtWidgets import (
 
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.ticket_knowledge_widget import TicketKnowledgeWidget
-from f7hub.services.ticket_service import TICKET_NOTE_TYPES, TICKET_STATUSES, TicketValidationError
+from f7hub.services.ticket_service import (
+    TICKET_NOTE_TYPES, TICKET_PRIORITIES, TICKET_STATUSES, TicketValidationError,
+)
 
 
 class TicketTableModel(QAbstractTableModel):
@@ -61,6 +63,7 @@ class TicketWorkspace(QWidget):
         self._runner = runner
         self.details = None
         self._offset = 0
+        self._retry_offset = None
         self._knowledge_link_service = knowledge_link_service
         self._build_ui()
 
@@ -80,12 +83,20 @@ class TicketWorkspace(QWidget):
         self.status_filter.addItem("All statuses", None)
         for status in sorted(TICKET_STATUSES):
             self.status_filter.addItem(status.replace("_", " ").title(), status)
+        self.priority_filter = QComboBox(queue)
+        self.priority_filter.setAccessibleName("Filter tickets by priority")
+        self.priority_filter.addItem("All priorities", None)
+        for priority in sorted(TICKET_PRIORITIES, key=("CRITICAL", "HIGH", "MEDIUM", "LOW").index):
+            self.priority_filter.addItem(priority.title(), priority)
         self.refresh_button = QPushButton("Refresh", queue)
         self.refresh_button.clicked.connect(lambda: self.refresh_list())
         self.status_filter.currentIndexChanged.connect(lambda: self.refresh_list(offset=0))
+        self.priority_filter.currentIndexChanged.connect(lambda: self.refresh_list(offset=0))
         filters.addWidget(self.status_filter)
         filters.addWidget(self.refresh_button)
         queue_layout.addLayout(filters)
+        queue_layout.addWidget(self.priority_filter)
+        self._runner.busy_changed.connect(self._set_filter_controls_idle)
         number_row = QHBoxLayout()
         self.ticket_number_input = QLineEdit(queue)
         self.ticket_number_input.setAccessibleName("Open saved ticket by number")
@@ -189,12 +200,17 @@ class TicketWorkspace(QWidget):
     def refresh_list(self, *, offset=None, message=None):
         if self._runner.busy:
             return
-        target = self._offset if offset is None else max(0, offset)
+        if offset is None:
+            target = self._offset if self._retry_offset is None else self._retry_offset
+        else:
+            target = max(0, offset)
         status = self.status_filter.currentData()
+        priority = self.priority_filter.currentData()
         self.feedback.setText("Loading tickets…")
 
         def loaded(tickets):
             self._offset = target
+            self._retry_offset = None
             self.model.replace_tickets(tickets[:self.PAGE_SIZE])
             self.previous_button.setEnabled(target > 0)
             self.next_button.setEnabled(len(tickets) > self.PAGE_SIZE)
@@ -202,14 +218,27 @@ class TicketWorkspace(QWidget):
             self.feedback.setText(message or ("No tickets match this filter." if not tickets else "Double-click a ticket or select it and press Open."))
             self.knowledge_tab.refresh_links()
 
+        def failed(error):
+            self._retry_offset = target
+            self._show_error(
+                error, (message + " " if message else "") +
+                "Could not refresh tickets. Previous results are still shown.",
+            )
+
         self._runner.submit(
-            lambda: self._service.list_tickets(status=status, limit=self.PAGE_SIZE + 1, offset=target),
-            loaded, lambda error: self._show_error(error, (message + " " if message else "") + "Could not refresh tickets. Previous results are still shown."),
+            lambda: self._service.list_tickets(
+                status=status, priority=priority, limit=self.PAGE_SIZE + 1, offset=target,
+            ),
+            loaded, failed,
         )
 
     def _activate_row(self, index):
         if index.isValid():
             self.open_ticket(self.model.tickets[index.row()].ticket_id)
+
+    def _set_filter_controls_idle(self, busy):
+        self.status_filter.setEnabled(not busy)
+        self.priority_filter.setEnabled(not busy)
 
     def _set_number_lookup_idle(self, busy):
         self.ticket_number_input.setEnabled(not busy)

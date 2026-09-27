@@ -150,16 +150,21 @@ class TicketService:
             raise TicketCreationError("F7Hub could not create the ticket.") from error
 
     def list_tickets(
-        self, *, status: str | None = None, limit: int = 100, offset: int = 0,
+        self, *, status: str | None = None, priority: str | None = None,
+        limit: int = 100, offset: int = 0,
     ) -> tuple[TicketRecord, ...]:
         if status is not None:
             _choice(status, "status", TICKET_STATUSES)
+        if priority is not None:
+            _choice(priority, "priority", TICKET_PRIORITIES)
         if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 200:
             raise TicketValidationError("limit must be an integer from 1 to 200.")
         if isinstance(offset, bool) or not isinstance(offset, int) or not 0 <= offset <= 2**63 - 1:
             raise TicketValidationError("offset must be a non-negative SQLite integer.")
         try:
-            return self._ticket_repository.list_tickets(status=status, limit=limit, offset=offset)
+            return self._ticket_repository.list_tickets(
+                status=status, priority=priority, limit=limit, offset=offset,
+            )
         except sqlite3.Error as error:
             raise TicketReadError("F7Hub could not load the ticket list.") from error
 

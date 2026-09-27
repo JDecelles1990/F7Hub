@@ -137,6 +137,8 @@ Slice 024 adds one bounded multi-tag capability: read-only Any of selected globa
 
 Slice 025 adds read-only All of two or more selected global tags to the same current-article list/FTS path and cached-choice dialog. It validates a distinct bound ID tuple, requires every selected bridge row, retains one result row per article and preserves MATCH/bm25 ranking. Refresh keeps surviving IDs and collapses to single/All modes as needed. No schema, FTS or dependency changes are introduced.
 
+Slice 028 adds one bounded Saved Tickets queue filter: optional priority composes with the existing status filter, ordering and paging through the current repository/service/GUI path. This advances the ticket queue's basic filtering without starting ticket-text or unified search. No schema, index or database write is introduced.
+
 The F7Hub roadmap is organized into:
 
 ```text

@@ -530,7 +530,15 @@ Slice 027 — open a saved ticket by number, implemented and validated 2026-09-2
 - [x] Add exact, case-insensitive number lookup through the existing repository read and authoritative ticket detail path; trim input and make blank GUI input query-free.
 - [x] Add Enter/Open number in Saved Tickets, retaining queue page/filter and entered text; preserve detail/drafts on cancel, missing ticket, read failure and disappearance.
 - [x] Verify focused and affected tests, 339 Database + 153 GUI + 98 Integration = 590 full regression tests, database read-only behavior and native Windows 1000×700 layout.
-- [ ] Independent Slice 027 review; candidate is unstaged and uncommitted.
+- [x] Independently review and integrate Slice 027; closed on `main` through PR #28 at `ce55c5a`.
+
+Slice 028 — read-only Saved Tickets priority filtering, implemented and validated 2026-09-27:
+
+- [x] Add All/Critical/High/Medium/Low queue choices using the existing priority vocabulary and optional bound repository predicate.
+- [x] Compose with Status, retain ordering and paging, reset to page 1 when either filter changes, and retain selections through Refresh, paging and exact-number open.
+- [x] Keep asynchronous reads and prior rows/detail/drafts on failure, with both selectors disabled during worker activity and a retry path.
+- [x] Validate focused 22, affected 38, Database 340, GUI 153 and Integration 100 tests; inspect native Windows 1000×700 capture.
+- [ ] Independent read-only Slice 028 review; candidate remains unstaged and uncommitted.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 
