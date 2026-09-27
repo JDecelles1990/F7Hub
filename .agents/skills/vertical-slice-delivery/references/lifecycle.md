@@ -4,7 +4,7 @@
 
 Preserve F7Hub's engineering principle: UNDERSTAND -> INSPECT -> PLAN -> IMPLEMENT -> TEST -> REVIEW -> DOCUMENT. Implementation self-review informs documentation. Delivery then requires PLAN -> IMPLEMENT -> TEST -> DOCUMENT -> INDEPENDENT REVIEW -> INTEGRATE -> CLOSE. Documentation precedes independent review so the reviewer verifies both behavior and its synchronized description.
 
-Maintain a compact record: slice identity, state, interrupted phase if any, baseline, approved scope, authorization, last completed gate, next gate, and evidence locations. Record transitions as from/to, reason, evidence, and authorization where needed. Reports describe actual state, not intended completion. READY is a plan result; APPROVE is a review decision; neither is an extra lifecycle state.
+Maintain a compact record: slice identity, state, interrupted phase if any, baseline, approved scope, authorization, last completed gate, next gate, and evidence locations. Record transitions as from/to, reason, evidence, and authorization where needed. Reports describe actual state, not intended completion. READY is a design-plan result; current implementation-baseline readiness is a separate gate. APPROVE is a review decision; none is an extra lifecycle state.
 
 ## Normal transitions
 
@@ -40,9 +40,9 @@ Any active phase may enter BLOCKED, CHECKPOINTED, or RECOVERING when supported b
 ## PLAN: inspection only
 
 1. Verify root, branch/main, HEAD, index, tracked and untracked state; fetch origin and verify origin/main under [Git safety](git-safety.md). Fetch is the permitted metadata refresh, not permission to switch branches or edit.
-2. Read actual current Roadmap, Todo, CURRENT_STATE, ChangeLog, relevant canonical owners, source/tests, and deferred adjacent work. Reconcile dated prose with live evidence; do not invent a slice from old suggestions.
+2. Read actual current Roadmap, Todo, CURRENT_STATE, ChangeLog, relevant canonical owners, source/tests, and deferred adjacent work. Live repository/remote evidence determines current Git state; committed handoff prose may be historical. Label a material disagreement STALE HANDOFF METADATA, recording both the claim and verified state. Do not silently repair it during read-only PLAN, REVIEW, or RECOVERING.
 3. SEARCH -> IDENTIFY -> REUSE -> EXTEND -> CREATE ONLY IF NECESSARY. Compare candidate slices and select the smallest correct bounded one supported by current evidence.
-4. Produce [slice plan](../templates/slice-plan.md): READY or BLOCKED, objective, baseline, scope/exclusions, acceptance criteria, validation, likely files, architecture/database impact, branch and risks. Do not implement or automatically treat READY as approval.
+4. Produce [slice plan](../templates/slice-plan.md): report design readiness and current implementation-baseline readiness separately, with objective, scope/exclusions, acceptance criteria, validation, likely files, architecture/database impact, branch and risks. A READY design may have a BLOCKED FOR IMPLEMENTATION checkout. Do not implement or treat design readiness as approval.
 
 ## IMPLEMENT
 
@@ -50,9 +50,9 @@ Require approved plan; recheck baseline before edits. Establish one feature bran
 
 ## TEST
 
-Testing is its own semantic state: generated code is untrusted. Determine applicable unit, database, service, GUI, integration, native Windows, and regression coverage using specialized guidance. Cover success, failure, state recovery, and data integrity where applicable. Record why a category is inapplicable; never relabel an unexecuted required test as inapplicable to pass a gate.
+Testing is its own semantic state: generated code is untrusted. Determine applicable unit, database, service, GUI, integration, native Windows, and regression coverage using specialized guidance. Prefer focused tests, then affected suites, then full required regression; runtime alone never waives a required suite. Cover success, failure, state recovery, and data integrity where applicable. Record why a category is inapplicable; never relabel an unexecuted required test as inapplicable to pass a gate.
 
-Record exact command, candidate identity, environment, result, counts, exit status and evidence location per suite. Required FAIL enters FAILED_VALIDATION; required NOT RUN or BLOCKED prevents readiness. A focused pass does not replace required regression. Follow [continuity](token-continuity.md) for long tests and lost output.
+Record exact command, candidate identity, environment, result, counts, exit status and evidence location per suite. For native GUI checks, use the observable readiness gate in [review gates](review-gates.md). Required FAIL enters FAILED_VALIDATION; required NOT RUN or BLOCKED prevents readiness. A focused pass does not replace required regression. Follow [continuity](token-continuity.md) for long tests and lost output.
 
 ## DOCUMENT
 

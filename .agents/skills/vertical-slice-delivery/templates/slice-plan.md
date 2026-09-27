@@ -1,11 +1,12 @@
 # F7Hub Slice Plan
 
-Use with [lifecycle](../references/lifecycle.md). PLAN is inspection-only. Fill with evidence; use NOT VERIFIED for unknown facts. READY is not implementation approval.
+Use with [lifecycle](../references/lifecycle.md). PLAN is inspection-only. Fill with evidence; use NOT VERIFIED for unknown facts. A READY design is not implementation approval or a ready checkout.
 
 ## Slice and Result
 
 - Number / name:
-- Result: READY / BLOCKED
+- Plan / design readiness: READY / BLOCKED
+- Current implementation baseline readiness: READY / BLOCKED FOR IMPLEMENTATION (reason; recheck before editing)
 - Lifecycle state:
 - Objective and user need:
 
@@ -18,7 +19,8 @@ Use with [lifecycle](../references/lifecycle.md). PLAN is inspection-only. Fill 
 - Protected unrelated paths:
 - Governance and actual current Roadmap / Todo / CURRENT_STATE / ChangeLog inspected:
 - Relevant source/tests and deferred adjacent work inspected:
-- Stale or conflicting claims and disposition:
+- STALE HANDOFF METADATA, if material: documented claim / verified live state / disposition:
+- Workspace topology when nontrivial: canonical workspace / feature worktree and branch / protected or recovery branch / remote main / current candidate workspace:
 
 ## Selection and Scope
 

@@ -5,7 +5,7 @@ description: Plan, implement, test, document, independently review, integrate, o
 
 # F7Hub Vertical Slice Delivery
 
-Version: 0.1
+Version: 0.2
 
 Own slice state, scope, transitions, evidence, continuity, recovery, reporting, and Git/GitHub safety. Preserve explicit user scope and authorization. This skill does not authorize external actions merely by being loaded.
 
@@ -13,12 +13,12 @@ Own slice state, scope, transitions, evidence, continuity, recovery, reporting, 
 
 | Intent | Entry behavior |
 |---|---|
-| Plan Slice 024 | Inspection-only PLAN; propose READY or BLOCKED. |
-| Implement approved Slice 024 | Verify approved plan and baseline before editing. |
-| Review Slice 024 | Independent read-only REVIEW. |
-| Integrate approved Slice 024 | Verify review approval, integration authorization, and Git gates. |
-| Resume Slice 024 / RESUME | RECOVERING audit, then continue the interrupted phase. |
-| What's the state of Slice 024? | Read-only reconciliation of live evidence and reports. |
+| Plan Slice NNN | Inspection-only PLAN; report design and current baseline readiness separately. |
+| Implement approved Slice NNN | Verify approved plan and baseline before editing. |
+| Review Slice NNN | Independent read-only REVIEW. |
+| Integrate approved Slice NNN | Verify review approval, integration authorization, and Git gates. |
+| Resume Slice NNN / RESUME | RECOVERING audit, then continue the interrupted phase. |
+| What's the state of Slice NNN? | Read-only reconciliation of live evidence and reports. |
 | Continue | Identify current state, last verified gate, and existing authorization; choose the safest action within the same phase. |
 
 Ambiguous continuation never automatically means implement, commit, push, merge, or start another slice. If mutation authorization is unclear, remain in read-only status/recovery. Already-granted authorization persists across sessions only for the same slice, scope, reviewed candidate, and operation; expansion requires new authorization.
@@ -70,7 +70,7 @@ Unexpected destructive migration, core relationship change, authentication/secur
 - All delivery phases: [lifecycle](references/lifecycle.md).
 - Checkpoint, pressure, or RESUME: [token continuity](references/token-continuity.md).
 - Baseline, integration, or uncertain Git action: [Git safety](references/git-safety.md).
-- Review readiness, independent review, or changed approved content: [review gates](references/review-gates.md).
+- Native GUI validation, review readiness, independent review, or changed approved content: [review gates](references/review-gates.md).
 
 Use the relevant report template; do not load every template by default:
 
@@ -84,4 +84,4 @@ Reports distinguish PASS, FAIL, NOT RUN, BLOCKED, and CHECKPOINTED. Test results
 
 ## Evolution
 
-After approximately Slices 024–026, propose a v0.2 review of useful/ignored gates, exhaustion behavior, repeated prompts, defects caught, Git mistakes prevented, test/runtime costs, and documentation accuracy. Do not automatically revise the skill or start the next slice.
+Review future refinements against observed delivery evidence, including gate usefulness, recovery behavior, test cost, and documentation accuracy. Do not automatically revise the skill or start the next slice.

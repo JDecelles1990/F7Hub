@@ -28,7 +28,7 @@ Use with [Git safety](../references/git-safety.md). Report verified actions only
 | Each discovered PR: number / URL / state / actual base / expected base / head SHA | | | |
 | Conflicting or multiple PRs / evidence classification / explicit disposition | | | |
 | PR base / head / commits / exact file scope | | | |
-| Required checks / conflicts / mergeability | | | |
+| Checks classification (NO CHECKS CONFIGURED / CHECK QUERY FAILED / CHECKS FAILED / passing checks), PR rollup and effective rule evidence; conflicts / mergeability | | | |
 | Main freshness and expected head before merge | | | |
 | Normal merge / merge SHA / parents | | | |
 | Feature ancestry / resulting content identity | | | |

@@ -4,6 +4,8 @@ TOKEN PRESSURE NEVER ADVANCES A LIFECYCLE GATE. Strategy may change; correctness
 
 ## Assess pressure
 
+These procedures are design safeguards. Do not describe recovery from real token exhaustion as operationally validated without observed evidence.
+
 Use a reliable host-provided remaining-context/token indicator conservatively if exposed. Otherwise never invent an exact count. Observe explicit user notice, host/tool/session warnings, truncation warnings, inability to recall inspected details reliably, unusually large accumulated state, or an imminent context limit. Absence of a counter alone is not exhaustion; inability to trust continuity is UNKNOWN and follows RED.
 
 | Level | Allowed strategy |
@@ -50,7 +52,7 @@ Preferred root: resolve LOCALAPPDATA from the environment, then use F7Hub\CodexC
 
 ```powershell
 $checkpointRoot = Join-Path $env:LOCALAPPDATA 'F7Hub\CodexCheckpoints'
-$sliceCheckpointDirectory = Join-Path $checkpointRoot 'Slice-024'
+$sliceCheckpointDirectory = Join-Path $checkpointRoot 'Slice-NNN'
 ```
 
 Before writing, confirm LOCALAPPDATA is available and the resolved destination is outside the repository and its worktrees. Validate the slice directory name; never interpolate arbitrary slice text into a path. Use latest.md as the clearly identifiable latest checkpoint and timestamped checkpoint-YYYYMMDD-HHMMSS.md snapshots where useful. Avoid collisions and preserve a prior valid snapshot until the new file is written and read back successfully; never overwrite an unrelated file. Record the actual path and persistence verification. Do not modify .gitignore or repository files for checkpointing.
