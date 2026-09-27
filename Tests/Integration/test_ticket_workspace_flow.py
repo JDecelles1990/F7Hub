@@ -20,7 +20,7 @@ from f7hub.gui.main_window import MainWindow
 from f7hub.infrastructure.database import bootstrap_database
 from f7hub.repositories import TicketRepository
 from f7hub.services import TicketService
-from f7hub.services.ticket_service import TICKET_TYPES
+from f7hub.services.ticket_service import TICKET_TYPES, TicketReadError, TicketValidationError
 
 
 class TicketWorkspaceFlowTests(unittest.TestCase):
@@ -461,6 +461,144 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         self.assertEqual(self.workspace.model.rowCount(), 2)
         self.assertEqual(self.window.ticket_create_widget.subject_input.text(), "")
         self.assertNotIn("private diagnostic", self.workspace.feedback.text())
+
+    def test_subject_dialog_cancel_validation_and_success_refresh(self):
+        ticket = self.workspace.details.ticket
+        self.workspace.note_input.setPlainText("Keep note draft")
+        cancelled = self.workspace.open_edit_subject()
+        self.assertEqual(cancelled.subject_input.text(), ticket.subject)
+        cancelled.cancel_button.click()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id), ticket)
+        dialog = self.workspace.open_edit_subject()
+        dialog.subject_input.setText("  ")
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertIn("non-blank", dialog.feedback.text())
+        self.assertEqual(dialog.subject_input.text(), "  ")
+        dialog.subject_input.setText("  Printer repaired  ")
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id).subject, "Printer repaired")
+        self.assertEqual(self.workspace.details.ticket.subject, "Printer repaired")
+        self.assertEqual(self.workspace.model.tickets[0].subject, "Printer repaired")
+        self.assertIn("Subject saved", self.workspace.feedback.text())
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep note draft")
+        self.assertEqual([e.event_type for e in self.repository.list_timeline_events(ticket.ticket_id)]
+                         .count("SUBJECT_CHANGED"), 1)
+
+    def test_subject_dialog_stale_and_save_failure_retain_entry(self):
+        ticket = self.workspace.details.ticket
+        dialog = self.workspace.open_edit_subject()
+        dialog.subject_input.setText("Wanted subject")
+        self.service.update_ticket_subject(
+            ticket.ticket_id, expected_subject=ticket.subject,
+            expected_updated_at=ticket.updated_at, subject="External change",
+        )
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertIn("Reload", dialog.feedback.text())
+        self.assertFalse(dialog.save_button.isEnabled())
+        self.assertEqual(dialog.subject_input.text(), "Wanted subject")
+        dialog.cancel_button.click()
+        self.workspace.open_ticket(ticket.ticket_id)
+        self.wait_idle()
+        failed = self.workspace.open_edit_subject()
+        failed.subject_input.setText("Retry this")
+        with patch.object(self.service, "update_ticket_subject", side_effect=RuntimeError("private")):
+            failed.save_button.click()
+            self.wait_idle()
+        self.assertEqual(failed.subject_input.text(), "Retry this")
+        self.assertIn("Could not save the subject", failed.feedback.text())
+        self.assertNotIn("private", failed.feedback.text())
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id).subject, "External change")
+        failed.cancel_button.click()
+
+    def test_subject_dialog_blocks_duplicate_save_and_close_while_busy(self):
+        dialog = self.workspace.open_edit_subject()
+        dialog.subject_input.setText("Delayed subject")
+        started = threading.Event()
+        release = threading.Event()
+        original = self.service.update_ticket_subject
+        calls = []
+
+        def delayed_update(*args, **kwargs):
+            calls.append(kwargs["subject"])
+            started.set()
+            if not release.wait(5):
+                raise TimeoutError("Update gate timed out")
+            return original(*args, **kwargs)
+
+        try:
+            with patch.object(self.service, "update_ticket_subject", side_effect=delayed_update):
+                dialog.save_button.click()
+                self.assertTrue(started.wait(5))
+                self.assertFalse(dialog.save_button.isEnabled())
+                self.assertFalse(dialog.cancel_button.isEnabled())
+                dialog.submit()
+                dialog.reject()
+                self.assertTrue(dialog.isVisible())
+                release.set()
+                self.wait_idle()
+        finally:
+            release.set()
+        self.assertEqual(calls, ["Delayed subject"])
+        self.assertEqual(self.repository.get_ticket(self.ticket_id).subject, "Delayed subject")
+
+    def test_committed_subject_edit_survives_detail_and_queue_reload_failures(self):
+        ticket = self.workspace.details.ticket
+        first = self.workspace.open_edit_subject()
+        first.subject_input.setText("Saved despite detail failure")
+        with patch.object(self.service, "get_ticket_details", side_effect=RuntimeError("private")):
+            first.save_button.click()
+            self.wait_idle()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id).subject,
+                         "Saved despite detail failure")
+        self.assertIn("Subject saved", self.workspace.feedback.text())
+        self.assertIn("Reload ticket", self.workspace.feedback.text())
+        self.assertNotIn("private", self.workspace.feedback.text())
+        self.workspace.reload_button.click()
+        self.wait_idle()
+        errors = (
+            RuntimeError("private"),
+            TicketValidationError("Invalid queue filter."),
+            TicketReadError("F7Hub could not load the ticket list."),
+        )
+        for index, error in enumerate(errors, start=1):
+            with self.subTest(error=type(error).__name__):
+                subject = f"Saved despite queue failure {index}"
+                dialog = self.workspace.open_edit_subject()
+                dialog.subject_input.setText(subject)
+                original_update = self.service.update_ticket_subject
+                with patch.object(self.service, "update_ticket_subject", wraps=original_update) as update:
+                    with patch.object(self.service, "list_tickets", side_effect=error):
+                        dialog.save_button.click()
+                        self.wait_idle()
+                self.assertEqual(update.call_count, 1)
+                self.assertEqual(self.repository.get_ticket(ticket.ticket_id).subject, subject)
+                self.assertEqual(self.workspace.details.ticket.subject, subject)
+                self.assertIn("Subject saved", self.workspace.feedback.text())
+                self.assertIn("Could not refresh tickets", self.workspace.feedback.text())
+                self.assertIn("Refresh to retry", self.workspace.feedback.text())
+                if isinstance(error, TicketValidationError):
+                    self.assertIn(str(error), self.workspace.feedback.text())
+                else:
+                    self.assertNotIn("private", self.workspace.feedback.text())
+                event_count = [e.event_type for e in self.repository.list_timeline_events(ticket.ticket_id)]
+                self.assertEqual(event_count.count("SUBJECT_CHANGED"), index + 1)
+                self.workspace.refresh_button.click()
+                self.wait_idle()
+                self.assertEqual(self.workspace.model.tickets[0].subject, subject)
+                self.assertEqual([e.event_type for e in self.repository.list_timeline_events(ticket.ticket_id)]
+                                 .count("SUBJECT_CHANGED"), index + 1)
+
+    def test_ordinary_queue_validation_failure_keeps_existing_feedback(self):
+        previous_rows = self.workspace.model.tickets
+        with patch.object(self.service, "list_tickets",
+                          side_effect=TicketValidationError("Invalid queue filter.")):
+            self.workspace.refresh_button.click()
+            self.wait_idle()
+        self.assertEqual(self.workspace.feedback.text(), "Invalid queue filter.")
+        self.assertEqual(self.workspace.model.tickets, previous_rows)
 
 
 if __name__ == "__main__":

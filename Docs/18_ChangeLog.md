@@ -47,13 +47,23 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-27 — Slice 030: Edit a Saved Ticket Subject
+
+Saved Tickets now offers Edit subject beside Reload ticket. The dialog prefills the loaded subject, preserves entered text on validation or save failure, blocks duplicate writes and closing during a write, and instructs a stale editor to reload. The service validates the exact loaded subject and update timestamp before a no-op decision. A real edit atomically changes only subject and a strictly later UTC `updated_at`, adds one `SUBJECT_CHANGED` event without subject text, and reloads before commit. The dialog closes only after committed success; later detail or queue read failures still acknowledge the save and give a retry path. No schema, migration, index, dependency or other editable field changed.
+
+Initial-candidate validation before the first independent review: focused **33 PASS**, affected **49 PASS**, full Database **345 PASS**, GUI **153 PASS**, Integration **106 PASS** = **604 PASS**, all exit 0. Isolated SQLite tests cover normalization, no-op, missing/stale state, same-millisecond advancement, rollback of update/event/reload failures, preservation of unrelated fields and relationships, integrity check and foreign-key check. Native Windows `windows` platform reached observable idle at 1000×700; dialog and post-save captures were opened and inspected with readable controls and feedback. Changes were unstaged and uncommitted.
+
+Independent review found that a `TicketValidationError` during post-commit queue refresh could replace the committed-save acknowledgment. The queue failure callback now preserves caller-supplied success context and Refresh guidance for every error category, while still showing safe validation detail; ordinary queue-read error feedback is unchanged. Corrected-candidate validation: focused **34 PASS**, affected **50 PASS**, full Database **345 PASS**, GUI **153 PASS**, Integration **107 PASS** = **605 PASS**, all exit 0. Integration tests cover RuntimeError, TicketValidationError and TicketReadError after commit, one write per edit, retry without a second write, pre-commit save failure and ordinary queue validation failure. Fresh native Windows 1000×700 captures show the saved acknowledgment, refresh failure and retry text together, then the recovered queue after Refresh. Independent rereview remains pending; the 15-path candidate is unstaged and uncommitted.
+
+---
+
 # 2026-09-27 — Slice 029: Saved Tickets Type Filter
 
 Saved Tickets now filters its read-only queue by All types, Incident, Service request, Problem or Task. The service validates the canonical stored type before querying; the repository binds Type with Status and Priority in one query while preserving ordering and paging. Filter changes start at page 1. Refresh, paging and exact-number opening retain all three selections; failed reads keep prior rows, detail and drafts for requested-page retry. No schema, migration, index, write or dependency changed.
 
 Fresh candidate validation: focused **25 PASS**, affected **41 PASS**, full Database **341 PASS**, GUI **153 PASS**, Integration **102 PASS** = **596 PASS**, all exit 0. Real SQLite content was unchanged by filtered reads, with integrity and foreign-key checks passing. Native Windows reached idle with one Open, High Service request ticket at 1000×700; the capture was opened and inspected without observed clipping or overlap. The candidate remains unstaged and uncommitted for independent review.
 
-After independent review requested a correction, the Type selector now iterates the single ordered `TICKET_TYPES` vocabulary instead of enumerating a local copy. The integration test verifies every authoritative type appears once and All types maps to `None`. Focused **25**, affected **41**, Database **341**, GUI **153**, and Integration **102** all passed again on the corrected candidate. A fresh native Windows 1000×700 capture was inspected after observable idle. Independent rereview remains pending.
+After independent review requested a correction, the Type selector now iterates the single ordered `TICKET_TYPES` vocabulary instead of enumerating a local copy. The integration test verifies every authoritative type appears once and All types maps to `None`. Focused **25**, affected **41**, Database **341**, GUI **153**, and Integration **102** all passed again on the corrected candidate. A fresh native Windows 1000×700 capture was inspected after observable idle. Independent rereview was pending at that handoff; Slice 029 was subsequently merged through PR #30 at `cdd49fa`.
 
 ---
 

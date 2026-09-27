@@ -261,6 +261,8 @@ Core capabilities:
 - persist
 - validate
 
+Slice 030 implements the first bounded ticket edit: a technician can correct the subject of a loaded saved ticket. A changed subject advances its activity timestamp and adds one subject-change timeline event. Stale details are rejected before a no-op decision. Description and other ticket fields are not editable in this slice.
+
 ---
 
 ## FEAT-TICKET-002 — Ticket Workspace

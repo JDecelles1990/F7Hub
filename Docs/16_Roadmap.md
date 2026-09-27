@@ -141,6 +141,8 @@ Slice 028 adds one bounded Saved Tickets queue filter: optional priority compose
 
 Slice 029 adds optional ticket type to that same read-only queue path. The four existing ticket types compose with Status and Priority without a reference loader or new search infrastructure. The current ticket-edit requirement and broader search remain separate work.
 
+Slice 030 begins the P0 ticket-edit requirement with one subject correction workflow. It reuses the existing ticket writer transaction, timeline, worker and detail/queue reload paths. Other editable fields and ticket search remain separate future work; no migration or dependency is added.
+
 The F7Hub roadmap is organized into:
 
 ```text

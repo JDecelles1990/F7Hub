@@ -545,7 +545,15 @@ Slice 029 — read-only Saved Tickets type filtering, implemented and validated 
 - [x] Add All/Incident/Service request/Problem/Task using the existing `TICKET_TYPES` vocabulary and a bound repository predicate.
 - [x] Compose Type with Status and Priority; retain stable ordering, paging, exact-number opening and failed-read retry state.
 - [x] Verify focused 25, affected 41, Database 341, GUI 153 and Integration 102 tests; inspect native Windows 1000×700 capture.
-- [ ] Independent read-only Slice 029 review; candidate remains unstaged and uncommitted.
+- [x] Independently review and integrate Slice 029; merged on `main` through PR #30 at `cdd49fa`.
+
+Slice 030 — edit one saved-ticket subject, implemented and validated 2026-09-27:
+
+- [x] Validate loaded subject and timestamp before no-op; atomically update only changed subject/activity time and add one text-free timeline event.
+- [x] Add asynchronous Edit subject dialog with draft preservation, stale reload instruction and committed-save recovery after failed refresh.
+- [x] Correct the independent-review finding: every post-commit queue refresh failure retains the saved-subject acknowledgment and Refresh retry guidance, including validation errors; ordinary queue errors retain their existing feedback.
+- [x] Revalidate focused 34, affected 50, and full Database 345 + GUI 153 + Integration 107 = 605 tests; inspect native Windows 1000×700 post-commit failure and recovery.
+- [ ] Independent read-only rereview of the corrected exact unstaged candidate; no commit, push or integration is authorized.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 

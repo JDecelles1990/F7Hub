@@ -2,6 +2,42 @@
 
 Last verified: 2026-09-27 (America/Toronto).
 
+Current candidate: **Slice 030 — Edit a Saved Ticket Subject**, on `feature/ticket-subject-edit-s030` in `C:\Dev\F7Hub`. Approved base and branch HEAD are `cdd49fac734d6bedfecf58aacfea4846b8a6e79d`, equal to fetched `origin/main` at the implementation baseline gate. The checkout, index and untracked set were initially clean. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
+
+Status: **PASS — READY_FOR_REVIEW after correction**, with independent read-only rereview pending. The first independent review found a post-commit queue-refresh feedback defect; the previous review decision is invalidated by this correction. Authorization covered the bounded correction, testing and documentation only. The candidate remains unstaged and uncommitted; no push, PR or integration was performed. The prior Slice 029 Todo/current-state claim that rereview was pending is **STALE HANDOFF METADATA**: live `main` includes its PR #30 merge at `cdd49fa`. The previous report below is retained as a historical handoff snapshot.
+
+## Slice 030 Result and Scope
+
+`TicketService.update_ticket_subject(ticket_id, *, expected_subject, expected_updated_at, subject)` validates the loaded subject and exact update timestamp inside the existing repository writer transaction before deciding no-op. A real change trims required text, uses a bound guarded UPDATE for only subject and a strictly later UTC activity timestamp, creates exactly one `SUBJECT_CHANGED` timeline event without either subject value, and reloads the authoritative row before commit. Missing/stale state and invalid input create no event; update, event or reload failure rolls back. The correction is permitted in every ticket status. The Save dialog is prefilled, keeps entered text on failure, blocks duplicate submission and close during a write, and asks for a reload after conflict. Successful commit reuses the existing detail and queue reload path. The review correction preserves **Subject saved** and Refresh retry guidance for every post-commit queue failure, including `TicketValidationError`, without changing ordinary queue-read feedback; a later detail read failure still acknowledges the save and offers Reload ticket. Notes/status drafts remain intact. No schema, migration, index, dependency, description edit, other ticket edit, search or Knowledge change is included.
+
+## Slice 030 Fresh Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration ran with `QT_QPA_PLATFORM=offscreen`; native validation used `windows` with isolated synthetic SQLite.
+
+| Suite | Command | Final-candidate result |
+|---|---|---|
+| Focused ticket reads/workspace | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Integration.test_ticket_workspace_flow` | PASS — 34 tests, exit 0 |
+| Affected ticket set | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Database.test_ticket_service Tests.Database.test_ticket_repository Tests.GUI.test_main_window Tests.Integration.test_ticket_workspace_flow` | PASS — 50 tests, exit 0 |
+| Database | `python -B -m unittest discover -s Tests\Database -p 'test_*.py'` | PASS — 345 tests, exit 0 |
+| GUI | `python -B -m unittest discover -s Tests\GUI -p 'test_*.py'` | PASS — 153 tests, exit 0 |
+| Integration | `python -B -m unittest discover -s Tests\Integration -p 'test_*.py'` | PASS — 107 tests, exit 0 |
+
+Full regression: **605 PASS**, zero failures/errors; focused and affected tests overlap the full suites. Real SQLite tests cover normalization, no-op and stale-before-no-op validation, missing ticket, closed-ticket correction, same-millisecond timestamp advancement, one text-free event, rollback for update/event/reload failure, unrelated field/note/relationship preservation, `integrity_check = ok` and zero foreign-key violations. Integration covers Cancel, retained input, stale feedback, duplicate/busy protection, detail and queue refresh, and committed-save feedback after either later read fails. The corrected test covers RuntimeError, TicketValidationError and TicketReadError queue failures after commit, verifies one update per edit and no duplicate on Refresh, and checks that an ordinary queue validation error keeps its prior behavior. Expected error-path log messages had successful unittest outcomes and exit 0.
+
+Native Windows: PASS — actual `windows` Qt platform with the MainWindow at 1000×700, after observable worker idle. A persisted ticket was opened and its prefilled subject corrected. A simulated validation failure after commit left the new detail visible and the old queue row available. The [post-commit failure capture](C:/Users/Jo/AppData/Local/Temp/f7-s030-correction-refresh-failed.png) and [recovered queue capture](C:/Users/Jo/AppData/Local/Temp/f7-s030-correction-refresh-recovered.png) were opened and inspected: saved acknowledgment, refresh failure, retry guidance and controls were readable without observed overlap. Refresh then loaded the committed subject into the queue. This verifies the tested Windows environment, not every display scale.
+
+## Slice 030 Delivery Gate
+
+The independent review's one blocking post-commit feedback finding has been corrected and self-validated; independent rereview remains required. Production scope is the ticket repository, service, saved-ticket workspace and one focused dialog; tests are the ticket read and workspace flow files. Affected canonical owners are Features, User Workflows, GUI, Database architecture, Python architecture, Roadmap, Todo, ChangeLog and this status report. Product requirement FR-TICKET-003 remains broader than this first edit slice. Physical SQL Schema, ERD, system architecture, AHK and PowerShell owners have no behavioral change. No independent approval has been granted. The next gate is independent read-only rereview of the exact unstaged candidate; implementation evidence does not authorize staging or integration.
+
+Exact candidate scope: modified `Python/f7hub/repositories/ticket_repository.py`, `Python/f7hub/services/ticket_service.py`, `Python/f7hub/gui/ticket_workspace.py`, `Tests/Database/test_ticket_reads.py`, `Tests/Integration/test_ticket_workspace_flow.py`, `Docs/03_Features.md`, `Docs/04_UserWorkflows.md`, `Docs/05_GUI.md`, `Docs/07_Database.md`, `Docs/13_PythonArchitecture.md`, `Docs/16_Roadmap.md`, `Docs/17_Todo.md`, `Docs/18_ChangeLog.md` and this file; created untracked `Python/f7hub/gui/edit_ticket_subject_dialog.py`. No staged or deleted paths. The bounded review correction changed only the workspace callback, integration coverage, Todo, ChangeLog and this status report. Focused and affected tests were run before the three full suites; documentation changed afterward without changes to code, tests, schema, configuration or dependencies. Native captures were taken after the final code and test bytes stabilized.
+
+---
+
+## Prior Slice 029 handoff snapshot (historical; Slice 029 later merged through PR #30)
+
+Last verified: 2026-09-27 (America/Toronto).
+
 Current candidate: **Slice 029 — Filter Saved Tickets by Type**, `feature/ticket-type-filter-s029` in `C:\Dev\F7Hub`. Approved base and branch HEAD: `1b66f3e888ab24eb1b1fefde2d74e3f60ebba84b`, equal to freshly fetched `origin/main` at the implementation baseline gate. Tracked, staged and untracked state was initially clean. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
 
 Status: **PASS — READY_FOR_REVIEW after correction**. The first independent review required removing the Type selector's duplicated ticket-type list. That review decision no longer applies to the corrected candidate; independent rereview is pending. Authorization covers correction, testing and documentation only. Candidate changes remain unstaged and uncommitted. No push, PR or integration was performed for Slice 029. Earlier text below describing Slice 028 as awaiting review is **STALE HANDOFF METADATA**: live Git shows Slice 028 merged through PR #29 at `1b66f3e`; that text is retained as a historical candidate snapshot.

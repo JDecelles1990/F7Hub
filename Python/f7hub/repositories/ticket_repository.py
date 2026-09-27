@@ -327,6 +327,19 @@ class TicketRepositoryTransaction:
 
         return _get_ticket(self._connection, ticket_id)
 
+    def update_ticket_subject(
+        self, ticket_id: int, *, expected_subject: str,
+        expected_updated_at: str, subject: str, updated_at: str,
+    ) -> bool:
+        """Change only the subject and activity time under loaded-state guards."""
+
+        cursor = self._connection.execute(
+            "UPDATE tickets SET subject = ?, updated_at = ? "
+            "WHERE ticket_id = ? AND subject = ? AND updated_at = ?",
+            (subject, updated_at, ticket_id, expected_subject, expected_updated_at),
+        )
+        return cursor.rowcount == 1
+
     def create_ticket(
         self,
         *,
