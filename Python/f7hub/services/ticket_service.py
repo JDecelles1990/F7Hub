@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Collection
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import json
 import sqlite3
 from uuid import uuid4
@@ -22,6 +22,8 @@ TICKET_PRIORITIES = frozenset({"LOW", "MEDIUM", "HIGH", "CRITICAL"})
 INITIAL_TICKET_STATUS = "NEW"
 TICKET_CREATED_EVENT_TYPE = "TICKET_CREATED"
 TICKET_CREATED_EVENT_TITLE = "Ticket created"
+TICKET_SUBJECT_CHANGED_EVENT_TYPE = "SUBJECT_CHANGED"
+TICKET_SUBJECT_CHANGED_EVENT_TITLE = "Ticket subject changed"
 TICKET_NOTE_TYPES = frozenset({"INTERNAL", "PUBLIC", "WORKLOG", "RESOLUTION"})
 TICKET_STATUS_TRANSITIONS = {
     "NEW": frozenset({"OPEN", "IN_PROGRESS", "WAITING", "RESOLVED", "CANCELLED"}),
@@ -48,7 +50,11 @@ class TicketCreationError(RuntimeError):
 
 
 class TicketUpdateError(RuntimeError):
-    """Raised when persistence prevents a note or status change."""
+    """Raised when persistence prevents a ticket activity or subject change."""
+
+
+class TicketEditConflictError(TicketValidationError):
+    """Raised when an edit is based on outdated ticket details."""
 
 
 class TicketReadError(RuntimeError):
@@ -193,6 +199,48 @@ class TicketService:
         if ticket is None:
             raise TicketNotFoundError("No ticket has that number.")
         return self.get_ticket_details(ticket.ticket_id)
+
+    def update_ticket_subject(
+        self, ticket_id: int, *, expected_subject: str,
+        expected_updated_at: str, subject: str,
+    ) -> TicketRecord:
+        """Correct a loaded subject without replacing other ticket fields."""
+
+        _validate_ticket_id(ticket_id)
+        _required_text(expected_subject, "expected_subject")
+        _required_text(expected_updated_at, "expected_updated_at")
+        clean_subject = _required_text(subject, "subject")
+        try:
+            with self._ticket_repository.transaction() as transaction:
+                current = _require_ticket(transaction.get_ticket(ticket_id))
+                if (current.subject != expected_subject
+                        or current.updated_at != expected_updated_at):
+                    raise TicketEditConflictError(
+                        "This ticket changed. Reload it before editing the subject again."
+                    )
+                if current.subject == clean_subject:
+                    return current
+                timestamp = _next_ticket_timestamp(self._clock(), current.updated_at)
+                if not transaction.update_ticket_subject(
+                    ticket_id, expected_subject=expected_subject,
+                    expected_updated_at=expected_updated_at,
+                    subject=clean_subject, updated_at=timestamp,
+                ):
+                    raise TicketEditConflictError(
+                        "This ticket changed. Reload it before editing the subject again."
+                    )
+                transaction.create_timeline_event(
+                    ticket_id=ticket_id,
+                    event_type=TICKET_SUBJECT_CHANGED_EVENT_TYPE,
+                    title=TICKET_SUBJECT_CHANGED_EVENT_TITLE,
+                    occurred_at=timestamp,
+                )
+                updated = transaction.get_ticket(ticket_id)
+                if updated is None:
+                    raise TicketUpdateError("F7Hub could not reload the updated ticket.")
+                return updated
+        except sqlite3.Error as error:
+            raise TicketUpdateError("F7Hub could not update the ticket subject.") from error
 
     @staticmethod
     def allowed_statuses(status: str) -> tuple[str, ...]:
@@ -467,6 +515,20 @@ def _format_utc_timestamp(value: datetime) -> str:
         raise ValueError("clock must return a timezone-aware datetime.")
     utc_value = value.astimezone(timezone.utc)
     return utc_value.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+
+def _next_ticket_timestamp(now: datetime, previous: str) -> str:
+    """Return a UTC millisecond value strictly after the stored activity time."""
+
+    current = _format_utc_timestamp(now)
+    try:
+        prior = datetime.fromisoformat(previous.replace("Z", "+00:00"))
+        if prior.tzinfo is None or prior.utcoffset() is None:
+            raise ValueError("Ticket timestamp has no timezone")
+        minimum = prior.astimezone(timezone.utc) + timedelta(milliseconds=1)
+    except (ValueError, OverflowError) as error:
+        raise TicketUpdateError("F7Hub could not read the ticket update time.") from error
+    return max(current, _format_utc_timestamp(minimum))
 
 
 def _utc_now() -> datetime:

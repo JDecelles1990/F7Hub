@@ -837,6 +837,8 @@ Slice 028 extends `TicketService.list_tickets` and `TicketRepository.list_ticket
 
 Slice 029 extends those reads with optional `ticket_type=None`. The service validates non-None values with the existing `TICKET_TYPES` vocabulary before querying. The repository binds Type beside Status and Priority in one SQL query and retains `updated_at DESC, ticket_id DESC` paging. `TicketWorkspace` maps display labels to canonical type values, reuses the shared runner and existing requested-page retry state, and replaces rows only after a successful read. No schema, index, migration, write or dependency is added.
 
+Slice 030 adds `TicketService.update_ticket_subject(ticket_id, *, expected_subject, expected_updated_at, subject)`. It validates the ID and text, then checks both loaded-state values inside `TicketRepository.transaction()` before considering a no-op. A changed value receives a strictly later UTC activity timestamp, a conditional repository update, one `SUBJECT_CHANGED` timeline event without subject content, and an authoritative reload before commit. Missing and stale tickets have typed validation errors; SQLite failures receive a safe update error. `EditTicketSubjectDialog` follows the existing asynchronous edit-dialog pattern and calls only the service through `ServiceTaskRunner`. `TicketWorkspace` reuses its post-save detail/queue reload path and reports a committed save separately from a failed later read. No generic editor or schema change is added.
+
 ---
 
 # 31. Domain Package
