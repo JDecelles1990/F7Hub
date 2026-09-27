@@ -171,6 +171,93 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         self.assertFalse(self.workspace.previous_button.isEnabled())
         self.assertFalse(self.workspace.next_button.isEnabled())
 
+    def test_priority_and_status_filter_compose_with_page_refresh_and_number_open(self):
+        self.assertEqual(
+            [self.workspace.priority_filter.itemData(index)
+             for index in range(self.workspace.priority_filter.count())],
+            [None, "CRITICAL", "HIGH", "MEDIUM", "LOW"],
+        )
+        self.assertEqual(self.workspace.priority_filter.accessibleName(), "Filter tickets by priority")
+        first = self.service.create_ticket(subject="First high", priority="HIGH", ticket_number="P28-FIRST")
+        self.service.change_status(first.ticket_id, new_status="OPEN")
+        second = self.service.create_ticket(subject="Second high", priority="HIGH", ticket_number="P28-SECOND")
+        self.service.change_status(second.ticket_id, new_status="OPEN")
+        self.service.create_ticket(subject="Other priority", priority="LOW")
+        self.workspace.PAGE_SIZE = 1
+        self.workspace.priority_filter.setCurrentIndex(self.workspace.priority_filter.findData("HIGH"))
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+        self.workspace.status_filter.setCurrentIndex(self.workspace.status_filter.findData("OPEN"))
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+        self.assertEqual(self.workspace.model.tickets, (self.repository.get_ticket(second.ticket_id),))
+        self.workspace.next_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, (self.repository.get_ticket(first.ticket_id),))
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.assertEqual(self.workspace.model.tickets, (self.repository.get_ticket(first.ticket_id),))
+        self.workspace.ticket_number_input.setText(self.repository.get_ticket(self.ticket_id).ticket_number)
+        self.workspace.open_number_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.assertEqual(self.workspace.priority_filter.currentData(), "HIGH")
+        self.assertEqual(self.workspace.status_filter.currentData(), "OPEN")
+        self.workspace.priority_filter.setCurrentIndex(0)
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+        self.assertIsNone(self.workspace.priority_filter.currentData())
+
+    def test_failed_priority_read_keeps_rows_detail_draft_and_retry(self):
+        high = self.service.create_ticket(subject="High ticket", priority="HIGH")
+        self.workspace.status_filter.setCurrentIndex(self.workspace.status_filter.findData("NEW"))
+        self.wait_idle()
+        self.workspace.PAGE_SIZE = 1
+        self.workspace.refresh_list(offset=0)
+        self.wait_idle()
+        self.workspace.next_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        previous_rows = self.workspace.model.tickets
+        previous_page = self.workspace.page_label.text()
+        self.workspace.note_input.setPlainText("Keep draft")
+        started = threading.Event()
+        release = threading.Event()
+        original = self.service.list_tickets
+
+        def delayed_failure(**kwargs):
+            started.set()
+            if not release.wait(5):
+                raise TimeoutError("Priority read gate timed out")
+            raise sqlite3.OperationalError("private")
+
+        try:
+            with patch.object(self.service, "list_tickets", side_effect=delayed_failure):
+                self.workspace.priority_filter.setCurrentIndex(self.workspace.priority_filter.findData("HIGH"))
+                self.assertTrue(started.wait(5))
+                self.assertFalse(self.workspace.status_filter.isEnabled())
+                self.assertFalse(self.workspace.priority_filter.isEnabled())
+                release.set()
+                self.wait_idle()
+        finally:
+            release.set()
+        self.assertEqual(self.workspace.model.tickets, previous_rows)
+        self.assertEqual(self.workspace.page_label.text(), previous_page)
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep draft")
+        self.assertEqual(self.workspace.priority_filter.currentData(), "HIGH")
+        self.assertEqual(self.workspace.status_filter.currentData(), "NEW")
+        self.assertTrue(self.workspace.status_filter.isEnabled())
+        self.assertTrue(self.workspace.priority_filter.isEnabled())
+        self.assertIn("Previous results are still shown", self.workspace.feedback.text())
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, (self.repository.get_ticket(high.ticket_id),))
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+
     def test_open_exact_number_outside_queue_filter_and_page(self):
         other = self.service.create_ticket(subject="Target", ticket_number="INC-SEARCH-27")
         self.service.create_ticket(subject="Newer ticket", ticket_number="INC-NEWER-27")

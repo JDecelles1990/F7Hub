@@ -202,17 +202,25 @@ class TicketRepository:
             return _get_ticket(connection, ticket_id)
 
     def list_tickets(
-        self, *, status: str | None = None, limit: int = 100, offset: int = 0,
+        self, *, status: str | None = None, priority: str | None = None,
+        limit: int = 100, offset: int = 0,
     ) -> tuple[TicketRecord, ...]:
         """Return a bounded page, most recently updated first, with ID ties."""
 
-        predicate = "" if status is None else "WHERE status = ?"
-        parameters = (limit, offset) if status is None else (status, limit, offset)
+        predicates = []
+        parameters = []
+        if status is not None:
+            predicates.append("status = ?")
+            parameters.append(status)
+        if priority is not None:
+            predicates.append("priority = ?")
+            parameters.append(priority)
+        predicate = "WHERE " + " AND ".join(predicates) if predicates else ""
         with database_connection(self._database_path) as connection:
             rows = connection.execute(
                 f"SELECT {_TICKET_COLUMNS} FROM tickets {predicate} "
                 "ORDER BY updated_at DESC, ticket_id DESC LIMIT ? OFFSET ?",
-                parameters,
+                (*parameters, limit, offset),
             ).fetchall()
         return tuple(_ticket_from_row(row) for row in rows)
 

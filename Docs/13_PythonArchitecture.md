@@ -833,6 +833,8 @@ The initial transition policy, implemented in `TICKET_STATUS_TRANSITIONS`, is:
 
 Slice 027 adds `TicketService.get_ticket_details_by_number`: it validates and trims the complete reference, reuses `TicketRepository.get_ticket_by_number`, then calls the existing authoritative detail read. `TicketWorkspace` submits this read through its shared `ServiceTaskRunner` and applies the existing draft-discard decision before replacing displayed detail. No new exception type, repository query, write transaction, schema object or dependency is introduced.
 
+Slice 028 extends `TicketService.list_tickets` and `TicketRepository.list_tickets` with optional `priority=None`. The service validates non-None values with the existing `TICKET_PRIORITIES` vocabulary; the repository composes fixed status/priority predicates with bound values before the existing newest-updated, ticket-ID-tiebroken page. `TicketWorkspace` exposes All priorities as `None`, submits reads through the same runner, disables both queue selectors while it is busy, and replaces rows only on success. A failed replacement retains the displayed page and records its requested offset for Refresh retry. No write, schema object, migration, index or dependency is added.
+
 ---
 
 # 31. Domain Package

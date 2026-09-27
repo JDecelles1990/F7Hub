@@ -270,6 +270,8 @@ Requirements: `FR-TICKET-002`, `FR-TICKET-007`
 
 Opening a ticket should provide a contextual workspace containing relevant support information.
 
+Slice 028 adds a read-only Saved Tickets priority filter. All priorities means no priority constraint; Low, Medium, High and Critical compose with the existing status filter, newest-updated ordering and paging. A failed queue read retains the last successful rows and current ticket detail. This does not add ticket-text search or change stored tickets.
+
 Potential panels:
 
 - ticket details

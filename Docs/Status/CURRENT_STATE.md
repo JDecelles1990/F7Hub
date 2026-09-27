@@ -1,5 +1,39 @@
 # F7Hub Current State
 
+Last verified: 2026-09-27 (America/Toronto).
+
+Current candidate: **Slice 028 — Filter Saved Tickets by Priority**, `feature/ticket-priority-filter-s028` in `C:\Dev\F7Hub`. Approved base and current branch HEAD: `ce55c5a355bbc8434b3b536001e3dd393147821d`, equal to freshly fetched `origin/main` at the implementation baseline gate. The initial tracked, staged and untracked state was clean. Slice 027 was merged through PR #28. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
+
+Status: **PASS — READY_FOR_REVIEW**. Authorization covers IMPLEMENT → TEST → DOCUMENT only. Candidate files are unstaged and uncommitted; independent review is pending. No push, PR or integration was performed for Slice 028.
+
+## Slice 028 Result and Scope
+
+Saved Tickets adds a Priority selector below Status/Refresh. All priorities passes `None`; Critical, High, Medium and Low reuse the existing priority vocabulary. `TicketService.list_tickets` validates the optional priority, and `TicketRepository.list_tickets` composes it with Status using bound SQL values while preserving `updated_at DESC, ticket_id DESC` and bounded paging. Both filter changes reset to page 1. Refresh, page navigation and exact-number opening preserve both selections and the applicable page. Reads remain on the shared worker; both filter controls disable while it is busy. A failed replacement keeps the last successful rows, current detail, activity drafts and selected filters; Refresh retries the requested page, including page 1 after a failed filter change. The feature makes no database write and adds no schema, migration, index, dependency, ticket-text search or unrelated Knowledge change.
+
+## Slice 028 Fresh Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration tests used `QT_QPA_PLATFORM=offscreen`; native validation used `windows` against isolated synthetic SQLite.
+
+| Suite | Command | Fresh final-candidate result |
+|---|---|---|
+| Focused ticket reads/workspace | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Integration.test_ticket_workspace_flow` | PASS — 22 tests, exit 0 |
+| Affected ticket set | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Database.test_ticket_service Tests.Database.test_ticket_repository Tests.GUI.test_main_window Tests.Integration.test_ticket_workspace_flow` | PASS — 38 tests, exit 0 |
+| Database | `python -B -m unittest discover -s Tests\Database -p 'test_*.py'` | PASS — 340 tests, exit 0 |
+| GUI | `python -B -m unittest discover -s Tests\GUI -p 'test_*.py'` | PASS — 153 tests, exit 0 |
+| Integration | `python -B -m unittest discover -s Tests\Integration -p 'test_*.py'` | PASS — 100 tests, exit 0 |
+
+Full regression: **593 PASS**, zero failures or errors. Focused and affected results overlap the full suites. Real-SQLite checks cover all priority modes, priority/status composition, stable ordering, paging, invalid values, SQL-like input, unchanged before/after database dump, `integrity_check = ok` and zero foreign-key violations. Integration tests cover filter choice order/accessibility, page/Refresh/direct-open preservation, disabled selectors during a delayed read, failure preservation and retry from page 2 to the requested page 1. The initial full GUI run failed three 1000×700 layout checks because placing Priority in the Status row raised the window minimum width to 1176px. Moving Priority to its own row fixed the layout. A later self-review found the failed-filter page retry edge and added a pending requested offset; focused, affected and all three full suites passed after that final production change.
+
+Native Windows: PASS — actual `windows` Qt platform with MainWindow at 1000×700, High and Open selected, one matching synthetic ticket and current detail loaded after observable worker idle. A first harness attempt checked workspace visibility before navigating away from New Ticket and stopped before validating the feature; the corrected harness passed. The [final post-fix capture](C:/Users/Jo/AppData/Local/Temp/f7-s028-native-final-d40ee4e8bcd94da8bea2371029ca0f02.png) was opened and inspected: both filter controls, queue, ticket detail and activity controls were readable without observed overlap or clipped controls. This verifies the tested Windows environment, not every display scale.
+
+## Slice 028 Delivery Gate
+
+Implementation self-review found no remaining blocking defect. Only the approved ticket repository/service/workspace, focused tests and affected documentation changed. Documentation owners affected: Features, User Workflows, GUI, Python Architecture, Roadmap, Todo, ChangeLog and this report. Database architecture and SQL Schema were inspected but require no edit because physical schema, migrations and indexes did not change. AHK, PowerShell and Knowledge owners are unaffected. The next gate is independent read-only review of the exact unstaged candidate; this self-review grants no integration approval.
+
+---
+
+## Prior Slice 027 handoff snapshot (historical; Slice 027 later merged through PR #28)
+
 Last verified: 2026-09-26 (America/Toronto).
 
 Current candidate: **Slice 027 — Open a saved ticket by number**, `feature/ticket-number-open-s027` in `C:\Dev\F7Hub`. Base and current HEAD: `db81aff585d309e7db605d667fbd8332d0d1863a`, equal to freshly fetched `origin/main` at the implementation baseline gate. The initial tracked, staged and untracked scope was clean. Slice 026 is merged through PR #26; the preserved `recovery/pre-s024-protected-work` branch remains read-only at `002a494735f30e1488f61e21ea98740ae6371d4d`.

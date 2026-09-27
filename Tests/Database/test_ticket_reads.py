@@ -33,6 +33,28 @@ class TicketReadTests(unittest.TestCase):
         self.assertEqual(self.service.list_tickets(offset=99), ())
         self.assertEqual(self.repo.list_tickets(status="OPEN' OR 1=1 --"), ())
 
+    def test_priority_filter_composes_with_status_and_pages_without_writing(self):
+        tickets = [self.repo.create_ticket(
+            ticket_number=f"P-{index}", subject=f"Priority {index}",
+            created_at="2026-09-04T00:00:00.000Z", updated_at="2026-09-04T00:00:00.000Z",
+            status=status, priority=priority,
+        ) for index, (status, priority) in enumerate((
+            ("OPEN", "HIGH"), ("CLOSED", "HIGH"), ("OPEN", "LOW"),
+            ("OPEN", "HIGH"), ("OPEN", "CRITICAL"),
+        ))]
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        self.assertEqual(self.service.list_tickets(priority="HIGH"), (tickets[3], tickets[1], tickets[0]))
+        self.assertEqual(self.service.list_tickets(status="OPEN", priority="HIGH"), (tickets[3], tickets[0]))
+        self.assertEqual(self.service.list_tickets(status="OPEN", priority="HIGH", limit=1, offset=1), (tickets[0],))
+        self.assertEqual(self.service.list_tickets(priority="CRITICAL"), (tickets[4],))
+        self.assertEqual(self.service.list_tickets(priority="MEDIUM"), ())
+        self.assertEqual(self.repo.list_tickets(priority="HIGH' OR 1=1 --"), ())
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
     def test_detail_reloads_ticket_and_related_activity(self):
         ticket = self.service.create_ticket(subject="Read me")
         note = self.service.add_note(ticket.ticket_id, note_text="First note")
@@ -75,7 +97,9 @@ class TicketReadTests(unittest.TestCase):
 
     def test_read_validation_and_missing_ticket(self):
         for args in ({"limit": 0}, {"limit": True}, {"limit": 201},
-                     {"offset": -1}, {"offset": True}, {"offset": 2**64}, {"status": "BAD"}):
+                     {"offset": -1}, {"offset": True}, {"offset": 2**64}, {"status": "BAD"},
+                     {"priority": "BAD"}, {"priority": "high"}, {"priority": True},
+                     {"priority": 1}):
             with self.subTest(args=args), self.assertRaises(TicketValidationError):
                 self.service.list_tickets(**args)
         with self.assertRaises(TicketNotFoundError):
