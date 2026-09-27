@@ -203,6 +203,7 @@ class TicketRepository:
 
     def list_tickets(
         self, *, status: str | None = None, priority: str | None = None,
+        ticket_type: str | None = None,
         limit: int = 100, offset: int = 0,
     ) -> tuple[TicketRecord, ...]:
         """Return a bounded page, most recently updated first, with ID ties."""
@@ -215,6 +216,9 @@ class TicketRepository:
         if priority is not None:
             predicates.append("priority = ?")
             parameters.append(priority)
+        if ticket_type is not None:
+            predicates.append("ticket_type = ?")
+            parameters.append(ticket_type)
         predicate = "WHERE " + " AND ".join(predicates) if predicates else ""
         with database_connection(self._database_path) as connection:
             rows = connection.execute(

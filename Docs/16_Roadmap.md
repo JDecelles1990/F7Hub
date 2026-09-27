@@ -139,6 +139,8 @@ Slice 025 adds read-only All of two or more selected global tags to the same cur
 
 Slice 028 adds one bounded Saved Tickets queue filter: optional priority composes with the existing status filter, ordering and paging through the current repository/service/GUI path. This advances the ticket queue's basic filtering without starting ticket-text or unified search. No schema, index or database write is introduced.
 
+Slice 029 adds optional ticket type to that same read-only queue path. The four existing ticket types compose with Status and Priority without a reference loader or new search infrastructure. The current ticket-edit requirement and broader search remain separate work.
+
 The F7Hub roadmap is organized into:
 
 ```text

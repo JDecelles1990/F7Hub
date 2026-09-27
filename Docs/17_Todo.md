@@ -538,7 +538,14 @@ Slice 028 — read-only Saved Tickets priority filtering, implemented and valida
 - [x] Compose with Status, retain ordering and paging, reset to page 1 when either filter changes, and retain selections through Refresh, paging and exact-number open.
 - [x] Keep asynchronous reads and prior rows/detail/drafts on failure, with both selectors disabled during worker activity and a retry path.
 - [x] Validate focused 22, affected 38, Database 340, GUI 153 and Integration 100 tests; inspect native Windows 1000×700 capture.
-- [ ] Independent read-only Slice 028 review; candidate remains unstaged and uncommitted.
+- [x] Independently review and integrate Slice 028; merged on `main` through PR #29 at `1b66f3e`.
+
+Slice 029 — read-only Saved Tickets type filtering, implemented and validated 2026-09-27:
+
+- [x] Add All/Incident/Service request/Problem/Task using the existing `TICKET_TYPES` vocabulary and a bound repository predicate.
+- [x] Compose Type with Status and Priority; retain stable ordering, paging, exact-number opening and failed-read retry state.
+- [x] Verify focused 25, affected 41, Database 341, GUI 153 and Integration 102 tests; inspect native Windows 1000×700 capture.
+- [ ] Independent read-only Slice 029 review; candidate remains unstaged and uncommitted.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 

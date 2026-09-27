@@ -55,6 +55,50 @@ class TicketReadTests(unittest.TestCase):
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
 
+    def test_type_filter_composes_with_status_priority_and_stable_paging(self):
+        timestamp = "2026-09-04T00:00:00.000Z"
+        values = (
+            ("INCIDENT", "OPEN", "HIGH"),
+            ("SERVICE_REQUEST", "OPEN", "HIGH"),
+            ("PROBLEM", "OPEN", "HIGH"),
+            ("TASK", "OPEN", "HIGH"),
+            ("INCIDENT", "CLOSED", "HIGH"),
+            ("INCIDENT", "OPEN", "LOW"),
+            ("INCIDENT", "OPEN", "HIGH"),
+        )
+        tickets = [self.repo.create_ticket(
+            ticket_number=f"TYPE-{index}", subject=f"Type {index}",
+            ticket_type=ticket_type, status=status, priority=priority,
+            created_at=timestamp, updated_at=timestamp,
+        ) for index, (ticket_type, status, priority) in enumerate(values)]
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        for ticket_type in ("INCIDENT", "SERVICE_REQUEST", "PROBLEM", "TASK"):
+            with self.subTest(ticket_type=ticket_type):
+                expected = tuple(ticket for ticket in reversed(tickets)
+                                 if ticket.ticket_type == ticket_type)
+                self.assertEqual(self.service.list_tickets(ticket_type=ticket_type), expected)
+        self.assertEqual(
+            self.service.list_tickets(status="OPEN", priority="HIGH", ticket_type="INCIDENT"),
+            (tickets[6], tickets[0]),
+        )
+        self.assertEqual(
+            self.service.list_tickets(status="OPEN", priority="HIGH", ticket_type="INCIDENT",
+                                      limit=1, offset=1),
+            (tickets[0],),
+        )
+        self.assertEqual(self.service.list_tickets(ticket_type=None), tuple(reversed(tickets)))
+        self.assertEqual(self.repo.list_tickets(ticket_type="INCIDENT' OR 1=1 --"), ())
+        with patch.object(self.repo, "list_tickets") as query:
+            for value in ("", "incident", "INCIDENT' OR 1=1 --", True, 1, []):
+                with self.subTest(invalid=value), self.assertRaises(TicketValidationError):
+                    self.service.list_tickets(ticket_type=value)
+            query.assert_not_called()
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
     def test_detail_reloads_ticket_and_related_activity(self):
         ticket = self.service.create_ticket(subject="Read me")
         note = self.service.add_note(ticket.ticket_id, note_text="First note")

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Collection
 from datetime import datetime, timezone
 import json
 import sqlite3
@@ -17,7 +17,7 @@ from f7hub.repositories.ticket_repository import (
 )
 
 
-TICKET_TYPES = frozenset({"INCIDENT", "SERVICE_REQUEST", "PROBLEM", "TASK"})
+TICKET_TYPES = ("INCIDENT", "SERVICE_REQUEST", "PROBLEM", "TASK")
 TICKET_PRIORITIES = frozenset({"LOW", "MEDIUM", "HIGH", "CRITICAL"})
 INITIAL_TICKET_STATUS = "NEW"
 TICKET_CREATED_EVENT_TYPE = "TICKET_CREATED"
@@ -151,19 +151,23 @@ class TicketService:
 
     def list_tickets(
         self, *, status: str | None = None, priority: str | None = None,
+        ticket_type: str | None = None,
         limit: int = 100, offset: int = 0,
     ) -> tuple[TicketRecord, ...]:
         if status is not None:
             _choice(status, "status", TICKET_STATUSES)
         if priority is not None:
             _choice(priority, "priority", TICKET_PRIORITIES)
+        if ticket_type is not None:
+            _choice(ticket_type, "ticket_type", TICKET_TYPES)
         if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 200:
             raise TicketValidationError("limit must be an integer from 1 to 200.")
         if isinstance(offset, bool) or not isinstance(offset, int) or not 0 <= offset <= 2**63 - 1:
             raise TicketValidationError("offset must be a non-negative SQLite integer.")
         try:
             return self._ticket_repository.list_tickets(
-                status=status, priority=priority, limit=limit, offset=offset,
+                status=status, priority=priority, ticket_type=ticket_type,
+                limit=limit, offset=offset,
             )
         except sqlite3.Error as error:
             raise TicketReadError("F7Hub could not load the ticket list.") from error
@@ -442,7 +446,7 @@ def _optional_text(value: object | None, field_name: str) -> str | None:
     return clean_value or None
 
 
-def _choice(value: object, field_name: str, choices: frozenset[str]) -> str:
+def _choice(value: object, field_name: str, choices: Collection[str]) -> str:
     if not isinstance(value, str) or value not in choices:
         allowed = ", ".join(sorted(choices))
         raise TicketValidationError(f"{field_name} must be one of: {allowed}.")

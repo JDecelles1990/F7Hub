@@ -2,6 +2,40 @@
 
 Last verified: 2026-09-27 (America/Toronto).
 
+Current candidate: **Slice 029 — Filter Saved Tickets by Type**, `feature/ticket-type-filter-s029` in `C:\Dev\F7Hub`. Approved base and branch HEAD: `1b66f3e888ab24eb1b1fefde2d74e3f60ebba84b`, equal to freshly fetched `origin/main` at the implementation baseline gate. Tracked, staged and untracked state was initially clean. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
+
+Status: **PASS — READY_FOR_REVIEW after correction**. The first independent review required removing the Type selector's duplicated ticket-type list. That review decision no longer applies to the corrected candidate; independent rereview is pending. Authorization covers correction, testing and documentation only. Candidate changes remain unstaged and uncommitted. No push, PR or integration was performed for Slice 029. Earlier text below describing Slice 028 as awaiting review is **STALE HANDOFF METADATA**: live Git shows Slice 028 merged through PR #29 at `1b66f3e`; that text is retained as a historical candidate snapshot.
+
+## Slice 029 Result and Scope
+
+Saved Tickets adds Type below Priority: All types, Incident, Service request, Problem and Task. All types passes `ticket_type=None`. After review correction, the selector iterates the existing `TICKET_TYPES` vocabulary directly in its established display order; labels are presentation-only. `TicketService.list_tickets` rejects invalid non-None types before querying; `TicketRepository.list_tickets` adds a bound Type predicate alongside Status and Priority in one SQL query. Newest-updated ordering and bounded paging are unchanged. Any filter change requests page 1; Refresh, paging and exact-number opening retain all three selections. The shared worker disables all three selectors while busy. A failed queue read retains prior rows, detail, drafts and selections and records the requested page for Refresh retry. This slice adds no database write, schema, migration, index, dependency, category reference, ticket editing, search or Knowledge change.
+
+## Slice 029 Fresh Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration used `QT_QPA_PLATFORM=offscreen`; native validation used `windows` against isolated synthetic SQLite.
+
+| Suite | Command | Fresh final-candidate result |
+|---|---|---|
+| Focused ticket reads/workspace | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Integration.test_ticket_workspace_flow` | PASS — 25 tests, exit 0 |
+| Affected ticket set | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Database.test_ticket_service Tests.Database.test_ticket_repository Tests.GUI.test_main_window Tests.Integration.test_ticket_workspace_flow` | PASS — 41 tests, exit 0 |
+| Database | `python -B -m unittest discover -s Tests\Database -p 'test_*.py'` | PASS — 341 tests, exit 0 |
+| GUI | `python -B -m unittest discover -s Tests\GUI -p 'test_*.py'` | PASS — 153 tests, exit 0 |
+| Integration | `python -B -m unittest discover -s Tests\Integration -p 'test_*.py'` | PASS — 102 tests, exit 0 |
+
+Full regression: **596 PASS**, zero failures or errors. Focused and affected results overlap the full suites. Real-SQLite tests cover all four valid types, invalid and SQL-like values, service rejection before repository querying, three-filter composition, stable paging/order, unchanged before/after database dump, `integrity_check = ok` and zero foreign-key violations. Integration tests cover selector order/accessibility, page-1 reset, Refresh/page/Open number retention, busy-state disabling, failure preservation and requested-page retry. Expected error-path log messages in GUI/Integration had successful unittest results and exit 0.
+
+Native Windows after correction: PASS — actual `windows` Qt platform with MainWindow at 1000×700, Open + High + Service request selected, one matching synthetic ticket and current detail loaded after observable worker idle. The [corrected-candidate capture](C:/Users/Jo/AppData/Local/Temp/f7-s029-correction-native.png) was opened and inspected: all three selectors, queue, detail and activity controls were readable without observed overlap or clipped controls. The native harness also checked that the options equal `TICKET_TYPES` once each and that All types carries `None`. This verifies the tested Windows environment, not every display scale.
+
+## Slice 029 Delivery Gate
+
+The review finding was corrected by making the service's single authoritative `TICKET_TYPES` sequence ordered and having the workspace iterate it directly. `_choice` now accepts that collection type; validation behavior is unchanged. The integration test checks each authoritative type exactly once and All types as `None`. Focused, affected and full regression counts above were rerun on the correction and all passed. Scope remains the same 13 tracked paths: the ticket repository/service/workspace, two focused test files and affected documentation. Database architecture and SQL Schema need no edit because the physical schema and indexes are unchanged. AHK, PowerShell and Knowledge owners are unaffected. The next gate is independent read-only rereview of the new unstaged candidate; this self-review grants no integration approval.
+
+---
+
+## Prior Slice 028 handoff snapshot (historical; Slice 028 later merged through PR #29)
+
+Last verified: 2026-09-27 (America/Toronto).
+
 Current candidate: **Slice 028 — Filter Saved Tickets by Priority**, `feature/ticket-priority-filter-s028` in `C:\Dev\F7Hub`. Approved base and current branch HEAD: `ce55c5a355bbc8434b3b536001e3dd393147821d`, equal to freshly fetched `origin/main` at the implementation baseline gate. The initial tracked, staged and untracked state was clean. Slice 027 was merged through PR #28. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
 
 Status: **PASS — READY_FOR_REVIEW**. Authorization covers IMPLEMENT → TEST → DOCUMENT only. Candidate files are unstaged and uncommitted; independent review is pending. No push, PR or integration was performed for Slice 028.
