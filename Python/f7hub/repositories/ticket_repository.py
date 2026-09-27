@@ -367,6 +367,19 @@ class TicketRepositoryTransaction:
         )
         return cursor.rowcount == 1
 
+    def update_ticket_type(
+        self, ticket_id: int, *, expected_ticket_type: str,
+        expected_updated_at: str, ticket_type: str, updated_at: str,
+    ) -> bool:
+        """Change only type and activity time under loaded-state guards."""
+
+        cursor = self._connection.execute(
+            "UPDATE tickets SET ticket_type = ?, updated_at = ? "
+            "WHERE ticket_id = ? AND ticket_type = ? AND updated_at = ?",
+            (ticket_type, updated_at, ticket_id, expected_ticket_type, expected_updated_at),
+        )
+        return cursor.rowcount == 1
+
     def create_ticket(
         self,
         *,

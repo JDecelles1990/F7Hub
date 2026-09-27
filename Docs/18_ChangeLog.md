@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-27 — Slice 033: Edit a Saved Ticket Type
+
+Saved Tickets now shows the loaded ticket type and offers Edit type using the ordered `TICKET_TYPES` domain. Exact loaded type and update time are checked before no-op. A real edit atomically changes only type and a strictly later activity timestamp, writes one `TYPE_CHANGED` event without type values, and reloads before commit. Failed update, event or reload rolls back. A changed ticket may leave the active Type queue while its updated detail stays visible. Later read failures retain the committed-save acknowledgment and retry path without another update. The five detail actions remain usable in a two-row grid at 1000×700.
+
+The focused ticket/MainWindow set passed **65**, affected set **76**, and full Database **356**, GUI **154**, Integration **121** = **631 full regression PASS**, all exit 0. Isolated SQLite tests cover all type values and transitions, invalid/missing/stale/no-op requests, same-millisecond advancement, rollback, unrelated data and links, integrity and foreign keys. Worker-backed integration covers dialog state, committed-save read failures and retry, filters, page and draft retention, and Type-filter exit. Native Windows `windows` platform reached observable idle at 1000×700; five captures of actions, dialog, filter exit, post-commit failure and recovery were inspected without observed clipping or overlap. No schema, migration, index, dependency, generic editor or unrelated subsystem changed. The candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-27 — Slice 032: Edit a Saved Ticket Description
 
 Saved Tickets now offers Edit description for a loaded ticket. The multiline plain-text dialog starts with the loaded value or empty for NULL, retains draft text after failed saves, and blocks duplicate writes and unsafe close during a write. The service reuses creation's optional-text normalization: surrounding whitespace is trimmed, internal line breaks remain, and blank input clears to NULL. Exact loaded description and update time are checked before no-op. A real edit atomically updates only description and a strictly later `updated_at`, adds one `DESCRIPTION_CHANGED` event without description text, and reloads before commit. Failed update/event/reload rolls back. Later detail or queue read failures retain the saved acknowledgment and retry path without another write.

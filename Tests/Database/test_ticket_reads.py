@@ -13,6 +13,7 @@ from f7hub.repositories.knowledge_repository import KnowledgeRepository
 from f7hub.services.ticket_service import (
     TicketService, TicketValidationError, TicketReadError, TicketNotFoundError,
     TicketEditConflictError, TicketUpdateError, TICKET_PRIORITIES,
+    TICKET_TYPES,
 )
 
 
@@ -556,6 +557,160 @@ class TicketReadTests(unittest.TestCase):
         self.assertEqual(edited.priority, "HIGH")
         self.assertEqual([event.event_type for event in self.repo.list_timeline_events(ticket.ticket_id)]
                          .count("PRIORITY_CHANGED"), 1)
+
+    def test_type_edit_transitions_preserve_ticket_activity_and_relationships(self):
+        ticket = self.service.create_ticket(
+            subject="Printer offline", ticket_number="INC-UNCHANGED", ticket_type="INCIDENT",
+            priority="HIGH", description="Original description", assigned_to="Technician",
+            source="Manual",
+        )
+        self.service.add_note(ticket.ticket_id, note_text="Existing note")
+        self.service.change_status(ticket.ticket_id, new_status="RESOLVED", resolution="Fixed")
+        self.service.change_status(ticket.ticket_id, new_status="CLOSED")
+        article = KnowledgeRepository(self.path).create_article(
+            article_code="KB-TYPE-33", title="Guide", summary=None,
+            body_markdown="Body", created_at=ticket.created_at, updated_at=ticket.updated_at,
+        )
+        current = self.repo.get_ticket(ticket.ticket_id)
+        with closing(sqlite3.connect(self.path)) as connection:
+            connection.execute(
+                "INSERT INTO ticket_knowledge_articles "
+                "(ticket_id, knowledge_article_id, linked_at) VALUES (?, ?, ?)",
+                (ticket.ticket_id, article.knowledge_article_id, current.updated_at),
+            )
+            connection.commit()
+        before_details = self.service.get_ticket_details(ticket.ticket_id)
+        for destination in (*TICKET_TYPES[1:], TICKET_TYPES[0]):
+            with self.subTest(destination=destination):
+                previous = current
+                current = self.service.update_ticket_type(
+                    ticket.ticket_id, expected_ticket_type=previous.ticket_type,
+                    expected_updated_at=previous.updated_at, ticket_type=destination,
+                )
+                self.assertEqual(current, replace(previous, ticket_type=destination,
+                                                  updated_at=current.updated_at))
+                self.assertGreater(current.updated_at, previous.updated_at)
+        details = self.service.get_ticket_details(ticket.ticket_id)
+        self.assertEqual(details.ticket, current)
+        self.assertEqual(current.ticket_number, "INC-UNCHANGED")
+        self.assertEqual(current.status, "CLOSED")
+        self.assertEqual(details.notes, before_details.notes)
+        self.assertEqual(details.status_history, before_details.status_history)
+        events = [event for event in details.timeline_events
+                  if event.event_type == "TYPE_CHANGED"]
+        self.assertEqual(len(events), len(TICKET_TYPES))
+        self.assertTrue(all(event.details is None and event.metadata_json is None
+                            and event.title == "Ticket type changed" for event in events))
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(connection.execute(
+                "SELECT COUNT(*) FROM ticket_knowledge_articles WHERE ticket_id = ?",
+                (ticket.ticket_id,),
+            ).fetchone(), (1,))
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
+    def test_every_type_transition_is_allowed(self):
+        for initial in TICKET_TYPES:
+            for destination in TICKET_TYPES:
+                if destination == initial:
+                    continue
+                with self.subTest(initial=initial, destination=destination):
+                    ticket = self.service.create_ticket(
+                        subject=f"{initial} to {destination}", ticket_type=initial,
+                    )
+                    updated = self.service.update_ticket_type(
+                        ticket.ticket_id, expected_ticket_type=initial,
+                        expected_updated_at=ticket.updated_at, ticket_type=destination,
+                    )
+                    self.assertEqual(updated.ticket_type, destination)
+                    self.assertEqual([event.event_type for event in
+                                      self.repo.list_timeline_events(ticket.ticket_id)]
+                                     .count("TYPE_CHANGED"), 1)
+
+    def test_type_edit_rejects_invalid_missing_and_stale_before_no_op(self):
+        ticket = self.service.create_ticket(subject="Original", ticket_type="INCIDENT")
+        args = dict(expected_ticket_type=ticket.ticket_type,
+                    expected_updated_at=ticket.updated_at)
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        for value in (0, -1, True, None):
+            with self.subTest(ticket_id=value), self.assertRaises(TicketValidationError):
+                self.service.update_ticket_type(value, ticket_type="TASK", **args)
+        for value in ("", "incident", "TASK' OR 1=1 --", True, None, 42):
+            with self.subTest(ticket_type=value), self.assertRaises(TicketValidationError):
+                self.service.update_ticket_type(ticket.ticket_id, ticket_type=value, **args)
+        for field, value in (("expected_ticket_type", "UNKNOWN"),
+                             ("expected_updated_at", "")):
+            with self.subTest(field=field), self.assertRaises(TicketValidationError):
+                self.service.update_ticket_type(
+                    ticket.ticket_id, ticket_type="TASK", **(args | {field: value}),
+                )
+        with self.assertRaises(TicketNotFoundError):
+            self.service.update_ticket_type(999, ticket_type="TASK", **args)
+        for expected in (args | {"expected_ticket_type": "TASK"},
+                         args | {"expected_updated_at": "2020-01-01T00:00:00.000Z"}):
+            with self.subTest(expected=expected), self.assertRaises(TicketEditConflictError):
+                self.service.update_ticket_type(
+                    ticket.ticket_id, ticket_type="INCIDENT", **expected,
+                )
+        self.assertEqual(self.service.update_ticket_type(
+            ticket.ticket_id, ticket_type="INCIDENT", **args,
+        ), ticket)
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+
+    def test_type_edit_advances_same_millisecond_and_rolls_back_failures(self):
+        ticket = self.service.create_ticket(subject="Old", ticket_type="INCIDENT")
+        from datetime import datetime
+        fixed = datetime.fromisoformat(ticket.updated_at.replace("Z", "+00:00"))
+        service = TicketService(self.repo, clock=lambda: fixed)
+        args = dict(expected_ticket_type=ticket.ticket_type,
+                    expected_updated_at=ticket.updated_at, ticket_type="TASK")
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        with patch.object(TicketRepositoryTransaction, "update_ticket_type",
+                          side_effect=sqlite3.OperationalError("private")):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_type(ticket.ticket_id, **args)
+        with patch.object(TicketRepositoryTransaction, "update_ticket_type", return_value=False):
+            with self.assertRaises(TicketEditConflictError):
+                service.update_ticket_type(ticket.ticket_id, **args)
+        with patch.object(TicketRepositoryTransaction, "create_timeline_event",
+                          side_effect=sqlite3.OperationalError("private")):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_type(ticket.ticket_id, **args)
+        original_get = TicketRepositoryTransaction.get_ticket
+        reads = 0
+
+        def fail_second_read(transaction, ticket_id):
+            nonlocal reads
+            reads += 1
+            if reads == 2:
+                raise sqlite3.OperationalError("private")
+            return original_get(transaction, ticket_id)
+
+        with patch.object(TicketRepositoryTransaction, "get_ticket", fail_second_read):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_type(ticket.ticket_id, **args)
+        reads = 0
+
+        def lose_second_read(transaction, ticket_id):
+            nonlocal reads
+            reads += 1
+            if reads == 2:
+                return None
+            return original_get(transaction, ticket_id)
+
+        with patch.object(TicketRepositoryTransaction, "get_ticket", lose_second_read):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_type(ticket.ticket_id, **args)
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+        edited = service.update_ticket_type(ticket.ticket_id, **args)
+        self.assertGreater(edited.updated_at, ticket.updated_at)
+        self.assertEqual(edited.ticket_type, "TASK")
+        self.assertEqual([event.event_type for event in self.repo.list_timeline_events(ticket.ticket_id)]
+                         .count("TYPE_CHANGED"), 1)
 
     def test_exact_number_lookup_reloads_current_details_without_writing(self):
         ticket = self.service.create_ticket(subject="Read by number", ticket_number="INC-2042")

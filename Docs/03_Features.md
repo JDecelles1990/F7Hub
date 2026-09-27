@@ -267,6 +267,8 @@ Slice 031 adds a separate correction for a loaded ticket's priority. The four ex
 
 Slice 032 adds correction of the loaded ticket's optional plain-text description. Blank input clears it to NULL; multiline content retains internal line breaks. A real change advances activity time and records one description-change event without copying description text. Stale details are rejected before no-op. Other editable fields remain separate work.
 
+Slice 033 adds correction of the loaded ticket's type using the four existing values. Saved details show the current type. A real change advances activity time and records one value-free type-change event; a stale or unchanged request writes nothing. A ticket can leave the selected Type queue while its updated detail remains open. Other ticket fields and search remain separate work.
+
 ---
 
 ## FEAT-TICKET-002 — Ticket Workspace

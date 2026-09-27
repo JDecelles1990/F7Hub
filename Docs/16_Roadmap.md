@@ -147,6 +147,8 @@ Slice 031 adds one priority correction workflow on the same writer, timeline and
 
 Slice 032 adds one optional multiline description correction workflow on the existing writer, timeline and GUI worker path. Blank input clears the description; stale loaded state is rejected before no-op, and post-commit read failures retain the saved acknowledgment. Other ticket edits and ticket search remain separate work; no migration or dependency is added.
 
+Slice 033 adds one saved-ticket type correction workflow on the same writer, timeline and GUI worker path. The four existing types are authoritative; current type is visible in details and a changed ticket can leave the selected Type queue while its updated detail remains open. Other ticket edits and ticket search remain separate work; no migration or dependency is added.
+
 The F7Hub roadmap is organized into:
 
 ```text

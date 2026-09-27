@@ -28,6 +28,8 @@ TICKET_PRIORITY_CHANGED_EVENT_TYPE = "PRIORITY_CHANGED"
 TICKET_PRIORITY_CHANGED_EVENT_TITLE = "Ticket priority changed"
 TICKET_DESCRIPTION_CHANGED_EVENT_TYPE = "DESCRIPTION_CHANGED"
 TICKET_DESCRIPTION_CHANGED_EVENT_TITLE = "Ticket description changed"
+TICKET_TYPE_CHANGED_EVENT_TYPE = "TYPE_CHANGED"
+TICKET_TYPE_CHANGED_EVENT_TITLE = "Ticket type changed"
 TICKET_NOTE_TYPES = frozenset({"INTERNAL", "PUBLIC", "WORKLOG", "RESOLUTION"})
 TICKET_STATUS_TRANSITIONS = {
     "NEW": frozenset({"OPEN", "IN_PROGRESS", "WAITING", "RESOLVED", "CANCELLED"}),
@@ -54,7 +56,7 @@ class TicketCreationError(RuntimeError):
 
 
 class TicketUpdateError(RuntimeError):
-    """Raised when persistence prevents a ticket activity or subject change."""
+    """Raised when persistence prevents a ticket activity or edit."""
 
 
 class TicketEditConflictError(TicketValidationError):
@@ -330,6 +332,48 @@ class TicketService:
                 return updated
         except sqlite3.Error as error:
             raise TicketUpdateError("F7Hub could not update the ticket description.") from error
+
+    def update_ticket_type(
+        self, ticket_id: int, *, expected_ticket_type: str,
+        expected_updated_at: str, ticket_type: str,
+    ) -> TicketRecord:
+        """Correct a loaded type without replacing other ticket fields."""
+
+        _validate_ticket_id(ticket_id)
+        _choice(expected_ticket_type, "expected_ticket_type", TICKET_TYPES)
+        _required_text(expected_updated_at, "expected_updated_at")
+        clean_ticket_type = _choice(ticket_type, "ticket_type", TICKET_TYPES)
+        try:
+            with self._ticket_repository.transaction() as transaction:
+                current = _require_ticket(transaction.get_ticket(ticket_id))
+                if (current.ticket_type != expected_ticket_type
+                        or current.updated_at != expected_updated_at):
+                    raise TicketEditConflictError(
+                        "This ticket changed. Reload it before editing the type again."
+                    )
+                if current.ticket_type == clean_ticket_type:
+                    return current
+                timestamp = _next_ticket_timestamp(self._clock(), current.updated_at)
+                if not transaction.update_ticket_type(
+                    ticket_id, expected_ticket_type=expected_ticket_type,
+                    expected_updated_at=expected_updated_at,
+                    ticket_type=clean_ticket_type, updated_at=timestamp,
+                ):
+                    raise TicketEditConflictError(
+                        "This ticket changed. Reload it before editing the type again."
+                    )
+                transaction.create_timeline_event(
+                    ticket_id=ticket_id,
+                    event_type=TICKET_TYPE_CHANGED_EVENT_TYPE,
+                    title=TICKET_TYPE_CHANGED_EVENT_TITLE,
+                    occurred_at=timestamp,
+                )
+                updated = transaction.get_ticket(ticket_id)
+                if updated is None:
+                    raise TicketUpdateError("F7Hub could not reload the updated ticket.")
+                return updated
+        except sqlite3.Error as error:
+            raise TicketUpdateError("F7Hub could not update the ticket type.") from error
 
     @staticmethod
     def allowed_statuses(status: str) -> tuple[str, ...]:
