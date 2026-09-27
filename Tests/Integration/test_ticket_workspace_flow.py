@@ -5,6 +5,7 @@ from contextlib import closing
 from pathlib import Path
 import sqlite3
 import tempfile
+import threading
 import time
 import unittest
 from unittest.mock import patch
@@ -12,6 +13,7 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtTest import QTest
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from f7hub.gui.main_window import MainWindow
@@ -168,6 +170,93 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         self.assertEqual(self.workspace.model.rowCount(), 0)
         self.assertFalse(self.workspace.previous_button.isEnabled())
         self.assertFalse(self.workspace.next_button.isEnabled())
+
+    def test_open_exact_number_outside_queue_filter_and_page(self):
+        other = self.service.create_ticket(subject="Target", ticket_number="INC-SEARCH-27")
+        self.service.create_ticket(subject="Newer ticket", ticket_number="INC-NEWER-27")
+        self.service.create_ticket(subject="Newest ticket", ticket_number="INC-NEWEST-27")
+        self.workspace.PAGE_SIZE = 1
+        self.workspace.refresh_list(offset=0)
+        self.wait_idle()
+        self.workspace.next_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.assertNotIn(other.ticket_id, [ticket.ticket_id for ticket in self.workspace.model.tickets])
+        self.workspace.ticket_number_input.setText("  inc-search-27  ")
+        self.workspace.open_number_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.details.ticket.ticket_id, other.ticket_id)
+        self.assertIsNone(self.workspace.status_filter.currentData())
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.assertEqual(self.workspace.ticket_number_input.text(), "  inc-search-27  ")
+        self.workspace.status_filter.setCurrentIndex(self.workspace.status_filter.findData("CLOSED"))
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.rowCount(), 0)
+        self.workspace.open_number_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.details.ticket.ticket_id, other.ticket_id)
+        self.assertEqual(self.workspace.status_filter.currentData(), "CLOSED")
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+        self.workspace.ticket_number_input.setText(self.repository.get_ticket(self.ticket_id).ticket_number)
+        QTest.keyClick(self.workspace.ticket_number_input, Qt.Key.Key_Return)
+        self.wait_idle()
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+
+    def test_number_lookup_blank_missing_and_read_error_preserve_detail_and_draft(self):
+        self.workspace.note_input.setPlainText("Keep this draft")
+        with patch.object(self.service, "get_ticket_details_by_number") as lookup:
+            self.workspace.ticket_number_input.setText("  ")
+            self.workspace.open_number_button.click()
+            lookup.assert_not_called()
+        self.assertIn("Enter a ticket number", self.workspace.feedback.text())
+        self.workspace.ticket_number_input.setText("INC-MISSING")
+        self.workspace.open_number_button.click()
+        self.wait_idle()
+        self.assertIn("No ticket has that number", self.workspace.feedback.text())
+        with patch.object(self.service, "get_ticket_details_by_number", side_effect=RuntimeError("private")):
+            self.workspace.open_number_button.click()
+            self.wait_idle()
+        self.assertNotIn("private", self.workspace.feedback.text())
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep this draft")
+        self.assertEqual(self.workspace.ticket_number_input.text(), "INC-MISSING")
+
+    def test_number_lookup_cancel_preserves_draft_and_busy_lookup_is_single(self):
+        other = self.service.create_ticket(subject="Other", ticket_number="INC-OTHER-27")
+        self.workspace.note_input.setPlainText("Keep this draft")
+        self.workspace.ticket_number_input.setText("INC-OTHER-27")
+        started = threading.Event()
+        release = threading.Event()
+        original = self.service.get_ticket_details_by_number
+        calls = []
+
+        def delayed_lookup(number):
+            calls.append(number)
+            started.set()
+            if not release.wait(5):
+                raise TimeoutError("Lookup gate timed out")
+            return original(number)
+
+        try:
+            with patch.object(self.service, "get_ticket_details_by_number", side_effect=delayed_lookup):
+                with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Cancel):
+                    self.workspace.open_number_button.click()
+                    self.assertTrue(started.wait(5))
+                    self.assertFalse(self.workspace.open_number_button.isEnabled())
+                    self.workspace.open_ticket_by_number()
+                    self.assertEqual(calls, ["INC-OTHER-27"])
+                    release.set()
+                    self.wait_idle()
+        finally:
+            release.set()
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep this draft")
+        self.assertIn("cancelled", self.workspace.feedback.text())
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Discard):
+            self.workspace.open_number_button.click()
+            self.wait_idle()
+        self.assertEqual(self.workspace.details.ticket.ticket_id, other.ticket_id)
+        self.assertFalse(self.workspace.has_draft())
 
     def test_created_ticket_with_failed_detail_load_is_recoverable_in_queue(self):
         self.window.show_new_ticket()

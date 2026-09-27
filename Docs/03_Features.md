@@ -361,6 +361,8 @@ Requirements: `FR-TICKET-008`
 
 Tickets shall be searchable by relevant fields and associated content.
 
+Slice 027 implements a narrow exact-number entry in Saved Tickets: enter a complete ticket number and open its current details. Matching is case-insensitive after trimming surrounding whitespace. The current status filter and page remain in place even when the opened ticket is outside that queue view. This is not prefix, ticket-content, or universal search.
+
 ---
 
 ## FEAT-TICKET-008 — Resolution and Escalation

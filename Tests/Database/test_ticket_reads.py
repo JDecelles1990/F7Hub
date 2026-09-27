@@ -1,3 +1,4 @@
+from contextlib import closing
 from pathlib import Path
 import sqlite3
 import tempfile
@@ -41,6 +42,36 @@ class TicketReadTests(unittest.TestCase):
         self.assertEqual(details.notes, (note,))
         self.assertEqual(tuple(h.new_status for h in details.status_history), ("NEW", "OPEN"))
         self.assertEqual(len(details.timeline_events), 3)
+
+    def test_exact_number_lookup_reloads_current_details_without_writing(self):
+        ticket = self.service.create_ticket(subject="Read by number", ticket_number="INC-2042")
+        self.service.add_note(ticket.ticket_id, note_text="Latest note")
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        details = self.service.get_ticket_details_by_number("  inc-2042  ")
+        self.assertEqual(details.ticket.ticket_id, ticket.ticket_id)
+        self.assertEqual(details.notes[0].note_text, "Latest note")
+        with self.assertRaises(TicketNotFoundError):
+            self.service.get_ticket_details_by_number("INC-204")
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+
+    def test_number_lookup_validation_missing_and_disappearing_ticket(self):
+        for value in ("", "  ", None, 7, True):
+            with self.subTest(value=value), self.assertRaises(TicketValidationError):
+                self.service.get_ticket_details_by_number(value)
+        with self.assertRaises(TicketNotFoundError):
+            self.service.get_ticket_details_by_number("missing")
+        ticket = self.service.create_ticket(subject="Disappearing", ticket_number="INC-GONE")
+        with patch.object(self.repo, "get_ticket_details", return_value=None):
+            with self.assertRaises(TicketNotFoundError):
+                self.service.get_ticket_details_by_number(ticket.ticket_number)
+
+    def test_number_lookup_translates_repository_failure(self):
+        with patch.object(self.repo, "get_ticket_by_number", side_effect=sqlite3.OperationalError("private")):
+            with self.assertRaises(TicketReadError) as caught:
+                self.service.get_ticket_details_by_number("INC-2042")
+        self.assertNotIn("private", str(caught.exception))
 
     def test_read_validation_and_missing_ticket(self):
         for args in ({"limit": 0}, {"limit": True}, {"limit": 201},

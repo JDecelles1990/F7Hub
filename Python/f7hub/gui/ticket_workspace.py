@@ -86,6 +86,17 @@ class TicketWorkspace(QWidget):
         filters.addWidget(self.status_filter)
         filters.addWidget(self.refresh_button)
         queue_layout.addLayout(filters)
+        number_row = QHBoxLayout()
+        self.ticket_number_input = QLineEdit(queue)
+        self.ticket_number_input.setAccessibleName("Open saved ticket by number")
+        self.ticket_number_input.setPlaceholderText("Ticket number")
+        self.ticket_number_input.returnPressed.connect(self.open_ticket_by_number)
+        self.open_number_button = QPushButton("Open number", queue)
+        self.open_number_button.clicked.connect(self.open_ticket_by_number)
+        number_row.addWidget(self.ticket_number_input, 1)
+        number_row.addWidget(self.open_number_button)
+        queue_layout.addLayout(number_row)
+        self._runner.busy_changed.connect(self._set_number_lookup_idle)
         self.model = TicketTableModel(self)
         self.table = QTableView(queue)
         self.table.setAccessibleName("Saved tickets; activate a row to open")
@@ -199,6 +210,38 @@ class TicketWorkspace(QWidget):
     def _activate_row(self, index):
         if index.isValid():
             self.open_ticket(self.model.tickets[index.row()].ticket_id)
+
+    def _set_number_lookup_idle(self, busy):
+        self.ticket_number_input.setEnabled(not busy)
+        self.open_number_button.setEnabled(not busy)
+
+    def open_ticket_by_number(self):
+        if self._runner.busy:
+            return
+        ticket_number = self.ticket_number_input.text()
+        if not ticket_number.strip():
+            self.feedback.setText("Enter a ticket number.")
+            return
+        self.feedback.setText("Opening ticket…")
+
+        def loaded(details):
+            switching = self.details is not None and self.details.ticket.ticket_id != details.ticket.ticket_id
+            if switching and not self.confirm_discard():
+                self.feedback.setText("Ticket opening cancelled.")
+                return
+            if switching:
+                self._clear_drafts()
+            self._display_details(details)
+            self.feedback.setText("Ticket loaded.")
+            self.knowledge_tab.refresh_links()
+
+        self._runner.submit(
+            lambda: self._service.get_ticket_details_by_number(ticket_number),
+            loaded,
+            lambda error: self._show_error(
+                error, "Could not load the requested ticket. Existing information and drafts are unchanged."
+            ),
+        )
 
     def has_draft(self):
         return bool(self.note_input.toPlainText().strip() or self.reason_input.text().strip()

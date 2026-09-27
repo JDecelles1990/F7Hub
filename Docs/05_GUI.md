@@ -134,6 +134,8 @@ Application and GUI integration tests: PASS — 50 tests (fresh Slice 011 final 
 
 `TicketCreateWidget` provides the minimum ticket input form, inline required-field feedback, safe persistence-error presentation, input preservation, keyboard save action, service delegation and a successful-ticket signal. The main window provides New ticket and Saved tickets navigation. Successful creation opens the saved ticket. The queue supports status filtering and pages of 100 tickets; details show notes, lifecycle history and timeline events. Technicians can add notes, resolve with a summary, close and reopen using service-provided status choices.
 
+Slice 027 adds one Ticket number field and Open number button beneath the Saved Tickets status/refresh row. Enter and the button perform the same exact-number read through the shared service runner. The number is retained for retry; a successful direct open leaves the queue page and status filter unchanged. Native Windows verification at 1000×700 found the controls and detail readable after the workspace reached idle.
+
 Failed saves preserve drafts. Switching tickets or leaving activity drafts prompts before discarding them; failed loads preserve existing details and drafts. A committed save followed by a failed reload remains reported as saved. If the initial detail load fails after creation, the queue refreshes so the saved ticket can be opened again. Operations disable conflicting actions while running; closing waits for the operation to finish. Automated GUI checks run offscreen; native Windows visual inspection and input-event checks are PASS on 2026-09-05 at the default size and 1000×700. Initial window sizing now leaves space for Windows borders and the taskbar. Reference-data loading is verified: New Ticket loads active companies and company-filtered active contacts through a background service call. Changing company clears the old contact. Refresh references supports retry and preserves draft text and valid selections. Saved ticket details display company/contact names, including inactive references; null or deleted references show Not selected. Native Windows Slice 006 visual/input checks passed at the initial size and 1000×700, including error feedback. The AutoHotkey F7 shortcut launches, focuses or restores the application while its script is active.
 
 Slice 007 category integration is verified on 2026-09-05. New Ticket loads active TICKET category names through the existing background runner, with independent ID values, Not selected, empty feedback and a Refresh categories retry action. Category failures preserve text and company/contact/category selections; category-only retry does not query companies or contacts. Saved details show current category names, including inactive references, and Not selected after null/deletion. The description minimum height is 100 pixels so the added feedback row fits at 1000×700. Native Windows renders and input checks passed for the category workflow and failure feedback; these are agent checks, not user acceptance testing.
@@ -405,7 +407,7 @@ Potential sections:
 ├──────────────────────────────┼────────────────────────────────┤
 │ Recent Knowledge             │ Recent Activity                │
 │                              │                                │
-│ Outlook Profile Repair       │ DNS diagnostic                │
+│ Outlook Profile Repair       │ DNS diagnostic                 │
 │ Teams Camera Troubleshooting │ KB article updated             │
 └──────────────────────────────┴────────────────────────────────┘
 ```
@@ -799,7 +801,7 @@ Suggested layout:
 │ Search                   │ Test-DnsHealth.ps1                       │
 │ Categories               │ Description                              │
 │ Tags                     │ Risk: Low                                │
-│                          │ Privilege: User                           │
+│                          │ Privilege: User                          │
 │ DNS                      │ Parameters                               │
 │ Exchange                 │                                          │
 │ Intune                   │ [Review Script] [Run]                    │
@@ -882,10 +884,10 @@ Suggested layout:
 │ DNS                     │                                           │
 │ Teams                   │ Can the user access Outlook Web?          │
 │ Intune                  │                                           │
-│                         │ ( ) Yes                                    │
-│                         │ ( ) No                                     │
+│                         │ ( ) Yes                                   │
+│                         │ ( ) No                                    │
 │                         │                                           │
-│                         │ [Back] [Next]                              │
+│                         │ [Back] [Next]                             │
 └─────────────────────────┴───────────────────────────────────────────┘
 ```
 
@@ -991,7 +993,7 @@ Suggested structure:
 │ Ticketing             │ {{ticket_title}}                           │
 │ Knowledge             │ {{diagnostic_results}}                     │
 │ PowerShell            │                                            │
-│                       │ [Preview] [Use]                             │
+│                       │ [Preview] [Use]                            │
 └───────────────────────┴────────────────────────────────────────────┘
 ```
 
@@ -2107,7 +2109,7 @@ The intended experience is:
 ├───────────────┬───────────────────────────────────────┬───────────────────┤
 │ Navigation    │ Current Work                          │ Context           │
 │               │                                       │                   │
-│ Dashboard     │ Ticket / KB / Script / Diagnostic    │ Company           │
+│ Dashboard     │ Ticket / KB / Script / Diagnostic     │ Company           │
 │ Tickets       │                                       │ Related KB        │
 │ KB            │                                       │ Diagnostics       │
 │ Search        │                                       │ AI                │
@@ -2115,7 +2117,7 @@ The intended experience is:
 ├───────────────┴───────────────────────────────────────┴───────────────────┤
 │ PowerShell / Output / Activity / Logs                                     │
 ├───────────────────────────────────────────────────────────────────────────┤
-│ DB ✓ | PS ✓ | Graph ○ | AI ✓ | Workspace: Helpdesk                        │
+│ DB ✓ | PS ✓ | Graph ○ | AI ✓ | Workspace: Helpdesk                       │
 └───────────────────────────────────────────────────────────────────────────┘
 ```
 

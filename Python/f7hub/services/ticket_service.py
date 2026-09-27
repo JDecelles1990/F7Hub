@@ -173,6 +173,18 @@ class TicketService:
         except sqlite3.Error as error:
             raise TicketReadError("F7Hub could not load the ticket.") from error
 
+    def get_ticket_details_by_number(self, ticket_number: str) -> TicketDetailsRecord:
+        """Open an exact technician reference through the current detail read."""
+
+        clean_number = _required_text(ticket_number, "ticket_number")
+        try:
+            ticket = self._ticket_repository.get_ticket_by_number(clean_number)
+        except sqlite3.Error as error:
+            raise TicketReadError("F7Hub could not load the ticket.") from error
+        if ticket is None:
+            raise TicketNotFoundError("No ticket has that number.")
+        return self.get_ticket_details(ticket.ticket_id)
+
     @staticmethod
     def allowed_statuses(status: str) -> tuple[str, ...]:
         """Expose workflow choices to presentation without duplicating rules."""

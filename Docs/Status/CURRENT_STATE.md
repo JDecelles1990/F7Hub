@@ -2,6 +2,40 @@
 
 Last verified: 2026-09-26 (America/Toronto).
 
+Current candidate: **Slice 027 — Open a saved ticket by number**, `feature/ticket-number-open-s027` in `C:\Dev\F7Hub`. Base and current HEAD: `db81aff585d309e7db605d667fbd8332d0d1863a`, equal to freshly fetched `origin/main` at the implementation baseline gate. The initial tracked, staged and untracked scope was clean. Slice 026 is merged through PR #26; the preserved `recovery/pre-s024-protected-work` branch remains read-only at `002a494735f30e1488f61e21ea98740ae6371d4d`.
+
+Status: **PASS — READY_FOR_REVIEW**. The user authorized IMPLEMENT → TEST → DOCUMENT only. The Slice 027 changes are unstaged and uncommitted; independent review is pending. No push, PR or integration occurred.
+
+## Slice 027 Result and Scope
+
+Saved Tickets adds an exact Ticket number field and Open number action. Enter and the button use the same `TicketService.get_ticket_details_by_number` call through the existing runner. The service trims input, reuses the case-insensitive repository lookup, and reloads current details through `get_ticket_details`. Blank GUI input makes no query. A successful open can display a ticket outside the visible status-filtered page without changing the filter or page. The entered number remains for retry. Missing/read-failure/disappearing-ticket paths and Cancel on the existing draft-discard confirmation preserve current detail and activity drafts. No repository query, database write, schema, migration, dependency or new exception hierarchy was added.
+
+## Slice 027 Fresh Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration tests used `QT_QPA_PLATFORM=offscreen`; native validation used `windows`.
+
+| Suite | Command | Fresh result |
+|---|---|---|
+| Focused ticket reads/workspace | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Integration.test_ticket_workspace_flow` | PASS — 19 tests, exit 0, 25.138s |
+| Affected ticket set | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Database.test_ticket_service Tests.Database.test_ticket_repository Tests.GUI.test_main_window Tests.Integration.test_ticket_workspace_flow` | PASS — 35 tests, exit 0, 26.322s |
+| Database | `python -B -m unittest discover -s Tests\Database -p 'test_*.py'` | PASS — 339 tests, exit 0, 24.343s |
+| GUI | `python -B -m unittest discover -s Tests\GUI -p 'test_*.py'` | PASS — 153 tests, exit 0, 158.378s |
+| Integration | `python -B -m unittest discover -s Tests\Integration -p 'test_*.py'` | PASS — 98 tests, exit 0, 267.124s |
+
+Full regression: **590 PASS**, zero failures or errors. Focused/affected results overlap the full suites. Real-SQLite tests verify exact/case-insensitive match, complete current details, no match for a prefix, unchanged before/after database dump, validation, missing/disappearing-ticket and safe read-error handling. UI/integration tests verify Enter/button, preservation of Page 2, out-of-filter opening, blank input without a service call, busy duplicate prevention, retained input, cancellation and draft/detail preservation. The first focused attempt failed because test setup left a SQLite handle open and placed the target on page one; both fixtures were corrected before the passing reruns. Candidate implementation did not change to resolve those fixture failures.
+
+Native Windows: PASS — actual 1000×700 MainWindow with isolated synthetic SQLite, `QT_QPA_PLATFORM=windows`. The harness waited for visible/enabled/idle MainWindow and Saved Tickets states before interaction. Button lookup opened a ticket outside an empty Closed queue while preserving the filter and input; Enter opened another. The [final MainWindow capture](C:/Users/Jo/AppData/Local/Temp/f7-s027-native-final-1000x700.png) was opened and inspected after the final test change: the number controls, queue, detail and status actions were readable with no observed clipping or overlap. This verifies the tested Windows environment, not every display scale.
+
+## Slice 027 Delivery Gate
+
+Self-review found no blocking defect. Only the approved service, GUI, focused tests and affected canonical documents changed. Ticket text/prefix/universal search, migrations, repository redesign and the protected recovery branch remain outside scope. The next gate is independent read-only review of the exact unstaged candidate.
+
+---
+
+## Prior Slice 026 handoff snapshot (historical; Slice 026 later merged into `main`)
+
+Last verified: 2026-09-26 (America/Toronto).
+
 Current candidate: **Slice 026 — Show current Knowledge article dates**, `feature/knowledge-article-dates-s026` in `C:\Dev\F7Hub`. Base and current HEAD: `c9a1a85a3b04afbf4a856379f3f0485dbf5d4351`, equal to live `origin/main` at the implementation baseline gate. Initial tree, index and untracked scope were clean. Slice 025 is CLOSED on this base. The preserved `recovery/pre-s024-protected-work` branch remains read-only at `002a494735f30e1488f61e21ea98740ae6371d4d`.
 
 Status: **PASS — READY_FOR_REVIEW**. The user authorized IMPLEMENT → TEST → DOCUMENT only. No staging, commit, push, PR or integration occurred; independent Slice 026 review is pending.

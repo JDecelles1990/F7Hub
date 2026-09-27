@@ -523,7 +523,14 @@ Slice 026 — show current Knowledge article dates, implemented and validated 20
 - [x] Display persisted current `created_at` and `updated_at` below Version through the existing detail read, with no conversion or write.
 - [x] Clear dates with empty, missing or failed detail; verify selection, updates, search and Ticket Open Article.
 - [x] Validate focused GUI/real-SQLite cases, Database 336 + GUI 153 + Integration 95 = 584 full regression tests, and native Windows 1000×700 capture.
-- [ ] Independent Slice 026 review; the candidate is unstaged and uncommitted.
+- [x] Independently review and integrate Slice 026; merged on `main` through PR #26 at `17d61d6`.
+
+Slice 027 — open a saved ticket by number, implemented and validated 2026-09-26:
+
+- [x] Add exact, case-insensitive number lookup through the existing repository read and authoritative ticket detail path; trim input and make blank GUI input query-free.
+- [x] Add Enter/Open number in Saved Tickets, retaining queue page/filter and entered text; preserve detail/drafts on cancel, missing ticket, read failure and disappearance.
+- [x] Verify focused and affected tests, 339 Database + 153 GUI + 98 Integration = 590 full regression tests, database read-only behavior and native Windows 1000×700 layout.
+- [ ] Independent Slice 027 review; candidate is unstaged and uncommitted.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 

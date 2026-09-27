@@ -831,6 +831,8 @@ The initial transition policy, implemented in `TICKET_STATUS_TRANSITIONS`, is:
 
 `TicketNotFoundError` identifies a missing workflow target; `TicketValidationError` identifies rejected input or transitions; `TicketUpdateError` translates SQLite activity-write failures into safe service feedback. Persistence operations do not independently select transitions or create history/timeline records. The notes/status GUI is implemented in TicketWorkspace.
 
+Slice 027 adds `TicketService.get_ticket_details_by_number`: it validates and trims the complete reference, reuses `TicketRepository.get_ticket_by_number`, then calls the existing authoritative detail read. `TicketWorkspace` submits this read through its shared `ServiceTaskRunner` and applies the existing draft-discard decision before replacing displayed detail. No new exception type, repository query, write transaction, schema object or dependency is introduced.
+
 ---
 
 # 31. Domain Package
