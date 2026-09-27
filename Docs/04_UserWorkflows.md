@@ -298,6 +298,8 @@ Slice 030 adds **Edit subject** beside Reload ticket for a loaded saved ticket. 
 
 Slice 031 adds **Edit priority** for a loaded saved ticket. The dialog selects its current priority; Cancel and an unchanged choice write nothing. A stale priority or update time requires Reload ticket before retry, even when the requested value matches the current row. Save errors keep the selected value. A committed change reloads detail and the queue, retains Status/Priority/Type filters and activity drafts, and remains acknowledged if a later read fails. If the ticket no longer matches the selected Priority filter, its queue row disappears while its saved detail stays open.
 
+Slice 032 adds **Edit description** for a loaded saved ticket. The multiline dialog starts with the current plain text or an empty editor for NULL. Cancel and an unchanged normalized value write nothing; whitespace-only input clears the description. An old description or update time requires Reload ticket before retry, even when the requested value matches the current row. Failed saves retain the entered draft. After commit, detail and queue refresh preserve the save acknowledgment and retry guidance if a read fails, without writing the description again. Status/Priority/Type filters, page and activity drafts remain intact.
+
 ## Related Resources May Include
 
 - related tickets

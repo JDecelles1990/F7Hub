@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-27 — Slice 032: Edit a Saved Ticket Description
+
+Saved Tickets now offers Edit description for a loaded ticket. The multiline plain-text dialog starts with the loaded value or empty for NULL, retains draft text after failed saves, and blocks duplicate writes and unsafe close during a write. The service reuses creation's optional-text normalization: surrounding whitespace is trimmed, internal line breaks remain, and blank input clears to NULL. Exact loaded description and update time are checked before no-op. A real edit atomically updates only description and a strictly later `updated_at`, adds one `DESCRIPTION_CHANGED` event without description text, and reloads before commit. Failed update/event/reload rolls back. Later detail or queue read failures retain the saved acknowledgment and retry path without another write.
+
+Focused **50 PASS**, affected **66 PASS**, Database **352 PASS**, GUI **153 PASS**, Integration **116 PASS** = **621 full regression PASS**, all exit 0 on their completed runs. Database evidence was retained after a GUI-only layout correction because its service, repository, tests, schema and other Database inputs were unchanged; focused, affected, GUI and Integration checks passed after that correction. The initial GUI run found that four detail actions in one row forced the main window to 1058 pixels wide; a two-row grid restored the 1000×700 layout. The three failing layout checks and the complete GUI suite passed after that correction. Native Windows `windows` platform reached observable idle at 1000×700; the multiline dialog, successful save, post-commit validation-error feedback and retry captures were opened and inspected without observed clipping or overlap. No migration, schema, index, dependency or other ticket edit changed. The candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-27 — Slice 031: Edit a Saved Ticket Priority
 
 Saved Tickets now offers Edit priority for a loaded ticket using the existing four-value priority domain. A valid change compares the loaded priority and exact update time before no-op, atomically updates only priority and a strictly later `updated_at`, adds one `PRIORITY_CHANGED` event without priority values, and reloads before commit. Missing/stale/invalid/no-op requests write nothing; update, event and reload failures roll back. The dialog retains selection after failure and blocks duplicate writes and close during a write. After commit, detail and queue refresh keep the save acknowledged if a later read fails; a ticket may leave the selected priority-filtered queue while its saved detail remains open. No schema, migration, index, dependency or other ticket edit changed.

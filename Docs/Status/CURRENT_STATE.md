@@ -2,6 +2,38 @@
 
 Last verified: 2026-09-27 (America/Toronto).
 
+Current candidate: **Slice 032 — Edit a Saved Ticket Description**, on `feature/ticket-description-edit-s032` in `C:\Dev\F7Hub`. Fresh fetch confirmed the approved base, branch starting HEAD and live `origin/main` at `8ff62f902aecbab8c30338c0988a7ec5032b4319` before editing; the checkout, index and untracked set were clean. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
+
+Status: **PASS — READY_FOR_REVIEW** after implementation, testing, documentation and self-review. Changes are unstaged and uncommitted; no push, PR or integration was performed. The Slice 031 claim below that review is pending is **STALE HANDOFF METADATA**: live `main` includes its PR #32 merge at `8ff62f9`. That report is retained below as a historical candidate snapshot.
+
+## Slice 032 Result and Scope
+
+`TicketService.update_ticket_description(ticket_id, *, expected_description, expected_updated_at, description)` validates the ID, preserves the exact nullable expected value, and normalizes submitted optional plain text using the existing creation rule. Inside `TicketRepository.transaction()`, it checks the authoritative description and timestamp before no-op. A real edit uses a bound NULL-safe guarded UPDATE of only description and strictly later activity time, adds one `DESCRIPTION_CHANGED` event without description text, and reloads before commit. Validation, missing, stale and no-op requests write nothing; update, event or reload failure rolls back. `EditTicketDescriptionDialog` preloads multiline text or an empty editor for NULL, retains drafts after failure, blocks duplicate submission and close during a write, and gives stale reload guidance. `TicketWorkspace` reuses shared worker and post-save detail/queue refresh, preserving save acknowledgment after later read failure. Filters, page, open detail and activity drafts remain; the four detail actions use a two-row grid. No schema, migration, index, dependency, other ticket edit, search or Knowledge change was included.
+
+## Slice 032 Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration ran with `QT_QPA_PLATFORM=offscreen`; native validation used `windows` and isolated synthetic SQLite.
+
+| Suite | Command | Candidate result |
+|---|---|---|
+| Focused ticket reads/workspace | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Integration.test_ticket_workspace_flow` | PASS — 50 tests, exit 0 |
+| Affected ticket set | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Database.test_ticket_service Tests.Database.test_ticket_repository Tests.GUI.test_main_window Tests.Integration.test_ticket_workspace_flow` | PASS — 66 tests, exit 0 |
+| Database | `python -B -m unittest discover -s Tests\Database -p 'test_*.py'` | RETAINED PASS — 352 tests, exit 0; inputs unchanged by later GUI-only layout correction |
+| GUI | `python -B -m unittest discover -s Tests\GUI -p 'test_*.py'` | PASS — 153 tests, exit 0 after two-row layout correction |
+| Integration | `python -B -m unittest discover -s Tests\Integration -p 'test_*.py'` | PASS — 116 tests, exit 0 after two-row layout correction |
+
+Full regression: **621 PASS**, zero failures or errors on the completed suite runs. The Database result is retained after the GUI-only layout correction because its service, repository, tests, schema and other relevant inputs stayed unchanged; focused, affected, GUI and Integration checks passed after that correction. Isolated SQLite tests cover add/change/clear of multiline description, exact NULL/stale checks before no-op, same-millisecond timestamp advancement, one text-free event, update/event/reload rollback, unrelated data and relationship preservation, integrity and foreign keys. Integration covers Cancel, prefill, draft retention, busy protection, committed-save read failures and retry without duplicate write, filter/draft/page retention. Expected negative-path logs had successful unittest results and exit 0. The initial full GUI run had three 1000×700 width failures because four detail buttons occupied one row; a two-row grid fixed the cause, the three focused layout checks passed, and the entire GUI suite passed on rerun.
+
+Native Windows: PASS — actual `windows` Qt platform with MainWindow at 1000×700 after observable worker idle. A synthetic ticket description was changed to multiline text; an injected post-commit queue validation failure kept **Description saved**, refresh failure and retry guidance visible. Refresh recovered the queue without a second description update. The [dialog](C:/Users/Jo/AppData/Local/Temp/f7-s032-description-dialog.png), [saved detail](C:/Users/Jo/AppData/Local/Temp/f7-s032-description-saved.png), [post-commit failure](C:/Users/Jo/AppData/Local/Temp/f7-s032-description-refresh-failed.png), and [recovery](C:/Users/Jo/AppData/Local/Temp/f7-s032-description-recovered.png) captures were opened and inspected without observed clipping or overlap. This validates the tested Windows environment, not every display scale.
+
+## Slice 032 Delivery Gate
+
+Production scope is the ticket repository, service, Saved Tickets workspace and one focused dialog; tests are the ticket read and workspace flow files. Affected canonical owners are Features, User Workflows, GUI, Database architecture, Python architecture, Roadmap, Todo, ChangeLog and this report. Physical SQL Schema, ERD, system architecture, AHK and PowerShell remain unaffected by this no-schema/no-dependency edit. The next gate is independent read-only review of the exact unstaged candidate; self-review does not grant integration approval.
+
+---
+
+## Prior Slice 031 handoff snapshot (historical; Slice 031 later merged through PR #32)
+
 Current candidate: **Slice 031 — Edit a Saved Ticket Priority**, on `feature/ticket-priority-edit-s031` in `C:\Dev\F7Hub`. The approved base and branch HEAD are `32970e06ca9c5ca481d06cd4833e383b51f01ee3`, equal to freshly fetched `origin/main` at the implementation baseline gate. The initial checkout, index and untracked set were clean. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
 
 Status: **PASS — READY_FOR_REVIEW** after implementation, testing, documentation and self-review. Changes are unstaged and uncommitted; no push, PR or integration was performed. The prior Slice 030 claim below that rereview is pending is **STALE HANDOFF METADATA**: live `main` includes its PR #31 merge at `32970e0`. The prior report is retained below as a historical candidate snapshot.

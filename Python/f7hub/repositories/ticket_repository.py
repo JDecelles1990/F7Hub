@@ -353,6 +353,20 @@ class TicketRepositoryTransaction:
         )
         return cursor.rowcount == 1
 
+    def update_ticket_description(
+        self, ticket_id: int, *, expected_description: str | None,
+        expected_updated_at: str, description: str | None, updated_at: str,
+    ) -> bool:
+        """Change only description and activity time under null-safe guards."""
+
+        cursor = self._connection.execute(
+            "UPDATE tickets SET description = ?, updated_at = ? "
+            "WHERE ticket_id = ? AND description IS ? AND updated_at = ?",
+            (description, updated_at, ticket_id,
+             expected_description, expected_updated_at),
+        )
+        return cursor.rowcount == 1
+
     def create_ticket(
         self,
         *,
