@@ -6,6 +6,8 @@ Verify the canonical root C:\Dev\F7Hub (or an explicitly justified checkout), br
 
 Before implementation, recheck the approved baseline. Normally begin from clean main and create one feature branch. If baseline changed, inspect the delta and obtain any necessary plan revision before editing. Do not assume a previous fetch is current. Preserve unrelated changes; document protected paths and content identity where needed. Unknown untracked files require inspection/classification; never include them by default. Unexpected pre-staged content blocks staging until an explicitly authorized resolution exists.
 
+When worktree topology is nontrivial, report the canonical workspace, feature workspace/worktree and branch, protected/recovery branch if any, remote main, and workspace containing the current implementation candidate. A preservation/recovery branch is not a feature-integration candidate without its own explicit review and authorization.
+
 Never use destructive recovery to simplify state. Do not automatically use git reset --hard, git clean, git rebase, force push, stash apply/pop, branch deletion, or worktree deletion. These need specific task authorization after inspection. No reset, clean, restore, or stash operation merely to obtain cleanliness. Do not alter Git configuration or line-ending policy to bypass a gate.
 
 ## Bind approval and authorization
@@ -23,13 +25,19 @@ Check [token pressure](token-continuity.md) before each atomic operation. Only A
 3. Audit git diff --cached --name-status, the full cached diff, git diff --cached --check, and status. Confirm exact expected path/content identity, protected exclusions, and no omitted intended changes. Stop on mismatch; do not automatically unstage user content.
 4. Create one atomic feature commit containing the approved production/tests/docs scope. Verify commit SHA, parent, tree and changed files. If a commit may already exist, use the recovery procedure below before creating another.
 5. Push normally to the intended remote feature branch. Verify the live remote SHA equals the feature commit. No force push.
-6. Apply the PR discovery and disposition rules below before creating or reusing a PR: discover the same repository/feature head across all bases and states first, then validate the base. Verify PR target main, head SHA, commits and exact changed-file/content scope. Check applicable required checks, conflicts and mergeability; do not bypass project protection rules.
+6. Apply the PR discovery and disposition rules below before creating or reusing a PR: discover the same repository/feature head across all bases and states first, then validate the base. Verify PR target main, head SHA, commits and exact changed-file/content scope. Classify checks using the rule below; verify conflicts and mergeability without bypassing project protection rules.
 7. Fetch origin and recheck main freshness and PR head immediately before merging. Main advancement enters INTEGRATION_BLOCKED. Default is NORMAL MERGE COMMIT, never squash/rebase unless project policy explicitly changes. Use an available expected-head guard; do not assume a precheck eliminates races. Verify the actual result.
 8. Verify PR is merged and identify merge SHA. Fetch origin; verify the merge exists, its parents and approved feature-commit ancestry, and its presence in origin/main. Check resulting content against the reviewed candidate and approved base. A clean merge with unchanged reviewed content and base may retain prior test evidence; Git verification remains fresh.
 9. Conflict resolution or changed resulting content requires renewed affected validation and independent review; do not resolve it silently in the integration phase. If discovered after merge, do not claim CLOSED: enter INTEGRATION_BLOCKED, record actual merged state, and seek an authorized correction without destructive rollback. A main race or other unexpected parent/content also requires reconciliation before closure.
 10. When safe, return the local workspace to main, use git pull --ff-only, and verify HEAD == freshly verified origin/main. Verify merge/feature ancestry and final preservation/status. Do not delete branches/worktrees as implicit cleanup. Normally end clean; protected unrelated work is preserved and any verified exception is reported. Unresolved synchronization prevents CLOSED.
 
 Use [integration report](../templates/integration-report.md). If network/auth/required evidence is unavailable, report BLOCKED/INTEGRATION_BLOCKED, never infer success.
+
+## Check results and shell-safe identity
+
+Classify check evidence as NO CHECKS CONFIGURED, CHECK QUERY FAILED, or CHECKS FAILED when applicable. A nonzero `gh pr checks` result alone does not distinguish them: corroborate an empty result with PR check/rollup data and effective branch rules or protection. NO CHECKS CONFIGURED is not CI PASS; an unresolved query failure or failed required check blocks integration.
+
+In PowerShell, use `git show -s --format=%T <commit-sha>` for a tree, `git show -s --format=%P <merge-sha>` for parents, and `git diff --name-status <base-sha> <candidate-sha>` for path scope. Compare the returned identities with the reviewed candidate; shell-safe commands supplement, rather than replace, content and scope checks.
 
 ## PR discovery and disposition
 

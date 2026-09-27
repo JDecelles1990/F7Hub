@@ -29,6 +29,7 @@ Use [token continuity](../references/token-continuity.md). Save under the enviro
 - Staged files / cached diff identity:
 - Untracked files:
 - Protected unrelated paths and preservation evidence:
+- Workspace topology when nontrivial: canonical workspace / feature worktree and branch / protected or recovery branch / remote main / current candidate workspace:
 
 ## Approved Scope
 
@@ -61,6 +62,7 @@ Use [token continuity](../references/token-continuity.md). Save under the enviro
 
 - Completed:
 - Pending:
+- STALE HANDOFF METADATA, if material: documented claim / verified live state / disposition (do not repair during read-only recovery):
 
 ## Review
 
