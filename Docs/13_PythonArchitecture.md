@@ -839,6 +839,8 @@ Slice 029 extends those reads with optional `ticket_type=None`. The service vali
 
 Slice 030 adds `TicketService.update_ticket_subject(ticket_id, *, expected_subject, expected_updated_at, subject)`. It validates the ID and text, then checks both loaded-state values inside `TicketRepository.transaction()` before considering a no-op. A changed value receives a strictly later UTC activity timestamp, a conditional repository update, one `SUBJECT_CHANGED` timeline event without subject content, and an authoritative reload before commit. Missing and stale tickets have typed validation errors; SQLite failures receive a safe update error. `EditTicketSubjectDialog` follows the existing asynchronous edit-dialog pattern and calls only the service through `ServiceTaskRunner`. `TicketWorkspace` reuses its post-save detail/queue reload path and reports a committed save separately from a failed later read. No generic editor or schema change is added.
 
+Slice 031 adds `TicketService.update_ticket_priority(ticket_id, *, expected_priority, expected_updated_at, priority)` on the same transaction and timestamp path. It validates against `TICKET_PRIORITIES`, checks loaded state before no-op, conditionally updates priority/activity time, adds one `PRIORITY_CHANGED` event, and reloads before commit. `EditTicketPriorityDialog` uses those authoritative choices and the shared `ServiceTaskRunner`; `TicketWorkspace` reuses its post-save detail/queue refresh and retains filters when a changed ticket leaves the queue. No generic editor, schema object or dependency is added.
+
 ---
 
 # 31. Domain Package

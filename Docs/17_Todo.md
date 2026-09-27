@@ -553,7 +553,15 @@ Slice 030 — edit one saved-ticket subject, implemented and validated 2026-09-2
 - [x] Add asynchronous Edit subject dialog with draft preservation, stale reload instruction and committed-save recovery after failed refresh.
 - [x] Correct the independent-review finding: every post-commit queue refresh failure retains the saved-subject acknowledgment and Refresh retry guidance, including validation errors; ordinary queue errors retain their existing feedback.
 - [x] Revalidate focused 34, affected 50, and full Database 345 + GUI 153 + Integration 107 = 605 tests; inspect native Windows 1000×700 post-commit failure and recovery.
-- [ ] Independent read-only rereview of the corrected exact unstaged candidate; no commit, push or integration is authorized.
+- [x] Independently rereview and integrate Slice 030; merged on `main` through PR #31 at `32970e0`. The preceding candidate report is historical.
+
+Slice 031 — edit one saved-ticket priority, implemented and validated 2026-09-27:
+
+- [x] Validate loaded priority and timestamp before no-op; atomically update only priority/activity time and add one value-free timeline event.
+- [x] Add asynchronous Edit priority dialog with authoritative choices, stale reload instruction, retained selection, busy protection and committed-save recovery after failed reads.
+- [x] Preserve Status/Priority/Type filters and open detail when a priority edit removes the row from its active queue filter.
+- [x] Validate focused 42, affected 58, and full Database 349 + GUI 153 + Integration 111 = 613 tests; inspect native Windows 1000×700 captures.
+- [ ] Independent read-only review of the exact unstaged Slice 031 candidate; no staging, commit, push, PR or integration is authorized.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 

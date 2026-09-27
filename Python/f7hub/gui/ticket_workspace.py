@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (
 
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.edit_ticket_subject_dialog import EditTicketSubjectDialog
+from f7hub.gui.edit_ticket_priority_dialog import EditTicketPriorityDialog
 from f7hub.gui.ticket_knowledge_widget import TicketKnowledgeWidget
 from f7hub.services.ticket_service import (
     TICKET_NOTE_TYPES, TICKET_PRIORITIES, TICKET_STATUSES, TICKET_TYPES,
@@ -68,6 +69,7 @@ class TicketWorkspace(QWidget):
         self._retry_offset = None
         self._knowledge_link_service = knowledge_link_service
         self._edit_subject_dialog = None
+        self._edit_priority_dialog = None
         self._build_ui()
 
     def _build_ui(self):
@@ -205,8 +207,11 @@ class TicketWorkspace(QWidget):
         self.reload_button.clicked.connect(lambda: self.open_ticket(self.details.ticket.ticket_id) if self.details else None)
         self.edit_subject_button = QPushButton("Edit subject", self.detail_panel)
         self.edit_subject_button.clicked.connect(self.open_edit_subject)
+        self.edit_priority_button = QPushButton("Edit priority", self.detail_panel)
+        self.edit_priority_button.clicked.connect(self.open_edit_priority)
         detail_actions = QHBoxLayout()
         detail_actions.addWidget(self.edit_subject_button)
+        detail_actions.addWidget(self.edit_priority_button)
         detail_actions.addWidget(self.reload_button)
         detail_layout.addLayout(detail_actions)
         self.detail_panel.setEnabled(False)
@@ -389,7 +394,9 @@ class TicketWorkspace(QWidget):
         self.status_input.setCurrentIndex(0)
 
     def open_edit_subject(self):
-        if self.details is None or self._runner.busy or self._edit_subject_dialog is not None:
+        if (self.details is None or self._runner.busy
+                or self._edit_subject_dialog is not None
+                or self._edit_priority_dialog is not None):
             return None
         ticket = self.details.ticket
         dialog = EditTicketSubjectDialog(self._service, self._runner, ticket, self)
@@ -405,6 +412,26 @@ class TicketWorkspace(QWidget):
             self.feedback.setText("Subject unchanged.")
             return
         self._reload_after_save(updated.ticket_id, "Subject saved.")
+
+    def open_edit_priority(self):
+        if (self.details is None or self._runner.busy
+                or self._edit_priority_dialog is not None
+                or self._edit_subject_dialog is not None):
+            return None
+        ticket = self.details.ticket
+        dialog = EditTicketPriorityDialog(self._service, self._runner, ticket, self)
+        self._edit_priority_dialog = dialog
+        dialog.finished.connect(lambda _result: setattr(self, "_edit_priority_dialog", None))
+        dialog.priority_updated.connect(lambda updated: self._priority_updated(ticket, updated))
+        dialog.open()
+        return dialog
+
+    def _priority_updated(self, previous, updated):
+        if (updated.priority == previous.priority
+                and updated.updated_at == previous.updated_at):
+            self.feedback.setText("Priority unchanged.")
+            return
+        self._reload_after_save(updated.ticket_id, "Priority saved.")
 
     def add_note(self):
         if self.details is None or self._runner.busy:

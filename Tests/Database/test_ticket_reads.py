@@ -1,4 +1,5 @@
 from contextlib import closing
+from dataclasses import replace
 from pathlib import Path
 import sqlite3
 import tempfile
@@ -11,7 +12,7 @@ from f7hub.repositories.ticket_repository import TicketRepositoryTransaction
 from f7hub.repositories.knowledge_repository import KnowledgeRepository
 from f7hub.services.ticket_service import (
     TicketService, TicketValidationError, TicketReadError, TicketNotFoundError,
-    TicketEditConflictError, TicketUpdateError,
+    TicketEditConflictError, TicketUpdateError, TICKET_PRIORITIES,
 )
 
 
@@ -227,6 +228,151 @@ class TicketReadTests(unittest.TestCase):
                 self.service.update_ticket_subject(ticket.ticket_id, **args)
         with closing(sqlite3.connect(self.path)) as connection:
             self.assertEqual(tuple(connection.iterdump()), before)
+
+    def test_priority_edit_transitions_preserve_other_data_and_relationships(self):
+        ticket = self.service.create_ticket(
+            subject="Printer offline", ticket_type="TASK", priority="LOW",
+            description="Original description", assigned_to="Technician", source="Manual",
+        )
+        self.service.add_note(ticket.ticket_id, note_text="Existing note")
+        self.service.change_status(ticket.ticket_id, new_status="RESOLVED", resolution="Fixed")
+        self.service.change_status(ticket.ticket_id, new_status="CLOSED")
+        article = KnowledgeRepository(self.path).create_article(
+            article_code="KB-PRIORITY-31", title="Guide", summary=None,
+            body_markdown="Body", created_at=ticket.created_at, updated_at=ticket.updated_at,
+        )
+        current = self.repo.get_ticket(ticket.ticket_id)
+        with closing(sqlite3.connect(self.path)) as connection:
+            connection.execute(
+                "INSERT INTO ticket_knowledge_articles "
+                "(ticket_id, knowledge_article_id, linked_at) VALUES (?, ?, ?)",
+                (ticket.ticket_id, article.knowledge_article_id, current.updated_at),
+            )
+            connection.commit()
+        before_details = self.service.get_ticket_details(ticket.ticket_id)
+        for priority in sorted(TICKET_PRIORITIES - {"LOW"}) + ["LOW"]:
+            with self.subTest(priority=priority):
+                previous = current
+                current = self.service.update_ticket_priority(
+                    ticket.ticket_id, expected_priority=previous.priority,
+                    expected_updated_at=previous.updated_at, priority=priority,
+                )
+                self.assertEqual(current, replace(previous, priority=priority,
+                                                  updated_at=current.updated_at))
+                self.assertGreater(current.updated_at, previous.updated_at)
+        details = self.service.get_ticket_details(ticket.ticket_id)
+        self.assertEqual(details.ticket, current)
+        self.assertEqual(details.notes, before_details.notes)
+        self.assertEqual(details.status_history, before_details.status_history)
+        events = [event for event in details.timeline_events
+                  if event.event_type == "PRIORITY_CHANGED"]
+        self.assertEqual(len(events), len(TICKET_PRIORITIES))
+        self.assertTrue(all(event.details is None and event.metadata_json is None
+                            and event.title == "Ticket priority changed" for event in events))
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(connection.execute(
+                "SELECT COUNT(*) FROM ticket_knowledge_articles WHERE ticket_id = ?",
+                (ticket.ticket_id,),
+            ).fetchone(), (1,))
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
+    def test_priority_edit_rejects_invalid_missing_and_stale_before_no_op(self):
+        ticket = self.service.create_ticket(subject="Original", priority="MEDIUM")
+        args = dict(expected_priority=ticket.priority, expected_updated_at=ticket.updated_at)
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        for value in (0, -1, True, None):
+            with self.subTest(ticket_id=value), self.assertRaises(TicketValidationError):
+                self.service.update_ticket_priority(value, priority="HIGH", **args)
+        for value in ("", "medium", "HIGH' OR 1=1 --", True, None, 42):
+            with self.subTest(priority=value), self.assertRaises(TicketValidationError):
+                self.service.update_ticket_priority(ticket.ticket_id, priority=value, **args)
+        for field, value in (("expected_priority", "UNKNOWN"),
+                             ("expected_updated_at", "")):
+            with self.subTest(field=field), self.assertRaises(TicketValidationError):
+                self.service.update_ticket_priority(
+                    ticket.ticket_id, priority="HIGH", **(args | {field: value}),
+                )
+        with self.assertRaises(TicketNotFoundError):
+            self.service.update_ticket_priority(999, priority="HIGH", **args)
+        for expected in (args | {"expected_priority": "LOW"},
+                         args | {"expected_updated_at": "2020-01-01T00:00:00.000Z"}):
+            with self.subTest(expected=expected), self.assertRaises(TicketEditConflictError):
+                self.service.update_ticket_priority(ticket.ticket_id, priority="MEDIUM", **expected)
+        self.assertEqual(self.service.update_ticket_priority(ticket.ticket_id,
+                         priority="MEDIUM", **args), ticket)
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+
+    def test_every_priority_transition_is_allowed(self):
+        for initial in TICKET_PRIORITIES:
+            for destination in TICKET_PRIORITIES - {initial}:
+                with self.subTest(initial=initial, destination=destination):
+                    ticket = self.service.create_ticket(
+                        subject=f"{initial} to {destination}", priority=initial,
+                    )
+                    updated = self.service.update_ticket_priority(
+                        ticket.ticket_id, expected_priority=initial,
+                        expected_updated_at=ticket.updated_at, priority=destination,
+                    )
+                    self.assertEqual(updated.priority, destination)
+                    self.assertEqual([event.event_type for event in
+                                      self.repo.list_timeline_events(ticket.ticket_id)]
+                                     .count("PRIORITY_CHANGED"), 1)
+
+    def test_priority_edit_advances_same_millisecond_and_rolls_back_failures(self):
+        ticket = self.service.create_ticket(subject="Old", priority="LOW")
+        from datetime import datetime
+        fixed = datetime.fromisoformat(ticket.updated_at.replace("Z", "+00:00"))
+        service = TicketService(self.repo, clock=lambda: fixed)
+        args = dict(expected_priority=ticket.priority, expected_updated_at=ticket.updated_at,
+                    priority="HIGH")
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        with patch.object(TicketRepositoryTransaction, "update_ticket_priority",
+                          side_effect=sqlite3.OperationalError("private")):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_priority(ticket.ticket_id, **args)
+        with patch.object(TicketRepositoryTransaction, "update_ticket_priority", return_value=False):
+            with self.assertRaises(TicketEditConflictError):
+                service.update_ticket_priority(ticket.ticket_id, **args)
+        with patch.object(TicketRepositoryTransaction, "create_timeline_event",
+                          side_effect=sqlite3.OperationalError("private")):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_priority(ticket.ticket_id, **args)
+        original_get = TicketRepositoryTransaction.get_ticket
+        reads = 0
+
+        def fail_second_read(transaction, ticket_id):
+            nonlocal reads
+            reads += 1
+            if reads == 2:
+                raise sqlite3.OperationalError("private")
+            return original_get(transaction, ticket_id)
+
+        with patch.object(TicketRepositoryTransaction, "get_ticket", fail_second_read):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_priority(ticket.ticket_id, **args)
+        reads = 0
+
+        def lose_second_read(transaction, ticket_id):
+            nonlocal reads
+            reads += 1
+            if reads == 2:
+                return None
+            return original_get(transaction, ticket_id)
+
+        with patch.object(TicketRepositoryTransaction, "get_ticket", lose_second_read):
+            with self.assertRaises(TicketUpdateError):
+                service.update_ticket_priority(ticket.ticket_id, **args)
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+        edited = service.update_ticket_priority(ticket.ticket_id, **args)
+        self.assertGreater(edited.updated_at, ticket.updated_at)
+        self.assertEqual(edited.priority, "HIGH")
+        self.assertEqual([event.event_type for event in self.repo.list_timeline_events(ticket.ticket_id)]
+                         .count("PRIORITY_CHANGED"), 1)
 
     def test_exact_number_lookup_reloads_current_details_without_writing(self):
         ticket = self.service.create_ticket(subject="Read by number", ticket_number="INC-2042")

@@ -296,6 +296,8 @@ Slice 029 adds **Type** below Priority: All types, Incident, Service request, Pr
 
 Slice 030 adds **Edit subject** beside Reload ticket for a loaded saved ticket. The dialog starts with the current subject; Cancel makes no change. Save trims surrounding whitespace and requires text. Unchanged input writes nothing. An edit based on an old subject or update time is rejected with an instruction to reload, including when the submitted text matches the current subject. Save errors retain the entered text for retry. A committed change reloads detail and the queue; if either read fails, F7Hub still reports that the subject was saved and offers Reload ticket or Refresh to recover. Existing note and status drafts remain intact.
 
+Slice 031 adds **Edit priority** for a loaded saved ticket. The dialog selects its current priority; Cancel and an unchanged choice write nothing. A stale priority or update time requires Reload ticket before retry, even when the requested value matches the current row. Save errors keep the selected value. A committed change reloads detail and the queue, retains Status/Priority/Type filters and activity drafts, and remains acknowledged if a later read fails. If the ticket no longer matches the selected Priority filter, its queue row disappears while its saved detail stays open.
+
 ## Related Resources May Include
 
 - related tickets

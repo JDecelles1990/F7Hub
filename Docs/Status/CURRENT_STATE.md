@@ -2,6 +2,40 @@
 
 Last verified: 2026-09-27 (America/Toronto).
 
+Current candidate: **Slice 031 — Edit a Saved Ticket Priority**, on `feature/ticket-priority-edit-s031` in `C:\Dev\F7Hub`. The approved base and branch HEAD are `32970e06ca9c5ca481d06cd4833e383b51f01ee3`, equal to freshly fetched `origin/main` at the implementation baseline gate. The initial checkout, index and untracked set were clean. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
+
+Status: **PASS — READY_FOR_REVIEW** after implementation, testing, documentation and self-review. Changes are unstaged and uncommitted; no push, PR or integration was performed. The prior Slice 030 claim below that rereview is pending is **STALE HANDOFF METADATA**: live `main` includes its PR #31 merge at `32970e0`. The prior report is retained below as a historical candidate snapshot.
+
+## Slice 031 Result and Scope
+
+`TicketService.update_ticket_priority(ticket_id, *, expected_priority, expected_updated_at, priority)` validates the positive ID and existing `TICKET_PRIORITIES` domain. Inside `TicketRepository.transaction()`, it compares authoritative priority and exact update time before no-op; a real edit uses a bound guarded UPDATE of only priority and a strictly later UTC `updated_at`, adds one `PRIORITY_CHANGED` event without priority values, and reloads before commit. Missing/stale/invalid/no-op requests write nothing; failed update, event or reload rolls back. Corrections are allowed in every ticket status. `EditTicketPriorityDialog` preselects the loaded value, retains selection after failed save, blocks duplicate submission and unsafe close during a write, and gives reload guidance for stale state. `TicketWorkspace` reuses the shared worker and post-save detail/queue refresh. A failed later read retains saved acknowledgment and retry guidance. If the new priority excludes the ticket from the current queue filter, the row disappears while saved detail and Status/Priority/Type filters remain. No schema, migration, index, dependency, other ticket edit, search or Knowledge change was included.
+
+## Slice 031 Fresh Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration ran with `QT_QPA_PLATFORM=offscreen`; native validation used the `windows` platform and isolated synthetic SQLite.
+
+| Suite | Command | Final-candidate result |
+|---|---|---|
+| Focused ticket reads/workspace | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Integration.test_ticket_workspace_flow` | PASS — 42 tests, exit 0 |
+| Affected ticket set | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Database.test_ticket_service Tests.Database.test_ticket_repository Tests.GUI.test_main_window Tests.Integration.test_ticket_workspace_flow` | PASS — 58 tests, exit 0 |
+| Database | `python -B -m unittest discover -s Tests\Database -p 'test_*.py'` | PASS — 349 tests, exit 0 |
+| GUI | `python -B -m unittest discover -s Tests\GUI -p 'test_*.py'` | PASS — 153 tests, exit 0 |
+| Integration | `python -B -m unittest discover -s Tests\Integration -p 'test_*.py'` | PASS — 111 tests, exit 0 |
+
+Full regression: **613 PASS**, zero failures or errors; focused and affected results overlap the full suites. Real SQLite checks cover every valid priority pair, invalid and missing requests, stale priority/time before no-op, same-millisecond advancement, one value-free event, rollback after update/event/reload failure, unrelated fields/notes/status history/Knowledge link preservation, `integrity_check = ok` and zero foreign-key violations. Integration covers Cancel, authoritative choices, retained selection, stale/busy feedback, committed-save feedback after detail and three queue error categories, retry without duplicate write, and filter exit with open detail retained. Expected negative-path logs had successful unittest results and exit 0.
+
+Native Windows: PASS — actual `windows` Qt platform with MainWindow at 1000×700 after observable worker idle. An isolated saved ticket was edited from Medium to High; an injected post-commit queue validation failure left **Priority saved**, refresh failure and retry guidance readable. Refresh recovered the queue. Changing High to Low under the selected High filter removed its row and kept Low detail open. The [dialog](C:/Users/Jo/AppData/Local/Temp/f7-s031-priority-dialog.png), [post-commit failure](C:/Users/Jo/AppData/Local/Temp/f7-s031-priority-refresh-failed.png) and [filter exit](C:/Users/Jo/AppData/Local/Temp/f7-s031-priority-filter-exit.png) captures were opened and inspected without observed clipping or overlap. This validates the tested Windows environment, not every display scale.
+
+## Slice 031 Delivery Gate
+
+Implementation self-review found no blocking defect. Production scope is the ticket repository, service, Saved Tickets workspace and one focused dialog; tests are the ticket read and workspace flow files. Affected canonical owners are Features, User Workflows, GUI, Database architecture, Python architecture, Roadmap, Todo, ChangeLog and this report. Product requirement FR-TICKET-003 remains broader than these two edit slices. Physical SQL Schema, ERD, system architecture, AHK and PowerShell owners were inspected or considered but have no behavior change. The next gate is independent read-only review of the exact unstaged candidate; self-review does not grant integration approval.
+
+Exact candidate scope: modified `Python/f7hub/repositories/ticket_repository.py`, `Python/f7hub/services/ticket_service.py`, `Python/f7hub/gui/ticket_workspace.py`, `Tests/Database/test_ticket_reads.py`, `Tests/Integration/test_ticket_workspace_flow.py`, `Docs/03_Features.md`, `Docs/04_UserWorkflows.md`, `Docs/05_GUI.md`, `Docs/07_Database.md`, `Docs/13_PythonArchitecture.md`, `Docs/16_Roadmap.md`, `Docs/17_Todo.md`, `Docs/18_ChangeLog.md` and this file; created untracked `Python/f7hub/gui/edit_ticket_priority_dialog.py`. No staged or deleted paths. Native captures were taken after final production and test bytes stabilized.
+
+---
+
+## Prior Slice 030 handoff snapshot (historical; Slice 030 later merged through PR #31)
+
 Current candidate: **Slice 030 — Edit a Saved Ticket Subject**, on `feature/ticket-subject-edit-s030` in `C:\Dev\F7Hub`. Approved base and branch HEAD are `cdd49fac734d6bedfecf58aacfea4846b8a6e79d`, equal to fetched `origin/main` at the implementation baseline gate. The checkout, index and untracked set were initially clean. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
 
 Status: **PASS — READY_FOR_REVIEW after correction**, with independent read-only rereview pending. The first independent review found a post-commit queue-refresh feedback defect; the previous review decision is invalidated by this correction. Authorization covered the bounded correction, testing and documentation only. The candidate remains unstaged and uncommitted; no push, PR or integration was performed. The prior Slice 029 Todo/current-state claim that rereview was pending is **STALE HANDOFF METADATA**: live `main` includes its PR #30 merge at `cdd49fa`. The previous report below is retained as a historical handoff snapshot.

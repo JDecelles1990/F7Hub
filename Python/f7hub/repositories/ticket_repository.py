@@ -340,6 +340,19 @@ class TicketRepositoryTransaction:
         )
         return cursor.rowcount == 1
 
+    def update_ticket_priority(
+        self, ticket_id: int, *, expected_priority: str,
+        expected_updated_at: str, priority: str, updated_at: str,
+    ) -> bool:
+        """Change only priority and activity time under loaded-state guards."""
+
+        cursor = self._connection.execute(
+            "UPDATE tickets SET priority = ?, updated_at = ? "
+            "WHERE ticket_id = ? AND priority = ? AND updated_at = ?",
+            (priority, updated_at, ticket_id, expected_priority, expected_updated_at),
+        )
+        return cursor.rowcount == 1
+
     def create_ticket(
         self,
         *,
