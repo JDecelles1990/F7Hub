@@ -149,6 +149,8 @@ Slice 032 adds one optional multiline description correction workflow on the exi
 
 Slice 033 adds one saved-ticket type correction workflow on the same writer, timeline and GUI worker path. The four existing types are authoritative; current type is visible in details and a changed ticket can leave the selected Type queue while its updated detail remains open. Other ticket edits and ticket search remain separate work; no migration or dependency is added.
 
+Slice 034 adds bounded Saved Tickets subject search on the existing read-only list path. Literal substring matching composes with Status, Priority and Type while preserving queue ordering, paging, drafts and open detail. This advances ticket search without starting universal search, FTS, another ticket editor or a schema change.
+
 The F7Hub roadmap is organized into:
 
 ```text

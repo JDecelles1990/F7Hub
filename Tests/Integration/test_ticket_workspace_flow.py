@@ -174,6 +174,166 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         self.assertFalse(self.workspace.previous_button.isEnabled())
         self.assertFalse(self.workspace.next_button.isEnabled())
 
+    def test_subject_search_submit_draft_paging_filters_number_open_and_clear(self):
+        older = self.service.create_ticket(subject="Printer paper")
+        newer = self.service.create_ticket(subject="PRINTER spooler")
+        self.service.create_ticket(subject="Different issue")
+        self.workspace.PAGE_SIZE = 1
+        self.workspace.status_filter.setCurrentIndex(self.workspace.status_filter.findData("NEW"))
+        self.wait_idle()
+        self.workspace.priority_filter.setCurrentIndex(self.workspace.priority_filter.findData("MEDIUM"))
+        self.wait_idle()
+        self.workspace.type_filter.setCurrentIndex(self.workspace.type_filter.findData("INCIDENT"))
+        self.wait_idle()
+        previous_rows = self.workspace.model.tickets
+        self.workspace.subject_search_input.setText("Printer")
+        self.assertEqual(self.workspace.model.tickets, previous_rows)
+        self.assertIsNone(self.workspace._subject_query)
+        QTest.keyClick(self.workspace.subject_search_input, Qt.Key.Key_Return)
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+        self.assertEqual(self.workspace.model.tickets, (self.repository.get_ticket(newer.ticket_id),))
+        self.assertTrue(self.workspace.next_button.isEnabled())
+        self.workspace.subject_search_input.setText("Different")
+        self.workspace.next_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.assertEqual(self.workspace.model.tickets, (self.repository.get_ticket(older.ticket_id),))
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, (self.repository.get_ticket(older.ticket_id),))
+        self.workspace.ticket_number_input.setText(self.repository.get_ticket(self.ticket_id).ticket_number)
+        self.workspace.open_number_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace._subject_query, "Printer")
+        self.assertEqual(self.workspace.subject_search_input.text(), "Different")
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.assertEqual(self.workspace.status_filter.currentData(), "NEW")
+        self.assertEqual(self.workspace.priority_filter.currentData(), "MEDIUM")
+        self.assertEqual(self.workspace.type_filter.currentData(), "INCIDENT")
+        self.workspace.search_subjects_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace._subject_query, "Different")
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+        self.assertEqual(self.workspace.model.rowCount(), 1)
+        self.workspace.clear_subject_search_button.click()
+        self.wait_idle()
+        self.assertIsNone(self.workspace._subject_query)
+        self.assertEqual(self.workspace.subject_search_input.text(), "")
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+        self.assertEqual(self.workspace.status_filter.currentData(), "NEW")
+        self.assertEqual(self.workspace.priority_filter.currentData(), "MEDIUM")
+        self.assertEqual(self.workspace.type_filter.currentData(), "INCIDENT")
+
+    def test_subject_search_failed_request_and_refresh_retain_queue_detail_draft_and_retry(self):
+        self.service.create_ticket(subject="Printer second")
+        self.workspace.PAGE_SIZE = 1
+        self.workspace.refresh_list(offset=0)
+        self.wait_idle()
+        old_rows = self.workspace.model.tickets
+        self.workspace.note_input.setPlainText("Keep note draft")
+        self.workspace.subject_search_input.setText("Printer")
+        with patch.object(self.service, "list_tickets", side_effect=TicketReadError("read failed")):
+            self.workspace.search_subjects_button.click()
+            self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, old_rows)
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep note draft")
+        self.assertEqual(self.workspace.subject_search_input.text(), "Printer")
+        self.assertEqual(self.workspace._subject_query, "Printer")
+        self.assertEqual(self.workspace._retry_offset, 0)
+        self.assertIn("Use Refresh to retry", self.workspace.feedback.text())
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.rowCount(), 1)
+        self.assertTrue(self.workspace.next_button.isEnabled())
+        first_page = self.workspace.model.tickets
+        with patch.object(self.service, "list_tickets", side_effect=TicketReadError("read failed")):
+            self.workspace.next_button.click()
+            self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, first_page)
+        self.assertEqual(self.workspace._retry_offset, 1)
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep note draft")
+        rows = self.workspace.model.tickets
+        with patch.object(self.service, "list_tickets", side_effect=TicketReadError("read failed")):
+            self.workspace.refresh_button.click()
+            self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, rows)
+        self.assertEqual(self.workspace._retry_offset, 1)
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, rows)
+
+    def test_subject_search_controls_block_duplicate_requests_while_busy(self):
+        self.workspace.subject_search_input.setText("Printer")
+        started = threading.Event()
+        release = threading.Event()
+        original = self.service.list_tickets
+        calls = []
+
+        def delayed_read(**kwargs):
+            calls.append(kwargs["subject_query"])
+            started.set()
+            if not release.wait(5):
+                raise TimeoutError("Subject read gate timed out")
+            return original(**kwargs)
+
+        try:
+            with patch.object(self.service, "list_tickets", side_effect=delayed_read):
+                self.workspace.search_subjects_button.click()
+                self.assertTrue(started.wait(5))
+                self.assertFalse(self.workspace.subject_search_input.isEnabled())
+                self.assertFalse(self.workspace.search_subjects_button.isEnabled())
+                self.assertFalse(self.workspace.clear_subject_search_button.isEnabled())
+                self.workspace.search_subjects()
+                self.workspace.clear_subject_search()
+                release.set()
+                self.wait_idle()
+        finally:
+            release.set()
+        self.assertEqual(calls, ["Printer"])
+        self.assertEqual(self.workspace._subject_query, "Printer")
+
+    def test_subject_edit_can_exit_active_subject_search_without_losing_detail_or_draft(self):
+        ticket = self.workspace.details.ticket
+        self.workspace.note_input.setPlainText("Keep note draft")
+        self.workspace.status_filter.setCurrentIndex(self.workspace.status_filter.findData("NEW"))
+        self.wait_idle()
+        self.workspace.priority_filter.setCurrentIndex(self.workspace.priority_filter.findData("MEDIUM"))
+        self.wait_idle()
+        self.workspace.type_filter.setCurrentIndex(self.workspace.type_filter.findData("INCIDENT"))
+        self.wait_idle()
+        self.workspace.subject_search_input.setText("Printer")
+        self.workspace.search_subjects_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, (ticket,))
+        dialog = self.workspace.open_edit_subject()
+        dialog.subject_input.setText("Scanner repaired")
+        with patch.object(self.service, "update_ticket_subject",
+                          wraps=self.service.update_ticket_subject) as update:
+            dialog.save_button.click()
+            self.wait_idle()
+        self.assertEqual(update.call_count, 1)
+        self.assertEqual(self.workspace.model.tickets, ())
+        self.assertEqual(self.workspace.details.ticket.subject, "Scanner repaired")
+        self.assertEqual(self.workspace.heading.text().splitlines()[0],
+                         f"{ticket.ticket_number} — Scanner repaired")
+        self.assertEqual(self.workspace._subject_query, "Printer")
+        self.assertEqual(self.workspace.status_filter.currentData(), "NEW")
+        self.assertEqual(self.workspace.priority_filter.currentData(), "MEDIUM")
+        self.assertEqual(self.workspace.type_filter.currentData(), "INCIDENT")
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep note draft")
+        self.assertIn("Subject saved", self.workspace.feedback.text())
+        self.assertEqual([event.event_type for event in
+                          self.repository.list_timeline_events(ticket.ticket_id)]
+                         .count("SUBJECT_CHANGED"), 1)
+
     def test_priority_and_status_filter_compose_with_page_refresh_and_number_open(self):
         self.assertEqual(
             [self.workspace.priority_filter.itemData(index)

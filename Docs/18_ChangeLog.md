@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-27 — Slice 034: Search Saved Tickets by Subject
+
+Saved Tickets now accepts a submitted literal subject substring. TicketService validates and trims optional text; TicketRepository binds a LIKE predicate with an explicit escape character so percent signs, underscores and backslashes remain literal. Search composes with Status, Priority and Type in the existing ordered, paged SELECT. The workspace separates draft text from the submitted query, offers Enter/Search/Clear, retains previous results and open detail on failed reads, and retries the requested query/page through Refresh. A committed subject edit can remove its row from active search while its new detail remains open. No schema, migration, index, FTS, dependency or other subsystem changed.
+
+Focused ticket tests passed 65, affected tests 82, and full Database 358 + GUI 154 + Integration 125 = 637 regression tests passed, all exit 0. Database coverage includes literal wildcard and escape-character matches, lookalike exclusions, filter composition, stable paging, no writes and integrity. Worker-backed GUI coverage includes draft/submitted state, Enter/Search/Clear, filters, paging, exact-number opening, failure/retry, busy protection and subject-edit search exit. Native Windows passed at 1000×700 using isolated SQLite; six captures were inspected for input/action fit, usable queue/detail, failure recovery and the updated detail after result exit. The candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-27 — Slice 033: Edit a Saved Ticket Type
 
 Saved Tickets now shows the loaded ticket type and offers Edit type using the ordered `TICKET_TYPES` domain. Exact loaded type and update time are checked before no-op. A real edit atomically changes only type and a strictly later activity timestamp, writes one `TYPE_CHANGED` event without type values, and reloads before commit. Failed update, event or reload rolls back. A changed ticket may leave the active Type queue while its updated detail stays visible. Later read failures retain the committed-save acknowledgment and retry path without another update. The five detail actions remain usable in a two-row grid at 1000×700.

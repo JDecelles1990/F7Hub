@@ -69,6 +69,7 @@ class TicketWorkspace(QWidget):
         self.details = None
         self._offset = 0
         self._retry_offset = None
+        self._subject_query = None
         self._knowledge_link_service = knowledge_link_service
         self._edit_subject_dialog = None
         self._edit_priority_dialog = None
@@ -113,6 +114,19 @@ class TicketWorkspace(QWidget):
         queue_layout.addWidget(self.priority_filter)
         queue_layout.addWidget(self.type_filter)
         self._runner.busy_changed.connect(self._set_filter_controls_idle)
+        search_row = QHBoxLayout()
+        self.subject_search_input = QLineEdit(queue)
+        self.subject_search_input.setAccessibleName("Search saved ticket subjects")
+        self.subject_search_input.setPlaceholderText("Search subjects")
+        self.subject_search_input.returnPressed.connect(self.search_subjects)
+        self.search_subjects_button = QPushButton("Search", queue)
+        self.search_subjects_button.clicked.connect(self.search_subjects)
+        self.clear_subject_search_button = QPushButton("Clear", queue)
+        self.clear_subject_search_button.clicked.connect(self.clear_subject_search)
+        search_row.addWidget(self.subject_search_input, 1)
+        search_row.addWidget(self.search_subjects_button)
+        search_row.addWidget(self.clear_subject_search_button)
+        queue_layout.addLayout(search_row)
         number_row = QHBoxLayout()
         self.ticket_number_input = QLineEdit(queue)
         self.ticket_number_input.setAccessibleName("Open saved ticket by number")
@@ -237,6 +251,7 @@ class TicketWorkspace(QWidget):
         status = self.status_filter.currentData()
         priority = self.priority_filter.currentData()
         ticket_type = self.type_filter.currentData()
+        subject_query = self._subject_query
         self.feedback.setText("Loading tickets…")
 
         def loaded(tickets):
@@ -262,10 +277,24 @@ class TicketWorkspace(QWidget):
         self._runner.submit(
             lambda: self._service.list_tickets(
                 status=status, priority=priority, ticket_type=ticket_type,
+                subject_query=subject_query,
                 limit=self.PAGE_SIZE + 1, offset=target,
             ),
             loaded, failed,
         )
+
+    def search_subjects(self):
+        if self._runner.busy:
+            return
+        self._subject_query = self.subject_search_input.text().strip() or None
+        self.refresh_list(offset=0)
+
+    def clear_subject_search(self):
+        if self._runner.busy:
+            return
+        self.subject_search_input.clear()
+        self._subject_query = None
+        self.refresh_list(offset=0)
 
     def _activate_row(self, index):
         if index.isValid():
@@ -275,6 +304,9 @@ class TicketWorkspace(QWidget):
         self.status_filter.setEnabled(not busy)
         self.priority_filter.setEnabled(not busy)
         self.type_filter.setEnabled(not busy)
+        self.subject_search_input.setEnabled(not busy)
+        self.search_subjects_button.setEnabled(not busy)
+        self.clear_subject_search_button.setEnabled(not busy)
 
     def _set_number_lookup_idle(self, busy):
         self.ticket_number_input.setEnabled(not busy)
