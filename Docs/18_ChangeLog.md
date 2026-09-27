@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-26 — Slice 027: Open a Saved Ticket by Number
+
+Saved Tickets now opens an exact ticket number through the existing case-insensitive repository lookup and authoritative detail read. Enter and Open number share one asynchronous action. Blank input issues no query; missing/read-failure/disappearing-ticket and cancelled draft-discard paths preserve current detail and activity drafts. The entered number, queue page and status filter remain in place. Lookup is read-only. No new exception hierarchy, repository query, schema, migration or dependency was added.
+
+Candidate validation: focused 19 PASS; affected ticket set 35 PASS; full Database **339 PASS**, GUI **153 PASS**, Integration **98 PASS** = **590 PASS**, all exit 0. A real SQLite dump was unchanged across lookup. Native Windows MainWindow reached idle and passed button/Enter lookup at 1000×700; its capture was opened and inspected. Candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-26 — Slice 026: Current Knowledge Article Dates
 
 The Knowledge detail now shows the current article's persisted Created and Last updated values below Version, using the existing authoritative record. Values are displayed exactly without timezone conversion. Empty, missing and failed detail clears the line. No query, service API, database write, schema change, migration or dependency was added.

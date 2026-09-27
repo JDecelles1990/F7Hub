@@ -288,6 +288,8 @@ Set Active Ticket Context
 Display Ticket Workspace
 ```
 
+Slice 027 adds **Open number** to Saved Tickets. Enter a complete ticket number or press Enter to load its current details asynchronously; surrounding whitespace is ignored and matching is case-insensitive. The queue page and status filter stay in place, so the opened ticket may be absent from the visible queue. Blank input makes no query. Missing tickets and read failures leave the current detail and activity drafts intact; the entered number remains for retry. If the lookup would switch away from a ticket with unsaved activity, the existing discard confirmation applies. Cancel keeps the current detail and drafts. Broader ticket-text and universal search remain planned.
+
 ## Related Resources May Include
 
 - related tickets
