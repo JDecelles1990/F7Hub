@@ -835,6 +835,8 @@ Slice 027 adds `TicketService.get_ticket_details_by_number`: it validates and tr
 
 Slice 028 extends `TicketService.list_tickets` and `TicketRepository.list_tickets` with optional `priority=None`. The service validates non-None values with the existing `TICKET_PRIORITIES` vocabulary; the repository composes fixed status/priority predicates with bound values before the existing newest-updated, ticket-ID-tiebroken page. `TicketWorkspace` exposes All priorities as `None`, submits reads through the same runner, disables both queue selectors while it is busy, and replaces rows only on success. A failed replacement retains the displayed page and records its requested offset for Refresh retry. No write, schema object, migration, index or dependency is added.
 
+Slice 029 extends those reads with optional `ticket_type=None`. The service validates non-None values with the existing `TICKET_TYPES` vocabulary before querying. The repository binds Type beside Status and Priority in one SQL query and retains `updated_at DESC, ticket_id DESC` paging. `TicketWorkspace` maps display labels to canonical type values, reuses the shared runner and existing requested-page retry state, and replaces rows only after a successful read. No schema, index, migration, write or dependency is added.
+
 ---
 
 # 31. Domain Package

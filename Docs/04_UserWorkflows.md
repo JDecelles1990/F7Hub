@@ -292,6 +292,8 @@ Slice 027 adds **Open number** to Saved Tickets. Enter a complete ticket number 
 
 Slice 028 adds **Priority** to the Saved Tickets queue. All priorities shows the unfiltered priority set; one of Critical, High, Medium or Low narrows the list together with Status. Changing either filter starts at page 1. Refresh and Previous/Next keep both selections and the current page; Open number keeps the filters and page even for a ticket outside the queue. The two filter controls are unavailable during a worker read. If that read fails, the previous rows, open detail and activity drafts remain visible, both selections remain for retry, and no ticket is changed. Refresh retries the requested page, including page 1 after a failed filter change from a later page.
 
+Slice 029 adds **Type** below Priority: All types, Incident, Service request, Problem and Task. Type composes with Status and Priority. Changing any of the three starts at page 1; Refresh and Previous/Next retain all three and the current page, while Open number leaves the queue state intact. A failed read retains the last successful rows, current detail, drafts and chosen filters; Refresh retries the requested page. Filtering makes no ticket change.
+
 ## Related Resources May Include
 
 - related tickets

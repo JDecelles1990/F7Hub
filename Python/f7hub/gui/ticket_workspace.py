@@ -12,7 +12,8 @@ from PySide6.QtWidgets import (
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.ticket_knowledge_widget import TicketKnowledgeWidget
 from f7hub.services.ticket_service import (
-    TICKET_NOTE_TYPES, TICKET_PRIORITIES, TICKET_STATUSES, TicketValidationError,
+    TICKET_NOTE_TYPES, TICKET_PRIORITIES, TICKET_STATUSES, TICKET_TYPES,
+    TicketValidationError,
 )
 
 
@@ -88,14 +89,21 @@ class TicketWorkspace(QWidget):
         self.priority_filter.addItem("All priorities", None)
         for priority in sorted(TICKET_PRIORITIES, key=("CRITICAL", "HIGH", "MEDIUM", "LOW").index):
             self.priority_filter.addItem(priority.title(), priority)
+        self.type_filter = QComboBox(queue)
+        self.type_filter.setAccessibleName("Filter tickets by type")
+        self.type_filter.addItem("All types", None)
+        for ticket_type in TICKET_TYPES:
+            self.type_filter.addItem(ticket_type.replace("_", " ").capitalize(), ticket_type)
         self.refresh_button = QPushButton("Refresh", queue)
         self.refresh_button.clicked.connect(lambda: self.refresh_list())
         self.status_filter.currentIndexChanged.connect(lambda: self.refresh_list(offset=0))
         self.priority_filter.currentIndexChanged.connect(lambda: self.refresh_list(offset=0))
+        self.type_filter.currentIndexChanged.connect(lambda: self.refresh_list(offset=0))
         filters.addWidget(self.status_filter)
         filters.addWidget(self.refresh_button)
         queue_layout.addLayout(filters)
         queue_layout.addWidget(self.priority_filter)
+        queue_layout.addWidget(self.type_filter)
         self._runner.busy_changed.connect(self._set_filter_controls_idle)
         number_row = QHBoxLayout()
         self.ticket_number_input = QLineEdit(queue)
@@ -206,6 +214,7 @@ class TicketWorkspace(QWidget):
             target = max(0, offset)
         status = self.status_filter.currentData()
         priority = self.priority_filter.currentData()
+        ticket_type = self.type_filter.currentData()
         self.feedback.setText("Loading tickets…")
 
         def loaded(tickets):
@@ -227,7 +236,8 @@ class TicketWorkspace(QWidget):
 
         self._runner.submit(
             lambda: self._service.list_tickets(
-                status=status, priority=priority, limit=self.PAGE_SIZE + 1, offset=target,
+                status=status, priority=priority, ticket_type=ticket_type,
+                limit=self.PAGE_SIZE + 1, offset=target,
             ),
             loaded, failed,
         )
@@ -239,6 +249,7 @@ class TicketWorkspace(QWidget):
     def _set_filter_controls_idle(self, busy):
         self.status_filter.setEnabled(not busy)
         self.priority_filter.setEnabled(not busy)
+        self.type_filter.setEnabled(not busy)
 
     def _set_number_lookup_idle(self, busy):
         self.ticket_number_input.setEnabled(not busy)

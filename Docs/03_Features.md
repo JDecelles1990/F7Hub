@@ -272,6 +272,8 @@ Opening a ticket should provide a contextual workspace containing relevant suppo
 
 Slice 028 adds a read-only Saved Tickets priority filter. All priorities means no priority constraint; Low, Medium, High and Critical compose with the existing status filter, newest-updated ordering and paging. A failed queue read retains the last successful rows and current ticket detail. This does not add ticket-text search or change stored tickets.
 
+Slice 029 adds a read-only Saved Tickets type filter. All types means no type constraint; Incident, Service request, Problem and Task compose with Status and Priority in the same bounded query. Filter changes start at page 1; Refresh, paging and exact-number opening retain the selections. Failed reads preserve the prior queue and detail for retry. No ticket data or schema changes.
+
 Potential panels:
 
 - ticket details
