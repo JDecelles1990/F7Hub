@@ -263,6 +263,8 @@ Core capabilities:
 
 Slice 030 implements the first bounded ticket edit: a technician can correct the subject of a loaded saved ticket. A changed subject advances its activity timestamp and adds one subject-change timeline event. Stale details are rejected before a no-op decision. Description and other ticket fields are not editable in this slice.
 
+Slice 031 adds a separate correction for a loaded ticket's priority. The four existing priority values are selectable; a changed value advances activity time and records one priority-change event. Stale details are rejected before no-op, and a ticket may leave the current priority-filtered queue while its saved detail stays open. Description and other ticket fields remain outside this slice.
+
 ---
 
 ## FEAT-TICKET-002 — Ticket Workspace

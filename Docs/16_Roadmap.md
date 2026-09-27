@@ -143,6 +143,8 @@ Slice 029 adds optional ticket type to that same read-only queue path. The four 
 
 Slice 030 begins the P0 ticket-edit requirement with one subject correction workflow. It reuses the existing ticket writer transaction, timeline, worker and detail/queue reload paths. Other editable fields and ticket search remain separate future work; no migration or dependency is added.
 
+Slice 031 adds one priority correction workflow on the same writer, timeline and GUI worker path. The existing priority domain and queue filter remain authoritative; a changed ticket can leave the filtered queue without losing its open detail. Description and other ticket edits and ticket search remain separate future work; no migration or dependency is added.
+
 The F7Hub roadmap is organized into:
 
 ```text

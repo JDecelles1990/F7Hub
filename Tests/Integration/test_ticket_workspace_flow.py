@@ -20,7 +20,9 @@ from f7hub.gui.main_window import MainWindow
 from f7hub.infrastructure.database import bootstrap_database
 from f7hub.repositories import TicketRepository
 from f7hub.services import TicketService
-from f7hub.services.ticket_service import TICKET_TYPES, TicketReadError, TicketValidationError
+from f7hub.services.ticket_service import (
+    TICKET_PRIORITIES, TICKET_TYPES, TicketReadError, TicketValidationError,
+)
 
 
 class TicketWorkspaceFlowTests(unittest.TestCase):
@@ -599,6 +601,157 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
             self.wait_idle()
         self.assertEqual(self.workspace.feedback.text(), "Invalid queue filter.")
         self.assertEqual(self.workspace.model.tickets, previous_rows)
+
+    def test_priority_dialog_choices_cancel_no_op_and_success(self):
+        ticket = self.workspace.details.ticket
+        self.workspace.note_input.setPlainText("Keep note draft")
+        cancelled = self.workspace.open_edit_priority()
+        self.assertEqual(cancelled.priority_input.currentData(), ticket.priority)
+        self.assertEqual({cancelled.priority_input.itemData(index)
+                          for index in range(cancelled.priority_input.count())}, TICKET_PRIORITIES)
+        cancelled.cancel_button.click()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id), ticket)
+        unchanged = self.workspace.open_edit_priority()
+        unchanged.save_button.click()
+        self.wait_idle()
+        self.assertIn("Priority unchanged", self.workspace.feedback.text())
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id), ticket)
+        dialog = self.workspace.open_edit_priority()
+        dialog.priority_input.setCurrentIndex(dialog.priority_input.findData("HIGH"))
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id).priority, "HIGH")
+        self.assertEqual(self.workspace.details.ticket.priority, "HIGH")
+        self.assertEqual(self.workspace.model.tickets[0].priority, "HIGH")
+        self.assertIn("Priority saved", self.workspace.feedback.text())
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep note draft")
+        self.assertEqual([e.event_type for e in self.repository.list_timeline_events(ticket.ticket_id)]
+                         .count("PRIORITY_CHANGED"), 1)
+
+    def test_priority_dialog_stale_and_failure_keep_selection(self):
+        ticket = self.workspace.details.ticket
+        dialog = self.workspace.open_edit_priority()
+        dialog.priority_input.setCurrentIndex(dialog.priority_input.findData("HIGH"))
+        self.service.update_ticket_priority(
+            ticket.ticket_id, expected_priority=ticket.priority,
+            expected_updated_at=ticket.updated_at, priority="LOW",
+        )
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertIn("Reload", dialog.feedback.text())
+        self.assertFalse(dialog.save_button.isEnabled())
+        self.assertEqual(dialog.priority_input.currentData(), "HIGH")
+        dialog.cancel_button.click()
+        self.workspace.reload_button.click()
+        self.wait_idle()
+        failed = self.workspace.open_edit_priority()
+        failed.priority_input.setCurrentIndex(failed.priority_input.findData("CRITICAL"))
+        with patch.object(self.service, "update_ticket_priority",
+                          side_effect=TicketValidationError("Invalid priority.")):
+            failed.save_button.click()
+            self.wait_idle()
+        self.assertEqual(failed.priority_input.currentData(), "CRITICAL")
+        self.assertIn("Invalid priority", failed.feedback.text())
+        with patch.object(self.service, "update_ticket_priority", side_effect=RuntimeError("private")):
+            failed.save_button.click()
+            self.wait_idle()
+        self.assertEqual(failed.priority_input.currentData(), "CRITICAL")
+        self.assertIn("Could not save the priority", failed.feedback.text())
+        self.assertNotIn("private", failed.feedback.text())
+        failed.cancel_button.click()
+
+    def test_priority_dialog_blocks_duplicate_save_and_close_while_busy(self):
+        dialog = self.workspace.open_edit_priority()
+        dialog.priority_input.setCurrentIndex(dialog.priority_input.findData("HIGH"))
+        started = threading.Event()
+        release = threading.Event()
+        original = self.service.update_ticket_priority
+        calls = []
+
+        def delayed_update(*args, **kwargs):
+            calls.append(kwargs["priority"])
+            started.set()
+            if not release.wait(5):
+                raise TimeoutError("Update gate timed out")
+            return original(*args, **kwargs)
+
+        try:
+            with patch.object(self.service, "update_ticket_priority", side_effect=delayed_update):
+                dialog.save_button.click()
+                self.assertTrue(started.wait(5))
+                self.assertFalse(dialog.save_button.isEnabled())
+                self.assertFalse(dialog.cancel_button.isEnabled())
+                dialog.submit()
+                dialog.reject()
+                self.assertTrue(dialog.isVisible())
+                release.set()
+                self.wait_idle()
+        finally:
+            release.set()
+        self.assertEqual(calls, ["HIGH"])
+        self.assertEqual(self.repository.get_ticket(self.ticket_id).priority, "HIGH")
+
+    def test_committed_priority_edit_survives_refresh_failures_and_filter_exit(self):
+        ticket = self.workspace.details.ticket
+        first = self.workspace.open_edit_priority()
+        first.priority_input.setCurrentIndex(first.priority_input.findData("LOW"))
+        with patch.object(self.service, "get_ticket_details", side_effect=RuntimeError("private")):
+            first.save_button.click()
+            self.wait_idle()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id).priority, "LOW")
+        self.assertIn("Priority saved", self.workspace.feedback.text())
+        self.assertIn("Reload ticket", self.workspace.feedback.text())
+        self.workspace.reload_button.click()
+        self.wait_idle()
+        errors = (
+            RuntimeError("private"),
+            TicketValidationError("Invalid queue filter."),
+            TicketReadError("F7Hub could not load the ticket list."),
+        )
+        for priority, error in zip(("MEDIUM", "HIGH", "CRITICAL"), errors):
+            with self.subTest(error=type(error).__name__):
+                dialog = self.workspace.open_edit_priority()
+                dialog.priority_input.setCurrentIndex(dialog.priority_input.findData(priority))
+                original_update = self.service.update_ticket_priority
+                with patch.object(self.service, "update_ticket_priority", wraps=original_update) as update:
+                    with patch.object(self.service, "list_tickets", side_effect=error):
+                        dialog.save_button.click()
+                        self.wait_idle()
+                self.assertEqual(update.call_count, 1)
+                self.assertEqual(self.repository.get_ticket(ticket.ticket_id).priority, priority)
+                self.assertEqual(self.workspace.details.ticket.priority, priority)
+                self.assertIn("Priority saved", self.workspace.feedback.text())
+                self.assertIn("Could not refresh tickets", self.workspace.feedback.text())
+                self.assertIn("Refresh to retry", self.workspace.feedback.text())
+                if isinstance(error, TicketValidationError):
+                    self.assertIn(str(error), self.workspace.feedback.text())
+                else:
+                    self.assertNotIn("private", self.workspace.feedback.text())
+                before_retry = [e.event_type for e in self.repository.list_timeline_events(ticket.ticket_id)]
+                self.workspace.refresh_button.click()
+                self.wait_idle()
+                self.assertEqual(self.workspace.model.tickets[0].priority, priority)
+                self.assertEqual([e.event_type for e in self.repository.list_timeline_events(ticket.ticket_id)],
+                                 before_retry)
+
+        self.workspace.status_filter.setCurrentIndex(self.workspace.status_filter.findData("NEW"))
+        self.wait_idle()
+        self.workspace.type_filter.setCurrentIndex(self.workspace.type_filter.findData("INCIDENT"))
+        self.wait_idle()
+        self.workspace.priority_filter.setCurrentIndex(self.workspace.priority_filter.findData("CRITICAL"))
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.rowCount(), 1)
+        dialog = self.workspace.open_edit_priority()
+        dialog.priority_input.setCurrentIndex(dialog.priority_input.findData("LOW"))
+        dialog.save_button.click()
+        self.wait_idle()
+        self.assertEqual(self.repository.get_ticket(ticket.ticket_id).priority, "LOW")
+        self.assertEqual(self.workspace.details.ticket.priority, "LOW")
+        self.assertEqual(self.workspace.model.rowCount(), 0)
+        self.assertEqual(self.workspace.status_filter.currentData(), "NEW")
+        self.assertEqual(self.workspace.priority_filter.currentData(), "CRITICAL")
+        self.assertEqual(self.workspace.type_filter.currentData(), "INCIDENT")
+        self.assertIn("Priority saved", self.workspace.feedback.text())
 
 
 if __name__ == "__main__":

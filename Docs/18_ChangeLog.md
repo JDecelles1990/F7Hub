@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-27 — Slice 031: Edit a Saved Ticket Priority
+
+Saved Tickets now offers Edit priority for a loaded ticket using the existing four-value priority domain. A valid change compares the loaded priority and exact update time before no-op, atomically updates only priority and a strictly later `updated_at`, adds one `PRIORITY_CHANGED` event without priority values, and reloads before commit. Missing/stale/invalid/no-op requests write nothing; update, event and reload failures roll back. The dialog retains selection after failure and blocks duplicate writes and close during a write. After commit, detail and queue refresh keep the save acknowledged if a later read fails; a ticket may leave the selected priority-filtered queue while its saved detail remains open. No schema, migration, index, dependency or other ticket edit changed.
+
+Final-candidate focused **42 PASS**, affected **58 PASS**, full Database **349 PASS**, GUI **153 PASS**, Integration **111 PASS** = **613 PASS**, all exit 0. Isolated SQLite checks cover every valid priority pair, stale-before-no-op, same-millisecond advancement, rollback, unrelated data/relationship preservation, integrity and foreign keys. Integration covers Cancel, selection retention, busy protection, committed-save read failures and retry without a second write, and active-filter exit. Native Windows at 1000×700 reached observable idle; dialog, post-commit failure and filtered-detail captures were opened and inspected without observed overlap. The candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-27 — Slice 030: Edit a Saved Ticket Subject
 
 Saved Tickets now offers Edit subject beside Reload ticket. The dialog prefills the loaded subject, preserves entered text on validation or save failure, blocks duplicate writes and closing during a write, and instructs a stale editor to reload. The service validates the exact loaded subject and update timestamp before a no-op decision. A real edit atomically changes only subject and a strictly later UTC `updated_at`, adds one `SUBJECT_CHANGED` event without subject text, and reloads before commit. The dialog closes only after committed success; later detail or queue read failures still acknowledge the save and give a retry path. No schema, migration, index, dependency or other editable field changed.
