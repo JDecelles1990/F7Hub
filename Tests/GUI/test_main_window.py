@@ -24,6 +24,7 @@ class RecordingTicketService:
         self.ticket = SimpleNamespace(
             ticket_id=1, ticket_number="TKT-1001", subject="Printer offline",
             description="Test printer", status="NEW", priority="MEDIUM",
+            ticket_type="INCIDENT",
             assigned_to=None, created_at="2026-09-04T15:00:00.000Z",
             updated_at="2026-09-04T15:00:00.000Z", resolved_at=None,
             closed_at=None, resolution=None,
@@ -124,6 +125,19 @@ class MainWindowTests(unittest.TestCase):
         self.wait_idle()
         self.assertEqual(workspace.details.ticket.ticket_id, 1)
         self.assertIn("Printer offline", workspace.heading.text())
+        self.assertIn("Type: Incident", workspace.summary.toPlainText())
+
+    def test_five_saved_ticket_detail_actions_fit_1000_by_700(self):
+        self.window.show_tickets()
+        self.wait_idle()
+        self.window.resize(1000, 700)
+        self.application.processEvents()
+        self.assertEqual((self.window.width(), self.window.height()), (1000, 700))
+        workspace = self.window.workspace
+        for button in (workspace.edit_subject_button, workspace.edit_priority_button,
+                       workspace.edit_type_button, workspace.edit_description_button,
+                       workspace.reload_button):
+            self.assertTrue(button.isVisible())
 
     def wait_idle(self):
         deadline = time.monotonic() + 5

@@ -300,6 +300,8 @@ Slice 031 adds **Edit priority** for a loaded saved ticket. The dialog selects i
 
 Slice 032 adds **Edit description** for a loaded saved ticket. The multiline dialog starts with the current plain text or an empty editor for NULL. Cancel and an unchanged normalized value write nothing; whitespace-only input clears the description. An old description or update time requires Reload ticket before retry, even when the requested value matches the current row. Failed saves retain the entered draft. After commit, detail and queue refresh preserve the save acknowledgment and retry guidance if a read fails, without writing the description again. Status/Priority/Type filters, page and activity drafts remain intact.
 
+Slice 033 adds **Edit type** for a loaded saved ticket. The dialog preselects its current type from Incident, Service request, Problem and Task. Cancel and a true no-op write nothing; stale type or update time requires Reload ticket even when the requested value matches the current row. Failed saves retain the choice. A committed change refreshes details and queue, preserving save acknowledgment and retry guidance if a later read fails. When the ticket leaves the selected Type filter, its row disappears while the new authoritative type remains visible in details; the selected filters, page and activity drafts remain.
+
 ## Related Resources May Include
 
 - related tickets

@@ -2,6 +2,38 @@
 
 Last verified: 2026-09-27 (America/Toronto).
 
+Current candidate: **Slice 033 — Edit a Saved Ticket Type**, on `feature/ticket-type-edit-s033` in `C:\Dev\F7Hub`. Before editing, a fresh fetch confirmed clean `main`, HEAD and `origin/main` at `9f3ddab19ba4d54d619d9ce21c2887beae6558db`. The feature branch starts at that exact base. The protected `recovery/pre-s024-protected-work` ref remains `002a494735f30e1488f61e21ea98740ae6371d4d`; other worktrees were not changed.
+
+Status: **PASS — READY_FOR_REVIEW** after implementation, testing, native Windows inspection, documentation and self-review. All candidate changes remain unstaged and uncommitted; no push, PR or integration was performed. The earlier Slice 032 review/integration request, retained in the prior snapshot below, is **STALE HANDOFF METADATA**: live `main` contains its PR #33 merge at `9f3ddab`; the prior report remains historical evidence.
+
+## Slice 033 Result and Scope
+
+`TicketService.update_ticket_type(ticket_id, *, expected_ticket_type, expected_updated_at, ticket_type)` validates the existing ordered type domain and loaded tokens. Within `TicketRepository.transaction()`, it rejects stale state before no-op; a real change uses a bound guarded UPDATE of only type and strictly later activity time, adds one value-free `TYPE_CHANGED` event and reloads before commit. Invalid, missing, stale and no-op requests write nothing; failed update, event or reload rolls back. `EditTicketTypeDialog` derives its choices directly from `TICKET_TYPES`, preserves selection after failure, gives stale reload guidance and blocks duplicate submission/unsafe closing during a write. Saved details show the authoritative current type. The shared worker retains committed-save acknowledgment after later reads fail; changing type can remove a row from the selected Type queue while keeping its updated detail open. No schema, migration, index, dependency, generic editor, search or Knowledge change was included.
+
+## Slice 033 Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration used `QT_QPA_PLATFORM=offscreen`; native validation used `windows` and isolated synthetic SQLite.
+
+| Suite | Command | Final-candidate result |
+|---|---|---|
+| Focused ticket reads/workspace/MainWindow | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Integration.test_ticket_workspace_flow Tests.GUI.test_main_window` | PASS — 65 tests, exit 0 |
+| Affected ticket set | `python -B -m unittest Tests.Database.test_ticket_reads Tests.Database.test_ticket_service Tests.Database.test_ticket_repository Tests.GUI.test_main_window Tests.Integration.test_ticket_workspace_flow` | PASS — 76 tests, exit 0 |
+| Database | `python -B -m unittest discover -s Tests\Database -p 'test_*.py'` | PASS — 356 tests, exit 0 |
+| GUI | `python -B -m unittest discover -s Tests\GUI -p 'test_*.py'` | PASS — 154 tests, exit 0 |
+| Integration | `python -B -m unittest discover -s Tests\Integration -p 'test_*.py'` | PASS — 121 tests, exit 0 |
+
+Full regression: **631 PASS**, zero failures/errors on the final completed suites. The initial focused run failed because new test methods split an existing priority test; its boundary was restored, two affected post-commit tests passed, and the entire focused, affected and full sequence passed on rerun. Expected injected error-path logs had successful unittest counts and exit 0. SQLite checks cover every type, all valid transitions, invalid/missing/stale/no-op cases, same-millisecond advancement, value-free event, update/event/reload rollback, unrelated ticket fields and links, `integrity_check = ok` and zero foreign-key violations. Integration covers Cancel, preselection, choice order, busy/stale/error behavior, detail and queue failures after commit, retry without another update, page/filter/draft retention and Type-filter exit.
+
+Native Windows: PASS — the actual `windows` Qt platform with MainWindow at 1000×700 after observable worker idle. An isolated Incident ticket was changed to Task under the Incident filter; its row disappeared, the Task detail stayed open, Status/Priority/Type selections and note draft remained, and save feedback stayed truthful. A later type change with injected post-commit queue validation failure retained **Type saved**, refresh failure and retry guidance; Refresh recovered the queue without another type event. The [five actions](C:/Users/Jo/AppData/Local/Temp/f7-s033-native-captures/initial-actions.png), [dialog](C:/Users/Jo/AppData/Local/Temp/f7-s033-native-captures/edit-type-dialog.png), [filter exit](C:/Users/Jo/AppData/Local/Temp/f7-s033-native-captures/filter-exit.png), [failure](C:/Users/Jo/AppData/Local/Temp/f7-s033-native-captures/post-commit-failure.png) and [recovery](C:/Users/Jo/AppData/Local/Temp/f7-s033-native-captures/refresh-recovered.png) captures were opened and inspected without observed clipping, overlap or unusable controls. This validates the tested Windows environment, not every display scale.
+
+## Slice 033 Delivery Gate
+
+Production scope is the ticket repository, service, Saved Tickets workspace and one focused dialog; tests are ticket reads, workspace flow and MainWindow. Affected canonical owners are Features, User Workflows, GUI, Database architecture, Python architecture, Roadmap, Todo, ChangeLog and this report. Physical SQL Schema, ERD, system architecture, AHK and PowerShell remain unaffected. The next gate is independent read-only review of the exact unstaged candidate; self-review does not grant integration approval.
+
+---
+
+## Prior Slice 032 handoff snapshot (historical; Slice 032 later merged through PR #33)
+
 Current candidate: **Slice 032 — Edit a Saved Ticket Description**, on `feature/ticket-description-edit-s032` in `C:\Dev\F7Hub`. Fresh fetch confirmed the approved base, branch starting HEAD and live `origin/main` at `8ff62f902aecbab8c30338c0988a7ec5032b4319` before editing; the checkout, index and untracked set were clean. The protected `recovery/pre-s024-protected-work` branch remains at `002a494735f30e1488f61e21ea98740ae6371d4d` and was not modified.
 
 Status: **PASS — READY_FOR_REVIEW** after implementation, testing, documentation and self-review. Changes are unstaged and uncommitted; no push, PR or integration was performed. The Slice 031 claim below that review is pending is **STALE HANDOFF METADATA**: live `main` includes its PR #32 merge at `8ff62f9`. That report is retained below as a historical candidate snapshot.

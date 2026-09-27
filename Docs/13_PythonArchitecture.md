@@ -843,6 +843,8 @@ Slice 031 adds `TicketService.update_ticket_priority(ticket_id, *, expected_prio
 
 Slice 032 adds `TicketService.update_ticket_description(ticket_id, *, expected_description, expected_updated_at, description)`. It reuses creation's optional-text normalization, compares the exact loaded nullable value and timestamp before no-op, and makes a NULL-safe guarded update of description/activity time. One text-free `DESCRIPTION_CHANGED` event and authoritative reload share the transaction. `EditTicketDescriptionDialog` uses a multiline plain-text editor and the existing `ServiceTaskRunner`; `TicketWorkspace` reuses post-save detail/queue refresh with preserved acknowledgment on later read failure. No generic editor, schema object or dependency is added.
 
+Slice 033 adds `TicketService.update_ticket_type(ticket_id, *, expected_ticket_type, expected_updated_at, ticket_type)` using ordered `TICKET_TYPES`. It checks the loaded type and timestamp before no-op, guards a narrow type/activity update, writes one value-free `TYPE_CHANGED` event and reloads before commit. `EditTicketTypeDialog` uses that same authoritative type collection and `ServiceTaskRunner`; `TicketWorkspace` displays the loaded type and reuses detail/queue refresh, including post-commit retry feedback and filter exit. No generic editor, schema object or dependency is added.
+
 ---
 
 # 31. Domain Package

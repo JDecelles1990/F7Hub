@@ -570,7 +570,14 @@ Slice 032 — edit one saved-ticket description, implemented and validated 2026-
 - [x] Add a multiline asynchronous dialog with draft preservation, stale guidance, busy protection and committed-save recovery after failed reads.
 - [x] Preserve queue filters, paging, open detail and activity drafts; keep all four detail actions usable at 1000×700.
 - [x] Validate focused 50, affected 66, and full Database 352 + GUI 153 + Integration 116 = 621 tests; inspect native Windows 1000×700 captures.
-- [ ] Independent read-only review of the exact unstaged Slice 032 candidate; no staging, commit, push, PR or integration is authorized.
+- [x] Independently review and integrate Slice 032; merged on `main` through PR #33 at `9f3ddab`. The preceding candidate report is historical.
+
+Slice 033 — edit one saved-ticket type, implemented and self-validated 2026-09-27:
+
+- [x] Validate type and loaded update time before no-op; atomically update only type/activity time and add one value-free timeline event.
+- [x] Add an asynchronous Edit type dialog sourced directly from `TICKET_TYPES`; show the authoritative type in saved details and retain drafts, filters, page and post-commit recovery feedback.
+- [x] Verify Type-filter exit while the updated detail stays open; validate focused 65, affected 76, and full Database 356 + GUI 154 + Integration 121 = 631 tests, plus native Windows 1000×700 captures.
+- [ ] Independent read-only review of the exact unstaged Slice 033 candidate; no staging, commit, push, PR or integration is authorized.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 

@@ -13,6 +13,7 @@ from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.edit_ticket_subject_dialog import EditTicketSubjectDialog
 from f7hub.gui.edit_ticket_priority_dialog import EditTicketPriorityDialog
 from f7hub.gui.edit_ticket_description_dialog import EditTicketDescriptionDialog
+from f7hub.gui.edit_ticket_type_dialog import EditTicketTypeDialog
 from f7hub.gui.ticket_knowledge_widget import TicketKnowledgeWidget
 from f7hub.services.ticket_service import (
     TICKET_NOTE_TYPES, TICKET_PRIORITIES, TICKET_STATUSES, TICKET_TYPES,
@@ -72,6 +73,7 @@ class TicketWorkspace(QWidget):
         self._edit_subject_dialog = None
         self._edit_priority_dialog = None
         self._edit_description_dialog = None
+        self._edit_type_dialog = None
         self._build_ui()
 
     def _build_ui(self):
@@ -213,9 +215,12 @@ class TicketWorkspace(QWidget):
         self.edit_priority_button.clicked.connect(self.open_edit_priority)
         self.edit_description_button = QPushButton("Edit description", self.detail_panel)
         self.edit_description_button.clicked.connect(self.open_edit_description)
+        self.edit_type_button = QPushButton("Edit type", self.detail_panel)
+        self.edit_type_button.clicked.connect(self.open_edit_type)
         detail_actions = QGridLayout()
         detail_actions.addWidget(self.edit_subject_button, 0, 0)
         detail_actions.addWidget(self.edit_priority_button, 0, 1)
+        detail_actions.addWidget(self.edit_type_button, 0, 2)
         detail_actions.addWidget(self.edit_description_button, 1, 0)
         detail_actions.addWidget(self.reload_button, 1, 1)
         detail_layout.addLayout(detail_actions)
@@ -363,6 +368,7 @@ class TicketWorkspace(QWidget):
         self.heading.setText(f"{ticket.ticket_number} — {ticket.subject}\n{ticket.status} · {ticket.priority}")
         self.summary.setPlainText(
             f"{ticket.description or '(No description)'}\n\n"
+            f"Type: {ticket.ticket_type.replace('_', ' ').capitalize()}\n"
             f"Company: {details.company_name or ('Unavailable' if ticket.company_id else 'Not selected')}\n"
             f"Contact: {details.contact_name or ('Unavailable' if ticket.contact_id else 'Not selected')}\n"
             f"Category: {details.category_name or ('Unavailable' if ticket.category_id else 'Not selected')}\n\n"
@@ -402,7 +408,8 @@ class TicketWorkspace(QWidget):
         if (self.details is None or self._runner.busy
                 or self._edit_subject_dialog is not None
                 or self._edit_priority_dialog is not None
-                or self._edit_description_dialog is not None):
+                or self._edit_description_dialog is not None
+                or self._edit_type_dialog is not None):
             return None
         ticket = self.details.ticket
         dialog = EditTicketSubjectDialog(self._service, self._runner, ticket, self)
@@ -423,7 +430,8 @@ class TicketWorkspace(QWidget):
         if (self.details is None or self._runner.busy
                 or self._edit_priority_dialog is not None
                 or self._edit_subject_dialog is not None
-                or self._edit_description_dialog is not None):
+                or self._edit_description_dialog is not None
+                or self._edit_type_dialog is not None):
             return None
         ticket = self.details.ticket
         dialog = EditTicketPriorityDialog(self._service, self._runner, ticket, self)
@@ -444,7 +452,8 @@ class TicketWorkspace(QWidget):
         if (self.details is None or self._runner.busy
                 or self._edit_description_dialog is not None
                 or self._edit_subject_dialog is not None
-                or self._edit_priority_dialog is not None):
+                or self._edit_priority_dialog is not None
+                or self._edit_type_dialog is not None):
             return None
         ticket = self.details.ticket
         dialog = EditTicketDescriptionDialog(self._service, self._runner, ticket, self)
@@ -462,6 +471,28 @@ class TicketWorkspace(QWidget):
             self.feedback.setText("Description unchanged.")
             return
         self._reload_after_save(updated.ticket_id, "Description saved.")
+
+    def open_edit_type(self):
+        if (self.details is None or self._runner.busy
+                or self._edit_type_dialog is not None
+                or self._edit_subject_dialog is not None
+                or self._edit_priority_dialog is not None
+                or self._edit_description_dialog is not None):
+            return None
+        ticket = self.details.ticket
+        dialog = EditTicketTypeDialog(self._service, self._runner, ticket, self)
+        self._edit_type_dialog = dialog
+        dialog.finished.connect(lambda _result: setattr(self, "_edit_type_dialog", None))
+        dialog.type_updated.connect(lambda updated: self._type_updated(ticket, updated))
+        dialog.open()
+        return dialog
+
+    def _type_updated(self, previous, updated):
+        if (updated.ticket_type == previous.ticket_type
+                and updated.updated_at == previous.updated_at):
+            self.feedback.setText("Type unchanged.")
+            return
+        self._reload_after_save(updated.ticket_id, "Type saved.")
 
     def add_note(self):
         if self.details is None or self._runner.busy:
