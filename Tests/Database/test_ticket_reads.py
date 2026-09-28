@@ -53,6 +53,13 @@ class TicketReadTests(unittest.TestCase):
                     self.service.list_tickets(subject_query=invalid)
             query.assert_not_called()
 
+    def test_description_search_requires_boolean_before_query(self):
+        with patch.object(self.repo, "list_tickets") as query:
+            for invalid in (None, 0, 1, "", "yes", [], object()):
+                with self.subTest(invalid=invalid), self.assertRaises(TicketValidationError):
+                    self.service.list_tickets(subject_query="printer", include_description=invalid)
+            query.assert_not_called()
+
     def test_subject_search_is_literal_select_only_and_composes_with_queue_filters(self):
         timestamp = "2026-09-04T00:00:00.000Z"
         values = (
@@ -110,6 +117,68 @@ class TicketReadTests(unittest.TestCase):
             (tickets[2], tickets[1], tickets[0]),
         )
         self.assertEqual(self.repo.list_tickets(subject_query="' OR 1=1 --"), ())
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
+    def test_subject_or_description_search_is_literal_ordered_and_select_only(self):
+        timestamp = "2026-09-04T00:00:00.000Z"
+        phrase = "Printer 50% user_name \\ path"
+        values = (
+            (phrase, None, "OPEN", "HIGH", "INCIDENT"),
+            ("General issue", phrase.upper(), "OPEN", "HIGH", "INCIDENT"),
+            (phrase, phrase, "OPEN", "HIGH", "INCIDENT"),
+            ("General issue", phrase, "CLOSED", "HIGH", "INCIDENT"),
+            ("General issue", phrase, "OPEN", "LOW", "INCIDENT"),
+            ("General issue", phrase, "OPEN", "HIGH", "TASK"),
+            ("General issue", "Other 50X userXname path", "OPEN", "HIGH", "INCIDENT"),
+            ("General issue", None, "OPEN", "HIGH", "INCIDENT"),
+        )
+        tickets = [self.repo.create_ticket(
+            ticket_number=f"TEXT-{index}", subject=subject, description=description,
+            status=status, priority=priority, ticket_type=ticket_type,
+            created_at=timestamp, updated_at=timestamp,
+        ) for index, (subject, description, status, priority, ticket_type) in enumerate(values)]
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        expected_all = tuple(reversed(tickets))
+        expected_matches = tuple(tickets[index] for index in (5, 4, 3, 2, 1, 0))
+        self.assertEqual(self.service.list_tickets(subject_query=None, include_description=True), expected_all)
+        self.assertEqual(self.service.list_tickets(subject_query=" \t ", include_description=True), expected_all)
+        self.assertEqual(self.service.list_tickets(subject_query="printer"), (tickets[2], tickets[0]))
+        self.assertEqual(self.service.list_tickets(subject_query="printer", include_description=False),
+                         (tickets[2], tickets[0]))
+        for query in ("printer", "PRINTER", "50%", "user_name", "%", "_", "\\", phrase):
+            with self.subTest(query=query):
+                self.assertEqual(
+                    self.service.list_tickets(subject_query=query, include_description=True),
+                    expected_matches,
+                )
+        self.assertEqual(self.service.list_tickets(subject_query="50X", include_description=True),
+                         (tickets[6],))
+        self.assertEqual(self.service.list_tickets(subject_query="userXname", include_description=True),
+                         (tickets[6],))
+        self.assertEqual(self.service.list_tickets(subject_query="50%X", include_description=True), ())
+        self.assertEqual(self.service.list_tickets(subject_query="printer", include_description=True,
+                                                    status="OPEN"),
+                         tuple(tickets[index] for index in (5, 4, 2, 1, 0)))
+        self.assertEqual(self.service.list_tickets(subject_query="printer", include_description=True,
+                                                    priority="HIGH"),
+                         tuple(tickets[index] for index in (5, 3, 2, 1, 0)))
+        self.assertEqual(self.service.list_tickets(subject_query="printer", include_description=True,
+                                                    ticket_type="INCIDENT"),
+                         tuple(tickets[index] for index in (4, 3, 2, 1, 0)))
+        filtered = tuple(tickets[index] for index in (2, 1, 0))
+        self.assertEqual(self.service.list_tickets(subject_query="printer", include_description=True,
+                                                    status="OPEN", priority="HIGH",
+                                                    ticket_type="INCIDENT"), filtered)
+        self.assertEqual(self.service.list_tickets(subject_query="printer", include_description=True,
+                                                    limit=2), expected_matches[:2])
+        self.assertEqual(self.service.list_tickets(subject_query="printer", include_description=True,
+                                                    limit=3, offset=2), expected_matches[2:5])
+        self.assertEqual(self.repo.list_tickets(subject_query="' OR 1=1 --",
+                                                include_description=True), ())
         with closing(sqlite3.connect(self.path)) as connection:
             self.assertEqual(tuple(connection.iterdump()), before)
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))

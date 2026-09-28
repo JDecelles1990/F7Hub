@@ -1,5 +1,39 @@
 # F7Hub Current State
 
+Last verified: 2026-09-28 (America/Toronto).
+
+Current candidate: **Slice 035 — Search Saved Tickets by Subject or Description**, on `feature/ticket-text-search-s035` in `C:\Dev\F7Hub`. Before editing, `git fetch origin` confirmed clean `main` with HEAD and origin/main at `f235cfde50d4e728527706440bc3c4abb56bd8c6`. The feature branch starts at that exact base. The protected `recovery/pre-s024-protected-work` ref remains `002a494735f30e1488f61e21ea98740ae6371d4d`; other worktrees were not changed.
+
+Status: **PASS — READY_FOR_REVIEW** after implementation, validation, native Windows inspection, documentation and self-review. The Slice 034 review/integration request in the prior snapshot and Todo was **STALE HANDOFF METADATA**: live `main` includes its PR #35 merge at `f235cfde`. The prior report is historical evidence. Candidate changes remain unstaged and uncommitted; no push, PR or integration was performed for Slice 035.
+
+## Slice 035 Result and Scope
+
+`TicketService.list_tickets` and `TicketRepository.list_tickets` accept `include_description: bool = False`. The service rejects non-booleans before querying and keeps None/blank queries unconstrained. Default callers retain Slice 034 subject-only behavior. Saved Tickets passes True, so one submitted literal phrase matches subject or description inside a parenthesized, bound SQL predicate. NULL descriptions do not match and both-field matches return one ticket. Status/Priority/Type filters, newest-updated/ID order and bounded paging are unchanged. The existing field is labeled Search subjects and descriptions; Enter/Search/Clear, draft and applied text, worker busy state, exact-number opening and failed-read retry remain on the same path. A successful description edit may remove the queue row while its authoritative updated detail stays open, activity draft and filters remain, and the save stays acknowledged. No schema, migration, index, FTS object, dependency or new search service was added.
+
+## Slice 035 Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD` from `C:\Dev\F7Hub`. Automated GUI/Integration used `QT_QPA_PLATFORM=offscreen`; native validation used the Windows Qt platform and isolated synthetic SQLite.
+
+| Suite | Result |
+|---|---|
+| Focused ticket reads/workspace | PASS — 68 tests, exit 0 |
+| Affected ticket reads/service/repository/MainWindow/workspace | PASS — 85 tests, exit 0 |
+| Database | PASS — 360 tests, exit 0 |
+| GUI | PASS — 154 tests, exit 0 |
+| Integration | PASS — 126 tests, exit 0 |
+
+Full regression: **640 PASS**, zero failures/errors on completed suites. Expected injected error-path logs had successful unittest counts and exit 0. Isolated tests cover subject-only compatibility, description-only/both-field/NULL matches, literal `%`, `_` and backslash, filters and OR precedence, order/paging, no duplicate rows, unchanged database dump, integrity_check=ok and zero foreign-key violations. Worker-backed tests cover description search, draft/applied state, Enter/Search/Clear, filters, paging, exact-number opening, failed Search/Refresh and retry, busy protection and description-edit result exit with one write.
+
+Native Windows: PASS — actual `windows` Qt platform at 1000×700 after observable worker idle. Eight captures under the external `f7-s035-native-captures` directory were opened and inspected. The complete Search subjects and descriptions placeholder, Search/Clear, filters, queue, detail and action controls were accessible without observed clipping or overlap. The synthetic workflow covered description-only Enter search, page 2, failed Search and Refresh with recovery, and a description edit that removed the row but retained authoritative updated detail, applied query, unsubmitted draft, note draft and truthful save feedback. This validates the tested Windows environment, not every display scale.
+
+## Slice 035 Delivery Gate
+
+Production scope is the ticket repository, service and Saved Tickets workspace; tests are ticket reads and workspace flow. Affected canonical owners are Features, User Workflows, GUI, Database architecture, Python architecture, Roadmap, Todo, ChangeLog and this report. The physical SQL Schema, ERD, system architecture, AHK and PowerShell are unaffected. The next gate is independent read-only review of the exact unstaged candidate; self-review grants no integration approval.
+
+---
+
+## Prior Slice 034 handoff snapshot (historical; Slice 034 later merged through PR #35)
+
 Last verified: 2026-09-27 (America/Toronto).
 
 Current candidate: **Slice 034 — Search Saved Tickets by Subject**, on feature/ticket-subject-search-s034 in C:\Dev\F7Hub. Before editing, a fresh fetch confirmed clean main with HEAD and origin/main at 6041bae3eba521cd92c2a4bcf535e541ec15b40d. The feature branch starts at that exact base. The protected recovery/pre-s024-protected-work ref remains 002a494735f30e1488f61e21ea98740ae6371d4d; other worktrees were not changed.

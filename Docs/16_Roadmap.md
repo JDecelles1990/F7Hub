@@ -151,6 +151,8 @@ Slice 033 adds one saved-ticket type correction workflow on the same writer, tim
 
 Slice 034 adds bounded Saved Tickets subject search on the existing read-only list path. Literal substring matching composes with Status, Priority and Type while preserving queue ordering, paging, drafts and open detail. This advances ticket search without starting universal search, FTS, another ticket editor or a schema change.
 
+Slice 035 extends that queue search to ticket descriptions with the same submitted phrase and bounded read path. Existing callers retain subject-only search by default; Saved Tickets opts in. Filters, ordering, paging, failure recovery and the open detail after a description edit remain intact. Notes and other fields, universal search and FTS remain separate work.
+
 The F7Hub roadmap is organized into:
 
 ```text

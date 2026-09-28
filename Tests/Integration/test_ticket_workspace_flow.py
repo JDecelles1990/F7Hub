@@ -334,6 +334,51 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
                           self.repository.list_timeline_events(ticket.ticket_id)]
                          .count("SUBJECT_CHANGED"), 1)
 
+    def test_description_only_search_and_edit_exit_keep_updated_detail_and_drafts(self):
+        target = self.service.create_ticket(
+            subject="General issue", description="Printer jam at tray",
+        )
+        self.workspace.status_filter.setCurrentIndex(self.workspace.status_filter.findData("NEW"))
+        self.wait_idle()
+        self.workspace.priority_filter.setCurrentIndex(self.workspace.priority_filter.findData("MEDIUM"))
+        self.wait_idle()
+        self.workspace.type_filter.setCurrentIndex(self.workspace.type_filter.findData("INCIDENT"))
+        self.wait_idle()
+        self.assertEqual(self.workspace.subject_search_input.accessibleName(),
+                         "Search subjects and descriptions")
+        self.assertEqual(self.workspace.subject_search_input.placeholderText(),
+                         "Search subjects and descriptions")
+        self.workspace.subject_search_input.setText("jam")
+        QTest.keyClick(self.workspace.subject_search_input, Qt.Key.Key_Return)
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, (self.repository.get_ticket(target.ticket_id),))
+        self.assertEqual(self.workspace.page_label.text(), "Page 1")
+        self.workspace.open_ticket(target.ticket_id)
+        self.wait_idle()
+        self.workspace.note_input.setPlainText("Keep note draft")
+        self.workspace.subject_search_input.setText("Unsubmitted text")
+        dialog = self.workspace.open_edit_description()
+        dialog.description_input.setPlainText("Cleared roller")
+        with patch.object(self.service, "update_ticket_description",
+                          wraps=self.service.update_ticket_description) as update:
+            dialog.save_button.click()
+            self.wait_idle()
+        self.assertEqual(update.call_count, 1)
+        self.assertEqual(self.workspace.model.tickets, ())
+        self.assertEqual(self.workspace.details.ticket.ticket_id, target.ticket_id)
+        self.assertEqual(self.workspace.details.ticket.description, "Cleared roller")
+        self.assertIn("Cleared roller", self.workspace.summary.toPlainText())
+        self.assertEqual(self.workspace.status_filter.currentData(), "NEW")
+        self.assertEqual(self.workspace.priority_filter.currentData(), "MEDIUM")
+        self.assertEqual(self.workspace.type_filter.currentData(), "INCIDENT")
+        self.assertEqual(self.workspace._subject_query, "jam")
+        self.assertEqual(self.workspace.subject_search_input.text(), "Unsubmitted text")
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep note draft")
+        self.assertIn("Description saved", self.workspace.feedback.text())
+        self.assertEqual([event.event_type for event in
+                          self.repository.list_timeline_events(target.ticket_id)]
+                         .count("DESCRIPTION_CHANGED"), 1)
+
     def test_priority_and_status_filter_compose_with_page_refresh_and_number_open(self):
         self.assertEqual(
             [self.workspace.priority_filter.itemData(index)

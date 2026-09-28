@@ -304,6 +304,8 @@ Slice 033 adds **Edit type** for a loaded saved ticket. The dialog preselects it
 
 Slice 034 adds **Search subjects** to Saved Tickets. Enter or Search submits trimmed text as a literal, case-insensitive subject substring and starts at page 1. Typing without submitting leaves the queue unchanged. Status, Priority and Type continue to compose with the submitted query; Refresh and paging reuse it without submitting later draft text. Clear removes the subject constraint and resets to page 1 while keeping the three filters. Open number leaves the submitted query, draft text, filters and page intact. Failed reads retain the previous queue, open detail and activity drafts for Refresh retry. Editing a matching ticket's subject may remove its queue row while the saved, updated detail stays open.
 
+Slice 035 relabels the same control **Search subjects and descriptions**. Enter or Search now finds a literal phrase in either field; a NULL description contributes no match. Existing draft/submitted, Clear, filter, paging, Open number and failed-read retry behavior remains. If a successful description edit removes the open ticket from active results, its updated detail and activity draft remain visible and the save remains acknowledged.
+
 ## Related Resources May Include
 
 - related tickets

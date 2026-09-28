@@ -12,6 +12,8 @@
 
 Slice 034 extends TicketService.list_tickets and TicketRepository.list_tickets with optional subject_query. The service rejects non-text values before repository access, trims surrounding whitespace and maps blank text to no constraint. The repository escapes LIKE metacharacters and binds a literal substring predicate with the existing queue filters. TicketWorkspace stores the submitted query separately from draft input and reuses its worker, paging and retry state. Subject editing still reloads authoritative detail and the filtered queue without a second write. No general search service or FTS change is introduced.
 
+Slice 035 adds `include_description: bool = False` to those two list methods. TicketService rejects non-booleans before repository access; the default remains subject-only, and blank/None queries remain unconstrained. Saved Tickets opts in to a bound subject-or-description literal predicate through its existing worker and submitted-query state. The existing description editor and post-save reload can remove the edited row from search results while leaving its authoritative detail open. No new search layer or persistence object is introduced.
+
 This document defines the Python architecture for F7Hub.
 
 It answers:
