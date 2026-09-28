@@ -377,6 +377,8 @@ Slice 027 implements a narrow exact-number entry in Saved Tickets: enter a compl
 
 Slice 034 adds read-only subject substring search to the Saved Tickets queue. Submitted text matches literally, including percent signs, underscores and backslashes, and composes with Status, Priority and Type. Typing alone leaves results unchanged; Search starts at page 1, Refresh and paging reuse the submitted query, and Clear removes only the subject constraint. Exact-number opening remains independent. Description, notes, other ticket fields and universal search remain separate work.
 
+Slice 035 extends that same Saved Tickets search to optional ticket descriptions. One submitted phrase matches a subject or description once per ticket, including literal wildcard characters, while existing service callers remain subject-only by default. The queue, filters, ordering, paging and recovery behavior are reused. Notes, reference fields and universal search remain separate work.
+
 ---
 
 ## FEAT-TICKET-008 — Resolution and Escalation

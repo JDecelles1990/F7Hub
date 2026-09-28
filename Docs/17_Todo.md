@@ -585,7 +585,15 @@ Slice 034 — search Saved Tickets by subject, implemented and self-validated 20
 - [x] Add Search subjects, Search, Clear and Enter using separate draft and submitted query state. Preserve filters, page, open detail and drafts through Refresh, exact-number opening and failed reads.
 - [x] Verify that a subject edit may remove the row from search results while updated detail stays open; inspect native Windows at 1000×700.
 - [x] Validate focused 65, affected 82, and full Database 358 + GUI 154 + Integration 125 = 637 tests; native Windows Enter, Clear, failure/retry and subject-exit captures passed.
-- [ ] Independent read-only review of the exact unstaged Slice 034 candidate; no staging, commit, push, PR or integration is authorized.
+- [x] Independently review and integrate Slice 034; merged on `main` through PR #35 at `f235cfde`. The preceding candidate report is historical handoff metadata.
+
+Slice 035 — search Saved Tickets by subject or description, implemented and self-validated 2026-09-28:
+
+- [x] Add an opt-in description match to the existing bound literal-substring ticket list query; retain subject-only results for default callers and compose the parenthesized OR with Status, Priority and Type.
+- [x] Relabel the existing search input and reuse Enter/Search/Clear, draft versus applied query, paging, exact-number opening, worker busy state and failed-read retry.
+- [x] Confirm that a description edit can remove the ticket from active results while its authoritative updated detail, activity draft, filters and applied query remain.
+- [x] Validate focused 68, affected 85, and full Database 360 + GUI 154 + Integration 126 = 640 tests; inspect eight native Windows 1000×700 captures.
+- [ ] Independent read-only review of the exact unstaged Slice 035 candidate. No staging, commit, push, PR or integration is authorized in this implementation phase.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 

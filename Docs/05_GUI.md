@@ -461,6 +461,8 @@ Suggested layout:
 
 Slice 034 adds a Search subjects row with a text field, Search and Clear buttons. The field accepts Enter. The submitted query is separate from unsubmitted input, composes with Status/Priority/Type and uses the existing asynchronous queue replacement, paging and Refresh path. Clear removes only subject search. During a queue worker operation the search controls are disabled; failed reads keep the previous rows, current detail and drafts with retry feedback. A subject edit can remove the row from the active search without closing the updated detail. Native Windows 1000×700 evidence is recorded in Status/CURRENT_STATE.md.
 
+Slice 035 keeps that row and relabels its input Search subjects and descriptions. The same submitted phrase searches either field through the queue worker, with all three filters and page recovery intact. A description edit can remove a result without closing its saved, updated detail or clearing activity drafts. Native Windows inspection at 1000×700 found the full placeholder, Search, Clear, filters and detail actions accessible without observed clipping or overlap.
+
 The ticket list should support:
 
 - search

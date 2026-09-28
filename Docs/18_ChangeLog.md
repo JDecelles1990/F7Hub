@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-28 — Slice 035: Search Saved Tickets by Subject or Description
+
+Saved Tickets now searches a submitted literal phrase in either the subject or optional description using the existing paged SELECT. `include_description=False` preserves the subject-only service/repository contract for default callers; the workspace opts in. The same escaped pattern is bound to both columns inside a parenthesized OR predicate, combined with Status, Priority and Type. Search/Enter/Clear, draft and applied text, paging, exact-number opening, busy protection and failed-read retry continue through the existing worker. A description edit can remove a matching row while the updated detail stays open and the save remains acknowledged. No schema, migration, index, FTS object or dependency changed.
+
+Focused **68 PASS**, affected **85 PASS**, and Database **360** + GUI **154** + Integration **126** = **640 full regression PASS**, all exit 0. Isolated SQLite checks cover default compatibility, optional description matches, NULL, literal metacharacters, combined filters, ordering, paging, one row per ticket, unchanged data, integrity and foreign keys. Native Windows Qt at 1000×700 passed description-only search, Enter, paging, failed Search/Refresh recovery and description-edit result exit; all eight external captures were inspected. The candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-27 — Slice 034: Search Saved Tickets by Subject
 
 Saved Tickets now accepts a submitted literal subject substring. TicketService validates and trims optional text; TicketRepository binds a LIKE predicate with an explicit escape character so percent signs, underscores and backslashes remain literal. Search composes with Status, Priority and Type in the existing ordered, paged SELECT. The workspace separates draft text from the submitted query, offers Enter/Search/Clear, retains previous results and open detail on failed reads, and retries the requested query/page through Refresh. A committed subject edit can remove its row from active search while its new detail remains open. No schema, migration, index, FTS, dependency or other subsystem changed.
