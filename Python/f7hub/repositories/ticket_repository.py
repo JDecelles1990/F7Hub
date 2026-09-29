@@ -204,7 +204,7 @@ class TicketRepository:
     def list_tickets(
         self, *, status: str | None = None, priority: str | None = None,
         ticket_type: str | None = None, subject_query: str | None = None,
-        include_description: bool = False,
+        include_description: bool = False, company_id: int | None = None,
         limit: int = 100, offset: int = 0,
     ) -> tuple[TicketRecord, ...]:
         """Return a bounded page, most recently updated first, with ID ties."""
@@ -220,6 +220,9 @@ class TicketRepository:
         if ticket_type is not None:
             predicates.append("ticket_type = ?")
             parameters.append(ticket_type)
+        if company_id is not None:
+            predicates.append("company_id = ?")
+            parameters.append(company_id)
         if subject_query is not None:
             literal = subject_query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
             pattern = f"%{literal}%"

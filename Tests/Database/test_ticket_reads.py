@@ -38,6 +38,83 @@ class TicketReadTests(unittest.TestCase):
         self.assertEqual(self.service.list_tickets(offset=99), ())
         self.assertEqual(self.repo.list_tickets(status="OPEN' OR 1=1 --"), ())
 
+    def test_company_filter_validates_before_query_and_composes_with_existing_predicates(self):
+        stamp = "2026-09-04T00:00:00.000Z"
+        with database_connection(self.path) as connection:
+            first = connection.execute(
+                "INSERT INTO companies (name, is_active, created_at, updated_at) VALUES (?, 1, ?, ?)",
+                ("Northwind", stamp, stamp),
+            ).lastrowid
+            second = connection.execute(
+                "INSERT INTO companies (name, is_active, created_at, updated_at) VALUES (?, 1, ?, ?)",
+                ("Other", stamp, stamp),
+            ).lastrowid
+        matching = self.repo.create_ticket(
+            ticket_number="COMP-1", subject="Printer help", description="Printer offline",
+            company_id=first, status="OPEN", priority="HIGH", ticket_type="INCIDENT",
+            created_at=stamp, updated_at=stamp,
+        )
+        other_type = self.repo.create_ticket(
+            ticket_number="COMP-2", subject="Printer help", company_id=first,
+            status="OPEN", priority="HIGH", ticket_type="TASK",
+            created_at=stamp, updated_at=stamp,
+        )
+        other_company = self.repo.create_ticket(
+            ticket_number="COMP-3", subject="Printer help", company_id=second,
+            status="OPEN", priority="HIGH", ticket_type="INCIDENT",
+            created_at=stamp, updated_at=stamp,
+        )
+        self.assertEqual(self.service.list_tickets(company_id=None),
+                         (other_company, other_type, matching))
+        self.assertEqual(self.service.list_tickets(company_id=first), (other_type, matching))
+        self.assertEqual(self.service.list_tickets(company_id=first, status="OPEN"),
+                         (other_type, matching))
+        self.assertEqual(self.service.list_tickets(company_id=first, priority="HIGH"),
+                         (other_type, matching))
+        self.assertEqual(self.service.list_tickets(company_id=first, ticket_type="INCIDENT"),
+                         (matching,))
+        self.assertEqual(self.service.list_tickets(company_id=first, subject_query="printer"),
+                         (other_type, matching))
+        self.assertEqual(self.service.list_tickets(
+            company_id=first, status="OPEN", priority="HIGH", ticket_type="INCIDENT",
+            subject_query="offline", include_description=True,
+        ), (matching,))
+        self.assertEqual(self.repo.list_tickets(company_id="1 OR 1=1"), ())
+        with patch.object(self.repo, "list_tickets") as query:
+            for invalid in (True, False, 0, -1, 1.0, "1", [], 2**63):
+                with self.subTest(invalid=invalid), self.assertRaises(TicketValidationError):
+                    self.service.list_tickets(company_id=invalid)
+            query.assert_not_called()
+
+    def test_recent_company_tickets_are_bounded_ordered_select_only_and_allow_inactive_company(self):
+        stamp = "2026-09-04T00:00:00.000Z"
+        with database_connection(self.path) as connection:
+            company_id = connection.execute(
+                "INSERT INTO companies (name, is_active, created_at, updated_at) VALUES (?, 0, ?, ?)",
+                ("Inactive company", stamp, stamp),
+            ).lastrowid
+        tickets = [self.repo.create_ticket(
+            ticket_number=f"RECENT-{index}", subject=f"Ticket {index}",
+            company_id=company_id, created_at=stamp, updated_at=stamp,
+        ) for index in range(25)]
+        unrelated = self.repo.create_ticket(
+            ticket_number="UNRELATED", subject="Other company", created_at=stamp, updated_at=stamp,
+        )
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        self.assertEqual(self.service.list_tickets(company_id=company_id, limit=20),
+                         tuple(reversed(tickets[-20:])))
+        self.assertEqual(self.service.list_tickets(company_id=company_id, limit=20, offset=20),
+                         tuple(reversed(tickets[:5])))
+        self.assertEqual(self.service.list_tickets(limit=1, offset=20), (tickets[5],))
+        self.assertEqual(self.service.get_ticket_details(tickets[-1].ticket_id).company_name,
+                         "Inactive company")
+        self.assertNotIn(unrelated, self.service.list_tickets(company_id=company_id, limit=20))
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
     def test_subject_search_normalizes_blank_and_rejects_non_text_before_query(self):
         ticket = self.service.create_ticket(subject="Printer offline")
         with patch.object(self.repo, "list_tickets", wraps=self.repo.list_tickets) as query:

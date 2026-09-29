@@ -1,6 +1,28 @@
 # F7Hub Current State
 
-Last verified: 2026-09-28 (America/Toronto).
+Last verified: 2026-09-29 (America/Toronto).
+
+Current candidate: **Slice 036 — Recent Tickets for a Saved Ticket's Company**, on `feature/company-ticket-context-s036` in `C:\Dev\F7Hub`. A fresh `git fetch origin` before editing confirmed clean `main`, HEAD and `origin/main` at `112d51cff17582756625af86f69817ccec761ef2`. The feature branch starts at that exact base. The protected `recovery/pre-s024-protected-work` ref remained `002a494735f30e1488f61e21ea98740ae6371d4d`; other worktrees were not changed.
+
+Status: **PASS — READY_FOR_REVIEW** after implementation, focused/affected/full regression, native Windows inspection, documentation and self-review. The Slice 035 pre-review/pre-integration request below and in Todo was **STALE HANDOFF METADATA**: live `main` includes its PR #36 merge at `112d51cf`. The prior candidate report remains historical evidence. Slice 036 changes remain unstaged and uncommitted; no push, PR or integration was performed.
+
+## Slice 036 Result and Scope
+
+`TicketService.list_tickets` and `TicketRepository.list_tickets` accept optional `company_id`. The service rejects bool, zero, negative, non-integer and out-of-range IDs before querying; None preserves existing calls. The repository binds `company_id = ?` into the existing SELECT with Status/Priority/Type/text predicates, newest-updated/ID ordering and paging. Saved Tickets adds a Company tab with the authoritative company name and a separate `TicketTableModel`. **Load recent tickets** requests only 20 first-page tickets for the stored company ID using the shared worker. Context identity and generation guard completion after ticket/company changes. Switching tickets clears old company results; a no-company ticket disables loading. A same-context failed refresh retains previous company rows and offers retry. Opening a result uses the existing ticket-open path and unsaved-draft confirmation, without changing the main queue. No schema, migration, index, new service or dependency was added.
+
+## Slice 036 Validation
+
+Environment: `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD`; automated GUI/Integration used `QT_QPA_PLATFORM=offscreen`. Focused ticket reads/company context: **35 PASS**, exit 0. Affected ticket/database/GUI/integration set: **105 PASS**, exit 0. Full Database **362 PASS**, GUI **154 PASS**, Integration **131 PASS** = **647 PASS**, all exit 0. Expected injected failure-path logs accompanied clean unittest summaries. Isolated SQLite verifies SELECT-only contents, `integrity_check = ok` and zero foreign-key violations.
+
+Native Windows: **PASS** on the actual `windows` Qt platform at 1000×700 after observable shared-worker idle. Eight captures under `LOCALAPPDATA/F7Hub/CodexEvidence/Slice-036` were opened and inspected: initial Company tab, loaded rows, failed refresh, retry, canceled draft discard, related-ticket open, inactive company and no-company state. The visible Company tab and existing queue/detail actions showed no observed clipping, overlap or inaccessible controls in this tested environment. The main queue rows, filters, page and search draft/applied state remained coherent throughout.
+
+## Slice 036 Delivery Gate
+
+Production scope is the ticket repository, service and Saved Tickets workspace; tests are ticket reads and Company-context flow. Affected canonical owners are Features, User Workflows, GUI, Database architecture, Python architecture, Roadmap, Todo, ChangeLog and this report. The physical SQL Schema, ERD, system architecture, AHK and PowerShell are unaffected. The next gate is independent read-only review of the exact unstaged candidate; self-review grants no integration approval.
+
+---
+
+## Prior Slice 035 handoff snapshot (historical; Slice 035 later merged through PR #36)
 
 Current candidate: **Slice 035 — Search Saved Tickets by Subject or Description**, on `feature/ticket-text-search-s035` in `C:\Dev\F7Hub`. Before editing, `git fetch origin` confirmed clean `main` with HEAD and origin/main at `f235cfde50d4e728527706440bc3c4abb56bd8c6`. The feature branch starts at that exact base. The protected `recovery/pre-s024-protected-work` ref remains `002a494735f30e1488f61e21ea98740ae6371d4d`; other worktrees were not changed.
 

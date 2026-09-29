@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-29 — Slice 036: Recent Tickets for a Saved Ticket's Company
+
+Saved Tickets now has a Company tab for the loaded ticket. **Load recent tickets** reads up to 20 most recently updated tickets using the persisted company ID and the existing ticket list service/repository. The query binds an optional company predicate and retains existing filters, ordering and paging. The tab has its own ticket model, uses the shared worker, rejects stale async results after context changes, and opens a result through the existing draft-confirmed ticket path. No-company and read-failure states are explicit; same-context results survive failed refresh. Inactive company names remain readable. The main queue and its page, filters and search state are unchanged. No schema, migration, index, dependency or new service was added.
+
+Focused **35 PASS**, affected **105 PASS**, and Database **362** + GUI **154** + Integration **131** = **647 full regression PASS**, all exit 0. Isolated SQLite checks cover validation, binding, predicate composition, ordering, top-20 bounds, paging, unchanged data, integrity and foreign keys. Native Windows Qt at 1000×700 passed Company-tab load, failure/retry, draft-discard Cancel, related-ticket opening, inactive and no-company states; all eight external captures under `LOCALAPPDATA/F7Hub/CodexEvidence/Slice-036` were inspected. The candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-28 — Slice 035: Search Saved Tickets by Subject or Description
 
 Saved Tickets now searches a submitted literal phrase in either the subject or optional description using the existing paged SELECT. `include_description=False` preserves the subject-only service/repository contract for default callers; the workspace opts in. The same escaped pattern is bound to both columns inside a parenthesized OR predicate, combined with Status, Priority and Type. Search/Enter/Clear, draft and applied text, paging, exact-number opening, busy protection and failed-read retry continue through the existing worker. A description edit can remove a matching row while the updated detail stays open and the save remains acknowledged. No schema, migration, index, FTS object or dependency changed.
