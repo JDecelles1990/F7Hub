@@ -8,6 +8,12 @@
 
 ---
 
+## View recent tickets for a saved ticket's company — Slice 036
+
+Open a saved ticket with a company → Company tab → **Load recent tickets**. The tab shows up to 20 newest tickets for that stored company ID, including inactive companies. **Open selected ticket** uses the normal detail load and asks before discarding an unsaved activity draft; Cancel keeps the current ticket and draft. A ticket without a company shows no results and disables loading. Switching tickets clears prior company results. Failed loads keep only previously loaded results for the same current ticket/company and offer retry. The main queue, page, filters and search text do not change.
+
+---
+
 ## All selected Knowledge tags — Slice 025
 
 Knowledge Base → Tag filter → Choose tags… → select **Match all selected tags** and at least two cached global tags → Apply. The list or last executed search now shows only articles carrying every chosen tag. Switching Any/All with the same IDs reruns the results; Cancel or unchanged Apply does not. Zero or one selected tag uses the existing All tags or specific-tag mode. Clear Search retains the choice; Ticket Open Article resets it before revealing the current article. Refresh keeps the All mode while at least two selected IDs survive, collapses to specific or All tags when fewer survive, and retains cached choices after a failed tag read.

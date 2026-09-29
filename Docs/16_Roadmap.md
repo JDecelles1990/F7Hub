@@ -153,6 +153,8 @@ Slice 034 adds bounded Saved Tickets subject search on the existing read-only li
 
 Slice 035 extends that queue search to ticket descriptions with the same submitted phrase and bounded read path. Existing callers retain subject-only search by default; Saved Tickets opts in. Filters, ordering, paging, failure recovery and the open detail after a description edit remain intact. Notes and other fields, universal search and FTS remain separate work.
 
+Slice 036 begins the remaining company-context view with up to 20 recent tickets for the loaded saved ticket's persisted company ID. The Company tab reuses the existing ticket list and open-detail paths, retains inactive company names, and leaves the main queue untouched. Company Center, contact history, broader company management and universal search remain separate work. No migration or index is added.
+
 The F7Hub roadmap is organized into:
 
 ```text

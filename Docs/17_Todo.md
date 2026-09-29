@@ -593,7 +593,14 @@ Slice 035 — search Saved Tickets by subject or description, implemented and se
 - [x] Relabel the existing search input and reuse Enter/Search/Clear, draft versus applied query, paging, exact-number opening, worker busy state and failed-read retry.
 - [x] Confirm that a description edit can remove the ticket from active results while its authoritative updated detail, activity draft, filters and applied query remain.
 - [x] Validate focused 68, affected 85, and full Database 360 + GUI 154 + Integration 126 = 640 tests; inspect eight native Windows 1000×700 captures.
-- [ ] Independent read-only review of the exact unstaged Slice 035 candidate. No staging, commit, push, PR or integration is authorized in this implementation phase.
+- [x] Independently review and integrate Slice 035; merged on `main` through PR #36 at `112d51cf`. The preceding candidate report is historical handoff metadata.
+
+Slice 036 — recent tickets for a saved ticket's company, implemented and self-validated 2026-09-29:
+
+- [x] Bind an optional validated company ID into the existing ticket list while preserving filters, ordering, paging and default callers.
+- [x] Add a Company tab with a separate ticket model, 20 recent results, shared-worker loading, context-safe completion, no-company state, retry, and normal ticket opening.
+- [x] Validate focused 35, affected 105, and full Database 362 + GUI 154 + Integration 131 = 647 tests; inspect eight native Windows 1000×700 captures.
+- [ ] Independent read-only review of the exact unstaged Slice 036 candidate; staging, commit, push, PR and integration remain outside this implementation phase.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 

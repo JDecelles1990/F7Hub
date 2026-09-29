@@ -164,7 +164,7 @@ class TicketService:
     def list_tickets(
         self, *, status: str | None = None, priority: str | None = None,
         ticket_type: str | None = None, subject_query: str | None = None,
-        include_description: bool = False,
+        include_description: bool = False, company_id: int | None = None,
         limit: int = 100, offset: int = 0,
     ) -> tuple[TicketRecord, ...]:
         if status is not None:
@@ -177,6 +177,7 @@ class TicketService:
             raise TicketValidationError("subject_query must be text or None.")
         if not isinstance(include_description, bool):
             raise TicketValidationError("include_description must be a boolean.")
+        _validate_optional_id(company_id, "company_id")
         clean_subject_query = subject_query.strip() or None if subject_query is not None else None
         if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 200:
             raise TicketValidationError("limit must be an integer from 1 to 200.")
@@ -186,7 +187,7 @@ class TicketService:
             return self._ticket_repository.list_tickets(
                 status=status, priority=priority, ticket_type=ticket_type,
                 subject_query=clean_subject_query,
-                include_description=include_description,
+                include_description=include_description, company_id=company_id,
                 limit=limit, offset=offset,
             )
         except sqlite3.Error as error:

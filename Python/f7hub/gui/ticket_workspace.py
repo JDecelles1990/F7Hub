@@ -70,6 +70,8 @@ class TicketWorkspace(QWidget):
         self._offset = 0
         self._retry_offset = None
         self._subject_query = None
+        self._company_context = None
+        self._company_context_generation = 0
         self._knowledge_link_service = knowledge_link_service
         self._edit_subject_dialog = None
         self._edit_priority_dialog = None
@@ -179,6 +181,41 @@ class TicketWorkspace(QWidget):
         self.knowledge_tab = TicketKnowledgeWidget(self._knowledge_link_service, self._runner, tabs)
         self.knowledge_tab.knowledge_article_requested.connect(self.knowledge_article_requested.emit)
         tabs.addTab(self.knowledge_tab, "Knowledge")
+        company_tab = QWidget(tabs)
+        company_layout = QVBoxLayout(company_tab)
+        self.company_heading = QLabel("No company is linked to this ticket.", company_tab)
+        self.company_heading.setTextFormat(Qt.TextFormat.PlainText)
+        self.company_heading.setWordWrap(True)
+        company_layout.addWidget(self.company_heading)
+        self.company_feedback = QLabel(company_tab)
+        self.company_feedback.setTextFormat(Qt.TextFormat.PlainText)
+        self.company_feedback.setWordWrap(True)
+        company_layout.addWidget(self.company_feedback)
+        self.company_load_button = QPushButton("Load recent tickets", company_tab)
+        self.company_load_button.clicked.connect(self.load_company_tickets)
+        self.company_load_button.setEnabled(False)
+        company_layout.addWidget(self.company_load_button)
+        self.company_model = TicketTableModel(self)
+        self.company_table = QTableView(company_tab)
+        self.company_table.setAccessibleName("Recent tickets for this company")
+        self.company_table.setModel(self.company_model)
+        self.company_table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
+        self.company_table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
+        self.company_table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        self.company_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
+        self.company_table.activated.connect(self._activate_company_row)
+        company_layout.addWidget(self.company_table)
+        self.company_open_button = QPushButton("Open selected ticket", company_tab)
+        self.company_open_button.clicked.connect(
+            lambda: self._activate_company_row(self.company_table.currentIndex())
+        )
+        self.company_open_button.setEnabled(False)
+        company_layout.addWidget(self.company_open_button)
+        self.company_table.selectionModel().currentChanged.connect(
+            lambda: self._set_company_controls_idle(self._runner.busy)
+        )
+        self._runner.busy_changed.connect(self._set_company_controls_idle)
+        tabs.addTab(company_tab, "Company")
         self.detail_tabs = tabs
         detail_layout.addWidget(tabs)
         self.author_input = QLineEdit(self.detail_panel)
@@ -312,6 +349,59 @@ class TicketWorkspace(QWidget):
         self.ticket_number_input.setEnabled(not busy)
         self.open_number_button.setEnabled(not busy)
 
+    def _set_company_controls_idle(self, busy):
+        self.company_load_button.setEnabled(
+            not busy and self._company_context is not None
+            and self._company_context[1] is not None
+        )
+        self.company_open_button.setEnabled(
+            not busy and self.company_table.currentIndex().isValid()
+        )
+
+    def load_company_tickets(self):
+        if self._runner.busy or self._company_context is None:
+            return
+        context = self._company_context
+        if context[1] is None:
+            return
+        generation = self._company_context_generation
+        self.company_feedback.setText("Loading recent company tickets…")
+
+        def still_current():
+            return (self._company_context_generation == generation
+                    and self._company_context == context)
+
+        def loaded(tickets):
+            if not still_current():
+                return
+            self.company_model.replace_tickets(tickets)
+            if tickets:
+                self.company_table.selectRow(0)
+                self.company_feedback.setText("Up to 20 most recently updated tickets for this company.")
+            else:
+                self.company_feedback.setText("No recent tickets for this company.")
+            self._set_company_controls_idle(False)
+
+        def failed(error):
+            if not still_current():
+                return
+            logging.getLogger(__name__).error("Company ticket load failed: %s", type(error).__name__)
+            self.company_feedback.setText(
+                "Could not load recent company tickets. Previous results for this company remain. "
+                "Use Load recent tickets to retry."
+                if self.company_model.tickets else
+                "Could not load recent company tickets. Use Load recent tickets to retry."
+            )
+
+        self._runner.submit(
+            lambda: self._service.list_tickets(company_id=context[1], limit=20, offset=0),
+            loaded, failed,
+        )
+
+    def _activate_company_row(self, index):
+        if not self._runner.busy and index.isValid() and index.row() < len(self.company_model.tickets):
+            self.open_ticket(self.company_model.tickets[index.row()].ticket_id)
+
     def open_ticket_by_number(self):
         if self._runner.busy:
             return
@@ -396,6 +486,20 @@ class TicketWorkspace(QWidget):
     def _display_details(self, details):
         self.details = details
         ticket = details.ticket
+        context = (ticket.ticket_id, ticket.company_id)
+        if context != self._company_context:
+            self._company_context = context
+            self._company_context_generation += 1
+            self.company_model.replace_tickets(())
+            self.company_feedback.setText(
+                "Select Load recent tickets to see up to 20 tickets for this company."
+                if ticket.company_id is not None else ""
+            )
+        self.company_heading.setText(
+            f"Company: {details.company_name or 'Unavailable'}"
+            if ticket.company_id is not None else "No company is linked to this ticket."
+        )
+        self._set_company_controls_idle(self._runner.busy)
         self.knowledge_tab.set_ticket(ticket.ticket_id)
         self.heading.setText(f"{ticket.ticket_number} — {ticket.subject}\n{ticket.status} · {ticket.priority}")
         self.summary.setPlainText(

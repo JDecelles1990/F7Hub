@@ -8,6 +8,12 @@
 
 ---
 
+## Saved-ticket Company tab — Slice 036
+
+Saved-ticket detail includes a Company tab with the authoritative company name, **Load recent tickets**, a separate ticket table, and **Open selected ticket**. The read is asynchronous through the shared worker and capped at 20 newest tickets. No-company and read-failure states are explicit; a failed refresh keeps earlier rows only for the same loaded ticket/company. Opening a result uses existing draft-discard confirmation and detail loading. Native Windows inspection at 1000×700 found the Company tab and existing queue/detail controls accessible without observed clipping or overlap.
+
+---
+
 ## All-selected-tag filter selection — Slice 025
 
 The existing Choose tags… dialog adds keyboard-usable Any/All radio choices above its check list. With two or more selected IDs, the Tag combo displays **All of N tags** or **Any of N tags** and lists the selected names in its tooltip. Zero and one selections collapse to All tags and the existing specific-tag item. Cancel and unchanged Apply submit no result request. The tested native Windows 1000×700 MainWindow and dialog kept the filter row, detail, check list and actions visible; evidence is in `Status/CURRENT_STATE.md`.

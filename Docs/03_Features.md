@@ -8,6 +8,12 @@
 
 ---
 
+## Recent company tickets in Saved Tickets — Slice 036
+
+A saved ticket's Company tab can load up to 20 most recently updated tickets linked to the same persisted company ID. It shows the current company name, including inactive companies, and opens a result through the normal ticket workflow. A ticket without a company has an unavailable state. The Company tab is read-only and does not change the Saved Tickets queue or its filters. A full Company Center and contact history remain separate work.
+
+---
+
 ## Read-only all-selected-tag filtering — Slice 025
 
 Knowledge lists and current FTS results can require every one of two or more selected global tags. The existing selector offers Any or All; zero selections use All tags and one uses the specific-tag mode. All-selected filtering composes with Category and Status, returns each article once, and preserves list order and FTS ranking. It reads current tag relationships only. Custom Boolean expressions, saved/date filters, tag administration and historical tag filtering remain deferred.
