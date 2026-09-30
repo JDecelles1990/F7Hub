@@ -226,6 +226,107 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         self.assertEqual(self.workspace.priority_filter.currentData(), "MEDIUM")
         self.assertEqual(self.workspace.type_filter.currentData(), "INCIDENT")
 
+    def test_note_only_search_paging_retry_and_exact_number_open(self):
+        first = self.service.create_ticket(subject="General issue one")
+        second = self.service.create_ticket(subject="General issue two")
+        self.service.add_note(first.ticket_id, note_text="Router needs reboot")
+        self.service.add_note(first.ticket_id, note_text="Router rebooted")
+        self.service.add_note(second.ticket_id, note_text="Router cable checked")
+        self.workspace.PAGE_SIZE = 1
+        self.workspace.status_filter.setCurrentIndex(self.workspace.status_filter.findData("NEW"))
+        self.wait_idle()
+        self.workspace.priority_filter.setCurrentIndex(self.workspace.priority_filter.findData("MEDIUM"))
+        self.wait_idle()
+        self.workspace.type_filter.setCurrentIndex(self.workspace.type_filter.findData("INCIDENT"))
+        self.wait_idle()
+        self.workspace.note_input.setPlainText("Keep activity draft")
+        self.workspace.subject_search_input.setText("router")
+        QTest.keyClick(self.workspace.subject_search_input, Qt.Key.Key_Return)
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets,
+                         (self.repository.get_ticket(second.ticket_id),))
+        self.assertTrue(self.workspace.next_button.isEnabled())
+        self.assertEqual(self.workspace._subject_query, "router")
+        self.workspace.subject_search_input.setText("Unsubmitted draft")
+        self.workspace.next_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets,
+                         (self.repository.get_ticket(first.ticket_id),))
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets,
+                         (self.repository.get_ticket(first.ticket_id),))
+        self.workspace.previous_button.click()
+        self.wait_idle()
+        before_failure = self.workspace.model.tickets
+        with patch.object(self.service, "list_tickets", side_effect=TicketReadError("private note")):
+            self.workspace.next_button.click()
+            self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, before_failure)
+        self.assertEqual(self.workspace._retry_offset, 1)
+        self.assertNotIn("private note", self.workspace.feedback.text())
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets,
+                         (self.repository.get_ticket(first.ticket_id),))
+        self.workspace.ticket_number_input.setText(
+            self.repository.get_ticket(self.ticket_id).ticket_number
+        )
+        self.workspace.open_number_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep activity draft")
+        self.assertEqual(self.workspace.subject_search_input.text(), "Unsubmitted draft")
+        self.assertEqual(self.workspace._subject_query, "router")
+        self.assertEqual(self.workspace.page_label.text(), "Page 2")
+        self.workspace.clear_subject_search_button.click()
+        self.wait_idle()
+        self.assertIsNone(self.workspace._subject_query)
+        self.assertEqual(self.workspace.subject_search_input.text(), "")
+        self.assertEqual(self.workspace.status_filter.currentData(), "NEW")
+        self.assertEqual(self.workspace.priority_filter.currentData(), "MEDIUM")
+        self.assertEqual(self.workspace.type_filter.currentData(), "INCIDENT")
+
+    def test_committed_note_enters_applied_search_without_replacing_draft(self):
+        self.workspace.subject_search_input.setText("diagnostic phrase")
+        self.workspace.search_subjects_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, ())
+        self.workspace.subject_search_input.setText("Unsubmitted draft")
+        self.workspace.reason_input.setText("Keep reason draft")
+        self.workspace.note_input.setPlainText("Diagnostic phrase from a new note")
+        self.workspace.add_note_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets,
+                         (self.repository.get_ticket(self.ticket_id),))
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertIn("Diagnostic phrase", self.workspace.notes_history.toPlainText())
+        self.assertEqual(self.workspace._subject_query, "diagnostic phrase")
+        self.assertEqual(self.workspace.subject_search_input.text(), "Unsubmitted draft")
+        self.assertEqual(self.workspace.reason_input.text(), "Keep reason draft")
+        self.assertIn("Note saved.", self.workspace.feedback.text())
+        self.assertNotIn("Diagnostic phrase", self.workspace.feedback.text())
+
+    def test_note_search_failed_read_preserves_rows_detail_and_activity_draft(self):
+        self.service.add_note(self.ticket_id, note_text="Router trace")
+        self.workspace.note_input.setPlainText("Keep unsaved note")
+        before = self.workspace.model.tickets
+        self.workspace.subject_search_input.setText("router")
+        with patch.object(self.service, "list_tickets", side_effect=TicketReadError("secret note")):
+            self.workspace.search_subjects_button.click()
+            self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets, before)
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep unsaved note")
+        self.assertEqual(self.workspace._subject_query, "router")
+        self.assertEqual(self.workspace._retry_offset, 0)
+        self.assertNotIn("secret note", self.workspace.feedback.text())
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.tickets,
+                         (self.repository.get_ticket(self.ticket_id),))
+
     def test_subject_search_failed_request_and_refresh_retain_queue_detail_draft_and_retry(self):
         self.service.create_ticket(subject="Printer second")
         self.workspace.PAGE_SIZE = 1
@@ -345,9 +446,9 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         self.workspace.type_filter.setCurrentIndex(self.workspace.type_filter.findData("INCIDENT"))
         self.wait_idle()
         self.assertEqual(self.workspace.subject_search_input.accessibleName(),
-                         "Search subjects and descriptions")
+                         "Search subjects, descriptions and notes")
         self.assertEqual(self.workspace.subject_search_input.placeholderText(),
-                         "Search subjects and descriptions")
+                         "Search subjects, descriptions and notes")
         self.workspace.subject_search_input.setText("jam")
         QTest.keyClick(self.workspace.subject_search_input, Qt.Key.Key_Return)
         self.wait_idle()

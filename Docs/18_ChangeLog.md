@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-30 — Slice 039: Search Saved Tickets by Note Text
+
+Saved Tickets now submits its existing literal query against subject, description and note text. TicketService and TicketRepository add an optional boolean `include_notes` that defaults to false, retaining subject-only behavior for existing callers. The repository uses a bound correlated `EXISTS` so multiple matching notes still return one ticket and all existing filters, newest-updated ordering and paging remain intact. The workspace uses its existing worker and post-save refresh: a committed note can add its ticket to applied results without submitting later draft search text. No note snippet, schema, migration, index, dependency or new search subsystem was added.
+
+Focused ticket-read **33 PASS** and ticket-workspace **43 PASS**; affected note-service **17 PASS**, company-context **5 PASS** and MainWindow **8 PASS**. Fresh Database **377** + GUI **156** + Integration **140** = **673 full regression PASS**, all exit 0. Read tests include literal metacharacters, all four flag combinations, filter grouping, ordering, paging, no duplicate rows, unchanged SQLite content, integrity, foreign keys and an index-backed correlated query plan. Native Windows Qt at 1000×700 passed Enter search, combined filters, note-save membership, safe failure, retry and Clear on an isolated database; all five final Saved Tickets captures were inspected. The candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-29 — Slice 038: Manual SQLite Database Backup
 
 The File menu now offers **Back up database**. Bootstrap supplies the active database path to DatabaseBackupService; the shared worker keeps the GUI responsive. A dedicated read-only SQLite connection copies the live source with the online backup API to a temporary file under `%LOCALAPPDATA%\F7Hub\Backups`. An independent reopen must pass integrity and foreign-key checks before a no-overwrite rename publishes a unique `.db` file. Success shows the path and local-drive limitation; failure shows bounded feedback and leaves existing backups intact. The backup contains SQLite data only; no restore, scheduling, retention, schema, migration, dependency or external transfer was added.

@@ -18,6 +18,10 @@ The existing File menu contains **Back up database**. The shared worker keeps th
 
 Saved-ticket detail includes a Company tab with the authoritative company name, **Load recent tickets**, a separate ticket table, and **Open selected ticket**. The read is asynchronous through the shared worker and capped at 20 newest tickets. No-company and read-failure states are explicit; a failed refresh keeps earlier rows only for the same loaded ticket/company. Opening a result uses existing draft-discard confirmation and detail loading. Native Windows inspection at 1000×700 found the Company tab and existing queue/detail controls accessible without observed clipping or overlap.
 
+## Saved-ticket note search — Slice 039
+
+The existing queue search field now displays and exposes the accessible name **Search subjects, descriptions and notes**. Enter or Search submits one literal phrase; note-only matches appear as ordinary ticket rows without note excerpts. A successful note save uses the existing detail and queue refresh, preserving an applied phrase and any later unsubmitted draft. Failed reads keep the prior rows and detail for Refresh retry. Native Windows inspection at 1000×700 confirmed the empty, matched, failed, recovered and cleared states with the Saved Tickets page visible and no observed control overlap.
+
 ---
 
 ## All-selected-tag filter selection — Slice 025

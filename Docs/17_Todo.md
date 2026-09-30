@@ -30,6 +30,17 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
+Slice 039 — Saved Tickets note-text search, implemented and self-validated 2026-09-30:
+
+- [x] Extend the existing literal list search with optional note matching through a bound correlated read, preserving the subject-only default and all queue filters.
+- [x] Update the Saved Tickets search text and use the existing worker, retry and post-save refresh paths without note snippets.
+- [x] Validate focused ticket reads 33 and ticket workspace 43, affected note-service 17, company-context 5 and MainWindow 8, full Database 377 + GUI 156 + Integration 140 = 673 tests, and native Windows 1000×700 search/failure/recovery captures.
+- [ ] Independent read-only review of the exact unstaged Slice 039 candidate. Staging, commit, push, PR and integration are outside this implementation phase.
+
+The Slice 038 rereview/integration-pending wording below is **STALE HANDOFF METADATA**: freshly fetched `main` and `origin/main` contain its PR #39 merge at `17e8a0c03a8e027cc044b09a83ebd0646e5409e0`. Its 667-test record remains prior baseline evidence; the protected recovery branch is unchanged.
+
+---
+
 Slice 038 — manual SQLite database backup, corrected and self-validated 2026-09-30:
 
 - [x] Add File → Back up database through the shared worker and a narrow service using the resolved active database path.

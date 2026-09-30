@@ -2,6 +2,28 @@
 
 Last verified: 2026-09-30 (America/Toronto).
 
+Current candidate: **Slice 039 — Search Saved Tickets by Note Text**, on `feature/ticket-note-search-s039` in `C:\Dev\F7Hub`. The user approved the Slice 039 plan and explicitly authorized implementation, testing and documentation through `READY_FOR_REVIEW`. A fresh `git fetch origin --prune` confirmed clean canonical `main`, empty index/untracked set and HEAD = `origin/main` = `17e8a0c03a8e027cc044b09a83ebd0646e5409e0` before branching. The protected `recovery/pre-s024-protected-work` ref remained `002a494735f30e1488f61e21ea98740ae6371d4d`, and the four unrelated linked worktrees were left untouched.
+
+Status: **PASS — READY_FOR_REVIEW** after bounded implementation, focused/affected/full regression, native Windows validation, documentation and self-review. Slice 038's pending rereview/integration wording below and in Todo is **STALE HANDOFF METADATA**: fetched local and remote `main` include its PR #39 merge at `17e8a0c03a8e027cc044b09a83ebd0646e5409e0`. Its 667-test result is prior baseline evidence, not Slice 039 validation. Slice 039 remains unstaged and uncommitted; independent read-only review is the next gate.
+
+## Slice 039 Result and Scope
+
+TicketService and TicketRepository now accept optional `include_notes: bool = False` on the existing list path. The service validates the flag before repository access; default callers remain subject-only. Saved Tickets opts into both description and note matching. The repository binds one escaped literal pattern into grouped subject, description and correlated note alternatives, preserving Status/Priority/Type/company constraints, ordering, paging and one result row per ticket. The existing worker, submitted-versus-draft search state, failure retry, exact-number opening and post-save detail/queue refresh remain in use. A new committed note can add a ticket to the applied results. Note text is not included in queue rows, preview snippets, logs or error feedback. No schema, migration, index, dependency, FTS or new search subsystem was added.
+
+## Slice 039 Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD`; automated GUI/Integration used `QT_QPA_PLATFORM=offscreen`. Focused ticket reads **33 PASS** and ticket workspace **43 PASS**. Affected note-service **17 PASS**, company-context **5 PASS** and MainWindow **8 PASS**. Fresh Database **377 PASS**, GUI **156 PASS**, Integration **140 PASS** = **673 full regression PASS**, each suite exit 0. Read tests cover all four text-field flag combinations, literal metacharacters, note-only/overlap/multiple-note matches, grouping with all queue and company filters, ordering, paging, unchanged SQLite contents, integrity, foreign keys and an `EXPLAIN QUERY PLAN` lookup using the existing note ticket-ID index. Integration covers search state, note-save membership, drafts, later-page retry, safe failures and exact-number opening. Injected negative-path log lines were expected; unittest summaries and exits were clean.
+
+Native Windows: **PASS** on actual `windows` Qt at 1000×700 with an isolated populated database. After observable worker-idle readiness and explicit navigation to Saved Tickets, Enter search, combined filters, note-save membership, failed-read feedback, retry and Clear passed. All five final captures under `%LOCALAPPDATA%\F7Hub\CodexEvidence\Slice-039\native-hhc3zegc` were opened and inspected; the search placeholder and queue/detail controls were readable without observed overlap. An initial harness run timed out before inspection, and a later run captured the hidden New Ticket page; those were corrected in the external harness and are not counted as native visual evidence.
+
+## Slice 039 Delivery Gate
+
+Production scope is the ticket repository, ticket service and Saved Tickets workspace; focused tests are ticket reads and ticket workspace flow. Affected canonical owners are Features, User Workflows, GUI, Database Architecture, Python Architecture, Roadmap, Todo, ChangeLog and this report. Product Requirements already states the search need. System Architecture, physical SQL Schema, ERD, AHK and PowerShell have no change. Independent read-only review of the exact unstaged candidate is required; implementation self-review does not authorize staging or integration.
+
+---
+
+## Prior Slice 038 handoff snapshot (historical; Slice 038 later merged through PR #39)
+
 Current candidate: **Slice 038 — Manual SQLite Database Backup**, on `feature/manual-database-backup-s038` in `C:\Dev\F7Hub`. The user approved the Slice 038 plan and authorized IMPLEMENT → TEST → DOCUMENT, then explicitly authorized the bounded Slice 038 correction after independent review. A fresh `git fetch origin` before branching confirmed a clean canonical `main`, empty index/untracked set, and HEAD = `origin/main` = `61a5ecb8f1607dc0e5da19cbacc9a0248c62fffb`. The protected `recovery/pre-s024-protected-work` ref remained `002a494735f30e1488f61e21ea98740ae6371d4d`. The four other linked worktrees were inspected and not changed; one already had unrelated documentation deletion/untracked archive work.
 
 Status: **PASS — READY_FOR_REREVIEW** after the bounded 2026-09-30 correction, fresh focused/affected/full regression, native Windows validation, documentation and self-review. Slice 037's pre-review/pre-integration wording below and in Todo is **STALE HANDOFF METADATA**: live `main` includes its PR #38 merge at `61a5ecb8`. Slice 038 remains unstaged and uncommitted. Independent read-only rereview is the next gate; no push, PR or integration was performed.

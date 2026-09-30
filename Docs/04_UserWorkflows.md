@@ -320,6 +320,8 @@ Slice 034 adds **Search subjects** to Saved Tickets. Enter or Search submits tri
 
 Slice 035 relabels the same control **Search subjects and descriptions**. Enter or Search now finds a literal phrase in either field; a NULL description contributes no match. Existing draft/submitted, Clear, filter, paging, Open number and failed-read retry behavior remains. If a successful description edit removes the open ticket from active results, its updated detail and activity draft remain visible and the save remains acknowledged.
 
+Slice 039 relabels it **Search subjects, descriptions and notes**. The submitted phrase can also find a saved note, returning the ticket once without a note snippet. A new note may add its ticket to the applied results after the normal save and queue refresh. Typing a later draft does not replace the applied phrase; filters, paging, exact-number opening, retry, loaded detail and remaining activity drafts follow the existing behavior. A successful note write remains acknowledged if a later read fails.
+
 ## Related Resources May Include
 
 - related tickets
