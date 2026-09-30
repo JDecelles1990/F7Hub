@@ -11,6 +11,7 @@ import sys
 from PySide6.QtWidgets import QApplication, QMessageBox
 
 from f7hub.app.bootstrap import bootstrap_application
+from f7hub.app.logging_config import configure_application_logging, close_application_logging
 
 
 LOGGER = logging.getLogger(__name__)
@@ -28,23 +29,28 @@ def main(argv: Sequence[str] | None = None) -> int:
     )
     arguments, qt_arguments = parser.parse_known_args(process_arguments[1:])
 
-    application = QApplication.instance() or QApplication(
-        [process_arguments[0], *qt_arguments]
-    )
-    application.setApplicationName("F7Hub")
-    application.setOrganizationName("F7Hub")
-
+    application_handler = configure_application_logging()
     try:
-        context = bootstrap_application(database_path=arguments.database)
-    except Exception:
-        LOGGER.exception("F7Hub application startup failed.")
-        QMessageBox.critical(
-            None,
-            "F7Hub could not start",
-            "The application services could not be initialized. "
-            "No ticket data was changed.",
+        application = QApplication.instance() or QApplication(
+            [process_arguments[0], *qt_arguments]
         )
-        return 1
+        application.setApplicationName("F7Hub")
+        application.setOrganizationName("F7Hub")
 
-    context.main_window.show()
-    return application.exec()
+        try:
+            context = bootstrap_application(database_path=arguments.database)
+        except Exception as error:
+            LOGGER.error("Application startup failed; exception_type=%s", type(error).__name__)
+            QMessageBox.critical(
+                None,
+                "F7Hub could not start",
+                "The application services could not be initialized. "
+                "No ticket data was changed.",
+            )
+            return 1
+
+        context.main_window.show()
+        LOGGER.info("Application startup completed.")
+        return application.exec()
+    finally:
+        close_application_logging(application_handler)

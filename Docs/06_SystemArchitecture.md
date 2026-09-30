@@ -1290,6 +1290,8 @@ Logging Service
 
 Logging should include sufficient context without exposing sensitive data.
 
+Slice 037 implements the current startup logging boundary with Python's standard `logging` hierarchy under `f7hub`. One application-owned handler writes a bounded local file, with an owned stderr handler if file setup fails. Propagation to the process root logger is disabled while configured; the owned handler is closed on application exit. Startup records contain fixed operation text and exception type only. Callers remain responsible for keeping future messages free of sensitive data; this is not a generic redaction or diagnostic logging service.
+
 # 48. Logging Context
 
 Useful logging context may include:

@@ -30,6 +30,15 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
+Slice 037 — safe application logging at startup, implemented and self-validated 2026-09-29:
+
+- [x] Initialize one F7Hub-owned UTF-8 rotating file handler under LOCALAPPDATA before bootstrap, with explicit non-propagation, safe stderr fallback, bounded rotation and owned-handler cleanup.
+- [x] Replace raw startup exception logging with fixed text and exception type only; retain the existing safe dialog and exit behavior.
+- [x] Validate focused 9, affected 15, and full Database 362 + GUI 154 + Integration 136 = 652 tests; inspect native Windows 1000×700 startup and failure-dialog captures.
+- [ ] Independent read-only review of the exact unstaged Slice 037 candidate. Staging, commit, push, PR and integration are outside this implementation phase.
+
+The Slice 036 review/integration-pending line below is **STALE HANDOFF METADATA**: fetched `origin/main` and local `main` contain its PR #37 merge at `95744e36d34238f7223660392db9e38ecb8a94ac`. The protected recovery branch remains unchanged.
+
 ## Migration Checksum Portability - 2026-09-22
 
 - [x] Canonical LF checksum and pending SQL execution; source-derived LF/CRLF/exact-raw legacy compatibility.
@@ -600,7 +609,7 @@ Slice 036 — recent tickets for a saved ticket's company, implemented and self-
 - [x] Bind an optional validated company ID into the existing ticket list while preserving filters, ordering, paging and default callers.
 - [x] Add a Company tab with a separate ticket model, 20 recent results, shared-worker loading, context-safe completion, no-company state, retry, and normal ticket opening.
 - [x] Validate focused 35, affected 105, and full Database 362 + GUI 154 + Integration 131 = 647 tests; inspect eight native Windows 1000×700 captures.
-- [ ] Independent read-only review of the exact unstaged Slice 036 candidate; staging, commit, push, PR and integration remain outside this implementation phase.
+- [x] Independently review and integrate Slice 036; merged on `main` through PR #37 at `95744e3`. The preceding candidate report is historical handoff metadata.
 
 Custom tag expressions, restore/revert, polling/watchers, category/tag administration and saved/date filters remain deferred.
 

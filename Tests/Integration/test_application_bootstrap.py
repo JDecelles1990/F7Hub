@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from io import StringIO
 import os
 from pathlib import Path
 import tempfile
@@ -26,12 +27,19 @@ class ApplicationBootstrapTests(unittest.TestCase):
 
     def setUp(self) -> None:
         self.temporary_directory = tempfile.TemporaryDirectory()
+        self.environment = patch.dict(os.environ, {"LOCALAPPDATA": self.temporary_directory.name})
+        self.environment.start()
         self.database_path = (
             Path(self.temporary_directory.name) / "application-bootstrap.db"
         )
 
     def tearDown(self) -> None:
+        self.environment.stop()
         self.temporary_directory.cleanup()
+
+    def log_text(self) -> str:
+        return (Path(self.temporary_directory.name) / "F7Hub" / "Logs" /
+                "Application" / "f7hub.log").read_text(encoding="utf-8")
 
     def test_bootstrap_composes_window_service_repository_and_database(self) -> None:
         context = bootstrap_application(
@@ -75,6 +83,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
 
         self.assertEqual(exit_code, 0)
         event_loop.assert_called_once_with()
+        self.assertIn("Application startup completed.", self.log_text())
         with database_connection(self.database_path) as connection:
             self.assertEqual(
                 connection.execute(
@@ -84,25 +93,50 @@ class ApplicationBootstrapTests(unittest.TestCase):
             )
 
     def test_main_entry_point_reports_startup_failure(self) -> None:
+        secret = "S037_PRIVATE_STARTUP_MARKER"
         with (
             patch(
                 "f7hub.app.main.bootstrap_application",
-                side_effect=RuntimeError("internal startup detail"),
+                side_effect=RuntimeError(secret),
             ),
             patch("f7hub.app.main.QMessageBox.critical") as show_error,
-            self.assertLogs("f7hub.app.main", level="ERROR"),
+            patch("sys.stderr", new_callable=StringIO) as stderr,
         ):
             exit_code = main(
                 ["f7hub", "--database", str(self.database_path)]
             )
 
         self.assertEqual(exit_code, 1)
+        log_text = self.log_text()
+        self.assertIn("Application startup failed; exception_type=RuntimeError", log_text)
+        self.assertNotIn(secret, log_text)
+        self.assertNotIn("Traceback", log_text)
+        self.assertNotIn(secret, stderr.getvalue())
         show_error.assert_called_once_with(
             None,
             "F7Hub could not start",
             "The application services could not be initialized. "
             "No ticket data was changed.",
         )
+
+    def test_main_entry_point_continues_with_safe_stderr_fallback(self) -> None:
+        secret = "S037_PRIVATE_LOG_SETUP_MARKER"
+        with (
+            patch("f7hub.app.logging_config.RotatingFileHandler", side_effect=OSError(secret)),
+            patch("sys.stderr", new_callable=StringIO) as stderr,
+            patch.object(QApplication, "exec", return_value=0) as event_loop,
+        ):
+            exit_code = main(["f7hub", "--database", str(self.database_path)])
+
+        self.assertEqual(exit_code, 0)
+        event_loop.assert_called_once_with()
+        self.assertFalse((Path(self.temporary_directory.name) / "F7Hub" / "Logs" /
+                          "Application" / "f7hub.log").exists())
+        output = stderr.getvalue()
+        self.assertIn("application log file unavailable; exception_type=OSError", output)
+        self.assertIn("Application startup completed.", output)
+        self.assertNotIn(secret, output)
+        self.assertNotIn("Traceback", output)
 
 
 if __name__ == "__main__":

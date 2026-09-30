@@ -1284,6 +1284,8 @@ Installed application logging may later move to:
 %LOCALAPPDATA%\F7Hub\Logs\
 ```
 
+Slice 037 uses `%LOCALAPPDATA%\F7Hub\Logs\Application\f7hub.log` for the current application entry point. It creates only this path's missing directories, keeps two rotated backups at 1 MiB per file, and falls back to stderr if file setup fails. Development runs use the same local application-data location; no runtime log belongs in Git.
+
 ---
 
 # 76. Logs\Application
