@@ -10,6 +10,8 @@
 
 # 1. Purpose
 
+Slice 040 adds `0007_script_registry.sql`: a metadata-only `scripts` table with a nullable foreign key to shared `categories`, unique code and relative path, constrained script metadata, `is_enabled DEFAULT 0`, and enabled/name plus category indexes. The registry has no production rows. `ScriptRepository` reads enabled rows by default and joins only `SCRIPT` scope categories; a row linked to another category scope is excluded from catalog reads. The existing single-column foreign key enforces category identity, while the read boundary enforces scope. No write API, execution history, approval or PowerShell execution is introduced.
+
 Slice 034 extends the existing ticket-list SELECT with a bound subject LIKE predicate and an explicit backslash ESCAPE clause. The repository escapes percent signs, underscores and backslashes before surrounding submitted text with substring wildcards. The predicate composes with Status, Priority and Type in the same query and retains updated-time/ID ordering and bounded paging. No ticket data, schema object, migration or index changes.
 
 Slice 035 adds an opt-in description match to that same SELECT. The escaped literal pattern is bound for both columns inside a parenthesized subject OR description predicate, after the existing Status/Priority/Type predicates. NULL descriptions do not match; a row matching both fields appears once. Default callers retain subject-only behavior. Isolated read tests confirm unchanged database contents, integrity and foreign keys; the schema, migrations and indexes remain unchanged.

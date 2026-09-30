@@ -30,6 +30,18 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
+Slice 040 — PowerShell script registry foundation, implementation candidate on `feature/powershell-script-registry-s040`:
+
+- [x] Add migration 0007 with default-disabled metadata, existing `SCRIPT` taxonomy relationship and listing/category indexes; keep the production catalog empty.
+- [x] Add enabled-only repository and service reads, with separate file-reference statuses and no script execution.
+- [x] Cover fresh/incremental migration, constraints, category scope, read-only behavior and Windows path escape cases in isolated tests.
+- [x] Complete and record focused, affected and full Database, GUI and Integration regression on the final executable candidate: 8 registry, 10 category, 6 bootstrap, then 385 Database, 156 GUI and 140 Integration tests; all exit 0. The full suites total 681 tests.
+- [ ] Independent read-only review of the exact unstaged and uncommitted candidate. No staging, commit, push, PR or integration in this phase.
+
+The Slice 039 review/integration-pending wording below is **STALE HANDOFF METADATA**: fetched `main` and `origin/main` are `5072ae20cb912f25cd721bd6c18e5bf23a816eb0`, the PR #40 merge of Slice 039. Its 673-test result is prior baseline evidence.
+
+---
+
 Slice 039 — Saved Tickets note-text search, implemented and self-validated 2026-09-30:
 
 - [x] Extend the existing literal list search with optional note matching through a bound correlated read, preserving the subject-only default and all queue filters.

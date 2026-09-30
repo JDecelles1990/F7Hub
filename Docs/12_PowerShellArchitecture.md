@@ -10,6 +10,8 @@
 
 # 1. Purpose
 
+Slice 040 introduces only a Python/SQLite read-only registry for PowerShell `.ps1` references. References are limited to Diagnostics, Reports and Modules below the supplied project root, with traversal, external links and invalid Windows paths rejected. File status is an observation, not execution approval. No production PowerShell file, `pwsh.exe` invocation, content read or execution gateway is added.
+
 This document defines the PowerShell architecture for F7Hub.
 
 It answers:
@@ -612,7 +614,7 @@ Do not store full PowerShell source in SQLite by default.
 
 # 26. Script Registry
 
-F7Hub should eventually maintain a script registry.
+Slice 040 maintains read-only script metadata in SQLite. A user-facing script library, registration and execution remain planned.
 
 Conceptual flow:
 

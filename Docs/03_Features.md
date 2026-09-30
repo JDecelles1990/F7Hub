@@ -685,6 +685,8 @@ AI must not be required for core local search.
 
 ## FEAT-SCRIPT-001 — Script Registry
 
+Slice 040 implements a read-only, database-backed PowerShell metadata registry. It lists enabled entries and looks up an enabled entry by stable code. The production catalog starts empty. A searchable user-facing catalog remains planned.
+
 Priority: P1  
 Requirements: `FR-SCRIPT-001`, `FR-SCRIPT-002`
 
@@ -700,6 +702,8 @@ Potential languages:
 ---
 
 ## FEAT-SCRIPT-002 — Script Metadata
+
+Slice 040 stores the documented core metadata in SQLite, with `is_enabled` defaulting to `0`. Enabled means eligible for catalog display only; it conveys no content review, checksum verification, execution permission or elevation. Disabled-row inspection is an explicit repository maintenance read, not an authorization mechanism.
 
 Priority: P1  
 Requirements: `FR-SCRIPT-002`
@@ -720,6 +724,8 @@ Metadata may include:
 ---
 
 ## FEAT-SCRIPT-003 — File-Based Script Source
+
+Slice 040 resolves references only below `PowerShell/Diagnostics`, `PowerShell/Reports` or `PowerShell/Modules` and reports `AVAILABLE`, `MISSING`, `INACCESSIBLE` or `INVALID_REFERENCE` separately from metadata. It neither reads contents nor executes files. Availability is a point-in-time observation; a future execution subsystem must revalidate path and authorization.
 
 Priority: P1  
 Requirements: `FR-SCRIPT-003`

@@ -806,6 +806,8 @@ script_executions
 
 # 28. scripts
 
+Slice 040 implements the `scripts` metadata entity and its optional many-to-one relationship to the existing shared `categories` table. The foreign key checks category existence; catalog reads require the referenced category to have `SCRIPT` scope. Script parameters and executions remain planned. The initial production catalog is empty and newly inserted metadata defaults to disabled.
+
 Purpose:
 
 Represent an automation script registered in F7Hub.
@@ -1925,7 +1927,7 @@ Canonical conceptual inventory:
 | Knowledge | knowledge_article_tags | KB/tag junction | VERIFIED |
 | Search | knowledge_articles_fts | Derived current Knowledge content index | VERIFIED |
 | Knowledge | knowledge_article_scripts | KB/script junction | PLANNED |
-| Automation | scripts | Script registry | PLANNED |
+| Automation | scripts | Metadata-only script registry (Slice 040) | IMPLEMENTED |
 | Automation | script_parameters | Script input definitions | PLANNED |
 | Automation | script_executions | Execution history | PLANNED |
 | Automation | script_tags | Script/tag junction | PLANNED |

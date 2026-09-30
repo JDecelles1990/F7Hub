@@ -2129,6 +2129,8 @@ script_executions
 
 # 62. `scripts`
 
+Implemented by `0007_script_registry.sql` in Slice 040. The approved migration changes the earlier planned `is_enabled` default to `0`. Only `scripts`, `idx_scripts_enabled_name`, and `idx_scripts_category_id` are implemented here; parameter, execution, FTS and view definitions elsewhere in this document remain planned. The nullable category foreign key checks identity; `ScriptRepository` requires `SCRIPT` scope for catalog reads. No trigger or production seed is added.
+
 ```sql
 CREATE TABLE scripts (
     script_id INTEGER PRIMARY KEY,
@@ -2198,7 +2200,7 @@ CREATE TABLE scripts (
             requires_structured_output IN (0, 1)
         ),
 
-    is_enabled INTEGER NOT NULL DEFAULT 1
+    is_enabled INTEGER NOT NULL DEFAULT 0
         CHECK (is_enabled IN (0, 1)),
 
     created_at TEXT NOT NULL,
@@ -3476,6 +3478,18 @@ CREATE INDEX idx_knowledge_article_tags_tag_id
 
 # 105. Script Indexes
 
+Implemented in Slice 040:
+
+```sql
+CREATE INDEX idx_scripts_enabled_name
+    ON scripts(is_enabled, name COLLATE NOCASE, script_id);
+
+CREATE INDEX idx_scripts_category_id
+    ON scripts(category_id);
+```
+
+The remaining indexes are future design, not objects created by migration 0007:
+
 ```sql
 CREATE INDEX idx_scripts_enabled_type
     ON scripts(
@@ -3485,9 +3499,6 @@ CREATE INDEX idx_scripts_enabled_type
 
 CREATE INDEX idx_scripts_name
     ON scripts(name COLLATE NOCASE);
-
-CREATE INDEX idx_scripts_category_id
-    ON scripts(category_id);
 
 CREATE INDEX idx_script_executions_script_started
     ON script_executions(
@@ -4784,6 +4795,7 @@ Implemented migration sequence:
 0004_tickets.sql
 0005_knowledge.sql
 0006_knowledge_search.sql
+0007_script_registry.sql
 ```
 
 Future domain migration numbers are intentionally unassigned until each bounded slice is approved.
