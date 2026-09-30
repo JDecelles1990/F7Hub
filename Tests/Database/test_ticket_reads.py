@@ -137,6 +137,142 @@ class TicketReadTests(unittest.TestCase):
                     self.service.list_tickets(subject_query="printer", include_description=invalid)
             query.assert_not_called()
 
+    def test_note_search_requires_boolean_before_query(self):
+        with patch.object(self.repo, "list_tickets") as query:
+            for invalid in (None, 0, 1, "", "yes", [], object()):
+                with self.subTest(invalid=invalid), self.assertRaises(TicketValidationError):
+                    self.service.list_tickets(subject_query="printer", include_notes=invalid)
+            query.assert_not_called()
+
+    def test_note_search_flags_filters_order_paging_and_select_only(self):
+        stamp = "2026-09-04T00:00:00.000Z"
+        with database_connection(self.path) as connection:
+            company = connection.execute(
+                "INSERT INTO companies (name, created_at, updated_at) VALUES (?, ?, ?)",
+                ("Northwind", stamp, stamp),
+            ).lastrowid
+            other_company = connection.execute(
+                "INSERT INTO companies (name, created_at, updated_at) VALUES (?, ?, ?)",
+                ("Other", stamp, stamp),
+            ).lastrowid
+
+        def ticket(number, *, subject="General issue", description=None,
+                   company_id=company, status="OPEN", priority="HIGH",
+                   ticket_type="INCIDENT"):
+            return self.repo.create_ticket(
+                ticket_number=number, subject=subject, description=description,
+                company_id=company_id, status=status, priority=priority,
+                ticket_type=ticket_type, created_at=stamp, updated_at=stamp,
+            )
+
+        def note(record, text="needle"):
+            with self.repo.transaction() as transaction:
+                transaction.create_note(
+                    ticket_id=record.ticket_id, note_text=text,
+                    created_at=stamp, updated_at=stamp,
+                )
+
+        subject = ticket("SEARCH-1", subject="Needle in subject")
+        description = ticket("SEARCH-2", description="Needle in description")
+        note_only = ticket("SEARCH-3")
+        note(note_only)
+        note(note_only, "Another needle")
+        overlap = ticket("SEARCH-4", subject="Needle", description="Needle")
+        note(overlap)
+        note(overlap, "needle again")
+        elsewhere = ticket("SEARCH-5", company_id=other_company)
+        note(elsewhere)
+        closed = ticket("SEARCH-6", status="CLOSED")
+        note(closed)
+        low = ticket("SEARCH-7", priority="LOW")
+        note(low)
+        task = ticket("SEARCH-8", ticket_type="TASK")
+        note(task)
+        unrelated = ticket("SEARCH-9")
+        all_tickets = (unrelated, task, low, closed, elsewhere, overlap,
+                       note_only, description, subject)
+        note_matches = (task, low, closed, elsewhere, overlap, note_only)
+
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        self.assertEqual(self.service.list_tickets(subject_query="needle"),
+                         (overlap, subject))
+        self.assertEqual(self.service.list_tickets(
+            subject_query="needle", include_description=True,
+        ), (overlap, description, subject))
+        self.assertEqual(self.service.list_tickets(
+            subject_query="needle", include_notes=True,
+        ), note_matches + (subject,))
+        self.assertEqual(self.service.list_tickets(
+            subject_query="needle", include_description=True, include_notes=True,
+        ), note_matches + (description, subject))
+        for blank in (None, "", " \t "):
+            with self.subTest(blank=blank):
+                self.assertEqual(self.service.list_tickets(
+                    subject_query=blank, include_description=True, include_notes=True,
+                ), all_tickets)
+        self.assertEqual(self.service.list_tickets(
+            subject_query="needle", include_description=True, include_notes=True,
+            company_id=company, status="OPEN", priority="HIGH",
+            ticket_type="INCIDENT",
+        ), (overlap, note_only, description, subject))
+        self.assertEqual(self.service.list_tickets(
+            subject_query="needle", include_description=True, include_notes=True,
+            company_id=company, status="OPEN", priority="HIGH",
+            ticket_type="INCIDENT", limit=2, offset=1,
+        ), (note_only, description))
+        self.assertEqual(self.service.list_tickets(
+            subject_query="needle", include_notes=True,
+            company_id=company, status="OPEN", priority="HIGH",
+            ticket_type="INCIDENT",
+        ), (overlap, note_only, subject))
+        self.assertEqual(self.service.list_tickets(
+            subject_query="needle", include_notes=True, limit=1, offset=7,
+        ), ())
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+            plan = connection.execute(
+                "EXPLAIN QUERY PLAN SELECT ticket_id FROM tickets "
+                "WHERE subject LIKE ? ESCAPE '\\' OR EXISTS "
+                "(SELECT 1 FROM ticket_notes AS note "
+                "WHERE note.ticket_id = tickets.ticket_id "
+                "AND note.note_text LIKE ? ESCAPE '\\')",
+                ("%needle%", "%needle%"),
+            ).fetchall()
+            self.assertTrue(any("idx_ticket_notes_ticket_created" in row[3]
+                                for row in plan), plan)
+
+    def test_note_search_escapes_literal_special_characters_and_keeps_case_behavior(self):
+        stamp = "2026-09-04T00:00:00.000Z"
+        literal = "Printer 50% user_name \\ path"
+        matching = self.repo.create_ticket(
+            ticket_number="LITERAL-NOTE", subject="General issue",
+            created_at=stamp, updated_at=stamp,
+        )
+        other = self.repo.create_ticket(
+            ticket_number="LOOKALIKE-NOTE", subject="General issue",
+            created_at=stamp, updated_at=stamp,
+        )
+        with self.repo.transaction() as transaction:
+            transaction.create_note(ticket_id=matching.ticket_id, note_text=literal,
+                                    created_at=stamp, updated_at=stamp)
+            transaction.create_note(ticket_id=other.ticket_id,
+                                    note_text="Printer 50X userXname path",
+                                    created_at=stamp, updated_at=stamp)
+        for query in (literal, literal.upper(), "50%", "user_name", "%", "_", "\\"):
+            with self.subTest(query=query):
+                self.assertEqual(self.service.list_tickets(
+                    subject_query=query, include_notes=True,
+                ), (matching,))
+        self.assertEqual(self.service.list_tickets(
+            subject_query="50%X", include_notes=True,
+        ), ())
+        self.assertEqual(self.repo.list_tickets(
+            subject_query="' OR 1=1 --", include_notes=True,
+        ), ())
+
     def test_subject_search_is_literal_select_only_and_composes_with_queue_filters(self):
         timestamp = "2026-09-04T00:00:00.000Z"
         values = (

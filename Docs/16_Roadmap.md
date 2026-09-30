@@ -153,7 +153,9 @@ Slice 033 adds one saved-ticket type correction workflow on the same writer, tim
 
 Slice 034 adds bounded Saved Tickets subject search on the existing read-only list path. Literal substring matching composes with Status, Priority and Type while preserving queue ordering, paging, drafts and open detail. This advances ticket search without starting universal search, FTS, another ticket editor or a schema change.
 
-Slice 035 extends that queue search to ticket descriptions with the same submitted phrase and bounded read path. Existing callers retain subject-only search by default; Saved Tickets opts in. Filters, ordering, paging, failure recovery and the open detail after a description edit remain intact. Notes and other fields, universal search and FTS remain separate work.
+Slice 035 extends that queue search to ticket descriptions with the same submitted phrase and bounded read path. Existing callers retain subject-only search by default; Saved Tickets opts in. Filters, ordering, paging, failure recovery and the open detail after a description edit remain intact. Note searching follows in Slice 039; other fields, universal search and FTS remain separate work.
+
+Slice 039 extends the same bounded Saved Tickets search to note text with a correlated read of existing ticket notes. It reuses literal matching, queue filters, ordering, paging, worker retry and post-save refresh; a newly saved note can add its ticket to the applied results. Existing list callers remain subject-only by default. The verified Slice 039 candidate adds no schema, index, dependency or search subsystem; reference-field, universal and FTS search remain separate work.
 
 Slice 036 begins the remaining company-context view with up to 20 recent tickets for the loaded saved ticket's persisted company ID. The Company tab reuses the existing ticket list and open-detail paths, retains inactive company names, and leaves the main queue untouched. Company Center, contact history, broader company management and universal search remain separate work. No migration or index is added.
 

@@ -204,7 +204,8 @@ class TicketRepository:
     def list_tickets(
         self, *, status: str | None = None, priority: str | None = None,
         ticket_type: str | None = None, subject_query: str | None = None,
-        include_description: bool = False, company_id: int | None = None,
+        include_description: bool = False, include_notes: bool = False,
+        company_id: int | None = None,
         limit: int = 100, offset: int = 0,
     ) -> tuple[TicketRecord, ...]:
         """Return a bounded page, most recently updated first, with ID ties."""
@@ -226,12 +227,19 @@ class TicketRepository:
         if subject_query is not None:
             literal = subject_query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
             pattern = f"%{literal}%"
+            alternatives = ["subject LIKE ? ESCAPE '\\'"]
+            parameters.append(pattern)
             if include_description:
-                predicates.append("(subject LIKE ? ESCAPE '\\' OR description LIKE ? ESCAPE '\\')")
-                parameters.extend((pattern, pattern))
-            else:
-                predicates.append("subject LIKE ? ESCAPE '\\'")
+                alternatives.append("description LIKE ? ESCAPE '\\'")
                 parameters.append(pattern)
+            if include_notes:
+                alternatives.append(
+                    "EXISTS (SELECT 1 FROM ticket_notes AS note "
+                    "WHERE note.ticket_id = tickets.ticket_id "
+                    "AND note.note_text LIKE ? ESCAPE '\\')"
+                )
+                parameters.append(pattern)
+            predicates.append("(" + " OR ".join(alternatives) + ")")
         predicate = "WHERE " + " AND ".join(predicates) if predicates else ""
         with database_connection(self._database_path) as connection:
             rows = connection.execute(

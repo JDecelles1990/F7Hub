@@ -118,8 +118,8 @@ class TicketWorkspace(QWidget):
         self._runner.busy_changed.connect(self._set_filter_controls_idle)
         search_row = QHBoxLayout()
         self.subject_search_input = QLineEdit(queue)
-        self.subject_search_input.setAccessibleName("Search subjects and descriptions")
-        self.subject_search_input.setPlaceholderText("Search subjects and descriptions")
+        self.subject_search_input.setAccessibleName("Search subjects, descriptions and notes")
+        self.subject_search_input.setPlaceholderText("Search subjects, descriptions and notes")
         self.subject_search_input.returnPressed.connect(self.search_subjects)
         self.search_subjects_button = QPushButton("Search", queue)
         self.search_subjects_button.clicked.connect(self.search_subjects)
@@ -314,7 +314,7 @@ class TicketWorkspace(QWidget):
         self._runner.submit(
             lambda: self._service.list_tickets(
                 status=status, priority=priority, ticket_type=ticket_type,
-                subject_query=subject_query, include_description=True,
+                subject_query=subject_query, include_description=True, include_notes=True,
                 limit=self.PAGE_SIZE + 1, offset=target,
             ),
             loaded, failed,
