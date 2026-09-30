@@ -6,6 +6,10 @@
 > Purpose: Define the internal Python architecture of F7Hub, including application startup, GUI composition, services, domain logic, repositories, infrastructure, integrations, background execution, state management, diagnostics, search, AI boundaries, and testing.  
 > Related Documents: `04_UserWorkflows.md`, `05_GUI.md`, `06_SystemArchitecture.md`, `07_Database.md`, `10_FolderStructure.md`, `11_AHKArchitecture.md`, `12_PowerShellArchitecture.md`
 
+## Manual database backup — Slice 038
+
+Bootstrap gives DatabaseBackupService the resolved active database path. MainWindow submits its File-menu action through the existing ServiceTaskRunner and presents only the published path or bounded failure feedback. SQLite infrastructure opens a dedicated read-only source connection, uses `Connection.backup()` into a temporary file, independently reopens and validates integrity and foreign keys, then publishes without overwrite. Connections are closed before publication. The work creates no schema or migration and does not use a new worker model.
+
 ---
 
 # 1. Purpose

@@ -1507,6 +1507,8 @@ Final runtime data paths belong in configuration and deployment documentation.
 
 F7Hub must define a reliable database backup process before important operational data is stored.
 
+Slice 038 provides an explicit File-menu backup of the active SQLite database. Python's SQLite online backup API copies a live source into a temporary file in `%LOCALAPPDATA%\F7Hub\Backups`. A separate connection reopens that file and requires `PRAGMA integrity_check = ok` and no `PRAGMA foreign_key_check` violations before a no-overwrite rename publishes it. Failed work removes its temporary file when possible; completed backups are not deleted or replaced. The source is opened read-only and no migration is run on the snapshot. This covers SQLite data only and does not protect against loss of the local drive until the file is copied elsewhere. Scheduling, retention and restore remain separate work.
+
 Backups should account for:
 
 - active transactions

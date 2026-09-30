@@ -1286,6 +1286,8 @@ Installed application logging may later move to:
 
 Slice 037 uses `%LOCALAPPDATA%\F7Hub\Logs\Application\f7hub.log` for the current application entry point. It creates only this path's missing directories, keeps two rotated backups at 1 MiB per file, and falls back to stderr if file setup fails. Development runs use the same local application-data location; no runtime log belongs in Git.
 
+Slice 038 publishes manual SQLite snapshots under `%LOCALAPPDATA%\F7Hub\Backups\`. Temporary backup files are created in that same directory and removed after failure when possible. This runtime data stays outside the source repository. There is no automatic retention or off-device copy.
+
 ---
 
 # 76. Logs\Application

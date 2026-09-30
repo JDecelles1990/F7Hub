@@ -8,6 +8,12 @@
 
 ---
 
+## Manual SQLite database backup — Slice 038
+
+File → **Back up database** creates one validated snapshot of the active local SQLite database under `%LOCALAPPDATA%\F7Hub\Backups`. It runs in the existing background worker, reports the completed path, and gives safe failure feedback. The backup contains SQLite data only. There is no scheduling, retention, restore action, or protection from loss of the local drive until the technician copies it elsewhere.
+
+---
+
 ## Recent company tickets in Saved Tickets — Slice 036
 
 A saved ticket's Company tab can load up to 20 most recently updated tickets linked to the same persisted company ID. It shows the current company name, including inactive companies, and opens a result through the normal ticket workflow. A ticket without a company has an unavailable state. The Company tab is read-only and does not change the Saved Tickets queue or its filters. A full Company Center and contact history remain separate work.

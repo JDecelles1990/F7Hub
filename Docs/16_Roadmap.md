@@ -92,6 +92,8 @@ Validation and test results use `PASS`, `FAIL`, `NOT RUN`, or `BLOCKED`.
 
 # 4. Current Project Status
 
+Slice 038 implements a bounded manual local database backup before further data-bearing workflows. It uses the existing File menu and background worker, SQLite online backup, temporary-file validation, and no-overwrite publication. Focused 26, affected 39, and full Database 374 + GUI 156 + Integration 137 = 667 tests passed; native Windows 1000×700 inspection passed on an isolated populated database. This does not implement restore, scheduling, retention, attachments, or off-device protection.
+
 Repository inspection and tests through 2026-09-09 verify the Python SQLite foundation, migrations through `0006_knowledge_search.sql`, the company/contact and ticket workflows, and Knowledge create/read/edit/history/link/unlink/search. PowerShell integration remains unimplemented.
 
 ```text

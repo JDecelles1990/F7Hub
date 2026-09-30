@@ -1,5 +1,29 @@
 # F7Hub Current State
 
+Last verified: 2026-09-30 (America/Toronto).
+
+Current candidate: **Slice 038 — Manual SQLite Database Backup**, on `feature/manual-database-backup-s038` in `C:\Dev\F7Hub`. The user approved the Slice 038 plan and authorized IMPLEMENT → TEST → DOCUMENT, then explicitly authorized the bounded Slice 038 correction after independent review. A fresh `git fetch origin` before branching confirmed a clean canonical `main`, empty index/untracked set, and HEAD = `origin/main` = `61a5ecb8f1607dc0e5da19cbacc9a0248c62fffb`. The protected `recovery/pre-s024-protected-work` ref remained `002a494735f30e1488f61e21ea98740ae6371d4d`. The four other linked worktrees were inspected and not changed; one already had unrelated documentation deletion/untracked archive work.
+
+Status: **PASS — READY_FOR_REREVIEW** after the bounded 2026-09-30 correction, fresh focused/affected/full regression, native Windows validation, documentation and self-review. Slice 037's pre-review/pre-integration wording below and in Todo is **STALE HANDOFF METADATA**: live `main` includes its PR #38 merge at `61a5ecb8`. Slice 038 remains unstaged and uncommitted. Independent read-only rereview is the next gate; no push, PR or integration was performed.
+
+## Slice 038 Result and Scope
+
+The File menu adds **Back up database**. Bootstrap passes the active resolved SQLite path to a narrow service; the existing ServiceTaskRunner keeps the GUI responsive and prevents overlapping backup actions. A dedicated read-only source connection uses SQLite online backup into a temporary file under `%LOCALAPPDATA%\F7Hub\Backups`. The destination is closed, independently reopened and checked with `integrity_check = ok` and zero foreign-key violations before publication through a no-overwrite rename. All three backup connections enable foreign keys. A source write racing the backup snapshot boundary may or may not appear in the snapshot; successfully committed writes remain in the source. A unique filename avoids same-second collision assumptions. Failures remove the temporary file when possible and preserve completed backups. Success displays the actual path and explains that the file contains local SQLite data only and needs another location for protection from local-drive loss. Failure feedback does not expose raw exception text. No schema, migration, dependency, restore, schedule, retention, attachment/configuration/log backup or external transfer was added.
+
+## Slice 038 Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD`; automated GUI/Integration used `QT_QPA_PLATFORM=offscreen`. Corrected focused backup/MainWindow/bootstrap **26 PASS**, affected database connection/integrity/path/MainWindow/bootstrap **39 PASS**. Fresh Database **374 PASS**, GUI **156 PASS**, Integration **137 PASS** = **667 full regression PASS**, each suite exit 0. The initial focused run exposed Windows test-connection leaks and a false assertion requiring a racing write in the snapshot. The corrected fixture closes connections deterministically; the test now verifies a coherent SQLite snapshot and the committed source write while accepting either valid snapshot boundary. A focused test observes `PRAGMA foreign_keys = 1` on the source, temporary destination and independent validation connections. Existing focused tests still cover populated source, missing source/LOCALAPPDATA, destination failure, failed-backup and validation cleanup, foreign-key rejection, collision preservation, WAL concurrency and source non-modification. Expected injected negative-path logs occurred with clean unittest summaries. Integration confirms the composed service backs up the initialized six-migration database without changing migration history.
+
+Native Windows: **PASS** on actual `windows` Qt at 1000×700 using an isolated populated database. After observable idle, the File menu action was accessible and the backup ran through the worker. The published snapshot reopened with `integrity_check = ok`, zero foreign-key violations and the fixture company present. Success showed the final path and local-only guidance; a synthetic failure showed no secret text or false success, left the completed backup intact and restored the action. All four captures under `%LOCALAPPDATA%\F7Hub\CodexEvidence\Slice-038\corrected-native-jovxkx9r` were opened and inspected. This verifies the tested Windows environment, not every display scale.
+
+## Slice 038 Delivery Gate
+
+Production scope is the database infrastructure, one backup service, bootstrap composition and MainWindow action; focused tests are the new database backup module and existing MainWindow/bootstrap tests. Affected owner documents are Features, User Workflows, GUI, System Architecture, Database Architecture, Folder Structure, Python Architecture, Roadmap, Todo, ChangeLog and this report. Product requirements already state the backup need and require no rewrite. Physical SQL Schema, ERD, AHK and PowerShell are unaffected. Independent read-only rereview of the exact corrected unstaged candidate is required; self-review grants no integration approval.
+
+---
+
+## Prior Slice 037 handoff snapshot (historical; Slice 037 later merged through PR #38)
+
 Last verified: 2026-09-29 (America/Toronto).
 
 Current candidate: **Slice 037 — Safe Application Logging at Startup**, on `feature/safe-startup-logging-s037` in `C:\Dev\F7Hub`. The approved plan authorized implementation only. Before branching, a fresh `git fetch origin` confirmed clean `main`, an empty index/untracked set, and both HEAD and `origin/main` at `95744e36d34238f7223660392db9e38ecb8a94ac`. The protected `recovery/pre-s024-protected-work` ref remained `002a494735f30e1488f61e21ea98740ae6371d4d`; other worktrees were not changed.
