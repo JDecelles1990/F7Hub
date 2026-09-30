@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
+from contextlib import closing, contextmanager
 from dataclasses import dataclass
 import os
 from pathlib import Path
 import sqlite3
-from typing import Iterator
+import tempfile
+from typing import Callable, Iterator
 
 from f7hub.infrastructure.migrations import (
     MigrationRunResult,
@@ -154,6 +155,49 @@ def validate_database_integrity(
         )
 
     return integrity_results, foreign_key_violations
+
+
+def create_database_snapshot(source_path: str | Path, backup_directory: str | Path,
+                             final_name: str, *,
+                             progress: Callable[[int, int, int], None] | None = None) -> Path:
+    """Publish a validated SQLite backup without replacing an existing file.
+
+    The source is opened read-only so a missing path cannot become a new database.
+    This Windows application uses os.rename for no-overwrite publication.
+    """
+    source = Path(source_path).expanduser().resolve(strict=False)
+    if not source.is_file():
+        raise DatabaseError("The source database is unavailable.")
+    directory = Path(backup_directory).expanduser().resolve(strict=False)
+    directory.mkdir(parents=True, exist_ok=True)
+    if not directory.is_dir():
+        raise DatabaseError("The backup directory is unavailable.")
+    if Path(final_name).name != final_name or not final_name.endswith(".db"):
+        raise DatabaseError("The backup filename is invalid.")
+    final_path = directory / final_name
+    temporary_path: Path | None = None
+    try:
+        descriptor, raw_temporary_path = tempfile.mkstemp(
+            prefix=".f7hub-backup-", suffix=".tmp", dir=directory
+        )
+        os.close(descriptor)
+        temporary_path = Path(raw_temporary_path)
+        with closing(sqlite3.connect(source.as_uri() + "?mode=ro", uri=True,
+                                     timeout=DEFAULT_BUSY_TIMEOUT_MS / 1_000)) as source_connection:
+            source_connection.execute("PRAGMA foreign_keys = ON")
+            with closing(sqlite3.connect(temporary_path,
+                                         timeout=DEFAULT_BUSY_TIMEOUT_MS / 1_000)) as destination_connection:
+                destination_connection.execute("PRAGMA foreign_keys = ON")
+                source_connection.backup(destination_connection, pages=128, progress=progress)
+        with closing(sqlite3.connect(temporary_path.as_uri() + "?mode=ro", uri=True)) as check_connection:
+            check_connection.execute("PRAGMA foreign_keys = ON")
+            validate_database_integrity(check_connection)
+        os.rename(temporary_path, final_path)
+        temporary_path = None
+        return final_path
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
 
 
 def bootstrap_database(

@@ -8,6 +8,12 @@
 
 ---
 
+## Back up the local database — Slice 038
+
+File → **Back up database** → wait for completion → read the published path. F7Hub backs up the currently opened SQLite database to a new file under `%LOCALAPPDATA%\F7Hub\Backups` and validates integrity and foreign keys before showing success. If backup or validation fails, no completed backup is reported; retry after resolving the local storage problem. The file contains local SQLite data only. Copy it to another location for protection from local-drive loss. Restore, automatic scheduling and retention are separate work.
+
+---
+
 ## View recent tickets for a saved ticket's company — Slice 036
 
 Open a saved ticket with a company → Company tab → **Load recent tickets**. The tab shows up to 20 newest tickets for that stored company ID, including inactive companies. **Open selected ticket** uses the normal detail load and asks before discarding an unsaved activity draft; Cancel keeps the current ticket and draft. A ticket without a company shows no results and disables loading. Switching tickets clears prior company results. Failed loads keep only previously loaded results for the same current ticket/company and offer retry. The main queue, page, filters and search text do not change.

@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-29 — Slice 038: Manual SQLite Database Backup
+
+The File menu now offers **Back up database**. Bootstrap supplies the active database path to DatabaseBackupService; the shared worker keeps the GUI responsive. A dedicated read-only SQLite connection copies the live source with the online backup API to a temporary file under `%LOCALAPPDATA%\F7Hub\Backups`. An independent reopen must pass integrity and foreign-key checks before a no-overwrite rename publishes a unique `.db` file. Success shows the path and local-drive limitation; failure shows bounded feedback and leaves existing backups intact. The backup contains SQLite data only; no restore, scheduling, retention, schema, migration, dependency or external transfer was added.
+
+The initial pre-review candidate passed 666 full tests but independent review found a false concurrent-snapshot assertion and missing foreign-key connection configuration. The 2026-09-30 correction enables foreign keys on the source, destination and validation connections and verifies a coherent snapshot while allowing either inclusion or exclusion of a racing committed write. Corrected focused **26 PASS**, affected **39 PASS**, and fresh Database **374** + GUI **156** + Integration **137** = **667 full regression PASS**, all exit 0. Focused tests cover the three connection settings, source-write preservation, missing source, destination and validation failures, foreign-key rejection, collision preservation and WAL concurrency. Native Windows 1000×700 success and synthetic-failure workflows passed again on an isolated populated database; four corrected-candidate captures were inspected. The published snapshot reopened with `integrity_check = ok`, zero foreign-key violations and the fixture company present. The candidate remains unstaged and uncommitted for independent rereview.
+
+---
+
 # 2026-09-29 — Slice 037: Safe Application Logging at Startup
 
 The application entry point now configures one `f7hub` logger handler before bootstrap. A UTF-8 rotating file at `%LOCALAPPDATA%\F7Hub\Logs\Application\f7hub.log` is capped at 1 MiB with two backups. If file setup fails, a fixed type-only stderr warning precedes an application-owned stderr handler and startup continues. The process root logger is unchanged and F7Hub records do not propagate to it while configured. Reconfiguration replaces and closes only the prior F7Hub-owned handler; exit closes the active handler and restores prior level/propagation where still owned. Successful startup records fixed text. Bootstrap failure records fixed text and exception type only, retaining the existing safe dialog and exit code. This protects the current approved startup messages; future callers remain responsible for safe content.

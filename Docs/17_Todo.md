@@ -30,6 +30,17 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
+Slice 038 — manual SQLite database backup, corrected and self-validated 2026-09-30:
+
+- [x] Add File → Back up database through the shared worker and a narrow service using the resolved active database path.
+- [x] Publish a validated SQLite online snapshot under `%LOCALAPPDATA%\F7Hub\Backups` without overwrite; keep the source read-only and remove failed temporary files when possible.
+- [x] Validate focused 26, affected 39, and full Database 374 + GUI 156 + Integration 137 = 667 tests, plus native Windows 1000×700 success/failure and snapshot inspection.
+- [ ] Independent read-only rereview of the corrected, exact unstaged Slice 038 candidate. Staging, commit, push, PR and integration are outside this implementation phase.
+
+The Slice 037 review/integration-pending wording below is **STALE HANDOFF METADATA**: fetched `origin/main` and local implementation base include PR #38 at `61a5ecb8f1607dc0e5da19cbacc9a0248c62fffb`. Its earlier test record is historical baseline evidence; the protected recovery branch remains unchanged.
+
+---
+
 Slice 037 — safe application logging at startup, implemented and self-validated 2026-09-29:
 
 - [x] Initialize one F7Hub-owned UTF-8 rotating file handler under LOCALAPPDATA before bootstrap, with explicit non-propagation, safe stderr fallback, bounded rotation and owned-handler cleanup.

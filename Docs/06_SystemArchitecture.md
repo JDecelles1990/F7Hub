@@ -6,6 +6,10 @@
 > Scope: System-level architecture.
 > Related Documents: 00_ProjectVision.md, 01_Project.md, 02_ProductRequirements.md, 05_GUI.md, 07_Database.md, 11_AHKArchitecture.md, 12_PowerShellArchitecture.md, 13_PythonArchitecture.md
 
+## Manual local backup boundary — Slice 038
+
+MainWindow's File action uses the existing ServiceTaskRunner, then DatabaseBackupService, then SQLite infrastructure. Bootstrap supplies the already-resolved active database path. The infrastructure opens a separate read-only source connection, writes an online backup to a temporary local file, validates it, and publishes it without overwriting an earlier backup. GUI code owns no SQLite connection or backup SQL. This does not change schema, migration, authentication or cross-language ownership.
+
 # 1. Purpose
 
 This document defines the high-level architecture of F7Hub.

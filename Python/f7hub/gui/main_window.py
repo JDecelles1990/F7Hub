@@ -12,6 +12,7 @@ from f7hub.services.company_service import CompanyService
 from f7hub.services.contact_service import ContactService
 from f7hub.services.knowledge_service import KnowledgeService
 from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
+from f7hub.services.database_backup_service import DatabaseBackupService
 
 from f7hub.gui.ticket_create_widget import (
     TicketCreateWidget,
@@ -31,6 +32,7 @@ class MainWindow(QMainWindow):
         contact_service: ContactService | None = None,
         knowledge_service: KnowledgeService | None = None,
         knowledge_link_service: TicketKnowledgeService | None = None,
+        backup_service: DatabaseBackupService | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -40,6 +42,7 @@ class MainWindow(QMainWindow):
         self.resize(min(1180, available.width() - 40), min(850, available.height() - 60))
 
         self.runner = ServiceTaskRunner(self)
+        self.backup_service = backup_service
         self.pages = QStackedWidget(self)
         self.ticket_create_widget = TicketCreateWidget(
             ticket_service, reference_service=reference_service, company_service=company_service,
@@ -75,6 +78,11 @@ class MainWindow(QMainWindow):
         for action in (self.new_ticket_action, self.tickets_action, self.knowledge_action):
             file_menu.addAction(action)
             toolbar.addAction(action)
+        self.backup_action = QAction("Back up database", self)
+        self.backup_action.setObjectName("backupDatabaseAction")
+        self.backup_action.setEnabled(self.backup_service is not None)
+        self.backup_action.triggered.connect(self.back_up_database)
+        file_menu.addAction(self.backup_action)
         exit_action = QAction("E&xit", self)
         exit_action.setObjectName("exitAction")
         exit_action.setShortcut(QKeySequence.StandardKey.Quit)
@@ -97,6 +105,7 @@ class MainWindow(QMainWindow):
         self.new_ticket_action.setEnabled(not busy)
         self.tickets_action.setEnabled(not busy)
         self.knowledge_action.setEnabled(not busy and self.knowledge_workspace is not None)
+        self.backup_action.setEnabled(not busy and self.backup_service is not None)
         self.statusBar().showMessage("Working…" if busy else "Ready")
 
     def show_new_ticket(self):
@@ -105,6 +114,28 @@ class MainWindow(QMainWindow):
                 return
             self.workspace._clear_drafts()
             self.pages.setCurrentWidget(self.ticket_create_widget)
+
+    def back_up_database(self):
+        if self.runner.busy or self.backup_service is None:
+            return
+
+        def completed(path):
+            self.statusBar().showMessage("Database backup completed.", 5_000)
+            QMessageBox.information(
+                self, "Database backup completed",
+                f"Backup saved to:\n{path}\n\n"
+                "This contains local SQLite data only. Copy it to another location "
+                "to protect against loss of this drive.",
+            )
+
+        def failed(_error):
+            self.statusBar().showMessage("Database backup failed.", 5_000)
+            QMessageBox.warning(
+                self, "Database backup failed",
+                "The database backup could not be completed. No completed backup was published.",
+            )
+
+        self.runner.submit(self.backup_service.create_backup, completed, failed)
 
     def show_tickets(self):
         if not self.runner.busy:

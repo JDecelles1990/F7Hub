@@ -8,6 +8,12 @@
 
 ---
 
+## Manual database backup action — Slice 038
+
+The existing File menu contains **Back up database**. The shared worker keeps the window responsive and disables the action and conflicting navigation while backup runs. The success dialog shows the actual published path and brief local-only protection guidance; failure shows bounded feedback without a raw exception message. Closing during work follows the existing busy guard. Native Windows inspection at 1000×700 found the menu item and both dialogs readable; the isolated snapshot reopened and passed integrity and foreign-key checks.
+
+---
+
 ## Saved-ticket Company tab — Slice 036
 
 Saved-ticket detail includes a Company tab with the authoritative company name, **Load recent tickets**, a separate ticket table, and **Open selected ticket**. The read is asynchronous through the shared worker and capped at 20 newest tickets. No-company and read-failure states are explicit; a failed refresh keeps earlier rows only for the same loaded ticket/company. Opening a result uses existing draft-discard confirmation and detail loading. Native Windows inspection at 1000×700 found the Company tab and existing queue/detail controls accessible without observed clipping or overlap.

@@ -21,6 +21,7 @@ from f7hub.services.contact_service import ContactService
 from f7hub.services.knowledge_service import KnowledgeService
 from f7hub.repositories.ticket_knowledge_repository import TicketKnowledgeRepository
 from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
+from f7hub.services.database_backup_service import DatabaseBackupService
 
 
 DEFAULT_PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -79,6 +80,7 @@ def bootstrap_application(
         contact_service=ContactService(contacts, companies),
         knowledge_service=knowledge_service,
         knowledge_link_service=ticket_knowledge_service,
+        backup_service=DatabaseBackupService(resolved_database_path),
     )
 
     return ApplicationContext(

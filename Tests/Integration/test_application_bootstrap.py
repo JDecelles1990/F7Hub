@@ -13,7 +13,7 @@ from PySide6.QtWidgets import QApplication
 
 from f7hub.app.bootstrap import bootstrap_application
 from f7hub.app.main import main
-from f7hub.infrastructure.database import database_connection
+from f7hub.infrastructure.database import database_connection, validate_database_integrity
 from f7hub.infrastructure.migrations import MigrationDiscoveryError
 
 
@@ -54,6 +54,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
             context.main_window.ticket_create_widget._ticket_service,
             context.ticket_service,
         )
+        self.assertEqual(context.main_window.backup_service.database_path, self.database_path.resolve())
 
         with database_connection(self.database_path) as connection:
             applied_versions = tuple(
@@ -74,6 +75,20 @@ class ApplicationBootstrapTests(unittest.TestCase):
             )
 
         self.assertFalse(self.database_path.exists())
+
+    def test_composed_backup_service_copies_initialized_database_without_migration(self) -> None:
+        context = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.database_path)
+        self.addCleanup(context.main_window.deleteLater)
+        with database_connection(self.database_path) as connection:
+            before = tuple(connection.execute("SELECT version FROM schema_migrations ORDER BY version"))
+        snapshot_path = context.main_window.backup_service.create_backup()
+        self.assertEqual(snapshot_path.parent,
+                         Path(self.temporary_directory.name) / "F7Hub" / "Backups")
+        with database_connection(snapshot_path) as snapshot:
+            self.assertEqual(validate_database_integrity(snapshot), (("ok",), ()))
+            self.assertEqual(tuple(snapshot.execute("SELECT version FROM schema_migrations ORDER BY version")), before)
+        with database_connection(self.database_path) as connection:
+            self.assertEqual(tuple(connection.execute("SELECT version FROM schema_migrations ORDER BY version")), before)
 
     def test_main_entry_point_bootstraps_and_enters_event_loop(self) -> None:
         with patch.object(QApplication, "exec", return_value=0) as event_loop:

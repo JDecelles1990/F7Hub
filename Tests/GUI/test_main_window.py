@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import os
+from pathlib import Path
 from types import SimpleNamespace
 import threading
 import time
 import unittest
+from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
@@ -49,6 +51,22 @@ class RecordingTicketService:
     allowed_statuses = staticmethod(TicketService.allowed_statuses)
 
 
+class RecordingBackupService:
+    def __init__(self):
+        self.calls = 0
+        self.gate = None
+        self.error = None
+        self.path = Path(r"C:\local\F7Hub\Backups\F7Hub-Database-example.db")
+
+    def create_backup(self):
+        self.calls += 1
+        if self.gate:
+            self.gate.wait(3)
+        if self.error:
+            raise self.error
+        return self.path
+
+
 class MainWindowTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -56,13 +74,16 @@ class MainWindowTests(unittest.TestCase):
 
     def setUp(self) -> None:
         self.service = RecordingTicketService()
-        self.window = MainWindow(self.service)
+        self.backup = RecordingBackupService()
+        self.window = MainWindow(self.service, backup_service=self.backup)
         self.window.show()
         self.application.processEvents()
 
     def tearDown(self) -> None:
         if self.service.gate:
             self.service.gate.set()
+        if self.backup.gate:
+            self.backup.gate.set()
         self.wait_idle()
         self.window.workspace._clear_drafts()
         self.window.ticket_create_widget.reset_form()
@@ -138,6 +159,41 @@ class MainWindowTests(unittest.TestCase):
                        workspace.edit_type_button, workspace.edit_description_button,
                        workspace.reload_button):
             self.assertTrue(button.isVisible())
+
+    def test_backup_action_runs_once_on_worker_and_reports_local_snapshot(self):
+        self.assertIn(self.window.backup_action, self.window.menuBar().actions()[0].menu().actions())
+        self.assertEqual(self.window.backup_action.text(), "Back up database")
+        self.backup.gate = threading.Event()
+        with patch("f7hub.gui.main_window.QMessageBox.information") as message:
+            self.window.backup_action.trigger()
+            self.assertTrue(self.window.runner.busy)
+            self.assertFalse(self.window.backup_action.isEnabled())
+            ticks = []
+            QTimer.singleShot(0, lambda: ticks.append(True))
+            QTest.qWait(20)
+            self.assertTrue(ticks)
+            self.window.back_up_database()
+            self.assertFalse(self.window.close())
+            self.backup.gate.set()
+            self.wait_idle()
+        self.assertEqual(self.backup.calls, 1)
+        self.assertTrue(self.window.backup_action.isEnabled())
+        self.assertIn("completed", self.window.statusBar().currentMessage())
+        body = message.call_args.args[2]
+        self.assertIn(str(self.backup.path), body)
+        self.assertIn("local SQLite data only", body)
+        self.assertIn("another location", body)
+
+    def test_backup_failure_is_safe_and_restores_action(self):
+        self.backup.error = RuntimeError("PRIVATE_BACKUP_ERROR")
+        with patch("f7hub.gui.main_window.QMessageBox.warning") as message:
+            self.window.backup_action.trigger()
+            self.wait_idle()
+        self.assertEqual(self.backup.calls, 1)
+        self.assertTrue(self.window.backup_action.isEnabled())
+        self.assertIn("failed", self.window.statusBar().currentMessage())
+        self.assertNotIn("PRIVATE_BACKUP_ERROR", message.call_args.args[2])
+        self.assertIn("No completed backup", message.call_args.args[2])
 
     def wait_idle(self):
         deadline = time.monotonic() + 5
