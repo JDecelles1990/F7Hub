@@ -6,6 +6,10 @@
 > Purpose: Define the internal Python architecture of F7Hub, including application startup, GUI composition, services, domain logic, repositories, infrastructure, integrations, background execution, state management, diagnostics, search, AI boundaries, and testing.  
 > Related Documents: `04_UserWorkflows.md`, `05_GUI.md`, `06_SystemArchitecture.md`, `07_Database.md`, `10_FolderStructure.md`, `11_AHKArchitecture.md`, `12_PowerShellArchitecture.md`
 
+## Read-only PowerShell registry — Slice 040
+
+`ScriptRepository` uses configured SQLite connections for enabled catalog reads and exact case-insensitive `script_code` lookup. It joins only `SCRIPT` scope categories, excluding rows linked to other scopes; explicit `include_disabled=True` is internal inspection only. `ScriptService` returns metadata alongside a separate file status from path inspection under the supplied project root. The resolver validates Windows path syntax, approved folders, resolved containment and regular-file accessibility without reading script contents. No GUI, writer, approval or execution path is implemented. The production registry is empty.
+
 ## Manual database backup — Slice 038
 
 Bootstrap gives DatabaseBackupService the resolved active database path. MainWindow submits its File-menu action through the existing ServiceTaskRunner and presents only the published path or bounded failure feedback. SQLite infrastructure opens a dedicated read-only source connection, uses `Connection.backup()` into a temporary file, independently reopens and validates integrity and foreign keys, then publishes without overwrite. Connections are closed before publication. The work creates no schema or migration and does not use a new worker model.

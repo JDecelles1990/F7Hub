@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-30 — Slice 040: PowerShell Script Registry Foundation
+
+Migration `0007_script_registry.sql` adds the metadata-only `scripts` table with unique case-insensitive code and relative path, constrained documented metadata, nullable shared-category foreign key, `is_enabled DEFAULT 0`, and enabled/name plus category indexes. The production registry is empty. `ScriptRepository` offers enabled-only list and code lookup; explicit disabled inspection is internal. Catalog reads exclude rows linked to categories outside `SCRIPT` scope. `ScriptService` returns metadata with a separate `AVAILABLE`, `MISSING`, `INACCESSIBLE` or `INVALID_REFERENCE` file status. Path inspection limits `.ps1` references to Diagnostics, Reports and Modules beneath the supplied project root and rejects Windows path escapes and symlink escapes. It reads no script contents and launches no PowerShell process. Approval, registration, execution, parameters, history and GUI remain future work.
+
+Validation details and candidate identity are recorded in `Status/CURRENT_STATE.md`. The candidate remains unstaged and uncommitted for independent read-only review.
+
+---
+
 # 2026-09-30 — Slice 039: Search Saved Tickets by Note Text
 
 Saved Tickets now submits its existing literal query against subject, description and note text. TicketService and TicketRepository add an optional boolean `include_notes` that defaults to false, retaining subject-only behavior for existing callers. The repository uses a bound correlated `EXISTS` so multiple matching notes still return one ticket and all existing filters, newest-updated ordering and paging remain intact. The workspace uses its existing worker and post-save refresh: a committed note can add its ticket to applied results without submitting later draft search text. No note snippet, schema, migration, index, dependency or new search subsystem was added.

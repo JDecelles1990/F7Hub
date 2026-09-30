@@ -962,7 +962,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 7)
 
     def test_navigation_respects_unsaved_ticket_activity(self):
         self.link()
@@ -1003,7 +1003,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 6)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 7)
 
     def test_unlink_candidate_reappears_and_relink_has_new_timestamp_and_one_row(self):
         with patch("f7hub.services.ticket_knowledge_service.datetime") as clock:
