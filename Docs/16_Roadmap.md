@@ -541,7 +541,7 @@ Do not implement every future dock at once.
 [x] Main window opens
 [x] SQLite initializes
 [x] Migrations execute safely
-[ ] Logging initializes
+[x] Logging initializes — Slice 037 configures one bounded local application handler before bootstrap, with safe stderr fallback and type-only startup failures; 2026-09-29 candidate validation: Database 362, GUI 154, Integration 136 = 652 PASS, plus native Windows 1000×700 success/failure inspection. Independent review remains pending.
 [x] Application closes cleanly
 [x] Startup failure produces useful error
 [x] Basic application startup test exists

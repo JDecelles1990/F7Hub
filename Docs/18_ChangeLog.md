@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-29 — Slice 037: Safe Application Logging at Startup
+
+The application entry point now configures one `f7hub` logger handler before bootstrap. A UTF-8 rotating file at `%LOCALAPPDATA%\F7Hub\Logs\Application\f7hub.log` is capped at 1 MiB with two backups. If file setup fails, a fixed type-only stderr warning precedes an application-owned stderr handler and startup continues. The process root logger is unchanged and F7Hub records do not propagate to it while configured. Reconfiguration replaces and closes only the prior F7Hub-owned handler; exit closes the active handler and restores prior level/propagation where still owned. Successful startup records fixed text. Bootstrap failure records fixed text and exception type only, retaining the existing safe dialog and exit code. This protects the current approved startup messages; future callers remain responsible for safe content.
+
+Focused **9 PASS**, affected **15 PASS**, and fresh Database **362** + GUI **154** + Integration **136** = **652 full regression PASS**, all exit 0. Isolated tests cover path, UTF-8, 1 MiB/two-backup rotation, root isolation, owned-handler replacement/closure, safe synthetic-secret failure content and deterministic stderr fallback. Native Windows startup reached observable idle at 1000×700 and the failure dialog preserved its safe text; both external captures were inspected. No SQLite schema, migration, dependency, repository behavior or database content changed. The candidate remains unstaged and uncommitted for independent review.
+
+---
+
 # 2026-09-29 — Slice 036: Recent Tickets for a Saved Ticket's Company
 
 Saved Tickets now has a Company tab for the loaded ticket. **Load recent tickets** reads up to 20 most recently updated tickets using the persisted company ID and the existing ticket list service/repository. The query binds an optional company predicate and retains existing filters, ordering and paging. The tab has its own ticket model, uses the shared worker, rejects stale async results after context changes, and opens a result through the existing draft-confirmed ticket path. No-company and read-failure states are explicit; same-context results survive failed refresh. Inactive company names remain readable. The main queue and its page, filters and search state are unchanged. No schema, migration, index, dependency or new service was added.

@@ -1318,6 +1318,8 @@ Requirements: `FR-LOG-001`
 
 F7Hub should capture useful operational information.
 
+Slice 037 initializes one application-owned, rotating local log at startup. Current startup records use fixed operational messages and exception types only; file setup failure uses a safe stderr fallback. This does not make arbitrary future log messages safe.
+
 ---
 
 ## FEAT-LOG-002 — Execution Activity

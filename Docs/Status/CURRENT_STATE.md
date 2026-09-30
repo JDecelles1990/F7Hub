@@ -2,6 +2,30 @@
 
 Last verified: 2026-09-29 (America/Toronto).
 
+Current candidate: **Slice 037 — Safe Application Logging at Startup**, on `feature/safe-startup-logging-s037` in `C:\Dev\F7Hub`. The approved plan authorized implementation only. Before branching, a fresh `git fetch origin` confirmed clean `main`, an empty index/untracked set, and both HEAD and `origin/main` at `95744e36d34238f7223660392db9e38ecb8a94ac`. The protected `recovery/pre-s024-protected-work` ref remained `002a494735f30e1488f61e21ea98740ae6371d4d`; other worktrees were not changed.
+
+Status: **PASS — READY_FOR_REVIEW** after bounded implementation, focused/affected/full regression, native Windows inspection, documentation and self-review. The Slice 036 pre-review/pre-integration request below and in Todo is **STALE HANDOFF METADATA**: live `main` contains PR #37 at `95744e3`. Slice 037 remains unstaged and uncommitted; independent review is the next gate. No push, PR or integration was performed.
+
+## Slice 037 Result and Scope
+
+`app.main` configures the `f7hub` logger before application bootstrap. One application-owned UTF-8 `RotatingFileHandler` writes `%LOCALAPPDATA%\F7Hub\Logs\Application\f7hub.log` with a 1 MiB limit and two backups. If path creation or handler initialization fails, a fixed warning with setup exception type only goes to stderr and an owned stderr `StreamHandler` carries subsequent application records. The process root logger is not configured and `f7hub` propagation is disabled while active. Reconfiguration replaces/closes only a prior owned handler; application exit closes the active handler and restores prior level/propagation where still controlled by the helper. Current startup success records fixed text; a bootstrap failure records fixed text and exception type only, keeping the existing safe dialog and exit code. This does not sanitize arbitrary future log calls. No database schema, migration, dependency, repository, or startup workflow expansion was added.
+
+## Slice 037 Validation
+
+Environment: repository `.venv\Scripts\python.exe -B`, `PYTHONPATH=$PWD\Python;$PWD`; automated GUI/Integration used `QT_QPA_PLATFORM=offscreen`. Focused logging/bootstrap **9 PASS**, affected logging/bootstrap/MainWindow **15 PASS**. Fresh Database **362 PASS**, GUI **154 PASS**, Integration **136 PASS** = **652 full regression PASS**, each suite exit 0. Expected injected negative-path logs occurred with clean unittest summaries. Isolated checks cover exact log path, UTF-8, rotation settings and rollover, root isolation, owned-handler lifecycle, safe synthetic-secret startup failure, and deterministic stderr fallback. Existing database/migration tests passed without production database changes.
+
+Native Windows: **PASS** on the actual `windows` Qt platform. Isolated startup reached observable idle with `Ready` status at 1000×700; the log had exactly one success record. An isolated synthetic bootstrap failure displayed the unchanged safe dialog and returned exit code 1; its log contained only the fixed failure text and exception type, without the synthetic secret or traceback. Both external captures under `LOCALAPPDATA/F7Hub/CodexEvidence/Slice-037` were opened and inspected. The tested 1000×700 main window showed no observed clipping or inaccessible controls, and the failure dialog showed no secret text.
+
+## Slice 037 Delivery Gate
+
+Production scope is `app/main.py` and one small application logging helper; tests are isolated logging/bootstrap and existing MainWindow coverage. Updated owner documents are Features, User Workflows, System Architecture, Folder Structure, Python Architecture, Roadmap, Todo, ChangeLog and this report. GUI layout, physical SQL Schema, ERD, Database architecture, AHK and PowerShell are unaffected. The next gate is independent read-only review of the exact unstaged candidate. Self-review is not independent approval.
+
+---
+
+## Prior Slice 036 handoff snapshot (historical; Slice 036 later merged through PR #37)
+
+Last verified: 2026-09-29 (America/Toronto).
+
 Current candidate: **Slice 036 — Recent Tickets for a Saved Ticket's Company**, on `feature/company-ticket-context-s036` in `C:\Dev\F7Hub`. A fresh `git fetch origin` before editing confirmed clean `main`, HEAD and `origin/main` at `112d51cff17582756625af86f69817ccec761ef2`. The feature branch starts at that exact base. The protected `recovery/pre-s024-protected-work` ref remained `002a494735f30e1488f61e21ea98740ae6371d4d`; other worktrees were not changed.
 
 Status: **PASS — READY_FOR_REVIEW** after implementation, focused/affected/full regression, native Windows inspection, documentation and self-review. The Slice 035 pre-review/pre-integration request below and in Todo was **STALE HANDOFF METADATA**: live `main` includes its PR #36 merge at `112d51cf`. The prior candidate report remains historical evidence. Slice 036 changes remain unstaged and uncommitted; no push, PR or integration was performed.

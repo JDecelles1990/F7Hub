@@ -2008,6 +2008,8 @@ logger = logging.getLogger(__name__)
 
 This preserves source context.
 
+Slice 037 configures the `f7hub` logger hierarchy before application bootstrap through a small application-owned helper. It attaches one UTF-8 `RotatingFileHandler` at `%LOCALAPPDATA%\F7Hub\Logs\Application\f7hub.log` (1 MiB, two backups), or one stderr `StreamHandler` after a safe type-only setup warning. It never configures the root logger, disables root propagation while active, replaces only its own prior handler on repeated configuration, and closes its active handler on application exit while restoring prior logger level/propagation where unchanged externally. Current startup success and failure messages contain fixed text and, for failure, only the exception type. Other callers must keep their own future log messages safe.
+
 ---
 
 # 92. Logging Sensitive Data

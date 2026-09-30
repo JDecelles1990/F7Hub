@@ -223,6 +223,8 @@ Ready
 
 The technician reaches the main application even if optional services such as AI or Microsoft Graph are unavailable.
 
+Slice 037 initializes the local application log before the current database/service bootstrap. Successful startup records a fixed completion message; a bootstrap failure keeps the existing safe dialog and exit code while recording only the exception type. If the log file cannot be opened, a safe stderr warning and application logging fallback let startup continue.
+
 ## F7 Launch / Focus Shortcut
 
 When the AutoHotkey v2 shortcut script is active, the technician can press
