@@ -7,12 +7,14 @@ from PySide6.QtWidgets import QMainWindow, QWidget, QStackedWidget, QMessageBox
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.knowledge_workspace import KnowledgeWorkspace
 from f7hub.gui.ticket_workspace import TicketWorkspace
+from f7hub.gui.script_workspace import ScriptWorkspace
 from f7hub.services.ticket_reference_service import TicketReferenceService
 from f7hub.services.company_service import CompanyService
 from f7hub.services.contact_service import ContactService
 from f7hub.services.knowledge_service import KnowledgeService
 from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
 from f7hub.services.database_backup_service import DatabaseBackupService
+from f7hub.services.script_service import ScriptService
 
 from f7hub.gui.ticket_create_widget import (
     TicketCreateWidget,
@@ -33,6 +35,7 @@ class MainWindow(QMainWindow):
         knowledge_service: KnowledgeService | None = None,
         knowledge_link_service: TicketKnowledgeService | None = None,
         backup_service: DatabaseBackupService | None = None,
+        script_service: ScriptService | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -58,10 +61,17 @@ class MainWindow(QMainWindow):
             if knowledge_service is not None
             else None
         )
+        self.script_workspace = (
+            ScriptWorkspace(script_service, self.runner, self)
+            if script_service is not None
+            else None
+        )
         self.pages.addWidget(self.ticket_create_widget)
         self.pages.addWidget(self.workspace)
         if self.knowledge_workspace is not None:
             self.pages.addWidget(self.knowledge_workspace)
+        if self.script_workspace is not None:
+            self.pages.addWidget(self.script_workspace)
         self.setCentralWidget(self.pages)
         self.ticket_create_widget.ticket_created.connect(self._ticket_created)
 
@@ -75,7 +85,10 @@ class MainWindow(QMainWindow):
         self.knowledge_action = QAction("Knowledge Base", self)
         self.knowledge_action.setEnabled(self.knowledge_workspace is not None)
         self.knowledge_action.triggered.connect(self.show_knowledge)
-        for action in (self.new_ticket_action, self.tickets_action, self.knowledge_action):
+        self.scripts_action = QAction("Scripts", self)
+        self.scripts_action.setEnabled(self.script_workspace is not None)
+        self.scripts_action.triggered.connect(self.show_scripts)
+        for action in (self.new_ticket_action, self.tickets_action, self.knowledge_action, self.scripts_action):
             file_menu.addAction(action)
             toolbar.addAction(action)
         self.backup_action = QAction("Back up database", self)
@@ -105,6 +118,7 @@ class MainWindow(QMainWindow):
         self.new_ticket_action.setEnabled(not busy)
         self.tickets_action.setEnabled(not busy)
         self.knowledge_action.setEnabled(not busy and self.knowledge_workspace is not None)
+        self.scripts_action.setEnabled(not busy and self.script_workspace is not None)
         self.backup_action.setEnabled(not busy and self.backup_service is not None)
         self.statusBar().showMessage("Working…" if busy else "Ready")
 
@@ -149,6 +163,14 @@ class MainWindow(QMainWindow):
             self.workspace._clear_drafts()
             self.pages.setCurrentWidget(self.knowledge_workspace)
             self.knowledge_workspace.refresh_list()
+
+    def show_scripts(self):
+        if not self.runner.busy and self.script_workspace is not None:
+            if not self.workspace.confirm_discard():
+                return
+            self.workspace._clear_drafts()
+            self.pages.setCurrentWidget(self.script_workspace)
+            self.script_workspace.refresh_list()
 
     def open_knowledge_article(self, article_id):
         if self.runner.busy or self.knowledge_workspace is None:

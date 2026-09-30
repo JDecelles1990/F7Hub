@@ -55,6 +55,11 @@ class ApplicationBootstrapTests(unittest.TestCase):
             context.ticket_service,
         )
         self.assertEqual(context.main_window.backup_service.database_path, self.database_path.resolve())
+        self.assertEqual(context.script_repository._database_path, self.database_path.resolve())
+        self.assertIs(context.script_service._repository, context.script_repository)
+        self.assertEqual(context.script_service._project_root, PROJECT_ROOT.resolve())
+        self.assertIs(context.main_window.script_workspace._service, context.script_service)
+        self.assertEqual(context.script_service.list_scripts(), ())
 
         with database_connection(self.database_path) as connection:
             applied_versions = tuple(

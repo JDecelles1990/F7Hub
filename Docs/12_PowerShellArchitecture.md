@@ -10,6 +10,8 @@
 
 # 1. Purpose
 
+Slice 041 exposes enabled Slice 040 registry metadata in the read-only **Scripts** workspace. File statuses (AVAILABLE, MISSING, INACCESSIBLE, INVALID_REFERENCE) describe reference inspection at the last refresh; unexpected values display as Unknown. Even AVAILABLE does not grant execution approval. The workspace never opens `.ps1` contents and has no Run, registration, enable/disable or approval controls. PowerShell execution infrastructure remains deferred.
+
 Slice 040 introduces only a Python/SQLite read-only registry for PowerShell `.ps1` references. References are limited to Diagnostics, Reports and Modules below the supplied project root, with traversal, external links and invalid Windows paths rejected. File status is an observation, not execution approval. No production PowerShell file, `pwsh.exe` invocation, content read or execution gateway is added.
 
 This document defines the PowerShell architecture for F7Hub.
@@ -614,7 +616,7 @@ Do not store full PowerShell source in SQLite by default.
 
 # 26. Script Registry
 
-Slice 040 maintains read-only script metadata in SQLite. A user-facing script library, registration and execution remain planned.
+Slice 040 maintains read-only script metadata in SQLite. Slice 041 adds the read-only user-facing Scripts catalog. Registration and execution remain planned.
 
 Conceptual flow:
 

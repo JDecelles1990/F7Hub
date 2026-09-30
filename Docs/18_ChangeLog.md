@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-30 — Slice 041: Read-Only Scripts Catalog UI
+
+Application bootstrap now composes the existing ScriptRepository and ScriptService with the resolved database path and project root. The existing MainWindow stack, File menu and toolbar expose **Scripts**. ScriptWorkspace loads enabled entries through ServiceTaskRunner, shows an intentional empty state, four text file statuses and plain-text metadata, and supports selection-preserving manual Refresh and safe retry after a failed read. The shared runner and close guard prevent concurrent loads and page destruction during work. The GUI does not query SQLite, validate paths, read `.ps1` contents or execute PowerShell. No schema, migration, production seed, registry management or execution control was added.
+
+Focused, full regression and native Windows evidence are recorded in `Status/CURRENT_STATE.md`. The candidate remains unstaged and uncommitted for independent read-only review.
+
+---
+
 # 2026-09-30 — Slice 040: PowerShell Script Registry Foundation
 
 Migration `0007_script_registry.sql` adds the metadata-only `scripts` table with unique case-insensitive code and relative path, constrained documented metadata, nullable shared-category foreign key, `is_enabled DEFAULT 0`, and enabled/name plus category indexes. The production registry is empty. `ScriptRepository` offers enabled-only list and code lookup; explicit disabled inspection is internal. Catalog reads exclude rows linked to categories outside `SCRIPT` scope. `ScriptService` returns metadata with a separate `AVAILABLE`, `MISSING`, `INACCESSIBLE` or `INVALID_REFERENCE` file status. Path inspection limits `.ps1` references to Diagnostics, Reports and Modules beneath the supplied project root and rejects Windows path escapes and symlink escapes. It reads no script contents and launches no PowerShell process. Approval, registration, execution, parameters, history and GUI remain future work.

@@ -9,7 +9,7 @@
 
 # 1. Purpose
 
-Slice 040 has implemented the first Script Center foundation: SQLite metadata, read-only Python catalog and file-reference status checks. Searchable GUI, registration, approval, parameters, execution and history remain future work. This implementation stops at independent read-only review before any integration.
+Slice 040 established the metadata-only Script Registry; Slice 041 adds a read-only Scripts catalog page for enabled entries and manual refresh. Search, registration, approval, parameters, execution and history remain future work. Slice 041 stops at independent read-only review before any integration.
 
 This document defines the development roadmap for F7Hub.
 

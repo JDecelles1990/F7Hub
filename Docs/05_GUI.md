@@ -8,6 +8,12 @@
 
 ---
 
+## Scripts workspace — Slice 041
+
+The existing File menu and toolbar add one **Scripts** action that opens a page in MainWindow's stacked navigation. The page has a four-column enabled-script table (Name, Code, Category, File status), a read-only scrollable plain-text metadata panel, an intentional empty message, and a manual **Refresh** button. Row selection, including keyboard selection, updates details from the loaded entry without another service read. Refresh preserves the selected script code when present, otherwise selects the first row. Loading and failure clear stale content; Refresh is disabled while the shared worker is busy. Status remains readable as text, with unknown values shown as Unknown. There is no clickable script path or execution control.
+
+---
+
 ## Manual database backup action — Slice 038
 
 The existing File menu contains **Back up database**. The shared worker keeps the window responsive and disables the action and conflicting navigation while backup runs. The success dialog shows the actual published path and brief local-only protection guidance; failure shows bounded feedback without a raw exception message. Closing during work follows the existing busy guard. Native Windows inspection at 1000×700 found the menu item and both dialogs readable; the isolated snapshot reopened and passed integrity and foreign-key checks.

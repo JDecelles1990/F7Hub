@@ -22,6 +22,8 @@ from f7hub.services.knowledge_service import KnowledgeService
 from f7hub.repositories.ticket_knowledge_repository import TicketKnowledgeRepository
 from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
 from f7hub.services.database_backup_service import DatabaseBackupService
+from f7hub.repositories.script_repository import ScriptRepository
+from f7hub.services.script_service import ScriptService
 
 
 DEFAULT_PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -39,6 +41,8 @@ class ApplicationContext:
     knowledge_service: KnowledgeService
     ticket_knowledge_repository: TicketKnowledgeRepository
     ticket_knowledge_service: TicketKnowledgeService
+    script_repository: ScriptRepository
+    script_service: ScriptService
     main_window: MainWindow
 
 
@@ -69,6 +73,8 @@ def bootstrap_application(
     knowledge_service = KnowledgeService(knowledge_repository, categories, tags)
     ticket_knowledge_repository = TicketKnowledgeRepository(resolved_database_path)
     ticket_knowledge_service = TicketKnowledgeService(ticket_knowledge_repository)
+    script_repository = ScriptRepository(resolved_database_path)
+    script_service = ScriptService(script_repository, resolved_project_root)
     companies = CompanyRepository(resolved_database_path)
     contacts = ContactRepository(resolved_database_path)
     reference_service = TicketReferenceService(
@@ -81,6 +87,7 @@ def bootstrap_application(
         knowledge_service=knowledge_service,
         knowledge_link_service=ticket_knowledge_service,
         backup_service=DatabaseBackupService(resolved_database_path),
+        script_service=script_service,
     )
 
     return ApplicationContext(
@@ -92,5 +99,7 @@ def bootstrap_application(
         knowledge_service=knowledge_service,
         ticket_knowledge_repository=ticket_knowledge_repository,
         ticket_knowledge_service=ticket_knowledge_service,
+        script_repository=script_repository,
+        script_service=script_service,
         main_window=main_window,
     )
