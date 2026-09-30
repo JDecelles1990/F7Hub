@@ -8,6 +8,12 @@
 
 ---
 
+## Inspect the Scripts catalog — Slice 041
+
+Choose **Scripts** from the File menu or toolbar. F7Hub loads enabled registry entries in the background. If none exist, it shows **No scripts available.** Select a row to read its metadata and relative PowerShell reference as plain text. File status is **AVAILABLE**, **MISSING**, **INACCESSIBLE** or **INVALID_REFERENCE**; an unrecognized value appears as **Unknown**. **AVAILABLE** means the file was found at the last refresh, not that it may be run. Choose **Refresh** for a new observation. A failed load clears stale rows/details and offers a safe retry message. Scripts cannot be run or managed from this view.
+
+---
+
 ## Back up the local database — Slice 038
 
 File → **Back up database** → wait for completion → read the published path. F7Hub backs up the currently opened SQLite database to a new file under `%LOCALAPPDATA%\F7Hub\Backups` and validates integrity and foreign keys before showing success. If backup or validation fails, no completed backup is reported; retry after resolving the local storage problem. The file contains local SQLite data only. Copy it to another location for protection from local-drive loss. Restore, automatic scheduling and retention are separate work.

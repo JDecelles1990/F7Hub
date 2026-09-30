@@ -30,15 +30,23 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
-Slice 040 — PowerShell script registry foundation, implementation candidate on `feature/powershell-script-registry-s040`:
+Slice 041 — read-only Scripts catalog, implementation candidate on `feature/powershell-script-catalog-s041`:
+
+- [x] Compose the existing ScriptRepository and ScriptService in application bootstrap and expose Scripts through MainWindow's existing navigation stack.
+- [x] Show enabled entries, intentional empty state, read-only metadata, four file statuses, manual refresh and safe retry without execution or registry-management controls.
+- [x] Cover workspace, MainWindow, bootstrap and isolated SQLite-to-GUI flow; inspect native Windows 1000×700 captures.
+- [x] Run final full Database **385 PASS**, GUI **163 PASS**, and Integration **141 PASS** (689 total), all exit 0; record the exact candidate manifest in the external Slice 041 checkpoint.
+- [ ] Independent read-only review of the exact unstaged and uncommitted candidate. No staging, commit, push, PR or integration in this phase.
+
+Slice 040 — PowerShell script registry foundation, **CLOSED on main** at the Slice 041 approved base `1bbf3183bab67cb53cb2002ee18deb5f419b56b1`. Its 681-test result is prior baseline evidence:
 
 - [x] Add migration 0007 with default-disabled metadata, existing `SCRIPT` taxonomy relationship and listing/category indexes; keep the production catalog empty.
 - [x] Add enabled-only repository and service reads, with separate file-reference statuses and no script execution.
 - [x] Cover fresh/incremental migration, constraints, category scope, read-only behavior and Windows path escape cases in isolated tests.
 - [x] Complete and record focused, affected and full Database, GUI and Integration regression on the final executable candidate: 8 registry, 10 category, 6 bootstrap, then 385 Database, 156 GUI and 140 Integration tests; all exit 0. The full suites total 681 tests.
-- [ ] Independent read-only review of the exact unstaged and uncommitted candidate. No staging, commit, push, PR or integration in this phase.
+- [x] Independent read-only review and integration completed before Slice 041 began.
 
-The Slice 039 review/integration-pending wording below is **STALE HANDOFF METADATA**: fetched `main` and `origin/main` are `5072ae20cb912f25cd721bd6c18e5bf23a816eb0`, the PR #40 merge of Slice 039. Its 673-test result is prior baseline evidence.
+The Slice 039 review/integration-pending wording below is **STALE HANDOFF METADATA**. At Slice 040 entry, fetched `main` and `origin/main` were `5072ae20cb912f25cd721bd6c18e5bf23a816eb0`, the PR #40 merge of Slice 039; at Slice 041 entry both were `1bbf3183bab67cb53cb2002ee18deb5f419b56b1`. Slice 039's 673-test result is prior baseline evidence.
 
 ---
 

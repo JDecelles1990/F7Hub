@@ -8,6 +8,12 @@
 
 ---
 
+## Read-only Scripts catalog — Slice 041
+
+The Scripts workspace lists enabled PowerShell registry entries with name, code, category and point-in-time file status. Selecting a row shows the existing metadata as plain text. The empty registry shows **No scripts available.** Manual Refresh clears stale results before reloading; failure gives a safe retry message. File status describes the reference at the last refresh and does not approve execution. This workspace has no script execution or registry-management controls.
+
+---
+
 ## Manual SQLite database backup — Slice 038
 
 File → **Back up database** creates one validated snapshot of the active local SQLite database under `%LOCALAPPDATA%\F7Hub\Backups`. It runs in the existing background worker, reports the completed path, and gives safe failure feedback. The backup contains SQLite data only. There is no scheduling, retention, restore action, or protection from loss of the local drive until the technician copies it elsewhere.
@@ -685,7 +691,7 @@ AI must not be required for core local search.
 
 ## FEAT-SCRIPT-001 — Script Registry
 
-Slice 040 implements a read-only, database-backed PowerShell metadata registry. It lists enabled entries and looks up an enabled entry by stable code. The production catalog starts empty. A searchable user-facing catalog remains planned.
+Slice 040 implements a read-only, database-backed PowerShell metadata registry. It lists enabled entries and looks up an enabled entry by stable code. The production catalog starts empty. Slice 041 adds an unfiltered user-facing Scripts catalog; search remains planned.
 
 Priority: P1  
 Requirements: `FR-SCRIPT-001`, `FR-SCRIPT-002`

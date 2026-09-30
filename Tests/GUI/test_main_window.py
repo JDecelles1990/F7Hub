@@ -67,6 +67,18 @@ class RecordingBackupService:
         return self.path
 
 
+class RecordingScriptService:
+    def __init__(self):
+        self.calls = 0
+        self.gate = None
+
+    def list_scripts(self):
+        self.calls += 1
+        if self.gate:
+            self.gate.wait(3)
+        return ()
+
+
 class MainWindowTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
@@ -75,7 +87,9 @@ class MainWindowTests(unittest.TestCase):
     def setUp(self) -> None:
         self.service = RecordingTicketService()
         self.backup = RecordingBackupService()
-        self.window = MainWindow(self.service, backup_service=self.backup)
+        self.scripts = RecordingScriptService()
+        self.window = MainWindow(self.service, backup_service=self.backup,
+                                 script_service=self.scripts)
         self.window.show()
         self.application.processEvents()
 
@@ -84,6 +98,8 @@ class MainWindowTests(unittest.TestCase):
             self.service.gate.set()
         if self.backup.gate:
             self.backup.gate.set()
+        if self.scripts.gate:
+            self.scripts.gate.set()
         self.wait_idle()
         self.window.workspace._clear_drafts()
         self.window.ticket_create_widget.reset_form()
@@ -147,6 +163,35 @@ class MainWindowTests(unittest.TestCase):
         self.assertEqual(workspace.details.ticket.ticket_id, 1)
         self.assertIn("Printer offline", workspace.heading.text())
         self.assertIn("Type: Incident", workspace.summary.toPlainText())
+
+    def test_scripts_action_opens_stacked_workspace_and_loads_catalog(self):
+        self.assertEqual(self.window.scripts_action.text(), "Scripts")
+        self.assertIn(self.window.scripts_action, self.window.menuBar().actions()[0].menu().actions())
+        self.assertIn(self.window.scripts_action, self.window.findChildren(type(self.window.scripts_action)))
+        self.assertEqual(self.window.pages.indexOf(self.window.script_workspace), 2)
+        self.window.scripts_action.trigger()
+        self.wait_idle()
+        self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
+        self.assertEqual(self.window.script_workspace.heading.text(), "Scripts")
+        self.assertEqual(self.scripts.calls, 1)
+        self.window.show_new_ticket()
+        self.assertIs(self.window.pages.currentWidget(), self.window.ticket_create_widget)
+
+    def test_script_load_keeps_window_and_page_alive_until_worker_finishes(self):
+        self.scripts.gate = threading.Event()
+        self.window.show_scripts()
+        self.assertTrue(self.window.runner.busy)
+        self.assertFalse(self.window.scripts_action.isEnabled())
+        self.assertFalse(self.window.pages.isEnabled())
+        self.assertFalse(self.window.close())
+        self.assertTrue(self.window.isVisible())
+        self.window.show_tickets()
+        self.window.show_scripts()
+        self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
+        self.scripts.gate.set()
+        self.wait_idle()
+        self.assertEqual(self.scripts.calls, 1)
+        self.assertTrue(self.window.scripts_action.isEnabled())
 
     def test_five_saved_ticket_detail_actions_fit_1000_by_700(self):
         self.window.show_tickets()

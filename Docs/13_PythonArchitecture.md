@@ -6,6 +6,10 @@
 > Purpose: Define the internal Python architecture of F7Hub, including application startup, GUI composition, services, domain logic, repositories, infrastructure, integrations, background execution, state management, diagnostics, search, AI boundaries, and testing.  
 > Related Documents: `04_UserWorkflows.md`, `05_GUI.md`, `06_SystemArchitecture.md`, `07_Database.md`, `10_FolderStructure.md`, `11_AHKArchitecture.md`, `12_PowerShellArchitecture.md`
 
+## Read-only Scripts GUI — Slice 041
+
+`bootstrap_application` now composes the existing ScriptRepository and ScriptService using its resolved database path and project root and exposes both through ApplicationContext. MainWindow passes ScriptService to ScriptWorkspace in the existing QStackedWidget. The workspace submits `list_scripts()` through the shared ServiceTaskRunner, renders already-returned entries as plain text, and supports selection, manual refresh and safe retry. The runner and MainWindow busy/close gates serialize requests and retain the page through completion. Selection does not call `get_script()`. No SQL, path inspection, content read or process execution belongs to the GUI; no database or service contract changed.
+
 ## Read-only PowerShell registry — Slice 040
 
 `ScriptRepository` uses configured SQLite connections for enabled catalog reads and exact case-insensitive `script_code` lookup. It joins only `SCRIPT` scope categories, excluding rows linked to other scopes; explicit `include_disabled=True` is internal inspection only. `ScriptService` returns metadata alongside a separate file status from path inspection under the supplied project root. The resolver validates Windows path syntax, approved folders, resolved containment and regular-file accessibility without reading script contents. No GUI, writer, approval or execution path is implemented. The production registry is empty.
