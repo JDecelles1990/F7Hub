@@ -6,6 +6,10 @@
 > Scope: System-level architecture.
 > Related Documents: 00_ProjectVision.md, 01_Project.md, 02_ProductRequirements.md, 05_GUI.md, 07_Database.md, 11_AHKArchitecture.md, 12_PowerShellArchitecture.md, 13_PythonArchitecture.md
 
+## Verified source copy boundary — Slice 043
+
+ScriptWorkspace submits an enabled script code through ServiceTaskRunner to ScriptService. The service uses ScriptRepository, revalidates the approved path, reads one byte buffer, compares its SHA-256 to the reviewed registry value and strictly decodes that same buffer. The GUI alone sets the Qt clipboard after a current-selection check. SQLite stores approval metadata; the version-controlled `.ps1` remains source. No PowerShell process, remote call, new dependency or cross-language execution contract is added.
+
 ## Read-only Scripts composition — Slice 041
 
 Bootstrap composes ScriptRepository from the resolved application database path and ScriptService from that repository and the resolved project root. MainWindow passes the service to a Scripts workspace inside its existing stack. Catalog reads use the shared ServiceTaskRunner, then ScriptService, then ScriptRepository and SQLite; file-reference status remains within ScriptService. GUI code does not access SQLite, validate paths, read script contents or invoke PowerShell. The shared runner serializes loads, disables navigation during work and participates in the existing close guard. No schema or cross-language contract changes.

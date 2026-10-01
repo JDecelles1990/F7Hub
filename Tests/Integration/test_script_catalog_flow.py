@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import hashlib
 from pathlib import Path
 import shutil
 import tempfile
@@ -51,10 +52,12 @@ class ScriptCatalogFlowTests(unittest.TestCase):
 
     def wait_idle(self):
         deadline = time.monotonic() + 5
-        while (self.window.runner.busy or self.window.script_workspace._loading) and time.monotonic() < deadline:
+        while (self.window.runner.busy or self.window.script_workspace._loading or
+               self.window.script_workspace._copying) and time.monotonic() < deadline:
             QTest.qWait(5)
         self.assertFalse(self.window.runner.busy, "Catalog worker did not finish")
         self.assertFalse(self.window.script_workspace._loading, "Catalog callback did not finish")
+        self.assertFalse(self.window.script_workspace._copying, "Copy callback did not finish")
 
     def insert_script(self, code, *, enabled=1, path=None, category_id=None):
         with database_connection(self.database) as connection:
@@ -130,6 +133,48 @@ class ScriptCatalogFlowTests(unittest.TestCase):
             execute.assert_not_called()
         self.assertFalse(any(control.text().lower() in {"run", "test", "execute"}
                              for control in workspace.findChildren(QPushButton)))
+
+    def test_approved_snapshot_copies_exact_source_and_failures_preserve_clipboard(self):
+        migrations = self.root / "Database" / "Migrations"
+        for name in ("0008_system_snapshot_script.sql", "0009_system_snapshot_checksum.sql"):
+            shutil.copyfile(ROOT / "Database/Migrations" / name, migrations / name)
+        script = self.root / "PowerShell/Diagnostics/Get-SystemSnapshot.ps1"
+        script.parent.mkdir(parents=True)
+        shutil.copyfile(ROOT / "PowerShell/Diagnostics/Get-SystemSnapshot.ps1", script)
+        original = script.read_bytes()
+        original_hash = hashlib.sha256(original).hexdigest()
+        bootstrap_database(self.database, migrations)
+        with database_connection(self.database) as connection:
+            checksum = connection.execute("SELECT checksum_sha256 FROM scripts WHERE "
+                                          "script_code='diagnostic.windows.system_snapshot'").fetchone()[0]
+        self.assertEqual(checksum, original_hash)
+        workspace = self.window.script_workspace
+        clipboard = self.application.clipboard()
+        previous = clipboard.text()
+        self.addCleanup(clipboard.setText, previous)
+        with patch("subprocess.Popen", side_effect=AssertionError("PowerShell launched")) as execute:
+            self.window.scripts_action.trigger()
+            self.wait_idle()
+            self.assertEqual(workspace.model.item(0, 3).text(), "AVAILABLE")
+            self.assertTrue(workspace.copy_button.isEnabled())
+            workspace.copy_button.click()
+            self.wait_idle()
+            self.assertEqual(clipboard.text(), original.decode("utf-8"))
+            self.assertEqual(workspace.feedback.text(), "PowerShell script copied to clipboard.")
+            execute.assert_not_called()
+        self.assertEqual(script.read_bytes(), original)
+
+        clipboard.setText("preserve")
+        script.write_bytes(original + b"# changed")
+        workspace.copy_button.click()
+        self.wait_idle()
+        self.assertEqual(clipboard.text(), "preserve")
+        self.assertEqual(workspace.feedback.text(), "Script changed since approval. Copy blocked.")
+        script.unlink()
+        workspace.copy_button.click()
+        self.wait_idle()
+        self.assertEqual(clipboard.text(), "preserve")
+        self.assertEqual(workspace.feedback.text(), "Script file is no longer available.")
 
 
 if __name__ == "__main__":

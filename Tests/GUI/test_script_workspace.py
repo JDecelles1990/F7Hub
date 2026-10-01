@@ -14,7 +14,7 @@ from PySide6.QtWidgets import QApplication, QPushButton
 
 from f7hub.gui.script_workspace import ScriptWorkspace
 from f7hub.gui.service_task_runner import ServiceTaskRunner
-from f7hub.services.script_service import ScriptCatalogEntry
+from f7hub.services.script_service import ScriptCatalogEntry, ScriptCopyError
 
 
 def entry(code="ONE", *, status="AVAILABLE", description="Details", name=None):
@@ -32,6 +32,10 @@ class RecordingService:
         self.calls = 0
         self.gate = None
         self.error = None
+        self.copy_gate = None
+        self.copy_error = None
+        self.source = "# exact source\r\nWrite-Output 'hello'\r\n"
+        self.read_calls = []
 
     def list_scripts(self):
         self.calls += 1
@@ -40,6 +44,14 @@ class RecordingService:
         if self.error:
             raise self.error
         return self.entries
+
+    def read_verified_script(self, code):
+        self.read_calls.append(code)
+        if self.copy_gate:
+            self.copy_gate.wait(3)
+        if self.copy_error:
+            raise self.copy_error
+        return self.source
 
 
 class ScriptWorkspaceTests(unittest.TestCase):
@@ -53,11 +65,15 @@ class ScriptWorkspaceTests(unittest.TestCase):
         self.workspace = ScriptWorkspace(self.service, self.runner)
         self.workspace.show()
         self.application.processEvents()
+        self.previous_clipboard = self.application.clipboard().text()
 
     def tearDown(self):
         if self.service.gate:
             self.service.gate.set()
+        if self.service.copy_gate:
+            self.service.copy_gate.set()
         self.wait_idle()
+        self.application.clipboard().setText(self.previous_clipboard)
         self.workspace.close()
         self.workspace.deleteLater()
         self.runner.deleteLater()
@@ -65,10 +81,11 @@ class ScriptWorkspaceTests(unittest.TestCase):
 
     def wait_idle(self):
         deadline = time.monotonic() + 5
-        while (self.runner.busy or self.workspace._loading) and time.monotonic() < deadline:
+        while (self.runner.busy or self.workspace._loading or self.workspace._copying) and time.monotonic() < deadline:
             QTest.qWait(5)
         self.assertFalse(self.runner.busy, "Catalog worker did not finish")
         self.assertFalse(self.workspace._loading, "Catalog callback did not finish")
+        self.assertFalse(self.workspace._copying, "Copy callback did not finish")
 
     def test_construction_empty_and_columns(self):
         self.assertEqual(self.workspace.heading.text(), "Scripts")
@@ -135,7 +152,12 @@ class ScriptWorkspaceTests(unittest.TestCase):
         self.workspace.table.selectRow(4)
         self.assertIn("File status: Unknown", self.workspace.details.toPlainText())
         self.assertNotIn("File found", self.workspace.details.toPlainText())
-        self.assertEqual(self.workspace.findChildren(QPushButton), [self.workspace.refresh_button])
+        self.assertEqual(set(self.workspace.findChildren(QPushButton)),
+                         {self.workspace.refresh_button, self.workspace.copy_button})
+        self.assertEqual(self.workspace.copy_button.text(), "Copy Script")
+        self.assertEqual(self.workspace.copy_button.accessibleName(), "Copy Script")
+        self.assertFalse(any(button.text() in {"Run", "Execute", "Test"}
+                             for button in self.workspace.findChildren(QPushButton)))
 
     def test_loading_duplicate_prevention_failure_and_retry(self):
         self.service.entries = (entry(),)
@@ -163,6 +185,59 @@ class ScriptWorkspaceTests(unittest.TestCase):
         self.assertEqual(self.service.calls, 3)
         self.assertEqual(self.workspace.model.rowCount(), 1)
         self.assertEqual(self.workspace.feedback.text(), "")
+
+    def test_copy_requires_available_selection_and_copies_exact_source(self):
+        self.assertFalse(self.workspace.copy_button.isEnabled())
+        self.assertFalse(self.workspace.copy_script())
+        self.service.entries = (entry("MISSING", status="MISSING"), entry("ONE"))
+        self.workspace.refresh_list()
+        self.wait_idle()
+        self.assertFalse(self.workspace.copy_button.isEnabled())
+        self.workspace.table.selectRow(1)
+        self.assertTrue(self.workspace.copy_button.isEnabled())
+        self.application.clipboard().setText("unchanged")
+        self.workspace.copy_button.click()
+        self.wait_idle()
+        self.assertEqual(self.service.read_calls, ["ONE"])
+        self.assertEqual(self.application.clipboard().text(), self.service.source)
+        self.assertEqual(self.workspace.feedback.text(), "PowerShell script copied to clipboard.")
+
+    def test_copy_failures_keep_clipboard_and_hide_raw_error(self):
+        self.service.entries = (entry(),)
+        self.workspace.refresh_list()
+        self.wait_idle()
+        for error, message in (
+            (ScriptCopyError("INTEGRITY_NOT_APPROVED"), "Script integrity has not been approved."),
+            (ScriptCopyError("INTEGRITY_MISMATCH"), "Script changed since approval. Copy blocked."),
+            (ScriptCopyError("FILE_UNAVAILABLE"), "Script file is no longer available."),
+            (RuntimeError("PRIVATE_SCRIPT_ERROR"), "Script could not be read."),
+        ):
+            with self.subTest(error=error):
+                self.application.clipboard().setText("unchanged")
+                self.service.copy_error = error
+                self.workspace.copy_button.click()
+                self.wait_idle()
+                self.assertEqual(self.application.clipboard().text(), "unchanged")
+                self.assertEqual(self.workspace.feedback.text(), message)
+                self.assertNotIn("PRIVATE_SCRIPT_ERROR", self.workspace.feedback.text())
+
+    def test_duplicate_click_and_stale_selection_discard(self):
+        self.service.entries = (entry("ONE"), entry("TWO"))
+        self.workspace.refresh_list()
+        self.wait_idle()
+        self.application.clipboard().setText("unchanged")
+        self.service.copy_gate = threading.Event()
+        self.assertTrue(self.workspace.copy_script())
+        self.assertEqual(self.workspace.feedback.text(), "Verifying script…")
+        self.assertFalse(self.workspace.copy_button.isEnabled())
+        self.assertFalse(self.workspace.copy_script())
+        self.workspace.table.selectRow(1)
+        self.service.copy_gate.set()
+        self.wait_idle()
+        self.assertEqual(self.service.read_calls, ["ONE"])
+        self.assertEqual(self.application.clipboard().text(), "unchanged")
+        self.assertNotEqual(self.workspace.feedback.text(), "PowerShell script copied to clipboard.")
+        self.assertTrue(self.workspace.copy_button.isEnabled())
 
 
 if __name__ == "__main__":

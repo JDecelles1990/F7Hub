@@ -680,7 +680,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
             self.assertEqual(tuple(connection.iterdump()), dump_before)
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 8)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 9)
 
         reconstructed = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.path)
         restored = reconstructed.main_window

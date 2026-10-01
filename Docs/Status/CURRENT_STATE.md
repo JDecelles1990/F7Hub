@@ -2,6 +2,20 @@
 
 Last verified: 2026-09-30 (America/Toronto).
 
+Current candidate: **Slice 043 — Secure Script Copy to Clipboard**, on `feature/secure-script-copy-s043` from `4d6901c01064af143abcca6292ff4abbea77129f`. Before branching, fresh local and live remote `main` matched this base with a clean tree and index; the protected recovery ref and four unrelated worktree HEADs matched the requested baseline. Slice 042 is CLOSED through PR #43. The Slice 042 pending-review text below is a historical handoff snapshot.
+
+Status: **PASS — READY_FOR_REVIEW**. Root `.gitattributes` pins CRLF checkout for only `Get-SystemSnapshot.ps1`; migration 0009 guards the reviewed SHA-256 update without changing the `scripts` schema. `ScriptService` uses enabled-only lookup, current path validation, one binary read, exact-byte SHA-256 comparison and strict UTF-8 decoding. ScriptWorkspace submits the read through ServiceTaskRunner and copies raw source through Qt only if selection remains current. No PowerShell execution, automatic paste or remote integration was added. The candidate remains unstaged and uncommitted; independent read-only review of this exact candidate is the next gate.
+
+## Slice 043 Validation
+
+Focused exact-byte/migration **4 PASS**, service **6 PASS**, Scripts GUI **8 PASS**, and catalog integration **3 PASS** were rerun during recovery, each exit 0. Fresh full Database **398 PASS**, PowerShell **6 PASS**, and Integration **143 PASS** each exited 0; the prior full GUI **166 PASS**, exit 0, is retained because its production, GUI-test, migration and configuration inputs did not change. The first full Integration run found one stale eight-migration assertion; its narrow correction passed in the final complete rerun. Native Windows validation at 1000×700 is retained because production GUI/service and native-harness inputs did not change: after observable worker idle, real clipboard text matched the approved source, a local editor paste reproduced its text after editor newline normalization, and mismatch/missing-file fixtures preserved prior clipboard text. Keyboard Space activated Copy Script. Three screenshots under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-043\` were inspected; the visible controls and feedback had no observed overlap or clipping. This is candidate validation, not independent approval.
+
+---
+
+## Prior Slice 042 handoff snapshot (historical; Slice 042 later closed on main)
+
+Last verified: 2026-09-30 (America/Toronto).
+
 Current candidate: **Slice 042 — First Production PowerShell Diagnostic Script**, on `feature/system-snapshot-script-s042` in `C:\Dev\F7Hub`. A fresh `git fetch origin --prune` confirmed clean local `main` and fetched `origin/main` at approved base `c4c87ded5e7e8b66ded4f844c1715567760c730b` before branching, with an empty index and no untracked files. The protected `recovery/pre-s024-protected-work` ref was `002a494735f30e1488f61e21ea98740ae6371d4d`; four unrelated linked worktrees were left untouched. Slice 041 is CLOSED on the fetched base. The Slice 041 candidate wording below is **STALE HANDOFF METADATA**, retained as a prior snapshot.
 
 Status: **PASS — READY_FOR_REREVIEW** after narrow corrections to the independently reviewed candidate. Migration 0008 installs one enabled Windows System Snapshot registry row without changing the schema or default-disabled table behavior. `Get-SystemSnapshot.ps1` collects a local read-only Windows snapshot as one JSON result when run standalone by test tooling. Returned drives retain null for unavailable Size or FreeSpace, preserve real zero, and make the result WARNING without discarding available measurements. The existing Scripts workspace displays the row as AVAILABLE when the file is present. F7Hub has no PowerShell execution path; production Python and GUI code are unchanged. Independent read-only rereview of the exact corrected, unstaged candidate is the next gate.

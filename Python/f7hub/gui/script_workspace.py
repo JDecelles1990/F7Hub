@@ -5,7 +5,7 @@ from __future__ import annotations
 from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
-    QAbstractItemView, QHBoxLayout, QHeaderView, QLabel, QPlainTextEdit,
+    QAbstractItemView, QApplication, QHBoxLayout, QHeaderView, QLabel, QPlainTextEdit,
     QPushButton, QSplitter, QTableView, QVBoxLayout, QWidget,
 )
 
@@ -13,10 +13,19 @@ from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.services.script_service import (
     AVAILABLE, INACCESSIBLE, INVALID_REFERENCE, MISSING,
     ScriptCatalogEntry, ScriptService,
+    ScriptCopyError,
 )
 
 
 _FILE_STATUSES = {AVAILABLE, MISSING, INACCESSIBLE, INVALID_REFERENCE}
+_COPY_FEEDBACK = {
+    "SCRIPT_NOT_ELIGIBLE": "Script is no longer eligible to copy.",
+    "INVALID_REFERENCE": "Script reference is invalid. Copy blocked.",
+    "FILE_UNAVAILABLE": "Script file is no longer available.",
+    "READ_FAILED": "Script could not be read.",
+    "INTEGRITY_NOT_APPROVED": "Script integrity has not been approved.",
+    "INTEGRITY_MISMATCH": "Script changed since approval. Copy blocked.",
+}
 
 
 def _status_text(status: str) -> str:
@@ -32,15 +41,21 @@ class ScriptWorkspace(QWidget):
         self._runner = runner
         self._entries: tuple[ScriptCatalogEntry, ...] = ()
         self._loading = False
+        self._copying = False
+        self._selection_generation = 0
         self._preferred_code: str | None = None
 
         self.heading = QLabel("Scripts", self)
         self.heading.setObjectName("scriptsHeading")
         self.refresh_button = QPushButton("Refresh", self)
         self.refresh_button.clicked.connect(self.refresh_list)
+        self.copy_button = QPushButton("Copy Script", self)
+        self.copy_button.setAccessibleName("Copy Script")
+        self.copy_button.clicked.connect(self.copy_script)
         heading_row = QHBoxLayout()
         heading_row.addWidget(self.heading)
         heading_row.addStretch()
+        heading_row.addWidget(self.copy_button)
         heading_row.addWidget(self.refresh_button)
 
         self.feedback = QLabel("", self)
@@ -81,16 +96,59 @@ class ScriptWorkspace(QWidget):
         layout.addLayout(heading_row)
         layout.addWidget(self.feedback)
         layout.addWidget(splitter, 1)
-        self._runner.busy_changed.connect(self._update_refresh)
-        self._update_refresh(self._runner.busy)
+        self._runner.busy_changed.connect(self._update_actions)
+        self._update_actions(self._runner.busy)
 
-    def _update_refresh(self, busy: bool) -> None:
+    def _update_actions(self, busy: bool) -> None:
         self.refresh_button.setEnabled(not busy and not self._loading)
+        row = self.table.currentIndex().row()
+        available = 0 <= row < len(self._entries) and self._entries[row].file_status == AVAILABLE
+        self.copy_button.setEnabled(available and not busy and not self._loading and not self._copying)
+
+    def copy_script(self) -> bool:
+        """Verify source off-thread, then copy only a still-selected result."""
+        row = self.table.currentIndex().row()
+        if (self._runner.busy or self._loading or self._copying or
+                not 0 <= row < len(self._entries) or self._entries[row].file_status != AVAILABLE):
+            return False
+        code = self._entries[row].metadata.script_code
+        generation = self._selection_generation
+        self._copying = True
+        self.feedback.setText("Verifying script…")
+        self._update_actions(True)
+
+        def current() -> bool:
+            selected = self.table.currentIndex().row()
+            return (generation == self._selection_generation and self.isVisible() and
+                    0 <= selected < len(self._entries) and
+                    self._entries[selected].metadata.script_code == code)
+
+        def succeeded(source: str) -> None:
+            self._copying = False
+            if current():
+                QApplication.clipboard().setText(source)
+                self.feedback.setText("PowerShell script copied to clipboard.")
+            self._update_actions(self._runner.busy)
+
+        def failed(error: object) -> None:
+            self._copying = False
+            if current():
+                key = error.code if isinstance(error, ScriptCopyError) else "READ_FAILED"
+                self.feedback.setText(_COPY_FEEDBACK.get(key, _COPY_FEEDBACK["READ_FAILED"]))
+            self._update_actions(self._runner.busy)
+
+        if not self._runner.submit(lambda: self._service.read_verified_script(code), succeeded, failed):
+            self._copying = False
+            self.feedback.setText("Script could not be read.")
+            self._update_actions(self._runner.busy)
+            return False
+        return True
 
     def refresh_list(self) -> bool:
         """Read once on the shared runner; preserve selection only after success."""
         if self._runner.busy or self._loading:
             return False
+        self._selection_generation += 1
         current = self.table.currentIndex()
         if current.isValid() and current.row() < len(self._entries):
             self._preferred_code = self._entries[current.row()].metadata.script_code
@@ -100,7 +158,7 @@ class ScriptWorkspace(QWidget):
         self.details.clear()
         self.empty_state.hide()
         self.feedback.setText("Loading scripts…")
-        self._update_refresh(True)
+        self._update_actions(True)
         if not self._runner.submit(self._service.list_scripts, self._loaded, self._failed):
             self._failed(None)
             return False
@@ -126,21 +184,29 @@ class ScriptWorkspace(QWidget):
             self.table.setCurrentIndex(self.model.index(row, 0))
             self._show_entry(self._entries[row])
         self._preferred_code = None
-        self._update_refresh(self._runner.busy)
+        self._update_actions(self._runner.busy)
 
     def _failed(self, _error: object) -> None:
         self._loading = False
         self._preferred_code = None
         self.feedback.setText("Could not load scripts. Select Refresh to try again.")
         self.empty_state.hide()
-        self._update_refresh(self._runner.busy)
+        self._update_actions(self._runner.busy)
 
     def _selection_changed(self, *_args: object) -> None:
+        self._selection_generation += 1
         row = self.table.currentIndex().row()
         if 0 <= row < len(self._entries):
             self._show_entry(self._entries[row])
         else:
             self.details.clear()
+        if self._copying:
+            self.feedback.clear()
+        self._update_actions(self._runner.busy)
+
+    def hideEvent(self, event) -> None:
+        self._selection_generation += 1
+        super().hideEvent(event)
 
     def _show_entry(self, entry: ScriptCatalogEntry) -> None:
         record = entry.metadata

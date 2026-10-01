@@ -30,14 +30,22 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
-Slice 042 — first production PowerShell diagnostic, implementation candidate on `feature/system-snapshot-script-s042`:
+Slice 043 — secure Script Copy to Clipboard, implementation candidate on `feature/secure-script-copy-s043` from `4d6901c01064af143abcca6292ff4abbea77129f`:
+
+- [x] Bind the production script to CRLF checkout bytes with a targeted `.gitattributes` rule and guarded checksum data migration 0009.
+- [x] Add one-read SHA-256 verification and strict UTF-8 decoding to ScriptService; keep enabled lookup and approved-path validation.
+- [x] Add asynchronous **Copy Script** with stale-selection protection, safe feedback and Qt clipboard ownership.
+- [x] Add isolated checkout, migration drift, service, GUI and integration coverage.
+- [x] Complete full regression, native Windows validation, documentation and exact candidate audit; independent read-only review is the next gate. Do not stage, commit, push, open a PR or merge in this phase.
+
+Slice 042 — first production PowerShell diagnostic, **CLOSED on main** through PR #43 at `4d6901c01064af143abcca6292ff4abbea77129f`. The following checklist records its historical candidate state:
 
 - [x] Add the local, read-only `Get-SystemSnapshot.ps1` and one enabled production registry row through data migration 0008.
 - [x] Keep F7Hub's Scripts workspace passive; standalone PowerShell validation belongs only in Tests/PowerShell.
 - [x] Cover parser, normal and injected failure results, migration conflict rollback, and catalog display with isolated fixtures.
 - [x] Correct unavailable drive measurements without substituting zero; clarify current Script Registry and Scripts GUI documentation; rename three current-migration test methods.
 - [x] Validate the corrected candidate: fresh PowerShell **6 PASS**, migration **3 PASS**, affected catalog/bootstrap **19 PASS**, and Database **388 PASS**. Retain applicable isolated GUI **163 PASS**, Integration **142 PASS**, and native Windows 1000×700 evidence after verifying their relevant inputs are unchanged; record the corrected manifest in the external Slice 042 checkpoint.
-- [ ] Independently rereview the exact corrected, unstaged candidate. No staging, commit, push, PR or integration in this phase.
+- [x] Independently rereview and integrate the corrected candidate through PR #43; the earlier pending-review instruction is historical.
 
 Slice 041 — read-only Scripts catalog, **CLOSED on main** through PR #42 at Slice 042 base `c4c87ded5e7e8b66ded4f844c1715567760c730b`. Its 689 tests are prior baseline evidence. The following checklist records its implementation-candidate state before review and merge:
 

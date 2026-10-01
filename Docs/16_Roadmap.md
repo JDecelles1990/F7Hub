@@ -9,7 +9,7 @@
 
 # 1. Purpose
 
-Slice 040 established the metadata-only Script Registry; Slice 041 added a read-only Scripts catalog page for enabled entries and manual refresh. Slice 042 adds one local Windows System Snapshot diagnostic and one production catalog row. Search, registration, approval, parameters, application execution and history remain future work. Slice 042 stops at independent read-only review before integration.
+Slice 040 established the metadata-only Script Registry; Slice 041 added a read-only Scripts catalog page for enabled entries and manual refresh. Slice 042 added one local Windows System Snapshot diagnostic and one production catalog row, then closed through PR #43. Slice 043 adds checksum-approved manual source copy to the Windows clipboard. Search, registration UI, parameters, application execution and history remain future work. Slice 043 stops at independent read-only review before integration.
 
 This document defines the development roadmap for F7Hub.
 
