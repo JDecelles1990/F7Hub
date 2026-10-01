@@ -8,6 +8,7 @@ Use with [review gates](../references/review-gates.md). Review does not repair o
 - Reviewer identity / independent from implementer:
 - Root / branch / HEAD / reviewed base SHA:
 - Exact candidate content identity, including untracked additions:
+- Candidate manifest / independently reproduced aggregate and per-path checks:
 - Approved paths / protected exclusions:
 - Initial tracked / staged / untracked state:
 - Approval/plan source and acceptance criteria:
@@ -20,16 +21,16 @@ Use with [review gates](../references/review-gates.md). Review does not repair o
 
 ## Independent Evidence
 
-| Area | Fresh command / inspection or retained evidence | Candidate binding and applicability | PASS / FAIL / NOT RUN / BLOCKED | Evidence location |
-|---|---|---|---|---|
-| Source and scope | | | | |
-| Tests and recovery paths | | | | |
-| Architecture | | | | |
-| Security | | | | |
-| Database integrity, if applicable | | | | |
-| Native Windows, if applicable | | | | |
-| Documentation | | | | |
-| Final Git/content identity | | | | |
+| Area | Command / inspection | Provenance: FRESH / RETAINED / NOT RUN / BLOCKED | Candidate binding and applicability | PASS / FAIL / NOT RUN / BLOCKED | Evidence location |
+|---|---|---|---|---|---|
+| Source and scope | | | | | |
+| Tests and recovery paths | | | | | |
+| Architecture | | | | | |
+| Security | | | | | |
+| Database integrity, if applicable | | | | | |
+| Native Windows, if applicable | | | | | |
+| Documentation | | | | | |
+| Final Git/content identity | | | | | |
 
 - Exact test counts / exit status / environment:
 - Retained evidence independently verified and reuse rationale:
@@ -37,6 +38,18 @@ Use with [review gates](../references/review-gates.md). Review does not repair o
 - Missing required evidence / limitations:
 - Final status compared with initial status; candidate unchanged:
 - Repository modifications by reviewer: none / report unexpected effects:
+- Changed trust boundaries / invariants / concurrency / security / integrity risks independently verified:
+- Transitively affected areas / baseline compatibility / regression / lifecycle compliance:
+- Durable suite and native result records inspected / limitations:
+- Correction review: old/new manifests, per-path drift matrix, suite-to-transitive-input dispositions verified:
+
+## Carry-forward notes
+
+Record None if empty. Blocking notes prevent the applicable approval gate; APPROVE WITH NOTES permits only nonblocking follow-ups.
+
+| Note / source | Blocking / nonblocking | Owner / future phase (or unknown) | Rationale | Work type: code / test / documentation / architecture / cleanup | Resolution status / evidence |
+|---|---|---|---|---|---|
+| | | | | | |
 
 ## Decision
 

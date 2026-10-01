@@ -5,7 +5,7 @@ description: Plan, implement, test, document, independently review, integrate, o
 
 # F7Hub Vertical Slice Delivery
 
-Version: 0.2
+Version: 0.3
 
 Own slice state, scope, transitions, evidence, continuity, recovery, reporting, and Git/GitHub safety. Preserve explicit user scope and authorization. This skill does not authorize external actions merely by being loaded.
 
@@ -81,6 +81,34 @@ Use the relevant report template; do not load every template by default:
 - [Recovery checkpoint](templates/recovery-checkpoint.md)
 
 Reports distinguish PASS, FAIL, NOT RUN, BLOCKED, and CHECKPOINTED. Test results use PASS / FAIL / NOT RUN / BLOCKED; CHECKPOINTED describes execution continuity, not a passing test. Uninspected facts are NOT VERIFIED.
+
+Evidence provenance is a separate axis: FRESH / RETAINED / NOT RUN / BLOCKED, defined in [review gates](references/review-gates.md). Candidate manifests, durable suite results, native records, and carry-forward notes are evidence metadata, never additional lifecycle states. READY_FOR_REVIEW MUST include a reproducible candidate manifest. Implementation ends there unless the user also requests independent review or integration; leave the candidate unstaged/uncommitted unless staging or committing is explicitly authorized.
+
+## Compact slice prompts
+
+Prompts SHOULD communicate the slice-specific delta; this skill owns baseline verification, Git safety, continuity, manifests, provenance, independence, authorization, reporting, and closure. Preserve specific invariants, risks, and acceptance criteria even when compressing a prompt. Recommended shape:
+
+```text
+@IMPLEMENT @TEST @DOCUMENT
+Use /vertical-slice-delivery.
+
+OBJECTIVE
+Implement approved Slice NNN — <name>.
+
+BASE
+<expected base or approved baseline; approved plan location>
+
+SLICE-SPECIFIC INVARIANTS
+<boundaries, risks, constraints, dependencies>
+
+OUT OF SCOPE
+<explicit exclusions>
+
+ACCEPTANCE CRITERIA
+<observable behavior and slice-specific validation>
+
+Stop at READY_FOR_REVIEW.
+```
 
 ## Evolution
 

@@ -19,6 +19,8 @@ Use with [lifecycle](../references/lifecycle.md). PLAN is inspection-only. Fill 
 - Protected unrelated paths:
 - Governance and actual current Roadmap / Todo / CURRENT_STATE / ChangeLog inspected:
 - Relevant source/tests and deferred adjacent work inspected:
+- Immediately preceding integration/closure report inspected (or unavailable):
+- Unresolved carry-forward notes / source / select, defer, or escalate rationale (inputs, not automatic scope):
 - STALE HANDOFF METADATA, if material: documented claim / verified live state / disposition:
 - Workspace topology when nontrivial: canonical workspace / feature worktree and branch / protected or recovery branch / remote main / current candidate workspace:
 

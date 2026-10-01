@@ -38,6 +38,7 @@ Use [token continuity](../references/token-continuity.md). Save under the enviro
 - Documentation:
 - Out of scope:
 - Approved plan / reviewed candidate identity:
+- Candidate manifest / aggregate recipe / per-path identity comparison:
 - Authorization already granted, source and exact operation limits:
 - Architectural decisions and evidence:
 
@@ -56,7 +57,10 @@ Use [token continuity](../references/token-continuity.md). Save under the enviro
 - NOT RUN:
 - BLOCKED:
 - Commands / environment / candidate identity / counts / exit status:
-- Fresh versus retained evidence:
+- Provenance: FRESH / RETAINED / NOT RUN / BLOCKED, separate from execution outcome:
+- Durable suite result artifacts / logs / completion evidence to inspect before expensive reruns:
+- Native result record / assertions / readiness / capture inventory / exit-code limitations:
+- Recovery validation category: design-tested/simulated or operationally exercised, with originating evidence:
 
 ## Documentation
 
@@ -69,6 +73,7 @@ Use [token continuity](../references/token-continuity.md). Save under the enviro
 - Status / decision / reviewer:
 - Findings:
 - Approved base / scope / content binding, if applicable:
+- Review/integration/closure report locations and unresolved carry-forward notes (severity, owner/phase, rationale, work type, status):
 
 ## Git / GitHub
 
@@ -104,9 +109,9 @@ Enter RECOVERING before dependent work:
 
 1. Verify root, branch and HEAD.
 2. Fetch/verify origin/main when relevant; inspect status, staged diff and untracked files.
-3. Verify known commits and pending/running operations.
+3. Verify candidate manifest/identities, durable suite result artifacts/logs before expensive reruns, known commits and pending/running operations.
 4. Verify remote branch, existing PR and merge state where applicable before any repeated mutation.
-5. Compare actual evidence with this checkpoint; classify each material claim below.
+5. Inspect review/integration/closure reports and unresolved carry-forward notes; compare actual evidence with this checkpoint and classify each material claim below.
 6. Reconcile scope, reviewed content and existing authorization. Material conflicts mean BLOCKED or INTEGRATION_BLOCKED.
 7. Resume the SAME interrupted phase only after reconciliation. Record any subsequent justified lifecycle transition separately.
 

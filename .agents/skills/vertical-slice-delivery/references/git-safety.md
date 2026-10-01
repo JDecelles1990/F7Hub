@@ -16,6 +16,8 @@ Independent approval records reviewed base SHA, branch/HEAD, exact allowed paths
 
 Integration authorization is distinct from review approval. Respect authorization already granted, but keep it bounded to the same slice/scope/candidate/operation. Post-review candidate changes invalidate approval for affected content; do not integrate them without renewed review and relevant validation. Even documentation-only changes require review of the delta; unchanged implementation evidence may be retained under [review gates](review-gates.md).
 
+MUST compare the READY_FOR_REVIEW candidate manifest with actual working/index/commit content at integration gates. Tracking status may legitimately change when untracked additions are staged/committed; record that transition and compare reviewed content, additions/deletions, modes, and scope rather than interpreting it as automatic content drift. Use the manifest's documented normalization and aggregate recipe; raw CRLF/LF byte differences alone do not prove a changed Git-normalized candidate. Preserve reviewed raw bytes when exact-byte behavior requires them. Unexplained aggregate or per-path mismatch blocks integration.
+
 ## Integration sequence
 
 Check [token pressure](token-continuity.md) before each atomic operation. Only APPROVED and authorized work may proceed.

@@ -9,6 +9,7 @@ Use with [Git safety](../references/git-safety.md). Report verified actions only
 - Lifecycle state / interrupted phase:
 - Root / branch / HEAD:
 - Reviewed base / candidate identity / review decision and source:
+- Candidate manifest / reproduced content identity / justified tracking-status transitions:
 - Exact approved paths / protected paths:
 - Integration authorization source and operation limits:
 - Initial tracked / staged / untracked status:
@@ -41,6 +42,8 @@ Use with [Git safety](../references/git-safety.md). Report verified actions only
 ## Validation and Recovery
 
 - Retained test/review evidence and unchanged-content justification:
+- Per-validation provenance: FRESH / RETAINED / NOT RUN / BLOCKED, separate from result:
+- RETAINED originating command / artifact / identity / transitive inputs / environment / rationale:
 - Fresh validation required and executed:
 - Definitely completed actions:
 - Definitely not completed actions:
@@ -58,3 +61,12 @@ Use with [Git safety](../references/git-safety.md). Report verified actions only
 - CLOSED gate satisfied or outstanding checks:
 - Next safe action:
 - Deferred next-slice candidates (planning requires a new instruction):
+- STALE HANDOFF METADATA claim / verified fact / source; closure authority pending authorized synchronization:
+
+## Carry-forward notes
+
+Preserve unresolved review notes; record None if empty. Notes are next-PLAN inputs, not automatic scope. Blocking notes prevent their applicable gate.
+
+| Note / source | Blocking / nonblocking | Owner / future phase (or unknown) | Rationale | Work type: code / test / documentation / architecture / cleanup | Resolution status / evidence |
+|---|---|---|---|---|---|
+| | | | | | |

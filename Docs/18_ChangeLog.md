@@ -47,6 +47,12 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-10-01 — Vertical-slice-delivery skill v0.3
+
+Updated the existing delivery skill and report templates with reproducible candidate manifests, durable long-suite and native GUI result records, explicit evidence provenance, correction drift matrices, carry-forward notes, stale handoff authority, compact prompts, risk-focused review, and separate authoritative-mutation versus refresh outcomes. Recovery now checks durable results and running operations before repeating expensive validation; PLAN consumes the preceding integration/closure report and unresolved notes without adopting them automatically. The 17 lifecycle states and readiness/approval/integration/closure distinctions are preserved. This is skill maintenance; Slice 045 and application behavior are unchanged. Structural and behavioral validation evidence is recorded in the external Skill-v0.3 delivery reports; this entry does not claim integration or real token-exhaustion testing.
+
+---
+
 # 2026-10-01 — Slice 044: Script registration and local management
 
 Added **Manage scripts…** with scoped disabled-row inspection, registration of existing readable approved-folder `.ps1` references and guarded enable/disable. New rows retain table defaults and null category/checksum; writes reload before commit, reject stale state and preserve integrity approval metadata. Shared-runner dialogs prevent duplicate writes, retain failed registration input, ignore dismissed reads and distinguish saved changes from failed refreshes. Copy Script keeps its existing service integrity boundary and clipboard protection. No schema, migration, dependency or PowerShell source change was added. Clarified reviewed checksum metadata versus approval UI/workflow in Database architecture.

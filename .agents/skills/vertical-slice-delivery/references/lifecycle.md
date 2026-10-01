@@ -14,7 +14,7 @@ Maintain a compact record: slice identity, state, interrupted phase if any, base
 | PLANNED | IMPLEMENTING | Approved plan, current baseline gate, branch and exact scope. |
 | IMPLEMENTING | TESTING | Bounded implementation and self-review complete enough to validate; exact candidate recorded. |
 | TESTING | DOCUMENTING | All required tests PASS for the candidate; commands/results and applicability recorded. |
-| DOCUMENTING | READY_FOR_REVIEW | Affected docs synchronized, required evidence complete, scope audited. |
+| DOCUMENTING | READY_FOR_REVIEW | Affected docs synchronized, required evidence complete, scope audited, reproducible candidate manifest recorded. |
 | READY_FOR_REVIEW | REVIEWING | Independent reviewer and exact reviewed candidate identified. |
 | REVIEWING | CHANGES_REQUIRED | Review decision CHANGES REQUIRED with actionable findings. |
 | CHANGES_REQUIRED | IMPLEMENTING | Findings mapped to bounded fixes within approved scope; escalation resolved if needed. |
@@ -40,13 +40,19 @@ Any active phase may enter BLOCKED, CHECKPOINTED, or RECOVERING when supported b
 ## PLAN: inspection only
 
 1. Verify root, branch/main, HEAD, index, tracked and untracked state; fetch origin and verify origin/main under [Git safety](git-safety.md). Fetch is the permitted metadata refresh, not permission to switch branches or edit.
-2. Read actual current Roadmap, Todo, CURRENT_STATE, ChangeLog, relevant canonical owners, source/tests, and deferred adjacent work. Live repository/remote evidence determines current Git state; committed handoff prose may be historical. Label a material disagreement STALE HANDOFF METADATA, recording both the claim and verified state. Do not silently repair it during read-only PLAN, REVIEW, or RECOVERING.
+2. Read actual current Roadmap, Todo, CURRENT_STATE/checkpoint, ChangeLog, relevant canonical owners, source/tests, and deferred adjacent work. Where available, MUST inspect the immediately preceding integration/closure report and unresolved carry-forward notes before defining scope. Notes are planning inputs, not automatic scope; explicitly select, defer, or escalate each relevant note with rationale.
 3. SEARCH -> IDENTIFY -> REUSE -> EXTEND -> CREATE ONLY IF NECESSARY. Compare candidate slices and select the smallest correct bounded one supported by current evidence.
 4. Produce [slice plan](../templates/slice-plan.md): report design readiness and current implementation-baseline readiness separately, with objective, scope/exclusions, acceptance criteria, validation, likely files, architecture/database impact, branch and risks. A READY design may have a BLOCKED FOR IMPLEMENTATION checkout. Do not implement or treat design readiness as approval.
 
 ## IMPLEMENT
 
 Require approved plan; recheck baseline before edits. Establish one feature branch only after gates pass, normally in C:\Dev\F7Hub. Extra worktrees require an explicit recovery, integration, isolation, or parallel-development reason; record it. Keep the approved objective bounded, preserve unrelated work, and avoid unrelated refactors. Unexpected architectural expansion enters BLOCKED for explicit review.
+
+### Authoritative mutation and subsequent refresh
+
+For database write -> GUI refresh, filesystem write -> reconstruction, or API mutation -> local re-query, MUST record OPERATION OUTCOME (authoritative mutation succeeded, failed, or remains uncertain) separately from POST-OPERATION OUTCOME (refresh/reconstruction/display succeeded, failed, or was not attempted). A committed mutation followed by failed refresh MUST NOT be reported as a failed mutation. Define transaction/commit boundaries, accurate user/report messaging, and a safe refresh-only recovery path. SHOULD assess idempotency and duplicate prevention before retrying. When mutation outcome is uncertain, verify authoritative state before repeating it; refreshing does not authorize a second write.
+
+Implementation reports MUST identify new/changed trust boundaries and invariants, including applicable concurrency/transaction, filesystem/process/security, and data-integrity risks. Record unaffected or inapplicable surfaces with rationale so review can target changed and transitively affected behavior.
 
 ## TEST
 
@@ -67,3 +73,9 @@ Apply [review gates](review-gates.md). Review is independent and read-only. CHAN
 Only APPROVED work, explicitly authorized for integration, enters [controlled Git integration](git-safety.md). Use the [integration report](../templates/integration-report.md). Confirm merge and feature ancestry, origin/main, safe local-main synchronization, final scope and preserved unrelated work. Normally finish on main with HEAD == origin/main and a clean tree. If unrelated work prevents cleanliness, preserve it and report the verified exception; never clean to satisfy a target. Unresolved synchronization or content verification prevents CLOSED.
 
 Closure records actual validation, remaining limitations and deferred work. A newly requested next-slice plan begins from current repository evidence; never automatically start its planning or implementation.
+
+## Handoff authority and carry-forward notes
+
+Live verified Git state MUST govern branch/HEAD/index/worktree facts. Verified review/integration/closure artifacts may establish completed lifecycle facts; check their candidate/base and actual completion evidence before accepting them. If CURRENT_STATE, Todo, checkpoints or similar metadata disagree, label STALE HANDOFF METADATA with claim, verified fact, and source. MUST NOT roll back live state to make old prose true, or synchronize stale metadata unless the current task authorizes that edit. After closure, the verified closure report may temporarily be the authoritative lifecycle handoff until canonical documentation is synchronized.
+
+Review and integration/closure reports MUST contain `Carry-forward notes`, explicitly `None` if empty. Each note records blocking/nonblocking, rationale, code/test/documentation/architecture/cleanup work type, owner/future phase if known (otherwise unknown), and resolution status/evidence. A blocking note prevents its applicable gate; deferral cannot disguise a required correction. Preserve unresolved notes and their source across correction, integration, closure, and recovery; resolve explicitly rather than silently dropping them. Next-slice PLAN inspects them without automatically adopting them.
