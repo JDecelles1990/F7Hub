@@ -68,16 +68,33 @@ class ScriptRepository:
     def __init__(self, database_path: str | Path) -> None:
         self._database_path = database_path
 
-    def list_scripts(self, *, include_disabled: bool = False) -> tuple[ScriptRecord, ...]:
-        """List enabled scripts, or explicitly include disabled management rows."""
+    def list_scripts(
+        self, *, include_disabled: bool = False, text_query: str | None = None,
+    ) -> tuple[ScriptRecord, ...]:
+        """List scoped metadata, optionally matching a literal text substring."""
         if not isinstance(include_disabled, bool):
             raise ValueError("include_disabled must be a boolean.")
+        if text_query is not None:
+            if not isinstance(text_query, str) or "\x00" in text_query:
+                raise ValueError("text_query must be text without NUL characters or None.")
+            text_query = text_query.strip() or None
+        predicate = ""
+        parameters: tuple[object, ...] = (int(include_disabled),)
+        if text_query is not None:
+            literal = text_query.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+            pattern = f"%{literal}%"
+            predicate = (
+                " AND (s.name LIKE ? ESCAPE '\\' OR s.script_code LIKE ? ESCAPE '\\'"
+                " OR s.description LIKE ? ESCAPE '\\')"
+            )
+            parameters += (pattern, pattern, pattern)
         with database_connection(self._database_path) as connection:
             rows = connection.execute(
                 "SELECT " + _COLUMNS + _FROM
                 + " AND (? = 1 OR s.is_enabled = 1)"
+                + predicate
                 + " ORDER BY s.name COLLATE NOCASE, s.script_code COLLATE NOCASE, s.script_id",
-                (int(include_disabled),),
+                parameters,
             ).fetchall()
         return tuple(ScriptRecord(**dict(row)) for row in rows)
 

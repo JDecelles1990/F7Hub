@@ -316,5 +316,99 @@ class ScriptCatalogFlowTests(unittest.TestCase):
         self.assertEqual(workspace.feedback.text(), "Script file is no longer available.")
 
 
+    def test_search_navigation_reconstruction_and_persisted_metadata_no_writes(self):
+        self.insert_script("code-needle")
+        self.insert_script("name-only")
+        self.insert_script("description-only")
+        self.insert_script("unrelated")
+        self.insert_script("disabled-needle", enabled=0)
+        with database_connection(self.database) as connection:
+            connection.execute("UPDATE scripts SET name='Needle name', description=NULL WHERE script_code='name-only'")
+            connection.execute("UPDATE scripts SET description='Needle purpose' WHERE script_code='description-only'")
+            before = tuple(connection.iterdump())
+        workspace = self.window.script_workspace
+        self.window.show_scripts()
+        self.wait_idle()
+        workspace.search_input.setText("needle")
+        workspace.search_button.click()
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 3)
+        workspace.search_input.setText("unrelated")
+        self.window.show_tickets()
+        self.wait_idle()
+        self.window.show_scripts()
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 3)
+        self.assertEqual(workspace.search_input.text(), "unrelated")
+        with database_connection(self.database) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+        self.window.close()
+        self.window.deleteLater()
+        self.application.processEvents()
+        self.context = bootstrap_application(project_root=self.root, database_path=self.database)
+        self.window = self.context.main_window
+        self.window.show()
+        self.window.show_scripts()
+        self.wait_idle()
+        self.assertEqual(self.window.script_workspace.search_input.text(), "")
+        self.assertEqual(self.window.script_workspace.model.rowCount(), 4)
+
+    def test_filtered_management_write_success_and_failed_refresh_retry_without_rewrite(self):
+        folder = self.root / "PowerShell" / "Diagnostics"
+        folder.mkdir(parents=True)
+        (folder / "needle.ps1").write_text("# harmless fixture", encoding="utf-8")
+        registered = self.context.script_service.register_script(
+            script_code="needle", name="Needle", relative_path="PowerShell/Diagnostics/needle.ps1",
+            script_type="DIAGNOSTIC", risk_level="LOW", privilege_level="STANDARD_USER")
+        self.insert_script("other")
+        self.window.show_scripts()
+        self.wait_idle()
+        workspace = self.window.script_workspace
+        workspace.search_input.setText("needle")
+        workspace.search_scripts()
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 0)
+        manager = workspace.open_management()
+        self.wait_idle()
+        self.assertEqual(manager.model.rowCount(), 2)
+        selected = next(i for i, item in enumerate(manager._entries)
+                        if item.metadata.script_id == registered.script_id)
+        manager.table.selectRow(selected)
+        with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Yes):
+            manager.toggle_selected()
+        self.wait_idle()
+        manager.reject()
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 1)
+        workspace.search_input.setText("unapplied draft")
+        manager = workspace.open_management()
+        self.wait_idle()
+        manager.table.selectRow(next(i for i, item in enumerate(manager._entries)
+                                    if item.metadata.script_id == registered.script_id))
+        service = self.context.script_service
+        with patch.object(service, "set_script_enabled", wraps=service.set_script_enabled) as write:
+            with patch.object(service, "list_registered_scripts", side_effect=RuntimeError("private refresh failure")):
+                manager.toggle_selected()
+                self.wait_idle()
+                self.assertIn("disabled", manager.feedback.text().lower())
+                self.assertIn("Could not refresh", manager.feedback.text())
+                self.assertNotIn("private", manager.feedback.text())
+            with patch.object(service, "list_scripts", side_effect=RuntimeError("private catalog failure")):
+                manager.reject()
+                self.wait_idle()
+            self.assertEqual(workspace.model.rowCount(), 0)
+            self.assertIn("Select Refresh", workspace.feedback.text())
+            self.assertEqual(workspace.search_input.text(), "unapplied draft")
+            workspace.refresh_list()
+            self.wait_idle()
+            self.assertEqual(workspace.empty_state.text(), "No scripts match your search.")
+            self.assertEqual(write.call_count, 1)
+            with database_connection(self.database) as connection:
+                record = connection.execute("SELECT is_enabled, checksum_sha256 FROM scripts WHERE script_id=?",
+                                            (registered.script_id,)).fetchone()
+                self.assertEqual(tuple(record), (0, None))
+
 if __name__ == "__main__":
     unittest.main()

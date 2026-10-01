@@ -30,6 +30,18 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
+Slice 045 — Manual Scripts Catalog Text Search, on `feature/script-catalog-search-s045` from `66f6a3d3da3c08242fcf698707bd233ff12e84f6`:
+
+- [x] Extend scoped repository/service reads with optional literal name/code/description query; reject type/NUL before access and preserve unfiltered defaults/management.
+- [x] Add Search/Enter/Clear with draft/applied semantics, captured worker query, loading/copy guards, selection reconciliation, truthful empty/error recovery and filtered management reload.
+- [x] Validate search/isolation/no-write/integrity, async/copy safety, reconstruction and existing management regressions. Fresh Database **418 PASS**, GUI **178 PASS**, Integration **148 PASS** (744 full regression total), all exit 0 with no failures, errors or skips. Focused **32 PASS** and affected **46 PASS** overlap the full suites. Native Windows **PASS** at 1000×700 with observable worker/callback idle; six captures inspected.
+- [x] Synchronize affected Slice 045 behavior documents; broader FR-SCRIPT-004 dimensions remain deferred.
+- [ ] Independent read-only review of the exact unstaged/uncommitted candidate. No Slice 045 staging, commit, push, PR or integration authorization.
+
+### Prior Slice 044 handoff snapshot
+
+Slice 044 is CLOSED through PR #45 at `5fe1ed73d9c65c4d1b88defd0f43a3d1b91b94c0`; the historical candidate checklist below is retained. Broad stale handoff synchronization remains deferred.
+
 Slice 044 — script registration and local management, implementation candidate on `feature/script-registration-admin-s044` from `b4d46ef7af6936c5ef3c34686040691222115f31`:
 
 - [x] Reuse scoped disabled-row inspection and the existing path validator; add atomic default-disabled registration and guarded visibility writes without checksum approval or a schema change.

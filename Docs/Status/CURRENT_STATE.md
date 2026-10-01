@@ -1,5 +1,19 @@
 # F7Hub Current State
 
+## Slice 045 — Manual Scripts Catalog Text Search
+
+Last verified: 2026-10-01 (America/Toronto). Current candidate on `feature/script-catalog-search-s045`; HEAD/base `66f6a3d3da3c08242fcf698707bd233ff12e84f6`. Local main includes the approved v0.3 maintenance commit; remote main remained at Slice 044 closure `5fe1ed73d9c65c4d1b88defd0f43a3d1b91b94c0` at implementation entry. No remote mutation was authorized/performed for this slice.
+
+Status: **PASS — READY_FOR_REVIEW**. Manual Search/Enter/Clear matches enabled scoped name/code/description metadata by escaped bound literal substring. Query validation rejects type/NUL before database access. Draft/applied state, refresh/navigation/management reload, selection, worker/callback guards, safe failures and existing verified-copy behavior are covered. No schema, migration, source-content search, execution, approval or dependency change.
+
+Fresh Database **418 PASS**, GUI **178 PASS**, Integration **148 PASS** (744 full regression total), all exit 0 with no failures, errors or skips. Focused **32 PASS** and affected **46 PASS** overlap the full suites. Native Windows **PASS** at 1000×700 with observable worker/callback idle; six captures inspected. Search query-only/dump and integrity/FK evidence passed on isolated data. Native delay/refresh-failure fixtures were injected service failures, not native ACL evidence; the Windows GUI, keyboard and clipboard workflow was real. Prior clipboard MIME data was restored and temporary fixtures removed. Independent implementation review is pending.
+
+Approved plan recovered from this conversation and durably saved as `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-045\approved-plan.md`. Candidate manifests, suite results/logs, native harness/result and six inspected captures are in the same external directory. Final manifest/report identify exact candidate content; test-era manifests differ only by documented owner-document edits with unchanged relevant runtime inputs. All candidate files are unstaged/uncommitted; index empty. Protected recovery ref and four unrelated worktrees are preserved. Next gate: independent read-only review.
+
+### Prior Slice 044 handoff snapshot (historical)
+
+The verified closure report establishes Slice 044 CLOSED through PR #45. Its retained pending-review prose below is STALE HANDOFF METADATA. Broad historical synchronization remains DEFERRED.
+
 Last verified: 2026-10-01 (America/Toronto).
 
 Current candidate: **Slice 044 — Script registration and local management**, on `feature/script-registration-admin-s044` from `b4d46ef7af6936c5ef3c34686040691222115f31`. Freshly fetched origin/main and clean local main matched this approved base before branching, with an empty index and no untracked files. Protected recovery ref `recovery/pre-s024-protected-work` remained `002a494735f30e1488f61e21ea98740ae6371d4d`; four unrelated worktree HEADs were preserved. Slice 043 is merged through PR #44; its pending-review text below is **STALE HANDOFF METADATA**, retained as a historical snapshot.
