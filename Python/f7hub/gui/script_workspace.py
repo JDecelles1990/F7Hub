@@ -5,7 +5,7 @@ from __future__ import annotations
 from PySide6.QtCore import QSignalBlocker, Qt
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
-    QAbstractItemView, QApplication, QHBoxLayout, QHeaderView, QLabel, QPlainTextEdit,
+    QAbstractItemView, QApplication, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPlainTextEdit,
     QPushButton, QSplitter, QTableView, QVBoxLayout, QWidget,
 )
 
@@ -14,7 +14,7 @@ from f7hub.gui.script_management_dialog import ScriptManagementDialog
 from f7hub.services.script_service import (
     AVAILABLE, INACCESSIBLE, INVALID_REFERENCE, MISSING,
     ScriptCatalogEntry, ScriptService,
-    ScriptCopyError,
+    ScriptCopyError, ScriptValidationError,
 )
 
 
@@ -43,6 +43,7 @@ class ScriptWorkspace(QWidget):
         self._entries: tuple[ScriptCatalogEntry, ...] = ()
         self._loading = False
         self._copying = False
+        self._text_query: str | None = None
         self._selection_generation = 0
         self._preferred_code: str | None = None
         self._management_dialog = None
@@ -63,6 +64,19 @@ class ScriptWorkspace(QWidget):
         heading_row.addWidget(self.copy_button)
         heading_row.addWidget(self.manage_button)
         heading_row.addWidget(self.refresh_button)
+
+        self.search_input = QLineEdit(self)
+        self.search_input.setAccessibleName("Search script names, codes and descriptions")
+        self.search_input.setPlaceholderText("Search names, codes and descriptions")
+        self.search_input.returnPressed.connect(self.search_scripts)
+        self.search_button = QPushButton("Search", self)
+        self.search_button.clicked.connect(self.search_scripts)
+        self.clear_search_button = QPushButton("Clear", self)
+        self.clear_search_button.clicked.connect(self.clear_search)
+        search_row = QHBoxLayout()
+        search_row.addWidget(self.search_input, 1)
+        search_row.addWidget(self.search_button)
+        search_row.addWidget(self.clear_search_button)
 
         self.feedback = QLabel("", self)
         self.feedback.setTextFormat(Qt.TextFormat.PlainText)
@@ -100,6 +114,7 @@ class ScriptWorkspace(QWidget):
 
         layout = QVBoxLayout(self)
         layout.addLayout(heading_row)
+        layout.addLayout(search_row)
         layout.addWidget(self.feedback)
         layout.addWidget(splitter, 1)
         self._runner.busy_changed.connect(self._update_actions)
@@ -107,14 +122,17 @@ class ScriptWorkspace(QWidget):
         self._update_actions(self._runner.busy)
 
     def _update_actions(self, busy: bool) -> None:
-        self.manage_button.setEnabled(not busy and not self._loading and self._management_dialog is None)
-        self.refresh_button.setEnabled(not busy and not self._loading)
+        idle = not busy and not self._loading and not self._copying
+        self.manage_button.setEnabled(idle and self._management_dialog is None)
+        self.refresh_button.setEnabled(idle)
+        for control in (self.search_input, self.search_button, self.clear_search_button):
+            control.setEnabled(idle)
         row = self.table.currentIndex().row()
         available = 0 <= row < len(self._entries) and self._entries[row].file_status == AVAILABLE
         self.copy_button.setEnabled(available and not busy and not self._loading and not self._copying)
 
     def open_management(self):
-        if self._runner.busy or self._loading or self._management_dialog is not None:
+        if self._runner.busy or self._loading or self._copying or self._management_dialog is not None:
             return None
         # Parent outside MainWindow.pages, which is disabled during worker calls.
         dialog = ScriptManagementDialog(self._service, self._runner, self.window())
@@ -177,10 +195,24 @@ class ScriptWorkspace(QWidget):
             return False
         return True
 
+    def search_scripts(self) -> bool:
+        if self._runner.busy or self._loading or self._copying:
+            return False
+        self._text_query = self.search_input.text().strip() or None
+        return self.refresh_list()
+
+    def clear_search(self) -> bool:
+        if self._runner.busy or self._loading or self._copying:
+            return False
+        self.search_input.clear()
+        self._text_query = None
+        return self.refresh_list()
+
     def refresh_list(self) -> bool:
         """Read once on the shared runner; preserve selection only after success."""
-        if self._runner.busy or self._loading:
+        if self._runner.busy or self._loading or self._copying:
             return False
+        query = self._text_query
         self._selection_generation += 1
         current = self.table.currentIndex()
         if current.isValid() and current.row() < len(self._entries):
@@ -192,12 +224,13 @@ class ScriptWorkspace(QWidget):
         self.empty_state.hide()
         self.feedback.setText("Loading scripts…")
         self._update_actions(True)
-        if not self._runner.submit(self._service.list_scripts, self._loaded, self._failed):
+        if not self._runner.submit(lambda: self._service.list_scripts(text_query=query),
+                                   lambda entries: self._loaded(entries, query), self._failed):
             self._failed(None)
             return False
         return True
 
-    def _loaded(self, entries: tuple[ScriptCatalogEntry, ...]) -> None:
+    def _loaded(self, entries: tuple[ScriptCatalogEntry, ...], query: str | None) -> None:
         self._loading = False
         self._entries = tuple(entries)
         with QSignalBlocker(self.table.selectionModel()):
@@ -209,6 +242,8 @@ class ScriptWorkspace(QWidget):
                     QStandardItem(_status_text(entry.file_status)),
                 ])
         self.feedback.clear()
+        self.empty_state.setText("No scripts match your search." if query is not None
+                                 else "No scripts available.")
         self.empty_state.setVisible(not self._entries)
         if self._entries:
             row = next((index for index, entry in enumerate(self._entries)
@@ -219,10 +254,13 @@ class ScriptWorkspace(QWidget):
         self._preferred_code = None
         self._update_actions(self._runner.busy)
 
-    def _failed(self, _error: object) -> None:
+    def _failed(self, error: object) -> None:
         self._loading = False
         self._preferred_code = None
-        self.feedback.setText("Could not load scripts. Select Refresh to try again.")
+        if isinstance(error, ScriptValidationError):
+            self.feedback.setText("Search text is invalid. Edit it and select Search, or select Clear.")
+        else:
+            self.feedback.setText("Could not load scripts. Select Refresh to try again.")
         self.empty_state.hide()
         self._update_actions(self._runner.busy)
 

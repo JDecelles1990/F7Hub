@@ -72,7 +72,7 @@ class RecordingScriptService:
         self.calls = 0
         self.gate = None
 
-    def list_scripts(self):
+    def list_scripts(self, *, text_query=None):
         self.calls += 1
         if self.gate:
             self.gate.wait(3)

@@ -8,6 +8,14 @@
 
 ---
 
+## Search enabled scripts — Slice 045
+
+Open **Scripts**, enter part of a name, code or description, then select **Search** or press Enter. Select a result to inspect its metadata. **Clear** removes the search and restores the enabled catalog. A filtered empty result says **No scripts match your search.**; an unfiltered empty catalog says **No scripts available.** Management remains available with zero matches.
+
+Changing text alone does not apply it. Refresh and returning to Scripts re-query the applied search and retain draft text. A selected script stays selected if it still matches; otherwise the first match is selected, or details and Copy Script are cleared. Invalid search text requires edited Search or Clear; a failed read clears stale results and offers Refresh while retaining query state. Closing a changed manager reloads the same search. A saved management change followed by a failed refresh remains saved; retrying the read does not repeat the write. Copy Script retains current eligibility/checksum and clipboard safeguards.
+
+---
+
 ## Register and manage a local script — Slice 044
 
 Open **Scripts → Manage scripts… → Register script…**. Enter code, name and a relative path to an existing readable `.ps1` below PowerShell/Diagnostics, Reports or Modules. Choose type, risk and privilege; description and version are optional. Register saves metadata with the displayed defaults and selects the new disabled registration. Cancel writes nothing; failures preserve entered information.

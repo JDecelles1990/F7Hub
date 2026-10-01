@@ -8,6 +8,14 @@
 
 ---
 
+## Manual Scripts search controls — Slice 045
+
+Scripts adds a dedicated accessible search row: one field, **Search** and **Clear**. Enter applies the field. Draft text and the applied query remain separate; Refresh/navigation/management reload preserve both their meanings. Query state is local to the current workspace and resets on reconstruction. The table, details and existing heading actions are reused.
+
+Search, Clear and Refresh are guarded during shared-runner activity and local loading/copying, including idle-before-callback completion. Each request captures its applied query. Loading/failure clears stale rows and details; validation feedback offers edited Search/Clear, read failure offers Refresh. Filtered/unfiltered empty messages differ; the manager stays accessible with no matches. Selection reconciliation and late-copy rejection are preserved. Fresh native Windows validation passed at 1000×700 after observable idle; six captures showed readable controls, feedback and metadata without observed control clipping or overlap. The long query scrolls inside its field.
+
+---
+
 ## Local script management — Slice 044
 
 The Scripts heading row adds **Manage scripts…**, opening a modal owned by MainWindow outside its disabled pages hierarchy. Its table shows Name, Code, Enabled and File status for scoped registrations, with a scrollable plain-text metadata panel and Register script…, Refresh, Enable/Disable and Close actions. Selection and successful refresh retain stable script IDs. Registration uses a separate form requiring code, name, relative path, type, risk and privilege; description/version are optional. Classification choices require an explicit selection. Cancel is the default action and writes nothing.

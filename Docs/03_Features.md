@@ -8,6 +8,14 @@
 
 ---
 
+## Manual Scripts catalog search — Slice 045
+
+The enabled Scripts catalog now supports explicit **Search** / Enter and **Clear** across name, code and description. Matching is a literal substring with SQLite's default ASCII-insensitive behavior; percent, underscore and backslash are literal characters. Empty or whitespace-only input returns the unfiltered catalog. Disabled and wrong-category-scope registrations remain excluded, with the existing stable order and one row per script.
+
+Typing leaves results unchanged. Refresh, navigation and management-close reload use the applied query while preserving unapplied draft text; workspace reconstruction starts unfiltered. Search adds no database writes, content reads, approval or execution. This is a bounded increment toward FR-SCRIPT-004 / FEAT-SCRIPT-004; category, tags, technology, privilege and other structured discovery remain deferred.
+
+---
+
 ## Script registration and local management — Slice 044
 
 **Manage scripts…** lists valid SCRIPT-scope registrations, including disabled rows. The technician can register an existing readable `.ps1` in an approved PowerShell folder and change catalog visibility. New metadata uses PowerShell 7, a 120-second timeout, structured output required, disabled state and null category/checksum. Enabling requires current file availability and a current update token; it does not approve content. Copy Script still rejects missing approval through the existing service boundary. Metadata editing, deletion, checksum approval and execution remain deferred.
@@ -709,7 +717,7 @@ AI must not be required for core local search.
 
 ## FEAT-SCRIPT-001 — Script Registry
 
-Slice 040 established the database-backed PowerShell metadata registry with enabled-only catalog reads and stable-code lookup. Its production catalog initially started empty; Slice 042 adds one enabled production diagnostic row. Slice 041 adds an unfiltered user-facing Scripts catalog; Slice 044 adds default-disabled registration and guarded enable/disable writes. Search remains planned.
+Slice 040 established the database-backed PowerShell metadata registry with enabled-only catalog reads and stable-code lookup. Its production catalog initially started empty; Slice 042 adds one enabled production diagnostic row. Slice 041 adds an unfiltered user-facing Scripts catalog; Slice 044 adds default-disabled registration and guarded enable/disable writes. Slice 045 adds enabled-catalog name/code/description search; other discovery dimensions remain planned.
 
 Priority: P1  
 Requirements: `FR-SCRIPT-001`, `FR-SCRIPT-002`

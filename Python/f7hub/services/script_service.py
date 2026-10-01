@@ -34,7 +34,7 @@ PRIVILEGE_LEVELS = (
 
 
 class ScriptValidationError(ValueError):
-    """Invalid registration input; safe to display."""
+    """Invalid script input; safe to display."""
 
 
 class ScriptWriteError(RuntimeError):
@@ -68,9 +68,13 @@ class ScriptService:
         self._repository = repository
         self._project_root = Path(project_root)
 
-    def list_scripts(self) -> tuple[ScriptCatalogEntry, ...]:
+    def list_scripts(self, *, text_query: str | None = None) -> tuple[ScriptCatalogEntry, ...]:
+        if text_query is not None and (
+                not isinstance(text_query, str) or "\x00" in text_query):
+            raise ScriptValidationError("Search text must be text without NUL characters.")
+        query = _optional_text(text_query, "Search text")
         try:
-            records = self._repository.list_scripts()
+            records = self._repository.list_scripts(text_query=query)
         except (sqlite3.Error, OSError, RuntimeError) as error:
             raise ScriptReadError("Could not load the script catalog.") from error
         return tuple(self._entry(record) for record in records)

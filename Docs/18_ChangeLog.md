@@ -47,6 +47,14 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-10-01 — Slice 045: Manual Scripts Catalog Text Search
+
+Added optional bound literal-substring catalog search across name, code and description, retaining enabled/category predicates and deterministic unique results. Type/NUL validation occurs before database access. Scripts adds Search/Enter/Clear, separate draft/applied state, request query capture, loading/copy guards, selection reconciliation, distinct empty messages and recoverable failure feedback. Navigation and filtered management reload preserve the applied query; committed management writes are not repeated after refresh failure. Existing verified-copy and registration/visibility behavior remain intact. No schema, migration, dependency or PowerShell source changes.
+
+Fresh Database **418 PASS**, GUI **178 PASS**, Integration **148 PASS** (744 full regression total), all exit 0 with no failures, errors or skips. Focused **32 PASS** and affected **46 PASS** overlap the full suites. Native Windows **PASS** at 1000×700 with observable worker/callback idle; six captures inspected. Durable suite/native records and manifests are outside the repository under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-045\`. This is implementation validation; independent review is pending. The candidate remains unstaged/uncommitted at READY_FOR_REVIEW. No integration was performed.
+
+---
+
 # 2026-10-01 — Vertical-slice-delivery skill v0.3
 
 Updated the existing delivery skill and report templates with reproducible candidate manifests, durable long-suite and native GUI result records, explicit evidence provenance, correction drift matrices, carry-forward notes, stale handoff authority, compact prompts, risk-focused review, and separate authoritative-mutation versus refresh outcomes. Recovery now checks durable results and running operations before repeating expensive validation; PLAN consumes the preceding integration/closure report and unresolved notes without adopting them automatically. The 17 lifecycle states and readiness/approval/integration/closure distinctions are preserved. This is skill maintenance; Slice 045 and application behavior are unchanged. Structural and behavioral validation evidence is recorded in the external Skill-v0.3 delivery reports; this entry does not claim integration or real token-exhaustion testing.

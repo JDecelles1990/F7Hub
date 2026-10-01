@@ -9,6 +9,8 @@
 
 # 1. Purpose
 
+Slice 045 implements the next bounded Script Library discovery increment: manual literal-substring search of enabled metadata by name, code or description. It reuses the catalog layers and preserves scoped reads, draft/applied state, async and copy safeguards without a schema change. Metadata filters, broader search dimensions, content approval and execution remain future work. The implementation candidate stops at READY_FOR_REVIEW. The predecessor overview below retains historical Slice 044 phase wording; verified PR #45 closure is the authority for its completed lifecycle.
+
 Slice 040 established the metadata-only Script Registry; Slice 041 added a read-only Scripts catalog page for enabled entries and manual refresh. Slice 042 added one local Windows System Snapshot diagnostic and one production catalog row, then closed through PR #43. Slice 043 added checksum-approved manual source copy and merged through PR #44. Slice 044 adds local default-disabled registration and guarded enable/disable management, with no checksum approval or execution. Search, metadata editing/deletion, content-approval UI, parameters, application execution and history remain future work. Slice 044 stops at independent read-only review before integration.
 
 This document defines the development roadmap for F7Hub.
@@ -986,7 +988,7 @@ Do not begin with arbitrary script execution.
 [ ] Metadata is persisted
 [ ] Registry resolves valid relative paths
 [ ] Missing script files are detected
-[ ] Script search works
+[x] Script search works (name/code/description only, Slice 045; broader discovery deferred)
 [ ] No arbitrary shell command execution exists
 ```
 
