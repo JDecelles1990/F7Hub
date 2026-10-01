@@ -47,9 +47,19 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-10-01 — Slice 044: Script registration and local management
+
+Added **Manage scripts…** with scoped disabled-row inspection, registration of existing readable approved-folder `.ps1` references and guarded enable/disable. New rows retain table defaults and null category/checksum; writes reload before commit, reject stale state and preserve integrity approval metadata. Shared-runner dialogs prevent duplicate writes, retain failed registration input, ignore dismissed reads and distinguish saved changes from failed refreshes. Copy Script keeps its existing service integrity boundary and clipboard protection. No schema, migration, dependency or PowerShell source change was added. Clarified reviewed checksum metadata versus approval UI/workflow in Database architecture.
+
+Fresh focused **40 PASS**; full Database **409 PASS**, GUI **174 PASS**, Integration **145 PASS** (728 total), all exit 0. Native Windows at 1000×700 passed keyboard registration/toggling, busy and dismissal guards, error/retry, truthful post-save refresh failure and clipboard protection; six captures were inspected. The candidate remains unstaged and uncommitted for independent read-only review.
+
+The initial independent review subsequently required a Windows readability correction: metadata inspection could report AVAILABLE when NTFS denied an actual read. Registration and Enable now prove read access with a binary open and one-byte read before writing; empty readable files remain valid, denied access leaves the database unchanged, and Disable still works while unreadable. Source and checksum/copy semantics are unchanged. The corrected candidate passed fresh focused **46**, Database **414**, GUI **174** and Integration **146** tests (734 full regression total), all exit 0. Fresh native NTFS rejection/recovery and the full native workflow passed; eight captures were inspected, fixture ACLs restored exactly and temporary data removed. It is READY_FOR_REVIEW for independent rereview, without staging or integration.
+
+---
+
 # 2026-09-30 — Slice 043: Secure Script Copy to Clipboard
 
-Added a targeted CRLF checkout rule and guarded data migration 0009 with the reviewed exact-byte SHA-256 for Windows System Snapshot. ScriptService now reads one current byte buffer after enabled lookup and approved-path validation, checks the registry hash, and strictly decodes only matching bytes. ScriptWorkspace adds asynchronous **Copy Script**, current-selection protection and safe feedback; only the GUI writes raw source to the Qt clipboard. Full Database 398, Integration 143 and PowerShell 6 passed during recovery; full GUI 166 and native Windows evidence were retained after unchanged relevant inputs were verified. The unstaged candidate is READY_FOR_REVIEW; independent review remains pending. F7Hub does not execute, paste or transmit PowerShell.
+Added a targeted CRLF checkout rule and guarded data migration 0009 with the reviewed exact-byte SHA-256 for Windows System Snapshot. ScriptService now reads one current byte buffer after enabled lookup and approved-path validation, checks the registry hash, and strictly decodes only matching bytes. ScriptWorkspace adds asynchronous **Copy Script**, current-selection protection and safe feedback; only the GUI writes raw source to the Qt clipboard. Full Database 398, Integration 143 and PowerShell 6 passed during recovery; full GUI 166 and native Windows evidence were retained after unchanged relevant inputs were verified. Slice 043 subsequently merged through PR #44 at `b4d46ef7af6936c5ef3c34686040691222115f31`; its prior pending-review wording is historical. F7Hub does not execute, paste or transmit PowerShell.
 
 ---
 

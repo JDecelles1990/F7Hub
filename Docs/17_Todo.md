@@ -30,7 +30,16 @@ It does not own long-term sequencing, technical specifications or historical cha
 
 # 2. Current Project State
 
-Slice 043 — secure Script Copy to Clipboard, implementation candidate on `feature/secure-script-copy-s043` from `4d6901c01064af143abcca6292ff4abbea77129f`:
+Slice 044 — script registration and local management, implementation candidate on `feature/script-registration-admin-s044` from `b4d46ef7af6936c5ef3c34686040691222115f31`:
+
+- [x] Reuse scoped disabled-row inspection and the existing path validator; add atomic default-disabled registration and guarded visibility writes without checksum approval or a schema change.
+- [x] Add local management/registration dialogs through the shared runner, with explicit enable confirmation, stale-token feedback and truthful saved-write/failed-refresh recovery.
+- [x] Correct the independent review's Windows denied-read finding with a real binary open/read before registration and enable writes; preserve unreadable-file disable, tokens and checksum metadata.
+- [x] Validate the corrected candidate: focused **46 PASS**, full Database **414 PASS**, GUI **174 PASS**, Integration **146 PASS** (734 total), fresh native NTFS rejection/recovery and keyboard/error/busy/retry/clipboard workflows at 1000×700 with eight inspected captures. Fixture ACLs and temporary data were restored/removed.
+- [x] Synchronize affected owner documents, including the distinction between reviewed checksum approval metadata and an approval UI or execution-approval workflow.
+- [ ] Independent read-only rereview of the corrected exact unstaged, uncommitted candidate. The initial review required the correction above; staging, commit, push, PR and integration remain outside this implementation phase.
+
+Slice 043 — secure Script Copy to Clipboard, merged on main through PR #44 at Slice 044 base `b4d46ef7af6936c5ef3c34686040691222115f31`. The following checklist records its historical candidate state:
 
 - [x] Bind the production script to CRLF checkout bytes with a targeted `.gitattributes` rule and guarded checksum data migration 0009.
 - [x] Add one-read SHA-256 verification and strict UTF-8 decoding to ScriptService; keep enabled lookup and approved-path validation.

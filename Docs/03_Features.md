@@ -8,6 +8,12 @@
 
 ---
 
+## Script registration and local management — Slice 044
+
+**Manage scripts…** lists valid SCRIPT-scope registrations, including disabled rows. The technician can register an existing readable `.ps1` in an approved PowerShell folder and change catalog visibility. New metadata uses PowerShell 7, a 120-second timeout, structured output required, disabled state and null category/checksum. Enabling requires current file availability and a current update token; it does not approve content. Copy Script still rejects missing approval through the existing service boundary. Metadata editing, deletion, checksum approval and execution remain deferred.
+
+---
+
 ## Secure Script Copy to Clipboard — Slice 043
 
 The Scripts workspace offers **Copy Script** for a selected entry last observed as AVAILABLE. At click time, ScriptService repeats enabled lookup and approved-path checks, reads the `.ps1` file once as bytes, requires a well-formed approved SHA-256 matching those exact bytes, and strictly decodes that same buffer as UTF-8. Only the raw source reaches the Qt clipboard. Missing approval, changed bytes or an unavailable file block copying. AVAILABLE alone means file presence at the last refresh, not checksum verification. The technician manually pastes into an approved destination; NinjaRMM is an example workflow, not an integration. F7Hub does not execute or transmit the script. Clipboard contents remain visible to the OS and applications until replaced or cleared.
@@ -22,7 +28,7 @@ The catalog includes one enabled **Windows System Snapshot** entry installed by 
 
 ## Read-only Scripts catalog — Slice 041
 
-The Scripts workspace lists enabled PowerShell registry entries with name, code, category and point-in-time file status. Selecting a row shows the existing metadata as plain text. The empty registry shows **No scripts available.** Manual Refresh clears stale results before reloading; failure gives a safe retry message. File status describes the reference at the last refresh and does not approve execution. This workspace has no script execution or registry-management controls.
+The Scripts workspace lists enabled PowerShell registry entries with name, code, category and point-in-time file status. Selecting a row shows the existing metadata as plain text. The empty registry shows **No scripts available.** Manual Refresh clears stale results before reloading; failure gives a safe retry message. File status describes the reference at the last refresh and does not approve execution. Slice 044 adds the separate local management dialog described above; execution remains deferred.
 
 ---
 
@@ -703,7 +709,7 @@ AI must not be required for core local search.
 
 ## FEAT-SCRIPT-001 — Script Registry
 
-Slice 040 implements a read-only, database-backed PowerShell metadata registry. It lists enabled entries and looks up an enabled entry by stable code. Its production catalog initially started empty; Slice 042 adds one enabled production diagnostic row. Slice 041 adds an unfiltered user-facing Scripts catalog; search remains planned.
+Slice 040 established the database-backed PowerShell metadata registry with enabled-only catalog reads and stable-code lookup. Its production catalog initially started empty; Slice 042 adds one enabled production diagnostic row. Slice 041 adds an unfiltered user-facing Scripts catalog; Slice 044 adds default-disabled registration and guarded enable/disable writes. Search remains planned.
 
 Priority: P1  
 Requirements: `FR-SCRIPT-001`, `FR-SCRIPT-002`
@@ -721,7 +727,7 @@ Potential languages:
 
 ## FEAT-SCRIPT-002 — Script Metadata
 
-Slice 040 stores the documented core metadata in SQLite, with `is_enabled` defaulting to `0`. Enabled means eligible for catalog display only; it conveys no content review, checksum verification, execution permission or elevation. Disabled-row inspection is an explicit repository maintenance read, not an authorization mechanism.
+Slice 040 stores the documented core metadata in SQLite, with `is_enabled` defaulting to `0`. Enabled means eligible for catalog display only; it conveys no content review, checksum verification, execution permission or elevation. Slice 044 reuses the explicit disabled-row repository read for local management while preserving category scope. It is not an authorization mechanism.
 
 Priority: P1  
 Requirements: `FR-SCRIPT-002`

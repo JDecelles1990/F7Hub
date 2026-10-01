@@ -12,7 +12,7 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QPushButton
+from PySide6.QtWidgets import QApplication, QPushButton, QMessageBox
 
 from f7hub.app.bootstrap import bootstrap_application
 from f7hub.infrastructure.database import bootstrap_database, database_connection
@@ -69,6 +69,145 @@ class ScriptCatalogFlowTests(unittest.TestCase):
                  path or f"PowerShell/Diagnostics/{code}.ps1", "DIAGNOSTIC",
                  category_id, enabled, STAMP, STAMP),
             )
+
+    def test_register_enable_copy_rejection_disable_and_catalog_reconciliation(self):
+        folder = self.root / "PowerShell" / "Diagnostics"
+        folder.mkdir(parents=True)
+        (folder / "registered.ps1").write_text("# fixture only", encoding="utf-8")
+        self.window.show_scripts()
+        self.wait_idle()
+        workspace = self.window.script_workspace
+        manager = workspace.open_management()
+        self.wait_idle()
+        self.assertIs(manager.parent(), self.window)
+        child = manager.open_registration()
+        child.code_input.setText("registered")
+        child.name_input.setText("Registered fixture")
+        child.path_input.setText("PowerShell\\Diagnostics\\registered.ps1")
+        for combo in (child.type_input, child.risk_input, child.privilege_input):
+            combo.setCurrentIndex(1)
+        child.register_button.click()
+        self.wait_idle()
+        self.assertEqual(manager.model.rowCount(), 1)
+        self.assertEqual(manager.model.item(0, 2).text(), "No")
+        self.assertEqual(self.context.script_service.list_scripts(), ())
+        with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Yes):
+            manager.toggle_button.click()
+        self.wait_idle()
+        self.assertEqual(manager.model.item(0, 2).text(), "Yes")
+        row = self.context.script_service.list_scripts()[0].metadata
+        self.assertEqual((row.timeout_seconds, row.is_enabled, row.checksum_sha256), (120, 1, None))
+        manager.reject()
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 1)
+        original_clipboard = self.application.clipboard().text()
+        try:
+            self.application.clipboard().setText("preserve fixture")
+            workspace.copy_button.click()
+            self.wait_idle()
+            self.assertEqual(self.application.clipboard().text(), "preserve fixture")
+            self.assertEqual(workspace.feedback.text(), "Script integrity has not been approved.")
+        finally:
+            self.application.clipboard().setText(original_clipboard)
+        manager = workspace.open_management()
+        self.wait_idle()
+        manager.toggle_button.click()
+        self.wait_idle()
+        manager.reject()
+        self.wait_idle()
+        self.assertEqual(workspace.model.rowCount(), 0)
+        self.assertEqual(len(self.context.script_service.list_registered_scripts()), 1)
+
+    def test_denied_read_preserves_registration_form_and_persisted_visibility(self):
+        folder = self.root / "PowerShell" / "Diagnostics"
+        folder.mkdir(parents=True)
+        (folder / "denied.ps1").write_bytes(b"# fixture only\n")
+        self.window.show_scripts()
+        self.wait_idle()
+        manager = self.window.script_workspace.open_management()
+        self.wait_idle()
+        child = manager.open_registration()
+        child.code_input.setText("denied")
+        child.name_input.setText("Denied fixture")
+        child.path_input.setText("PowerShell/Diagnostics/denied.ps1")
+        for combo in (child.type_input, child.risk_input, child.privilege_input):
+            combo.setCurrentIndex(1)
+
+        def persisted():
+            with database_connection(self.database) as connection:
+                return tuple(connection.iterdump())
+
+        before = persisted()
+        with patch.object(Path, "open", side_effect=PermissionError("private ACL detail")):
+            child.register_button.click()
+            self.wait_idle()
+        self.assertEqual(persisted(), before)
+        self.assertTrue(child.isVisible())
+        self.assertEqual(child.code_input.text(), "denied")
+        self.assertEqual(child.path_input.text(), "PowerShell/Diagnostics/denied.ps1")
+        self.assertNotIn("private", child.feedback.text())
+        self.assertIn("existing readable", child.feedback.text())
+        child.register_button.click()
+        self.wait_idle()
+        self.assertEqual(manager.model.rowCount(), 1)
+        disabled = manager._selected()
+        self.assertEqual(disabled.is_enabled, 0)
+        self.assertIsNone(disabled.checksum_sha256)
+        before = persisted()
+        with patch.object(Path, "open", side_effect=PermissionError("private ACL detail")), \
+                patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Yes):
+            manager.toggle_button.click()
+            self.wait_idle()
+        self.assertEqual(persisted(), before)
+        self.assertEqual(manager._selected(), disabled)
+        self.assertNotIn("private", manager.feedback.text())
+        self.assertIn("existing readable", manager.feedback.text())
+        with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Yes):
+            manager.toggle_button.click()
+        self.wait_idle()
+        self.assertEqual(manager._selected().is_enabled, 1)
+        self.assertIsNone(manager._selected().checksum_sha256)
+        with patch.object(Path, "open", side_effect=PermissionError("private ACL detail")) as opener:
+            manager.toggle_button.click()
+            self.wait_idle()
+        opener.assert_not_called()
+        self.assertEqual(manager._selected().is_enabled, 0)
+        self.assertIsNone(manager._selected().checksum_sha256)
+        self.assertEqual(manager.model.rowCount(), 1)
+        manager.reject()
+        self.wait_idle()
+
+    def test_changed_manager_dismissed_during_read_refreshes_catalog_after_late_callback(self):
+        folder = self.root / "PowerShell" / "Diagnostics"
+        folder.mkdir(parents=True)
+        (folder / "one.ps1").write_text("# fixture", encoding="utf-8")
+        row = self.context.script_service.register_script(
+            script_code="one", name="One", relative_path="PowerShell/Diagnostics/one.ps1",
+            script_type="DIAGNOSTIC", risk_level="LOW", privilege_level="STANDARD_USER",
+        )
+        self.window.show_scripts()
+        self.wait_idle()
+        manager = self.window.script_workspace.open_management()
+        self.wait_idle()
+        with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Yes):
+            manager.toggle_selected()
+        self.wait_idle()
+        import threading
+        gate = threading.Event()
+        original_list = self.context.script_service.list_registered_scripts
+        def delayed():
+            gate.wait(5)
+            return original_list()
+        try:
+            with patch.object(self.context.script_service, "list_registered_scripts", side_effect=delayed):
+                manager.refresh_list()
+                manager.reject()
+                gate.set()
+                self.wait_idle()
+        finally:
+            gate.set()
+        self.assertEqual(self.window.script_workspace.model.rowCount(), 1)
+        self.assertIsNone(self.window.script_workspace._management_dialog)
 
     def test_empty_then_enabled_catalog_status_and_disabled_exclusion(self):
         workspace = self.window.script_workspace

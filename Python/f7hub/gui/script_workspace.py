@@ -10,6 +10,7 @@ from PySide6.QtWidgets import (
 )
 
 from f7hub.gui.service_task_runner import ServiceTaskRunner
+from f7hub.gui.script_management_dialog import ScriptManagementDialog
 from f7hub.services.script_service import (
     AVAILABLE, INACCESSIBLE, INVALID_REFERENCE, MISSING,
     ScriptCatalogEntry, ScriptService,
@@ -44,6 +45,8 @@ class ScriptWorkspace(QWidget):
         self._copying = False
         self._selection_generation = 0
         self._preferred_code: str | None = None
+        self._management_dialog = None
+        self._management_refresh_pending = False
 
         self.heading = QLabel("Scripts", self)
         self.heading.setObjectName("scriptsHeading")
@@ -52,10 +55,13 @@ class ScriptWorkspace(QWidget):
         self.copy_button = QPushButton("Copy Script", self)
         self.copy_button.setAccessibleName("Copy Script")
         self.copy_button.clicked.connect(self.copy_script)
+        self.manage_button = QPushButton("Manage scripts…", self)
+        self.manage_button.clicked.connect(self.open_management)
         heading_row = QHBoxLayout()
         heading_row.addWidget(self.heading)
         heading_row.addStretch()
         heading_row.addWidget(self.copy_button)
+        heading_row.addWidget(self.manage_button)
         heading_row.addWidget(self.refresh_button)
 
         self.feedback = QLabel("", self)
@@ -97,13 +103,40 @@ class ScriptWorkspace(QWidget):
         layout.addWidget(self.feedback)
         layout.addWidget(splitter, 1)
         self._runner.busy_changed.connect(self._update_actions)
+        self._runner.busy_changed.connect(self._finish_management_refresh)
         self._update_actions(self._runner.busy)
 
     def _update_actions(self, busy: bool) -> None:
+        self.manage_button.setEnabled(not busy and not self._loading and self._management_dialog is None)
         self.refresh_button.setEnabled(not busy and not self._loading)
         row = self.table.currentIndex().row()
         available = 0 <= row < len(self._entries) and self._entries[row].file_status == AVAILABLE
         self.copy_button.setEnabled(available and not busy and not self._loading and not self._copying)
+
+    def open_management(self):
+        if self._runner.busy or self._loading or self._management_dialog is not None:
+            return None
+        # Parent outside MainWindow.pages, which is disabled during worker calls.
+        dialog = ScriptManagementDialog(self._service, self._runner, self.window())
+        self._management_dialog = dialog
+        dialog.finished.connect(self._management_closed)
+        dialog.open()
+        dialog.refresh_list()
+        self._update_actions(self._runner.busy)
+        return dialog
+
+    def _management_closed(self, _result):
+        dialog = self._management_dialog
+        self._management_dialog = None
+        self._management_refresh_pending = dialog.changed
+        dialog.deleteLater()
+        self._update_actions(self._runner.busy)
+        self._finish_management_refresh(self._runner.busy)
+
+    def _finish_management_refresh(self, busy):
+        if not busy and self._management_refresh_pending:
+            self._management_refresh_pending = False
+            self.refresh_list()
 
     def copy_script(self) -> bool:
         """Verify source off-thread, then copy only a still-selected result."""
