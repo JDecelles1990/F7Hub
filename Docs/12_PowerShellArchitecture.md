@@ -14,7 +14,9 @@ Slice 043 makes the existing diagnostic available for technician-controlled copy
 
 Slice 042 adds `PowerShell/Diagnostics/Get-SystemSnapshot.ps1`, a local, read-only PowerShell 7 diagnostic for standard-user execution. It queries local `Win32_OperatingSystem` and fixed `Win32_LogicalDisk` data through CIM, returning one schemaVersion 1 JSON result with `Get-SystemSnapshot` operation. Complete collection is PASS/exit 0. A drive-query failure is WARNING/exit 0 with an empty drive list; a returned drive with unavailable Size or FreeSpace is WARNING/exit 0 with that drive retained and only its unavailable measurements set to JSON null. Missing required OS data is ERROR/exit 1 with stable safe text. It takes no parameters, uses no network or credentials, and writes no files. Migration 0008 installs its enabled registry metadata with a null checksum. Enabled means catalog-visible, not approved for execution; AVAILABLE means present at last refresh. F7Hub still has no PowerShell execution path. Standalone execution occurs only in validation tooling.
 
-Slice 041 exposed enabled Slice 040 registry metadata in the **Scripts** workspace. File statuses (AVAILABLE, MISSING, INACCESSIBLE, INVALID_REFERENCE) describe reference inspection at the last refresh; unexpected values display as Unknown. Even AVAILABLE does not grant execution approval. Slice 043 adds a controlled verified-content read for copying; the workspace still has no Run, registration, enable/disable or approval controls. PowerShell execution infrastructure remains deferred.
+Slice 044 adds local Python-owned registration and enable/disable management for existing readable `.ps1` references in the approved folders. New rows use PowerShell 7, a 120-second timeout, structured output required, disabled state and null category/checksum. Registration does not create or edit files, approve contents or invoke PowerShell. Enabling rechecks availability and only makes metadata visible. ScriptService still rejects Copy Script when approval is missing or bytes do not match.
+
+Slice 041 exposed enabled Slice 040 registry metadata in the **Scripts** workspace. File statuses (AVAILABLE, MISSING, INACCESSIBLE, INVALID_REFERENCE) describe reference inspection at the last refresh; unexpected values display as Unknown. Even AVAILABLE does not grant execution approval. Slice 043 adds a controlled verified-content read for copying; Slice 044 adds metadata management. Run and approval controls remain deferred with PowerShell execution infrastructure.
 
 Slice 040 introduces only a Python/SQLite read-only registry for PowerShell `.ps1` references. References are limited to Diagnostics, Reports and Modules below the supplied project root, with traversal, external links and invalid Windows paths rejected. File status is an observation, not execution approval. No production PowerShell file, `pwsh.exe` invocation, content read or execution gateway is added.
 
@@ -620,7 +622,7 @@ Do not store full PowerShell source in SQLite by default.
 
 # 26. Script Registry
 
-Slice 040 maintains read-only script metadata in SQLite. Slice 041 adds the read-only user-facing Scripts catalog. Registration and execution remain planned.
+Slice 040 established script metadata reads in SQLite. Slice 041 adds the enabled-only user-facing Scripts catalog; Slice 044 adds local default-disabled registration and guarded catalog visibility changes. Content approval and application execution remain deferred.
 
 Conceptual flow:
 

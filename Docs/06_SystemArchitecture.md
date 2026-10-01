@@ -6,6 +6,10 @@
 > Scope: System-level architecture.
 > Related Documents: 00_ProjectVision.md, 01_Project.md, 02_ProductRequirements.md, 05_GUI.md, 07_Database.md, 11_AHKArchitecture.md, 12_PowerShellArchitecture.md, 13_PythonArchitecture.md
 
+## Local script metadata writes — Slice 044
+
+Scripts management and registration dialogs use the shared ServiceTaskRunner → ScriptService → ScriptRepository → SQLite boundary. The service reuses the approved-path resolver and proves current readability for registration and enabling by opening the resolved file in binary mode and reading one byte before any database write. Empty readable files are valid; open/read failures reject the write with safe feedback. The handle is closed without retaining source or computing a checksum. Disabling requires no file read. Management reads reuse `list_scripts(include_disabled=True)` without weakening SCRIPT category scope. Registration inserts only metadata with table defaults and null category/checksum. Visibility writes compare the previously read update token, change only `is_enabled`/`updated_at`, reload before commit and fail on stale state. File inspection and the readability probe occur before the short database write transaction. The GUI owns confirmation and recovery presentation; no schema, dependency, execution or cross-language contract is added.
+
 ## Verified source copy boundary — Slice 043
 
 ScriptWorkspace submits an enabled script code through ServiceTaskRunner to ScriptService. The service uses ScriptRepository, revalidates the approved path, reads one byte buffer, compares its SHA-256 to the reviewed registry value and strictly decodes that same buffer. The GUI alone sets the Qt clipboard after a current-selection check. SQLite stores approval metadata; the version-controlled `.ps1` remains source. No PowerShell process, remote call, new dependency or cross-language execution contract is added.

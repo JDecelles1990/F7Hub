@@ -8,6 +8,14 @@
 
 ---
 
+## Register and manage a local script — Slice 044
+
+Open **Scripts → Manage scripts… → Register script…**. Enter code, name and a relative path to an existing readable `.ps1` below PowerShell/Diagnostics, Reports or Modules. Choose type, risk and privilege; description and version are optional. Register saves metadata with the displayed defaults and selects the new disabled registration. Cancel writes nothing; failures preserve entered information.
+
+Select a registration and choose **Enable**, then confirm catalog visibility, or choose **Disable** to hide it. Enabling rechecks the file. Changed registrations require Refresh before retrying. Close management to refresh the normal enabled-only catalog. A saved change followed by a failed refresh remains reported as saved; Refresh retries the read without repeating the write. Registration does not approve a checksum: Copy Script on a newly enabled row still rejects missing approval and preserves the clipboard. Local management adds no roles, editing, deletion or execution.
+
+---
+
 ## Copy a verified script — Slice 043
 
 Open **Scripts**, select **Windows System Snapshot**, and choose **Copy Script**. The button is available for a selected row last observed as AVAILABLE; F7Hub then checks the enabled registration, path and approved SHA-256 against the current file bytes. Success copies only the PowerShell source to the Windows clipboard. The technician switches to an approved RMM script field or console and pastes manually. F7Hub does not paste, send or run it. A missing approval, changed file or unavailable file gives safe feedback and leaves the previous clipboard text in place. Clipboard content remains accessible to the OS and applications until replaced or cleared.
@@ -22,7 +30,7 @@ Open **Scripts**. The enabled **Windows System Snapshot** row appears automatica
 
 ## Inspect the Scripts catalog — Slice 041
 
-Choose **Scripts** from the File menu or toolbar. F7Hub loads enabled registry entries in the background. If none exist, it shows **No scripts available.** Select a row to read its metadata and relative PowerShell reference as plain text. File status is **AVAILABLE**, **MISSING**, **INACCESSIBLE** or **INVALID_REFERENCE**; an unrecognized value appears as **Unknown**. **AVAILABLE** means the file was found at the last refresh, not that it may be run. Choose **Refresh** for a new observation. A failed load clears stale rows/details and offers a safe retry message. Scripts cannot be run or managed from this view.
+Choose **Scripts** from the File menu or toolbar. F7Hub loads enabled registry entries in the background. If none exist, it shows **No scripts available.** Select a row to read its metadata and relative PowerShell reference as plain text. File status is **AVAILABLE**, **MISSING**, **INACCESSIBLE** or **INVALID_REFERENCE**; an unrecognized value appears as **Unknown**. **AVAILABLE** means the file was found at the last refresh, not that it may be run. Choose **Refresh** for a new observation. A failed load clears stale rows/details and offers a safe retry message. Slice 044 adds **Manage scripts…** for the separate workflow above. Scripts cannot be run from this view.
 
 ---
 

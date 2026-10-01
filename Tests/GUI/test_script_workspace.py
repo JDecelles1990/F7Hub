@@ -153,7 +153,7 @@ class ScriptWorkspaceTests(unittest.TestCase):
         self.assertIn("File status: Unknown", self.workspace.details.toPlainText())
         self.assertNotIn("File found", self.workspace.details.toPlainText())
         self.assertEqual(set(self.workspace.findChildren(QPushButton)),
-                         {self.workspace.refresh_button, self.workspace.copy_button})
+                         {self.workspace.refresh_button, self.workspace.copy_button, self.workspace.manage_button})
         self.assertEqual(self.workspace.copy_button.text(), "Copy Script")
         self.assertEqual(self.workspace.copy_button.accessibleName(), "Copy Script")
         self.assertFalse(any(button.text() in {"Run", "Execute", "Test"}

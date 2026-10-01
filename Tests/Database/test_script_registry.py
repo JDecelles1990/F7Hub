@@ -151,9 +151,7 @@ class ScriptRegistryTests(unittest.TestCase):
         with database_connection(self.database) as connection:
             after = tuple(connection.iterdump())
         self.assertEqual(before, after)
-        self.assertFalse(any(
-            hasattr(repo, name) for name in ("create_script", "update_script", "delete_script", "enable_script")
-        ))
+        self.assertFalse(any(hasattr(repo, name) for name in ("update_script", "delete_script")))
 
     def test_service_statuses_and_no_content_reads(self) -> None:
         self.bootstrap()

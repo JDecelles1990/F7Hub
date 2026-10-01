@@ -8,6 +8,14 @@
 
 ---
 
+## Local script management — Slice 044
+
+The Scripts heading row adds **Manage scripts…**, opening a modal owned by MainWindow outside its disabled pages hierarchy. Its table shows Name, Code, Enabled and File status for scoped registrations, with a scrollable plain-text metadata panel and Register script…, Refresh, Enable/Disable and Close actions. Selection and successful refresh retain stable script IDs. Registration uses a separate form requiring code, name, relative path, type, risk and privilege; description/version are optional. Classification choices require an explicit selection. Cancel is the default action and writes nothing.
+
+Reads and writes use the shared ServiceTaskRunner. Writes disable conflicting actions and dismissal; dismissed reads ignore late callbacks. Enabling requires explicit confirmation with Cancel as default. Errors preserve registration input, stale update conflicts clear actionable rows for Refresh, and a committed write with failed reload keeps its success notice and offers read-only retry. Closing a changed manager refreshes the catalog, waiting for a pending management read if necessary. Copy Script retains Slice 043's existing availability gating and service checksum check. Native Windows keyboard, busy/error/retry and clipboard workflows at 1000×700 passed; six captures were inspected without observed control overlap or clipping. This is implementation validation, not independent approval.
+
+---
+
 ## Copy Script control — Slice 043
 
 The Scripts heading row includes an accessible **Copy Script** button. It requires a selected entry last observed as AVAILABLE and is disabled during shared-worker activity. Clicking starts fresh verification in ServiceTaskRunner; success sets the Qt clipboard to raw source text and shows a short confirmation. A selection change or page departure while verification runs discards the stale result. Missing approval, mismatch, unavailable file and read failures show bounded plain-text feedback without paths, source or exception details. The GUI neither opens `.ps1` files nor executes PowerShell.
