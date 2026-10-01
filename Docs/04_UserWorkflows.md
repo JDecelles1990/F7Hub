@@ -8,6 +8,12 @@
 
 ---
 
+## Copy a verified script — Slice 043
+
+Open **Scripts**, select **Windows System Snapshot**, and choose **Copy Script**. The button is available for a selected row last observed as AVAILABLE; F7Hub then checks the enabled registration, path and approved SHA-256 against the current file bytes. Success copies only the PowerShell source to the Windows clipboard. The technician switches to an approved RMM script field or console and pastes manually. F7Hub does not paste, send or run it. A missing approval, changed file or unavailable file gives safe feedback and leaves the previous clipboard text in place. Clipboard content remains accessible to the OS and applications until replaced or cleared.
+
+---
+
 ## Find the Windows System Snapshot — Slice 042
 
 Open **Scripts**. The enabled **Windows System Snapshot** row appears automatically after migration 0008. Select it to read the code, diagnostic metadata and `PowerShell/Diagnostics/Get-SystemSnapshot.ps1` reference. **Not selected** is the current presentation for its null category. **AVAILABLE** reports file presence at the last refresh; Refresh checks again. This page has no way to run the script.

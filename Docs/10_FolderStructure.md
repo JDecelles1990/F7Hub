@@ -10,6 +10,8 @@
 
 # 1. Purpose
 
+Slice 043 adds root `.gitattributes` with a rule limited to `PowerShell/Diagnostics/Get-SystemSnapshot.ps1`, ensuring CRLF checkout bytes for its approved SHA-256. `Database/Migrations/0009_system_snapshot_checksum.sql` owns the reviewed registry checksum. No general line-ending policy or new source directory is added.
+
 The F7Hub folder structure separates:
 
 - application source code

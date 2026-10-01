@@ -47,9 +47,15 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-30 — Slice 043: Secure Script Copy to Clipboard
+
+Added a targeted CRLF checkout rule and guarded data migration 0009 with the reviewed exact-byte SHA-256 for Windows System Snapshot. ScriptService now reads one current byte buffer after enabled lookup and approved-path validation, checks the registry hash, and strictly decodes only matching bytes. ScriptWorkspace adds asynchronous **Copy Script**, current-selection protection and safe feedback; only the GUI writes raw source to the Qt clipboard. Full Database 398, Integration 143 and PowerShell 6 passed during recovery; full GUI 166 and native Windows evidence were retained after unchanged relevant inputs were verified. The unstaged candidate is READY_FOR_REVIEW; independent review remains pending. F7Hub does not execute, paste or transmit PowerShell.
+
+---
+
 # 2026-09-30 — Slice 042: First Production PowerShell Diagnostic Script
 
-Added one PowerShell 7 diagnostic, `Get-SystemSnapshot.ps1`, for a local read-only Windows OS, uptime, memory and fixed-drive snapshot. It emits one structured JSON result, with safe ERROR and partial WARNING paths. Data migration `0008_system_snapshot_script.sql` installs exactly one enabled, uncategorized `Windows System Snapshot` registry row; the table's default remains disabled and its checksum remains null. The existing Scripts workspace displays the file as AVAILABLE when present, with no application execution control or production Python change. Standalone PowerShell validation runs only in test tooling. Validation details and candidate identity are recorded in `Status/CURRENT_STATE.md`; independent review remains pending.
+Added one PowerShell 7 diagnostic, `Get-SystemSnapshot.ps1`, for a local read-only Windows OS, uptime, memory and fixed-drive snapshot. It emits one structured JSON result, with safe ERROR and partial WARNING paths. Data migration `0008_system_snapshot_script.sql` installs exactly one enabled, uncategorized `Windows System Snapshot` registry row; the table's default remains disabled and its checksum was initially null. The existing Scripts workspace displays the file as AVAILABLE when present, with no application execution control or production Python change. Standalone PowerShell validation runs only in test tooling. Slice 042 was subsequently reviewed and merged through PR #43; its initial pending-review wording is historical. Slice 043 adds the separate checksum approval for copying.
 
 ---
 

@@ -8,6 +8,12 @@
 
 ---
 
+## Copy Script control — Slice 043
+
+The Scripts heading row includes an accessible **Copy Script** button. It requires a selected entry last observed as AVAILABLE and is disabled during shared-worker activity. Clicking starts fresh verification in ServiceTaskRunner; success sets the Qt clipboard to raw source text and shows a short confirmation. A selection change or page departure while verification runs discards the stale result. Missing approval, mismatch, unavailable file and read failures show bounded plain-text feedback without paths, source or exception details. The GUI neither opens `.ps1` files nor executes PowerShell.
+
+---
+
 ## Scripts workspace — Slice 041
 
 The existing File menu and toolbar add one **Scripts** action that opens a page in MainWindow's stacked navigation. The page has a four-column enabled-script table (Name, Code, Category, File status), a read-only scrollable plain-text metadata panel, an intentional empty message, and a manual **Refresh** button. Row selection, including keyboard selection, updates details from the loaded entry without another service read. Refresh preserves the selected script code when present, otherwise selects the first row. Loading and failure clear stale content; Refresh is disabled while the shared worker is busy. Status remains readable as text, with unknown values shown as Unknown. There is no clickable script path or execution control.

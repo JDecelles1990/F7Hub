@@ -8,9 +8,15 @@
 
 ---
 
+## Secure Script Copy to Clipboard — Slice 043
+
+The Scripts workspace offers **Copy Script** for a selected entry last observed as AVAILABLE. At click time, ScriptService repeats enabled lookup and approved-path checks, reads the `.ps1` file once as bytes, requires a well-formed approved SHA-256 matching those exact bytes, and strictly decodes that same buffer as UTF-8. Only the raw source reaches the Qt clipboard. Missing approval, changed bytes or an unavailable file block copying. AVAILABLE alone means file presence at the last refresh, not checksum verification. The technician manually pastes into an approved destination; NinjaRMM is an example workflow, not an integration. F7Hub does not execute or transmit the script. Clipboard contents remain visible to the OS and applications until replaced or cleared.
+
+---
+
 ## First production Windows diagnostic — Slice 042
 
-The catalog includes one enabled **Windows System Snapshot** entry installed by migration 0008. Its repository-controlled PowerShell 7 script collects local OS, uptime, memory and fixed-drive information as one structured JSON result when run separately by validation tooling. **AVAILABLE** only means the file was found at the last catalog refresh. F7Hub cannot run it, and the registry stores no checksum or execution approval.
+The catalog includes one enabled **Windows System Snapshot** entry installed by migration 0008. Its repository-controlled PowerShell 7 script collects local OS, uptime, memory and fixed-drive information as one structured JSON result when run separately by validation tooling. **AVAILABLE** only means the file was found at the last catalog refresh. Migration 0009 adds the reviewed exact-byte checksum for copying; it grants no execution approval. F7Hub cannot run the script.
 
 ---
 
