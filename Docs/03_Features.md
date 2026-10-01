@@ -8,6 +8,12 @@
 
 ---
 
+## First production Windows diagnostic — Slice 042
+
+The catalog includes one enabled **Windows System Snapshot** entry installed by migration 0008. Its repository-controlled PowerShell 7 script collects local OS, uptime, memory and fixed-drive information as one structured JSON result when run separately by validation tooling. **AVAILABLE** only means the file was found at the last catalog refresh. F7Hub cannot run it, and the registry stores no checksum or execution approval.
+
+---
+
 ## Read-only Scripts catalog — Slice 041
 
 The Scripts workspace lists enabled PowerShell registry entries with name, code, category and point-in-time file status. Selecting a row shows the existing metadata as plain text. The empty registry shows **No scripts available.** Manual Refresh clears stale results before reloading; failure gives a safe retry message. File status describes the reference at the last refresh and does not approve execution. This workspace has no script execution or registry-management controls.
@@ -691,7 +697,7 @@ AI must not be required for core local search.
 
 ## FEAT-SCRIPT-001 — Script Registry
 
-Slice 040 implements a read-only, database-backed PowerShell metadata registry. It lists enabled entries and looks up an enabled entry by stable code. The production catalog starts empty. Slice 041 adds an unfiltered user-facing Scripts catalog; search remains planned.
+Slice 040 implements a read-only, database-backed PowerShell metadata registry. It lists enabled entries and looks up an enabled entry by stable code. Its production catalog initially started empty; Slice 042 adds one enabled production diagnostic row. Slice 041 adds an unfiltered user-facing Scripts catalog; search remains planned.
 
 Priority: P1  
 Requirements: `FR-SCRIPT-001`, `FR-SCRIPT-002`

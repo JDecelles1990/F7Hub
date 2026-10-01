@@ -8,6 +8,12 @@
 
 ---
 
+## Find the Windows System Snapshot — Slice 042
+
+Open **Scripts**. The enabled **Windows System Snapshot** row appears automatically after migration 0008. Select it to read the code, diagnostic metadata and `PowerShell/Diagnostics/Get-SystemSnapshot.ps1` reference. **Not selected** is the current presentation for its null category. **AVAILABLE** reports file presence at the last refresh; Refresh checks again. This page has no way to run the script.
+
+---
+
 ## Inspect the Scripts catalog — Slice 041
 
 Choose **Scripts** from the File menu or toolbar. F7Hub loads enabled registry entries in the background. If none exist, it shows **No scripts available.** Select a row to read its metadata and relative PowerShell reference as plain text. File status is **AVAILABLE**, **MISSING**, **INACCESSIBLE** or **INVALID_REFERENCE**; an unrecognized value appears as **Unknown**. **AVAILABLE** means the file was found at the last refresh, not that it may be run. Choose **Refresh** for a new observation. A failed load clears stale rows/details and offers a safe retry message. Scripts cannot be run or managed from this view.

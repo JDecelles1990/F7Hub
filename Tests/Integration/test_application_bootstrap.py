@@ -59,7 +59,10 @@ class ApplicationBootstrapTests(unittest.TestCase):
         self.assertIs(context.script_service._repository, context.script_repository)
         self.assertEqual(context.script_service._project_root, PROJECT_ROOT.resolve())
         self.assertIs(context.main_window.script_workspace._service, context.script_service)
-        self.assertEqual(context.script_service.list_scripts(), ())
+        scripts = context.script_service.list_scripts()
+        self.assertEqual(len(scripts), 1)
+        self.assertEqual(scripts[0].metadata.script_code, "diagnostic.windows.system_snapshot")
+        self.assertEqual(scripts[0].file_status, "AVAILABLE")
 
         with database_connection(self.database_path) as connection:
             applied_versions = tuple(
@@ -68,7 +71,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
                     "SELECT version FROM schema_migrations ORDER BY version"
                 )
             )
-        self.assertEqual(applied_versions, (1, 2, 3, 4, 5, 6, 7))
+        self.assertEqual(applied_versions, (1, 2, 3, 4, 5, 6, 7, 8))
 
     def test_missing_migrations_stop_before_application_composition(self) -> None:
         missing_project_root = Path(self.temporary_directory.name) / "missing-root"
@@ -109,7 +112,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
                 connection.execute(
                     "SELECT COUNT(*) FROM schema_migrations"
                 ).fetchone()[0],
-                7,
+                8,
             )
 
     def test_main_entry_point_reports_startup_failure(self) -> None:

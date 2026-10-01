@@ -2129,7 +2129,7 @@ script_executions
 
 # 62. `scripts`
 
-Implemented by `0007_script_registry.sql` in Slice 040. The approved migration changes the earlier planned `is_enabled` default to `0`. Only `scripts`, `idx_scripts_enabled_name`, and `idx_scripts_category_id` are implemented here; parameter, execution, FTS and view definitions elsewhere in this document remain planned. The nullable category foreign key checks identity; `ScriptRepository` requires `SCRIPT` scope for catalog reads. No trigger or production seed is added.
+Implemented by `0007_script_registry.sql` in Slice 040. The approved migration changes the earlier planned `is_enabled` default to `0`. Only `scripts`, `idx_scripts_enabled_name`, and `idx_scripts_category_id` are implemented here; parameter, execution, FTS and view definitions elsewhere in this document remain planned. The nullable category foreign key checks identity; `ScriptRepository` requires `SCRIPT` scope for catalog reads. No trigger was added. Slice 042's `0008_system_snapshot_script.sql` inserts one production reference-data row without a structural schema change: code `diagnostic.windows.system_snapshot`, name `Windows System Snapshot`, path `PowerShell/Diagnostics/Get-SystemSnapshot.ps1`, type `DIAGNOSTIC`, runtime `POWERSHELL_7`, risk `LOW`, privilege `STANDARD_USER`, version `1.0.0`, timeout 60, structured output 1, enabled 1, and null category/checksum. The table default remains disabled.
 
 ```sql
 CREATE TABLE scripts (
@@ -4796,6 +4796,7 @@ Implemented migration sequence:
 0005_knowledge.sql
 0006_knowledge_search.sql
 0007_script_registry.sql
+0008_system_snapshot_script.sql
 ```
 
 Future domain migration numbers are intentionally unassigned until each bounded slice is approved.

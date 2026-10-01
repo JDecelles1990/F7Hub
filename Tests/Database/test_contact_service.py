@@ -83,12 +83,12 @@ class ContactServiceTests(unittest.TestCase):
                 self.service.create_contact(company_id=self.company.company_id, display_name="Bob Example")
         self.assertNotIn("private path", str(caught.exception))
 
-    def test_integrity_foreign_keys_and_seven_migrations(self):
+    def test_integrity_foreign_keys_and_eight_migrations(self):
         self.service.create_contact(company_id=self.company.company_id, display_name="Alice Example")
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 7)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 8)
             self.assertEqual(connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)
 
     def test_invalid_company_ids_rejected_without_writes(self):

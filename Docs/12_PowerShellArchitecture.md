@@ -10,6 +10,8 @@
 
 # 1. Purpose
 
+Slice 042 adds `PowerShell/Diagnostics/Get-SystemSnapshot.ps1`, a local, read-only PowerShell 7 diagnostic for standard-user execution. It queries local `Win32_OperatingSystem` and fixed `Win32_LogicalDisk` data through CIM, returning one schemaVersion 1 JSON result with `Get-SystemSnapshot` operation. Complete collection is PASS/exit 0. A drive-query failure is WARNING/exit 0 with an empty drive list; a returned drive with unavailable Size or FreeSpace is WARNING/exit 0 with that drive retained and only its unavailable measurements set to JSON null. Missing required OS data is ERROR/exit 1 with stable safe text. It takes no parameters, uses no network or credentials, and writes no files. Migration 0008 installs its enabled registry metadata with a null checksum. Enabled means catalog-visible, not approved for execution; AVAILABLE means present at last refresh. F7Hub still has no PowerShell execution path. Standalone execution occurs only in validation tooling.
+
 Slice 041 exposes enabled Slice 040 registry metadata in the read-only **Scripts** workspace. File statuses (AVAILABLE, MISSING, INACCESSIBLE, INVALID_REFERENCE) describe reference inspection at the last refresh; unexpected values display as Unknown. Even AVAILABLE does not grant execution approval. The workspace never opens `.ps1` contents and has no Run, registration, enable/disable or approval controls. PowerShell execution infrastructure remains deferred.
 
 Slice 040 introduces only a Python/SQLite read-only registry for PowerShell `.ps1` references. References are limited to Diagnostics, Reports and Modules below the supplied project root, with traversal, external links and invalid Windows paths rejected. File status is an observation, not execution approval. No production PowerShell file, `pwsh.exe` invocation, content read or execution gateway is added.
@@ -2258,19 +2260,19 @@ Major verified changes should update:
 
 # 113. Current Implementation Status
 
-Repository inspection on 2026-09-02 found no PowerShell implementation under `PowerShell\`.
+The 2026-09-02 no-implementation observation is historical. Slice 042 adds one local read-only PowerShell 7 diagnostic under `PowerShell\Diagnostics` and standalone parser/result tests under `Tests\PowerShell`.
 
 ```text
-PowerShell implementation status: PLANNED
+Get-SystemSnapshot.ps1: IMPLEMENTED; standalone behavior validated
+F7Hub PowerShell execution: DEFERRED
 ```
 
-This document does not prove that:
+This does not establish that:
 
-- scripts exist
 - Graph connectivity exists
 - Exchange connectivity exists
-- structured results are implemented
-- tests pass
+- a production execution gateway exists
+- F7Hub can invoke the diagnostic
 
 ---
 
@@ -2300,7 +2302,7 @@ Recommended implementation order:
 10. Microsoft Graph read-only integration
 ```
 
-This proves the execution architecture before adding broad cloud administration.
+This sequence is conceptual. Slice 042 deliberately adds the first script and its standalone tests before any F7Hub execution architecture.
 
 ---
 

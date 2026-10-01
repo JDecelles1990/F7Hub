@@ -12,7 +12,7 @@
 
 ## Read-only PowerShell registry — Slice 040
 
-`ScriptRepository` uses configured SQLite connections for enabled catalog reads and exact case-insensitive `script_code` lookup. It joins only `SCRIPT` scope categories, excluding rows linked to other scopes; explicit `include_disabled=True` is internal inspection only. `ScriptService` returns metadata alongside a separate file status from path inspection under the supplied project root. The resolver validates Windows path syntax, approved folders, resolved containment and regular-file accessibility without reading script contents. No GUI, writer, approval or execution path is implemented. The production registry is empty.
+Slice 040 introduced `ScriptRepository` and `ScriptService` for metadata reads and file-reference inspection. `ScriptRepository` uses configured SQLite connections for enabled catalog reads and exact case-insensitive `script_code` lookup. It joins only `SCRIPT` scope categories, excluding rows linked to other scopes; explicit `include_disabled=True` is internal inspection only. `ScriptService` returns metadata alongside a separate file status from path inspection under the supplied project root. The resolver validates Windows path syntax, approved folders, resolved containment and regular-file accessibility without reading script contents. Slice 041 added the read-only Scripts workspace described above. Slice 042 adds one enabled production row through migration 0008 and its referenced `.ps1`; Python production code is unchanged. No registry writer, approval, PowerShell execution service or gateway, result capture, parameter handling or remote administration is implemented.
 
 ## Manual database backup — Slice 038
 

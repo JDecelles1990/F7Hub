@@ -47,11 +47,17 @@ No entry may imply that documented target architecture is implemented or verifie
 
 ---
 
+# 2026-09-30 — Slice 042: First Production PowerShell Diagnostic Script
+
+Added one PowerShell 7 diagnostic, `Get-SystemSnapshot.ps1`, for a local read-only Windows OS, uptime, memory and fixed-drive snapshot. It emits one structured JSON result, with safe ERROR and partial WARNING paths. Data migration `0008_system_snapshot_script.sql` installs exactly one enabled, uncategorized `Windows System Snapshot` registry row; the table's default remains disabled and its checksum remains null. The existing Scripts workspace displays the file as AVAILABLE when present, with no application execution control or production Python change. Standalone PowerShell validation runs only in test tooling. Validation details and candidate identity are recorded in `Status/CURRENT_STATE.md`; independent review remains pending.
+
+---
+
 # 2026-09-30 — Slice 041: Read-Only Scripts Catalog UI
 
 Application bootstrap now composes the existing ScriptRepository and ScriptService with the resolved database path and project root. The existing MainWindow stack, File menu and toolbar expose **Scripts**. ScriptWorkspace loads enabled entries through ServiceTaskRunner, shows an intentional empty state, four text file statuses and plain-text metadata, and supports selection-preserving manual Refresh and safe retry after a failed read. The shared runner and close guard prevent concurrent loads and page destruction during work. The GUI does not query SQLite, validate paths, read `.ps1` contents or execute PowerShell. No schema, migration, production seed, registry management or execution control was added.
 
-Focused, full regression and native Windows evidence are recorded in `Status/CURRENT_STATE.md`. The candidate remains unstaged and uncommitted for independent read-only review.
+Focused, full regression and native Windows evidence were recorded in the Slice 041 handoff. Slice 041 was subsequently reviewed and merged through PR #42; its original candidate-state wording is historical.
 
 ---
 

@@ -11,10 +11,10 @@ from unittest.mock import patch
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QPushButton
 
 from f7hub.app.bootstrap import bootstrap_application
-from f7hub.infrastructure.database import database_connection
+from f7hub.infrastructure.database import bootstrap_database, database_connection
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -33,7 +33,9 @@ class ScriptCatalogFlowTests(unittest.TestCase):
         migrations = self.root / "Database" / "Migrations"
         migrations.mkdir(parents=True)
         for source in (ROOT / "Database" / "Migrations").glob("*.sql"):
-            shutil.copyfile(source, migrations / source.name)
+            if int(source.name[:4]) <= 7:
+                # Preserve the pre-production-data empty catalog fixture.
+                shutil.copyfile(source, migrations / source.name)
         self.database = self.root / "catalog.db"
         self.context = bootstrap_application(project_root=self.root, database_path=self.database)
         self.window = self.context.main_window
@@ -99,6 +101,35 @@ class ScriptCatalogFlowTests(unittest.TestCase):
         self.assertIn("Category: Networking", workspace.details.toPlainText())
         self.assertIn("File found at last refresh.", workspace.details.toPlainText())
         self.assertFalse(workspace.empty_state.isVisible())
+
+    def test_production_snapshot_visible_without_execution(self):
+        migrations = self.root / "Database" / "Migrations"
+        shutil.copyfile(ROOT / "Database/Migrations/0008_system_snapshot_script.sql",
+                        migrations / "0008_system_snapshot_script.sql")
+        script = self.root / "PowerShell/Diagnostics/Get-SystemSnapshot.ps1"
+        script.parent.mkdir(parents=True)
+        shutil.copyfile(ROOT / "PowerShell/Diagnostics/Get-SystemSnapshot.ps1", script)
+        bootstrap_database(self.database, migrations)
+        workspace = self.window.script_workspace
+        with patch("subprocess.Popen", side_effect=AssertionError("PowerShell launched")) as execute:
+            self.window.scripts_action.trigger()
+            self.wait_idle()
+            self.assertEqual(workspace.model.rowCount(), 1)
+            self.assertEqual([workspace.model.item(0, column).text() for column in range(4)],
+                             ["Windows System Snapshot", "diagnostic.windows.system_snapshot",
+                              "Not selected", "AVAILABLE"])
+            details = workspace.details.toPlainText()
+            for value in ("Type: DIAGNOSTIC", "Runtime: POWERSHELL_7", "Risk: LOW",
+                          "Privilege: STANDARD_USER", "PowerShell reference: PowerShell/Diagnostics/Get-SystemSnapshot.ps1"):
+                self.assertIn(value, details)
+            workspace.table.selectRow(0)
+            workspace.refresh_button.click()
+            self.wait_idle()
+            self.assertEqual(workspace.model.rowCount(), 1)
+            self.assertEqual(workspace.model.item(0, 3).text(), "AVAILABLE")
+            execute.assert_not_called()
+        self.assertFalse(any(control.text().lower() in {"run", "test", "execute"}
+                             for control in workspace.findChildren(QPushButton)))
 
 
 if __name__ == "__main__":
