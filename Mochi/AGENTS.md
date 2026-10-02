@@ -32,7 +32,7 @@ The initial imported baseline had artwork, settings, a print-only `src/main.py`,
 empty packages/tests and an empty `config/guide.json`. Slice 001 now implements
 the standalone Python/PySide6 pet, settings validation, idle playback, dragging,
 Pause/Resume/Exit and logging under `src/mochi`; see [README](README.md) for current
-evidence and limitations. Screen recognition, hints, F7Hub adapters and Luna remain
+evidence and limitations. Slice 002 adds approved local startup/controls IPC as an implementation candidate. Screen recognition, hints, business-context adapters and Luna remain
 **PLANNED**. Artwork QA remains historical evidence, separate from runtime
 validation. Verify the live baseline again before future work.
 

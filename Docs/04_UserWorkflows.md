@@ -1,5 +1,11 @@
 ﻿# F7Hub User Workflows
 
+## Mochi runtime controls — Slice 002 candidate
+
+After the first actual F7Hub window display, one asynchronous attach-first startup attempt connects to Mochi or launches it once. Failure leaves ticket work and navigation usable. Settings → Mochi… opens one modeless dialog with status, Start/Show, Hide, Idle, Wave, Pause/Resume, Exit and Close. Closing Settings leaves the application controller and pet unchanged. Start/Show explicitly retries after failure or manual pet exit; ordinary focus, restore and Settings reopening do not relaunch it. No preferences are persisted.
+
+Manual Wave loops until another valid command. The first application-session greeting is a separate best-effort single wave cycle, then Idle. Paused, hidden, manually waving or exiting pets skip the greeting; user commands always take precedence. F7Hub closing leaves Mochi alive; final-controller loss restores a hidden pet with animation/frame/Pause preserved.
+
 > Document: `Docs/04_UserWorkflows.md`  
 > Project: F7Hub  
 > Purpose: Define how technicians interact with F7Hub to complete common IT support tasks.  

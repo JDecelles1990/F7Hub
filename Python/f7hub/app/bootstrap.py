@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from PySide6.QtWidgets import QApplication
 
 from f7hub.gui.main_window import MainWindow
 from f7hub.infrastructure.database import BootstrapResult, bootstrap_database
@@ -24,6 +25,8 @@ from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
 from f7hub.services.database_backup_service import DatabaseBackupService
 from f7hub.repositories.script_repository import ScriptRepository
 from f7hub.services.script_service import ScriptService
+from f7hub.infrastructure.mochi_gateway import MochiGateway
+from f7hub.services.mochi_service import MochiService
 
 
 DEFAULT_PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -44,6 +47,7 @@ class ApplicationContext:
     script_repository: ScriptRepository
     script_service: ScriptService
     main_window: MainWindow
+    mochi_service: MochiService
 
 
 def bootstrap_application(
@@ -77,6 +81,8 @@ def bootstrap_application(
     script_service = ScriptService(script_repository, resolved_project_root)
     companies = CompanyRepository(resolved_database_path)
     contacts = ContactRepository(resolved_database_path)
+    mochi_service = MochiService(MochiGateway(resolved_project_root, QApplication.instance()))
+    QApplication.instance().aboutToQuit.connect(mochi_service.close)
     reference_service = TicketReferenceService(
         companies, contacts,
         categories,
@@ -88,6 +94,7 @@ def bootstrap_application(
         knowledge_link_service=ticket_knowledge_service,
         backup_service=DatabaseBackupService(resolved_database_path),
         script_service=script_service,
+        mochi_service=mochi_service,
     )
 
     return ApplicationContext(
@@ -102,4 +109,5 @@ def bootstrap_application(
         script_repository=script_repository,
         script_service=script_service,
         main_window=main_window,
+        mochi_service=mochi_service,
     )

@@ -18,6 +18,7 @@ class Settings:
     frame_directory: str = "assets/animations/frames"
     idle_row: int = 0
     frame_interval_ms: int = 120
+    wave_row: int = 3
 
 
 def load_settings(root: Path) -> Settings:
@@ -73,6 +74,7 @@ def load_settings(root: Path) -> Settings:
                       lambda v: type(v) in (int, float) and 0.1 <= v <= 1.0 and math.isfinite(v)),
         frame_directory=value("animation", "frame_directory", defaults.frame_directory, safe_directory),
         idle_row=value("animation", "idle_row", defaults.idle_row, lambda v: type(v) is int and 0 <= v <= 10),
+        wave_row=value("animation", "wave_row", defaults.wave_row, lambda v: type(v) is int and 0 <= v <= 10),
         frame_interval_ms=value("animation", "frame_interval_ms", defaults.frame_interval_ms,
                                 lambda v: type(v) is int and 20 <= v <= 2000),
     )

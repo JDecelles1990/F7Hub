@@ -1,5 +1,11 @@
 # F7Hub GUI Design
 
+## Mochi Settings — Slice 002 candidate
+
+Settings → Mochi… opens a single parent-owned modeless `MochiSettingsDialog`. Repeated opening raises the existing dialog. Status and controls observe the application-owned MochiService; closing unsubscribes the dialog without closing the connection or storing preferences. Pending commands disable only conflicting Mochi controls. Close, F7Hub navigation and ticket work remain usable. Detached/obsolete dialog callbacks are ignored, and replacement dialogs subscribe to current service state.
+
+Controls are Start/Show, Hide, Idle, Wave, Pause/Resume and Exit. Animation switching is disabled while paused. Unconfirmed commands retain UNCERTAIN feedback separately from subsequently observed runtime state. The first display schedules one automatic attempt after recording its application-session gate, rather than launching during bootstrap.
+
 > Document: `Docs/05_GUI.md`  
 > Project: F7Hub  
 > Purpose: Define the intended graphical user interface, navigation model, workspace structure, panel behavior and interaction principles for F7Hub.  
