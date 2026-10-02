@@ -1,0 +1,112 @@
+{
+  "ok": true,
+  "frames_root": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waiting/frames",
+  "states": [
+    "waiting"
+  ],
+  "errors": [],
+  "warnings": [],
+  "rows": [
+    {
+      "state": "waiting",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waiting/frames/waiting/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20810,
+          "bbox": [
+            16,
+            5,
+            176,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 354
+        },
+        {
+          "index": 1,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waiting/frames/waiting/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 16612,
+          "bbox": [
+            25,
+            14,
+            166,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 292
+        },
+        {
+          "index": 2,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waiting/frames/waiting/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 16304,
+          "bbox": [
+            24,
+            5,
+            167,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 260
+        },
+        {
+          "index": 3,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waiting/frames/waiting/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 16741,
+          "bbox": [
+            27,
+            12,
+            165,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 299
+        },
+        {
+          "index": 4,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waiting/frames/waiting/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 17118,
+          "bbox": [
+            27,
+            13,
+            164,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 287
+        },
+        {
+          "index": 5,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waiting/frames/waiting/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18518,
+          "bbox": [
+            20,
+            16,
+            172,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 318
+        }
+      ]
+    }
+  ]
+}

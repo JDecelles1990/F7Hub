@@ -1,0 +1,82 @@
+{
+  "ok": true,
+  "frames_root": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waving/frames",
+  "states": [
+    "waving"
+  ],
+  "errors": [],
+  "warnings": [],
+  "rows": [
+    {
+      "state": "waving",
+      "expected_frames": 4,
+      "actual_frames": 4,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waving/frames/waving/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20920,
+          "bbox": [
+            15,
+            5,
+            177,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 256
+        },
+        {
+          "index": 1,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waving/frames/waving/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 21634,
+          "bbox": [
+            15,
+            5,
+            177,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 226
+        },
+        {
+          "index": 2,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waving/frames/waving/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20702,
+          "bbox": [
+            21,
+            5,
+            170,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 218
+        },
+        {
+          "index": 3,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waving/frames/waving/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20581,
+          "bbox": [
+            16,
+            5,
+            175,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 258
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "ok": true,
+  "chroma_key": {
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "threshold": 96.0
+  },
+  "rows": [
+    {
+      "state": "jumping",
+      "frames": [
+        "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/jumping/frames/jumping/00.png",
+        "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/jumping/frames/jumping/01.png",
+        "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/jumping/frames/jumping/02.png",
+        "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/jumping/frames/jumping/03.png",
+        "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/jumping/frames/jumping/04.png"
+      ],
+      "method": "components"
+    }
+  ]
+}

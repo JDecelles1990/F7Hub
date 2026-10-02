@@ -1,0 +1,112 @@
+{
+  "ok": true,
+  "frames_root": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/review/frames",
+  "states": [
+    "review"
+  ],
+  "errors": [],
+  "warnings": [],
+  "rows": [
+    {
+      "state": "review",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/review/frames/review/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20951,
+          "bbox": [
+            18,
+            5,
+            173,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 293
+        },
+        {
+          "index": 1,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/review/frames/review/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 16477,
+          "bbox": [
+            19,
+            41,
+            172,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 249
+        },
+        {
+          "index": 2,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/review/frames/review/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18121,
+          "bbox": [
+            25,
+            10,
+            166,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 241
+        },
+        {
+          "index": 3,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/review/frames/review/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18860,
+          "bbox": [
+            24,
+            5,
+            167,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 281
+        },
+        {
+          "index": 4,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/review/frames/review/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 18153,
+          "bbox": [
+            26,
+            5,
+            165,
+            202
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 235
+        },
+        {
+          "index": 5,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/review/frames/review/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20503,
+          "bbox": [
+            22,
+            5,
+            171,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 281
+        }
+      ]
+    }
+  ]
+}
