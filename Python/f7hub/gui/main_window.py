@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from PySide6.QtGui import QAction, QKeySequence
+from PySide6.QtCore import QTimer
 from PySide6.QtWidgets import QMainWindow, QWidget, QStackedWidget, QMessageBox
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.knowledge_workspace import KnowledgeWorkspace
@@ -15,6 +16,7 @@ from f7hub.services.knowledge_service import KnowledgeService
 from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
 from f7hub.services.database_backup_service import DatabaseBackupService
 from f7hub.services.script_service import ScriptService
+from f7hub.gui.mochi_settings_dialog import MochiSettingsDialog
 from f7hub.services.altf7hub_service import AltF7HubService, AltF7HubOpenError
 
 from f7hub.gui.ticket_create_widget import (
@@ -37,6 +39,7 @@ class MainWindow(QMainWindow):
         knowledge_link_service: TicketKnowledgeService | None = None,
         backup_service: DatabaseBackupService | None = None,
         script_service: ScriptService | None = None,
+        mochi_service=None,
         altf7hub_service: AltF7HubService | None = None,
         parent: QWidget | None = None,
     ) -> None:
@@ -48,6 +51,8 @@ class MainWindow(QMainWindow):
 
         self.runner = ServiceTaskRunner(self)
         self.backup_service = backup_service
+        self.mochi_service = mochi_service
+        self._mochi_dialog = None
         self.altf7hub_service = altf7hub_service
         self.pages = QStackedWidget(self)
         self.ticket_create_widget = TicketCreateWidget(
@@ -79,6 +84,12 @@ class MainWindow(QMainWindow):
         self.ticket_create_widget.ticket_created.connect(self._ticket_created)
 
         file_menu = self.menuBar().addMenu("&File")
+        settings_menu = self.menuBar().addMenu('&Settings')
+        self.mochi_action = QAction('Mochi…', self)
+        self.mochi_action.setObjectName('mochiSettingsAction')
+        self.mochi_action.setEnabled(mochi_service is not None)
+        self.mochi_action.triggered.connect(self.show_mochi_settings)
+        settings_menu.addAction(self.mochi_action)
         toolbar = self.addToolBar("Tickets")
         self.new_ticket_action = QAction("New ticket", self)
         self.new_ticket_action.setShortcut(QKeySequence.StandardKey.New)
@@ -114,6 +125,24 @@ class MainWindow(QMainWindow):
         self.runner.busy_changed.connect(self._set_busy)
 
         self.statusBar().showMessage("Ready")
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        if self.mochi_service is not None:
+            self.mochi_service.automatic_start(lambda callback: QTimer.singleShot(0, self, callback))
+
+    def show_mochi_settings(self):
+        if self.mochi_service is None:
+            return
+        if self._mochi_dialog is None:
+            self._mochi_dialog = MochiSettingsDialog(self.mochi_service, self)
+            self._mochi_dialog.finished.connect(self._mochi_dialog_closed)
+        self._mochi_dialog.show()
+        self._mochi_dialog.raise_()
+        self._mochi_dialog.activateWindow()
+
+    def _mochi_dialog_closed(self, _result):
+        self._mochi_dialog = None
 
     def _ticket_created(self, ticket: object) -> None:
         ticket_number = getattr(ticket, "ticket_number", "")
@@ -226,4 +255,8 @@ class MainWindow(QMainWindow):
             if answer != QMessageBox.StandardButton.Discard:
                 event.ignore()
                 return
+        if self.mochi_service is not None:
+            if self._mochi_dialog is not None:
+                self._mochi_dialog.close()
+            self.mochi_service.close()
         super().closeEvent(event)

@@ -1,4 +1,13 @@
 # F7Hub System Architecture
+
+## Mochi local control boundary — Slice 002 candidate
+
+The approved process boundary is F7Hub application → MochiService → MochiGateway/persistent QLocalSocket → Mochi LocalController/QLocalServer → PetRuntime → PetWindow. Bootstrap composes the service without launching. The application owns session ID, greeting consumption and one automatic-attempt gate. Settings is only a subscriber; ServiceTaskRunner is not used for persistent IPC. The detached renderer outlives F7Hub.
+
+The data-free protocol and Qt channel primitives are shared under Python/f7hub/domain/mochi_protocol.py and infrastructure/mochi_channel.py. The standalone renderer resolves only its checkout-relative Python package path and imports these shared modules, never F7Hub bootstrap, business services or SQLite. Endpoint ACL is same-user UserAccessOption; one canonical checkout identity determines protocol, endpoint and per-user lock names. Every renderer entry acquires a lifetime QLockFile using tryLock(0), with age expiry disabled, before listening or displaying. Contention reports unavailable and creates no pet.
+
+Validated persistent connections alone count as controllers. Hide checks that count at mutation execution. Final-controller loss restores a hidden pet unless EXITING, preserving animation/frame/Pause and recovering position against individual available screens. Protocol validation, resource bounds, event-loop serialization, stale-generation rejection and no automatic mutation replay protect this boundary. No database/schema, PowerShell, AHK, AI or reaction-system change is introduced.
+
 >
 > Document: Docs/06_SystemArchitecture.md
 > Project: F7Hub

@@ -994,7 +994,8 @@ FormatSelection(editor, action, chosenColor := "") {
     } else {
         candidate := {Id: item.Id, Title: item.Title, Body: item.Body, Path: item.Path, Shortcut: item.Shortcut, Runs: result}
         try {
-            if ReadTopic(item.Path, ArchiveMode).Body != item.Body
+            source := ReadTopic(item.Path, ArchiveMode)
+            if source.Title !== item.Title || source.Body !== item.Body
                 throw Error("The text file changed outside the app. Reopen the guide to load the updated text before formatting.")
             WriteTopic(candidate)
         }
