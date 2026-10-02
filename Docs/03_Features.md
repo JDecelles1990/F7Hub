@@ -8,6 +8,12 @@
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+AltF7Hub is an implemented AHK v2 help desk and interview reference overlay, available through Alt+F7 and the Python toolbar/File action **AltF7Hub Guide**. It reuses the supplied 31-topic library, keyword reminders, optional topic letters, search, editing, archive/restore and formatting. Up/Down wrap within visible topics; Left/Right change opacity by one percentage point and support keyboard repeat, clamped to 70–100% (default 85%). It displays reminders and does not execute troubleshooting commands. Ticket-context matching and issue-to-topic macros remain **DEFERRED**. Validation executed on 2026-10-01: GUI 181 PASS, Integration 156 PASS, isolated guide 162 checks PASS, native shared-host 29 checks PASS, request-failure 7 checks PASS, native Python/guide/editor 13 checks PASS, and existing F7 launcher and magnetic-follower suites PASS. On resume, GUI/Integration and AHK regression evidence is retained after verifying unchanged relevant inputs; native Python/guide/editor checks were freshly rerun and all 18 current AHK files passed fresh v2.0.26 parser validation. Commands, candidate identities, result files and inspected native captures are under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-046`. Native checks use isolated data at 96 DPI; repeated-key messages are automated evidence, not a claim of physical hardware acceptance or a live Teams/camera test.
+
+---
+
 ## Manual Scripts catalog search — Slice 045
 
 The enabled Scripts catalog now supports explicit **Search** / Enter and **Clear** across name, code and description. Matching is a literal substring with SQLite's default ASCII-insensitive behavior; percent, underscore and backslash are literal characters. Empty or whitespace-only input returns the unfiltered catalog. Disabled and wrong-category-scope registrations remain excluded, with the existing stable order and one row per script.

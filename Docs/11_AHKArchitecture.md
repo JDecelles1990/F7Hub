@@ -8,6 +8,22 @@
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+`AutoHotkey/F7Hub.ahk` includes the existing guide core through `GuideHost.ahk` and explicitly supplies the guide directory before loading topics/settings. The Script action uses that directory, independent of the running entry path. The standalone guide entry is a short-lived client; one shared host retains the editor and owns F7 and Alt+F7. Installed copies and Windows Startup entries outside this checkout are not modified.
+
+Alt+F7 uses a keyboard hook and completes each toggle before another hotkey interrupts it. It hides only an active, visible guide, otherwise shows/focuses it; an open editor is always focused. Plain arrow hotkeys intercept native ListBox navigation only when notes/list has focus. Up/Down wrap visible results; Left/Right apply 1% changes with keyboard repeat, 70–100% bounds and debounced persistence. Unchanged bounds do not redraw repeatedly. Modified keys and other controls remain native. Focusing notes preserves selection and scroll position.
+
+After correction of review finding R046-01, each accepted Up/Down activation commits one logical topic change in the input callback. Native ListBox selection and Rich Edit rendering run in one interruptible, serialized painter; only redundant paints are coalesced. A bounded pending flag retains the latest topic without queuing future navigation. Formatting and focus/modifier guards remain in place. The input's short atomic state update contains no native control calls.
+
+**IPC v1:** the readiness window title is `F7Hub.AltF7Hub.Ready.v1|` plus the normalized lowercase absolute host script path. Clients use a `Local\` mutex keyed by that path, share a ten-second coordination/readiness budget, validate the host interpreter against their own v2 runtime, and send registered message `F7Hub.AltF7Hub.Show.v1` with `wParam=1`, `lParam=0`. The host rejects other values and acknowledges 1 for the guide or 2 for an editor only after presentation succeeds and the target is visible. SendMessageTimeout bounds the response at three seconds; the client independently confirms a visible target and exits with `SHOWN` or `FOCUSED_EDITOR`. Python bounds the client process at sixteen seconds. A client lacking console handles still exits truthfully.
+
+The keyboard fallback is permitted only before any message dispatch, for a verified ready host with a hidden guide and no editor; held modifier keys reject it. It verifies visibility after one Alt+F7 send. A dispatched timeout or rejection never retries or sends a toggle. The host may already be running or may complete a request after timeout: report **open request not confirmed**, not failed launch or rollback. Manual retry is idempotent show/focus. No executable command or ticket content crosses this boundary; no elevation, security-filter changes or external transport is added.
+
+Only pending opacity saves are flushed on host exit; starting and closing a clean host preserves settings bytes. The guide still owns its existing local topic/archive/format files. Correction validation on 2026-10-01: FRESH navigation 77 checks, guide 162, shared-host 29, native Python/guide/editor 14, supplemental native 35, all three original repeat reproductions (9 checks each), existing F7 launcher, and parser validation of 19 AHK files PASS. Rapid discrete, held hotkey and native-message sequences each produced seven Down and seven Up transitions; release caused no trailing moves. GUI 181, Integration 156, request-failure 7 and magnetic-follower PASS are RETAINED after verifying unchanged transitive inputs and environment. Earlier guide/host/UI/launcher/parser results were invalidated by the changed core and replaced by fresh runs. Exact commands, tested identities, archived failed attempts, the corrected manifest and inspected native captures are under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-046\correction`. Native checks use isolated data at 96 DPI; injected repeat messages are automated evidence, not physical hardware acceptance or a live Teams/camera test. Independent rereview remains pending.
+
+---
+
 # 1. Purpose
 
 This document defines the AutoHotkey v2 architecture for F7Hub.
@@ -1636,7 +1652,7 @@ Interactive temporal flicker observation: PASS — user-reported physical accept
 
 Correction validation on 2026-09-21: the follower test passes six injected geometries through production `Tick()` and native `WinMove`, measuring actual HWND displacement for 600 ticks each. The review geometry moves 32.557641 px on its first tick (previously approximately 1733.18 px). Coverage includes same-monitor, disjoint right, negative/above, overlapping and oversized work areas, eventual containment and settled stability. Controller regressions pass self-stop and launch/start failures: same-press repeats do not retry; release/new press permits the next attempt. These regressions are in the launcher test. Both existing AHK test files pass with exit code 0 and console-independent result files. The live launcher test closes its app/shortcut and removes its isolated database. Its multi-monitor fixture keeps the cursor over the decoy so Windows hover activation cannot independently focus another application during the longer bounded transition. Latest user physical validation of the unchanged corrected implementation: PASS — magnetic follow, cross-monitor smoothness and multi-monitor movement. An earlier native session reported focus/disappearance behavior while Windows hover activation was enabled. The subsequent fresh user validation did not reproduce the disappearance or focus-loss behavior as a feature failure. Hover activation remains enabled (approximately 300 ms) and is a known environmental variable; it was not proven to be the original cause. This evidence applies to this PC only. The retained automated PASS results and newer physical acceptance supersede the earlier unresolved native status: PASS — READY FOR INDEPENDENT MAGNETIC REREVIEW.
 
-Remaining sections describe intended architecture; clipboard integration, quick menus and richer Python command communication remain planned.
+Remaining sections describe intended architecture; clipboard integration, quick menus and broader Python command forwarding remain planned. The fixed AltF7Hub show/focus bridge above is implemented.
 
 ---
 

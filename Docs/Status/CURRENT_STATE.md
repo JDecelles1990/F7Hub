@@ -1,6 +1,21 @@
 # F7Hub Current State
 
-## Slice 045 — Manual Scripts Catalog Text Search
+## Slice 046 — AltF7Hub integration and keyboard navigation
+
+Last verified: 2026-10-01 (America/Toronto). Candidate branch `feature/altf7hub-integration-s046`; HEAD/base `15c61b5c410d0d5dffe5ac6c5ac01a4b6dd960f7`. Status: **PASS — READY_FOR_REVIEW after correction of R046-01**. Index empty; candidate unstaged/uncommitted. Independent rereview is the next gate; integration is pending.
+
+Shared AHK v2 host, standalone client and Python toolbar/File action are implemented. Scoped topic arrows wrap; repeated opacity arrows share controls and persistence. R046-01 previously reproduced seven Down inputs advancing only three topics. The corrected input callback commits logical navigation immediately and defers native selection/formatting to an interruptible serialized painter. FRESH correction validation: navigation 77 checks, guide 162, shared-host 29, native Python/guide/editor 14, supplemental native 35, three original reproductions (9 checks each), F7 launcher and parser validation of 19 AHK files PASS. Seven rapid/held/native Down and Up inputs now each produce seven transitions, with synchronized final topic/title/body and no post-release movement. GUI 181, Integration 156, request-failure 7 and magnetic-follower PASS remain RETAINED after transitive-input/environment verification. Prior affected evidence was invalidated and freshly rerun. Exact results, attempts, native captures, corrected manifest and drift/applicability matrices are under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-046\correction`; `correction-report.md` in the parent folder is the current handoff. Native validation uses isolated data at 96 DPI; physical hardware, other DPI and live Teams/camera acceptance remain NOT RUN.
+
+Supplied topics, format metadata, settings, backups and older evidence are preserved. Other worktrees and protected refs are unchanged. The corrected candidate has 68 paths; its previous 67-path manifest and review decision are preserved as historical evidence. Ticket-to-topic automation remains deferred. No database, dependency, script execution or Windows Startup changes.
+
+## Slice 045 — verified closure
+
+Slice 045 is **CLOSED** through PR #46 at `15c61b5c410d0d5dffe5ac6c5ac01a4b6dd960f7`. Its external integration/closure report was inspected and its merge was reconfirmed before Slice 046. The earlier pending-review snapshot below is historical and superseded; its validation counts are retained history, not fresh Slice 046 evidence.
+
+### Historical implementation handoff
+
+
+### Slice 045 — historical candidate snapshot
 
 Last verified: 2026-10-01 (America/Toronto). Current candidate on `feature/script-catalog-search-s045`; HEAD/base `66f6a3d3da3c08242fcf698707bd233ff12e84f6`. Local main includes the approved v0.3 maintenance commit; remote main remained at Slice 044 closure `5fe1ed73d9c65c4d1b88defd0f43a3d1b91b94c0` at implementation entry. No remote mutation was authorized/performed for this slice.
 

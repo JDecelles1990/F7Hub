@@ -7,6 +7,18 @@
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+**2026-10-01 — Slice 046: AltF7Hub integration and keyboard navigation.** Integrated the supplied reference guide under the shared AHK v2 entry, retained standalone access through a bounded request wrapper, and added the Python toolbar/File action through the existing worker/service boundary. Topics wrap with Up/Down; Left/Right change opacity by 1% and support repeat, with focus exclusions, bounds and saved settings. Show/focus preserves editor content, ticket drafts and topic selection/scroll. Concurrent clients are serialized; unconfirmed dispatched requests do not trigger a keyboard toggle.
+
+Validation executed on 2026-10-01: GUI 181 PASS, Integration 156 PASS, isolated guide 162 checks PASS, native shared-host 29 checks PASS, request-failure 7 checks PASS, native Python/guide/editor 13 checks PASS, and existing F7 launcher and magnetic-follower suites PASS. On resume, GUI/Integration and AHK regression evidence is retained after verifying unchanged relevant inputs; native Python/guide/editor checks were freshly rerun and all 18 current AHK files passed fresh v2.0.26 parser validation. Commands, candidate identities, result files and inspected native captures are under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-046`. Native checks use isolated data at 96 DPI; repeated-key messages are automated evidence, not a claim of physical hardware acceptance or a live Teams/camera test.
+
+Status: **READY_FOR_REVIEW**, unstaged/uncommitted. Existing topics, backups, settings and prior evidence are preserved. Ticket-driven topic selection remains deferred. No schema, dependency, PowerShell execution or Startup-entry change.
+
+**Slice 045 closure reconciliation:** its reviewed candidate subsequently integrated through PR #46 at `15c61b5`; prior pending-review wording is superseded by its verified external closure report.
+
+---
+
 # 1. Purpose
 
 This file answers:
@@ -51,7 +63,7 @@ No entry may imply that documented target architecture is implemented or verifie
 
 Added optional bound literal-substring catalog search across name, code and description, retaining enabled/category predicates and deterministic unique results. Type/NUL validation occurs before database access. Scripts adds Search/Enter/Clear, separate draft/applied state, request query capture, loading/copy guards, selection reconciliation, distinct empty messages and recoverable failure feedback. Navigation and filtered management reload preserve the applied query; committed management writes are not repeated after refresh failure. Existing verified-copy and registration/visibility behavior remain intact. No schema, migration, dependency or PowerShell source changes.
 
-Fresh Database **418 PASS**, GUI **178 PASS**, Integration **148 PASS** (744 full regression total), all exit 0 with no failures, errors or skips. Focused **32 PASS** and affected **46 PASS** overlap the full suites. Native Windows **PASS** at 1000×700 with observable worker/callback idle; six captures inspected. Durable suite/native records and manifests are outside the repository under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-045\`. This is implementation validation; independent review is pending. The candidate remains unstaged/uncommitted at READY_FOR_REVIEW. No integration was performed.
+Fresh Database **418 PASS**, GUI **178 PASS**, Integration **148 PASS** (744 full regression total), all exit 0 with no failures, errors or skips. Focused **32 PASS** and affected **46 PASS** overlap the full suites. Native Windows **PASS** at 1000×700 with observable worker/callback idle; six captures inspected. Durable suite/native records and manifests are outside the repository under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-045\`. This records historical implementation validation. Slice 045 subsequently passed independent review and closed through PR #46 at `15c61b5c410d0d5dffe5ac6c5ac01a4b6dd960f7`; its verified external integration/closure report establishes the completed lifecycle.
 
 ---
 

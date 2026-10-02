@@ -1,0 +1,34 @@
+﻿ONEDRIVE SYNC
+SCOPE — account · device · file / folder · last successful sync
+CLOUD — web access · latest version · test upload · service health
+CLIENT — paused · pending · red X · sync errors · sign-in
+FILES — locks · names · path length · file size · storage quota
+LOCATION — correct account · library · folder selection
+LOCAL — disk space · Files On-Demand · permissions
+NETWORK — VPN · proxy · firewall · known-good connection
+COMPARE — web / desktop · second file · second device
+RECOVERY — unsynced-file backup · confirmed cloud copies · approved reset
+VALIDATE — upload · download · conflict resolution · timestamps
+ACCOUNT SPLIT — Personal · Work / School · tenant · sign-in address
+PATH MAP — local root · cloud location · SharePoint library · shortcut
+SYNC DIRECTION — upload · download · both · one file · all files
+STATUS DETAIL — processing · pending · paused · signing in · sync error
+WEB BASELINE — tenant · latest item · test upload · test download
+FILE LOCKS — open app · coauthoring · checkout · stale lock
+FILE VALIDITY — characters · reserved names · long path · file size
+CAPACITY — cloud quota · local space · Files On-Demand state
+ACCESS DETAIL — file permissions · library membership · sharing changes
+CONFLICT DETAIL — duplicate names · conflicted copies · version history
+LOCAL DATA — unsynced changes · local-only files · protected backup
+LIBRARY DETAIL — folder selection · sync relationship · shortcut overlap
+FOLDER BACKUP — Desktop · Documents · Pictures · redirection · policy
+NETWORK DETAIL — proxy · TLS inspection · VPN · required endpoints
+SECURITY DETAIL — ransomware indicators · mass deletion · escalation
+CLIENT DETAIL — version · accounts · startup · authentication prompts
+ISOLATION MATRIX — item / other item · web / local · known-good device
+TEST FILE — small neutral file · noncritical folder · timestamps
+SERVICE COMPARISON — tenant health · SharePoint · account health
+RESET BOUNDARY — unsynced-file backup · cloud confirmation · approved reset
+RELINK BOUNDARY — correct account · correct root · duplicate-folder avoidance
+RESTORE BOUNDARY — recycle bin · version history · retention owner
+FINAL CHECK — upload / download · latest content · path · conflicts

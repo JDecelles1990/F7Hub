@@ -1,0 +1,34 @@
+﻿IDENTITY / MICROSOFT 365
+VERIFY — user identity · approved verification process
+AUTHORITY — Entra ID · Active Directory · hybrid
+ACCOUNT — enabled · locked · expired · risk · license
+SIGN-IN — username · exact error · time · correlation ID
+MFA — method · device · registration · repeated prompts
+POLICY — Conditional Access · compliance · location · risk
+COMPARE — web · private session · device · application
+HYBRID — password authority · sync · replication · time
+AUTHORIZATION — access requests · least privilege · approved recovery
+VALIDATE — sign-in · affected resource · user confirmation
+IDENTITY MAP — UPN · email alias · tenant · domain · guest / member
+AUTHORITY MAP — cloud-only · AD-synced · federated · managed domain
+SIGN-IN CONTEXT — application · browser · device · network
+ERROR EVIDENCE — full code · correlation ID · timestamp · request
+SIGN-IN LOGS — failure reason · resource · policy evaluation
+ACCOUNT DETAIL — enabled · locked · expired · deleted · risky
+LICENSE DETAIL — assignment · service plan · provisioning · group delay
+AUTHENTICATION DETAIL — password · MFA · passwordless · federation
+MFA DETAIL — method · registered device · notification · time
+MFA BOUNDARY — verified identity · approved reset · no bypass
+POLICY DETAIL — Conditional Access · location · compliance · session
+DEVICE DETAIL — registration · join type · primary user · compliance
+TOKEN DETAIL — prompts · private browser · mismatch · cached session
+HYBRID DETAIL — reset authority · password synchronization · replication
+DOMAIN DETAIL — DNS · time skew · controller reachability
+KERBEROS DETAIL — tickets · service access · SPN · identity owner
+ACCESS DETAIL — membership · role · resource permission · propagation
+GUEST DETAIL — home / resource tenant · invitation · account selection
+SERVICE DETAIL — tenant health · application · federation availability
+ISOLATION MATRIX — user / alternate device · alternate user / device
+RECOVERY ORDER — identity verification · targeted correction · validation
+ESCALATION PACKAGE — sign-in event · policy result · join state · scope
+FINAL CHECK — authentication · target resource · MFA · confirmation

@@ -8,6 +8,14 @@
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+MainWindow adds **AltF7Hub Guide** to its existing toolbar and File menu. The action is enabled when its service is composed and the shared runner is idle; launch work runs through ServiceTaskRunner and preserves page selection and drafts. Completion distinguishes guide opening from editor focusing. Safe failures offer installation/file checks or retry without exposing internal diagnostics.
+
+The reference overlay retains its AHK GUI ownership and existing controls. Opening focuses notes while preserving selection and scroll position. Arrow navigation is scoped to notes/list and wraps visible topics; opacity keys support repeat and share the slider, label, native alpha and saved preference. Native Python action, overlay and editor captures were inspected at 96 DPI after observable worker/callback readiness; no new controls were clipped. Transparency naturally reveals the underlying window.
+
+---
+
 ## Manual Scripts search controls — Slice 045
 
 Scripts adds a dedicated accessible search row: one field, **Search** and **Clear**. Enter applies the field. Draft text and the applied query remain separate; Refresh/navigation/management reload preserve both their meanings. Query state is local to the current workspace and resets on reconstruction. The table, details and existing heading actions are reused.

@@ -1,0 +1,31 @@
+﻿HARDWARE / PERIPHERALS
+IDENTIFY — model · serial · asset tag · warranty
+CONNECTION — power · cable · USB · dock · port
+OBSERVE — LEDs · noise · heat · diagnostic codes
+COMPARE — known-good cable · peripheral · port · device
+DISPLAY — source · resolution · scaling · refresh rate
+SYSTEM — Device Manager · drivers · firmware · logs
+ISOLATE — one peripheral · direct connection · dock bypass
+SAFETY — liquid · swelling · smoke · stop · vendor procedure
+RECOVERY — authorization · compatible parts · rollback
+ESCALATE — evidence · hardware owner · replacement
+INVENTORY — model · serial · firmware · warranty · compatibility
+SIGNAL PATH — host · port · cable · dock / hub · peripheral
+POWER DETAIL — adapter rating · USB power · powered hub · dock
+USB DETAIL — connector · alternate port · direct host
+DOCK DETAIL — model · firmware · charger · display support
+DEVICE MANAGER — hardware ID · status code · driver · event history
+DRIVER DETAIL — OEM source · exact device · architecture · update
+DISPLAY DETAIL — HDMI / DisplayPort / USB-C · source · mode
+MULTI-DISPLAY — arrangement · scaling · resolution · refresh · bandwidth
+KEYBOARD / MOUSE — batteries · pairing · receiver · accessibility
+AUDIO DETAIL — routing · jack detection · microphone / output
+STORAGE DETAIL — detection · connector · encryption · data protection
+THERMAL DETAIL — ventilation · fan · temperature · workload
+DIAGNOSTICS — vendor test · error code · reproducible pattern
+INTERMITTENT — cable movement · sleep / wake · dock reconnect · heat
+COMPARISON MATRIX — known-good device · cable · port · model
+FIRMWARE BOUNDARY — stable power · approved package · recovery key
+PHYSICAL BOUNDARY — warranty · trained technician · safe access
+REPLACEMENT DETAIL — compatibility · asset tracking · loaner · impact
+FINAL CHECK — peripheral workflow · reconnect · restart · stability

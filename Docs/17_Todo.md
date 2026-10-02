@@ -7,6 +7,18 @@
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+Slice 046 — AltF7Hub integration and keyboard navigation, on `feature/altf7hub-integration-s046` from `15c61b5`:
+
+- [x] Shared AHK host, standalone request wrapper and Python toolbar/File action; retain editor and ticket drafts.
+- [x] Scoped wraparound topics, repeated 1% opacity keys, bounded show/focus requests and guarded fallback.
+- [x] Execute GUI/Integration, isolated guide, native host/failure/UI and existing F7 regressions; synchronize affected owners.
+- [ ] Independent read-only review of the exact unstaged/uncommitted candidate. Integration is not authorized.
+- [ ] Later separately scoped ticket-to-topic context and macros (**DEFERRED**).
+
+---
+
 # 1. Purpose
 
 This file answers:
@@ -36,7 +48,7 @@ Slice 045 — Manual Scripts Catalog Text Search, on `feature/script-catalog-sea
 - [x] Add Search/Enter/Clear with draft/applied semantics, captured worker query, loading/copy guards, selection reconciliation, truthful empty/error recovery and filtered management reload.
 - [x] Validate search/isolation/no-write/integrity, async/copy safety, reconstruction and existing management regressions. Fresh Database **418 PASS**, GUI **178 PASS**, Integration **148 PASS** (744 full regression total), all exit 0 with no failures, errors or skips. Focused **32 PASS** and affected **46 PASS** overlap the full suites. Native Windows **PASS** at 1000×700 with observable worker/callback idle; six captures inspected.
 - [x] Synchronize affected Slice 045 behavior documents; broader FR-SCRIPT-004 dimensions remain deferred.
-- [ ] Independent read-only review of the exact unstaged/uncommitted candidate. No Slice 045 staging, commit, push, PR or integration authorization.
+- [x] Independent review and exact-content integration completed; Slice 045 is CLOSED through PR #46 at `15c61b5c410d0d5dffe5ac6c5ac01a4b6dd960f7`. The checklist above retains its historical implementation evidence.
 
 ### Prior Slice 044 handoff snapshot
 

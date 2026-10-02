@@ -1,0 +1,31 @@
+﻿WINDOWS SERVICES
+IDENTIFY — service name · display name · role
+STATE — running · stopped · startup type · exit code
+EVIDENCE — exact error · time · System / Application logs
+DEPENDENCIES — required services · shared backend
+ACCOUNT — logon identity · permissions · password authority
+CONFIGURATION — executable path · policy · recent changes
+TOOLS — services.msc · Get-Service · sc.exe query
+AUTHORIZATION — shared impact · approved restart · rollback
+VALIDATE — startup behavior · dependent workflow
+ESCALATE — names · events · tests · ownership
+SERVICE INVENTORY — system name · display name · role · owner
+STATE DETAIL — stopped · starting · running · stopping · recovery
+STARTUP DETAIL — automatic · delayed · manual · disabled · trigger start
+ERROR DETAIL — Win32 code · service-specific code · timestamp
+DEPENDENCY DETAIL — service · driver · backend · network
+LOGON DETAIL — local · domain · managed service account
+ACCOUNT DETAIL — password · logon-as-service right · policy
+BINARY DETAIL — path · existence · permissions · version · signature
+CONFIGURATION DETAIL — arguments · working directory · file · environment
+RESOURCE DETAIL — disk · memory · port conflict · certificate
+EVENTS — Service Control Manager · Application · vendor logs
+PROCESS DETAIL — PID · crash · timeout · exit code
+RECOVERY DETAIL — restart policy · restart loop · failure timing
+POLICY DETAIL — Group Policy · baseline · endpoint controls
+COMPARISON — matching known-good host · expected startup
+TOOLS — services.msc · Get-Service · sc.exe query · Win32_Service
+SHARED IMPACT — dependencies · other users · service owner
+CHANGE BOUNDARY — approved restart · expected configuration · rollback
+ACCOUNT BOUNDARY — credential owner · no generic account replacement
+FINAL CHECK — successful start · stable process · dependent workflow

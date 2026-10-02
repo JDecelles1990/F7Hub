@@ -1,0 +1,32 @@
+﻿PHISHING / SECURITY TRIAGE
+IDENTIFY — sender · domain · reply-to · links · attachments
+CONTEXT — urgency · unexpected request · payment · credentials
+INTERACTION — opened · clicked · downloaded · credentials entered
+PRESERVE — original message · headers · timestamps · screenshots
+REPORT — approved reporting channel · security team · ticket
+CONTAINMENT — security authorization · device isolation · session review
+IDENTITY — compromised account · MFA prompts · approved recovery
+SCOPE — recipients · related messages · affected devices
+SAFETY — no live-link testing · no attachment execution
+FOLLOW-UP — security instructions · user communication · evidence
+MESSAGE ORIGIN — display name · actual address · reply-to · domain
+AUTHENTICATION — SPF · DKIM · DMARC · header evidence
+LINK REVIEW — visible text · target domain · lookalike · approved analysis
+ATTACHMENT REVIEW — type · unexpected archive · macro request · verdict
+SOCIAL ENGINEERING — urgency · authority · secrecy · payment change
+USER TIMELINE — receipt · open · click · download · credential submission
+CREDENTIAL EXPOSURE — password · MFA approval · session token · accounts
+DEVICE EXPOSURE — executed file · download · endpoint alert
+MAILBOX EVIDENCE — original email · headers · Message-ID · recipients
+ACCOUNT EVIDENCE — sign-in location · device · time · unfamiliar activity
+PERSISTENCE REVIEW — forwarding · inbox rules · delegated access
+SCOPE REVIEW — related messages · recipients · shared mailbox
+CONTAINMENT OWNER — security operations · incident lead · approved procedure
+ACCOUNT CONTAINMENT — authorized session revocation · credentials · MFA
+DEVICE CONTAINMENT — authorized isolation · endpoint tooling · evidence
+EMAIL CONTAINMENT — reporting · quarantine · mail security owner
+FINANCIAL REQUEST — independently verified contact · approved process
+HANDLING LIMITS — no live links · no attachment execution · evidence retention
+REPORT PACKAGE — action timeline · indicators · user · device · logs
+COMMUNICATION — neutral facts · reassurance · security updates
+FOLLOW-UP — recovery · security clearance · awareness reminders

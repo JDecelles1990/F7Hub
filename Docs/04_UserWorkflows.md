@@ -8,6 +8,14 @@
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+Start the canonical `AutoHotkey/F7Hub.ahk`, or use **AltF7Hub Guide** in the Python toolbar/File menu. Alt+F7 toggles the guide; an open editor is focused and its unsaved text is preserved. The Python action always shows/focuses rather than toggling, and retains the current workspace and ticket draft. The standalone guide entry starts/reuses the same host; `--show` opens it immediately.
+
+With notes/list focused, topic letters select assigned subjects, Up/Down wrap within current search results or archive view, and Left/Right adjust opacity by 1% with held-key repeat. Search/editor/dialog keys remain native. Use Page Up/Page Down or the mouse wheel to scroll notes; Ctrl+Page Up/Down also navigate topics. Preferences persist beside the guide. An unconfirmed open request offers retry or manual Alt+F7; a possibly dispatched request never triggers an automatic toggle. Ticket-driven topic selection is deferred.
+
+---
+
 ## Search enabled scripts — Slice 045
 
 Open **Scripts**, enter part of a name, code or description, then select **Search** or press Enter. Select a result to inspect its metadata. **Clear** removes the search and restores the enabled catalog. A filtered empty result says **No scripts match your search.**; an unfiltered empty catalog says **No scripts available.** Management remains available with zero matches.

@@ -1,0 +1,31 @@
+﻿MAPPED DRIVES / SMB
+IDENTIFY — drive letter · UNC path · server · share
+CONTEXT — sign-in · VPN · policy · recent changes
+CONNECTIVITY — IP · DNS · route · TCP 445
+COMPARE — mapped drive / UNC · known-good user · device
+AUTHENTICATION — account · saved credentials · domain · tickets
+ACCESS — share permissions · NTFS · group membership
+MAPPING — GPO · logon script · user context · timing
+STATE — red X · reconnect behavior · server availability
+RECOVERY — authorization · targeted change · rollback
+VALIDATE — open · read · write · reconnect
+RESOURCE MAP — letter · UNC · server · share · subfolder
+USER CONTEXT — interactive · elevated · application identity
+PATH MATRIX — letter / UNC · hostname / FQDN · known-good resource
+TRANSPORT DETAIL — TCP 445 · route · VPN · server
+DNS DETAIL — expected address · suffix · split DNS
+AUTHENTICATION DETAIL — domain · account · saved credentials
+KERBEROS DETAIL — tickets · time · SPN · identity owner
+PERMISSION DETAIL — share · NTFS · effective access
+MEMBERSHIP DETAIL — nested group · replication · refreshed logon
+MAPPING DETAIL — persistence · net use · SMB state
+DEPLOYMENT DETAIL — Group Policy · targeting · logon script
+POLICY TOOLS — gpresult · management logs · processing time
+TIMING DETAIL — sign-in network · VPN · delayed reconnect
+CLIENT DETAIL — offline files · cache · credential target
+SERVER DETAIL — share · storage · SMB service · capacity
+FILE DETAIL — path length · locks · open handles · read-only
+ERROR DETAIL — exact code · timestamp · access / path
+CHANGE BOUNDARY — targeted mapping · credential owner · rollback
+SECURITY BOUNDARY — no SMB1 enablement · approved policy
+FINAL MATRIX — read · write · open · save · reconnect · sign-in

@@ -1,0 +1,31 @@
+﻿VPN
+SCOPE — user · device · location · client version
+CLIENT — launch · service · profile · certificate
+IDENTITY — username · password · MFA · account state
+TRANSPORT — internet · endpoint · DNS · required ports
+TUNNEL — connection status · assigned IP · routes
+RESOURCES — internal DNS · required port · permissions
+QUALITY — Wi-Fi · latency · packet loss · reconnect pattern
+COMPARE — known-good network · device · user
+POLICY — compliance · authorization · approved configuration
+VALIDATE — tunnel · internal resource · original workflow
+CLIENT DETAIL — product · version · profile · OS · service state
+ENDPOINT DETAIL — gateway · DNS · port · certificate hostname
+TRANSPORT DETAIL — internet · captive portal · proxy · firewall
+CERTIFICATE DETAIL — expiry · chain · client certificate · clock
+AUTHENTICATION DETAIL — authority · username · password · MFA
+POLICY DETAIL — compliance · membership · restrictions
+ERROR DETAIL — exact message · stage · timestamp · client logs
+TUNNEL DETAIL — status · assigned address · negotiation · reconnect
+ROUTE DETAIL — subnet · split tunnel · default route · overlap
+DNS DETAIL — resolver · suffix · split DNS · name / IP comparison
+RESOURCE DETAIL — service availability · required port · permission
+OVERLAPPING SUBNETS — home LAN · corporate LAN · route preference
+QUALITY DETAIL — Wi-Fi · loss · latency · mobile network
+SESSION DETAIL — timeout · sleep / wake · roaming
+ISOLATION MATRIX — user / device / network · known-good profile
+CLIENT SERVICE — dependency · driver · endpoint security
+LOG CORRELATION — client · gateway · authentication · policy owner
+CHANGE BOUNDARY — approved profile · driver update · rollback
+SECURITY BOUNDARY — MFA verification · no policy bypass · approved reset
+FINAL MATRIX — tunnel · internal DNS · port · business app

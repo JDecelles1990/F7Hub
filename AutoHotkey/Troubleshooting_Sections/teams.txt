@@ -1,0 +1,32 @@
+﻿TEAMS / AUDIO / VIDEO
+SCOPE — meeting · account · device · web / desktop
+DEVICES — selected microphone · speaker · camera
+AUDIO — mute · input level · output · volume mixer
+CAMERA — privacy · shutter · indicator · USB · dock
+CONFLICTS — exclusive use · other apps · Bluetooth profile
+COMPARE — Windows Sound · Camera app · known-good headset
+CLIENT — version · settings · service health
+NETWORK — latency · loss · jitter · Wi-Fi · VPN
+EVIDENCE — meeting time · call-health data · symptoms
+VALIDATE — preview · test call · original meeting
+CLIENT MATRIX — desktop / web · same account · same meeting
+INPUT CHAIN — microphone · OS input · Teams device · meeting mute
+OUTPUT CHAIN — Teams speaker · OS output · mixer · device
+CAMERA CHAIN — shutter · privacy · OS Camera · Teams selection
+USB DETAIL — port · dock · hub · bandwidth · power
+BLUETOOTH DETAIL — profile · pairing · battery · competing device
+PERMISSION DETAIL — camera · microphone · browser · organization policy
+EXCLUSIVE USE — meeting app · recording app · device lock
+AUDIO LEVEL — input meter · gain · noise suppression · volume
+ECHO DETAIL — duplicate devices · speaker pickup · joined endpoints
+WEB BASELINE — supported browser · permissions · same device
+MEETING DETAIL — tenant · device · meeting ID · timestamp
+NETWORK DETAIL — latency · jitter · loss · Wi-Fi · VPN
+QUALITY DETAIL — call-health metrics · bandwidth · CPU · load
+CLIENT DETAIL — build · update · cached account · policy · health
+SCREEN SHARING — display selection · OS permission · graphics · policy
+IDENTITY DETAIL — prompts · guest tenant · MFA · license
+HARDWARE MATRIX — headset · camera · direct USB · another app
+LOG PACKAGE — app logs · call time · devices · comparisons
+REPAIR BOUNDARY — version-specific procedure · saved work · authorization
+FINAL MATRIX — preview · test call · audio · video · sharing

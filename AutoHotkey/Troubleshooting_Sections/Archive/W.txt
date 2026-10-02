@@ -1,0 +1,34 @@
+﻿WINDOWS
+STARTUP — display · boot · recovery · recent changes
+BITLOCKER — device identity · authorized recovery-key source
+PROFILE — account · free space · permissions · known-good user
+UPDATES — KB · error code · pending restart · policy · servicing
+PERFORMANCE — CPU · memory · disk · startup · storage health
+CRASHES — stop code · module · logs · dumps · Reliability Monitor
+DEVICE — drivers · firmware · diagnostics · heat
+DOMAIN — DNS · time · VPN · trust · authentication
+RECOVERY — backup · authorization · repair · rollback
+VALIDATE — reboot behavior · original workflow · evidence
+BOOT STAGE — firmware · POST · boot loader · Windows · sign-in
+RECENT CHANGE — update · driver · firmware · hardware · power loss
+RECOVERY ENVIRONMENT — authorized WinRE · startup repair · restore
+BITLOCKER DETAIL — asset match · recovery key ID · authorized source
+DISK VISIBILITY — firmware detection · controller · diagnostics
+PROFILE DETAIL — temporary profile · profile events · disk · permissions
+KNOWN-GOOD PROFILE — app behavior · per-user configuration · policy
+UPDATE DETAIL — KB · hexadecimal error · servicing · pending restart
+UPDATE LOGS — Event Viewer · CBS.log · DISM.log · update evidence
+UPDATE ENVIRONMENT — space · proxy · metered network · management policy
+INTEGRITY TOOLS — approved DISM · SFC · results · reboot requirement
+DRIVER DETAIL — hardware ID · version · recent update · rollback
+CRASH DETAIL — stop code · dump · module · Reliability Monitor
+CRASH PATTERN — load · sleep / wake · heat · device · frequency
+PERFORMANCE DETAIL — CPU · memory pressure · disk latency · startup
+STORAGE DETAIL — free space · vendor diagnostics · I/O events
+TIME DETAIL — time zone · clock skew · domain time source
+DOMAIN DETAIL — IP · DNS · VPN · trust · authentication
+POLICY DETAIL — Group Policy · MDM · compliance · owner
+TOOLS — msinfo32 · Event Viewer · Reliability Monitor · Device Manager
+RECOVERY ORDER — backup · recovery key · authorization · rollback
+ESCALATION PACKAGE — build · asset · error · logs · dump · test matrix
+FINAL CHECK — restart · sign-in · original workflow · stability

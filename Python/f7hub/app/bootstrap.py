@@ -24,6 +24,8 @@ from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
 from f7hub.services.database_backup_service import DatabaseBackupService
 from f7hub.repositories.script_repository import ScriptRepository
 from f7hub.services.script_service import ScriptService
+from f7hub.services.altf7hub_service import AltF7HubService
+from f7hub.infrastructure.altf7hub_gateway import WindowsAltF7HubGateway
 
 
 DEFAULT_PROJECT_ROOT = Path(__file__).resolve().parents[3]
@@ -88,6 +90,7 @@ def bootstrap_application(
         knowledge_link_service=ticket_knowledge_service,
         backup_service=DatabaseBackupService(resolved_database_path),
         script_service=script_service,
+        altf7hub_service=AltF7HubService(WindowsAltF7HubGateway(resolved_project_root)),
     )
 
     return ApplicationContext(

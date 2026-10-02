@@ -1,0 +1,27 @@
+﻿INTERVIEW / TECHNICAL ANSWERS
+STRUCTURE — clarify · scope · reproduce · isolate · validate
+NETWORK — link · IP · gateway · DNS · route · port
+ACCESS — identity · authority · account · MFA · permissions
+APPLICATION — error · version · known-good comparison · dependencies
+HARDWARE — power · connection · diagnostics · safe escalation
+TOOLS — purpose · expected evidence · result interpretation
+BOUNDARIES — authorization · user-data protection · rollback
+UNKNOWN ISSUE — documentation · safe tests · colleague · escalation
+FINISH — original-task confirmation · ticket notes · prevention
+OPENING CUES — expected behavior · symptom · scope · changes
+DIAGNOSTIC ORDER — observations · working comparison · one variable
+DNS ANSWER — address · resolver · record · cache · route · app
+AUTHENTICATION ANSWER — identity · authority · credentials · MFA · policy
+PERMISSIONS ANSWER — authentication / authorization · group · rights
+EMAIL ANSWER — web comparison · account · mailbox · transport · client
+SYNC ANSWER — cloud copy · local changes · quota · locks · rights
+PERFORMANCE ANSWER — measured process · resource · baseline · change
+POWER ANSWER — state · outlet · charger · dock · indicators · safety
+PRINTER ANSWER — device · queue · driver · spooler · comparison
+VPN ANSWER — transport · identity · tunnel · route · DNS · resource
+LINUX ANSWER — system · storage · service · journal · rights · network
+FIREWALL ANSWER — flow · route · policy · NAT · return path
+COMPLEX ISSUE — dependencies · timeline · discriminating test
+SAFE CHANGE — approval · backup · rollback · validation
+UNKNOWN ANSWER — honest boundary · source · safe test · escalation
+CLOSING CUES — original task · confirmation · ticket · prevention

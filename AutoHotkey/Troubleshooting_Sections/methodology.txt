@@ -1,0 +1,35 @@
+﻿TROUBLESHOOTING METHODOLOGY
+DEFINE — symptom · expected behavior · exact error
+SCOPE — user · device · application · site · business impact
+CONTEXT — recent changes · last working state · timestamps
+REPRODUCE — original workflow · minimal test · repeatability
+ISOLATE — one variable · working comparison · layer boundaries
+EVIDENCE — screenshots · logs · error codes · correlation IDs
+REMEDIATE — lowest risk · authorization · backup · rollback
+VALIDATE — original task · user confirmation · recurrence
+DOCUMENT — findings · tests · changes · outcome
+ESCALATE — ownership · impact · evidence · next action
+INTAKE — caller identity · contact · asset · location · ticket
+IMPACT — blocked task · affected users · critical function · workaround
+BASELINE — normal behavior · frequency · duration · last success
+CHANGE HISTORY — updates · moves · permissions · hardware · policy
+ERROR CAPTURE — verbatim text · code · screen · timestamp · time zone
+DEPENDENCY MAP — client · identity · DNS · transport · service · data
+REPRODUCTION — smallest input · original context · consistent sequence
+COMPARISON MATRIX — same user / other device · other user / same device
+LAYER ISOLATION — local / remote · application / OS · site / tenant
+HYPOTHESIS — supporting evidence · counterexample · discriminating test
+TEST ORDER — observation · reversible comparison · targeted remediation
+ONE CHANGE — single variable · baseline · measurable result
+INTERMITTENT — frequency · workload · network · environmental pattern
+TIMELINE CORRELATION — logs · service events · updates · error onset
+NEGATIVE RESULTS — excluded layers · remaining hypotheses · next test
+KNOWLEDGE — approved article · vendor documentation · known incident
+ACCESS BOUNDARY — help desk authority · service owner · change approval
+DATA PROTECTION — unsaved work · synchronization · backup · recovery
+ROLLBACK PLAN — original setting · recovery route · validation criteria
+WORKAROUND — continuity · limitations · duration · owner
+ESCALATION TRIGGER — SLA risk · security event · shared infrastructure
+HANDOFF PACKAGE — scope · timeline · errors · tests · results · logs
+ROOT CAUSE — confirmed evidence · contributing factors · uncertainty
+CLOSURE — user validation · ticket completeness · prevention · follow-up
