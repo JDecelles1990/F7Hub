@@ -1,9 +1,7 @@
-"""Mochi Luna Light entry point."""
+"""Compatibility launcher: python Mochi/src/main.py, from any directory."""
 
-
-def main():
-    print("Mochi Luna Light starting...")
+from mochi.app import main
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

@@ -1,13 +1,13 @@
 # Mochi file organization
 
-This layout groups the existing Mochi scaffold and imported workflow assets by
-purpose. It does not implement the planned pet, integrations or AI behavior.
+This layout groups the Mochi runtime and imported workflow assets by purpose.
+Slice 001 adds the local desktop pet; integrations and AI remain planned.
 The [MVP specification](Mochi_Luna_Light_MVP_Specification.md) is the populated
 planning document previously at the Mochi root; its empty `docs` placeholder
 was replaced. [Architecture](Architecture.md), [Roadmap](Roadmap.md) and the
 [guide-generator README](../tools/guide_generator/README.md) now document
-proposed responsibilities and future work. Source/test scaffolds and the empty
-guide remain unchanged; documentation does not implement those capabilities.
+responsibilities and future work. The original empty source packages and guide
+are preserved alongside the new runtime package and focused tests.
 
 ## Folder responsibilities
 
@@ -26,8 +26,16 @@ guide remain unchanged; documentation does not implement those capabilities.
   settings or a configured asset loader.
 - [Artwork evidence](../tests/evidence/artwork/) contains historical QA reports,
   intermediate artwork and review frames. It is separate from executable tests.
-- [Configuration](../config/) and [source](../src/) retain the existing runtime
-  settings and application scaffold.
+- [Configuration](../config/) retains unrelated settings and adds optional idle
+  frame-directory, row and timing values. Runtime loading never rewrites settings.
+- [Source](../src/) contains `mochi/` with composition, core configuration/logging,
+  pet metadata/loading/states, runtime service and Qt presentation packages.
+  `main.py` is a compatibility launcher; the initial empty packages are preserved.
+- [Tests](../tests/) adds synthetic configuration, animation, state, Qt and
+  startup/logging tests. Historical `evidence/artwork/` remains unchanged.
+- Ignored `logs/` holds bounded runtime logs. Fresh Slice 001 manifests,
+  suite/native result records, test harnesses and screenshots live outside the
+  worktree under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Mochi-Slice-001/`.
 - [Tools](../tools/) contains the relocated bootstrap script and the existing
   guide-generator placeholder. The bootstrap was not run during organization.
 
