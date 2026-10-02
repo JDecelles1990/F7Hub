@@ -24,6 +24,11 @@ Only pending opacity saves are flushed on host exit; starting and closing a clea
 
 ---
 
+## AltF7Hub topic contract — Slice 047
+
+Slice 047 separates `TopicRouting.ahk` runtime shortcut/group/color policy from `LegacyIds()` historical compatibility. Explicit A/S/H/W groups and interview keys 1–5 select stable IDs in the displayed collection and clear search. Main-guide Ctrl+F restores Search and places its caret at the end. Opacity bounds are 60–100%; topic list/title/automatic headings share effective color. See [README](../AutoHotkey/Troubleshooting_Sections/README.md) and [TopicCatalog](../AutoHotkey/Troubleshooting_Sections/TopicCatalog.md). Current show/focus IPC and Python ownership remain unchanged; topic-aware requests and ticket classification require a later reviewed slice.
+
+
 # 1. Purpose
 
 This document defines the AutoHotkey v2 architecture for F7Hub.

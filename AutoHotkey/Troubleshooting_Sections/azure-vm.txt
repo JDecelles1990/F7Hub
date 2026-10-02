@@ -1,0 +1,5 @@
+AZURE VM
+SCOPE — Azure virtual machine · subscription · resource group · region · affected service
+CONNECTION — RDP · SSH · private/public IP · NSG · route · VPN dependency
+STATE — running/stopped · boot diagnostics · guest agent · recent change
+EVIDENCE — exact error · timestamp · affected users · known-good comparison · escalation

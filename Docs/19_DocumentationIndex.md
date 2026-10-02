@@ -13,6 +13,11 @@ For the implemented AltF7Hub reference overlay, read [the guide README](../AutoH
 
 ---
 
+## AltF7Hub topic contract — Slice 047
+
+For Slice 047 topic identity, explicit shortcut groups, curated colors and reference-only future classification metadata, read [TopicCatalog.md](../AutoHotkey/Troubleshooting_Sections/TopicCatalog.md). It is documentation, not runtime configuration; [the guide README](../AutoHotkey/Troubleshooting_Sections/README.md) owns technician navigation. No topic-aware IPC or ticket classifier is introduced.
+
+
 # 1. Purpose
 
 This file is the navigation index for the F7Hub documentation system.

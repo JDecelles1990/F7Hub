@@ -27,7 +27,7 @@ F7 up:: {
 ; is still registered. Requests still target the exact checkout endpoint.
 $!F7::ToggleGuide()
 #HotIf IsObject(Guide) && WinActive("ahk_id " Guide.Hwnd)
-^f::FocusSearch()
+$^f::FocusSearch()
 ^l::ShowSidebar()
 ^PgUp::NavigateTopic(-1)
 ^PgDn::NavigateTopic(1)

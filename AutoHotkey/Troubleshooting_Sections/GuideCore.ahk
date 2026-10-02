@@ -1,4 +1,5 @@
 #Requires AutoHotkey v2.0
+#Include TopicRouting.ahk
 
 global DataRoot := A_ScriptDir, Topics := Map(), Archived := Map(), VisibleIds := []
 global Guide := 0, SearchBox := 0, TopicList := 0, NotesBox := 0, TopicTitle := 0
@@ -7,7 +8,7 @@ global StatusHwnd := 0
 global SettingsPending := false
 global SidebarButton := 0, HeadingBoldCheck := 0, ArchiveButton := 0, ArchiveViewButton := 0
 global CreateButton := 0, EditButton := 0, SidebarControls := [], ToolbarControls := []
-global CurrentId := "", ArchiveMode := false, Shortcuts := Map(), ShortcutWarnings := ""
+global CurrentId := "", ArchiveMode := false, Shortcuts := Map(), ShortcutGroups := Map(), ShortcutWarnings := ""
 global Opacity := 85, Pinned := false, SidebarHidden := false, HeadingColor := "6BCB77", HeadingBold := true
 global AutoFit := false, AutoFitCheck := 0, TopicColors := Map()
 global CurrentFontSize := 12, EditorGui := 0, EditorBody := 0, EditorId := 0, EditorTitle := 0
@@ -16,6 +17,7 @@ global EditorRuns := [], EditorLastText := "", EditorLoading := false
 global EditorHistory := Map()
 global FormattingBusy := false, LayoutBusy := false, SettingsWarning := "", StartupWarnings := ""
 global NavigationPending := false, NavigationScheduled := false, NavigationRendering := false
+global ShortcutSearchPending := false
 
 NormalizeText(text) => StrReplace(StrReplace(text, "`r`n", "`n"), "`r", "`n")
 EnglishText(body) {
@@ -42,12 +44,6 @@ LegacyIds() => Map("M", "methodology", "O", "outlook", "P", "power", "S", "onedr
     "L", "performance", "G", "dns", "V", "vpn", "R", "printing", "T", "teams",
     "F", "services", "K", "accounts", "B", "applications", "Q", "interview-questions",
     "Y", "fortigate", "Z", "interview-personal")
-DefaultShortcut(id) {
-    for key, value in LegacyIds()
-        if value = id
-            return key
-    return id = "mapped-drives" ? "X" : ""
-}
 ReadTopic(path, isArchive := false) {
     parts := StrSplit(NormalizeText(FileRead(path, "UTF-8")), "`n", , 2)
     SplitPath(path, , , , &stem)
@@ -64,8 +60,8 @@ ReadTopic(path, isArchive := false) {
     if SubStr(body, -1) = "`n"
         body := SubStr(body, 1, -1)
     body := EnglishText(body)
-    shortcut := IniRead(path ".styles.ini", "topic", "shortcut", DefaultShortcut(id))
-    if !RegExMatch(shortcut, "^[A-Z]?$") || shortcut != "" && InStr("ACE", shortcut)
+    shortcut := BuiltInTopics().Has(id) ? DefaultShortcut(id) : IniRead(path ".styles.ini", "topic", "shortcut", "")
+    if !ValidTopicShortcut(id, shortcut)
         shortcut := ""
     return {Id: id, Title: Trim(parts[1]), Body: body, Path: path,
         Shortcut: shortcut, Runs: ReadRuns(path, body), IsArchive: isArchive}
@@ -96,9 +92,13 @@ LoadTopics() {
 }
 BuildTopicColors() {
     global TopicColors
-    TopicColors := Map(), used := Map()
+    TopicColors := Map(), builtIns := BuiltInTopics()
     for collection in [Topics, Archived]
         for id, item in collection {
+            if builtIns.Has(id) {
+                TopicColors[id] := builtIns[id].Color
+                continue
+            }
             hash := TextFingerprint(id)
             hue := Integer("0x" SubStr(hash, 1, 4)) / 65536 * 6
             saturation := 0.45 + Integer("0x" SubStr(hash, 5, 2)) / 255 * 0.25
@@ -107,9 +107,6 @@ BuildTopicColors() {
             p := value * (1 - saturation), q := value * (1 - saturation * fraction), t := value * (1 - saturation * (1 - fraction))
             channels := [[value,t,p],[q,value,p],[p,value,t],[p,q,value],[t,p,value],[value,p,q]][sector + 1]
             color := Format("{:02X}{:02X}{:02X}", Round(channels[1]*255), Round(channels[2]*255), Round(channels[3]*255))
-            while used.Has(color)
-                color := SubStr(color,1,4) Format("{:02X}", Mod(Integer("0x" SubStr(color,5,2))+1,256))
-            used[color] := true
             TopicColors[id] := color
         }
 }
@@ -133,7 +130,7 @@ DrawTopicItem(wParam, lParam, *) {
     if !items.Has(id)
         return 1
     item := items[id]
-    validShortcut := Shortcuts.Has(item.Shortcut) && Shortcuts[item.Shortcut] = id
+    validShortcut := TopicShortcutEnabled(item)
     label := (validShortcut ? "[" item.Shortcut "] " : "") item.Title
     color := TopicColors.Has(id) ? TopicColors[id] : "ADD8E6"
     font := SendMessage(0x31, 0, 0, TopicList.Hwnd)
@@ -158,30 +155,12 @@ MeasureTopicItem(wParam, lParam, *) {
         return 1
     }
 }
-BuildShortcuts() {
-    global Shortcuts, ShortcutWarnings
-    Shortcuts := Map(), ShortcutWarnings := "", counts := Map()
-    for collection in [Topics, Archived]
-        for id, item in collection
-            if item.Shortcut != ""
-                counts[item.Shortcut] := counts.Has(item.Shortcut) ? counts[item.Shortcut] + 1 : 1
-    for collection in [Topics, Archived]
-        for id, item in collection {
-            key := item.Shortcut
-            if key = ""
-                continue
-            if counts[key] = 1
-                Shortcuts[key] := id
-            else if !InStr(ShortcutWarnings, key)
-                ShortcutWarnings .= key " "
-        }
-}
 DisplayedTopics() => ArchiveMode ? Archived : Topics
 LoadSettings() {
     global Opacity, Pinned, SidebarHidden, HeadingColor, HeadingBold
     path := DataRoot "\GuideSettings.ini"
     value := IniRead(path, "appearance", "opacity", "85")
-    Opacity := IsInteger(value) ? Max(70, Min(100, Integer(value))) : 85
+    Opacity := IsInteger(value) ? Max(60, Min(100, Integer(value))) : 85
     Pinned := IniRead(path, "appearance", "pinned", "0") = "1"
     SidebarHidden := IniRead(path, "appearance", "sidebarHidden", "0") = "1"
     HeadingBold := IniRead(path, "appearance", "headingBold", "1") = "1"
@@ -408,7 +387,7 @@ ApplyRange(control, start, length, color := "", bold := -1, points := 0) {
     SetSelection(control, start, start + length)
     SendMessage(0x444, 1, cf.Ptr, control.Hwnd)
 }
-FormatControl(control, body, runs, points := 12) {
+FormatControl(control, body, runs, points := 12, topicId := "") {
     global FormattingBusy
     if FormattingBusy
         return
@@ -424,7 +403,7 @@ FormatControl(control, body, runs, points := 12) {
         for line in StrSplit(body, "`n") {
             divider := InStr(line, " — ")
             if divider
-                ApplyRange(control, offset, divider - 1, HeadingColor, Integer(HeadingBold))
+                ApplyRange(control, offset, divider - 1, EffectiveTopicColor(topicId), Integer(HeadingBold))
             offset += StrLen(line) + 1
         }
         for run in runs
@@ -518,7 +497,7 @@ CreateGuide() {
     Guide.BackColor := "151719"
     Guide.SetFont("s10 cF1F3F4", "Segoe UI")
     Guide.AddText("x16 y14 w55", "Opacity")
-    OpacitySlider := Guide.AddSlider("x74 y8 w140 h28 Range70-100 ToolTip", Opacity)
+    OpacitySlider := Guide.AddSlider("x74 y8 w140 h28 Range60-100 ToolTip", Opacity)
     OpacitySlider.OnEvent("Change", ChangeOpacity)
     OpacityLabel := Guide.AddText("x220 y14 w42", Opacity "%")
     PinCheck := Guide.AddCheckbox("x272 y10 w124 h26", "Always on top")
@@ -538,7 +517,7 @@ CreateGuide() {
     CreateButton.OnEvent("Click", (*) => ShowEditor("create"))
     EditButton := Guide.AddButton("x105 y90 w82 h30", "E - Edit")
     EditButton.OnEvent("Click", (*) => ShowEditor("edit"))
-    scriptButton := Guide.AddButton("x194 y90 w86 h30", "A - Script")
+    scriptButton := Guide.AddButton("x194 y90 w86 h30", "Script")
     scriptButton.OnEvent("Click", OpenScript)
     ArchiveButton := Guide.AddButton("x16 y130 w128 h30", "Archive topic")
     ArchiveButton.OnEvent("Click", ArchiveOrRestore)
@@ -597,7 +576,7 @@ ChangeOpacity(*) {
 }
 SetGuideOpacity(value) {
     global Opacity, SettingsPending
-    nextOpacity := Max(70, Min(100, value))
+    nextOpacity := Max(60, Min(100, value))
     changed := nextOpacity != Opacity
     Opacity := nextOpacity
     OpacitySlider.Value := Opacity
@@ -641,8 +620,16 @@ ShowSidebar(*) {
     TopicList.Focus()
 }
 FocusSearch(*) {
-    ShowSidebar()
+    global SidebarHidden
+    if SidebarHidden {
+        SidebarHidden := false
+        ApplySidebar()
+        SaveSettingsQuietly()
+    }
     SearchBox.Focus()
+    ; Explicit collapsed selection places the typing caret after the existing query.
+    caret := StrLen(SearchBox.Value)
+    SendMessage(0xB1, caret, caret, SearchBox.Hwnd)
 }
 ChangeHeadingColor(*) {
     global HeadingColor
@@ -662,7 +649,7 @@ ChangeHeadingBold(*) {
 RefreshFormatting() {
     FitNotes()
     if IsObject(EditorBody)
-        FormatControl(EditorBody, EditorLastText, EditorRuns, 12)
+        FormatControl(EditorBody, EditorLastText, EditorRuns, 12, EditorId.Value)
 }
 ChangeAutoFit(*) {
     global AutoFit
@@ -671,7 +658,8 @@ ChangeAutoFit(*) {
     UpdateStatus()
     SaveSettingsQuietly()
 }
-FilterTopics(*) {
+FilterTopics(*) => RebuildTopicList()
+RebuildTopicList(preserveSelection := false) {
     global VisibleIds, CurrentId
     items := DisplayedTopics(), query := StrLower(Trim(SearchBox.Value)), ordered := ""
     for id, item in items
@@ -685,7 +673,7 @@ FilterTopics(*) {
         if query != "" && !InStr(StrLower(item.Title " " item.Body " " id " " item.Shortcut), query)
             continue
         VisibleIds.Push(id)
-        validShortcut := Shortcuts.Has(item.Shortcut) && Shortcuts[item.Shortcut] = id
+        validShortcut := TopicShortcutEnabled(item)
         labels.Push((validShortcut ? "[" item.Shortcut "] " : "") item.Title)
         if id = CurrentId
             index := VisibleIds.Length
@@ -693,8 +681,16 @@ FilterTopics(*) {
     TopicList.Delete()
     if labels.Length {
         TopicList.Add(labels)
-        TopicList.Choose(index)
-        SelectTopic()
+        if preserveSelection {
+            for i, id in VisibleIds
+                if id = CurrentId {
+                    TopicList.Choose(i)
+                    break
+                }
+        } else {
+            TopicList.Choose(index)
+            SelectTopic()
+        }
     } else {
         CurrentId := ""
         TopicTitle.Text := ArchiveMode ? "Archive" : "Topics"
@@ -713,8 +709,16 @@ SelectTopic(*) {
     CurrentId := id
     RenderTopic(changed)
 }
-ShowTopic(id) {
-    global CurrentId
+ShowTopic(id, deferRender := false) {
+    global CurrentId, ShortcutSearchPending
+    if deferRender {
+        if !DisplayedTopics().Has(id)
+            return
+        CurrentId := id
+        ShortcutSearchPending := true
+        QueueTopicNavigationRender()
+        return
+    }
     if !DisplayedTopics().Has(id)
         return
     CurrentId := id
@@ -768,7 +772,7 @@ ScheduleTopicNavigationRender() {
     SetTimer(RenderPendingTopicNavigation, -1)
 }
 RenderPendingTopicNavigation() {
-    global NavigationPending, NavigationScheduled, NavigationRendering
+    global NavigationPending, NavigationScheduled, NavigationRendering, ShortcutSearchPending
     ; Painting must be interruptible, including a new timer's initial period.
     Critical("Off")
     NavigationScheduled := false
@@ -781,6 +785,13 @@ RenderPendingTopicNavigation() {
         return
     NavigationRendering := true
     try {
+        if ShortcutSearchPending {
+            ShortcutSearchPending := false
+            SearchBox.Value := ""
+            RebuildTopicList(true)
+        }
+        if CurrentId = "" || !DisplayedTopics().Has(CurrentId)
+            return
         ; Snapshot one topic for the whole paint. Inputs can still commit a
         ; newer selection; one subsequent paint then reads the latest state.
         RenderTopic(true, DisplayedTopics()[CurrentId])
@@ -812,6 +823,7 @@ RenderTopic(resetPosition := false, item := 0) {
     if CurrentId != item.Id
         return
     TopicTitle.Text := item.Title
+    TopicTitle.SetFont("s14 bold c" EffectiveTopicColor(item.Id))
     body := GetBody(NotesBox)
     if CurrentId != item.Id
         return
@@ -862,20 +874,20 @@ FitNotes(item := 0) {
     saved := GetSelection(NotesBox), scroll := GetScroll(NotesBox)
     if !AutoFit {
         CurrentFontSize := 12
-        FormatControl(NotesBox, item.Body, item.Runs, 12)
+        FormatControl(NotesBox, item.Body, item.Runs, 12, item.Id)
         return
     }
     low := 12, high := 24, best := 12
     while low <= high {
         candidate := Floor((low + high) / 2)
-        FormatControl(NotesBox, item.Body, item.Runs, candidate)
+        FormatControl(NotesBox, item.Body, item.Runs, candidate, item.Id)
         if TextFits(NotesBox)
             best := candidate, low := candidate + 1
         else
             high := candidate - 1
     }
     CurrentFontSize := best
-    FormatControl(NotesBox, item.Body, item.Runs, best)
+    FormatControl(NotesBox, item.Body, item.Runs, best, item.Id)
     SetSelection(NotesBox, saved.Start, saved.End)
     RestoreScroll(NotesBox, scroll)
 }
@@ -915,6 +927,9 @@ UpdateStatus() {
         . "  |  " CurrentFontSize " pt  |  Up/Down: topics  |  Left/Right: opacity  |  Alt+F7: show/hide  |  Ctrl+F: search"
 }
 HandleGuideKeys(wParam, lParam, msg, hwnd) {
+    ; Keep the entire input callback atomic, before native calls can dispatch timers.
+    ; The thread restores its prior state on return; painting runs separately.
+    Critical()
     if !IsObject(Guide) || !WinActive("ahk_id " Guide.Hwnd)
         return
     focused := DllCall("GetFocus", "Ptr")
@@ -934,16 +949,14 @@ HandleGuideKeys(wParam, lParam, msg, hwnd) {
     }
     if lParam & 0x40000000
         return
-    if wParam >= 0x41 && wParam <= 0x5A {
+    if wParam >= 0x41 && wParam <= 0x5A || wParam >= 0x31 && wParam <= 0x35 {
         key := Chr(wParam)
         if key = "C" && !ArchiveMode
             ShowEditor("create")
         else if key = "E" && !ArchiveMode
             ShowEditor("edit")
-        else if key = "A"
-            OpenScript()
-        else if Shortcuts.Has(key) && DisplayedTopics().Has(Shortcuts[key])
-            ShowTopic(Shortcuts[key])
+        else if (target := ShortcutTarget(key)) != ""
+            ShowTopic(target, true)
         else
             return
         return 1
@@ -990,7 +1003,7 @@ FormatSelection(editor, action, chosenColor := "") {
     if editor {
         EditorRuns := result
         EditorHistory[EditorLastText] := CloneRuns(result)
-        FormatControl(control, EditorLastText, EditorRuns, 12)
+        FormatControl(control, EditorLastText, EditorRuns, 12, EditorId.Value)
     } else {
         candidate := {Id: item.Id, Title: item.Title, Body: item.Body, Path: item.Path, Shortcut: item.Shortcut, Runs: result}
         try {
@@ -1054,7 +1067,7 @@ ShowEditor(mode) {
             EditorLastText := "", EditorRuns := []
         EditorHistory := Map(EditorLastText, CloneRuns(EditorRuns))
         DllCall("SetWindowTextW", "Ptr", EditorBody.Hwnd, "Str", EditorLastText)
-        FormatControl(EditorBody, EditorLastText, EditorRuns, 12)
+        FormatControl(EditorBody, EditorLastText, EditorRuns, 12, EditorId.Value)
     } finally
         EditorLoading := false
     Guide.Opt("+Disabled")
@@ -1081,7 +1094,7 @@ SyncEditorText(*) {
     if EditorHistory.Count > 128
         EditorHistory := Map(text, CloneRuns(EditorRuns))
     EditorLastText := text
-    FormatControl(EditorBody, text, EditorRuns, 12)
+    FormatControl(EditorBody, text, EditorRuns, 12, EditorId.Value)
 }
 SaveEditor(mode) {
     SyncEditorText()
@@ -1091,17 +1104,23 @@ SaveEditor(mode) {
         MsgBox("Use an ID starting with a letter, followed by letters, digits or hyphens (up to 64 characters).", "Invalid ID", 48)
         return false
     }
-    if mode = "create" && (Topics.Has(id) || Archived.Has(id) || FileExist(DataRoot "\" id ".txt") || FileExist(DataRoot "\Archive\" id ".txt")) {
+    if mode = "create" && (BuiltInTopics().Has(id) || Topics.Has(id) || Archived.Has(id) || FileExist(DataRoot "\" id ".txt") || FileExist(DataRoot "\Archive\" id ".txt")) {
         MsgBox("That ID already belongs to an active or archived topic.", "ID already used", 48)
         return false
     }
-    if !RegExMatch(shortcut, "^[A-Z]?$") || shortcut != "" && InStr("ACE", shortcut) {
-        MsgBox("Choose one letter, excluding A, C and E, or leave the shortcut blank.", "Invalid shortcut", 48)
+    if !ValidTopicShortcut(id, shortcut) {
+        MsgBox("Built-in shortcuts are fixed. For a custom topic choose one letter excluding C and E, or leave it blank.", "Invalid shortcut", 48)
         return false
     }
+    if !BuiltInTopics().Has(id) && shortcut != ""
+        for builtId, metadata in BuiltInTopics()
+            if metadata.Key = shortcut {
+                MsgBox("That shortcut is reserved for a built-in topic.", "Shortcut already used", 48)
+                return false
+            }
     for collection in [Topics, Archived]
         for otherId, other in collection
-            if shortcut != "" && otherId != id && other.Shortcut = shortcut {
+            if shortcut != "" && otherId != id && other.Shortcut = shortcut && !BuiltInTopics().Has(id) {
                 MsgBox("That shortcut belongs to another active or archived topic.", "Shortcut already used", 48)
                 return false
             }

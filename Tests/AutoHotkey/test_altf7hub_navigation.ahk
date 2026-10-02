@@ -10,7 +10,16 @@ global Fixture := A_Temp "\F7Hub-s046-navigation-" DllCall("GetCurrentProcessId"
 SplitPath(A_ScriptDir, , &testsRoot)
 SplitPath(testsRoot, , &projectRoot)
 DirCreate(Fixture)
-DirCopy(projectRoot "\AutoHotkey", Fixture "\AutoHotkey")
+; Copy runtime inputs only; historical evidence/backups are not fixtures.
+Loop Files projectRoot "\AutoHotkey\*", "FR" {
+    relative := SubStr(A_LoopFileFullPath, StrLen(projectRoot "\AutoHotkey\") + 1)
+    if relative = "Troubleshooting_Sections\GuideSettings.ini" || InStr(relative, "Troubleshooting_Sections\Backups\") = 1 || InStr(relative, "Troubleshooting_Sections\Tests\Evidence\") = 1
+        continue
+    target := Fixture "\AutoHotkey\" relative
+    SplitPath(target, , &folder)
+    DirCreate(folder)
+    FileCopy(A_LoopFileFullPath, target)
+}
 host := Fixture "\AutoHotkey\F7Hub.ahk"
 client := Fixture "\AutoHotkey\Troubleshooting_Sections\Troubleshooting_Quick_Guide.ahk"
 DataRoot := Fixture "\AutoHotkey\Troubleshooting_Sections"
