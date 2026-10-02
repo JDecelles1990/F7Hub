@@ -1,5 +1,10 @@
 # F7Hub Folder Structure
 
+## Network Snapshot source and checkout rule — Slice 048
+
+`PowerShell/Diagnostics/Get-NetworkSnapshot.ps1` is the second standalone local diagnostic. `Database/Migrations/0010_network_snapshot_script.sql` owns its reference metadata and exact-byte checksum. `.gitattributes` adds only this file's `text eol=crlf` rule alongside the existing System Snapshot rule. Both raw checkout hashes and LF-normalized Git identities matter; the copy boundary hashes raw bytes. Tests live in existing PowerShell, Database and Integration directories. Candidate manifests/results/captures remain outside worktrees under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-048`.
+
+
 > Document: `Docs/10_FolderStructure.md`  
 > Project: F7Hub  
 > Purpose: Define the canonical repository organization, folder ownership, and rules governing where F7Hub source code, configuration, data, documentation, tests, tools, and deployment artifacts belong.  

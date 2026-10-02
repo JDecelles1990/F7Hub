@@ -1,5 +1,12 @@
 # F7Hub Database Architecture
 
+## Network Snapshot reference data — Slice 048
+
+Forward-only `0010_network_snapshot_script.sql` inserts exactly one enabled built-in with its literal exact-CRLF-byte SHA-256. The new code is `diagnostic.windows.network_snapshot`; source remains a version-controlled file. A temporary conflict assertion rejects existing case-insensitive code or separator-normalized/case-insensitive path matches before insertion. No existing registration is adopted or overwritten. Migration and history recording commit atomically; conflicts roll back without version 10 recorded.
+
+No persistent schema, relationship, index or default changes. Existing System Snapshot approval and migrations 0001–0009 remain unchanged; ordinary registrations retain default-disabled/null-checksum behavior. Future source revisions require review and a new forward-only checksum migration, never runtime approval updates.
+
+
 > Document: `Docs/07_Database.md`  
 > Project: F7Hub  
 > Purpose: Define the database architecture, rules, domains, integrity requirements, migration strategy, indexing principles, search strategy, audit expectations and repository boundaries for F7Hub.  

@@ -1,5 +1,10 @@
 # F7Hub Features
 
+## Second production diagnostic — Slice 048
+
+The enabled **Windows Network Configuration Snapshot** joins Windows System Snapshot in Scripts. Migration 0010 installs its reviewed-byte checksum with the metadata, so existing **Copy Script** can verify and copy its source. The standalone PowerShell 7 diagnostic describes local TCP/IP-enabled interface configuration, not connectivity health. It includes interface index/description, IPv4/IPv6 addresses and default gateways, DNS server order and provider DHCP state. Alias/status/link speed and prefix details are deferred. F7Hub still cannot execute PowerShell; enabled and AVAILABLE are not execution approval.
+
+
 > Document: `Docs/03_Features.md`  
 > Project: F7Hub  
 > Purpose: Define the planned product capabilities of F7Hub and map them to approved product requirements.  

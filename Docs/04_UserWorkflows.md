@@ -1,5 +1,12 @@
 ﻿# F7Hub User Workflows
 
+## Find and copy network configuration diagnostic — Slice 048
+
+Open **Scripts**, search for **network configuration** and submit Search/Enter. Select **Windows Network Configuration Snapshot** to inspect its diagnostic metadata, STANDARD_USER privilege and file status. **Copy Script** verifies the current enabled registration, contained path and exact source checksum before copying. Changed/unavailable source blocks copy and preserves the clipboard. The technician pastes and runs it separately in an approved environment; F7Hub performs no execution or automatic paste.
+
+Category remains **Not selected**. **Manage scripts…** can disable/re-enable the built-in using existing confirmation/token/readability checks. Visibility changes preserve its checksum; enabling does not approve changed content. Disabled rows disappear from the enabled catalog but remain in management.
+
+
 ## Mochi runtime controls — Slice 002 candidate
 
 After the first actual F7Hub window display, one asynchronous attach-first startup attempt connects to Mochi or launches it once. Failure leaves ticket work and navigation usable. Settings → Mochi… opens one modeless dialog with status, Start/Show, Hide, Idle, Wave, Pause/Resume, Exit and Close. Closing Settings leaves the application controller and pet unchanged. Start/Show explicitly retries after failure or manual pet exit; ordinary focus, restore and Settings reopening do not relaunch it. No preferences are persisted.

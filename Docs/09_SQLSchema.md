@@ -1,5 +1,12 @@
 # F7Hub SQL Schema
 
+## Slice 048 — production reference data only
+
+`0010_network_snapshot_script.sql` adds `diagnostic.windows.network_snapshot`, **Windows Network Configuration Snapshot**, description `Collects a local read-only Windows network configuration snapshot.`, path `PowerShell/Diagnostics/Get-NetworkSnapshot.ps1`, type `DIAGNOSTIC`, runtime `POWERSHELL_7`, risk `LOW`, privilege `STANDARD_USER`, version `1.0.0`, timeout 60, structured output 1, enabled 1 and category NULL. Created/updated timestamps are both `2026-10-02T00:00:00.000Z`. Exact UTF-8-without-BOM CRLF source SHA-256: `aa126985b01c840b588ee3769d4c0a4a43e57ae5415f422cc8c9db1bafcb02b7`.
+
+The temporary assertion rejects existing code and equivalent path conflicts, including backslashes and case differences; migration/history roll back together. The physical schema and default-disabled behavior are unchanged.
+
+
 > Document: `Docs/09_SQLSchema.md`  
 > Project: F7Hub  
 > Database: SQLite  
@@ -4798,6 +4805,7 @@ Implemented migration sequence:
 0007_script_registry.sql
 0008_system_snapshot_script.sql
 0009_system_snapshot_checksum.sql
+0010_network_snapshot_script.sql
 ```
 
 Future domain migration numbers are intentionally unassigned until each bounded slice is approved.

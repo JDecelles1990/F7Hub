@@ -1,5 +1,17 @@
 # F7Hub Todo
 
+## Slice 048 — Network Configuration Snapshot
+
+- [x] One local read-only core-configuration diagnostic with bounded structured output and deterministic failure handling.
+- [x] Atomic enabled registration/checksum migration, targeted CRLF rule, conflict/rollback and exact-copy coverage.
+- [x] Existing catalog/search/management integration, affected regressions and minimal native validation.
+- [x] Synchronize scoped documentation and create external reproducible candidate/evidence manifest.
+- [ ] Independent read-only review of the exact unstaged/uncommitted candidate.
+- [ ] Integration only after independent approval and separate integration authorization.
+
+Alias/status/link speed, prefix details, connectivity probes, approval UI and execution remain separate follow-ups.
+
+
 > Document: `Docs/17_Todo.md`  
 > Project: F7Hub  
 > Purpose: Maintain the current actionable work queue for F7Hub.  
