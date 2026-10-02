@@ -1,5 +1,14 @@
 # F7Hub ChangeLog
 
+## 2026-10-02 — Slice 048 implementation candidate
+
+Implemented **Windows Network Configuration Snapshot** as one local, read-only, parameterless PowerShell 7 script and one enabled registry/checksum row in migration 0010. Added its targeted CRLF rule and deterministic contract, rollback, byte-integrity and existing catalog/management integration coverage. Production Python/GUI/service/repository behavior and physical schema remain unchanged; F7Hub cannot execute PowerShell.
+
+Full regression: Powershell 19 PASS (RETAINED), Database 423 PASS (RETAINED), Gui 197 PASS (RETAINED), Integration 157 PASS (FRESH), all exit 0 with no failures/errors/skips. RETAINED standard-user standalone collection and native Windows Scripts search/select/details/exact-copy passed at 1000×700, 96 DPI, with observable idle, one inspected capture and clipboard restoration. The table elides the long name; the full details name/metadata remain visible. Recovery found a completed 157-test Integration failure from one stale nine-migration assertion; that test-only correction required one supervised full Integration rerun. The earlier incomplete confirmation-dialog attempt and all failure records are preserved; no identical unchanged native rerun was performed.
+
+Candidate is READY_FOR_REVIEW on `feature/network-snapshot-s048` from `dab8f25d65a505c6a7943b15335c9fb1c7984c92`, unstaged/uncommitted. External manifest/results/report are under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-048/implementation-20261002`. Independent approval and integration remain pending. Historical predecessor wording below retains its dated meaning; verified Slice 047 closure supplies the baseline.
+
+
 ## 2026-10-02 — Mochi Slice 002 implementation candidate
 
 Implemented the approved F7Hub startup, modeless Mochi controls, persistent local controller, bounded IPC, singleton runtime, Wave/greeting and visibility/controller-loss recovery contracts in an isolated feature worktree. Candidate remains unstaged/uncommitted pending independent review. No merge, Slice 003, schema, AHK launcher, PowerShell execution, capture product feature or persisted preferences are included. Exact tests, native evidence and limitations are recorded in the external Slice 002 implementation report; this entry grants no integration authorization.

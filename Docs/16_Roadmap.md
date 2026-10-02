@@ -1,5 +1,10 @@
 # F7Hub Roadmap
 
+## Network configuration diagnostic — Slice 048
+
+Slice 048 implements a second local diagnostic and atomic registry/checksum data migration through existing catalog/search/management/copy infrastructure. It adds no execution gateway. Required validation is complete; independent review is the next gate. Later separate slices may add adapter details, subnet/prefix information, targeted DNS/connectivity diagnostics, catalog filters, reviewed approval workflow, controlled execution, parameters and execution history.
+
+
 > Document: `Docs/16_Roadmap.md`  
 > Project: F7Hub  
 > Purpose: Define the recommended development sequence for F7Hub from documentation and database foundation through a useful technician application, automation, diagnostics, Microsoft integrations, AI assistance, packaging, and later extensibility.  

@@ -11,6 +11,7 @@ from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
+from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
 from PySide6.QtWidgets import QApplication, QPushButton, QMessageBox
 
@@ -315,6 +316,63 @@ class ScriptCatalogFlowTests(unittest.TestCase):
         self.assertEqual(clipboard.text(), "preserve")
         self.assertEqual(workspace.feedback.text(), "Script file is no longer available.")
 
+
+    def test_network_snapshot_search_copy_and_visibility_without_execution(self):
+        migrations = self.root / "Database" / "Migrations"
+        for name in ("0008_system_snapshot_script.sql", "0009_system_snapshot_checksum.sql",
+                     "0010_network_snapshot_script.sql"):
+            shutil.copyfile(ROOT / "Database/Migrations" / name, migrations / name)
+        for name in ("Get-SystemSnapshot.ps1", "Get-NetworkSnapshot.ps1"):
+            target = self.root / "PowerShell/Diagnostics" / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copyfile(ROOT / "PowerShell/Diagnostics" / name, target)
+        bootstrap_database(self.database, migrations)
+        target = self.root / "PowerShell/Diagnostics/Get-NetworkSnapshot.ps1"
+        original = target.read_bytes()
+        workspace = self.window.script_workspace
+        clipboard = self.application.clipboard()
+        previous = clipboard.text()
+        self.addCleanup(clipboard.setText, previous)
+        with patch("subprocess.Popen", side_effect=AssertionError("PowerShell launched")) as execute:
+            self.window.scripts_action.trigger()
+            self.wait_idle()
+            self.assertEqual(workspace.model.rowCount(), 2)
+            workspace.search_input.setText("network configuration")
+            QTest.keyClick(workspace.search_input, Qt.Key.Key_Return)
+            self.wait_idle()
+            self.assertEqual(workspace.model.rowCount(), 1)
+            self.assertEqual(workspace.model.item(0, 1).text(), "diagnostic.windows.network_snapshot")
+            self.assertIn("File status: AVAILABLE", workspace.details.toPlainText())
+            self.assertIn("Privilege: STANDARD_USER", workspace.details.toPlainText())
+            workspace.copy_button.click()
+            self.wait_idle()
+            self.assertEqual(clipboard.text(), original.decode("utf-8"))
+            clipboard.setText("preserve")
+            target.write_bytes(original + b"# changed\r\n")
+            workspace.copy_button.click()
+            self.wait_idle()
+            self.assertEqual(clipboard.text(), "preserve")
+            self.assertEqual(workspace.feedback.text(), "Script changed since approval. Copy blocked.")
+            target.write_bytes(original)
+            manager = workspace.open_management()
+            self.wait_idle()
+            self.assertEqual(manager.model.rowCount(), 2)
+            self.assertIn("Stored checksum: " + hashlib.sha256(original).hexdigest(), manager.details.toPlainText())
+            manager.toggle_button.click()
+            self.wait_idle()
+            self.assertEqual(self.context.script_service.list_scripts(text_query="network"), ())
+            with patch.object(QMessageBox, "exec", return_value=QMessageBox.StandardButton.Yes):
+                manager.toggle_button.click()
+                self.wait_idle()
+            row = self.context.script_repository.get_script("diagnostic.windows.network_snapshot")
+            self.assertEqual(row.checksum_sha256, hashlib.sha256(original).hexdigest())
+            manager.reject()
+            self.wait_idle()
+            self.assertEqual(workspace.model.rowCount(), 1)
+            workspace.clear_search_button.click()
+            self.wait_idle()
+            self.assertEqual(workspace.model.rowCount(), 2)
+            execute.assert_not_called()
 
     def test_search_navigation_reconstruction_and_persisted_metadata_no_writes(self):
         self.insert_script("code-needle")

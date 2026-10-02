@@ -1,5 +1,20 @@
 # F7Hub PowerShell Architecture
 
+## Network Configuration Snapshot contract — Slice 048
+
+`Get-NetworkSnapshot.ps1` is parameterless, local-only, read-only and standard-user compatible on the validated Windows/PowerShell 7 environment. One `Get-CimInstance` query reads `root/cimv2:Win32_NetworkAdapterConfiguration` with `IPEnabled=True`, selecting InterfaceIndex, Description, IPAddress, DefaultIPGateway, DNSServerSearchOrder and DHCPEnabled. It uses OperationTimeoutSec 20 and terminating errors without ComputerName/CimSession. This reports TCP/IP-enabled configurations, not all adapters or connectivity. Alias/status/link speed, MAC, DNS suffixes, leases, routes and prefix details are excluded.
+
+The required envelope is `schemaVersion=1`, `operation=Get-NetworkSnapshot`, Boolean `success`, `status`, fixed `message`, `data`, array `warnings`, and array `errors`. data has nullable `computerName` (Environment.MachineName) and `interfaces`. Each interface has required unsigned `interfaceIndex`, nullable `interfaceDescription`, nullable arrays `ipv4Addresses`, `ipv6Addresses`, `ipv4DefaultGateways`, `ipv6DefaultGateways`, `dnsServerAddresses`, and nullable Boolean `dhcpEnabled`. DHCP reflects the provider's configuration; it makes no DHCPv6 assertion.
+
+PASS/exit 0 means inventory collection succeeded with requested values within bounds, including a valid empty inventory. WARNING/exit 0 retains the inventory but reports optional unavailable/invalid data or truncation. ERROR/exit 1 means required inventory could not be read or has invalid/duplicate indices; no partial inventory is published. Missing/null/invalid optional values remain null, explicit empty arrays remain empty, and legitimate false/zero values are retained. An invalid address collection is null rather than a misleading partial list. These statuses describe collection completeness, not network health.
+
+Interfaces sort numerically; addresses and gateways are parsed locally, normalized, deduplicated and ordinal-sorted. DNS order is preserved, with duplicate addresses removed by first occurrence. Bounds: 64 interfaces, 16 addresses per family, 8 gateways per family, 16 DNS servers, computer name 128 and description 256 UTF-16 units (no split surrogate pair), one compact JSON document at most 512 KiB. All inventory indices are validated before the cap is applied. Any clipping produces a fixed warning. At most five deduplicated fixed warning categories cover metadata, addresses, gateways, DNS and clipping; no raw provider objects/exceptions are serialized. An output-limit failure returns a safe ERROR envelope.
+
+Fixed summaries are `Local Windows network configuration snapshot collected.`, `Network configuration collected with incomplete or bounded data.`, and `Unable to collect required local Windows network configuration.` No files/registry/database writes, remediation, credentials, elevation, remote commands, connectivity probes or DNS lookups are performed. The CIM timeout is not a whole-process watchdog; standalone validation has an external deadline.
+
+Migration 0010 installs metadata and literal source checksum together. The targeted CRLF checkout rule makes working-byte approval deterministic; a subsequent source or newline change fails existing Copy Script verification until explicitly reviewed through a new forward-only migration. No execution permission, approval UI or application PowerShell invocation is added. Deterministic fixture tests cover contract/failures/bounds; actual non-elevated collection is separate native evidence.
+
+
 > Document: `Docs/12_PowerShellArchitecture.md`  
 > Project: F7Hub  
 > Technology: PowerShell 7  
