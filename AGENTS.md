@@ -532,6 +532,8 @@ AutoHotkey v2
 
 Do not introduce AutoHotkey v1 syntax.
 
+For any task that reads, analyzes, modifies, tests, reviews or documents AltF7Hub or files under `AutoHotkey/Troubleshooting_Sections`, you MUST explicitly read `AutoHotkey/Troubleshooting_Sections/AGENTS.md` first, even in repository-root sessions. It specializes AltF7Hub architecture, mutable/local state, topic handling, native validation and recovery. Root rules and applicable delivery-skill gates remain authoritative.
+
 ---
 
 # 18. PowerShell Tasks

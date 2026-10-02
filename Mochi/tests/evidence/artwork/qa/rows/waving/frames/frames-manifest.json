@@ -1,0 +1,24 @@
+{
+  "ok": true,
+  "chroma_key": {
+    "hex": "#FF00FF",
+    "rgb": [
+      255,
+      0,
+      255
+    ],
+    "threshold": 96.0
+  },
+  "rows": [
+    {
+      "state": "waving",
+      "frames": [
+        "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waving/frames/waving/00.png",
+        "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waving/frames/waving/01.png",
+        "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waving/frames/waving/02.png",
+        "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/waving/frames/waving/03.png"
+      ],
+      "method": "components"
+    }
+  ]
+}

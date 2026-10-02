@@ -1,0 +1,25 @@
+{
+    "app": {
+        "name": "Mochi Luna Light",
+        "enabled": true
+    },
+    "pet": {
+        "always_on_top": true,
+        "click_through": false,
+        "opacity": 1.0
+    },
+    "animation": {
+        "frame_directory": "assets/animations/frames",
+        "idle_row": 0,
+        "frame_interval_ms": 120
+    },
+    "privacy": {
+        "clipboard_access": false,
+        "screen_capture": false,
+        "ocr": false
+    },
+    "f7hub": {
+        "integration_enabled": false,
+        "read_only": true
+    }
+}
