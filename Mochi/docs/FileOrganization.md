@@ -1,7 +1,7 @@
 # Mochi file organization
 
 This layout groups the Mochi runtime and imported workflow assets by purpose.
-Slice 001 adds the local desktop pet; integrations and AI remain planned.
+Slice 001 adds the local desktop pet; Slice 002 adds reviewed local F7Hub controls. Context integrations and AI remain planned.
 The [MVP specification](Mochi_Luna_Light_MVP_Specification.md) is the populated
 planning document previously at the Mochi root; its empty `docs` placeholder
 was replaced. [Architecture](Architecture.md), [Roadmap](Roadmap.md) and the
@@ -125,3 +125,7 @@ The per-file relocation inventory, operation journal, candidate manifest and
 fresh organization-validation report are stored outside the repository under
 `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Mochi-FileOrganization/`, in the dated
 directory for this operation. No staging, commit or integration is performed.
+
+## Slice 002 additions
+
+`src/mochi/integrations/local_server.py` owns validated local controller connections. Existing pure playback and window presentation are extended for Wave and separate visibility. The shared protocol/channel live under F7Hub's Python domain/infrastructure packages; F7Hub's gateway, service and modeless dialog retain application/controller/UI lifetimes explicitly. `docs/IPC.md` owns the versioned wire contract. Native screenshots, logs, manifests and result records remain outside the candidate; runtime logs stay ignored. Assets and original scaffolds remain preserved.

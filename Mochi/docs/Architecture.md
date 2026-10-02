@@ -1,8 +1,6 @@
 # Mochi architecture
 
-**Status:** Slice 001 desktop runtime implemented. The broader design derives
-from the [accepted MVP baseline](Mochi_Luna_Light_MVP_Specification.md); integrations
-remain proposed and independent review of Slice 001 is pending.
+**Status:** Slice 001 integrated and closed with nonblocking notes. Slice 002 local control implementation candidate is pending independent review. Broader MVP integrations remain proposed.
 
 Read [Mochi AGENTS.md](../AGENTS.md) and [F7Hub's system architecture](../../Docs/06_SystemArchitecture.md) before changes. Slice 001 selects PySide6 Widgets and a
 standalone entry point through its approved task; this document grants no provider
@@ -30,7 +28,7 @@ WindowStaysOnTopHint, with WA_TranslucentBackground. WA_ShowWithoutActivating av
 startup focus theft; direct interaction can activate the window/menu. The
 WindowDoesNotAcceptFocus flag is deliberately omitted because native Windows
 validation showed it swallowed mouse input. No click-through or global input
-hooks are present. The process owns no F7Hub state, workers, subprocesses or IPC.
+hooks are present. The process owns no F7Hub business state, workers or subprocesses. Slice 002 adds only the reviewed local control IPC below.
 
 The runtime loads only configured local PNG frames. It never interprets historical
 artwork metadata as executable configuration. No screenshots, OS input injection,
@@ -74,10 +72,18 @@ Read [AltF7Hub AGENTS.md](../../AutoHotkey/Troubleshooting_Sections/AGENTS.md) a
 - Distribution packaging beyond the approved standalone Python/PySide6 renderer.
   F7Hub remains the primary GUI; future framework/process/IPC changes require review.
 - Exact supported checkout/window/control identities, recognition confidence and a non-conflicting invocation mechanism.
-- Guide schema, settings validation and actual frame/state mapping.
-- Whether a new communication boundary is needed; define and review it before implementation.
+- Guide schema and context recognition. Settings and IDLE/WAVE playback are implemented for the approved local slices.
+- Any communication boundary beyond Slice 002's reviewed local controls requires separate review.
 - Luna provider/API, authentication, credential storage, retention terms and permitted payload policy.
 
 These later decisions remain unresolved. Use the [Roadmap](Roadmap.md) to scope
 and validate each separately authorized step; Slice 001 implements only its
 approved local desktop runtime.
+
+## Slice 002 local controls
+
+F7Hub owns MochiService → MochiGateway and its persistent asynchronous local socket for its application session. Settings only subscribes. The renderer's LocalController validates and registers controllers before dispatching commands through PetRuntime and PetWindow. Same-user local-server ACLs and a per-user/per-checkout lifetime QLockFile protect startup. Every script/module route uses the same lock. Singletons are rendered only after lock acquisition; contention exits unavailable without stealing the lock.
+
+Application session greeting consumption happens atomically before the first greeting-bearing attach. Failure may miss a greeting, never renew it. Runtime eligibility requires visible Idle; its consumed-session LRU is defense-in-depth. Greeting runs one actual four-frame WAVE cycle and returns to IDLE, unless interrupted. Manual WAVE loops indefinitely. Pause/Hide/Idle/Wave/Exit invalidate obsolete completion tokens; paused animation switching is rejected. Visibility does not replace behavior state. Show and final-controller recovery preserve state/frame and recover inaccessible positions against individual available screen rectangles.
+
+`Python/f7hub/domain/mochi_protocol.py` is the shared pure wire schema; `infrastructure/mochi_channel.py` contains shared Qt channel/checkout identity primitives. Standalone Mochi resolves this checkout's Python directory without importing application bootstrap or database code. See [IPC protocol](IPC.md) for schemas, limits and failure handling. No ReactionController, preferences, AI, AHK or PowerShell action is included.

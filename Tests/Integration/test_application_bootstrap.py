@@ -26,6 +26,9 @@ class ApplicationBootstrapTests(unittest.TestCase):
         cls.application = QApplication.instance() or QApplication([])
 
     def setUp(self) -> None:
+        self.mochi_launch = patch('f7hub.infrastructure.mochi_gateway.MochiGateway.launch', return_value=False)
+        self.mochi_launch.start()
+        self.addCleanup(self.mochi_launch.stop)
         self.temporary_directory = tempfile.TemporaryDirectory()
         self.environment = patch.dict(os.environ, {"LOCALAPPDATA": self.temporary_directory.name})
         self.environment.start()

@@ -1,4 +1,4 @@
-from PySide6.QtCore import QPoint, QTimer, Qt
+from PySide6.QtCore import QPoint, QTimer, Qt, Signal, QRect
 from PySide6.QtGui import QAction, QPainter, QPixmap
 from PySide6.QtWidgets import QMenu, QWidget
 
@@ -9,7 +9,9 @@ from ..services.pet_runtime import PetRuntime
 
 
 class PetWindow(QWidget):
-    def __init__(self, settings: Settings, loaded: LoadedAnimation, runtime: PetRuntime):
+    state_changed = Signal()
+
+    def __init__(self, settings: Settings, loaded: LoadedAnimation, runtime: PetRuntime, wave=None):
         # ShowWithoutActivating avoids startup focus theft. WindowDoesNotAcceptFocus
         # also eats native mouse activation on Windows, preventing the context menu.
         flags = Qt.WindowType.Tool | Qt.WindowType.FramelessWindowHint
@@ -23,6 +25,9 @@ class PetWindow(QWidget):
         self.setWindowOpacity(settings.opacity)
         self.runtime = runtime
         self._frames = tuple(QPixmap.fromImage(image) for image in loaded.images)
+        self._animations = {'IDLE': self._frames}
+        if wave is not None:
+            self._animations['WAVE'] = tuple(QPixmap.fromImage(image) for image in wave.images)
         self.setFixedSize(self._frames[0].size())
         self._drag_offset: QPoint | None = None
         self.timer = QTimer(self)
@@ -39,20 +44,64 @@ class PetWindow(QWidget):
         self._sync_actions()
 
     def start(self):
-        if self.runtime.start():
-            self.timer.start()
+        self.runtime.start()
+        self.sync_timer()
         self._sync_actions()
         self.update()
 
     def pause(self):
-        if self.runtime.pause():
+        self.apply('pause')
+
+    def resume(self):
+        self.apply('resume')
+
+    def sync_timer(self):
+        if self.runtime.playing:
+            if not self.timer.isActive():
+                self.timer.start()
+        else:
             self.timer.stop()
         self._sync_actions()
 
-    def resume(self):
-        if self.runtime.resume():
-            self.timer.start()
-        self._sync_actions()
+    def recover_position(self, rectangles=None, primary=None):
+        from PySide6.QtWidgets import QApplication
+        app = QApplication.instance()
+        rectangles = rectangles if rectangles is not None else [s.availableGeometry() for s in app.screens()]
+        primary = primary if primary is not None else app.primaryScreen().availableGeometry()
+        current = QRect(self.pos(), self.size())
+        if any(rect.contains(current) for rect in rectangles):
+            return
+        target = max(rectangles, key=lambda r: r.intersected(current).width() * r.intersected(current).height(),
+                     default=primary)
+        if target.intersected(current).isEmpty():
+            target = primary
+        x = max(target.left(), min(current.left(), target.right() - self.width() + 1))
+        y = max(target.top(), min(current.top(), target.bottom() - self.height() + 1))
+        self.move(x, y)
+
+    def apply(self, command, controller_count=0):
+        outcome = self.runtime.command(command, controller_count)
+        if outcome in ('CHANGED', 'UNCHANGED'):
+            if command == 'show':
+                self.recover_position()
+                self.show()
+            elif command == 'hide':
+                self.hide()
+            elif command == 'exit':
+                self.sync_timer()
+                self.state_changed.emit()
+                QTimer.singleShot(0, self.close)
+                return outcome
+        self.sync_timer()
+        self.update()
+        self.state_changed.emit()
+        return outcome
+
+    def greet(self, session_id):
+        self.runtime.greet(session_id)
+        self.sync_timer()
+        self.update()
+        self.state_changed.emit()
 
     def shutdown(self):
         self.timer.stop()
@@ -61,17 +110,24 @@ class PetWindow(QWidget):
         self._sync_actions()
 
     def _sync_actions(self):
-        self.pause_action.setEnabled(self.runtime.state is PetState.IDLE)
+        self.pause_action.setEnabled(self.runtime.state in (PetState.IDLE, PetState.WAVE))
         self.resume_action.setEnabled(self.runtime.state is PetState.PAUSED)
         self.exit_action.setEnabled(self.runtime.state is not PetState.EXITING)
 
     def _advance(self):
+        if not self.runtime.playing:
+            self.sync_timer()
+            return
+        previous = self.runtime.state
         self.runtime.advance()
+        self.sync_timer()
         self.update()
+        if self.runtime.state is not previous:
+            self.state_changed.emit()
 
     def paintEvent(self, event):
         painter = QPainter(self)
-        painter.drawPixmap(0, 0, self._frames[self.runtime.frame_index])
+        painter.drawPixmap(0, 0, self._animations[self.runtime.selected_animation][self.runtime.frame_index])
 
     def contextMenuEvent(self, event):
         self._drag_offset = None

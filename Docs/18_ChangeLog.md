@@ -1,5 +1,9 @@
 # F7Hub ChangeLog
 
+## 2026-10-02 — Mochi Slice 002 implementation candidate
+
+Implemented the approved F7Hub startup, modeless Mochi controls, persistent local controller, bounded IPC, singleton runtime, Wave/greeting and visibility/controller-loss recovery contracts in an isolated feature worktree. Candidate remains unstaged/uncommitted pending independent review. No merge, Slice 003, schema, AHK launcher, PowerShell execution, capture product feature or persisted preferences are included. Exact tests, native evidence and limitations are recorded in the external Slice 002 implementation report; this entry grants no integration authorization.
+
 > Document: `Docs/18_ChangeLog.md`  
 > Project: F7Hub  
 > Purpose: Record meaningful completed changes to F7Hub architecture, documentation, schema, behavior, tooling and releases.

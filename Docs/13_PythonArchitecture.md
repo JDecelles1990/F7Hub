@@ -1,5 +1,15 @@
 # F7Hub Python Architecture
 
+## Mochi startup and controller composition — Slice 002 candidate
+
+ApplicationContext retains MochiService and its asynchronous MochiGateway. MainWindow's first show records the automatic-attempt flag before scheduling connection work. Gateway tries validated attach first, then at most one QProcess.startDetached using the current interpreter, -B, an absolute checkout-derived entry and argument arrays. A five-second readiness deadline ends the attempt; no automatic relaunch occurs. Explicit Start/Show retries coalesce while busy and also attach first, including after a late runtime or manual exit.
+
+MochiService owns one session ID and an atomic greeting_consumed flag for the full F7Hub process lifetime. It consumes before writing a greeting-bearing attach and never renews after failed delivery, acknowledgement loss, runtime restart or runtime-LRU eviction. Subsequent attaches request no greeting. Runtime LRU retention of 16 consumed IDs is defense-in-depth, with recording before animation. Runtime completion follows actual WAVE frame advancement and guarded generation/token state. Manual Wave remains indefinite.
+
+The shared JSON-lines protocol has strict request/response schemas and bounded snapshots. Socket channels enforce UTF-8/JSON framing, input deadlines and write backpressure; server validates before dispatch, separately limits accepted clients and serializes coherent mutations on its Qt event loop. Connection generations and request/runtime IDs correlate replies. Lost mutation acknowledgements remain UNCERTAIN; reconnect/attach/status reconciliation never replays the mutation or launches during reconciliation. Exit remains uncertain when process termination cannot be established.
+
+PetRuntime remains Qt-independent. Visibility is separate from selected animation and PAUSED/EXITING state; PetWindow centrally synchronizes playback and checks state before every frame tick. IDLE and WAVE images preload before playback and must share dimensions. Native display recovery preserves negative coordinates and clamps the complete window to an actual available screen, never a combined bounding rectangle containing monitor gaps.
+
 > Document: `Docs/13_PythonArchitecture.md`  
 > Project: F7Hub  
 > Technology: Python + PySide6
