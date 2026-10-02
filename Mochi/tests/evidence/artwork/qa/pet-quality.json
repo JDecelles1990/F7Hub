@@ -1,0 +1,71 @@
+{
+  "ok": true,
+  "atlas": "/workspace/scratch/c7e8d42a27ac/mochi_pet/final/spritesheet-extended.png",
+  "encoded_bytes": 3431652,
+  "sha256": "2e8100d46f70073d2bdabacf98d640cfb25702883cf756d58f55d5934052a3ac",
+  "jump": {
+    "idle_baseline": 202,
+    "jump_baselines": [
+      202,
+      173,
+      140,
+      175,
+      202
+    ],
+    "airborne_lift_pixels": 62,
+    "landing_delta_pixels": 0
+  },
+  "look_registration": {
+    "neutral_center_x": 95.5,
+    "look_centers_x": [
+      98.5,
+      99.0,
+      100.0,
+      100.5,
+      102.0,
+      102.5,
+      105.0,
+      106.0,
+      97.0,
+      96.5,
+      97.0,
+      101.0,
+      99.5,
+      98.5,
+      100.0,
+      102.0
+    ],
+    "look_widths": [
+      147,
+      136,
+      134,
+      135,
+      138,
+      139,
+      144,
+      148,
+      132,
+      131,
+      130,
+      128,
+      139,
+      133,
+      126,
+      126
+    ],
+    "maximum_center_drift_pixels": 10.5,
+    "maximum_width_ratio": 1.1746031746031746
+  },
+  "errors": [],
+  "warnings": [
+    "000 has transparent interior hole rows (y=12, y=13, y=14, y=15, +3 more)",
+    "022.5 has transparent interior hole rows (y=15, y=16, y=17, y=18, +1 more)",
+    "045 has transparent interior hole rows (y=16, y=17, y=18)",
+    "135 has transparent interior hole rows (y=26, y=27, y=28, y=29)",
+    "157.5 has transparent interior hole rows (y=37)",
+    "157.5->180 diff is a local outlier (5506 pixels vs neighbor average 1898)",
+    "157.5->180 center shift is high (9.7px)",
+    "337.5->000 diff is a local outlier (6463 pixels vs neighbor average 2919)",
+    "337.5->000 sprite area ratio is high (1.35)"
+  ]
+}

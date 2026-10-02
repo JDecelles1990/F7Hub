@@ -1,0 +1,112 @@
+{
+  "ok": true,
+  "frames_root": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/idle/frames",
+  "states": [
+    "idle"
+  ],
+  "errors": [],
+  "warnings": [],
+  "rows": [
+    {
+      "state": "idle",
+      "expected_frames": 6,
+      "actual_frames": 6,
+      "extraction_method": "components",
+      "ok": true,
+      "errors": [],
+      "warnings": [],
+      "frames": [
+        {
+          "index": 0,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/idle/frames/idle/00.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20846,
+          "bbox": [
+            18,
+            5,
+            173,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 334
+        },
+        {
+          "index": 1,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/idle/frames/idle/01.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20663,
+          "bbox": [
+            18,
+            5,
+            173,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 366
+        },
+        {
+          "index": 2,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/idle/frames/idle/02.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20651,
+          "bbox": [
+            18,
+            5,
+            173,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 367
+        },
+        {
+          "index": 3,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/idle/frames/idle/03.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20566,
+          "bbox": [
+            18,
+            5,
+            173,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 385
+        },
+        {
+          "index": 4,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/idle/frames/idle/04.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20565,
+          "bbox": [
+            18,
+            5,
+            173,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 368
+        },
+        {
+          "index": 5,
+          "file": "/workspace/scratch/c7e8d42a27ac/mochi_pet/qa/rows/idle/frames/idle/05.png",
+          "width": 192,
+          "height": 208,
+          "nontransparent_pixels": 20485,
+          "bbox": [
+            21,
+            5,
+            171,
+            203
+          ],
+          "edge_pixels": 0,
+          "chroma_adjacent_pixels": 366
+        }
+      ]
+    }
+  ]
+}
