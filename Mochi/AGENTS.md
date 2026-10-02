@@ -28,11 +28,13 @@ than permanently depending on this development path.
    [its AGENTS.md](../AutoHotkey/Troubleshooting_Sections/AGENTS.md) and
    [README](../AutoHotkey/Troubleshooting_Sections/README.md).
 
-The inspected baseline has imported artwork, initial settings, a print-only
-`src/main.py`, empty package/test scaffolds and an empty `config/guide.json`.
-Pet rendering, settings validation, screen recognition, hints, F7Hub adapters
-and Luna requests remain **PLANNED**. Artwork QA is historical evidence, not
-desktop runtime validation. Verify this baseline again before future work.
+The initial imported baseline had artwork, settings, a print-only `src/main.py`,
+empty packages/tests and an empty `config/guide.json`. Slice 001 now implements
+the standalone Python/PySide6 pet, settings validation, idle playback, dragging,
+Pause/Resume/Exit and logging under `src/mochi`; see [README](README.md) for current
+evidence and limitations. Screen recognition, hints, F7Hub adapters and Luna remain
+**PLANNED**. Artwork QA remains historical evidence, separate from runtime
+validation. Verify the live baseline again before future work.
 
 The MVP is an accepted planning baseline. Its proposals are not implemented
 contracts or authorization to start the next feature. If it conflicts with a
@@ -52,9 +54,10 @@ technician-note state. A future F7Hub context adapter is read-only and disabled
 by default. Write workflows require a separately approved slice, an existing
 service boundary, validation, audit requirements, tests and independent review.
 
-The pet renderer and packaging remain undecided. F7Hub's primary GUI remains
-PySide6. A proposed additional framework, process or IPC contract needs the
-root architecture review before implementation; this file does not approve it.
+Slice 001 uses the explicitly approved standalone Python/PySide6 renderer.
+Distribution packaging remains undecided. F7Hub's primary GUI remains PySide6.
+Any further framework, process or IPC contract needs root architecture review
+before implementation; this file does not approve it.
 
 AHK v2 may own narrowly scoped desktop input and approved window metadata.
 Preserve `AutoHotkey/F7Hub.ahk` as the F7/Alt+F7 shared host. Do not duplicate

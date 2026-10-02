@@ -1,12 +1,42 @@
 # Mochi architecture
 
-**Status:** Proposed design derived from the [accepted MVP baseline](Mochi_Luna_Light_MVP_Specification.md). No pet runtime or integration is implemented.
+**Status:** Slice 001 desktop runtime implemented. The broader design derives
+from the [accepted MVP baseline](Mochi_Luna_Light_MVP_Specification.md); integrations
+remain proposed and independent review of Slice 001 is pending.
 
-Read [Mochi AGENTS.md](../AGENTS.md) and [F7Hub's system architecture](../../Docs/06_SystemArchitecture.md) before implementation. This document organizes existing intent; it does not approve a renderer, provider or IPC contract.
+Read [Mochi AGENTS.md](../AGENTS.md) and [F7Hub's system architecture](../../Docs/06_SystemArchitecture.md) before changes. Slice 001 selects PySide6 Widgets and a
+standalone entry point through its approved task; this document grants no provider
+or IPC authority.
 
 ## Existing implementation
 
-`src/main.py` prints a message. The `core`, `services`, `integrations`, `ui` and test packages are empty. Initial settings exist, but there is no loader. `config/guide.json` is empty. Imported artwork is available through the [existing asset layout](FileOrganization.md); generation reports are historical evidence.
+`src/main.py` is a thin launcher for the named `src/mochi` package. Initial empty
+packages are preserved. `config/guide.json` remains empty. Imported artwork and
+historical generation reports are preserved through the [existing layout](FileOrganization.md).
+
+## Slice 001 runtime
+
+| Component | Responsibility |
+|---|---|
+| `app.py`, `__main__.py` | Resolve installation root; configure logging; load settings/images before the event loop; compose and clean up the standalone Qt app |
+| `core/config.py`, `core/logging.py` | Read-only type/bounds/path validation and safe defaults; one bounded process-local Mochi log handler |
+| `pet/animation.py`, `pet/pet_state.py` | UI-independent immutable animation metadata and explicit state enum |
+| `pet/animation_loader.py` | One directory discovery and one decode per frame through QtGui; typed safe failures; no presentation widgets |
+| `services/pet_runtime.py` | STARTING → IDLE, IDLE ↔ PAUSED, active → EXITING; idempotent actions and frame wrap; no Qt dependency |
+| `ui/pet_window.py` | Draw preloaded pixmaps; GUI-thread timer; dragging and Pause/Resume/Exit menu; no filesystem or configuration parsing |
+
+Window construction selects Tool, FramelessWindowHint and configured
+WindowStaysOnTopHint, with WA_TranslucentBackground. WA_ShowWithoutActivating avoids
+startup focus theft; direct interaction can activate the window/menu. The
+WindowDoesNotAcceptFocus flag is deliberately omitted because native Windows
+validation showed it swallowed mouse input. No click-through or global input
+hooks are present. The process owns no F7Hub state, workers, subprocesses or IPC.
+
+The runtime loads only configured local PNG frames. It never interprets historical
+artwork metadata as executable configuration. No screenshots, OS input injection,
+capture or observation exist in runtime code; the external native validation
+harness is test-only. Settings and artwork are never written by the runtime.
+Runtime writes are limited to ignored Mochi logs.
 
 ## Proposed responsibilities
 
@@ -41,10 +71,13 @@ Read [AltF7Hub AGENTS.md](../../AutoHotkey/Troubleshooting_Sections/AGENTS.md) a
 
 ## Decisions required before the affected slice
 
-- Pet renderer and packaging, while retaining PySide6 as F7Hub's primary GUI. Any additional framework/process requires architectural review.
+- Distribution packaging beyond the approved standalone Python/PySide6 renderer.
+  F7Hub remains the primary GUI; future framework/process/IPC changes require review.
 - Exact supported checkout/window/control identities, recognition confidence and a non-conflicting invocation mechanism.
 - Guide schema, settings validation and actual frame/state mapping.
 - Whether a new communication boundary is needed; define and review it before implementation.
 - Luna provider/API, authentication, credential storage, retention terms and permitted payload policy.
 
-These remain unresolved. No code, settings, source files or deployed behavior are changed by this design. Use the [Roadmap](Roadmap.md) to scope and validate each separately authorized step.
+These later decisions remain unresolved. Use the [Roadmap](Roadmap.md) to scope
+and validate each separately authorized step; Slice 001 implements only its
+approved local desktop runtime.
