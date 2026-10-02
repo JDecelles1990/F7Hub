@@ -1,0 +1,26 @@
+﻿TICKETING / DOCUMENTATION
+IDENTIFY — requester · contact · device · application · location
+SUMMARY — symptom · expected behavior · business impact
+CLASSIFY — incident / request · category · priority · owner
+EVIDENCE — exact errors · time zone · logs · screenshots
+WORK NOTES — tests · results · changes · authorization
+DATA HYGIENE — necessary details · redaction · no passwords
+HANDOFF — scope · findings · remaining actions · responsible team
+RESOLUTION — cause if confirmed · fix · validation · user agreement
+CLOSE — status · knowledge reference · follow-up · recurrence
+INCIDENT QUALITY — title · service · observable symptom
+REQUEST QUALITY — desired access / service · approval · owner
+ENVIRONMENT — OS · app build · tenant · site · device
+TIMELINE — onset · last success · change · timestamps
+IMPACT DETAIL — users · blocked activity · workaround
+PRIORITY JUSTIFICATION — impact · urgency · SLA · business context
+REPRODUCTION DETAIL — workflow · input · comparison · result
+TEST RECORD — hypothesis · action · observation · interpretation
+CHANGE RECORD — approval · original / new setting · rollback
+ATTACHMENTS — logs · sanitized screenshots · exact error
+DATA BOUNDARY — no passwords · no secrets · minimum personal data
+ESCALATION QUALITY — focused question · missing authority · evidence
+OWNERSHIP QUALITY — team · next action · checkpoint
+RESOLUTION QUALITY — cause / uncertainty · fix · validation
+KNOWLEDGE QUALITY — reusable cues · scope · applicability · version
+CLOSURE QUALITY — agreement · outcome · reopen route · follow-up

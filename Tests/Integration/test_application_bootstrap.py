@@ -15,12 +15,23 @@ from f7hub.app.bootstrap import bootstrap_application
 from f7hub.app.main import main
 from f7hub.infrastructure.database import database_connection, validate_database_integrity
 from f7hub.infrastructure.migrations import MigrationDiscoveryError
+from f7hub.services.altf7hub_service import AltF7HubService
+from f7hub.infrastructure.altf7hub_gateway import WindowsAltF7HubGateway
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class ApplicationBootstrapTests(unittest.TestCase):
+    def test_bootstrap_composes_guide_for_the_resolved_checkout(self):
+        context = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.database_path)
+        self.addCleanup(context.main_window.deleteLater)
+        service = context.main_window.altf7hub_service
+        self.assertIsInstance(service, AltF7HubService)
+        self.assertIsInstance(service.gateway, WindowsAltF7HubGateway)
+        self.assertEqual(service.gateway.project_root, PROJECT_ROOT.resolve())
+        self.assertTrue(context.main_window.altf7hub_action.isEnabled())
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.application = QApplication.instance() or QApplication([])

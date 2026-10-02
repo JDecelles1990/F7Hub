@@ -1,0 +1,32 @@
+﻿ACCOUNT ACCESS / LOCKOUT
+VERIFY — user identity · approved recovery process
+STATE — disabled · locked · expired · password · risk
+AUTHORITY — AD · Entra · hybrid · reset owner
+EVIDENCE — error · timestamp · source device · sign-in logs
+REPEATED LOCKOUT — AD 4740 · old sessions · cached credentials
+SOURCES — mobile · VPN · mapped drives · services · scheduled tasks
+MFA / POLICY — method · Conditional Access · compliance
+HYBRID — synchronization · replication · sign-in name
+RECOVERY — authorization · targeted credential update
+VALIDATE — sign-in · original app · recurrence
+DIRECTORY MAP — AD · Entra · managed domain · hybrid authority
+USER MAP — UPN · SAM account · domain · email alias
+STATE DETAIL — disabled · locked · account expiry · password expiry
+VERIFICATION DETAIL — approved proof · authorized contact
+LOG DETAIL — source host · time · failure reason · repeated pattern
+AD EVENTS — 4740 · 4625 · 4771 · 4776 · authorized audit access
+CLOUD LOGS — sign-in failure · MFA · risk · policy evaluation
+PASSWORD TIMELINE — last change · authority · sync · replication
+RETRY SOURCES — mobile mail · VPN · Wi-Fi · RDP · browser
+BACKGROUND SOURCES — services · scheduled tasks · mapped drives
+CREDENTIAL STORES — exact target · Credential Manager · app session
+OLD SESSION DETAIL — disconnected session · unattended app · stale token
+HYBRID DETAIL — on-premises reset · cloud propagation · sign-in method
+DOMAIN DETAIL — controller · site · DNS · time skew
+MFA DETAIL — method · new phone · prompt · approved recovery
+POLICY DETAIL — Conditional Access · compliance · risk · location
+LOCKOUT SCOPE — device · app · repeated interval · recent change
+ROOT-CAUSE ORDER — source identification · targeted correction · controlled unlock
+BOUNDARY — no blanket credential deletion · no lockout-policy weakening
+ESCALATION PACKAGE — events · source · time · tests · authority
+FINAL CHECK — authentication · resource · recurrence window

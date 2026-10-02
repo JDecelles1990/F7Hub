@@ -1,0 +1,39 @@
+﻿FORTINET / FORTIGATE
+SCOPE — user · subnet · site · application · traffic direction
+PATH — source · destination · interface · route · required port
+TRAFFIC — forward traffic logs · FortiView · policy ID · action
+EVENTS — system logs · VPN events · authentication · timestamps
+POLICY — matching rule · order · address objects · schedule
+TRANSLATION — NAT · VIP · source address · return path
+SERVICES — DNS · DHCP · VPN tunnel · certificate
+SECURITY — UTM profile · IPS · web filter · SSL inspection
+COMPARE — known-good flow · approved packet capture · session details
+CHANGES — firewall-owner authorization · backup · rollback
+ESCALATE — source / destination · time · policy · logs · impact
+CONTEXT — FortiOS version · VDOM · HA member · role
+FLOW ID — source IP · destination IP · protocol · ports
+TIME CONTEXT — timestamp · time zone · log window · reproduction
+INGRESS — interface · VLAN · subnet · VDOM
+EGRESS — route lookup · policy route · SD-WAN rule · next hop
+RETURN PATH — reverse route · asymmetric flow · upstream route
+POLICY MATCH — rule order · interface pair · address object · service
+POLICY DETAIL — schedule · identity group · implicit deny · logging
+TRAFFIC LOGS — forward traffic · action · policy ID · session ID · bytes
+SESSION DETAIL — state · NAT mapping · timeout · hardware offload
+NAT DETAIL — SNAT · central NAT · VIP / DNAT · expected source
+DNS DETAIL — resolver · FortiGate DNS · domain filter · resolution
+AUTH DETAIL — LDAP / RADIUS · group match · certificate · MFA
+VPN DETAIL — IPsec phase state · selectors · route · auth logs
+SD-WAN DETAIL — health check · latency · loss · member selection
+SECURITY PROFILE — IPS · antivirus · web filter · app control
+TLS INSPECTION — trust · profile · handshake · exemption owner
+FORTIGUARD — license · reachability · signatures · category result
+SYSTEM HEALTH — CPU · memory · conserve mode · counters
+EVENT LOGS — system · admin change · HA · link · VPN
+HA DETAIL — active member · sync · failover time · session pickup
+CAPTURE PLAN — source / destination filter · interfaces · privacy
+DEBUG FLOW — authorization · narrow filters · short capture · debug stop
+DEBUG LIMITS — version-specific syntax · offload visibility · performance
+LOG COMPARISON — permitted flow · denied flow · known-good device
+CHANGE PLAN — firewall owner · config backup · approved window · rollback
+FINAL MATRIX — route · policy · session · app · return traffic

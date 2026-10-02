@@ -15,6 +15,12 @@ Validated persistent connections alone count as controllers. Hide checks that co
 > Scope: System-level architecture.
 > Related Documents: 00_ProjectVision.md, 01_Project.md, 02_ProductRequirements.md, 05_GUI.md, 07_Database.md, 11_AHKArchitecture.md, 12_PowerShellArchitecture.md, 13_PythonArchitecture.md
 
+## AltF7Hub Guide — Slice 046
+
+The approved guide-open boundary is `MainWindow → ServiceTaskRunner → AltF7HubService → WindowsAltF7HubGateway → fixed AHK v2 request wrapper → checkout-specific Windows message → F7Hub.ahk → guide`. AHK owns desktop shortcuts and the lightweight reference overlay; Python retains application services, tickets and SQLite.
+
+Process invocation alone cannot deliver a command to the existing `#SingleInstance Ignore` host. The wrapper therefore coordinates clients with a session-local, checkout-specific mutex and a registered fixed show/focus message. It accepts no ticket text or arbitrary commands. Host readiness, bounded acknowledgement, visible-window confirmation, uncertain outcomes and keyboard fallback guards are documented in the AHK architecture. The bridge introduces no server, generic command bus, dependency, database contract or automatic issue classification.
+
 ## Local script metadata writes — Slice 044
 
 Scripts management and registration dialogs use the shared ServiceTaskRunner → ScriptService → ScriptRepository → SQLite boundary. The service reuses the approved-path resolver and proves current readability for registration and enabling by opening the resolved file in binary mode and reading one byte before any database write. Empty readable files are valid; open/read failures reject the write with safe feedback. The handle is closed without retaining source or computing a checksum. Disabling requires no file read. Management reads reuse `list_scripts(include_disabled=True)` without weakening SCRIPT category scope. Registration inserts only metadata with table defaults and null category/checksum. Visibility writes compare the previously read update token, change only `is_enabled`/`updated_at`, reload before commit and fail on stale state. File inspection and the readability probe occur before the short database write transaction. The GUI owns confirmation and recovery presentation; no schema, dependency, execution or cross-language contract is added.

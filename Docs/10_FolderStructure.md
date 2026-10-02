@@ -8,6 +8,14 @@
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+The supplied `AutoHotkey/Troubleshooting_Sections` remains in place. `GuideCore.ahk` owns guide behavior; `GuideHost.ahk` initializes it for the shared entry; `GuideRequest.ahk` provides the narrow request bridge; `Troubleshooting_Quick_Guide.ahk` is the standalone client. The directory contains active UTF-8 topics, `Archive`, format sidecars, the local settings file and guide tests.
+
+Backups, the supplied settings and earlier `Tests/Evidence` are preserved local inputs and excluded from the Slice 046 candidate manifest. Topics and existing metadata sidecars remain authoritative guide content. New host/failure regression tests are under `Tests/AutoHotkey`; current suite evidence and screenshots are external to the repository. This is a bounded feature directory, not a repository restructure.
+
+---
+
 # 1. Purpose
 
 Slice 043 adds root `.gitattributes` with a rule limited to `PowerShell/Diagnostics/Get-SystemSnapshot.ps1`, ensuring CRLF checkout bytes for its approved SHA-256. `Database/Migrations/0009_system_snapshot_checksum.sql` owns the reviewed registry checksum. No general line-ending policy or new source directory is added.

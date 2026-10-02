@@ -1,0 +1,36 @@
+﻿LINUX
+CONTEXT — distribution · version · host · recent changes
+SYSTEM — uptime · CPU · memory · disk · inodes
+FILES — path · ownership · permissions · mounts
+SERVICES — systemctl status · journalctl · dependencies
+NETWORK — ip addr · ip route · resolver · ss · required port
+ACCESS — SSH · account · key · sudo authorization
+LOGS — timestamps · service logs · kernel messages
+PACKAGES — package manager · versions · repository state
+RECOVERY — backup · least privilege · approved change · rollback
+VALIDATE — service · access · original workflow
+HOST INVENTORY — distribution · release · kernel · architecture · role
+SYSTEM BASELINE — uptime · load average · CPU · memory · swap
+STORAGE CAPACITY — df -h · df -i · disk / inode exhaustion
+STORAGE MAP — lsblk · mount · findmnt · filesystem · path
+STORAGE HEALTH — kernel I/O · read-only mount · diagnostics
+FILE ACCESS — owner · group · mode · ACL · parent directories
+SECURITY CONTEXT — SELinux / AppArmor · audit evidence · approved policy
+PROCESS DETAIL — ps · top · PID · resource pattern · open descriptors
+SERVICE DETAIL — systemctl status · unit · dependencies · exit code
+STARTUP DETAIL — enabled state · overrides · directory · environment
+JOURNAL DETAIL — journalctl · unit · boot · priority · timestamp
+KERNEL DETAIL — dmesg · driver · device · OOM event
+NETWORK ADDRESS — ip addr · link · DHCP · subnet
+NETWORK PATH — ip route · gateway · VPN · port
+LISTENERS — ss · bind address · port · process
+DNS DETAIL — resolver · resolvectl · hostname / IP comparison
+SSH DETAIL — user · key · authorized_keys · rights · host key · logs
+ACCOUNT DETAIL — lock · shell · expiry · sudo authorization
+PACKAGE DETAIL — distribution package manager · version · repository
+CERTIFICATE DETAIL — trust store · expiry · hostname · time
+SCHEDULE DETAIL — cron · systemd timer · user context · output
+LOG ROTATION — disk growth · retention · service logs · ownership
+CONTAINER BOUNDARY — host / container · volume · namespace · owner
+RECOVERY ORDER — backup · approved service action · targeted change · rollback
+FINAL CHECK — process · service · access · original task · persistence

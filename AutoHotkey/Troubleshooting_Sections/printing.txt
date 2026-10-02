@@ -1,0 +1,30 @@
+﻿PRINTING
+SCOPE — user · application · printer · site
+DEVICE — power · paper · toner · display · connection
+PATH — IP · USB · network · print server · permissions
+QUEUE — correct printer · default · paused · stuck jobs
+ISOLATE — test page · PDF · another app · known-good device
+SERVICE — spooler state · event logs · dependencies
+DRIVER — model · version · port · duplex · paper size
+REMEDIATION — authorization · shared-queue impact · approved repair
+VALIDATE — original document · settings · user confirmation
+SCOPE MATRIX — app / all apps · user / all users · printer / all printers
+DEVICE DETAIL — power · consumables · paper path · display
+CONNECTION DETAIL — USB · direct IP · shared queue · Wi-Fi
+ADDRESS DETAIL — printer IP · reservation · old port address
+NETWORK DETAIL — DNS · reachability · print protocol · server
+QUEUE DETAIL — paused · offline · stuck job · owner
+JOB DETAIL — document type · size · corruption · user context
+CONTROL OUTPUT — printer self-test · Windows test page · minimal document
+APP COMPARISON — PDF · browser · Office · alternate device
+DRIVER DETAIL — model · architecture · package · version
+PORT DETAIL — TCP/IP · WSD · server share · expected address
+SETTINGS DETAIL — tray · paper size · duplex · color · finishing
+SPOOLER DETAIL — service · dependencies · crash events · timing
+SERVER DETAIL — shared impact · server queue · deployment policy
+ACCESS DETAIL — printer rights · membership · driver policy
+PATTERN DETAIL — document · driver · repeated spooler failure
+LOGS — PrintService Operational · Application · System · device logs
+REMEDIATION ORDER — individual job · targeted queue · approved driver repair
+SHARED IMPACT — other users · server owner · restart authorization
+FINAL CHECK — original document · correct printer · settings

@@ -7,6 +7,12 @@
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+For the implemented AltF7Hub reference overlay, read [the guide README](../AutoHotkey/Troubleshooting_Sections/README.md), `04_UserWorkflows.md` for keyboard use, `05_GUI.md` for the Python action, `11_AHKArchitecture.md` for the shared host and fixed Windows-message contract, and `13_PythonArchitecture.md` for service/gateway composition. `10_FolderStructure.md` describes preserved library/settings/evidence boundaries. Current candidate status and validation are in `Status/CURRENT_STATE.md`. Ticket-to-topic automation is deferred.
+
+---
+
 # 1. Purpose
 
 This file is the navigation index for the F7Hub documentation system.

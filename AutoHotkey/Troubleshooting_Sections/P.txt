@@ -1,0 +1,33 @@
+﻿POWER / STARTUP / DISPLAY
+STATE — no power · no display · no boot
+CONTEXT — outage · move · dock · liquid · recent hardware
+IDENTIFY — device model · asset tag · charger wattage
+OBSERVE — LEDs · fans · beeps · diagnostic patterns
+POWER — outlet · cable · charger · PSU switch
+ISOLATE — power strip · UPS · dock · peripherals
+LAPTOP — compatible charger · USB-C port · charging indicator
+POWER DRAIN — vendor procedure · AC · removable battery
+DISPLAY — monitor power · input · brightness · cable · known-good screen
+SAFETY — smoke · swelling · liquid · stop · no PSU opening
+ESCALATE — hardware diagnostics · warranty · evidence
+POWER CLASSIFICATION — no LEDs / fans · powered / blank screen · POST / boot
+POWER SOURCE — known-good outlet · power-strip bypass · UPS status
+CABLE PATH — wall / adapter · adapter / device · both ends · damage
+DESKTOP PSU — I / O switch · external indicators · no PSU opening
+LAPTOP ADAPTER — OEM compatibility · rated wattage · charging LED
+USB-C POWER — charging port · PD support · cable capability · dock supply
+BATTERY STATE — charge indication · removable battery · vendor reset
+DOCK ISOLATION — direct charger · direct monitor · known-good cable
+PERIPHERAL ISOLATION — storage · USB hub · webcam · printer · network
+POWER BUTTON — response · stuck button · indicators · timing
+POST EVIDENCE — beep count · LED pattern · vendor diagnostics
+DISPLAY PATH — correct GPU output · monitor source · cable standard
+MONITOR CONTROL — on-screen menu · known-good cable · known-good monitor
+LAPTOP SCREEN — brightness · external display · lid / dock state
+BOOT TRANSITION — vendor logo · firmware · disk detection · boot device
+RECOVERY BOUNDARY — BitLocker key source · data protection · authorization
+ENVIRONMENT — heat · liquid · surge · physical damage · transport
+SAFETY TRIGGER — smoke · smell · swelling · sparks · excessive heat
+HARDWARE ACCESS — warranty · trained technician · electrostatic precautions
+SERVICE HANDOFF — asset · model · charger · diagnostic code · comparisons
+FINAL CONTROL — stable power · display · boot · peripheral reconnection

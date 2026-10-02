@@ -1,0 +1,26 @@
+﻿PRIORITIZATION / ESCALATION
+IMPACT — affected users · critical service · business function
+URGENCY — deadline · blocked work · workaround
+PRIORITY — organization matrix · SLA · security implications
+TRIAGE — outage pattern · known incident · duplicate tickets
+OWNERSHIP — skill boundary · permissions · service owner
+ESCALATE — evidence · failed tests · impact · required assistance
+COMMUNICATE — user updates · handoff · next checkpoint
+FOLLOW-UP — SLA risk · dependency · resolution owner
+VALIDATE — restored workflow · user confirmation · documentation
+BUSINESS CONTEXT — revenue · operations · critical deadline
+AFFECTED SCOPE — user · team · site · organization
+SERVICE CRITICALITY — application · identity · network · data loss
+URGENCY DETAIL — blocked / degraded work · acceptable delay
+SECURITY PRIORITY — compromise · exposed data · security owner
+MAJOR INCIDENT — pattern · dependency · incident lead
+SLA DETAIL — response · resolution · escalation threshold
+WORKAROUND DETAIL — availability · effectiveness · temporary risk
+QUEUE REVIEW — age · impact · ownership · dependency
+PARALLEL WORK — independent tests · specialist · coordinated changes
+ESCALATION LEVEL — expertise · approval · vendor · management
+VENDOR PACKAGE — contract · asset · version · evidence
+COMMUNICATION CADENCE — user · stakeholders · next checkpoint
+DEPENDENCY TRACKING — approval · external team · promised response
+RECURRENCE — related tickets · problem record · known error
+CLOSURE PRIORITY — restoration · backlog · follow-up

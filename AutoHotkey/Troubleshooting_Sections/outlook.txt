@@ -1,0 +1,39 @@
+﻿OUTLOOK / EMAIL
+SCOPE — mailbox · recipient · message · desktop / web
+STATUS — service health · connection · offline mode · Outbox
+ISOLATE — plain-text test · self · internal / external · OWA
+IDENTITY — sign-in · MFA · license · mailbox provisioning
+MAILBOX — quota · send limits · aliases · delegation
+DELIVERY — full NDR · Message-ID · message trace · timestamps
+CONTENT — attachment size · signature · encryption · DLP
+CLIENT — updates · add-ins · profile · cache
+DISTINCTIONS — classic: COM / OST / profiles · new: web comparison
+RECOVERY — cloud-data confirmation · backup · approved repair
+VALIDATE — sending · receiving · calendar · search · user confirmation
+CLIENT IDENTITY — classic Outlook · new Outlook · web · exact build
+ACCOUNT CONTEXT — work / school · personal · shared mailbox · delegate
+SCOPE MATRIX — self / internal / external · recipient / all · device / all
+WEB CONTROL — same account · same recipient · same message · private browser
+TRANSPORT STATE — Connected · Disconnected · Work Offline · Need Password
+OUTBOX CONTROL — stuck message · offline move to Drafts · new minimal message
+RECIPIENT CONTROL — typed SMTP · AutoComplete bypass · group restrictions
+NDR EVIDENCE — complete 4.x.x / 5.x.x · diagnostic text · generating server
+TRACE CONTEXT — sender · recipient · Message-ID · time zone · reporting delay
+TRACE INTERPRETATION — submitted · deferred · delivered · failed · recipient-side location
+HEADERS — Received chain · Message-ID · duplicate submission · transport delay
+MAILBOX HEALTH — provisioning · service plan · quota · send restriction
+DELEGATION — Full Access · Send As · Send on Behalf · propagation
+GROUP DELIVERY — sender restrictions · moderation · membership · external policy
+MESSAGE CONTENT — size · MIME overhead · signature · sensitivity label
+PROTECTION — quarantine · anti-spam · anti-phishing · DLP · encryption
+ROUTING — transport rule · connector · accepted domain · mail-flow owner
+CLIENT ISOLATION — add-ins · integrations · profile · known-good user
+CLASSIC TOOLS — outlook.exe /safe · COM add-ins · new profile · indexing
+CLASSIC CACHE — OST · cache range · Exchange confirmation · local-only data
+NEW OUTLOOK — web comparison · account state · app update / repair
+SEARCH — web result · folder scope · cache duration · indexing
+CALENDAR — web permissions · delegate rights · direct / group Full Access
+IDENTITY DETAIL — token prompts · sign-ins · MFA · compliance · policy
+CONNECTIVITY DETAIL — outlook.office.com · DNS · TCP 443 · proxy · TLS inspection
+REPAIR ORDER — approved update · Quick Repair · Online Repair · rollback
+VALIDATION MATRIX — original send · delivery · replies · attachment · delegation

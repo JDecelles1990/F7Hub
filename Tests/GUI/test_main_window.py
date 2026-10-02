@@ -16,6 +16,7 @@ from PySide6.QtCore import QTimer
 
 from f7hub.gui.main_window import MainWindow
 from f7hub.services.ticket_service import TicketService
+from f7hub.services.altf7hub_service import AltF7HubService, AltF7HubOpenError
 
 
 class RecordingTicketService:
@@ -113,6 +114,58 @@ class MainWindowTests(unittest.TestCase):
         self.assertIs(self.window.pages.currentWidget(), self.window.ticket_create_widget)
         self.assertEqual(self.window.statusBar().currentMessage(), "Ready")
         self.assertEqual(self.window.exit_action.objectName(), "exitAction")
+
+    def test_guide_action_preserves_workspace_and_unsaved_ticket(self):
+        gate = threading.Event()
+        calls = []
+
+        class Gateway:
+            def show_guide(self):
+                calls.append(True)
+                gate.wait(3)
+                return "SHOWN"
+
+        self.window.altf7hub_service = AltF7HubService(Gateway())
+        self.window._set_busy(False)
+        self.window.ticket_create_widget.subject_input.setText("Unsaved ticket")
+        page = self.window.pages.currentWidget()
+        self.window.altf7hub_action.trigger()
+        self.window.show_altf7hub()
+        QTest.qWait(25)
+        self.assertTrue(self.window.runner.busy)
+        self.assertFalse(self.window.altf7hub_action.isEnabled())
+        gate.set()
+        self.wait_idle()
+        self.assertEqual(len(calls), 1)
+        self.assertIs(self.window.pages.currentWidget(), page)
+        self.assertEqual(self.window.ticket_create_widget.subject_input.text(), "Unsaved ticket")
+        self.assertIn("Guide opened", self.window.statusBar().currentMessage())
+
+    def test_guide_failure_is_safe_and_retryable(self):
+        class Gateway:
+            def show_guide(self):
+                raise AltF7HubOpenError("Install AutoHotkey v2 and retry.")
+
+        self.window.altf7hub_service = AltF7HubService(Gateway())
+        self.window._set_busy(False)
+        with patch("f7hub.gui.main_window.QMessageBox.warning") as warning:
+            self.window.altf7hub_action.trigger()
+            self.wait_idle()
+        self.assertIn("Install AutoHotkey v2", warning.call_args.args[2])
+        self.assertTrue(self.window.altf7hub_action.isEnabled())
+        self.assertIn("not confirmed", self.window.statusBar().currentMessage())
+
+    def test_guide_unexpected_error_does_not_expose_internal_detail(self):
+        class Gateway:
+            def show_guide(self):
+                raise RuntimeError("private internal value")
+
+        self.window.altf7hub_service = AltF7HubService(Gateway())
+        self.window._set_busy(False)
+        with patch("f7hub.gui.main_window.QMessageBox.warning") as warning:
+            self.window.altf7hub_action.trigger()
+            self.wait_idle()
+        self.assertNotIn("private", warning.call_args.args[2])
 
     def test_created_ticket_updates_application_status(self) -> None:
         self.window.ticket_create_widget.subject_input.setText("Printer offline")

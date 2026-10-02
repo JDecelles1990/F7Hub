@@ -1,0 +1,34 @@
+﻿NETWORK
+SCOPE — one device · one site · wired / wireless · outage
+PHYSICAL — cable · link lights · adapter · access point
+ADDRESSING — IP · subnet · DHCP · gateway · duplicate IP
+PATH — gateway · route · DNS · destination · required port
+WIRELESS — signal · SSID · authentication · interference
+COMPARE — known-good device · network · hotspot · wired
+INTERMEDIARIES — VPN · proxy · firewall · TLS inspection
+QUALITY — latency · loss · jitter · bandwidth
+TOOLS — ipconfig · ping limitations · tracert · Test-NetConnection
+ESCALATE — timestamps · path · tests · scope · network owner
+LAYER ORDER — physical · link · IP · routing · DNS · transport · application
+ADAPTER DETAIL — enabled · driver · speed · error counters
+WIRED DETAIL — port · cable · VLAN · duplex · switch owner
+WIRELESS DETAIL — SSID · band · signal · roaming · channel contention
+ADDRESS DETAIL — subnet · APIPA · DHCP lease · duplicate address
+DHCP DETAIL — lease · scope · reservation · relay · server owner
+GATEWAY DETAIL — reachability · ARP / neighbor · route · VLAN
+ROUTE DETAIL — default / specific route · VPN route · metric
+DNS DETAIL — resolver · suffix · internal / external · IPv4 / IPv6
+TRANSPORT DETAIL — required port · listener · firewall · timeout / refusal
+APPLICATION DETAIL — endpoint · TLS · authentication · proxy
+COMPARISON MATRIX — site / other site · wired / wireless · device / user
+PATH TOOLS — ipconfig /all · route print · arp -a · tracert
+PORT TOOLS — Test-NetConnection · listener · destination service
+DNS TOOLS — Resolve-DnsName · nslookup · resolver comparison
+QUALITY METRICS — latency · loss · jitter · utilization · retransmissions
+INTERMITTENT — time · location · roaming · VPN · peak load
+PROXY DETAIL — system / browser · PAC · authentication · bypass policy
+TLS DETAIL — chain · hostname · clock · inspection
+CAPTURE BOUNDARY — authorization · targeted filter · privacy · owner
+SHARED INFRASTRUCTURE — switch · router · firewall · ISP · service owner
+CHANGE BOUNDARY — approval · baseline · rollback
+FINAL MATRIX — IP · name · port · app · original workflow

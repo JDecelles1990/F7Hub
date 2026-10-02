@@ -1,0 +1,31 @@
+﻿DNS / INTERNET
+LINK — adapter · IP address · DHCP · gateway
+RESOLUTION — hostname · DNS server · cache · suffix
+COMPARE — IP / hostname · internal / external · known-good device
+PATH — route · required TCP port · proxy · firewall
+VPN — split DNS · routes · tunnel · internal resolver
+TLS — system time · certificate · inspection · exact error
+TOOLS — ipconfig /all · Resolve-DnsName · nslookup · Test-NetConnection
+DISTINCTIONS — ICMP blocked · ping success / application access
+CHANGES — evidence · authorization · rollback
+VALIDATE — original site / application · resolution · connectivity
+CLIENT CONFIG — resolvers · DHCP source · interface order
+QUERY MATRIX — short name · FQDN · IP · same resolver
+RECORD DETAIL — A · AAAA · CNAME · SRV · PTR · expected value
+ANSWER DETAIL — authoritative / cached · TTL · NXDOMAIN · SERVFAIL · timeout
+SERVER COMPARISON — configured resolver · authorized alternate
+CACHE DETAIL — client · negative cache · server · TTL
+LOCAL OVERRIDES — hosts file · suffix search · application cache
+DOMAIN DETAIL — AD DNS · SRV records · controller discovery
+VPN DETAIL — split DNS · NRPT · pushed resolver · routes
+NETWORK DETAIL — UDP / TCP 53 · routing · firewall · loss
+RECURSION DETAIL — forwarders · conditional forwarders · upstream
+ZONE DETAIL — authority · delegation · dynamic registration
+IPv6 DETAIL — AAAA · reachable route · address preference
+BROWSER DETAIL — secure DNS policy · proxy resolution · cache
+APPLICATION DETAIL — DNS success / TCP failure · port · TLS · backend
+PUBLIC RECORDS — propagation · authoritative answer · expiry · owner
+TOOLS — Resolve-DnsName · nslookup · ipconfig /displaydns
+SERVER TOOLS — DNS logs · service state · server-team authorization
+CHANGE BOUNDARY — captured answer · TTL · approved correction · rollback
+FINAL CHECK — expected answer · required port · application task

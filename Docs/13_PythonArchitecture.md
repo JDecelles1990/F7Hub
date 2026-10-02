@@ -46,6 +46,14 @@ Bootstrap gives DatabaseBackupService the resolved active database path. MainWin
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+Bootstrap composes `AltF7HubService` with `WindowsAltF7HubGateway` using the resolved checkout root. MainWindow receives the optional service and submits `show_guide()` through the shared ServiceTaskRunner. The service has no PySide6 dependency; the gateway uses the standard library to launch the fixed wrapper with an argument array, `shell=False`, bounded wait and captured output. It uses `%ProgramFiles%\AutoHotkey\v2\AutoHotkey64.exe` and verifies required checkout files before launch.
+
+Only `SHOWN` and `FOCUSED_EDITOR` with exit 0 count as success. Missing runtime/files, non-Windows use, OS errors, timeout and malformed/unconfirmed output are translated into safe actionable errors. Raw subprocess diagnostics are not shown or logged. A timeout terminates the short-lived client only; an already-started AHK host remains available. No application-wide state, ticket data transfer, provider dependency or database access is added.
+
+---
+
 # 1. Purpose
 
 Slice 034 extends TicketService.list_tickets and TicketRepository.list_tickets with optional subject_query. The service rejects non-text values before repository access, trims surrounding whitespace and maps blank text to no constraint. The repository escapes LIKE metacharacters and binds a literal substring predicate with the existing queue filters. TicketWorkspace stores the submitted query separately from draft input and reuses its worker, paging and retry state. Subject editing still reloads authoritative detail and the filtered queue without a second write. No general search service or FTS change is introduced.

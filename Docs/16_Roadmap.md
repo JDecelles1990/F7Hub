@@ -7,9 +7,17 @@
 
 ---
 
+## AltF7Hub Guide — Slice 046
+
+Slice 045 is **CLOSED** through PR #46, merged at `15c61b5c410d0d5dffe5ac6c5ac01a4b6dd960f7`, as verified by its external integration/closure report. Its prior pending-review wording below is historical.
+
+Slice 046 integrates the existing AltF7Hub guide, both launch routes and scoped keyboard controls, and stops at **READY_FOR_REVIEW**. The next gate is independent read-only review. Ticket-context transport, issue matching, ambiguity handling and user-triggered issue macros remain **DEFERRED** until separately scoped; no automatic topic selection is implemented.
+
+---
+
 # 1. Purpose
 
-Slice 045 implements the next bounded Script Library discovery increment: manual literal-substring search of enabled metadata by name, code or description. It reuses the catalog layers and preserves scoped reads, draft/applied state, async and copy safeguards without a schema change. Metadata filters, broader search dimensions, content approval and execution remain future work. The implementation candidate stops at READY_FOR_REVIEW. The predecessor overview below retains historical Slice 044 phase wording; verified PR #45 closure is the authority for its completed lifecycle.
+Slice 045 implements the next bounded Script Library discovery increment: manual literal-substring search of enabled metadata by name, code or description. It reuses the catalog layers and preserves scoped reads, draft/applied state, async and copy safeguards without a schema change. Metadata filters, broader search dimensions, content approval and execution remain future work. Slice 045 subsequently passed independent review and closed through PR #46. The predecessor overview below retains historical Slice 044 phase wording; verified PR #45 closure is the authority for its completed lifecycle.
 
 Slice 040 established the metadata-only Script Registry; Slice 041 added a read-only Scripts catalog page for enabled entries and manual refresh. Slice 042 added one local Windows System Snapshot diagnostic and one production catalog row, then closed through PR #43. Slice 043 added checksum-approved manual source copy and merged through PR #44. Slice 044 adds local default-disabled registration and guarded enable/disable management, with no checksum approval or execution. Search, metadata editing/deletion, content-approval UI, parameters, application execution and history remain future work. Slice 044 stops at independent read-only review before integration.
 

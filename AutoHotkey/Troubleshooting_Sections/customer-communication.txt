@@ -1,0 +1,27 @@
+﻿CUSTOMER COMMUNICATION
+OPEN — greeting · identity verification · contact details
+LISTEN — symptom · impact · user wording · expectations
+CLARIFY — scope · timing · recent change · original task
+EMPATHY — acknowledgement · calm tone · ownership
+EXPLAIN — plain language · next action · expected duration
+CONSENT — remote access · disruptive action · user-data protection
+UPDATES — progress · uncertainty · next checkpoint
+DIFFICULT CALLS — active listening · boundaries · escalation
+CLOSE — original-task confirmation · recap · follow-up
+DOCUMENT — facts · commitments · agreed next steps
+CALL CONTEXT — callback · location · urgency · user needs
+ACTIVE LISTENING — uninterrupted description · user wording · clarification
+FACT / ASSUMPTION — observed symptom · hypothesis · evidence
+EXPECTATION SETTING — next test · disruption · checkpoint
+PLAIN LANGUAGE — familiar terms · concise explanation · confirmation
+REMOTE SESSION — identity check · consent · visible actions
+USER ACTION — one instruction · confirmation · observed result
+FRUSTRATION — acknowledgement · calm pace · business impact
+ACCESSIBILITY — pace · landmarks · alternative channel
+UNCERTAINTY — finding · remaining hypothesis · escalation plan
+TIME MANAGEMENT — progress summary · pause point · callback
+HANDOFF — owner · reason · findings · next checkpoint
+WORKAROUND — benefit · limitation · temporary duration
+PRIVACY — sensitive screens · necessary data · approved handling
+CLOSURE CHECK — user task · outcome · remaining impact
+FOLLOW-UP — ticket · contact route · timeframe

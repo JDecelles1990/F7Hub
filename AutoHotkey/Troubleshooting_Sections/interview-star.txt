@@ -1,0 +1,24 @@
+﻿INTERVIEW / STAR STORY PROMPTS
+SITUATION — real incident · setting · impact
+TASK — responsibility · goal · constraints
+ACTION — diagnosis · communication · decisions · ownership
+RESULT — verified outcome · user impact · actual measures
+REFLECTION — learning · prevention · next-time improvement
+STORY IDEAS — difficult call · urgent outage · teamwork
+STORY IDEAS — mistake · unfamiliar issue · competing priorities
+PREPARATION — real examples · concise cues · no invented results
+STORY INVENTORY — support · difficult diagnosis · collaboration
+SITUATION DETAIL — user · service · impact · context
+TASK DETAIL — assignment · ownership · deadline · constraints
+ACTION DETAIL — decisions · diagnosis · communication
+RESULT DETAIL — actual improvement · confirmation · outcome
+TECHNICAL STORY — scope · hypothesis · comparison · cause
+CUSTOMER STORY — listening · de-escalation · explanation · resolution
+TEAM STORY — evidence · handoff · specialist collaboration
+PRIORITY STORY — impact · urgency · competing tasks · updates
+MISTAKE STORY — acknowledgement · correction · prevention
+LEARNING STORY — unfamiliar tool · source · safe test · feedback
+SECURITY STORY — verification · evidence · approved escalation
+BOUNDARIES — personal / team contribution · honest uncertainty
+DELIVERY — concise context · strongest actions · actual result
+FOLLOW-UP PROMPTS — alternatives · tradeoff · lesson · next-time change

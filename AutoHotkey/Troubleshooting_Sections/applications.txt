@@ -1,0 +1,31 @@
+﻿APPLICATIONS / CRASHES
+IDENTIFY — app · version · exact error · timestamp
+REPRODUCE — launch · action · file · minimal input
+EVIDENCE — Event Viewer · Reliability Monitor · faulting module
+COMPARE — user profile · device · file · web alternative
+LOCAL — disk · permissions · cache · configuration
+DEPENDENCIES — runtime · service · backend · network
+EXTENSIONS — safe mode · approved add-ins · load order
+CHANGES — updates · drivers · vendor known issues
+RECOVERY — data backup · repair · approved rollback
+VALIDATE — original task · stability · recurrence
+FAILURE MAP — launch · startup · action · file · backend · shutdown
+VERSION MAP — app · OS · architecture · plugins
+ERROR DETAIL — code · module · exception · time
+REPRODUCTION DETAIL — minimal input · safe copy · consistent action
+PROFILE MATRIX — user / other host · other user / host
+DATA MATRIX — file / new file · local / network path
+PROCESS DETAIL — launch · hang · exit code · resource use
+EVENTS — Application Error · Windows Error Reporting · vendor logs
+RELIABILITY — install timeline · repeated failure · update correlation
+DUMP BOUNDARY — authorization · app data · sensitive content
+DEPENDENCY DETAIL — .NET · Visual C++ · runtime · driver · service
+CONFIGURATION DETAIL — user settings · environment · cache · rights
+EXTENSION DETAIL — safe mode · approved add-in · version · load order
+BACKEND DETAIL — endpoint · DNS · port · authentication · health
+SECURITY DETAIL — app control · alert · permitted execution
+STORAGE DETAIL — free space · temp path · locks · corrupt input
+UPDATE DETAIL — vendor known issue · compatibility · rollback
+REPAIR ORDER — targeted setting · update · repair · reinstall last
+DATA BOUNDARY — backup · export · local-only data · license
+FINAL MATRIX — original action · original data · repeat · stability

@@ -1,0 +1,32 @@
+﻿PERFORMANCE / DISK SPACE
+BASELINE — onset · workload · uptime · recent changes
+MEASURE — Task Manager · sustained CPU · memory · disk
+STARTUP — applications · updates · indexing · scans
+STORAGE — free space · disk health · largest folders
+MEMORY — pressure · browser tabs · working set
+PROFILE — OneDrive · cache · known-good user
+HARDWARE — power mode · temperature · drivers · diagnostics
+CLEANUP — approved tools · user-data protection · retention
+RECOVERY — backup · authorization · rollback
+VALIDATE — same workload · measured improvement · recurrence
+ONSET DETAIL — sudden / gradual · update · uptime · workload
+MEASUREMENT WINDOW — idle baseline · active workload · sustained use
+CPU DETAIL — top process · service host · updates · security scan
+MEMORY DETAIL — committed memory · paging · tabs · application leak
+DISK DETAIL — active time · latency · queue · top I/O process
+CAPACITY DETAIL — system volume · profile · temporary data · cloud cache
+STORAGE HEALTH — I/O errors · diagnostics · disk type · failure signs
+STARTUP DETAIL — approved startup list · login duration · management agents
+PROFILE DETAIL — known-good user · redirected folders · sync backlog
+BROWSER DETAIL — extensions · tabs · profile · hardware acceleration
+THERMAL DETAIL — temperature · fan · vents · power · throttling
+POWER DETAIL — charger wattage · dock · battery saver · OEM profile
+NETWORK DETAIL — local / remote task · backend response · VPN
+INDEXING DETAIL — search index · large changes · workload timing
+SECURITY DETAIL — scan schedule · detections · endpoint health
+TOOLS — Task Manager · Resource Monitor · Performance Monitor
+CLEANUP BOUNDARY — approved tools · retention · user confirmation
+CACHE BOUNDARY — application cache · unsynced work · backup
+HARDWARE BOUNDARY — diagnostics · warranty · authorized upgrade
+CHANGE CONTROL — one adjustment · before / after timing · rollback
+FINAL CHECK — repeat workload · response time · baseline · recurrence

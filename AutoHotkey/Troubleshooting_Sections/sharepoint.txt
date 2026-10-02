@@ -1,0 +1,31 @@
+﻿SHAREPOINT / FILE ACCESS
+SCOPE — site · library · folder · file · account
+WEB — access · current version · recycle bin · version history
+IDENTITY — correct tenant · guest account · sign-in
+PERMISSIONS — membership · inheritance · sharing link · policy
+SYNC — correct library · OneDrive state · shortcuts · conflicts
+FILES — path · locks · checkout · name · size
+LOSS — deletion timeline · recycle bin · backup · retention owner
+RECOVERY — unsynced-file backup · authorization · restore validation
+COMPARE — web / desktop · known-good user · device
+VALIDATE — open · edit · save · sharing · latest version
+RESOURCE MAP — tenant · site URL · library · folder · file
+ACCOUNT MAP — member · guest · organization · browser session
+ACCESS MATRIX — site / library / item · web / sync · user / group
+PERMISSION DETAIL — inheritance · unique rights · membership
+SHARING DETAIL — link scope · expiration · guest restriction · owner
+MEMBERSHIP DETAIL — M365 group · SharePoint group · propagation
+FILE DETAIL — lock · checkout · coauthoring · sensitivity label
+VERSION DETAIL — modification · history · author · conflict
+LIBRARY DETAIL — metadata · required columns · content type · approval
+SYNC DETAIL — account · folders · shortcut overlap
+PATH DETAIL — item name · length · invalid characters
+DATA LOSS DETAIL — deletion time · recycle bins · retention · restore owner
+MASS CHANGE — unexpected deletes · propagation · security escalation
+FOLDER LOCATION — redirection · local-only copies · correct library
+POLICY DETAIL — Conditional Access · device restriction · sharing
+SERVICE DETAIL — tenant health · site availability · storage quota
+ISOLATION MATRIX — fresh browser · second item · known-good user / device
+EVIDENCE PACKAGE — URL · exact error · request time · correlation ID
+RECOVERY ORDER — backup · version / recycle-bin review · approved restore
+FINAL CHECK — web · synchronization · edit / save · sharing
