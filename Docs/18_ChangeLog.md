@@ -11,6 +11,14 @@ Implemented the approved F7Hub startup, modeless Mochi controls, persistent loca
 
 ---
 
+## AltF7Hub topic contract — Slice 047 candidate
+
+**2026-10-02 — Slice 047: stable topic documentation and Ctrl+F.** Added a complete 34-topic [catalog](../AutoHotkey/Troubleshooting_Sections/TopicCatalog.md), explicit A/S/H/W cycle order, interview keys 1–5, curated list/title/automatic-heading colors and keyword references for macOS, Azure VM and Windows 365. Main-guide Ctrl+F focuses Search with its caret after the current query; opacity now supports 60–100%. Runtime routing policy is separate from historical filename compatibility. Future classification aliases remain documentation only; the current show/focus IPC is unchanged.
+
+Slice 046 is CLOSED; PR #47 merged into authoritative main `bb81a2c2dd9851c2c80d42549fc078309e02be72`. Slice 047 was reconstructed from that base using only its authorized changes after CHANGES_REQUIRED for mixed-file scope. The corrected candidate is READY_FOR_REVIEW, unstaged and uncommitted; independent review and integration remain pending. Slice 047 is neither integrated nor closed. Historical ChangeLog entries retain their dated meaning.
+
+Validation, the new exact manifest and implementation handoff are external under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\Slice-047`. The previous 17-path aggregate `b9e08c6bacc6b4819a72e873eb2c29385b9e88de0dcb9da850d4fbf0dd51e925` is historical rejected evidence only and supplies no integration approval. The user's successful native acceptance is RETAINED after input comparison; it is not fresh automated validation.
+
 ## AltF7Hub Guide — Slice 046
 
 **2026-10-01 — Slice 046: AltF7Hub integration and keyboard navigation.** Integrated the supplied reference guide under the shared AHK v2 entry, retained standalone access through a bounded request wrapper, and added the Python toolbar/File action through the existing worker/service boundary. Topics wrap with Up/Down; Left/Right change opacity by 1% and support repeat, with focus exclusions, bounds and saved settings. Show/focus preserves editor content, ticket drafts and topic selection/scroll. Concurrent clients are serialized; unconfirmed dispatched requests do not trigger a keyboard toggle.

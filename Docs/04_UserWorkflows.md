@@ -108,6 +108,11 @@ Status choices are static lifecycle values and require no reference query or wor
 
 ---
 
+## AltF7Hub topic contract — Slice 047
+
+AltF7Hub main-guide Ctrl+F focuses Search with its caret at the end, restoring the sidebar if hidden. Bare topic keys act only in notes/list; A/S/H/W cycle explicit groups and 1–5 select interview references. Selection clears search within the current active/archive view. Opacity is 60–100%. See [the complete keyboard reference](../AutoHotkey/Troubleshooting_Sections/README.md) and [stable topic catalog](../AutoHotkey/Troubleshooting_Sections/TopicCatalog.md).
+
+
 # 1. Purpose
 
 This document defines the principal user workflows of F7Hub.

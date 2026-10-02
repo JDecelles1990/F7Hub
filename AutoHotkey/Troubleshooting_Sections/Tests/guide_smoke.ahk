@@ -29,10 +29,9 @@ Check(Topics.Has("mapped-drives") && Shortcuts["X"] = "mapped-drives", "Mapped d
 Check(Topics["power"].Path = Fixture "\P.txt", "Sibling override loaded")
 Check(Topics["interview-personal"].Body != "" && Topics.Has("linux") && Topics.Has("fortigate"), "Interview and expanded subjects loaded")
 Check(StartupWarnings = "" && ShortcutWarnings = "", "No load errors or shortcut collisions")
-usedColors := Map()
 for id, color in TopicColors {
-    Check(!usedColors.Has(color), "Distinct sidebar color: " id)
-    usedColors[color] := true
+    expected := BuiltInTopics()
+    Check(!expected.Has(id) || color = expected[id].Color, "Curated sidebar color: " id)
 }
 for id, item in Topics {
     if InStr(id, "placeholder")
@@ -60,7 +59,7 @@ LoadSettings()
 Check(Opacity = 100, "Opacity upper clamp")
 IniWrite("20", DataRoot "\GuideSettings.ini", "appearance", "opacity")
 LoadSettings()
-Check(Opacity = 70, "Opacity lower clamp")
+Check(Opacity = 60, "Opacity lower clamp")
 Opacity := 100, Pinned := false, SidebarHidden := false, HeadingBold := true
 FileAppend("PASS Settings`n", "*")
 
@@ -188,7 +187,7 @@ Check(NumGet(GetScroll(NotesBox), 4, "Int") = NumGet(scroll, 4, "Int"), "Formatt
 ShowTopic("unicode-test")
 ShowEditor("edit")
 Check(IsObject(EditorBody) && GetBody(EditorBody) = unicodeBody, "Editor loads topic and styles")
-for percent in [70, 85, 100] {
+for percent in [60, 85, 100] {
     OpacitySlider.Value := percent
     ChangeOpacity()
     expected := percent = 100 ? "" : Round(percent * 255 / 100)
@@ -316,7 +315,7 @@ Check(Opacity = 90 && OpacitySlider.Value = 90 && OpacityLabel.Text = "90%", "Re
 Check(WinGetTransparent(Guide.Hwnd) = Round(90 * 255 / 100), "Repeated Right updates native alpha")
 Loop 100
     HandleGuideKeys(0x25, 0x40000000, 0x100, NotesBox.Hwnd)
-Check(Opacity = 70, "Held Left clamps at lower bound")
+Check(Opacity = 60, "Held Left clamps at lower bound")
 Loop 100
     HandleGuideKeys(0x27, 0x40000000, 0x100, NotesBox.Hwnd)
 Check(Opacity = 100 && WinGetTransparent(Guide.Hwnd) = "", "Held Right clamps at fully opaque")

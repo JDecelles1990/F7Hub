@@ -1,0 +1,5 @@
+MACOS
+SCOPE — MacBook · iMac · macOS version · Apple Silicon · affected user/application
+ACCESS — sign-in · account · permissions · network · VPN · management profile
+DIAGNOSTICS — Activity Monitor · storage · updates · logs · known-good comparison
+EVIDENCE — exact error · timestamp · recent change · escalation · confirm recovery

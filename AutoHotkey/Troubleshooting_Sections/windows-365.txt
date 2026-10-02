@@ -1,0 +1,5 @@
+WINDOWS 365 / CLOUD PC
+SCOPE — Cloud PC · assigned user · Windows 365 app · browser · service health
+CONNECTION — sign-in · client version · network · connection error · known-good comparison
+PROVISIONING — license · assignment · provisioning status · policy · administrator review
+EVIDENCE — exact error · timestamp · affected users · escalation · confirm recovery

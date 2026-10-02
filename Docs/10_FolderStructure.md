@@ -16,6 +16,11 @@ Backups, the supplied settings and earlier `Tests/Evidence` are preserved local 
 
 ---
 
+## AltF7Hub topic contract — Slice 047
+
+`TopicRouting.ahk` owns explicit built-in shortcut/group/color policy. [TopicCatalog.md](../AutoHotkey/Troubleshooting_Sections/TopicCatalog.md) documents stable IDs and future classification hints and is never loaded as configuration. README remains the technician keyboard reference. The library adds macOS, Azure VM and Windows 365 keyword references without moving existing topic files.
+
+
 # 1. Purpose
 
 Slice 043 adds root `.gitattributes` with a rule limited to `PowerShell/Diagnostics/Get-SystemSnapshot.ps1`, ensuring CRLF checkout bytes for its approved SHA-256. `Database/Migrations/0009_system_snapshot_checksum.sql` owns the reviewed registry checksum. No general line-ending policy or new source directory is added.
