@@ -6,4 +6,3 @@ Run `AutoHotkey/F7Hub.ahk` with AutoHotkey v2: tap F7 to launch/focus the deskto
 
 In the guide, notes/list focus enables topic letters, Up/Down wraparound navigation and Left/Right opacity adjustment (1% per press, held-key repeat, 70–100%). The existing library, editor and archive are preserved. [Guide setup and shortcuts](AutoHotkey/Troubleshooting_Sections/README.md). The guide displays reference reminders; ticket-driven topic selection remains deferred.
 
-Slice 046 is READY_FOR_REVIEW with an unstaged/uncommitted candidate. It does not update separate installed guide copies or Windows Startup entries.
