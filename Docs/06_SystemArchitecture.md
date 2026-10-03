@@ -1,5 +1,11 @@
 # F7Hub System Architecture
 
+## Atomic ticket classification boundary — Slice 051
+
+TicketWorkspace dispatches one `TicketService.update_ticket_classification` through the existing ServiceTaskRunner. The service validates both inputs and coordinates an existing TicketRepository BEGIN IMMEDIATE transaction: authoritative priority/type/update-token checks, no-op detection, one guarded UPDATE of changed classification fields and activity time, existing change events, authoritative reload, then commit. Priority and Type both commit or neither commits. Existing individual priority/type APIs remain intact.
+
+GUI code owns dropdown drafts, original concurrency baseline, pending/callback generation and truthful refresh feedback; it contains no SQL. The committed returned record establishes the saved baseline before post-operation reads. Detail/queue read failures are distinct from mutation failure and recover through read-only actions. MainWindow includes classification pending in existing navigation/close guards. No schema, migration, dependency, framework, authentication, IPC, filesystem or external execution boundary changes. Quick Note, Status and New Ticket retain their separate operations.
+
 ## Ticket creation presentation ownership — Slice 050
 
 MainWindow retains application composition and navigation ownership. TicketWorkspace hosts the existing TicketCreateWidget in a parent-owned detail stack; ServiceTaskRunner still dispatches existing TicketService creation and authoritative detail/list reads. TicketService, TicketRepository, domain rules, schema, migrations and bootstrap composition are unchanged. There is no second form, duplicate lookup/write path or new controller framework.

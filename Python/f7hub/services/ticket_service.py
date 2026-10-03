@@ -303,6 +303,55 @@ class TicketService:
         except sqlite3.Error as error:
             raise TicketUpdateError("F7Hub could not update the ticket priority.") from error
 
+    def update_ticket_classification(
+        self, ticket_id: int, *, expected_priority: str,
+        expected_ticket_type: str, expected_updated_at: str,
+        priority: str, ticket_type: str,
+    ) -> TicketRecord:
+        """Apply priority and type together, including history and authoritative reload."""
+
+        _validate_ticket_id(ticket_id)
+        _choice(expected_priority, "expected_priority", TICKET_PRIORITIES)
+        _choice(expected_ticket_type, "expected_ticket_type", TICKET_TYPES)
+        _required_text(expected_updated_at, "expected_updated_at")
+        clean_priority = _choice(priority, "priority", TICKET_PRIORITIES)
+        clean_type = _choice(ticket_type, "ticket_type", TICKET_TYPES)
+        conflict = "This ticket changed. Reload it before applying priority/type changes again."
+        try:
+            with self._ticket_repository.transaction() as transaction:
+                current = _require_ticket(transaction.get_ticket(ticket_id))
+                if (current.priority != expected_priority
+                        or current.ticket_type != expected_ticket_type
+                        or current.updated_at != expected_updated_at):
+                    raise TicketEditConflictError(conflict)
+                if current.priority == clean_priority and current.ticket_type == clean_type:
+                    return current
+                timestamp = _next_ticket_timestamp(self._clock(), current.updated_at)
+                if not transaction.update_ticket_classification(
+                    ticket_id, expected_priority=expected_priority,
+                    expected_ticket_type=expected_ticket_type,
+                    expected_updated_at=expected_updated_at,
+                    priority=clean_priority, ticket_type=clean_type, updated_at=timestamp,
+                ):
+                    raise TicketEditConflictError(conflict)
+                for changed, event_type, title in (
+                    (current.priority != clean_priority, TICKET_PRIORITY_CHANGED_EVENT_TYPE,
+                     TICKET_PRIORITY_CHANGED_EVENT_TITLE),
+                    (current.ticket_type != clean_type, TICKET_TYPE_CHANGED_EVENT_TYPE,
+                     TICKET_TYPE_CHANGED_EVENT_TITLE),
+                ):
+                    if changed:
+                        transaction.create_timeline_event(
+                            ticket_id=ticket_id, event_type=event_type,
+                            title=title, occurred_at=timestamp,
+                        )
+                updated = transaction.get_ticket(ticket_id)
+                if updated is None:
+                    raise TicketUpdateError("F7Hub could not reload the updated ticket.")
+                return updated
+        except sqlite3.Error as error:
+            raise TicketUpdateError("F7Hub could not update the ticket priority/type.") from error
+
     def update_ticket_description(
         self, ticket_id: int, *, expected_description: str | None,
         expected_updated_at: str, description: str | None,

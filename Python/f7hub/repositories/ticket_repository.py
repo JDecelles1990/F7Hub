@@ -374,6 +374,33 @@ class TicketRepositoryTransaction:
         )
         return cursor.rowcount == 1
 
+    def update_ticket_classification(
+        self, ticket_id: int, *, expected_priority: str,
+        expected_ticket_type: str, expected_updated_at: str,
+        priority: str, ticket_type: str, updated_at: str,
+    ) -> bool:
+        """Guard both loaded values and update only changed classification fields."""
+
+        assignments = []
+        values = []
+        if priority != expected_priority:
+            assignments.append("priority = ?")
+            values.append(priority)
+        if ticket_type != expected_ticket_type:
+            assignments.append("ticket_type = ?")
+            values.append(ticket_type)
+        if not assignments:
+            return False
+        assignments.append("updated_at = ?")
+        values.extend((updated_at, ticket_id, expected_priority,
+                       expected_ticket_type, expected_updated_at))
+        cursor = self._connection.execute(
+            "UPDATE tickets SET " + ", ".join(assignments)
+            + " WHERE ticket_id = ? AND priority = ? AND ticket_type = ? AND updated_at = ?",
+            values,
+        )
+        return cursor.rowcount == 1
+
     def update_ticket_description(
         self, ticket_id: int, *, expected_description: str | None,
         expected_updated_at: str, description: str | None, updated_at: str,

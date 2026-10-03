@@ -1,5 +1,11 @@
 # F7Hub Roadmap
 
+## Tickets inline classification — Slice 051 candidate
+
+Slice 050 is CLOSED through PR #55, authoritative main `9111c9d87162d9f5f15a11c05b06495f9c86c328` and its external integration report. Its pending-review prose below is STALE HANDOFF METADATA retained as history.
+
+Slice 051 implements direct Priority/Type controls, explicit atomic Apply, existing optimistic concurrency/draft protection and truthful filter/refresh behavior. Required regression, native validation and scoped documentation are complete at **READY_FOR_REVIEW** on 2026-10-03; independent review and integration remain pending. Status and Subject/Description remain separate. Notes/Knowledge redesign, Category editing and Slice 052 remain deferred. No schema migration.
+
 ## Tickets UX consolidation — Slice 050 candidate
 
 Slice 049 is CLOSED through PR #54 and its externally verified closure report; earlier pending-review prose is retained history. Slice 050 implements the next bounded UX increment: Tickets naming, embedded existing New Ticket form, removal of its separate primary navigation, safe Cancel and post-create authoritative read/recovery. It preserves Quick Note and existing queue state. Recovery validation/documentation are complete at **READY_FOR_REVIEW** on 2026-10-03. Review and integration remain pending. Inline Priority/Type and other property redesign, note history/search redesign and Knowledge Base redesign remain separate deferred work.

@@ -1,5 +1,18 @@
 # F7Hub Todo
 
+## Slice 051 — Inline Priority and Type candidate
+
+- [x] Replace Edit priority/Edit type with direct dropdowns and one explicit Apply changes action.
+- [x] Add a guarded atomic service/repository operation; preserve individual APIs and existing history.
+- [x] Extend existing discard protection and pending/generation guards; preserve failed drafts and post-commit truthfulness.
+- [x] Preserve Quick Note, Status, New Ticket, queue filters/search/page and filter-exit behavior.
+- [x] Validate native Windows 1000×700 including expanded Resolution and inspect all nine final captures.
+- [x] Record 433 Database (RETAINED), 199 GUI and 190 Integration (FRESH) tests, all exit 0; final native 185 assertions PASS, exact external manifest and implementation report. **READY_FOR_REVIEW** on 2026-10-03.
+- [ ] Independent review/integration; Slice 051 is not integrated or CLOSED.
+- Deferred: Category editing, Subject/Description UX replacement, Notes/Knowledge redesign and Slice 052. No schema change.
+
+Slice 050 is CLOSED through PR #55 and its external integration report. Its pending-review checklist below is STALE HANDOFF METADATA retained as history.
+
 ## Slice 050 — Tickets workspace creation candidate
 
 - [x] Consolidate user-visible Saved Tickets into Tickets; remove separate New Ticket primary action/page/shortcut.

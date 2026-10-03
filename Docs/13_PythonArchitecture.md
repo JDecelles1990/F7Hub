@@ -1,5 +1,13 @@
 # F7Hub Python Architecture
 
+## Inline classification ownership — Slice 051
+
+TicketWorkspace directly presents the existing TICKET_PRIORITIES and ordered TICKET_TYPES vocabularies. Its authoritative classification baseline is a TicketRecord separate from live dropdown data. Unrelated note/status/subject/description refreshes preserve dirty choices and the original expected token, so stale Apply fails closed. Explicit discard/reload or committed classification results reset the baseline. New Ticket clears the active identity and classification choices.
+
+`TicketService.update_ticket_classification(ticket_id, *, expected_priority, expected_ticket_type, expected_updated_at, priority, ticket_type)` validates values and owns atomic history/transaction coordination. `TicketRepositoryTransaction.update_ticket_classification` builds assignments only from fixed supported column names and binds all values; all three expected-state guards participate in the UPDATE. The individual priority/type APIs remain supported. Unused EditTicketPriorityDialog/EditTicketTypeDialog modules are removed after caller search; Subject/Description dialogs remain.
+
+`classification_pending` and its signal extend existing shared-runner and MainWindow protections through write/detail/queue completion, dispatch rejection, synchronous dispatch exception, read failure and obsolete callbacks. A committed record resets Apply before refresh, and read recovery cannot repeat the write. ServiceTaskRunner itself is unchanged; no new service framework or dependency is introduced.
+
 ## Embedded ticket creation and callback ownership — Slice 050
 
 MainWindow composes one existing TicketCreateWidget with the shared runner and passes it to TicketWorkspace. The outer QStackedWidget contains only Tickets, optional Knowledge Base and optional Scripts. TicketWorkspace owns a right-pane QStackedWidget, the saved detail panel, a scroll area containing the reused form, and a pinned Cancel button. The internal show_new_ticket helper enters or focuses that embedded mode; it has no primary action or Ctrl+N registration.

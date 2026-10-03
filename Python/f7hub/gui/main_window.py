@@ -124,6 +124,7 @@ class MainWindow(QMainWindow):
         self.workspace.note_pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
         self.workspace.creation_pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
         self.workspace.status_pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
+        self.workspace.classification_pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
         self.ticket_create_widget.pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
 
         self.statusBar().showMessage("Ready")
@@ -159,7 +160,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"Created ticket {ticket_number}.", 5_000)
 
     def _set_busy(self, busy):
-        busy = busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending
+        busy = busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
         self.pages.setEnabled(not busy)
         self.tickets_action.setEnabled(not busy)
         self.knowledge_action.setEnabled(not busy and self.knowledge_workspace is not None)
@@ -169,7 +170,7 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Working…" if busy else "Ready")
 
     def show_new_ticket(self):
-        if (not self.runner.busy and not self.workspace.creation_pending and not self.workspace.status_pending
+        if (not self.runner.busy and not self.workspace.creation_pending and not self.workspace.status_pending and not self.workspace.classification_pending
                 and not self.workspace.note_pending and self.workspace.creating):
             self.pages.setCurrentWidget(self.workspace)
             self.ticket_create_widget.subject_input.setFocus()
@@ -177,7 +178,7 @@ class MainWindow(QMainWindow):
             self.pages.setCurrentWidget(self.workspace)
 
     def show_altf7hub(self):
-        if self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.altf7hub_service is None:
+        if self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending or self.altf7hub_service is None:
             return
 
         def completed(outcome):
@@ -195,7 +196,7 @@ class MainWindow(QMainWindow):
         self.runner.submit(self.altf7hub_service.show_guide, completed, failed)
 
     def back_up_database(self):
-        if self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.backup_service is None:
+        if self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending or self.backup_service is None:
             return
 
         def completed(path):
@@ -217,12 +218,12 @@ class MainWindow(QMainWindow):
         self.runner.submit(self.backup_service.create_backup, completed, failed)
 
     def show_tickets(self):
-        if not self.runner.busy and not self.workspace.note_pending and not self.workspace.creation_pending and not self.workspace.status_pending:
+        if not self.runner.busy and not self.workspace.note_pending and not self.workspace.creation_pending and not self.workspace.status_pending and not self.workspace.classification_pending:
             self.pages.setCurrentWidget(self.workspace)
             self.workspace.refresh_list()
 
     def show_knowledge(self):
-        if not self.runner.busy and not self.workspace.note_pending and not self.workspace.creation_pending and not self.workspace.status_pending and self.knowledge_workspace is not None:
+        if not self.runner.busy and not self.workspace.note_pending and not self.workspace.creation_pending and not self.workspace.status_pending and not self.workspace.classification_pending and self.knowledge_workspace is not None:
             if not self.workspace.confirm_discard():
                 return
             self.workspace._clear_drafts()
@@ -230,7 +231,7 @@ class MainWindow(QMainWindow):
             self.knowledge_workspace.refresh_list()
 
     def show_scripts(self):
-        if not self.runner.busy and not self.workspace.note_pending and not self.workspace.creation_pending and not self.workspace.status_pending and self.script_workspace is not None:
+        if not self.runner.busy and not self.workspace.note_pending and not self.workspace.creation_pending and not self.workspace.status_pending and not self.workspace.classification_pending and self.script_workspace is not None:
             if not self.workspace.confirm_discard():
                 return
             self.workspace._clear_drafts()
@@ -238,7 +239,7 @@ class MainWindow(QMainWindow):
             self.script_workspace.refresh_list()
 
     def open_knowledge_article(self, article_id):
-        if self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.knowledge_workspace is None:
+        if self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending or self.knowledge_workspace is None:
             return
         if not self.workspace.confirm_discard():
             return
@@ -247,7 +248,7 @@ class MainWindow(QMainWindow):
         self.knowledge_workspace.open_article_by_id(article_id)
 
     def closeEvent(self, event):
-        if (self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending
+        if (self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
                 or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading)):
             self.statusBar().showMessage("An operation is finishing. Please close again when it completes.")
             event.ignore()
