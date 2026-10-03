@@ -1,5 +1,12 @@
 # F7Hub GUI Design
 
+## Persistent Quick Note — Slice 049
+
+Saved-ticket detail retains its five existing tabs and optional Author field. A compact **Quick Note** row contains note type and **Add note** above the existing multiline plain-text editor. The button tooltip exposes Ctrl+Enter; the shortcut applies only in that editor. Blank/unloaded/busy states disable submission. Navigation, tab names, property editing and status layout are unchanged.
+
+The note's local pending state keeps note controls and MainWindow navigation/close protection active across the shared runner's idle-before-callback boundary. Success clears only note text and restores focus after the owned refresh completes; errors preserve the draft and distinguish committed writes from failed refreshes. Native Windows 1000×700/96 DPI checks passed across all tabs and expanded resolution; all six captures were inspected without observed control overlap or clipping. Physical manual input and other DPI environments remain NOT RUN.
+
+
 ## Mochi Settings — Slice 002 candidate
 
 Settings → Mochi… opens a single parent-owned modeless `MochiSettingsDialog`. Repeated opening raises the existing dialog. Status and controls observe the application-owned MochiService; closing unsubscribes the dialog without closing the connection or storing preferences. Pending commands disable only conflicting Mochi controls. Close, F7Hub navigation and ticket work remain usable. Detached/obsolete dialog callbacks are ignored, and replacement dialogs subscribe to current service state.

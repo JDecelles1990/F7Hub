@@ -123,6 +123,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(exit_action)
         self.exit_action = exit_action
         self.runner.busy_changed.connect(self._set_busy)
+        self.workspace.note_pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
 
         self.statusBar().showMessage("Ready")
 
@@ -152,6 +153,7 @@ class MainWindow(QMainWindow):
         self.workspace.open_ticket(ticket.ticket_id, refresh_queue=True)
 
     def _set_busy(self, busy):
+        busy = busy or self.workspace.note_pending
         self.pages.setEnabled(not busy)
         self.new_ticket_action.setEnabled(not busy)
         self.tickets_action.setEnabled(not busy)
@@ -162,14 +164,14 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage("Working…" if busy else "Ready")
 
     def show_new_ticket(self):
-        if not self.runner.busy:
+        if not self.runner.busy and not self.workspace.note_pending:
             if not self.workspace.confirm_discard():
                 return
             self.workspace._clear_drafts()
             self.pages.setCurrentWidget(self.ticket_create_widget)
 
     def show_altf7hub(self):
-        if self.runner.busy or self.altf7hub_service is None:
+        if self.runner.busy or self.workspace.note_pending or self.altf7hub_service is None:
             return
 
         def completed(outcome):
@@ -187,7 +189,7 @@ class MainWindow(QMainWindow):
         self.runner.submit(self.altf7hub_service.show_guide, completed, failed)
 
     def back_up_database(self):
-        if self.runner.busy or self.backup_service is None:
+        if self.runner.busy or self.workspace.note_pending or self.backup_service is None:
             return
 
         def completed(path):
@@ -209,12 +211,12 @@ class MainWindow(QMainWindow):
         self.runner.submit(self.backup_service.create_backup, completed, failed)
 
     def show_tickets(self):
-        if not self.runner.busy:
+        if not self.runner.busy and not self.workspace.note_pending:
             self.pages.setCurrentWidget(self.workspace)
             self.workspace.refresh_list()
 
     def show_knowledge(self):
-        if not self.runner.busy and self.knowledge_workspace is not None:
+        if not self.runner.busy and not self.workspace.note_pending and self.knowledge_workspace is not None:
             if not self.workspace.confirm_discard():
                 return
             self.workspace._clear_drafts()
@@ -222,7 +224,7 @@ class MainWindow(QMainWindow):
             self.knowledge_workspace.refresh_list()
 
     def show_scripts(self):
-        if not self.runner.busy and self.script_workspace is not None:
+        if not self.runner.busy and not self.workspace.note_pending and self.script_workspace is not None:
             if not self.workspace.confirm_discard():
                 return
             self.workspace._clear_drafts()
@@ -230,7 +232,7 @@ class MainWindow(QMainWindow):
             self.script_workspace.refresh_list()
 
     def open_knowledge_article(self, article_id):
-        if self.runner.busy or self.knowledge_workspace is None:
+        if self.runner.busy or self.workspace.note_pending or self.knowledge_workspace is None:
             return
         if not self.workspace.confirm_discard():
             return
@@ -239,7 +241,8 @@ class MainWindow(QMainWindow):
         self.knowledge_workspace.open_article_by_id(article_id)
 
     def closeEvent(self, event):
-        if self.runner.busy or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading):
+        if (self.runner.busy or self.workspace.note_pending
+                or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading)):
             self.statusBar().showMessage("An operation is finishing. Please close again when it completes.")
             event.ignore()
             return

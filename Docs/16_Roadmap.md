@@ -1,5 +1,12 @@
 # F7Hub Roadmap
 
+## Tickets UX first increment — Slice 049
+
+The approved redesign is delivered as separate increments. Slice 049 implements **Quick Note only**: compact persistent composition, editor-scoped Ctrl+Enter, operation-pending protection, draft/error handling and focus recovery. Required validation and scoped documentation are complete; independent read-only review is the next gate.
+
+Find in notes, remembered Author, inline Priority/Type, Tickets/Overview restructuring, creation entry integration and eventual duplicate-navigation removal remain separate follow-ups. No next slice, Knowledge Base redesign or migration is included. Slice 048 is CLOSED through PR #53; its pending-review wording below is historical STALE HANDOFF METADATA, corroborated by the external Slice-048 integration/closure report.
+
+
 ## Network configuration diagnostic — Slice 048
 
 Slice 048 implements a second local diagnostic and atomic registry/checksum data migration through existing catalog/search/management/copy infrastructure. It adds no execution gateway. Required validation is complete; independent review is the next gate. Later separate slices may add adapter details, subnet/prefix information, targeted DNS/connectivity diagnostics, catalog filters, reviewed approval workflow, controlled execution, parameters and execution history.

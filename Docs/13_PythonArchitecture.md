@@ -1,5 +1,14 @@
 # F7Hub Python Architecture
 
+## Quick Note operation ownership — Slice 049
+
+TicketWorkspace continues to call `TicketService.add_note` through the existing shared `ServiceTaskRunner`; service, repository, domain and schema contracts are unchanged. An editor-scoped event filter handles Ctrl+Return/Ctrl+Enter, preserves Enter newlines and Escape drafts, and ignores repeat submission keys. Submission snapshots ticket ID, text, type and author before dispatch.
+
+The workspace's read-only `note_pending` property and `note_pending_changed` signal cover write completion plus owned detail/queue refresh callbacks. MainWindow includes that state in busy navigation and close guards because ServiceTaskRunner signals idle before delivering completion. `refresh_list` accepts an optional completion callback for the owned refresh; ordinary queue requests and ticket replacement are rejected while a note is pending. The runner implementation is unchanged.
+
+Only confirmed success clears note text. Rejected dispatch/save failures retain the draft and release pending state; post-commit read failures retain save acknowledgement and offer read-only retry. Deferred focus restoration checks runner/pending state, loaded ticket identity and editor visibility. Existing note transactions, lifecycle, search/filter rules and draft-discard semantics remain authoritative.
+
+
 ## Mochi startup and controller composition — Slice 002 candidate
 
 ApplicationContext retains MochiService and its asynchronous MochiGateway. MainWindow's first show records the automatic-attempt flag before scheduling connection work. Gateway tries validated attach first, then at most one QProcess.startDetached using the current interpreter, -B, an absolute checkout-derived entry and argument arrays. A five-second readiness deadline ends the attempt; no automatic relaunch occurs. Explicit Start/Show retries coalesce while busy and also attach first, including after a late runtime or manual exit.
