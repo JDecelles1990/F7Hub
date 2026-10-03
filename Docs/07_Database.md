@@ -1,5 +1,11 @@
 # F7Hub Database Architecture
 
+## Ticket classification transaction — Slice 051
+
+`TicketService.update_ticket_classification` uses the existing repository writer transaction to compare authoritative priority, ticket_type and exact updated_at before no-op. A real change issues one bound conditional UPDATE affecting only changed classification columns plus a strictly later activity timestamp. It inserts exactly one existing-style PRIORITY_CHANGED event for a priority change and/or TYPE_CHANGED for a type change, then reloads before commit. Event titles contain no field values. UPDATE, either event or reload failure rolls back the entire operation.
+
+No-op requests produce no UPDATE, history event or timestamp change. Stale/invalid/missing requests write nothing. Existing separate priority/type methods remain unchanged. **NO SCHEMA CHANGE**: no migration, table, column, index, relationship or trigger change; 08_ERD and 09_SQLSchema require no edit. Real isolated SQLite tests cover atomic rollback and integrity/foreign-key checks; live user databases are untouched.
+
 ## Network Snapshot reference data — Slice 048
 
 Forward-only `0010_network_snapshot_script.sql` inserts exactly one enabled built-in with its literal exact-CRLF-byte SHA-256. The new code is `diagnostic.windows.network_snapshot`; source remains a version-controlled file. A temporary conflict assertion rejects existing case-insensitive code or separator-normalized/case-insensitive path matches before insertion. No existing registration is adopted or overwritten. Migration and history recording commit atomically; conflicts roll back without version 10 recorded.

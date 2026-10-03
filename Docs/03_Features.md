@@ -1,5 +1,11 @@
 # F7Hub Features
 
+## Inline ticket Priority and Type — Slice 051 candidate
+
+Tickets now shows Priority and Type as directly editable dropdowns. Selection alone writes nothing; **Apply changes** explicitly saves either or both fields in one atomic operation. The normal Edit priority/Edit type dialogs and their unused production modules are removed. Existing individual service operations remain supported.
+
+Stale loaded values fail closed. Unsaved inline selections participate in existing draft protection; failed saves preserve them. Successful saves retain queue filters/search/page, including filter exit with saved detail still open. Committed changes followed by failed reads remain reported as saved, with read-only recovery. Status, Subject/Description dialogs, Quick Note and embedded New Ticket remain separate. Category editing, Notes/Knowledge redesign and Slice 052 are deferred; there is no schema change. This candidate is awaiting independent review and integration.
+
 ## Tickets workspace creation — Slice 050
 
 The user-visible Saved Tickets workspace is now **Tickets**. Its visible **+ New Ticket** button opens the existing creation form in the right pane while the queue remains visible. The separate New Ticket primary navigation, File/menu action, toolbar action and Ctrl+N shortcut are removed. Cancel uses the existing default-Cancel discard convention and returns to the previous saved detail without writing.

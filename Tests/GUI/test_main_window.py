@@ -250,15 +250,15 @@ class MainWindowTests(unittest.TestCase):
         self.assertEqual(self.scripts.calls, 1)
         self.assertTrue(self.window.scripts_action.isEnabled())
 
-    def test_five_saved_ticket_detail_actions_fit_1000_by_700(self):
+    def test_inline_and_remaining_ticket_actions_fit_1000_by_700(self):
         self.window.show_tickets()
         self.wait_idle()
         self.window.resize(1000, 700)
         self.application.processEvents()
         self.assertEqual((self.window.width(), self.window.height()), (1000, 700))
         workspace = self.window.workspace
-        for button in (workspace.edit_subject_button, workspace.edit_priority_button,
-                       workspace.edit_type_button, workspace.edit_description_button,
+        for button in (workspace.edit_subject_button, workspace.apply_properties_button,
+                       workspace.edit_description_button,
                        workspace.reload_button):
             self.assertTrue(button.isVisible())
 
