@@ -1,5 +1,9 @@
 # F7Hub Roadmap
 
+## Tickets UX consolidation — Slice 050 candidate
+
+Slice 049 is CLOSED through PR #54 and its externally verified closure report; earlier pending-review prose is retained history. Slice 050 implements the next bounded UX increment: Tickets naming, embedded existing New Ticket form, removal of its separate primary navigation, safe Cancel and post-create authoritative read/recovery. It preserves Quick Note and existing queue state. Recovery validation/documentation are complete at **READY_FOR_REVIEW** on 2026-10-03. Review and integration remain pending. Inline Priority/Type and other property redesign, note history/search redesign and Knowledge Base redesign remain separate deferred work.
+
 ## Tickets UX first increment — Slice 049
 
 The approved redesign is delivered as separate increments. Slice 049 implements **Quick Note only**: compact persistent composition, editor-scoped Ctrl+Enter, operation-pending protection, draft/error handling and focus recovery. Required validation and scoped documentation are complete; independent read-only review is the next gate.

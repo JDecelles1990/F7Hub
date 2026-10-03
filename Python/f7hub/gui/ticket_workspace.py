@@ -6,7 +6,7 @@ from PySide6.QtCore import QAbstractTableModel, QEvent, QModelIndex, QTimer, Qt,
 from PySide6.QtWidgets import (
     QAbstractItemView, QComboBox, QFormLayout, QGridLayout, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QMessageBox, QPushButton, QSplitter, QTabWidget,
-    QTableView, QTextEdit, QVBoxLayout, QWidget,
+    QTableView, QTextEdit, QVBoxLayout, QWidget, QStackedWidget, QScrollArea,
 )
 
 from f7hub.gui.service_task_runner import ServiceTaskRunner
@@ -62,8 +62,11 @@ class TicketWorkspace(QWidget):
     PAGE_SIZE = 100
     knowledge_article_requested = Signal(object)
     note_pending_changed = Signal(bool)
+    creation_pending_changed = Signal(bool)
+    status_pending_changed = Signal(bool)
 
-    def __init__(self, service, runner: ServiceTaskRunner, parent=None, *, knowledge_link_service=None):
+    def __init__(self, service, runner: ServiceTaskRunner, parent=None, *, knowledge_link_service=None,
+                 create_widget=None):
         super().__init__(parent)
         self._service = service
         self._runner = runner
@@ -79,11 +82,112 @@ class TicketWorkspace(QWidget):
         self._edit_description_dialog = None
         self._edit_type_dialog = None
         self._note_pending = False
+        self.status_pending = False
         self._note_focus_ticket_id = None
+        self.create_widget = create_widget
+        self.creating = False
+        self._previous_details = None
+        self._creation_pending = False
+        self._created_ticket_id = None
+        self._creation_generation = 0
+        self._creation_focus_pending = False
         self._build_ui()
         self._runner.busy_changed.connect(self._update_note_controls)
         self.note_pending_changed.connect(self._update_note_controls)
         self._update_note_controls()
+        self._runner.busy_changed.connect(self._update_creation_controls)
+        self.note_pending_changed.connect(self._update_creation_controls)
+        self.creation_pending_changed.connect(self._update_creation_controls)
+        self.creation_pending_changed.connect(self._update_note_controls)
+        self.status_pending_changed.connect(self._update_creation_controls)
+        self.status_pending_changed.connect(self._update_note_controls)
+        if self.create_widget is not None:
+            self.create_widget.ticket_created.connect(self._ticket_created)
+            self.create_widget.pending_changed.connect(lambda _pending: self._update_creation_controls())
+
+    @property
+    def creation_pending(self):
+        return self._creation_pending or bool(self.create_widget and self.create_widget._submitting)
+
+    def _update_creation_controls(self, *_):
+        idle = not self._runner.busy and not self.note_pending and not self.creation_pending and not self.status_pending
+        self.new_ticket_button.setEnabled(idle and not self.creating and self.create_widget is not None)
+        self.cancel_create_button.setEnabled(idle)
+        self.retry_created_button.setEnabled(idle and not self.creating)
+        if idle and self.creating and self._creation_focus_pending:
+            QTimer.singleShot(0, self, self._focus_creation)
+
+    def _focus_creation(self):
+        if (self.creating and self._creation_focus_pending and not self._runner.busy
+                and self.create_widget.isVisible()):
+            self._creation_focus_pending = False
+            self.create_widget.subject_input.setFocus()
+
+    def begin_creation(self):
+        if (self.create_widget is None or self.creating or self._runner.busy
+                or self.note_pending or self.creation_pending or self.status_pending or not self.confirm_discard()):
+            return False
+        self._clear_drafts()
+        self._creation_generation += 1
+        self._previous_details = self.details
+        self.details = None
+        self.heading.setText("Open a ticket to see its details")
+        self.summary.clear()
+        self.notes_history.clear()
+        self.timeline.clear()
+        self.knowledge_tab.set_ticket(None)
+        self.detail_panel.setEnabled(False)
+        self.creating = True
+        self._creation_focus_pending = True
+        self.detail_stack.setCurrentWidget(self.creation_panel)
+        self.feedback.setText("New ticket — the queue and its filters are retained.")
+        self._update_note_controls()
+        self._update_creation_controls()
+        self.create_widget.subject_input.setFocus()
+        return True
+
+    def cancel_creation(self):
+        if not self.creating or self._runner.busy or self.creation_pending:
+            return False
+        if self.create_widget.has_draft() and QMessageBox.question(
+            self, "Unsaved new ticket", "Discard the unsaved new ticket?",
+            QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
+            QMessageBox.StandardButton.Cancel,
+        ) != QMessageBox.StandardButton.Discard:
+            return False
+        self.create_widget.reset_form()
+        self._creation_generation += 1
+        self.creating = False
+        self.detail_stack.setCurrentWidget(self.detail_panel)
+        if self._previous_details is not None:
+            self._display_details(self._previous_details)
+        self._previous_details = None
+        self.feedback.setText("New ticket cancelled. No ticket was created.")
+        self._update_creation_controls()
+        return True
+
+    def _ticket_created(self, ticket):
+        self._created_ticket_id = ticket.ticket_id
+        self.create_widget.reset_form()
+        self.creating = False
+        self._previous_details = None
+        self.detail_stack.setCurrentWidget(self.detail_panel)
+        self.retry_created_button.show()
+        self._open_created_ticket()
+
+    def _open_created_ticket(self):
+        if self.creating or self.status_pending or self.note_pending or self._runner.busy or self._creation_pending or self._created_ticket_id is None:
+            return
+        self._creation_pending = True
+        self.creation_pending_changed.emit(True)
+        generation = self._creation_generation
+
+        def finished():
+            if generation == self._creation_generation:
+                self._creation_pending = False
+                self.creation_pending_changed.emit(False)
+
+        self.open_ticket(self._created_ticket_id, refresh_queue=True, on_finished=finished)
 
     @property
     def note_pending(self):
@@ -91,6 +195,25 @@ class TicketWorkspace(QWidget):
 
     def _build_ui(self):
         layout = QVBoxLayout(self)
+        layout.setSpacing(6)
+        header = QHBoxLayout()
+        self.workspace_heading = QLabel("Tickets", self)
+        heading_font = self.workspace_heading.font()
+        heading_font.setBold(True)
+        heading_font.setPointSize(14)
+        self.workspace_heading.setFont(heading_font)
+        self.workspace_heading.setAccessibleName("Tickets")
+        header.addWidget(self.workspace_heading, 1)
+        self.retry_created_button = QPushButton("Open created ticket", self)
+        self.retry_created_button.clicked.connect(self._open_created_ticket)
+        self.retry_created_button.hide()
+        header.addWidget(self.retry_created_button)
+        self.new_ticket_button = QPushButton("+ New Ticket", self)
+        self.new_ticket_button.setObjectName("newTicketButton")
+        self.new_ticket_button.setAccessibleName("New Ticket")
+        self.new_ticket_button.clicked.connect(self.begin_creation)
+        header.addWidget(self.new_ticket_button)
+        layout.addLayout(header)
         self.feedback = QLabel(self)
         self.feedback.setTextFormat(Qt.TextFormat.PlainText)
         self.feedback.setWordWrap(True)
@@ -152,7 +275,7 @@ class TicketWorkspace(QWidget):
         self._runner.busy_changed.connect(self._set_number_lookup_idle)
         self.model = TicketTableModel(self)
         self.table = QTableView(queue)
-        self.table.setAccessibleName("Saved tickets; activate a row to open")
+        self.table.setAccessibleName("Tickets; activate a row to open")
         self.table.setModel(self.model)
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
@@ -175,8 +298,11 @@ class TicketWorkspace(QWidget):
             pages.addWidget(widget)
         queue_layout.addLayout(pages)
 
-        self.detail_panel = QWidget(splitter)
+        self.detail_stack = QStackedWidget(splitter)
+        self.detail_panel = QWidget(self.detail_stack)
+        self.detail_stack.addWidget(self.detail_panel)
         detail_layout = QVBoxLayout(self.detail_panel)
+        detail_layout.setSpacing(4)
         self.heading = QLabel("Open a ticket to see its details", self.detail_panel)
         self.heading.setTextFormat(Qt.TextFormat.PlainText)
         self.heading.setWordWrap(True)
@@ -292,11 +418,27 @@ class TicketWorkspace(QWidget):
         detail_actions.addWidget(self.reload_button, 1, 1)
         detail_layout.addLayout(detail_actions)
         self.detail_panel.setEnabled(False)
+        self.creation_panel = QWidget(self.detail_stack)
+        creation_layout = QVBoxLayout(self.creation_panel)
+        creation_layout.setContentsMargins(0, 0, 0, 0)
+        self.creation_scroll = QScrollArea(self.creation_panel)
+        self.creation_scroll.setWidgetResizable(True)
+        if self.create_widget is not None:
+            self.create_widget.layout().setContentsMargins(12, 12, 12, 12)
+            self.create_widget.layout().setSpacing(8)
+            self.creation_scroll.setWidget(self.create_widget)
+        creation_layout.addWidget(self.creation_scroll)
+        self.cancel_create_button = QPushButton("Cancel", self.creation_panel)
+        self.cancel_create_button.setAccessibleName("Cancel New Ticket")
+        self.cancel_create_button.clicked.connect(self.cancel_creation)
+        creation_layout.addWidget(self.cancel_create_button)
+        self.detail_stack.addWidget(self.creation_panel)
         splitter.setSizes([460, 620])
+        self._update_creation_controls()
 
     def refresh_list(self, *, offset=None, message=None, on_finished=None):
         # Only the note's own refresh may enter while its write is pending.
-        if self._runner.busy or (self.note_pending and on_finished is None):
+        if self._runner.busy or ((self.note_pending or self.creation_pending or self.status_pending) and on_finished is None):
             return False
         if offset is None:
             target = self._offset if self._retry_offset is None else self._retry_offset
@@ -306,12 +448,20 @@ class TicketWorkspace(QWidget):
         priority = self.priority_filter.currentData()
         ticket_type = self.type_filter.currentData()
         subject_query = self._subject_query
+        generation = self._creation_generation
         self.feedback.setText("Loading tickets…")
 
         def loaded(tickets):
+            if generation != self._creation_generation:
+                return
             self._offset = target
             self._retry_offset = None
             self.model.replace_tickets(tickets[:self.PAGE_SIZE])
+            if self.details is not None:
+                for row, ticket in enumerate(self.model.tickets):
+                    if ticket.ticket_id == self.details.ticket.ticket_id:
+                        self.table.selectRow(row)
+                        break
             self.previous_button.setEnabled(target > 0)
             self.next_button.setEnabled(len(tickets) > self.PAGE_SIZE)
             self.page_label.setText(f"Page {target // self.PAGE_SIZE + 1}")
@@ -321,6 +471,8 @@ class TicketWorkspace(QWidget):
                 on_finished()
 
         def failed(error):
+            if generation != self._creation_generation:
+                return
             self._retry_offset = target
             retry = "Could not refresh tickets. Previous results are still shown. Use Refresh to retry."
             if message:
@@ -342,13 +494,13 @@ class TicketWorkspace(QWidget):
         )
 
     def search_subjects(self):
-        if self._runner.busy or self.note_pending:
+        if self._runner.busy or self.note_pending or self.creation_pending or self.status_pending:
             return
         self._subject_query = self.subject_search_input.text().strip() or None
         self.refresh_list(offset=0)
 
     def clear_subject_search(self):
-        if self._runner.busy or self.note_pending:
+        if self._runner.busy or self.note_pending or self.creation_pending or self.status_pending:
             return
         self.subject_search_input.clear()
         self._subject_query = None
@@ -380,7 +532,8 @@ class TicketWorkspace(QWidget):
         )
 
     def load_company_tickets(self):
-        if self._runner.busy or self.note_pending or self._company_context is None:
+        if (self.creating or self.creation_pending or self._runner.busy
+                or self.note_pending or self._company_context is None):
             return
         context = self._company_context
         if context[1] is None:
@@ -424,15 +577,20 @@ class TicketWorkspace(QWidget):
             self.open_ticket(self.company_model.tickets[index.row()].ticket_id)
 
     def open_ticket_by_number(self):
-        if self._runner.busy or self.note_pending:
+        if self._runner.busy or self.note_pending or self.creation_pending or self.status_pending:
+            return
+        if self.creating and not self.cancel_creation():
             return
         ticket_number = self.ticket_number_input.text()
         if not ticket_number.strip():
             self.feedback.setText("Enter a ticket number.")
             return
         self.feedback.setText("Opening ticket…")
+        generation = self._creation_generation
 
         def loaded(details):
+            if generation != self._creation_generation:
+                return
             switching = self.details is not None and self.details.ticket.ticket_id != details.ticket.ticket_id
             if switching and not self.confirm_discard():
                 self.feedback.setText("Ticket opening cancelled.")
@@ -448,7 +606,7 @@ class TicketWorkspace(QWidget):
             loaded,
             lambda error: self._show_error(
                 error, "Could not load the requested ticket. Existing information and drafts are unchanged."
-            ),
+            ) if generation == self._creation_generation else None,
         )
 
     def has_draft(self):
@@ -466,45 +624,59 @@ class TicketWorkspace(QWidget):
             QMessageBox.StandardButton.Cancel,
         ) == QMessageBox.StandardButton.Discard
 
-    def open_ticket(self, ticket_id, *, refresh_queue=False):
-        if self._runner.busy or self.note_pending:
+    def open_ticket(self, ticket_id, *, refresh_queue=False, on_finished=None):
+        if self._runner.busy or self.note_pending or ((self.creation_pending or self.status_pending) and on_finished is None):
+            if on_finished is not None:
+                on_finished()
+            return
+        if self.creating and not self.cancel_creation():
+            if on_finished is not None:
+                on_finished()
             return
         switching = self.details is not None and self.details.ticket.ticket_id != ticket_id
         if switching and not self.confirm_discard():
+            # No read was submitted; release the retry's transition ownership.
+            if on_finished is not None:
+                on_finished()
             return
         self.feedback.setText("Loading ticket…")
+        generation = self._creation_generation
+
+        def refresh_created(message):
+            if not self.refresh_list(message=message, on_finished=on_finished) and on_finished is not None:
+                self.feedback.setText(message + " Refresh could not start; use Refresh.")
+                on_finished()
 
         def loaded(details):
+            if generation != self._creation_generation:
+                return
             if switching:
                 self._clear_drafts()
             self._display_details(details)
             self.feedback.setText("Ticket loaded.")
             if refresh_queue:
-                self.status_filter.blockSignals(True)
-                self.status_filter.setCurrentIndex(0)
-                self.status_filter.blockSignals(False)
-                self.refresh_list(offset=0, message="Ticket created and loaded.")
+                self._created_ticket_id = None
+                self.retry_created_button.hide()
+                refresh_created("Ticket created successfully and loaded. Current queue filters and page are retained.")
             else:
                 self.knowledge_tab.refresh_links()
 
         def load_failed(error):
+            if generation != self._creation_generation:
+                return
             if refresh_queue:
                 # Creation already committed; keep that outcome visible and
                 # refresh the queue so the new ticket can be opened again.
                 logging.getLogger(__name__).error("Created ticket reload failed: %s", type(error).__name__)
-                self.status_filter.blockSignals(True)
-                self.status_filter.setCurrentIndex(0)
-                self.status_filter.blockSignals(False)
-                self.refresh_list(offset=0, message=(
-                    "Ticket created, but its details could not be loaded. "
-                    "Select it from Saved tickets and retry."
-                ))
+                refresh_created("Ticket created successfully, but its details could not be loaded. "
+                                "Use Open created ticket to retry without creating another ticket.")
             else:
                 self._show_error(error, "Could not load the requested ticket. Existing information and drafts are unchanged.")
 
-        self._runner.submit(
+        if not self._runner.submit(
             lambda: self._service.get_ticket_details(ticket_id), loaded, load_failed,
-        )
+        ) and on_finished is not None:
+            load_failed(RuntimeError("Dispatch rejected"))
 
     def _display_details(self, details):
         self.details = details
@@ -565,7 +737,7 @@ class TicketWorkspace(QWidget):
         self.status_input.setCurrentIndex(0)
 
     def open_edit_subject(self):
-        if (self.details is None or self._runner.busy or self.note_pending
+        if (self.details is None or self._runner.busy or self.note_pending or self.creation_pending or self.status_pending
                 or self._edit_subject_dialog is not None
                 or self._edit_priority_dialog is not None
                 or self._edit_description_dialog is not None
@@ -587,7 +759,7 @@ class TicketWorkspace(QWidget):
         self._reload_after_save(updated.ticket_id, "Subject saved.")
 
     def open_edit_priority(self):
-        if (self.details is None or self._runner.busy or self.note_pending
+        if (self.details is None or self._runner.busy or self.note_pending or self.creation_pending or self.status_pending
                 or self._edit_priority_dialog is not None
                 or self._edit_subject_dialog is not None
                 or self._edit_description_dialog is not None
@@ -609,7 +781,7 @@ class TicketWorkspace(QWidget):
         self._reload_after_save(updated.ticket_id, "Priority saved.")
 
     def open_edit_description(self):
-        if (self.details is None or self._runner.busy or self.note_pending
+        if (self.details is None or self._runner.busy or self.note_pending or self.creation_pending or self.status_pending
                 or self._edit_description_dialog is not None
                 or self._edit_subject_dialog is not None
                 or self._edit_priority_dialog is not None
@@ -633,7 +805,7 @@ class TicketWorkspace(QWidget):
         self._reload_after_save(updated.ticket_id, "Description saved.")
 
     def open_edit_type(self):
-        if (self.details is None or self._runner.busy or self.note_pending
+        if (self.details is None or self._runner.busy or self.note_pending or self.creation_pending or self.status_pending
                 or self._edit_type_dialog is not None
                 or self._edit_subject_dialog is not None
                 or self._edit_priority_dialog is not None
@@ -675,7 +847,8 @@ class TicketWorkspace(QWidget):
     def _update_note_controls(self, *_):
         if not hasattr(self, "add_note_button"):
             return
-        enabled = self.details is not None and not self._runner.busy and not self.note_pending
+        enabled = (self.details is not None and not self.creating and not self.creation_pending and not self.status_pending
+                   and not self._runner.busy and not self.note_pending)
         for widget in (self.note_input, self.note_type, self.author_input):
             widget.setEnabled(enabled)
         self.add_note_button.setEnabled(enabled and bool(self.note_input.toPlainText().strip()))
@@ -683,7 +856,7 @@ class TicketWorkspace(QWidget):
             QTimer.singleShot(0, self, self._restore_note_focus)
 
     def _restore_note_focus(self):
-        if self._runner.busy or self.note_pending:
+        if self._runner.busy or self.note_pending or self.creation_pending or self.status_pending:
             return
         ticket_id = self._note_focus_ticket_id
         self._note_focus_ticket_id = None
@@ -697,7 +870,7 @@ class TicketWorkspace(QWidget):
         self.note_pending_changed.emit(False)
 
     def add_note(self):
-        if (self.details is None or self._runner.busy or self.note_pending
+        if (self.creating or self.details is None or self._runner.busy or self.note_pending or self.creation_pending or self.status_pending
                 or not self.note_input.toPlainText().strip()):
             return
         ticket_id = self.details.ticket.ticket_id
@@ -721,22 +894,33 @@ class TicketWorkspace(QWidget):
             self._finish_note(ticket_id)
 
     def change_status(self):
-        if self.details is None or self._runner.busy or self.note_pending:
+        if (self.creating or self.details is None or self._runner.busy
+                or self.note_pending or self.creation_pending or self.status_pending):
             return
         ticket_id = self.details.ticket.ticket_id
         status = self.status_input.currentData()
         values = dict(new_status=status, reason=self.reason_input.text(), changed_by=self.author_input.text())
         if status == "RESOLVED":
             values["resolution"] = self.resolution_input.toPlainText()
+        self.status_pending = True
+        self.status_pending_changed.emit(True)
+
+        def finished():
+            self.status_pending = False
+            self.status_pending_changed.emit(False)
 
         def saved(ticket):
             self.reason_input.clear()
             self.resolution_input.clear()
             self.status_input.setCurrentIndex(0)
-            self._reload_after_save(ticket_id, f"Status changed to {ticket.status}.")
+            self._reload_after_save(ticket_id, f"Status changed to {ticket.status}.", on_finished=finished)
 
-        self._runner.submit(lambda: self._service.change_status(ticket_id, **values), saved,
-                            lambda error: self._show_error(error, "Could not change status. Your draft is preserved."))
+        def failed(error):
+            self._show_error(error, "Could not change status. Your draft is preserved.")
+            finished()
+
+        if not self._runner.submit(lambda: self._service.change_status(ticket_id, **values), saved, failed):
+            failed(RuntimeError("Dispatch rejected"))
 
     def _reload_after_save(self, ticket_id, message, *, on_finished=None):
         # A failed reload must not present an already committed write as failed.

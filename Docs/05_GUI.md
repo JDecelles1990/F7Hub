@@ -1,5 +1,13 @@
 # F7Hub GUI Design
 
+## Tickets and embedded New Ticket — Slice 050
+
+**Tickets** is the single ticket navigation destination in the File menu and toolbar, and the initial application page loads its queue. The heading and keyboard-accessible **+ New Ticket** button remain above the queue/detail splitter without scrolling. There is no separate New Ticket page/action/keyboard shortcut.
+
+The right pane switches between saved detail and the reused creation form. A scroll area keeps the full existing form reachable at 1000×700, with Cancel pinned beneath it; the queue, search/filter controls and pagination remain visible. Small spacing/margin adjustments accommodate the new heading without a broader layout redesign. The form focuses Subject after initial reference reads. Ctrl+S is scoped to the visible form. New Ticket is disabled while already creating or during pending operations.
+
+Saved activity drafts require explicit discard before entry. Quick Note is hidden/disabled and the active saved identity is cleared during creation; Cancel restores the prior detail/tab. Confirmed creation opens saved detail and selects a matching queue row without resetting filters/search/page. Failure preserves form values; committed read failure has truthful feedback and a visible read-only reopen action. Old detail text is cleared while there is no active saved identity. Native Windows 1000×700/96 DPI agent validation passed with inspected captures. Input used QTest events on the native Windows Qt backend; physical input and other DPI configurations were not run.
+
 ## Persistent Quick Note — Slice 049
 
 Saved-ticket detail retains its five existing tabs and optional Author field. A compact **Quick Note** row contains note type and **Add note** above the existing multiline plain-text editor. The button tooltip exposes Ctrl+Enter; the shortcut applies only in that editor. Blank/unloaded/busy states disable submission. Navigation, tab names, property editing and status layout are unchanged.
@@ -197,7 +205,7 @@ GUI tests: PASS — 52 tests (fresh Slice 011 final regression)
 Application and GUI integration tests: PASS — 50 tests (fresh Slice 011 final regression)
 ```
 
-`TicketCreateWidget` provides the minimum ticket input form, inline required-field feedback, safe persistence-error presentation, input preservation, keyboard save action, service delegation and a successful-ticket signal. The main window provides New ticket and Saved tickets navigation. Successful creation opens the saved ticket. The queue supports status filtering and pages of 100 tickets; details show notes, lifecycle history and timeline events. Technicians can add notes, resolve with a summary, close and reopen using service-provided status choices.
+`TicketCreateWidget` provides the minimum ticket input form, inline required-field feedback, safe persistence-error presentation, input preservation, keyboard save action, service delegation and a successful-ticket signal. The main window provides Tickets (including + New Ticket) navigation. Successful creation opens the saved ticket. The queue supports status filtering and pages of 100 tickets; details show notes, lifecycle history and timeline events. Technicians can add notes, resolve with a summary, close and reopen using service-provided status choices.
 
 Slice 027 adds one Ticket number field and Open number button beneath the Saved Tickets status/refresh row. Enter and the button perform the same exact-number read through the shared service runner. The number is retained for retry; a successful direct open leaves the queue page and status filter unchanged. Native Windows verification at 1000×700 found the controls and detail readable after the workspace reached idle.
 

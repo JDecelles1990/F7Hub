@@ -1,5 +1,13 @@
 # F7Hub ChangeLog
 
+## 2026-10-02 — Slice 050: Consolidate creation into Tickets
+
+Renamed the user-visible Saved Tickets workspace to Tickets and removed the separate New Ticket primary navigation/menu/toolbar action and Ctrl+N. + New Ticket now hosts the existing TicketCreateWidget inside the right pane with a visible queue and pinned Cancel. Existing activity-draft confirmation protects entry; cancellation writes no ticket and restores prior detail/tab and queue state.
+
+Creation reuses the unchanged service/repository and initial activity transaction. Success reopens authoritative saved detail and refreshes/selects in the retained queue view. Save failures preserve the form; committed creation plus failed reads remains acknowledged with read-only reopen/Refresh recovery. Local pending/generation guards cover callback gaps, duplicates, stale reads and unsafe close. Quick Note has no active old-ticket identity during creation and is restored for saved detail. Native Windows 1000×700/96 DPI validation passed; captures were inspected, using native Qt QTest events and injected service failures. Physical input/additional DPI were not run.
+
+No schema, migration, service/repository, Knowledge Base or inline-edit redesign. Recovered and finalized on 2026-10-03 at **READY_FOR_REVIEW**: FRESH 10 boundary tests and 177 Integration tests PASS; RETAINED 199 GUI, 423 Database and corrected native evidence PASS after input verification. Historical failures remain preserved. Candidate remains unstaged/uncommitted; independent review and integration are pending. Slice 049 closure is established by its external report and PR #54 at fbb3340; earlier dated candidate entries remain historical.
+
 ## 2026-10-02 — Slice 049: Quick Note
 
 Implemented the first bounded Tickets UX increment: compact persistent Quick Note, editor-scoped Ctrl+Enter, explicit Internal default, blank/unloaded guards, captured submission values, pending protection across worker callbacks and focus recovery. Note type and the existing optional Author remain retained in session. Save failures preserve inputs; committed notes remain acknowledged if subsequent detail/queue reads fail, with read-only retry.

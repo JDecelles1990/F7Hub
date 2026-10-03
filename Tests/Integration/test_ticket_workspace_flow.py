@@ -39,6 +39,8 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         self.window = MainWindow(self.service)
         self.workspace = self.window.workspace
         self.window.show()
+        self.wait_idle()
+        self.window.show_new_ticket()
         self.window.ticket_create_widget.subject_input.setText("Printer offline")
         self.window.ticket_create_widget.save_button.click()
         self.wait_idle()
@@ -121,7 +123,7 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         def attempt(busy):
             if busy or not self.workspace.note_pending:
                 return
-            observed.append((self.window.pages.isEnabled(), self.window.new_ticket_action.isEnabled(),
+            observed.append((self.window.pages.isEnabled(), self.window.workspace.new_ticket_button.isEnabled(),
                              self.workspace.add_note_button.isEnabled()))
             self.workspace.add_note()
             self.workspace.open_ticket(other.ticket_id)

@@ -1,5 +1,11 @@
 # F7Hub Features
 
+## Tickets workspace creation — Slice 050
+
+The user-visible Saved Tickets workspace is now **Tickets**. Its visible **+ New Ticket** button opens the existing creation form in the right pane while the queue remains visible. The separate New Ticket primary navigation, File/menu action, toolbar action and Ctrl+N shortcut are removed. Cancel uses the existing default-Cancel discard convention and returns to the previous saved detail without writing.
+
+Creation uses the unchanged service/repository rules. Confirmed success opens authoritative saved detail and refreshes the retained queue filters, submitted search and page; if the new ticket matches that view it is selected. Otherwise its saved detail is open independently of the queue. Failed creation retains all form values. Committed creation with a failed read remains acknowledged and offers read-only Refresh/Open created ticket recovery. Quick Note remains available for loaded tickets and is hidden with no active saved identity during creation. No database/schema change. Inline property editing and Knowledge Base redesign remain deferred.
+
 ## Second production diagnostic — Slice 048
 
 The enabled **Windows Network Configuration Snapshot** joins Windows System Snapshot in Scripts. Migration 0010 installs its reviewed-byte checksum with the metadata, so existing **Copy Script** can verify and copy its source. The standalone PowerShell 7 diagnostic describes local TCP/IP-enabled interface configuration, not connectivity health. It includes interface index/description, IPv4/IPv6 addresses and default gateways, DNS server order and provider DHCP state. Alias/status/link speed and prefix details are deferred. F7Hub still cannot execute PowerShell; enabled and AVAILABLE are not execution approval.

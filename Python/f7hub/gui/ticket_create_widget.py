@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from typing import Protocol
 import logging
 
-from PySide6.QtCore import Signal, QTimer
+from PySide6.QtCore import Signal, QTimer, Qt
 from PySide6.QtGui import QFont, QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QComboBox,
@@ -55,6 +55,7 @@ class TicketCreateWidget(QWidget):
 
     ticket_created = Signal(object)
     submission_failed = Signal(str)
+    pending_changed = Signal(bool)
 
     def __init__(
         self,
@@ -398,11 +399,13 @@ class TicketCreateWidget(QWidget):
         )
         self.save_button.setEnabled(False)
         self._submitting = True
+        self.pending_changed.emit(True)
         if self._task_runner is not None:
-            self._task_runner.submit(
+            if not self._task_runner.submit(
                 lambda: self._ticket_service.create_ticket(**values),
                 self._submit_succeeded, self._submit_failed,
-            )
+            ):
+                self._submit_failed(RuntimeError("Dispatch rejected"))
         else:
             try:
                 ticket = self._ticket_service.create_ticket(**values)
@@ -412,7 +415,10 @@ class TicketCreateWidget(QWidget):
                 self._submit_succeeded(ticket)
 
     def _submit_failed(self, error: Exception) -> None:
+        if not self._submitting:
+            return
         self._submitting = False
+        self.pending_changed.emit(False)
         self.save_button.setEnabled(True)
         if isinstance(error, TicketValidationError):
             self._show_validation_error(str(error))
@@ -428,13 +434,16 @@ class TicketCreateWidget(QWidget):
             self.submission_failed.emit(message)
 
     def _submit_succeeded(self, ticket: TicketRecord) -> None:
-        self._submitting = False
-        self.save_button.setEnabled(True)
+        if not self._submitting:
+            return
         self.status_label.setText(
             f"Created ticket {ticket.ticket_number} successfully."
         )
         self.status_label.setVisible(True)
         self.ticket_created.emit(ticket)
+        self._submitting = False
+        self.save_button.setEnabled(True)
+        self.pending_changed.emit(False)
 
     def has_draft(self) -> bool:
         return bool(
@@ -620,6 +629,7 @@ class TicketCreateWidget(QWidget):
         layout.addStretch()
 
         save_shortcut = QShortcut(QKeySequence.StandardKey.Save, self)
+        save_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
         save_shortcut.activated.connect(self.submit)
         self._save_shortcut = save_shortcut
 

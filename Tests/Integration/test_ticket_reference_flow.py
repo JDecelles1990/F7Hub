@@ -36,6 +36,8 @@ class TicketReferenceFlowTests(unittest.TestCase):
         self.form = self.window.ticket_create_widget
         self.window.show()
         self.wait_idle()
+        self.window.show_new_ticket()
+        self.wait_idle()
 
     def wait_idle(self):
         self.app.processEvents()  # Includes the initial show-time reference load.
@@ -236,7 +238,7 @@ class TicketReferenceFlowTests(unittest.TestCase):
             self.form.refresh_references_button.click()
             self.wait_idle()
         self.assertTrue(self.form.isEnabled())
-        self.assertTrue(self.window.new_ticket_action.isEnabled())
+        self.assertTrue(self.window.workspace.cancel_create_button.isEnabled())
         self.assertEqual(self.form.subject_input.text(), "Keep subject")
         self.assertEqual(self.form.description_input.toPlainText(), "Keep description")
         self.assertNotIn("private detail", self.form.reference_feedback.text())
@@ -274,7 +276,8 @@ class TicketReferenceFlowTests(unittest.TestCase):
             connection.execute("UPDATE contacts SET is_active = 0 WHERE contact_id = ?", (self.alice.contact_id,))
         self.form.save_button.click()
         self.wait_idle()
-        self.assertIs(self.window.pages.currentWidget(), self.form)
+        self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
+        self.assertIs(self.window.workspace.detail_stack.currentWidget(), self.window.workspace.creation_panel)
         self.assertEqual(self.form.subject_input.text(), "Keep stale draft")
         self.assertEqual(self.form.contact_input.currentData(), self.alice.contact_id)
         self.assertIn("active contact", self.form.form_error.text())
