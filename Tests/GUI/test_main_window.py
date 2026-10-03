@@ -258,6 +258,40 @@ class MainWindowTests(unittest.TestCase):
                        workspace.reload_button):
             self.assertTrue(button.isVisible())
 
+    def test_quick_note_requires_loaded_ticket_and_nonblank_input(self):
+        workspace = self.window.workspace
+        self.assertFalse(workspace.add_note_button.isEnabled())
+        workspace.note_input.setPlainText("No ticket loaded")
+        workspace.add_note()
+        self.assertFalse(self.window.runner.busy)
+        self.assertFalse(workspace.note_pending)
+        self.window.show_tickets()
+        self.wait_idle()
+        workspace.open_ticket(1)
+        self.wait_idle()
+        self.assertTrue(workspace.add_note_button.isEnabled())
+        workspace.note_input.setPlainText(" \n\t")
+        self.assertFalse(workspace.add_note_button.isEnabled())
+
+    def test_quick_note_controls_fit_all_tabs_at_1000_by_700(self):
+        self.window.show_tickets()
+        self.wait_idle()
+        self.window.workspace.open_ticket(1)
+        self.wait_idle()
+        self.window.resize(1000, 700)
+        workspace = self.window.workspace
+        for index in range(workspace.detail_tabs.count()):
+            workspace.detail_tabs.setCurrentIndex(index)
+            self.application.processEvents()
+            self.assertEqual((self.window.width(), self.window.height()), (1000, 700))
+            for control in (workspace.author_input, workspace.note_type,
+                            workspace.note_input, workspace.add_note_button):
+                self.assertTrue(control.isVisible())
+                top_left = control.mapTo(self.window, control.rect().topLeft())
+                bottom_right = control.mapTo(self.window, control.rect().bottomRight())
+                self.assertTrue(self.window.rect().contains(top_left))
+                self.assertTrue(self.window.rect().contains(bottom_right))
+
     def test_backup_action_runs_once_on_worker_and_reports_local_snapshot(self):
         self.assertIn(self.window.backup_action, self.window.menuBar().actions()[0].menu().actions())
         self.assertEqual(self.window.backup_action.text(), "Back up database")

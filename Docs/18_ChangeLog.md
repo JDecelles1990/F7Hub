@@ -1,5 +1,14 @@
 # F7Hub ChangeLog
 
+## 2026-10-02 — Slice 049: Quick Note
+
+Implemented the first bounded Tickets UX increment: compact persistent Quick Note, editor-scoped Ctrl+Enter, explicit Internal default, blank/unloaded guards, captured submission values, pending protection across worker callbacks and focus recovery. Note type and the existing optional Author remain retained in session. Save failures preserve inputs; committed notes remain acknowledged if subsequent detail/queue reads fail, with read-only retry.
+
+FRESH focused GUI 15 PASS and ticket Integration 49 PASS overlap the full suites. FRESH full GUI **199 PASS** and Integration **163 PASS**, exit 0, no failures/errors/skips. Database **423 PASS RETAINED**, with accessible completion evidence and 82 unchanged relevant inputs independently verified. Native Windows 1000×700/96 DPI: **90 assertions PASS**, process exit 0, six captures inspected. Initial native harness dispatch/connection-cleanup errors and a process-liveness reporting correction are retained externally; candidate code did not change during those corrections. Physical manual input and additional DPI are NOT RUN.
+
+No service/repository/schema, lifecycle, navigation rename, author persistence, note retrieval or Knowledge Base change. Work remains unstaged/uncommitted at **READY_FOR_REVIEW**. Evidence is under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-049`; independent review is pending. One policy-rejected synthetic temporary-fixture cleanup is a nonblocking external note. Slice 048 closure is established by PR #53 and its verified external closure report; older pending-review prose is historical.
+
+
 ## 2026-10-02 — Slice 048 implementation candidate
 
 Implemented **Windows Network Configuration Snapshot** as one local, read-only, parameterless PowerShell 7 script and one enabled registry/checksum row in migration 0010. Added its targeted CRLF rule and deterministic contract, rollback, byte-integrity and existing catalog/management integration coverage. Production Python/GUI/service/repository behavior and physical schema remain unchanged; F7Hub cannot execute PowerShell.

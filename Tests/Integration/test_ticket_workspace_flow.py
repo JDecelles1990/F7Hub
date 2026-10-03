@@ -55,9 +55,138 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
 
     def wait_idle(self):
         deadline = time.monotonic() + 5
-        while self.window.runner.busy and time.monotonic() < deadline:
+        while (self.window.runner.busy or self.workspace.note_pending) and time.monotonic() < deadline:
             QTest.qWait(5)
         self.assertFalse(self.window.runner.busy, "Service worker timed out")
+        self.assertFalse(self.workspace.note_pending, "Note completion timed out")
+
+    def test_quick_note_keyboard_multiline_escape_and_tab_visibility(self):
+        self.assertEqual(self.workspace.note_type.currentData(), "INTERNAL")
+        for index in range(self.workspace.detail_tabs.count()):
+            self.workspace.detail_tabs.setCurrentIndex(index)
+            self.application.processEvents()
+            self.assertTrue(self.workspace.note_input.isVisible())
+            self.assertTrue(self.workspace.add_note_button.isVisible())
+        self.workspace.author_input.setText("Test technician")
+        self.workspace.note_type.setCurrentIndex(self.workspace.note_type.findData("WORKLOG"))
+        self.workspace.note_input.setPlainText("First line")
+        self.workspace.note_input.setFocus()
+        self.workspace.note_input.moveCursor(self.workspace.note_input.textCursor().MoveOperation.End)
+        QTest.keyClick(self.workspace.note_input, Qt.Key.Key_Return)
+        QTest.keyClicks(self.workspace.note_input, "Second line")
+        QTest.keyClick(self.workspace.note_input, Qt.Key.Key_Escape)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "First line\nSecond line")
+        self.assertEqual(self.repository.list_notes(self.ticket_id), ())
+        QTest.keyClick(self.workspace.note_input, Qt.Key.Key_Return, Qt.KeyboardModifier.ControlModifier)
+        self.wait_idle()
+        QTest.qWait(1)
+        notes = self.repository.list_notes(self.ticket_id)
+        self.assertEqual(len(notes), 1)
+        self.assertEqual((notes[0].note_text, notes[0].note_type, notes[0].author_label),
+                         ("First line\nSecond line", "WORKLOG", "Test technician"))
+        self.assertEqual(self.workspace.note_input.toPlainText(), "")
+        self.assertEqual(self.workspace.note_type.currentData(), "WORKLOG")
+        self.assertEqual(self.workspace.author_input.text(), "Test technician")
+        self.assertTrue(self.workspace.note_input.hasFocus())
+        other = self.service.create_ticket(subject="Another ticket")
+        self.workspace.open_ticket(other.ticket_id)
+        self.wait_idle()
+        self.assertEqual(self.workspace.note_type.currentData(), "WORKLOG")
+
+    def test_quick_note_blank_and_shortcut_outside_editor_do_not_write(self):
+        self.assertFalse(self.workspace.add_note_button.isEnabled())
+        self.workspace.note_input.setPlainText(" \n\t")
+        self.workspace.note_input.setFocus()
+        QTest.keyClick(self.workspace.note_input, Qt.Key.Key_Return, Qt.KeyboardModifier.ControlModifier)
+        self.workspace.add_note()
+        self.assertFalse(self.window.runner.busy)
+        self.assertFalse(self.workspace.note_pending)
+        self.workspace.note_input.setPlainText("Only the editor submits")
+        for widget in (self.workspace.author_input, self.workspace.reason_input,
+                       self.workspace.subject_search_input, self.workspace.notes_history):
+            if widget is self.workspace.notes_history:
+                self.workspace.detail_tabs.setCurrentWidget(widget)
+            widget.setFocus()
+            QTest.keyClick(widget, Qt.Key.Key_Return, Qt.KeyboardModifier.ControlModifier)
+            self.wait_idle()
+        self.assertEqual(self.repository.list_notes(self.ticket_id), ())
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Only the editor submits")
+
+    def test_quick_note_idle_before_callback_cannot_duplicate_switch_or_close(self):
+        other = self.service.create_ticket(subject="Other target")
+        self.workspace.note_input.setPlainText("Save once across callbacks")
+        self.workspace.ticket_number_input.setText(other.ticket_number)
+        observed = []
+
+        def attempt(busy):
+            if busy or not self.workspace.note_pending:
+                return
+            observed.append((self.window.pages.isEnabled(), self.window.new_ticket_action.isEnabled(),
+                             self.workspace.add_note_button.isEnabled()))
+            self.workspace.add_note()
+            self.workspace.open_ticket(other.ticket_id)
+            self.workspace.open_ticket_by_number()
+            self.window.show_new_ticket()
+            self.assertFalse(self.window.close())
+
+        self.window.runner.busy_changed.connect(attempt)
+        try:
+            self.workspace.add_note_button.click()
+            self.wait_idle()
+        finally:
+            self.window.runner.busy_changed.disconnect(attempt)
+        self.assertEqual(observed, [(False, False, False)] * 3)
+        self.assertIs(self.window.pages.currentWidget(), self.workspace)
+        self.assertEqual(self.workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(len(self.repository.list_notes(self.ticket_id)), 1)
+        self.assertEqual(self.repository.list_notes(other.ticket_id), ())
+
+    def test_quick_note_failed_keyboard_save_preserves_all_inputs_and_recovers(self):
+        self.workspace.note_input.setPlainText("Keep multiline\ninput")
+        self.workspace.author_input.setText("Test author")
+        self.workspace.note_type.setCurrentIndex(self.workspace.note_type.findData("PUBLIC"))
+        self.workspace.reason_input.setText("Unrelated reason")
+        self.workspace.note_input.setFocus()
+        with patch.object(self.service, "add_note", side_effect=RuntimeError("private diagnostic")):
+            QTest.keyClick(self.workspace.note_input, Qt.Key.Key_Enter, Qt.KeyboardModifier.ControlModifier)
+            self.wait_idle()
+        QTest.qWait(1)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Keep multiline\ninput")
+        self.assertEqual(self.workspace.note_type.currentData(), "PUBLIC")
+        self.assertEqual(self.workspace.author_input.text(), "Test author")
+        self.assertEqual(self.workspace.reason_input.text(), "Unrelated reason")
+        self.assertTrue(self.workspace.note_input.hasFocus())
+        self.assertNotIn("private diagnostic", self.workspace.feedback.text())
+        self.assertEqual(self.repository.list_notes(self.ticket_id), ())
+        self.workspace.add_note_button.click()
+        self.wait_idle()
+        self.assertEqual(len(self.repository.list_notes(self.ticket_id)), 1)
+        self.assertEqual(self.workspace.reason_input.text(), "Unrelated reason")
+
+    def test_quick_note_saved_with_failed_queue_refresh_recovers_without_second_write(self):
+        self.workspace.note_input.setPlainText("Committed queue failure")
+        with patch.object(self.service, "list_tickets", side_effect=RuntimeError("private diagnostic")):
+            self.workspace.add_note_button.click()
+            self.wait_idle()
+        self.assertIn("Note saved.", self.workspace.feedback.text())
+        self.assertIn("Could not refresh", self.workspace.feedback.text())
+        self.assertEqual(self.workspace.note_input.toPlainText(), "")
+        self.assertFalse(self.workspace.note_pending)
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(len(self.repository.list_notes(self.ticket_id)), 1)
+        self.assertIn("Committed queue failure", self.workspace.notes_history.toPlainText())
+
+    def test_quick_note_rejected_dispatch_preserves_draft_and_unlocks(self):
+        self.workspace.note_input.setPlainText("Dispatch draft")
+        with patch.object(self.window.runner, "submit", return_value=False):
+            self.workspace.add_note_button.click()
+        QTest.qWait(1)
+        self.assertFalse(self.workspace.note_pending)
+        self.assertEqual(self.workspace.note_input.toPlainText(), "Dispatch draft")
+        self.assertTrue(self.workspace.add_note_button.isEnabled())
+        self.assertTrue(self.window.pages.isEnabled())
+        self.assertEqual(self.repository.list_notes(self.ticket_id), ())
 
     def set_status(self, status, resolution=None):
         index = self.workspace.status_input.findData(status)

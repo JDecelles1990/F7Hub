@@ -2,7 +2,7 @@
 
 import logging
 
-from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt, Signal
+from PySide6.QtCore import QAbstractTableModel, QEvent, QModelIndex, QTimer, Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView, QComboBox, QFormLayout, QGridLayout, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QMessageBox, QPushButton, QSplitter, QTabWidget,
@@ -61,6 +61,7 @@ def _plain_editor(parent, *, read_only=False):
 class TicketWorkspace(QWidget):
     PAGE_SIZE = 100
     knowledge_article_requested = Signal(object)
+    note_pending_changed = Signal(bool)
 
     def __init__(self, service, runner: ServiceTaskRunner, parent=None, *, knowledge_link_service=None):
         super().__init__(parent)
@@ -77,7 +78,16 @@ class TicketWorkspace(QWidget):
         self._edit_priority_dialog = None
         self._edit_description_dialog = None
         self._edit_type_dialog = None
+        self._note_pending = False
+        self._note_focus_ticket_id = None
         self._build_ui()
+        self._runner.busy_changed.connect(self._update_note_controls)
+        self.note_pending_changed.connect(self._update_note_controls)
+        self._update_note_controls()
+
+    @property
+    def note_pending(self):
+        return self._note_pending
 
     def _build_ui(self):
         layout = QVBoxLayout(self)
@@ -225,18 +235,24 @@ class TicketWorkspace(QWidget):
         self.note_type = QComboBox(self.detail_panel)
         for kind in sorted(TICKET_NOTE_TYPES):
             self.note_type.addItem(kind.title(), kind)
+        self.note_type.setCurrentIndex(self.note_type.findData("INTERNAL"))
         self.note_type.setAccessibleName("Note type")
         self.note_input = _plain_editor(self.detail_panel)
         self.note_input.setPlaceholderText("Add a support note…")
         self.note_input.setAccessibleName("New note")
         self.note_input.setMaximumHeight(85)
+        self.note_input.installEventFilter(self)
+        self.note_input.textChanged.connect(self._update_note_controls)
         self.add_note_button = QPushButton("Add note", self.detail_panel)
+        self.add_note_button.setToolTip("Save this note (Ctrl+Enter in the note editor)")
         self.add_note_button.clicked.connect(self.add_note)
         note_actions = QHBoxLayout()
+        note_actions.addWidget(QLabel("Quick Note", self.detail_panel))
         note_actions.addWidget(self.note_type)
+        note_actions.addStretch()
         note_actions.addWidget(self.add_note_button)
-        detail_layout.addWidget(self.note_input)
         detail_layout.addLayout(note_actions)
+        detail_layout.addWidget(self.note_input)
         self.status_input = QComboBox(self.detail_panel)
         self.status_input.setAccessibleName("New ticket status")
         self.reason_input = QLineEdit(self.detail_panel)
@@ -278,9 +294,10 @@ class TicketWorkspace(QWidget):
         self.detail_panel.setEnabled(False)
         splitter.setSizes([460, 620])
 
-    def refresh_list(self, *, offset=None, message=None):
-        if self._runner.busy:
-            return
+    def refresh_list(self, *, offset=None, message=None, on_finished=None):
+        # Only the note's own refresh may enter while its write is pending.
+        if self._runner.busy or (self.note_pending and on_finished is None):
+            return False
         if offset is None:
             target = self._offset if self._retry_offset is None else self._retry_offset
         else:
@@ -300,6 +317,8 @@ class TicketWorkspace(QWidget):
             self.page_label.setText(f"Page {target // self.PAGE_SIZE + 1}")
             self.feedback.setText(message or ("No tickets match this filter." if not tickets else "Double-click a ticket or select it and press Open."))
             self.knowledge_tab.refresh_links()
+            if on_finished is not None:
+                on_finished()
 
         def failed(error):
             self._retry_offset = target
@@ -310,8 +329,10 @@ class TicketWorkspace(QWidget):
                 self.feedback.setText(f"{message} {retry}{detail}")
             else:
                 self._show_error(error, retry)
+            if on_finished is not None:
+                on_finished()
 
-        self._runner.submit(
+        return self._runner.submit(
             lambda: self._service.list_tickets(
                 status=status, priority=priority, ticket_type=ticket_type,
                 subject_query=subject_query, include_description=True, include_notes=True,
@@ -321,13 +342,13 @@ class TicketWorkspace(QWidget):
         )
 
     def search_subjects(self):
-        if self._runner.busy:
+        if self._runner.busy or self.note_pending:
             return
         self._subject_query = self.subject_search_input.text().strip() or None
         self.refresh_list(offset=0)
 
     def clear_subject_search(self):
-        if self._runner.busy:
+        if self._runner.busy or self.note_pending:
             return
         self.subject_search_input.clear()
         self._subject_query = None
@@ -359,7 +380,7 @@ class TicketWorkspace(QWidget):
         )
 
     def load_company_tickets(self):
-        if self._runner.busy or self._company_context is None:
+        if self._runner.busy or self.note_pending or self._company_context is None:
             return
         context = self._company_context
         if context[1] is None:
@@ -403,7 +424,7 @@ class TicketWorkspace(QWidget):
             self.open_ticket(self.company_model.tickets[index.row()].ticket_id)
 
     def open_ticket_by_number(self):
-        if self._runner.busy:
+        if self._runner.busy or self.note_pending:
             return
         ticket_number = self.ticket_number_input.text()
         if not ticket_number.strip():
@@ -435,6 +456,8 @@ class TicketWorkspace(QWidget):
                     or self.resolution_input.toPlainText().strip() or self.status_input.currentData())
 
     def confirm_discard(self):
+        if self.note_pending:
+            return False
         if not self.has_draft():
             return True
         return QMessageBox.question(
@@ -444,7 +467,7 @@ class TicketWorkspace(QWidget):
         ) == QMessageBox.StandardButton.Discard
 
     def open_ticket(self, ticket_id, *, refresh_queue=False):
-        if self._runner.busy:
+        if self._runner.busy or self.note_pending:
             return
         switching = self.details is not None and self.details.ticket.ticket_id != ticket_id
         if switching and not self.confirm_discard():
@@ -533,6 +556,7 @@ class TicketWorkspace(QWidget):
         self.status_input.setCurrentIndex(max(0, self.status_input.findData(selected)))
         self.change_status_button.setEnabled(self.status_input.count() > 1)
         self.detail_panel.setEnabled(True)
+        self._update_note_controls()
 
     def _clear_drafts(self):
         self.note_input.clear()
@@ -541,7 +565,7 @@ class TicketWorkspace(QWidget):
         self.status_input.setCurrentIndex(0)
 
     def open_edit_subject(self):
-        if (self.details is None or self._runner.busy
+        if (self.details is None or self._runner.busy or self.note_pending
                 or self._edit_subject_dialog is not None
                 or self._edit_priority_dialog is not None
                 or self._edit_description_dialog is not None
@@ -563,7 +587,7 @@ class TicketWorkspace(QWidget):
         self._reload_after_save(updated.ticket_id, "Subject saved.")
 
     def open_edit_priority(self):
-        if (self.details is None or self._runner.busy
+        if (self.details is None or self._runner.busy or self.note_pending
                 or self._edit_priority_dialog is not None
                 or self._edit_subject_dialog is not None
                 or self._edit_description_dialog is not None
@@ -585,7 +609,7 @@ class TicketWorkspace(QWidget):
         self._reload_after_save(updated.ticket_id, "Priority saved.")
 
     def open_edit_description(self):
-        if (self.details is None or self._runner.busy
+        if (self.details is None or self._runner.busy or self.note_pending
                 or self._edit_description_dialog is not None
                 or self._edit_subject_dialog is not None
                 or self._edit_priority_dialog is not None
@@ -609,7 +633,7 @@ class TicketWorkspace(QWidget):
         self._reload_after_save(updated.ticket_id, "Description saved.")
 
     def open_edit_type(self):
-        if (self.details is None or self._runner.busy
+        if (self.details is None or self._runner.busy or self.note_pending
                 or self._edit_type_dialog is not None
                 or self._edit_subject_dialog is not None
                 or self._edit_priority_dialog is not None
@@ -630,22 +654,74 @@ class TicketWorkspace(QWidget):
             return
         self._reload_after_save(updated.ticket_id, "Type saved.")
 
+    def eventFilter(self, watched, event):
+        if watched is self.note_input and self.note_input.hasFocus():
+            submit_key = (
+                event.type() in (QEvent.Type.KeyPress, QEvent.Type.ShortcutOverride)
+                and event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter)
+                and (event.modifiers() & ~Qt.KeyboardModifier.KeypadModifier)
+                == Qt.KeyboardModifier.ControlModifier
+            )
+            if submit_key:
+                if event.type() == QEvent.Type.KeyPress and not event.isAutoRepeat():
+                    self.add_note()
+                event.accept()
+                return True
+            if event.type() == QEvent.Type.KeyPress and event.key() == Qt.Key.Key_Escape:
+                event.accept()
+                return True
+        return super().eventFilter(watched, event)
+
+    def _update_note_controls(self, *_):
+        if not hasattr(self, "add_note_button"):
+            return
+        enabled = self.details is not None and not self._runner.busy and not self.note_pending
+        for widget in (self.note_input, self.note_type, self.author_input):
+            widget.setEnabled(enabled)
+        self.add_note_button.setEnabled(enabled and bool(self.note_input.toPlainText().strip()))
+        if self._note_focus_ticket_id is not None:
+            QTimer.singleShot(0, self, self._restore_note_focus)
+
+    def _restore_note_focus(self):
+        if self._runner.busy or self.note_pending:
+            return
+        ticket_id = self._note_focus_ticket_id
+        self._note_focus_ticket_id = None
+        if (self.details is not None and self.details.ticket.ticket_id == ticket_id
+                and self.note_input.isVisible() and self.note_input.isEnabled()):
+            self.note_input.setFocus()
+
+    def _finish_note(self, ticket_id):
+        self._note_focus_ticket_id = ticket_id
+        self._note_pending = False
+        self.note_pending_changed.emit(False)
+
     def add_note(self):
-        if self.details is None or self._runner.busy:
+        if (self.details is None or self._runner.busy or self.note_pending
+                or not self.note_input.toPlainText().strip()):
             return
         ticket_id = self.details.ticket.ticket_id
         values = dict(note_text=self.note_input.toPlainText(), note_type=self.note_type.currentData(),
                       author_label=self.author_input.text())
+        self._note_pending = True
+        self.note_pending_changed.emit(True)
+        self.feedback.setText("Saving note…")
 
         def saved(note):
             self.note_input.clear()
-            self._reload_after_save(ticket_id, "Note saved.")
+            self._reload_after_save(ticket_id, "Note saved.",
+                                    on_finished=lambda: self._finish_note(ticket_id))
 
-        self._runner.submit(lambda: self._service.add_note(ticket_id, **values), saved,
-                            lambda error: self._show_error(error, "Could not save the note. Your draft is preserved."))
+        def failed(error):
+            self._show_error(error, "Could not save the note. Your draft is preserved.")
+            self._finish_note(ticket_id)
+
+        if not self._runner.submit(lambda: self._service.add_note(ticket_id, **values), saved, failed):
+            self.feedback.setText("Could not start saving the note. Your draft is preserved.")
+            self._finish_note(ticket_id)
 
     def change_status(self):
-        if self.details is None or self._runner.busy:
+        if self.details is None or self._runner.busy or self.note_pending:
             return
         ticket_id = self.details.ticket.ticket_id
         status = self.status_input.currentData()
@@ -662,18 +738,26 @@ class TicketWorkspace(QWidget):
         self._runner.submit(lambda: self._service.change_status(ticket_id, **values), saved,
                             lambda error: self._show_error(error, "Could not change status. Your draft is preserved."))
 
-    def _reload_after_save(self, ticket_id, message):
+    def _reload_after_save(self, ticket_id, message, *, on_finished=None):
         # A failed reload must not present an already committed write as failed.
         def loaded(details):
             self._display_details(details)
             self.feedback.setText(message)
-            self.refresh_list(message=message)
+            if not self.refresh_list(message=message, on_finished=on_finished):
+                self.feedback.setText(message + " Refresh could not start; use Refresh.")
+                if on_finished is not None:
+                    on_finished()
 
         def reload_failed(error):
             logging.getLogger(__name__).error("Ticket reload after save failed: %s", type(error).__name__)
             self.feedback.setText(message + " Reload failed; use Reload ticket.")
+            if on_finished is not None:
+                on_finished()
 
-        self._runner.submit(lambda: self._service.get_ticket_details(ticket_id), loaded, reload_failed)
+        if not self._runner.submit(lambda: self._service.get_ticket_details(ticket_id), loaded, reload_failed):
+            self.feedback.setText(message + " Reload could not start; use Reload ticket.")
+            if on_finished is not None:
+                on_finished()
 
     def _show_error(self, error, fallback):
         logging.getLogger(__name__).error("Ticket operation failed: %s", type(error).__name__)

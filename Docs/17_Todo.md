@@ -1,5 +1,18 @@
 # F7Hub Todo
 
+## Slice 049 — Quick Note
+
+- [x] Compact composer on every saved-ticket detail tab; editor-scoped Ctrl+Enter, Enter newline and Escape draft preservation.
+- [x] Blank/unloaded/busy guards and pending ownership across write/detail/queue callbacks.
+- [x] Preserved failed inputs, retained type/author, draft decisions and truthful saved-write/failed-refresh recovery.
+- [x] Focused checks, affected full GUI/Integration regression, applicable retained Database evidence and bounded native Windows validation.
+- [x] Scoped owner documentation and external reproducible candidate/evidence manifest.
+- [ ] Independent read-only review of the exact unstaged/uncommitted candidate.
+- [ ] Integration only after independent approval and separate integration authorization.
+
+Redesign follow-ups B–G remain outside this candidate. Author persistence and Tickets/Overview renaming are not implemented. The external implementation report records one nonblocking synthetic temporary-fixture cleanup rejection. Slice 048 is CLOSED through PR #53; its unchecked historical gates below are STALE HANDOFF METADATA.
+
+
 ## Slice 048 — Network Configuration Snapshot
 
 - [x] One local read-only core-configuration diagnostic with bounded structured output and deterministic failure handling.

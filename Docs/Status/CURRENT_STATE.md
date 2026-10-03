@@ -1,5 +1,16 @@
 # F7Hub Current State
 
+## Slice 049 — Quick Note
+
+Verified 2026-10-02 (America/Toronto). Candidate `C:/Dev/F7Hub-S049`, branch `feature/tickets-quick-note-s049`, base/HEAD `9f66c9a51f2adb3fe6fbcd21bb65a09b69303957`. Entry fetch and live remote main matched this approved base. Slice 048 is CLOSED through PR #53 and its external integration/closure report; its candidate prose below is STALE HANDOFF METADATA. The dirty canonical checkout, 405 protected changed/untracked files, protected recovery ref and every prior worktree were preserved.
+
+Status **PASS — READY_FOR_REVIEW**. Scope is the first increment only: compact always-visible Quick Note, editor-scoped Ctrl+Enter, multiline/Escape behavior, Internal default, retained type/author, captured values, pending ownership through write/detail/queue callbacks, draft/error safety and same-ticket focus recovery. MainWindow guards navigation/close during callback gaps. No service/repository/schema, lifecycle, naming, preference, retrieval, property-edit, creation or Knowledge Base change.
+
+FRESH focused GUI **15 PASS**, ticket Integration **49 PASS**; full GUI **199 PASS**, Integration **163 PASS**, all exit 0, no failures/errors/skips. Database **423 PASS RETAINED**, after independently matching 82 relevant inputs, original logs/results and environment. Full regression total **785 PASS** comprises 362 fresh and 423 retained tests; focused counts overlap. Native Windows **90 assertions PASS**, process exit 0, at 1000×700/96 DPI; all six final captures inspected. Physical manual input and other DPI are NOT RUN. Earlier harness failures and liveness-report correction remain recorded; product tests were not rerun for unchanged inputs.
+
+Approved scope, manifests, suite results/logs, native procedure/result/captures, applicability and preservation records, implementation report and latest checkpoint reside under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-049`. All candidate files are unstaged/uncommitted and the index is empty. Next gate: independent read-only review; no commit/push/PR/merge performed. Follow-ups B–G are not started. One synthetic temporary fixture remains outside repositories after recursive cleanup was rejected by command policy; this is a nonblocking cleanup note, not user data.
+
+
 ## Slice 048 — Network Configuration Snapshot
 
 Verified 2026-10-02 (America/Toronto). Candidate workspace `C:/Dev/F7Hub-S048`, branch `feature/network-snapshot-s048`, base/HEAD `dab8f25d65a505c6a7943b15335c9fb1c7984c92`. Slice 047 is CLOSED through PR #52, corroborated by its external closure state and live local/remote main. The dirty canonical workspace on the older Slice 047 branch is protected and preserved from recovery entry. GuideSettings.ini already differed from the original implementation checkpoint; its current bytes are retained. Predecessor pending-review prose below is historical STALE HANDOFF METADATA.

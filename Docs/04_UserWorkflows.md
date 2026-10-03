@@ -1,5 +1,14 @@
 ﻿# F7Hub User Workflows
 
+## Quick Note from any saved-ticket tab — Slice 049
+
+Open a saved ticket and enter plain-text activity in the persistent **Quick Note** composer. Choose Internal, Public, Worklog or Resolution; Internal is the startup default. The optional Author field remains visible and also supplies status attribution. Names are not persisted by this slice.
+
+Click **Add note**, or press **Ctrl+Enter** with focus in the note editor. Enter adds a newline and Escape preserves the draft. Empty/whitespace notes and an unloaded ticket cannot submit. Saving blocks duplicate submission, conflicting navigation and window closure through the note's detail/queue refresh callbacks.
+
+Confirmed success clears only note text, retains type/author and returns focus to the same visible ticket's editor. Save failure preserves inputs. A committed note with failed detail/queue refresh remains reported as saved; use **Reload ticket** or **Refresh** to retry the read without inserting another note. Applied queue search and filters retain existing behavior. Tab changes and same-ticket reload preserve drafts; changing tickets or leaving uses Cancel/Discard, with Cancel as default.
+
+
 ## Find and copy network configuration diagnostic — Slice 048
 
 Open **Scripts**, search for **network configuration** and submit Search/Enter. Select **Windows Network Configuration Snapshot** to inspect its diagnostic metadata, STANDARD_USER privilege and file status. **Copy Script** verifies the current enabled registration, contained path and exact source checksum before copying. Changed/unavailable source blocks copy and preserves the clipboard. The technician pastes and runs it separately in an approved environment; F7Hub performs no execution or automatic paste.
