@@ -1,5 +1,9 @@
 # F7Hub System Architecture
 
+## Controlled PowerShell execution boundary — Slice 052 candidate
+
+`ScriptWorkspace → ServiceTaskRunner → PowerShellService → ScriptService/ScriptRepository → PowerShellGateway → PowerShell 7` is the one approved execution path. The service rechecks current enabled registration and fixed System Snapshot policy. ScriptService verifies the exact source buffer; the gateway creates a private sealed artifact from those bytes, then starts a non-elevated process in an owned kill-on-close Windows job. Bounded concurrent output capture, deadline, strict result parsing and verified cleanup precede GUI completion. Workspace pending state spans runner dispatch through callback presentation, including the runner idle gap. A valid diagnostic ERROR is a completed diagnostic outcome; launch, integrity, timeout, invalid output and uncertain cleanup are infrastructure failures. No schema, diagnostic writes, parameter API, pack runner, ticket integration, dependency or generic command gateway is introduced.
+
 ## Atomic ticket classification boundary — Slice 051
 
 TicketWorkspace dispatches one `TicketService.update_ticket_classification` through the existing ServiceTaskRunner. The service validates both inputs and coordinates an existing TicketRepository BEGIN IMMEDIATE transaction: authoritative priority/type/update-token checks, no-op detection, one guarded UPDATE of changed classification fields and activity time, existing change events, authoritative reload, then commit. Priority and Type both commit or neither commits. Existing individual priority/type APIs remain intact.

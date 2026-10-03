@@ -25,6 +25,8 @@ from f7hub.services.ticket_knowledge_service import TicketKnowledgeService
 from f7hub.services.database_backup_service import DatabaseBackupService
 from f7hub.repositories.script_repository import ScriptRepository
 from f7hub.services.script_service import ScriptService
+from f7hub.services.powershell_service import PowerShellService
+from f7hub.infrastructure.powershell_gateway import PowerShellGateway
 from f7hub.infrastructure.mochi_gateway import MochiGateway
 from f7hub.services.mochi_service import MochiService
 from f7hub.services.altf7hub_service import AltF7HubService
@@ -48,6 +50,7 @@ class ApplicationContext:
     ticket_knowledge_service: TicketKnowledgeService
     script_repository: ScriptRepository
     script_service: ScriptService
+    powershell_service: PowerShellService
     main_window: MainWindow
     mochi_service: MochiService
 
@@ -81,6 +84,7 @@ def bootstrap_application(
     ticket_knowledge_service = TicketKnowledgeService(ticket_knowledge_repository)
     script_repository = ScriptRepository(resolved_database_path)
     script_service = ScriptService(script_repository, resolved_project_root)
+    powershell_service = PowerShellService(script_service, PowerShellGateway())
     companies = CompanyRepository(resolved_database_path)
     contacts = ContactRepository(resolved_database_path)
     mochi_service = MochiService(MochiGateway(resolved_project_root, QApplication.instance()))
@@ -96,6 +100,7 @@ def bootstrap_application(
         knowledge_link_service=ticket_knowledge_service,
         backup_service=DatabaseBackupService(resolved_database_path),
         script_service=script_service,
+        powershell_service=powershell_service,
         mochi_service=mochi_service,
         altf7hub_service=AltF7HubService(WindowsAltF7HubGateway(resolved_project_root)),
     )
@@ -111,6 +116,7 @@ def bootstrap_application(
         ticket_knowledge_service=ticket_knowledge_service,
         script_repository=script_repository,
         script_service=script_service,
+        powershell_service=powershell_service,
         main_window=main_window,
         mochi_service=mochi_service,
     )

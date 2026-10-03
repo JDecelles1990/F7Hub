@@ -162,11 +162,11 @@ class ScriptWorkspaceTests(unittest.TestCase):
         self.assertNotIn("File found", self.workspace.details.toPlainText())
         self.assertEqual(set(self.workspace.findChildren(QPushButton)),
                          {self.workspace.refresh_button, self.workspace.copy_button, self.workspace.manage_button,
-                          self.workspace.search_button, self.workspace.clear_search_button})
+                          self.workspace.search_button, self.workspace.clear_search_button, self.workspace.run_button})
         self.assertEqual(self.workspace.copy_button.text(), "Copy Script")
         self.assertEqual(self.workspace.copy_button.accessibleName(), "Copy Script")
-        self.assertFalse(any(button.text() in {"Run", "Execute", "Test"}
-                             for button in self.workspace.findChildren(QPushButton)))
+        self.assertEqual(self.workspace.run_button.text(), "Run diagnostic")
+        self.assertFalse(self.workspace.run_button.isEnabled(), "Unpermitted selection has no execution action")
 
     def test_loading_duplicate_prevention_failure_and_retry(self):
         self.service.entries = (entry(),)

@@ -1,5 +1,9 @@
 # F7Hub PowerShell Architecture
 
+## First controlled execution — Slice 052 candidate
+
+F7Hub executes only the reviewed `Get-SystemSnapshot.ps1` through a fixed PowerShell 7 launcher. A currently enabled SCRIPT registration must match the fixed code, path, version, SHA-256, diagnostic type, low risk, Standard User privilege, structured-output requirement and bounded timeout. ScriptService reads and hashes the exact source bytes; the gateway writes those verified bytes to a private sealed artifact, holds file/path protections, and launches the installed 64-bit PowerShell 7 under a non-elevated token in an owned kill-on-close job. Stdout and stderr are captured concurrently with limits, and the process has a finite deadline. The service strictly checks UTF-8, JSON structure, operation, measurements, severity and exit code. A valid ERROR/exit 1 is a completed collection outcome; unavailable runtime, rejected eligibility, tampering, timeout, malformed output and uncertain cleanup are execution failures with no diagnostic result. Cleanup uncertainty blocks further runs. No script parameters, execution policy bypass, elevation, history, packs, remediation or other diagnostic execution is included.
+
 ## Network Configuration Snapshot contract — Slice 048
 
 `Get-NetworkSnapshot.ps1` is parameterless, local-only, read-only and standard-user compatible on the validated Windows/PowerShell 7 environment. One `Get-CimInstance` query reads `root/cimv2:Win32_NetworkAdapterConfiguration` with `IPEnabled=True`, selecting InterfaceIndex, Description, IPAddress, DefaultIPGateway, DNSServerSearchOrder and DHCPEnabled. It uses OperationTimeoutSec 20 and terminating errors without ComputerName/CimSession. This reports TCP/IP-enabled configurations, not all adapters or connectivity. Alias/status/link speed, MAC, DNS suffixes, leases, routes and prefix details are excluded.
@@ -27,11 +31,11 @@ Migration 0010 installs metadata and literal source checksum together. The targe
 
 Slice 043 makes the existing diagnostic available for technician-controlled copy after checksum verification. Root `.gitattributes` checks out this one script with CRLF; migration 0009 stores the SHA-256 of those exact bytes. `AVAILABLE` is only a prior file-status observation. ScriptService verifies current bytes on Copy, and the GUI places source text on the clipboard for manual paste. This adds no PowerShell launch, execution, RMM API, automatic paste or remote transfer. A future content change needs review and a new forward-only checksum migration.
 
-Slice 042 adds `PowerShell/Diagnostics/Get-SystemSnapshot.ps1`, a local, read-only PowerShell 7 diagnostic for standard-user execution. It queries local `Win32_OperatingSystem` and fixed `Win32_LogicalDisk` data through CIM, returning one schemaVersion 1 JSON result with `Get-SystemSnapshot` operation. Complete collection is PASS/exit 0. A drive-query failure is WARNING/exit 0 with an empty drive list; a returned drive with unavailable Size or FreeSpace is WARNING/exit 0 with that drive retained and only its unavailable measurements set to JSON null. Missing required OS data is ERROR/exit 1 with stable safe text. It takes no parameters, uses no network or credentials, and writes no files. Migration 0008 installs its enabled registry metadata with a null checksum. Enabled means catalog-visible, not approved for execution; AVAILABLE means present at last refresh. F7Hub still has no PowerShell execution path. Standalone execution occurs only in validation tooling.
+Slice 042 adds `PowerShell/Diagnostics/Get-SystemSnapshot.ps1`, a local, read-only PowerShell 7 diagnostic for standard-user execution. It queries local `Win32_OperatingSystem` and fixed `Win32_LogicalDisk` data through CIM, returning one schemaVersion 1 JSON result with `Get-SystemSnapshot` operation. Complete collection is PASS/exit 0. A drive-query failure is WARNING/exit 0 with an empty drive list; a returned drive with unavailable Size or FreeSpace is WARNING/exit 0 with that drive retained and only its unavailable measurements set to JSON null. Missing required OS data is ERROR/exit 1 with stable safe text. It takes no parameters, uses no network or credentials, and writes no files. Migration 0008 installs its enabled registry metadata with a null checksum. Enabled means catalog-visible, not approved for execution; AVAILABLE means present at last refresh. At Slice 042, F7Hub had no PowerShell execution path; execution was standalone validation only.
 
 Slice 044 adds local Python-owned registration and enable/disable management for existing readable `.ps1` references in the approved folders. New rows use PowerShell 7, a 120-second timeout, structured output required, disabled state and null category/checksum. Registration does not create or edit files, approve contents or invoke PowerShell. Enabling rechecks availability and only makes metadata visible. ScriptService still rejects Copy Script when approval is missing or bytes do not match.
 
-Slice 041 exposed enabled Slice 040 registry metadata in the **Scripts** workspace. File statuses (AVAILABLE, MISSING, INACCESSIBLE, INVALID_REFERENCE) describe reference inspection at the last refresh; unexpected values display as Unknown. Even AVAILABLE does not grant execution approval. Slice 043 adds a controlled verified-content read for copying; Slice 044 adds metadata management. Run and approval controls remain deferred with PowerShell execution infrastructure.
+Slice 041 exposed enabled Slice 040 registry metadata in the **Scripts** workspace. File statuses (AVAILABLE, MISSING, INACCESSIBLE, INVALID_REFERENCE) describe reference inspection at the last refresh; unexpected values display as Unknown. Even AVAILABLE does not grant execution approval. Slice 043 adds a controlled verified-content read for copying; Slice 044 adds metadata management. Run was deferred at that stage; Slice 052 adds the fixed System Snapshot action. A general content-approval control remains deferred.
 
 Slice 040 introduces only a Python/SQLite read-only registry for PowerShell `.ps1` references. References are limited to Diagnostics, Reports and Modules below the supplied project root, with traversal, external links and invalid Windows paths rejected. File status is an observation, not execution approval. No production PowerShell file, `pwsh.exe` invocation, content read or execution gateway is added.
 
@@ -637,7 +641,20 @@ Do not store full PowerShell source in SQLite by default.
 
 # 26. Script Registry
 
-Slice 040 established script metadata reads in SQLite. Slice 041 adds the enabled-only user-facing Scripts catalog; Slice 044 adds local default-disabled registration and guarded catalog visibility changes. Content approval and application execution remain deferred.
+Slice 040 established script metadata reads in SQLite. Slice 041 adds the enabled-only user-facing Scripts catalog; Slice 044 adds local default-disabled registration and guarded catalog visibility changes. At the completion of Slice 044, content approval and application execution remained deferred. Registration, enablement and Copy Script do not themselves execute scripts. Slice 052 adds one fixed, controlled production execution path for the registered Windows System Snapshot diagnostic. Generic registered-script execution and a general content-approval control remain deferred.
+
+Current fixed execution flow:
+
+```text
+ScriptWorkspace (explicit Run diagnostic)
+    → PowerShellService (fixed eligibility and result validation)
+    → ScriptService / ScriptRepository (registration and verified source bytes)
+    → PowerShellGateway (sealed artifact, bounded process and cleanup)
+    → PowerShell 7 (standard user)
+    → structured validated in-memory result
+```
+
+This path does not execute the registered Network Configuration Snapshot. Diagnostic packs, parameters or generated forms, execution-history and diagnostic-session persistence, ticket linkage, remediation, elevation, AI-triggered execution and generic approval workflows remain deferred.
 
 Conceptual flow:
 
@@ -2279,19 +2296,21 @@ Major verified changes should update:
 
 # 113. Current Implementation Status
 
-The 2026-09-02 no-implementation observation is historical. Slice 042 adds one local read-only PowerShell 7 diagnostic under `PowerShell\Diagnostics` and standalone parser/result tests under `Tests\PowerShell`.
+The 2026-09-02 no-implementation observation is historical. At the Slice 042 boundary, one local read-only PowerShell 7 diagnostic existed under `PowerShell\Diagnostics` with standalone parser/result tests under `Tests\PowerShell`:
 
 ```text
-Get-SystemSnapshot.ps1: IMPLEMENTED; standalone behavior validated
-F7Hub PowerShell execution: DEFERRED
+Get-SystemSnapshot.ps1: IMPLEMENTED; standalone behavior validated at Slice 042
+F7Hub PowerShell execution at Slice 042: DEFERRED
 ```
 
-This does not establish that:
+That Slice 042 validation did not establish that:
 
 - Graph connectivity exists
 - Exchange connectivity exists
 - a production execution gateway exists
 - F7Hub can invoke the diagnostic
+
+Slice 052 now contains one fixed production execution path for Windows System Snapshot through `ScriptWorkspace → PowerShellService → ScriptService / ScriptRepository → PowerShellGateway → PowerShell 7 → structured validated in-memory result`. It requires explicit technician Run, exact approved bytes, current eligible registration, standard-user execution, bounded output and timeout, and verified cleanup. Valid diagnostic ERROR is distinct from infrastructure failure. Results remain in memory. Generic or arbitrary script execution, diagnostic packs (including Network Snapshot execution through a pack), parameters, generated forms, execution-history and session persistence, ticket linkage, remediation, elevation, AI-triggered execution and generic approval workflows remain deferred.
 
 ---
 

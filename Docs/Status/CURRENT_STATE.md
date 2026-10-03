@@ -1,5 +1,11 @@
 # F7Hub Current State
 
+## Slice 052 — Controlled System Snapshot execution candidate
+
+**READY_FOR_REVIEW** on 2026-10-03 (America/Toronto), pending independent read-only review and separately authorized integration. Isolated worktree `C:/Dev/F7Hub-S052`, branch `feature/powershell-execution-s052`, base/HEAD `2730047e83387a042b9e89378ea4beca6cef4b45`; candidate remains unstaged/uncommitted. Scripts now explicitly runs only the reviewed read-only Windows System Snapshot under non-elevated PowerShell 7 and displays validated in-memory results. The source is exact-byte verified and executed through a private sealed artifact and owned finite job. Diagnostic ERROR differs from execution failure. No pack, parameter, history, ticket linkage, remediation, AI execution or schema migration.
+
+Resumed GUI **206 PASS FRESH**, exit 0. Database **433**, PowerShell **51** and Integration **201 PASS RETAINED** from durable results with unchanged relevant inputs. Corrected native Windows validation **43 assertions PASS**, process exit 0, zero owned survivors; ready, real result and synthetic timeout captures inspected at 1000×700/96 DPI. Physical manual input and other DPI NOT RUN. The earlier native failures and incomplete GUI run remain historical evidence. Exact manifest, logs, results, captures and implementation report are external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-052`. Prior Slice 051 candidate status below is historical handoff prose; its closure through current main was verified in the external Slice 051 integration report.
+
 ## Slice 051 — Bounded correction R1
 
 The independent review of aggregate `258d08f48869162960401c782bf056240f32d5afa1f7ff1ba815f38c30847ef5` returned **CHANGES REQUIRED**: an unchanged Subject/Description save or failed save followed by Cancel could leave inline Priority/Type/Apply disabled. Its original fresh reviewer result remains **30 PASS / 4 FAIL**.

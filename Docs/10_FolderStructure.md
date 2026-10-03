@@ -1,5 +1,9 @@
 # F7Hub Folder Structure
 
+## Controlled execution components — Slice 052 candidate
+
+`Python/f7hub/domain/diagnostic_results.py` holds typed results; `services/powershell_service.py` owns the fixed execution policy and result contract; `infrastructure/powershell_gateway.py` and `infrastructure/windows_execution.py` own the Windows process and sealed-file boundary. Existing bootstrap, ScriptService and Scripts GUI modules compose the path. Focused tests are under `Tests/PowerShell`, `Tests/GUI` and `Tests/Integration`. No migration, diagnostic source or new top-level directory is added. Validation records and captures remain external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-052`.
+
 ## Network Snapshot source and checkout rule — Slice 048
 
 `PowerShell/Diagnostics/Get-NetworkSnapshot.ps1` is the second standalone local diagnostic. `Database/Migrations/0010_network_snapshot_script.sql` owns its reference metadata and exact-byte checksum. `.gitattributes` adds only this file's `text eol=crlf` rule alongside the existing System Snapshot rule. Both raw checkout hashes and LF-normalized Git identities matter; the copy boundary hashes raw bytes. Tests live in existing PowerShell, Database and Integration directories. Candidate manifests/results/captures remain outside worktrees under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-048`.
