@@ -1,5 +1,11 @@
 # F7Hub ChangeLog
 
+## 2026-10-03 — AltF7Hub Knowledge corpus import
+
+Imported the supplied 31-topic YAML corpus as separate DRAFT/version-1 Knowledge articles in the local development database, preserving all 841 ordered sections and 3,089 prompts. Each article has an initial version snapshot, source metadata and a searchable FTS entry. The original article, unrelated tables and source YAML were preserved. The technician confirmed successful use in the application.
+
+Rehearsal/live article, history, search, duplicate-prevention and integrity checks passed; malformed/duplicate-key/conflict rejection and injected snapshot-write rollback were validated on an isolated copy. This evidence is RETAINED for the source/documentation integration after unchanged-input verification. No new automated native UI or full regression run is claimed. A validated backup preceded live writes. [Data/README.md](../Data/README.md) owns the import record and limitations: local database content is not committed or automatically seeded elsewhere; no schema, application dependency or synchronization change was added.
+
 ## 2026-10-03 — Slice 052: Controlled System Snapshot execution candidate
 
 Added explicit execution of the reviewed Windows System Snapshot from Scripts, through a fixed non-elevated PowerShell 7 gateway with exact-byte verification, private sealed artifact, finite owned job, bounded output and strict structured-result validation. Added memory-only result presentation and callback-spanning pending guards. No migration, source diagnostic change, pack, parameter, history, ticket write or remediation. Resumed from the preserved checkpoint without restarting implementation. The historical native harness failure and polling starvation remain recorded; corrected polling completed the real diagnostic plus injected invalid-output and timeout paths. Native **43 assertions PASS**, exit 0, zero owned survivors; three 1000×700/96 DPI captures inspected. GUI **206 PASS FRESH**; Database **433**, PowerShell **51** and Integration **201 PASS RETAINED** after relevant-input comparison. Physical input and other DPI NOT RUN. Independent review and integration pending; candidate remains unstaged/uncommitted. Evidence is external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-052`.

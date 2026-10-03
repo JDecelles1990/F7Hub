@@ -1,5 +1,9 @@
 # F7Hub Documentation Index
 
+## AltF7Hub Knowledge corpus import — 2026-10-03
+
+Read [Data/README.md](../Data/README.md) for the 31-topic YAML corpus, verified local Knowledge import, article mapping, validation provenance and recovery limits. [The source YAML](../Data/AltF7Hub-Troubleshooting-Topics.yaml) is versioned reference content; the local development database is not an automatic seed or synchronized copy.
+
 > Document: `Docs/19_DocumentationIndex.md`  
 > Project: F7Hub  
 > Purpose: Provide the canonical navigation, governance, ownership, status, dependency, task-routing, review-gate, and documentation-impact map for the F7Hub documentation system.  

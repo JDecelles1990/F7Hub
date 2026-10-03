@@ -1,5 +1,9 @@
 # F7Hub Folder Structure
 
+## AltF7Hub Knowledge corpus — 2026-10-03
+
+`Data/AltF7Hub-Troubleshooting-Topics.yaml` preserves the supplied 31-topic reference corpus. [Data/README.md](../Data/README.md) records its verified one-time import into the local development Knowledge Base, content mapping, validation and recovery boundaries. Local SQLite data, backups and import evidence remain outside Git; checking out the corpus does not automatically import it.
+
 ## Controlled execution components — Slice 052 candidate
 
 `Python/f7hub/domain/diagnostic_results.py` holds typed results; `services/powershell_service.py` owns the fixed execution policy and result contract; `infrastructure/powershell_gateway.py` and `infrastructure/windows_execution.py` own the Windows process and sealed-file boundary. Existing bootstrap, ScriptService and Scripts GUI modules compose the path. Focused tests are under `Tests/PowerShell`, `Tests/GUI` and `Tests/Integration`. No migration, diagnostic source or new top-level directory is added. Validation records and captures remain external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-052`.
