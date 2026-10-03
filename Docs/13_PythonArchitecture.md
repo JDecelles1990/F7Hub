@@ -1,5 +1,13 @@
 # F7Hub Python Architecture
 
+## Embedded ticket creation and callback ownership — Slice 050
+
+MainWindow composes one existing TicketCreateWidget with the shared runner and passes it to TicketWorkspace. The outer QStackedWidget contains only Tickets, optional Knowledge Base and optional Scripts. TicketWorkspace owns a right-pane QStackedWidget, the saved detail panel, a scroll area containing the reused form, and a pinned Cancel button. The internal show_new_ticket helper enters or focuses that embedded mode; it has no primary action or Ctrl+N registration.
+
+TicketCreateWidget pending_changed and its submitting state protect dispatch through ticket_created delivery. TicketWorkspace creation_pending/creation_pending_changed cover the owned authoritative detail/queue refresh, and MainWindow includes note, status and creation pending state in navigation/close guards. Status writes also hold status_pending/status_pending_changed through their owned detail/queue callbacks, preventing creation entry before a status reload finishes. Rejected dispatch and save/read failures release that guard while preserving truthful feedback. Owned refresh completion releases pending state, re-enables Quick Note and retains the same queue controls/page. Deferred initial queue loading checks the current page, active work, creation mode and loaded identity before dispatch. Deferred form focus checks visible mode and readiness after reference loading.
+
+Mode generations invalidate obsolete detail, exact-number and queue callbacks. Existing ticket activity confirmation protects drafts before mode changes; the previous saved detail is retained for Cancel while details is None in creation mode. Successful creation resets the same form, reopens through open_ticket, and refreshes/reselects through existing list reads. A retained committed ticket ID supports Open created ticket after failed reopen; Refresh retries failed queue reads. The save shortcut uses WidgetWithChildrenShortcut, preventing hidden-form Ctrl+S writes. Service/repository, reference creation, schema and ServiceTaskRunner implementation are unchanged.
+
 ## Quick Note operation ownership — Slice 049
 
 TicketWorkspace continues to call `TicketService.add_note` through the existing shared `ServiceTaskRunner`; service, repository, domain and schema contracts are unchanged. An editor-scoped event filter handles Ctrl+Return/Ctrl+Enter, preserves Enter newlines and Escape drafts, and ignores repeat submission keys. Submission snapshots ticket ID, text, type and author before dispatch.

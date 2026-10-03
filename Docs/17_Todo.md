@@ -1,5 +1,15 @@
 # F7Hub Todo
 
+## Slice 050 — Tickets workspace creation candidate
+
+- [x] Consolidate user-visible Saved Tickets into Tickets; remove separate New Ticket primary action/page/shortcut.
+- [x] Host the existing creation widget from + New Ticket, preserve queue state, protect drafts, provide safe Cancel and authoritative post-create read/recovery.
+- [x] Hide/disable Quick Note with no active saved identity during creation; preserve Slice 049 behavior for loaded tickets.
+- [x] Validate native Windows 1000×700 and inspect captures.
+- [x] Recover durable evidence; validate 10 focused boundary tests and 177 Integration tests; retain applicable 199 GUI, 423 Database and native evidence; finalize exact candidate manifest and implementation handoff. **READY_FOR_REVIEW** on 2026-10-03; independent review remains pending.
+- [ ] Independent review/integration; Slice 050 is not CLOSED.
+- Deferred: inline Priority/Type, other field redesign, note history/search redesign and Knowledge Base redesign. No schema migration.
+
 ## Slice 049 — Quick Note
 
 - [x] Compact composer on every saved-ticket detail tab; editor-scoped Ctrl+Enter, Enter newline and Escape draft preservation.

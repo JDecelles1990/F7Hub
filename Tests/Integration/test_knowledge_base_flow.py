@@ -145,7 +145,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         self.window.show_knowledge()
         self.wait_idle(self.window.runner)
         self.window.show_new_ticket()
-        self.assertIs(self.window.pages.currentWidget(), self.window.ticket_create_widget)
+        self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
         self.window.show_tickets()
         self.wait_idle(self.window.runner)
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)

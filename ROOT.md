@@ -83,7 +83,7 @@ $env:PYTHONPATH = "$PWD\Python"
 .\.venv\Scripts\python.exe -m f7hub
 ```
 
-This initializes `Database\Dev\f7hub_dev.db`, applies the available migrations and opens the application with New ticket and Saved tickets workflows. Open `AutoHotkey/F7Hub.ahk` with AutoHotkey v2 to enable F7. F7 launches F7Hub or focuses/restores its existing window. Exit or reload the shortcut from its tray icon. It runs only while that script is active; automatic login startup is not configured.
+This initializes `Database\Dev\f7hub_dev.db`, applies the available migrations and opens the application with the Tickets workspace, with + New Ticket for creation. Open `AutoHotkey/F7Hub.ahk` with AutoHotkey v2 to enable F7. F7 launches F7Hub or focuses/restores its existing window. Exit or reload the shortcut from its tray icon. It runs only while that script is active; automatic login startup is not configured.
 
 ---
 

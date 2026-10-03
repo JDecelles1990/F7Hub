@@ -1,5 +1,11 @@
 # F7Hub System Architecture
 
+## Ticket creation presentation ownership — Slice 050
+
+MainWindow retains application composition and navigation ownership. TicketWorkspace hosts the existing TicketCreateWidget in a parent-owned detail stack; ServiceTaskRunner still dispatches existing TicketService creation and authoritative detail/list reads. TicketService, TicketRepository, domain rules, schema, migrations and bootstrap composition are unchanged. There is no second form, duplicate lookup/write path or new controller framework.
+
+Presentation pending state spans creation and active status writes plus their post-commit detail/queue callbacks, including the runner idle-before-callback gap. Mode generation checks reject obsolete detail/queue completions. The active saved-ticket identity is cleared during creation and restored on Cancel or authoritative successful read. Quick Note retains Slice 049 operation ownership; form Save shortcuts are scoped to visible form descendants. Committed creation is separate from later read failure and is recovered by reading its returned saved identity. No external, IPC, credential or database boundary changes.
+
 ## Mochi local control boundary — Slice 002 candidate
 
 The approved process boundary is F7Hub application → MochiService → MochiGateway/persistent QLocalSocket → Mochi LocalController/QLocalServer → PetRuntime → PetWindow. Bootstrap composes the service without launching. The application owns session ID, greeting consumption and one automatic-attempt gate. Settings is only a subscriber; ServiceTaskRunner is not used for persistent IPC. The detached renderer outlives F7Hub.

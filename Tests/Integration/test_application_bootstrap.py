@@ -4,12 +4,14 @@ from io import StringIO
 import os
 from pathlib import Path
 import tempfile
+import time
 import unittest
 from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication
+from PySide6.QtTest import QTest
 
 from f7hub.app.bootstrap import bootstrap_application
 from f7hub.app.main import main
@@ -159,10 +161,28 @@ class ApplicationBootstrapTests(unittest.TestCase):
 
     def test_main_entry_point_continues_with_safe_stderr_fallback(self) -> None:
         secret = "S037_PRIVATE_LOG_SETUP_MARKER"
+        contexts = []
+        def compose(**kwargs):
+            context = bootstrap_application(**kwargs)
+            contexts.append(context)
+            return context
+        def finish_event_loop():
+            self.application.processEvents()
+            for context in contexts:
+                window = context.main_window
+                deadline = time.monotonic() + 5
+                while window.runner.busy and time.monotonic() < deadline:
+                    QTest.qWait(5)
+                self.assertFalse(window.runner.busy)
+                self.assertTrue(window.close())
+                window.deleteLater()
+            self.application.processEvents()
+            return 0
         with (
             patch("f7hub.app.logging_config.RotatingFileHandler", side_effect=OSError(secret)),
             patch("sys.stderr", new_callable=StringIO) as stderr,
-            patch.object(QApplication, "exec", return_value=0) as event_loop,
+            patch("f7hub.app.main.bootstrap_application", side_effect=compose),
+            patch.object(QApplication, "exec", side_effect=finish_event_loop) as event_loop,
         ):
             exit_code = main(["f7hub", "--database", str(self.database_path)])
 

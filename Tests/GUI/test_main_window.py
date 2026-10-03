@@ -93,6 +93,7 @@ class MainWindowTests(unittest.TestCase):
                                  script_service=self.scripts)
         self.window.show()
         self.application.processEvents()
+        self.wait_idle()
 
     def tearDown(self) -> None:
         if self.service.gate:
@@ -111,7 +112,7 @@ class MainWindowTests(unittest.TestCase):
     def test_window_hosts_ticket_form_and_application_chrome(self) -> None:
         self.assertEqual(self.window.windowTitle(), "F7Hub")
         self.assertIs(self.window.centralWidget(), self.window.pages)
-        self.assertIs(self.window.pages.currentWidget(), self.window.ticket_create_widget)
+        self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
         self.assertEqual(self.window.statusBar().currentMessage(), "Ready")
         self.assertEqual(self.window.exit_action.objectName(), "exitAction")
 
@@ -168,6 +169,7 @@ class MainWindowTests(unittest.TestCase):
         self.assertNotIn("private", warning.call_args.args[2])
 
     def test_created_ticket_updates_application_status(self) -> None:
+        self.window.show_new_ticket()
         self.window.ticket_create_widget.subject_input.setText("Printer offline")
 
         self.window.ticket_create_widget.submit()
@@ -181,6 +183,7 @@ class MainWindowTests(unittest.TestCase):
 
     def test_worker_keeps_event_loop_responsive_and_prevents_duplicate_submission(self):
         self.service.gate = threading.Event()
+        self.window.show_new_ticket()
         self.window.ticket_create_widget.subject_input.setText("Pending save")
         self.window.ticket_create_widget.submit()
         self.window.ticket_create_widget.submit()
@@ -198,6 +201,7 @@ class MainWindowTests(unittest.TestCase):
 
     def test_failed_background_save_preserves_new_ticket_draft(self):
         self.service.error = RuntimeError("Sensitive internal details")
+        self.window.show_new_ticket()
         self.window.ticket_create_widget.subject_input.setText("Keep draft")
         self.window.ticket_create_widget.submit()
         self.wait_idle()
@@ -205,7 +209,7 @@ class MainWindowTests(unittest.TestCase):
         self.assertEqual(form.subject_input.text(), "Keep draft")
         self.assertNotIn("Sensitive", form.form_error.text())
         self.assertTrue(form.save_button.isEnabled())
-        self.assertIs(self.window.pages.currentWidget(), form)
+        self.assertIs(self.window.workspace.detail_stack.currentWidget(), self.window.workspace.creation_panel)
 
     def test_saved_ticket_navigation_loads_and_opens_selected_row(self):
         self.window.show_tickets()
@@ -221,14 +225,14 @@ class MainWindowTests(unittest.TestCase):
         self.assertEqual(self.window.scripts_action.text(), "Scripts")
         self.assertIn(self.window.scripts_action, self.window.menuBar().actions()[0].menu().actions())
         self.assertIn(self.window.scripts_action, self.window.findChildren(type(self.window.scripts_action)))
-        self.assertEqual(self.window.pages.indexOf(self.window.script_workspace), 2)
+        self.assertEqual(self.window.pages.indexOf(self.window.script_workspace), 1)
         self.window.scripts_action.trigger()
         self.wait_idle()
         self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
         self.assertEqual(self.window.script_workspace.heading.text(), "Scripts")
         self.assertEqual(self.scripts.calls, 1)
         self.window.show_new_ticket()
-        self.assertIs(self.window.pages.currentWidget(), self.window.ticket_create_widget)
+        self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
 
     def test_script_load_keeps_window_and_page_alive_until_worker_finishes(self):
         self.scripts.gate = threading.Event()

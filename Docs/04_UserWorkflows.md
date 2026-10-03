@@ -1,5 +1,13 @@
 ﻿# F7Hub User Workflows
 
+## Create within Tickets — Slice 050
+
+Open **Tickets → + New Ticket**. The existing form replaces the right detail pane; the ticket list remains visible. Subject receives focus after initial reference loading. Enter the ticket fields and choose **Create Ticket**, or use Ctrl+S within the form. The form may scroll at 1000×700; **Cancel** stays visible below it.
+
+Unsaved Quick Note/status/reason/resolution changes require Cancel/Discard before entering creation. Cancel preserves them and stays on the saved ticket; Discard clears only those confirmed activity drafts. While creating, Quick Note is hidden and cannot write against the previous ticket. **Cancel** returns to its prior detail, retaining search, filters, paging and selected detail tab; an entered new-ticket draft requires the usual default-Cancel discard confirmation. Cancel performs no ticket write and does not undo separately committed Add Company/Add Contact operations.
+
+Successful creation returns to saved detail and refreshes the same queue view. The new row is selected if it matches the retained filters/page; its authoritative detail opens even if excluded. On a save failure, correct or retry the preserved form. If the ticket was created but detail could not reopen, choose **Open created ticket**; if queue refresh failed, choose **Refresh**. These retries read the saved ticket without creating it again. The separate New Ticket navigation and Ctrl+N shortcut are removed; subsequent Quick Note Add/Ctrl+Enter behavior is preserved.
+
 ## Quick Note from any saved-ticket tab — Slice 049
 
 Open a saved ticket and enter plain-text activity in the persistent **Quick Note** composer. Choose Internal, Public, Worklog or Resolution; Internal is the startup default. The optional Author field remains visible and also supplies status attribution. Names are not persisted by this slice.
@@ -902,7 +910,7 @@ Restore/revert, historical editing/deletion, comparison/apply and AI remain defe
 
 ## Implemented ticket/article linking — Slice 012
 
-Saved tickets → open a ticket → Knowledge → Link Article → select an existing article → Link Article. The ticket shows the linked code, current title, status and version. Open Article switches to Knowledge Base, selects that article and reads its current details. Refresh, Reload ticket or returning through Saved tickets refreshes linked metadata after an article edit. Relationships survive application reconstruction against the same database.
+Tickets → open a ticket → Knowledge → Link Article → select an existing article → Link Article. The ticket shows the linked code, current title, status and version. Open Article switches to Knowledge Base, selects that article and reads its current details. Refresh, Reload ticket or returning through Saved tickets refreshes linked metadata after an article edit. Relationships survive application reconstruction against the same database.
 
 An empty ticket shows “No knowledge articles linked.” The selector loads lightweight identities for DRAFT, PUBLISHED and ARCHIVED articles, excluding existing RELATED links. Cancel before saving writes nothing. Link runs in the background, blocks duplicate submission/closing during the write, and preserves selection on failure. Missing tickets/articles and duplicate links have clear feedback; an article disappearing before Open Article produces a safe missing-article message. A committed link followed by a failed list refresh remains explicitly reported as linked; use Refresh to recover.
 
@@ -910,7 +918,7 @@ Only RELATED is supported. Linking writes the relationship alone: no ticket upda
 
 ## Implemented RELATED unlink — Slice 013
 
-Saved tickets → open a ticket → Knowledge → select KB0001 → Unlink Article → confirm Unlink. The confirmation identifies KB0001 and explains that the ticket and knowledge article remain; Cancel, Enter with the default focus and Escape cancel without a service call or write, preserving selection. On success, only KB0001's RELATED association disappears. Other linked articles remain, and Open Article still opens the exact selected current article. KB0001 reappears in Link Article candidates and can be linked again with a fresh relationship timestamp.
+Tickets → open a ticket → Knowledge → select KB0001 → Unlink Article → confirm Unlink. The confirmation identifies KB0001 and explains that the ticket and knowledge article remain; Cancel, Enter with the default focus and Escape cancel without a service call or write, preserving selection. On success, only KB0001's RELATED association disappears. Other linked articles remain, and Open Article still opens the exact selected current article. KB0001 reappears in Link Article candidates and can be linked again with a fresh relationship timestamp.
 
 Unlink reserves the writer before checking ticket, article and exact RELATED existence. A missing ticket takes precedence; otherwise a missing article is reported, then an already-removed relationship. Concurrent unlink produces one success and one safe not-linked result. Use Refresh to reconcile stale lists. Failed persistence preserves the displayed selection and permits retry; successful persistence followed by failed list refresh remains reported as “Article unlinked.” and Refresh retries only the read. Obsolete callbacks do not update another ticket.
 
