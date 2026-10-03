@@ -71,7 +71,7 @@ class PowerShellServiceTests(unittest.TestCase):
         self.service = PowerShellService(self.scripts, self.gateway)
 
     def test_only_system_snapshot_manifest_code(self):
-        for code in ("diagnostic.windows.network_snapshot", "x", "", None, ["x"]):
+        for code in ("diagnostic.windows.unapproved", "x", "", None, ["x"]):
             with self.subTest(code=code):
                 self.assertEqual(self.service.execute_diagnostic(code).classification, "NOT_ELIGIBLE")
         self.assertEqual(self.gateway.calls, 0)

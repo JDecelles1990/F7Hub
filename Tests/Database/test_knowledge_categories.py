@@ -92,7 +92,7 @@ class KnowledgeCategoryRepositoryTests(CategoryFixture, unittest.TestCase):
             connection.execute("INSERT INTO knowledge_articles_fts(knowledge_articles_fts, rank) VALUES ('integrity-check', 1)")
             self.assertEqual(connection.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
             self.assertEqual(connection.execute('PRAGMA foreign_key_check').fetchall(), [])
-            self.assertEqual(connection.execute('SELECT count(*) FROM schema_migrations').fetchone()[0], 10)
+            self.assertEqual(connection.execute('SELECT count(*) FROM schema_migrations').fetchone()[0], 11)
 
     def test_invalid_category_is_rejected_without_changes(self):
         before = self.dump()

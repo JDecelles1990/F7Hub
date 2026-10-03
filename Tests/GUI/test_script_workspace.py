@@ -22,7 +22,7 @@ def entry(code="ONE", *, status="AVAILABLE", description="Details", name=None):
         name=name or code, script_code=code, category_name="Networking",
         description=description, script_type="DIAGNOSTIC", runtime="POWERSHELL_7",
         risk_level="LOW", privilege_level="STANDARD_USER",
-        relative_path=f"PowerShell/Diagnostics/{code}.ps1",
+        relative_path=f"PowerShell/Diagnostics/{code}.ps1", version=None,
     ), status)
 
 
@@ -98,7 +98,7 @@ class ScriptWorkspaceTests(unittest.TestCase):
     def test_construction_empty_and_columns(self):
         self.assertEqual(self.workspace.heading.text(), "Scripts")
         self.assertEqual([self.workspace.model.headerData(i, Qt.Orientation.Horizontal)
-                          for i in range(4)], ["Name", "Code", "Category", "File status"])
+                          for i in range(5)], ["Name", "Type", "Category", "File status", "Execution"])
         self.assertTrue(self.workspace.refresh_list())
         self.wait_idle()
         self.assertEqual(self.workspace.model.rowCount(), 0)
@@ -162,7 +162,8 @@ class ScriptWorkspaceTests(unittest.TestCase):
         self.assertNotIn("File found", self.workspace.details.toPlainText())
         self.assertEqual(set(self.workspace.findChildren(QPushButton)),
                          {self.workspace.refresh_button, self.workspace.copy_button, self.workspace.manage_button,
-                          self.workspace.search_button, self.workspace.clear_search_button, self.workspace.run_button})
+                      self.workspace.search_button, self.workspace.clear_search_button, self.workspace.run_button,
+                      self.workspace.pack_button})
         self.assertEqual(self.workspace.copy_button.text(), "Copy Script")
         self.assertEqual(self.workspace.copy_button.accessibleName(), "Copy Script")
         self.assertEqual(self.workspace.run_button.text(), "Run diagnostic")
