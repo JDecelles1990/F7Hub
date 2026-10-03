@@ -1,5 +1,9 @@
 ﻿# F7Hub User Workflows
 
+## Run the Windows System Snapshot — Slice 052 candidate
+
+Open **Scripts**, select **Windows System Snapshot**, review the read-only purpose, local target, Standard User privilege and 60-second limit, then choose **Run diagnostic**. F7Hub reloads the enabled registration, checks the reviewed policy and current exact source bytes, and runs a private verified copy through PowerShell 7 without elevation. The page remains responsive while conflicting actions and another run are blocked. The result panel shows execution status, diagnostic collection status and structured output in memory only. A valid diagnostic ERROR describes a completed collection; execution, integrity, timeout or output failure shows a safe message without a diagnostic result. After verified cleanup, another run is available. Other scripts cannot run here; packs, parameters, history, ticket linkage, remediation and AI execution are not part of this workflow.
+
 ## Edit Priority and Type in Tickets — Slice 051
 
 Open a ticket in **Tickets**. Choose **Priority**, **Type**, or both in the inline dropdowns, then select **Apply changes**. Apply is disabled while choices match the loaded ticket and during incompatible operations. Selecting or restoring choices performs no write. Priority and Type save together; neither persists if any part fails.
@@ -27,7 +31,7 @@ Confirmed success clears only note text, retains type/author and returns focus t
 
 ## Find and copy network configuration diagnostic — Slice 048
 
-Open **Scripts**, search for **network configuration** and submit Search/Enter. Select **Windows Network Configuration Snapshot** to inspect its diagnostic metadata, STANDARD_USER privilege and file status. **Copy Script** verifies the current enabled registration, contained path and exact source checksum before copying. Changed/unavailable source blocks copy and preserves the clipboard. The technician pastes and runs it separately in an approved environment; F7Hub performs no execution or automatic paste.
+Open **Scripts**, search for **network configuration** and submit Search/Enter. Select **Windows Network Configuration Snapshot** to inspect its diagnostic metadata, STANDARD_USER privilege and file status. **Copy Script** verifies the current enabled registration, contained path and exact source checksum before copying. Changed/unavailable source blocks copy and preserves the clipboard. The technician pastes and runs it separately in an approved environment; F7Hub does not execute this Network Snapshot or paste it automatically.
 
 Category remains **Not selected**. **Manage scripts…** can disable/re-enable the built-in using existing confirmation/token/readability checks. Visibility changes preserve its checksum; enabling does not approve changed content. Disabled rows disappear from the enabled catalog but remain in management.
 
@@ -72,13 +76,13 @@ Select a registration and choose **Enable**, then confirm catalog visibility, or
 
 ## Copy a verified script — Slice 043
 
-Open **Scripts**, select **Windows System Snapshot**, and choose **Copy Script**. The button is available for a selected row last observed as AVAILABLE; F7Hub then checks the enabled registration, path and approved SHA-256 against the current file bytes. Success copies only the PowerShell source to the Windows clipboard. The technician switches to an approved RMM script field or console and pastes manually. F7Hub does not paste, send or run it. A missing approval, changed file or unavailable file gives safe feedback and leaves the previous clipboard text in place. Clipboard content remains accessible to the OS and applications until replaced or cleared.
+Open **Scripts**, select **Windows System Snapshot**, and choose **Copy Script**. The button is available for a selected row last observed as AVAILABLE; F7Hub then checks the enabled registration, path and approved SHA-256 against the current file bytes. Success copies only the PowerShell source to the Windows clipboard. The technician switches to an approved RMM script field or console and pastes manually. Copy does not paste, send or run it. A missing approval, changed file or unavailable file gives safe feedback and leaves the previous clipboard text in place. Clipboard content remains accessible to the OS and applications until replaced or cleared.
 
 ---
 
 ## Find the Windows System Snapshot — Slice 042
 
-Open **Scripts**. The enabled **Windows System Snapshot** row appears automatically after migration 0008. Select it to read the code, diagnostic metadata and `PowerShell/Diagnostics/Get-SystemSnapshot.ps1` reference. **Not selected** is the current presentation for its null category. **AVAILABLE** reports file presence at the last refresh; Refresh checks again. This page has no way to run the script.
+Open **Scripts**. The enabled **Windows System Snapshot** row appears automatically after migration 0008. Select it to read the code, diagnostic metadata and `PowerShell/Diagnostics/Get-SystemSnapshot.ps1` reference. **Not selected** is the current presentation for its null category. **AVAILABLE** reports file presence at the last refresh; Refresh checks again. The Slice 052 action above requires a separate current eligibility check before execution.
 
 ---
 

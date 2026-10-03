@@ -63,6 +63,13 @@ class ScriptCatalogEntry:
     file_status: str
 
 
+@dataclass(frozen=True)
+class VerifiedScriptCandidate:
+    metadata: ScriptRecord
+    content: bytes
+    source_path: Path
+
+
 class ScriptService:
     def __init__(self, repository: ScriptRepository, project_root: str | Path) -> None:
         self._repository = repository
@@ -145,6 +152,10 @@ class ScriptService:
 
     def read_verified_script(self, script_code: str) -> str:
         """Return source decoded from the same bytes whose approved hash matched."""
+        return self.prepare_verified_script(script_code).content.decode("utf-8", errors="strict")
+
+    def prepare_verified_script(self, script_code: str, *, for_execution: bool = False) -> VerifiedScriptCandidate:
+        """Share approved-byte verification with copying and controlled execution."""
         try:
             record = self._repository.get_script(script_code)
         except (sqlite3.Error, OSError, RuntimeError, ValueError) as error:
@@ -159,8 +170,14 @@ class ScriptService:
             raise ScriptCopyError("FILE_UNAVAILABLE")
 
         try:
-            with target.open("rb") as source:
-                content = source.read()
+            if for_execution:
+                # Open and inspect the actual object, retaining protected ancestry
+                # until the bounded buffer has been read. Copy semantics stay unchanged.
+                from f7hub.infrastructure.windows_execution import protected_read
+                content = protected_read(self._project_root / record.relative_path, 1024 * 1024)
+            else:
+                with target.open("rb") as source:
+                    content = source.read()
         except (OSError, ValueError) as error:
             raise ScriptCopyError("READ_FAILED") from error
 
@@ -170,9 +187,10 @@ class ScriptService:
         if hashlib.sha256(content).hexdigest() != approved.lower():
             raise ScriptCopyError("INTEGRITY_MISMATCH")
         try:
-            return content.decode("utf-8", errors="strict")
+            content.decode("utf-8", errors="strict")
         except UnicodeDecodeError as error:
             raise ScriptCopyError("READ_FAILED") from error
+        return VerifiedScriptCandidate(record, content, target)
 
     def _entry(self, record: ScriptRecord) -> ScriptCatalogEntry:
         return ScriptCatalogEntry(record, inspect_script_reference(self._project_root, record.relative_path))

@@ -1,5 +1,9 @@
 # F7Hub Python Architecture
 
+## System Snapshot execution ownership — Slice 052 candidate
+
+The Python application and service layer now owns the single reviewed **Windows System Snapshot** execution path through `PowerShellService` and `PowerShellGateway`. Bootstrap composes `PowerShellService` with the existing `ScriptService` and a new `PowerShellGateway`. `ScriptWorkspace` collects an explicit **Run diagnostic** request and presents a plain-text, memory-only result; it does not build commands or access SQLite. The shared `ServiceTaskRunner` dispatches off the GUI thread. `run_pending` and a generation identity protect the runner idle-before-callback gap, duplicate actions, stale completions, navigation and close. PowerShellService reloads registry metadata, applies the one-script execution policy and validates the structured result. ScriptService owns the verified byte read; WindowsExecution and PowerShellGateway own protected paths, sealed artifact, process/job, output limits, timeout and cleanup. Typed domain values separate completed diagnostic ERROR from execution failure. No new dependency, schema, persistent result repository or generic script executor is introduced. General registered-script execution remains deferred.
+
 ## Inline classification ownership — Slice 051
 
 TicketWorkspace directly presents the existing TICKET_PRIORITIES and ordered TICKET_TYPES vocabularies. Its authoritative classification baseline is a TicketRecord separate from live dropdown data. Unrelated note/status/subject/description refreshes preserve dirty choices and the original expected token, so stale Apply fails closed. Explicit discard/reload or committed classification results reset the baseline. New Ticket clears the active identity and classification choices.
@@ -51,11 +55,11 @@ The repository composes a parenthesized bound `LIKE` OR across name/code/descrip
 
 `ScriptService.list_registered_scripts()` reuses the existing scoped repository read with `include_disabled=True` and returns metadata/file-status entries. `register_script()` validates required metadata, normalizes separators and uses the approved-path resolver plus a real binary open/read before inserting through ScriptRepository using table defaults and null category/checksum. `set_script_enabled()` checks the loaded token and repeats that readability proof at enable time. The shared service helper reads at most one byte and closes the handle; an empty readable file succeeds, while open/read errors produce safe validation feedback without a write. No source is retained or hashed. Disable does not require file access. Catalog inspection remains a point-in-time metadata/access observation; AVAILABLE or `os.access()` alone is not the write gate's readability proof. The repository holds a short immediate transaction, checks scope/token/path, updates only visibility and a strictly later UTC millisecond token, reloads and commits. A matching no-op leaves the token unchanged; stale or zero-row updates and failed reloads do not commit.
 
-ScriptManagementDialog and RegisterScriptDialog use the shared runner with safe typed feedback, write dismissal guards, late-read suppression and committed-write/failed-refresh recovery. MainWindow owns the manager outside its disabled page hierarchy. The normal catalog remains enabled-only; the existing Copy Script service and button behavior are preserved. No generic registry framework, checksum writer, schema migration or execution path is added.
+ScriptManagementDialog and RegisterScriptDialog use the shared runner with safe typed feedback, write dismissal guards, late-read suppression and committed-write/failed-refresh recovery. MainWindow owns the manager outside its disabled page hierarchy. The normal catalog remains enabled-only; the existing Copy Script service and button behavior are preserved. Slice 044 added no generic registry framework, checksum writer, schema migration or execution path; Slice 052 later added only the fixed System Snapshot path.
 
 ## Secure Script Copy — Slice 043
 
-`ScriptService.read_verified_script` uses the repository's enabled-only lookup and the catalog's shared path resolver. After a single binary read it requires a 64-character hexadecimal approved checksum, compares SHA-256 on that buffer, then strictly decodes the same bytes as UTF-8. A small typed error reports safe failure categories. ScriptWorkspace submits the method through ServiceTaskRunner, checks that the selection remains current, and uses Qt clipboard only after success. GUI code does no file read or integrity decision; Python starts no PowerShell process.
+`ScriptService.read_verified_script` uses the repository's enabled-only lookup and the catalog's shared path resolver. After a single binary read it requires a 64-character hexadecimal approved checksum, compares SHA-256 on that buffer, then strictly decodes the same bytes as UTF-8. A small typed error reports safe failure categories. ScriptWorkspace submits the method through ServiceTaskRunner, checks that the selection remains current, and uses Qt clipboard only after success. GUI code does no file read or integrity decision. At the completion of Slice 043, this Copy Script workflow started no PowerShell process and the Python application had no production execution path. Slice 052 later adds the separate fixed System Snapshot Run path through PowerShellService and PowerShellGateway; Copy Script still does not execute.
 
 ## Read-only Scripts GUI — Slice 041
 
@@ -63,7 +67,7 @@ ScriptManagementDialog and RegisterScriptDialog use the shared runner with safe 
 
 ## Read-only PowerShell registry — Slice 040
 
-Slice 040 introduced `ScriptRepository` and `ScriptService` for metadata reads and file-reference inspection. `ScriptRepository` uses configured SQLite connections for enabled catalog reads and exact case-insensitive `script_code` lookup. It joins only `SCRIPT` scope categories, excluding rows linked to other scopes; Slice 044 reuses explicit `include_disabled=True` for management. `ScriptService` returns metadata alongside a separate file status from path inspection under the supplied project root. The resolver validates Windows path syntax, approved folders, resolved containment and regular-file accessibility; Slice 043 reuses it before one verified content read and Slice 044 before registration/enabling. Slice 041 added the Scripts workspace described above. Slice 042 added one enabled production row through migration 0008 and its referenced `.ps1`; Slice 043 adds its checksum through migration 0009. Slice 044 adds the bounded writer UI above. PowerShell execution service/gateway, result capture, parameter handling and remote administration remain deferred.
+Slice 040 introduced `ScriptRepository` and `ScriptService` for metadata reads and file-reference inspection. `ScriptRepository` uses configured SQLite connections for enabled catalog reads and exact case-insensitive `script_code` lookup. It joins only `SCRIPT` scope categories, excluding rows linked to other scopes; Slice 044 reuses explicit `include_disabled=True` for management. `ScriptService` returns metadata alongside a separate file status from path inspection under the supplied project root. The resolver validates Windows path syntax, approved folders, resolved containment and regular-file accessibility; Slice 043 reuses it before one verified content read and Slice 044 before registration/enabling. Slice 041 added the Scripts workspace described above. Slice 042 added one enabled production row through migration 0008 and its referenced `.ps1`; Slice 043 adds its checksum through migration 0009. Slice 044 adds the bounded writer UI above. At the completion of Slice 044, PowerShell execution service/gateway and result capture remained deferred. Slice 052 later adds those boundaries only for System Snapshot; parameter handling, remote administration and general script execution remain deferred.
 
 ## Manual database backup — Slice 038
 
@@ -3521,7 +3525,7 @@ However, full localization infrastructure should not be added until justified.
 
 # 176. Current Implementation Status
 
-Repository inspection and tests through 2026-09-09 verify the SQLite infrastructure, migrations through `0006_knowledge_search.sql`, and the existing company/contact, ticket and Knowledge boundaries. Slice 015 extends KnowledgeRepository/KnowledgeService/KnowledgeWorkspace with current-article FTS5 search while preserving GUI → service → repository → SQLite ownership. ServiceTaskRunner executes search off the GUI thread and delivers completion on the GUI thread. A universal-search package and other application services remain planned.
+The following is a historical Slice 015-era verification snapshot through 2026-09-09, not a current inventory. It verified the SQLite infrastructure, migrations through `0006_knowledge_search.sql`, and the then-existing company/contact, ticket and Knowledge boundaries. Slice 015 extended KnowledgeRepository/KnowledgeService/KnowledgeWorkspace with current-article FTS5 search while preserving GUI → service → repository → SQLite ownership. ServiceTaskRunner executed search off the GUI thread and delivered completion on the GUI thread. A universal-search package and other application services remained planned at that boundary.
 
 ```text
 Python SQLite infrastructure: VERIFIED
@@ -3543,16 +3547,18 @@ GUI tests: PASS — 85 tests (fresh Slice 015 regression)
 Application and GUI integration tests: PASS — 77 tests (fresh Slice 015 regression)
 ```
 
-This verification does not prove that:
+That Slice 015-era verification did not prove that:
 
 - navigation or queues beyond the implemented ticket and Knowledge Base workspaces exist
 - additional business repositories beyond the inspected company, contact, category, ticket and knowledge boundaries exist
 - usability across other screen sizes, DPI settings or assistive technologies has been verified
 - additional application services beyond the implemented ticket, reference, company/contact creation and knowledge workflows exist
-- PowerShell integration exists
+- PowerShell integration existed at that slice boundary
 - tests outside the listed suites pass
 
 Unimplemented sections describe intended architecture.
+
+Current Slice 052 ownership is described above: Python now composes PowerShellService and PowerShellGateway for one controlled Windows System Snapshot execution path. Broader execution and persistent result/history services remain deferred.
 
 ---
 

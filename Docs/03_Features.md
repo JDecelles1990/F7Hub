@@ -1,5 +1,9 @@
 # F7Hub Features
 
+## Controlled System Snapshot execution — Slice 052 candidate
+
+Slice 052 introduces one controlled production execution path for the registered **Windows System Snapshot** diagnostic. In **Scripts**, the technician explicitly presses **Run diagnostic**. The read-only diagnostic runs under a non-elevated standard-user PowerShell 7 process, returns a validated structured result, and displays it in memory. Registration, approved source bytes, runtime, privilege and output contract must all match the execution policy. Duplicate runs and conflicting navigation are guarded until completion and cleanup. Diagnostic collection ERROR remains distinct from launch, integrity, timeout and output failures. Generic registered-script execution, packs, other scripts, parameters, persistent history, ticket linkage, remediation, elevation and AI-triggered execution remain deferred. This candidate awaits independent review and integration.
+
 ## Inline ticket Priority and Type — Slice 051 candidate
 
 Tickets now shows Priority and Type as directly editable dropdowns. Selection alone writes nothing; **Apply changes** explicitly saves either or both fields in one atomic operation. The normal Edit priority/Edit type dialogs and their unused production modules are removed. Existing individual service operations remain supported.
@@ -14,7 +18,7 @@ Creation uses the unchanged service/repository rules. Confirmed success opens au
 
 ## Second production diagnostic — Slice 048
 
-The enabled **Windows Network Configuration Snapshot** joins Windows System Snapshot in Scripts. Migration 0010 installs its reviewed-byte checksum with the metadata, so existing **Copy Script** can verify and copy its source. The standalone PowerShell 7 diagnostic describes local TCP/IP-enabled interface configuration, not connectivity health. It includes interface index/description, IPv4/IPv6 addresses and default gateways, DNS server order and provider DHCP state. Alias/status/link speed and prefix details are deferred. F7Hub still cannot execute PowerShell; enabled and AVAILABLE are not execution approval.
+The enabled **Windows Network Configuration Snapshot** joins Windows System Snapshot in Scripts. Migration 0010 installs its reviewed-byte checksum with the metadata, so existing **Copy Script** can verify and copy its source. The standalone PowerShell 7 diagnostic describes local TCP/IP-enabled interface configuration, not connectivity health. It includes interface index/description, IPv4/IPv6 addresses and default gateways, DNS server order and provider DHCP state. Alias/status/link speed and prefix details are deferred. At the completion of Slice 048, F7Hub had no application PowerShell execution path; enabled and AVAILABLE did not grant execution approval. Slice 052 later adds one controlled production path for Windows System Snapshot. Network Snapshot remains Copy Script only and cannot run through that path.
 
 
 > Document: `Docs/03_Features.md`  
@@ -41,25 +45,25 @@ Typing leaves results unchanged. Refresh, navigation and management-close reload
 
 ## Script registration and local management — Slice 044
 
-**Manage scripts…** lists valid SCRIPT-scope registrations, including disabled rows. The technician can register an existing readable `.ps1` in an approved PowerShell folder and change catalog visibility. New metadata uses PowerShell 7, a 120-second timeout, structured output required, disabled state and null category/checksum. Enabling requires current file availability and a current update token; it does not approve content. Copy Script still rejects missing approval through the existing service boundary. Metadata editing, deletion, checksum approval and execution remain deferred.
+**Manage scripts…** lists valid SCRIPT-scope registrations, including disabled rows. The technician can register an existing readable `.ps1` in an approved PowerShell folder and change catalog visibility. New metadata uses PowerShell 7, a 120-second timeout, structured output required, disabled state and null category/checksum. Enabling requires current file availability and a current update token; it does not approve content or execute a script. Copy Script still rejects missing approval through the existing service boundary. At the completion of Slice 044, metadata editing, deletion, checksum approval and application execution remained deferred. Slice 052 later adds only the fixed Windows System Snapshot Run path; generic registered-script execution remains deferred.
 
 ---
 
 ## Secure Script Copy to Clipboard — Slice 043
 
-The Scripts workspace offers **Copy Script** for a selected entry last observed as AVAILABLE. At click time, ScriptService repeats enabled lookup and approved-path checks, reads the `.ps1` file once as bytes, requires a well-formed approved SHA-256 matching those exact bytes, and strictly decodes that same buffer as UTF-8. Only the raw source reaches the Qt clipboard. Missing approval, changed bytes or an unavailable file block copying. AVAILABLE alone means file presence at the last refresh, not checksum verification. The technician manually pastes into an approved destination; NinjaRMM is an example workflow, not an integration. F7Hub does not execute or transmit the script. Clipboard contents remain visible to the OS and applications until replaced or cleared.
+The Scripts workspace offers **Copy Script** for a selected entry last observed as AVAILABLE. At click time, ScriptService repeats enabled lookup and approved-path checks, reads the `.ps1` file once as bytes, requires a well-formed approved SHA-256 matching those exact bytes, and strictly decodes that same buffer as UTF-8. Only the raw source reaches the Qt clipboard. Missing approval, changed bytes or an unavailable file block copying. AVAILABLE alone means file presence at the last refresh, not checksum verification. The technician manually pastes into an approved destination; NinjaRMM is an example workflow, not an integration. Copy Script does not itself execute or transmit the script. At the completion of Slice 043, F7Hub had no production PowerShell execution path. Clipboard contents remain visible to the OS and applications until replaced or cleared.
 
 ---
 
 ## First production Windows diagnostic — Slice 042
 
-The catalog includes one enabled **Windows System Snapshot** entry installed by migration 0008. Its repository-controlled PowerShell 7 script collects local OS, uptime, memory and fixed-drive information as one structured JSON result when run separately by validation tooling. **AVAILABLE** only means the file was found at the last catalog refresh. Migration 0009 adds the reviewed exact-byte checksum for copying; it grants no execution approval. F7Hub cannot run the script.
+The catalog includes one enabled **Windows System Snapshot** entry installed by migration 0008. Its repository-controlled PowerShell 7 script collects local OS, uptime, memory and fixed-drive information as one structured JSON result when run separately by validation tooling. **AVAILABLE** only means the file was found at the last catalog refresh. Migration 0009 adds the reviewed exact-byte checksum for copying; it grants no execution approval. At the completion of Slice 042, F7Hub could not run the script; Slice 052 later introduces the fixed, controlled Run path for it.
 
 ---
 
 ## Read-only Scripts catalog — Slice 041
 
-The Scripts workspace lists enabled PowerShell registry entries with name, code, category and point-in-time file status. Selecting a row shows the existing metadata as plain text. The empty registry shows **No scripts available.** Manual Refresh clears stale results before reloading; failure gives a safe retry message. File status describes the reference at the last refresh and does not approve execution. Slice 044 adds the separate local management dialog described above; execution remains deferred.
+The Scripts workspace lists enabled PowerShell registry entries with name, code, category and point-in-time file status. Selecting a row shows the existing metadata as plain text. The empty registry shows **No scripts available.** Manual Refresh clears stale results before reloading; failure gives a safe retry message. File status describes the reference at the last refresh and does not approve execution. Slice 044 later adds the separate local management dialog described above. At the Slice 041 boundary, application execution remained deferred; Slice 052 later adds only the fixed Windows System Snapshot path.
 
 ---
 
@@ -780,14 +784,14 @@ Metadata may include:
 
 ## FEAT-SCRIPT-003 — File-Based Script Source
 
-Slice 040 resolves references only below `PowerShell/Diagnostics`, `PowerShell/Reports` or `PowerShell/Modules` and reports `AVAILABLE`, `MISSING`, `INACCESSIBLE` or `INVALID_REFERENCE` separately from metadata. It neither reads contents nor executes files. Availability is a point-in-time observation; a future execution subsystem must revalidate path and authorization.
+Slice 040 resolves references only below `PowerShell/Diagnostics`, `PowerShell/Reports` or `PowerShell/Modules` and reports `AVAILABLE`, `MISSING`, `INACCESSIBLE` or `INVALID_REFERENCE` separately from metadata. That Slice 040 registry read neither read contents nor executed files. Availability is a point-in-time observation; the Slice 052 System Snapshot execution path revalidates the reference and its fixed eligibility policy before running.
 
 Priority: P1  
 Requirements: `FR-SCRIPT-003`
 
 Scripts should normally remain version-controlled files.
 
-SQLite stores metadata and execution history.
+SQLite stores script metadata. Execution-history storage is planned; Slice 052 keeps its one diagnostic result in memory only.
 
 ---
 

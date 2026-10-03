@@ -1,5 +1,9 @@
 # F7Hub GUI Design
 
+## Scripts diagnostic Run and result panel — Slice 052 candidate
+
+The existing Scripts page adds an explicit **Run diagnostic** button and a read-only plain-text result panel beside the catalog. Only an available selected **Windows System Snapshot** with the composed execution service enables Run; service policy performs the authoritative eligibility check. The selection shows purpose, local target, Standard User privilege, time limit and memory-only result handling before execution. The shared background runner keeps the GUI responsive. Workspace-owned pending state spans the idle-before-callback gap, suppresses duplicate and conflicting actions, and blocks navigation/close until result presentation and cleanup complete. Completed diagnostic ERROR and execution failure have distinct status text. Native Windows 1000×700/96 DPI captures of ready, completed and timeout states were inspected without observed overlap; input used QTest events. Physical manual input and other DPI are NOT RUN.
+
 ## Inline classification layout — Slice 051
 
 Saved-ticket detail has one compact row: **Priority [dropdown] Type [dropdown] [Apply changes]**. Accessible names are Ticket priority, Ticket type and Apply ticket changes. Choices come directly from the existing domain collections. The remaining compact action row contains Edit subject, Edit description and Reload ticket; Edit priority/Edit type are removed.

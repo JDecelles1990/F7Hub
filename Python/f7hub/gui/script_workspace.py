@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from PySide6.QtCore import QSignalBlocker, Qt
+from PySide6.QtCore import QSignalBlocker, Qt, Signal
+import json
 from PySide6.QtGui import QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
     QAbstractItemView, QApplication, QHBoxLayout, QHeaderView, QLabel, QLineEdit, QPlainTextEdit,
@@ -11,6 +12,7 @@ from PySide6.QtWidgets import (
 
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.script_management_dialog import ScriptManagementDialog
+from f7hub.services.powershell_service import SYSTEM_SNAPSHOT_CODE
 from f7hub.services.script_service import (
     AVAILABLE, INACCESSIBLE, INVALID_REFERENCE, MISSING,
     ScriptCatalogEntry, ScriptService,
@@ -36,10 +38,15 @@ def _status_text(status: str) -> str:
 class ScriptWorkspace(QWidget):
     """Display service-returned catalog entries without inspecting script files."""
 
-    def __init__(self, service: ScriptService, runner: ServiceTaskRunner, parent=None) -> None:
+    run_pending_changed = Signal(bool)
+
+    def __init__(self, service: ScriptService, runner: ServiceTaskRunner, parent=None, *, powershell_service=None) -> None:
         super().__init__(parent)
         self._service = service
         self._runner = runner
+        self._powershell_service = powershell_service
+        self._run_identity = None
+        self._execution_blocked = False
         self._entries: tuple[ScriptCatalogEntry, ...] = ()
         self._loading = False
         self._copying = False
@@ -58,9 +65,13 @@ class ScriptWorkspace(QWidget):
         self.copy_button.clicked.connect(self.copy_script)
         self.manage_button = QPushButton("Manage scripts…", self)
         self.manage_button.clicked.connect(self.open_management)
+        self.run_button = QPushButton("Run diagnostic", self)
+        self.run_button.setAccessibleName("Run the selected reviewed diagnostic")
+        self.run_button.clicked.connect(self.run_diagnostic)
         heading_row = QHBoxLayout()
         heading_row.addWidget(self.heading)
         heading_row.addStretch()
+        heading_row.addWidget(self.run_button)
         heading_row.addWidget(self.copy_button)
         heading_row.addWidget(self.manage_button)
         heading_row.addWidget(self.refresh_button)
@@ -102,6 +113,13 @@ class ScriptWorkspace(QWidget):
         self.details.setReadOnly(True)
         self.details.setAccessibleName("Script metadata, read only")
         self.details.setPlaceholderText("Select a script to read its metadata.")
+        self.run_notice = QLabel("", self)
+        self.run_notice.setTextFormat(Qt.TextFormat.PlainText)
+        self.run_notice.setWordWrap(True)
+        self.results = QPlainTextEdit(self)
+        self.results.setReadOnly(True)
+        self.results.setAccessibleName("Diagnostic result, read only; kept in memory only")
+        self.results.setPlaceholderText("Results are kept in memory only and replaced by the next run.")
 
         list_panel = QWidget(self)
         list_layout = QVBoxLayout(list_panel)
@@ -109,7 +127,13 @@ class ScriptWorkspace(QWidget):
         list_layout.addWidget(self.empty_state)
         splitter = QSplitter(Qt.Orientation.Horizontal, self)
         splitter.addWidget(list_panel)
-        splitter.addWidget(self.details)
+        result_panel = QWidget(self)
+        result_layout = QVBoxLayout(result_panel)
+        result_layout.setContentsMargins(0, 0, 0, 0)
+        result_layout.addWidget(self.details, 1)
+        result_layout.addWidget(self.run_notice)
+        result_layout.addWidget(self.results, 1)
+        splitter.addWidget(result_panel)
         splitter.setSizes((560, 440))
 
         layout = QVBoxLayout(self)
@@ -122,6 +146,7 @@ class ScriptWorkspace(QWidget):
         self._update_actions(self._runner.busy)
 
     def _update_actions(self, busy: bool) -> None:
+        busy = busy or self.run_pending
         idle = not busy and not self._loading and not self._copying
         self.manage_button.setEnabled(idle and self._management_dialog is None)
         self.refresh_button.setEnabled(idle)
@@ -130,9 +155,65 @@ class ScriptWorkspace(QWidget):
         row = self.table.currentIndex().row()
         available = 0 <= row < len(self._entries) and self._entries[row].file_status == AVAILABLE
         self.copy_button.setEnabled(available and not busy and not self._loading and not self._copying)
+        reviewed = available and self._entries[row].metadata.script_code == SYSTEM_SNAPSHOT_CODE
+        self.run_button.setEnabled(bool(reviewed and idle and self._management_dialog is None
+                                        and self._powershell_service is not None and not self._execution_blocked))
+        self.table.setEnabled(not self.run_pending)
+
+    @property
+    def run_pending(self):
+        return self._run_identity is not None
+
+    def run_diagnostic(self):
+        row = self.table.currentIndex().row()
+        if (self.run_pending or self._runner.busy or self._loading or self._copying
+                or self._management_dialog is not None or self._execution_blocked
+                or self._powershell_service is None or not 0 <= row < len(self._entries)
+                or self._entries[row].metadata.script_code != SYSTEM_SNAPSHOT_CODE
+                or self._entries[row].file_status != AVAILABLE):
+            return False
+        identity = object()
+        self._run_identity = identity
+        self.results.clear()
+        self.feedback.setText("Preparing/running local System Snapshot… Execution limit: 60 seconds; cleanup: up to 5 seconds. This run cannot be cancelled.")
+        self._update_actions(True)
+        self.run_pending_changed.emit(True)
+
+        def finish(result=None, error=None):
+            if self._run_identity is not identity:
+                return
+            try:
+                if error is not None:
+                    self.feedback.setText("The diagnostic could not complete. Refresh Scripts before retrying.")
+                else:
+                    self._execution_blocked = not result.cleanup_verified
+                    lines = ["Windows System Snapshot", f"Execution: {result.classification}",
+                             result.message, f"Duration: {result.duration_seconds:.2f} seconds",
+                             f"Exit code: {result.exit_code if result.exit_code is not None else 'Not available'}",
+                             f"Cleanup verified: {'Yes' if result.cleanup_verified else 'No'}"]
+                    if result.diagnostic is not None:
+                        diagnostic = result.diagnostic
+                        lines += [f"Collection: {diagnostic.status}",
+                                  "Warnings: " + ("; ".join(diagnostic.warnings) or "None"),
+                                  "Errors: " + ("; ".join(diagnostic.errors) or "None"),
+                                  json.dumps(diagnostic.data, ensure_ascii=False, indent=2)]
+                    self.results.setPlainText("\n".join(lines))
+                    self.feedback.setText("Run complete. Results are in memory only." if result.classification == "COMPLETED" else result.message)
+            finally:
+                # Remains owned through presentation, including the runner's
+                # idle-before-callback gap. Obsolete callbacks never release it.
+                self._run_identity = None
+                self._update_actions(self._runner.busy)
+                self.run_pending_changed.emit(False)
+
+        if not self._runner.submit(lambda: self._powershell_service.execute_diagnostic(SYSTEM_SNAPSHOT_CODE),
+                                   lambda result: finish(result), lambda error: finish(error=error)):
+            finish(error=RuntimeError("Dispatch failed"))
+            return False
+        return True
 
     def open_management(self):
-        if self._runner.busy or self._loading or self._copying or self._management_dialog is not None:
+        if self.run_pending or self._runner.busy or self._loading or self._copying or self._management_dialog is not None:
             return None
         # Parent outside MainWindow.pages, which is disabled during worker calls.
         dialog = ScriptManagementDialog(self._service, self._runner, self.window())
@@ -159,7 +240,7 @@ class ScriptWorkspace(QWidget):
     def copy_script(self) -> bool:
         """Verify source off-thread, then copy only a still-selected result."""
         row = self.table.currentIndex().row()
-        if (self._runner.busy or self._loading or self._copying or
+        if (self.run_pending or self._runner.busy or self._loading or self._copying or
                 not 0 <= row < len(self._entries) or self._entries[row].file_status != AVAILABLE):
             return False
         code = self._entries[row].metadata.script_code
@@ -196,13 +277,13 @@ class ScriptWorkspace(QWidget):
         return True
 
     def search_scripts(self) -> bool:
-        if self._runner.busy or self._loading or self._copying:
+        if self.run_pending or self._runner.busy or self._loading or self._copying:
             return False
         self._text_query = self.search_input.text().strip() or None
         return self.refresh_list()
 
     def clear_search(self) -> bool:
-        if self._runner.busy or self._loading or self._copying:
+        if self.run_pending or self._runner.busy or self._loading or self._copying:
             return False
         self.search_input.clear()
         self._text_query = None
@@ -210,7 +291,7 @@ class ScriptWorkspace(QWidget):
 
     def refresh_list(self) -> bool:
         """Read once on the shared runner; preserve selection only after success."""
-        if self._runner.busy or self._loading or self._copying:
+        if self.run_pending or self._runner.busy or self._loading or self._copying:
             return False
         query = self._text_query
         self._selection_generation += 1
@@ -295,3 +376,6 @@ class ScriptWorkspace(QWidget):
             f"PowerShell reference: {record.relative_path}",
             f"File status: {status}{status_note}",
         )))
+        self.run_notice.setText(
+            "Run collects OS, uptime, memory and fixed drives on this PC. Read only; Standard User; 60-second limit. Results are kept in memory only."
+            if record.script_code == SYSTEM_SNAPSHOT_CODE else "Execution is unavailable for this script.")

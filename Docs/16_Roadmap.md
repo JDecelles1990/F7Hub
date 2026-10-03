@@ -1,5 +1,9 @@
 # F7Hub Roadmap
 
+## Controlled System Snapshot execution — Slice 052 candidate
+
+Slice 052 is the first application-controlled PowerShell execution increment: the existing Scripts workspace can explicitly run the reviewed read-only Windows System Snapshot through a non-elevated PowerShell 7 gateway and show a validated in-memory result. Required GUI and native validation completed; prior applicable Database, PowerShell and Integration results were retained by unchanged-input comparison. Independent review and integration are pending. Diagnostic packs begin in Slice 053; parameters, persistent history, ticket linkage, remediation and AI execution remain deferred. No schema migration.
+
 ## Tickets inline classification — Slice 051 candidate
 
 Slice 050 is CLOSED through PR #55, authoritative main `9111c9d87162d9f5f15a11c05b06495f9c86c328` and its external integration report. Its pending-review prose below is STALE HANDOFF METADATA retained as history.

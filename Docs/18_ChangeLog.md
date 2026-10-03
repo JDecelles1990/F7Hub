@@ -1,5 +1,9 @@
 # F7Hub ChangeLog
 
+## 2026-10-03 — Slice 052: Controlled System Snapshot execution candidate
+
+Added explicit execution of the reviewed Windows System Snapshot from Scripts, through a fixed non-elevated PowerShell 7 gateway with exact-byte verification, private sealed artifact, finite owned job, bounded output and strict structured-result validation. Added memory-only result presentation and callback-spanning pending guards. No migration, source diagnostic change, pack, parameter, history, ticket write or remediation. Resumed from the preserved checkpoint without restarting implementation. The historical native harness failure and polling starvation remain recorded; corrected polling completed the real diagnostic plus injected invalid-output and timeout paths. Native **43 assertions PASS**, exit 0, zero owned survivors; three 1000×700/96 DPI captures inspected. GUI **206 PASS FRESH**; Database **433**, PowerShell **51** and Integration **201 PASS RETAINED** after relevant-input comparison. Physical input and other DPI NOT RUN. Independent review and integration pending; candidate remains unstaged/uncommitted. Evidence is external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-052`.
+
 ## 2026-10-03 — Slice 051: Bounded dialog completion correction
 
 Corrected blocking review finding R1 by recalculating inline classification availability with the existing helper when Subject/Description editing opens or finishes. Completion clears its dialog reference first; there is no force-enable bypass, draft reset, layout change or service/repository change. Added clean/dirty no-op and failure/Cancel regressions, adjacent success/direct Cancel/window-close checks and checks that other blockers still disable the controls. Removed the test-side private refresh that masked the missing production transition.

@@ -1,5 +1,16 @@
 # F7Hub Todo
 
+## Slice 052 — Controlled System Snapshot execution candidate
+
+- [x] Add one fixed execution policy, verified source buffer, sealed artifact, non-elevated PowerShell 7 process, bounded capture, timeout and owned cleanup.
+- [x] Add explicit Scripts Run and in-memory structured result presentation with pending/callback guards.
+- [x] Complete 206 GUI tests and 43 native Windows assertions at 1000×700/96 DPI; inspect all three captures and verify zero owned survivors.
+- [x] Retain applicable 433 Database, 51 PowerShell and 201 Integration passing results with unchanged relevant inputs; preserve earlier failures as historical evidence.
+- [x] Synchronize affected documentation and external candidate/evidence manifest. **READY_FOR_REVIEW**; independent review and integration pending.
+- [ ] Independent read-only review of this exact candidate; integration requires separate authorization.
+
+Diagnostic packs start in Slice 053. Parameters, history, ticket linkage, remediation and AI execution remain deferred.
+
 ## Slice 051 — Inline Priority and Type candidate
 
 - [x] Replace Edit priority/Edit type with direct dropdowns and one explicit Apply changes action.
