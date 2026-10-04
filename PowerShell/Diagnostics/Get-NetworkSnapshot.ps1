@@ -1,5 +1,11 @@
-# Local, read-only configuration only. F7Hub does not execute this diagnostic.
+<#
+.SYNOPSIS
+Collects local, read-only Windows network configuration.
+.DESCRIPTION
+Returns one structured JSON result for the approved F7Hub diagnostic execution path.
+#>
 # TCP/IP-enabled interfaces are not an exhaustive adapter or connectivity report.
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $warningFlags = [ordered]@{
     Metadata = $false

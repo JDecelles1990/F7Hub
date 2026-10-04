@@ -1,4 +1,10 @@
-# Parameterless local inventory only. No service control or health-policy verdict.
+<#
+.SYNOPSIS
+Collects a local, read-only Windows services inventory.
+.DESCRIPTION
+Returns one structured JSON result; it does not control services or judge their health.
+#>
+Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $warningFlags = [ordered]@{ Metadata = $false; Truncated = $false }
 

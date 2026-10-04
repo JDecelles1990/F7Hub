@@ -1,5 +1,9 @@
 # F7Hub Current State
 
+## PowerShell diagnostic compliance candidate
+
+The unstaged, uncommitted `feature/powershell-diagnostic-compliance` candidate adds strict mode and concise help to the three existing registered diagnostics. A guarded forward-only data migration refreshes their exact SHA-256 registrations, with matching literal execution-policy digests. The structured result and Local Baseline pack contracts remain unchanged. Validation and exact candidate identity are in the external implementation report; independent read-only review is the next gate.
+
 ## Slice 053 — Local Baseline Diagnostics
 
 **READY_FOR_REVIEW** on 2026-10-03 (America/Toronto). Isolated `C:/Dev/F7Hub-S053`, branch `feature/diagnostic-baseline-pack-s053`, base/HEAD `642db59e6883c7d2e0a6dc4bb081f22ff2739ac2`. The candidate is unstaged/uncommitted; independent read-only review is next. System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.

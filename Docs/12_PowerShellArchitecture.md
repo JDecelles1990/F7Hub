@@ -1,5 +1,9 @@
 # F7Hub PowerShell Architecture
 
+## Current diagnostic source compliance candidate
+
+The three approved production diagnostics (`Get-SystemSnapshot.ps1`, `Get-NetworkSnapshot.ps1`, and `Get-ServicesSnapshot.ps1`) now establish `Set-StrictMode -Version Latest` and include concise comment-based help. Their parameterless JSON operations and PASS/WARNING/ERROR exit behavior are unchanged. Migration 0012 refreshes only their exact source SHA-256 registrations, and the literal Python execution policy uses the same final digests. System and Network source comments now describe the controlled F7Hub execution path accurately.
+
 ## Slice 053 — Local Baseline Diagnostics
 
 System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.
@@ -12,7 +16,7 @@ The exact envelope has schemaVersion 1, operation `Get-ServicesSnapshot`, Boolea
 
 Services fixed summaries: `Local Windows services snapshot collected.`, `Services snapshot collected with incomplete or bounded data.`, `Unable to collect required local Windows services information.` Fixed warnings: `One or more services metadata values are unavailable.`, `Services snapshot output was limited to documented bounds.` Fixed errors: `Required local services information is unavailable.`, `Services snapshot exceeded its output size limit.`
 
-Network now has explicit execution approval and a strict Python validator bridged against its unchanged producer fixtures. It preserves interface identity zero, DHCP false, numeric IPv6 scope, null versus empty, and provider DNS order without DNS lookup. Existing Network and System raw digests are unchanged. No parameters, generic execution, elevation, remote targets, service control, health baseline, persistence/history, ticket linkage, AI execution or user-defined packs are included.
+Network now has explicit execution approval and a strict Python validator bridged against its unchanged producer fixtures. It preserves interface identity zero, DHCP false, numeric IPv6 scope, null versus empty, and provider DNS order without DNS lookup. At Slice 053, Network and System raw digests were unchanged; the current compliance candidate refreshes them. No parameters, generic execution, elevation, remote targets, service control, health baseline, persistence/history, ticket linkage, AI execution or user-defined packs are included.
 
 ## First controlled execution — Slice 052 historical candidate
 

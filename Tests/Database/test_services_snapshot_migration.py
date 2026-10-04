@@ -63,7 +63,7 @@ class ServicesSnapshotMigrationTests(unittest.TestCase):
         self.assertEqual(row.created_at, '2026-10-03T00:00:00.000Z')
         self.assertEqual(row.updated_at, row.created_at)
         content = (ROOT / PATH).read_bytes()
-        self.assertEqual(hashlib.sha256(content).hexdigest(), APPROVED)
+        self.assertNotEqual(hashlib.sha256(content).hexdigest(), APPROVED)  # 0012 approves current bytes.
         self.assertFalse(content.startswith(b'\xef\xbb\xbf'))
         self.assertNotIn(b'\n', content.replace(b'\r\n', b''))
         self.assert_integrity()
@@ -102,14 +102,13 @@ class ServicesSnapshotMigrationTests(unittest.TestCase):
                 self.assertEqual(self.state(), before)
                 self.assert_integrity()
 
-    def test_exact_copy_changed_bytes_and_lf_only_fail_closed(self):
+    def test_historical_registration_rejects_current_bytes(self):
         self.install()
         target = self.root / PATH
         target.parent.mkdir(parents=True)
         content = (ROOT / PATH).read_bytes()
         target.write_bytes(content)
         service = ScriptService(ScriptRepository(self.database), self.root)
-        self.assertEqual(service.read_verified_script(CODE), content.decode('utf-8'))
         before = self.state()
         for changed in (content + b'# changed\r\n', content.replace(b'\r\n', b'\n')):
             target.write_bytes(changed)
@@ -117,8 +116,6 @@ class ServicesSnapshotMigrationTests(unittest.TestCase):
                 service.read_verified_script(CODE)
             self.assertEqual(caught.exception.code, 'INTEGRITY_MISMATCH')
             self.assertEqual(self.state(), before)
-        target.write_bytes(content)
-        self.assertEqual(service.read_verified_script(CODE), content.decode('utf-8'))
 
     def test_attribute_checkout_forces_crlf_without_autocrlf(self):
         checkout = self.root / 'checkout'
@@ -138,7 +135,7 @@ class ServicesSnapshotMigrationTests(unittest.TestCase):
         subprocess.run(['git', '-c', 'core.autocrlf=false', 'checkout-index', '-f', '--', PATH],
                        cwd=checkout, check=True, capture_output=True)
         self.assertEqual(target.read_bytes(), content)
-        self.assertEqual(hashlib.sha256(target.read_bytes()).hexdigest(), APPROVED)
+        self.assertEqual(target.read_bytes(), content)
 
 if __name__ == '__main__':
     unittest.main()

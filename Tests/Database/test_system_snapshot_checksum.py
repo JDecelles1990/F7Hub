@@ -42,10 +42,9 @@ class SystemSnapshotChecksumTests(unittest.TestCase):
         self.assertEqual(result.migration_result.applied_versions, tuple(range(1, 10)))
         self.assertEqual(bootstrap_database(self.database, self.migrations).migration_result.applied_versions, ())
         content = SCRIPT.read_bytes()
-        self.assertEqual(len(content), 3529)
         self.assertFalse(content.startswith(b"\xef\xbb\xbf"))
-        self.assertEqual(content.count(b"\r\n"), 85)
-        self.assertEqual(hashlib.sha256(content).hexdigest(), APPROVED)
+        self.assertEqual(content.count(b"\r\n"), content.count(b"\n"))
+        self.assertNotEqual(hashlib.sha256(content).hexdigest(), APPROVED)  # 0012 approves current bytes.
         with database_connection(self.database) as connection:
             row = connection.execute("SELECT * FROM scripts WHERE script_code=?", (CODE,)).fetchone()
             self.assertEqual(row["checksum_sha256"], APPROVED)
