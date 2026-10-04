@@ -276,7 +276,9 @@ class ScriptCatalogFlowTests(unittest.TestCase):
 
     def test_approved_snapshot_copies_exact_source_and_failures_preserve_clipboard(self):
         migrations = self.root / "Database" / "Migrations"
-        for name in ("0008_system_snapshot_script.sql", "0009_system_snapshot_checksum.sql"):
+        for name in ("0008_system_snapshot_script.sql", "0009_system_snapshot_checksum.sql",
+                     "0010_network_snapshot_script.sql", "0011_services_snapshot_script.sql",
+                     "0012_snapshot_strict_mode_digests.sql"):
             shutil.copyfile(ROOT / "Database/Migrations" / name, migrations / name)
         script = self.root / "PowerShell/Diagnostics/Get-SystemSnapshot.ps1"
         script.parent.mkdir(parents=True)
@@ -294,6 +296,9 @@ class ScriptCatalogFlowTests(unittest.TestCase):
         self.addCleanup(clipboard.setText, previous)
         with patch("subprocess.Popen", side_effect=AssertionError("PowerShell launched")) as execute:
             self.window.scripts_action.trigger()
+            self.wait_idle()
+            workspace.search_input.setText("Windows System Snapshot")
+            QTest.keyClick(workspace.search_input, Qt.Key.Key_Return)
             self.wait_idle()
             self.assertEqual(workspace.model.item(0, 3).text(), "AVAILABLE")
             self.assertTrue(workspace.copy_button.isEnabled())
@@ -320,7 +325,8 @@ class ScriptCatalogFlowTests(unittest.TestCase):
     def test_network_snapshot_search_copy_and_visibility_without_execution(self):
         migrations = self.root / "Database" / "Migrations"
         for name in ("0008_system_snapshot_script.sql", "0009_system_snapshot_checksum.sql",
-                     "0010_network_snapshot_script.sql"):
+                     "0010_network_snapshot_script.sql", "0011_services_snapshot_script.sql",
+                     "0012_snapshot_strict_mode_digests.sql"):
             shutil.copyfile(ROOT / "Database/Migrations" / name, migrations / name)
         for name in ("Get-SystemSnapshot.ps1", "Get-NetworkSnapshot.ps1"):
             target = self.root / "PowerShell/Diagnostics" / name
@@ -336,7 +342,7 @@ class ScriptCatalogFlowTests(unittest.TestCase):
         with patch("subprocess.Popen", side_effect=AssertionError("PowerShell launched")) as execute:
             self.window.scripts_action.trigger()
             self.wait_idle()
-            self.assertEqual(workspace.model.rowCount(), 2)
+            self.assertEqual(workspace.model.rowCount(), 3)
             workspace.search_input.setText("network configuration")
             QTest.keyClick(workspace.search_input, Qt.Key.Key_Return)
             self.wait_idle()
@@ -356,7 +362,7 @@ class ScriptCatalogFlowTests(unittest.TestCase):
             target.write_bytes(original)
             manager = workspace.open_management()
             self.wait_idle()
-            self.assertEqual(manager.model.rowCount(), 2)
+            self.assertEqual(manager.model.rowCount(), 3)
             self.assertIn("Stored checksum: " + hashlib.sha256(original).hexdigest(), manager.details.toPlainText())
             manager.toggle_button.click()
             self.wait_idle()
@@ -371,7 +377,7 @@ class ScriptCatalogFlowTests(unittest.TestCase):
             self.assertEqual(workspace.model.rowCount(), 1)
             workspace.clear_search_button.click()
             self.wait_idle()
-            self.assertEqual(workspace.model.rowCount(), 2)
+            self.assertEqual(workspace.model.rowCount(), 3)
             execute.assert_not_called()
 
     def test_search_navigation_reconstruction_and_persisted_metadata_no_writes(self):

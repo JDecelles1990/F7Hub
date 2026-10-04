@@ -1,4 +1,10 @@
-# Local, read-only Windows snapshot. No application execution path is provided.
+<#
+.SYNOPSIS
+Collects a local, read-only Windows system snapshot.
+.DESCRIPTION
+Returns one structured JSON result for the approved F7Hub diagnostic execution path.
+#>
+Set-StrictMode -Version Latest
 $data = [ordered]@{
     computerName = $null
     windowsCaption = $null

@@ -98,4 +98,4 @@ class ServicesSnapshotTests(unittest.TestCase):
         result = subprocess.run([PWSH,'-NoProfile','-NonInteractive','-Command',command],capture_output=True,text=True,timeout=15)
         self.assertEqual(result.returncode,0)
         self.assertEqual(result.stderr,'')
-        self.assertEqual(set(result.stdout.splitlines()), {'Read-ServicesSnapshotProperty','Convert-ServicesSnapshotText','Get-CimInstance','Select-Object','ConvertTo-Json'})
+        self.assertEqual(set(result.stdout.splitlines()), {'Set-StrictMode','Read-ServicesSnapshotProperty','Convert-ServicesSnapshotText','Get-CimInstance','Select-Object','ConvertTo-Json'})

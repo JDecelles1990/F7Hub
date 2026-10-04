@@ -1,5 +1,9 @@
 # F7Hub ChangeLog
 
+## 2026-10-03 — PowerShell diagnostic strict-mode compliance candidate
+
+Added strict mode and bounded comment-based help to the three existing registered System, Network and Services snapshots. Corrected stale System and Network execution comments. Forward-only data migration 0012 and the literal execution policy refresh their exact source hashes; no schema, operation, pack membership, privilege, runtime, result or exit-code contract changed. Focused and affected validation is recorded in the external candidate report; independent read-only review remains the next gate.
+
 ## 2026-10-03 — AltF7Hub Knowledge corpus import
 
 Imported the supplied 31-topic YAML corpus as separate DRAFT/version-1 Knowledge articles in the local development database, preserving all 841 ordered sections and 3,089 prompts. Each article has an initial version snapshot, source metadata and a searchable FTS entry. The original article, unrelated tables and source YAML were preserved. The technician confirmed successful use in the application.

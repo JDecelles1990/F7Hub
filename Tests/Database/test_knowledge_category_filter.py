@@ -116,7 +116,7 @@ class KnowledgeCategoryFilterTests(CategoryFixture, unittest.TestCase):
         self.assertTrue(all(s.lstrip().upper().startswith(('SELECT', '--')) for s in statements), statements)
         self.assertEqual(self.dump(), before)
         with database_connection(self.path) as connection:
-            self.assertEqual(connection.execute('SELECT count(*) FROM schema_migrations').fetchone()[0], 11)
+            self.assertEqual(connection.execute('SELECT count(*) FROM schema_migrations').fetchone()[0], 12)
             self.assertEqual(connection.execute('PRAGMA integrity_check').fetchone()[0], 'ok')
             self.assertEqual(connection.execute('PRAGMA foreign_key_check').fetchall(), [])
             connection.execute("INSERT INTO knowledge_articles_fts(knowledge_articles_fts, rank) VALUES ('integrity-check', 1)")

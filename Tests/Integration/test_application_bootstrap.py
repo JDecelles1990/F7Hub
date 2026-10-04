@@ -89,7 +89,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
                     "SELECT version FROM schema_migrations ORDER BY version"
                 )
             )
-        self.assertEqual(applied_versions, (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11))
+        self.assertEqual(applied_versions, (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12))
 
     def test_missing_migrations_stop_before_application_composition(self) -> None:
         missing_project_root = Path(self.temporary_directory.name) / "missing-root"
@@ -130,7 +130,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
                 connection.execute(
                     "SELECT COUNT(*) FROM schema_migrations"
                 ).fetchone()[0],
-                11,
+                12,
             )
 
     def test_main_entry_point_reports_startup_failure(self) -> None:

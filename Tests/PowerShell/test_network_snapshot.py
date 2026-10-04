@@ -73,6 +73,7 @@ class NetworkSnapshotTests(unittest.TestCase):
         self.assertEqual(process.returncode, 0)
         self.assertEqual(process.stderr, '')
         self.assertEqual(set(process.stdout.splitlines()), {
+            'Set-StrictMode',
             'Read-NetworkSnapshotProperty', 'Convert-NetworkSnapshotText', 'Convert-NetworkSnapshotAddresses',
             'Get-CimInstance', 'Sort-Object', 'Select-Object', 'ConvertTo-Json'})
 

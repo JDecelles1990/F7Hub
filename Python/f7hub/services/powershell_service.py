@@ -20,11 +20,11 @@ from f7hub.services.script_service import ScriptCopyError, ScriptReadError
 
 
 SYSTEM_SNAPSHOT_CODE = "diagnostic.windows.system_snapshot"
-SYSTEM_SNAPSHOT_DIGEST = "7389e1b402050da4811270d71b92b1a1c53fff151e5300c2b2c6bdbc3fcef758"
+SYSTEM_SNAPSHOT_DIGEST = "c2b3931341a0a6d7e858f8a728e50c9cdc1bfbb41dd5545588c24a11e5103e19"
 SYSTEM_SNAPSHOT_PATH = "PowerShell/Diagnostics/Get-SystemSnapshot.ps1"
 NETWORK_SNAPSHOT_CODE = "diagnostic.windows.network_snapshot"
 SERVICES_SNAPSHOT_CODE = "diagnostic.windows.services_snapshot"
-SERVICES_SNAPSHOT_DIGEST = "8a48321800e4d8147f2dd94a9d83eebedace6ac4e45b3e38c00f74d280abc347"
+SERVICES_SNAPSHOT_DIGEST = "c747c65992518551c72e168e55ffc61bd1829572f804e318528d73fe53981a18"
 MESSAGES = {
     "NOT_ELIGIBLE": "This registration is not approved for execution. Refresh Scripts and check its metadata.",
     "INTEGRITY_FAILED": "The script could not be verified. Restore the reviewed file before running.",
@@ -457,7 +457,7 @@ APPROVED_DIAGNOSTICS = MappingProxyType({
         "Collects OS, uptime, memory and fixed drives on this PC."),
     NETWORK_SNAPSHOT_CODE: _ApprovedDiagnosticSpec(NETWORK_SNAPSHOT_CODE,
         "PowerShell/Diagnostics/Get-NetworkSnapshot.ps1",
-        "aa126985b01c840b588ee3769d4c0a4a43e57ae5415f422cc8c9db1bafcb02b7",
+        "f0b81a4a73c0db35333245be2ea4d0de76dbbd85d24b97a8ed39f2c74155400c",
         "Get-NetworkSnapshot", validate_network_snapshot,
         "Collects local TCP/IP-enabled interface configuration; does not test connectivity."),
     SERVICES_SNAPSHOT_CODE: _ApprovedDiagnosticSpec(SERVICES_SNAPSHOT_CODE,
