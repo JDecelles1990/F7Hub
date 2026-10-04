@@ -1,6 +1,18 @@
 # F7Hub Python Architecture
 
-## System Snapshot execution ownership — Slice 052 candidate
+## Slice 053 — Local Baseline Diagnostics
+
+System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.
+
+The existing shared PowerShellService, PowerShellGateway and ServiceTaskRunner serve both run modes. A service reservation spans the entire sequential pack. Every member repeats current registration lookup, exact-byte verification, sealed preparation, immediate revalidation, trusted 64-bit PowerShell 7/token checks, separate owned job, bounded capture, contract validation and verified cleanup. Valid collection ERROR/exit 1 continues; a boundary failure aborts with partial attempted results, failure position and skipped remainder, and no aggregate collection status. Cleanup uncertainty latches both run modes blocked.
+
+Frozen domain values describe the fixed pack and ordered attempted results. A read-only mapping of three frozen specifications binds exact code/path/version/raw digest/operation/validator. The nonblocking service reservation covers individual versus individual, pack versus individual and pack versus pack. Readiness reads fresh entries off-thread without reserving execution or granting approval. GUI code retains no SQL or shell construction. MainWindow, bootstrap, runner, ScriptService, ScriptRepository and the gateway remain unchanged.
+
+Scripts shows **Name | Type | Category | File status | Execution**. Code, Version and current metadata policy are in plain-text details. File availability and execution approval are separate; an approved missing file cannot Run. Shown/available/approved counts describe the filtered rows. Pack readiness checks its three registrations independently of search, remains advisory, and execution rechecks bytes/runtime. The pack panel names member order, local read-only scope, memory-only results and per-member limits: up to 60 seconds execution plus 5 seconds cleanup; preparation adds time. Runs cannot be cancelled. Shared pending ownership spans dispatch, runner idle-before-callback and result presentation, including stale-callback, failure, navigation and close guards.
+
+## System Snapshot execution ownership — Slice 052 historical candidate
+
+Historical Slice 052 scope, closed through PR #58 and superseded by Slice 053 above.
 
 The Python application and service layer now owns the single reviewed **Windows System Snapshot** execution path through `PowerShellService` and `PowerShellGateway`. Bootstrap composes `PowerShellService` with the existing `ScriptService` and a new `PowerShellGateway`. `ScriptWorkspace` collects an explicit **Run diagnostic** request and presents a plain-text, memory-only result; it does not build commands or access SQLite. The shared `ServiceTaskRunner` dispatches off the GUI thread. `run_pending` and a generation identity protect the runner idle-before-callback gap, duplicate actions, stale completions, navigation and close. PowerShellService reloads registry metadata, applies the one-script execution policy and validates the structured result. ScriptService owns the verified byte read; WindowsExecution and PowerShellGateway own protected paths, sealed artifact, process/job, output limits, timeout and cleanup. Typed domain values separate completed diagnostic ERROR from execution failure. No new dependency, schema, persistent result repository or generic script executor is introduced. General registered-script execution remains deferred.
 

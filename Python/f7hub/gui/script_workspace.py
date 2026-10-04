@@ -12,7 +12,8 @@ from PySide6.QtWidgets import (
 
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.script_management_dialog import ScriptManagementDialog
-from f7hub.services.powershell_service import SYSTEM_SNAPSHOT_CODE
+from f7hub.services.powershell_service import PowerShellService, APPROVED_DIAGNOSTICS
+from f7hub.domain.diagnostic_results import LOCAL_BASELINE_PACK
 from f7hub.services.script_service import (
     AVAILABLE, INACCESSIBLE, INVALID_REFERENCE, MISSING,
     ScriptCatalogEntry, ScriptService,
@@ -47,6 +48,8 @@ class ScriptWorkspace(QWidget):
         self._powershell_service = powershell_service
         self._run_identity = None
         self._execution_blocked = False
+        self._pack_ready = False
+        self._last_result = None
         self._entries: tuple[ScriptCatalogEntry, ...] = ()
         self._loading = False
         self._copying = False
@@ -96,8 +99,27 @@ class ScriptWorkspace(QWidget):
         self.empty_state.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.empty_state.hide()
 
-        self.model = QStandardItemModel(0, 4, self)
-        self.model.setHorizontalHeaderLabels(("Name", "Code", "Category", "File status"))
+        self.pack_heading = QLabel(LOCAL_BASELINE_PACK.name, self)
+        self.pack_heading.setTextFormat(Qt.TextFormat.PlainText)
+        self.pack_notice = QLabel(LOCAL_BASELINE_PACK.description +
+            " Results kept in memory. Up to 60 seconds execution and 5 seconds cleanup per diagnostic; "
+            "preparation adds time. This run cannot be cancelled.", self)
+        self.pack_notice.setTextFormat(Qt.TextFormat.PlainText)
+        self.pack_notice.setWordWrap(True)
+        self.pack_button = QPushButton("Run baseline diagnostics", self)
+        self.pack_button.setAccessibleName("Run baseline diagnostics")
+        self.pack_button.clicked.connect(self.run_pack)
+        self.pack_readiness = QLabel("Refresh Scripts to check pack readiness.", self)
+        self.pack_readiness.setTextFormat(Qt.TextFormat.PlainText)
+        self.pack_readiness.setWordWrap(True)
+        pack_row = QHBoxLayout()
+        pack_row.addWidget(self.pack_button)
+        pack_row.addWidget(self.pack_readiness, 1)
+        self.summary = QLabel("", self)
+        self.summary.setTextFormat(Qt.TextFormat.PlainText)
+
+        self.model = QStandardItemModel(0, 5, self)
+        self.model.setHorizontalHeaderLabels(("Name", "Type", "Category", "File status", "Execution"))
         self.table = QTableView(self)
         self.table.setAccessibleName("Enabled scripts; select a row to read metadata")
         self.table.setModel(self.model)
@@ -105,7 +127,7 @@ class ScriptWorkspace(QWidget):
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
-        for column in (1, 2, 3):
+        for column in (1, 2, 3, 4):
             self.table.horizontalHeader().setSectionResizeMode(column, QHeaderView.ResizeMode.ResizeToContents)
         self.table.selectionModel().selectionChanged.connect(self._selection_changed)
 
@@ -138,7 +160,11 @@ class ScriptWorkspace(QWidget):
 
         layout = QVBoxLayout(self)
         layout.addLayout(heading_row)
+        layout.addWidget(self.pack_heading)
+        layout.addWidget(self.pack_notice)
+        layout.addLayout(pack_row)
         layout.addLayout(search_row)
+        layout.addWidget(self.summary)
         layout.addWidget(self.feedback)
         layout.addWidget(splitter, 1)
         self._runner.busy_changed.connect(self._update_actions)
@@ -155,27 +181,75 @@ class ScriptWorkspace(QWidget):
         row = self.table.currentIndex().row()
         available = 0 <= row < len(self._entries) and self._entries[row].file_status == AVAILABLE
         self.copy_button.setEnabled(available and not busy and not self._loading and not self._copying)
-        reviewed = available and self._entries[row].metadata.script_code == SYSTEM_SNAPSHOT_CODE
+        reviewed = available and PowerShellService.execution_approved(self._entries[row].metadata)
         self.run_button.setEnabled(bool(reviewed and idle and self._management_dialog is None
                                         and self._powershell_service is not None and not self._execution_blocked))
+        self.pack_button.setEnabled(bool(idle and self._pack_ready and self._management_dialog is None
+            and self._powershell_service is not None and not self._execution_blocked))
         self.table.setEnabled(not self.run_pending)
 
     @property
     def run_pending(self):
         return self._run_identity is not None
 
+    def _can_run(self):
+        return (not self.run_pending and not self._runner.busy and not self._loading and not self._copying
+                and self._management_dialog is None and not self._execution_blocked
+                and self._powershell_service is not None)
+
     def run_diagnostic(self):
         row = self.table.currentIndex().row()
-        if (self.run_pending or self._runner.busy or self._loading or self._copying
-                or self._management_dialog is not None or self._execution_blocked
-                or self._powershell_service is None or not 0 <= row < len(self._entries)
-                or self._entries[row].metadata.script_code != SYSTEM_SNAPSHOT_CODE
-                or self._entries[row].file_status != AVAILABLE):
+        if not self._can_run() or not 0 <= row < len(self._entries):
             return False
+        entry = self._entries[row]
+        if entry.file_status != AVAILABLE or not PowerShellService.execution_approved(entry.metadata):
+            return False
+        code = entry.metadata.script_code
+        return self._start_run(lambda: self._powershell_service.execute_diagnostic(code), False)
+
+    def run_pack(self):
+        if not self._can_run() or not self._pack_ready:
+            return False
+        return self._start_run(lambda: self._powershell_service.execute_diagnostic_pack(LOCAL_BASELINE_PACK.code), True)
+
+    @staticmethod
+    def _attempt_lines(result):
+        spec = APPROVED_DIAGNOSTICS.get(result.script_code)
+        lines = [spec.operation.removeprefix("Get-") if spec else result.script_code,
+                 f"Execution: {result.classification}", result.message,
+                 f"Duration: {result.duration_seconds:.2f} seconds",
+                 f"Exit code: {result.exit_code if result.exit_code is not None else 'Not available'}",
+                 f"Cleanup verified: {'Yes' if result.cleanup_verified else 'No'}"]
+        if result.diagnostic is not None:
+            diagnostic = result.diagnostic
+            lines += [f"Collection: {diagnostic.status}",
+                      "Warnings: " + ("; ".join(diagnostic.warnings) or "None"),
+                      "Errors: " + ("; ".join(diagnostic.errors) or "None"),
+                      json.dumps(diagnostic.data, ensure_ascii=False, indent=2)]
+        return lines
+
+    def _present_result(self, result, pack):
+        if pack:
+            lines = [LOCAL_BASELINE_PACK.name, f"Pack execution: {result.classification}",
+                f"Collection: {result.collection_status or 'Not available (pack aborted)'}", result.message,
+                f"Whole duration: {result.duration_seconds:.2f} seconds",
+                f"Cleanup verified: {'Yes' if result.cleanup_verified else 'No'}"]
+            if result.failure_classification:
+                lines += [f"Failure: {result.failure_classification}", f"Aborted at: {result.aborted_at or 'Before execution'}"]
+            for attempt in result.diagnostics:
+                lines += [""] + self._attempt_lines(attempt)
+            lines += ["Skipped: " + (", ".join(result.skipped_codes) or "None")]
+        else:
+            lines = self._attempt_lines(result)
+        self.results.setPlainText("\n".join(lines))
+        self.feedback.setText("Run complete. Results are in memory only." if result.classification == "COMPLETED" else result.message)
+
+    def _start_run(self, work, pack):
         identity = object()
         self._run_identity = identity
         self.results.clear()
-        self.feedback.setText("Preparing/running local System Snapshot… Execution limit: 60 seconds; cleanup: up to 5 seconds. This run cannot be cancelled.")
+        self._last_result = None
+        self.feedback.setText("Preparing/running local diagnostics… Up to 60 seconds execution and 5 seconds cleanup per diagnostic; preparation adds time. This run cannot be cancelled.")
         self._update_actions(True)
         self.run_pending_changed.emit(True)
 
@@ -183,31 +257,24 @@ class ScriptWorkspace(QWidget):
             if self._run_identity is not identity:
                 return
             try:
-                if error is not None:
-                    self.feedback.setText("The diagnostic could not complete. Refresh Scripts before retrying.")
+                if result is not None:
+                    self._execution_blocked |= not result.cleanup_verified
+                    if self._execution_blocked:
+                        self._pack_ready = False
+                        self.pack_readiness.setText("Cleanup is unverified. Further execution is blocked; close F7Hub and reconcile owned resources.")
+                    self._last_result = result
+                    self._present_result(result, pack)
                 else:
-                    self._execution_blocked = not result.cleanup_verified
-                    lines = ["Windows System Snapshot", f"Execution: {result.classification}",
-                             result.message, f"Duration: {result.duration_seconds:.2f} seconds",
-                             f"Exit code: {result.exit_code if result.exit_code is not None else 'Not available'}",
-                             f"Cleanup verified: {'Yes' if result.cleanup_verified else 'No'}"]
-                    if result.diagnostic is not None:
-                        diagnostic = result.diagnostic
-                        lines += [f"Collection: {diagnostic.status}",
-                                  "Warnings: " + ("; ".join(diagnostic.warnings) or "None"),
-                                  "Errors: " + ("; ".join(diagnostic.errors) or "None"),
-                                  json.dumps(diagnostic.data, ensure_ascii=False, indent=2)]
-                    self.results.setPlainText("\n".join(lines))
-                    self.feedback.setText("Run complete. Results are in memory only." if result.classification == "COMPLETED" else result.message)
+                    self.feedback.setText("The diagnostic could not complete. Refresh Scripts before retrying.")
+            except Exception:
+                # Presentation failure is not a second execution and must release ownership.
+                self.feedback.setText("Run result could not be displayed. Results remain in memory; do not assume a collection outcome.")
             finally:
-                # Remains owned through presentation, including the runner's
-                # idle-before-callback gap. Obsolete callbacks never release it.
                 self._run_identity = None
                 self._update_actions(self._runner.busy)
                 self.run_pending_changed.emit(False)
 
-        if not self._runner.submit(lambda: self._powershell_service.execute_diagnostic(SYSTEM_SNAPSHOT_CODE),
-                                   lambda result: finish(result), lambda error: finish(error=error)):
+        if not self._runner.submit(work, lambda result: finish(result), lambda error: finish(error=error)):
             finish(error=RuntimeError("Dispatch failed"))
             return False
         return True
@@ -303,24 +370,38 @@ class ScriptWorkspace(QWidget):
         self.model.removeRows(0, self.model.rowCount())
         self.details.clear()
         self.empty_state.hide()
+        self.summary.clear()
+        self._pack_ready = False
+        self.pack_readiness.setText("Checking pack readiness…")
         self.feedback.setText("Loading scripts…")
         self._update_actions(True)
-        if not self._runner.submit(lambda: self._service.list_scripts(text_query=query),
-                                   lambda entries: self._loaded(entries, query), self._failed):
+        def read():
+            entries = self._service.list_scripts(text_query=query)
+            readiness = self._powershell_service.pack_readiness() if self._powershell_service is not None else (False, "Execution service is unavailable.")
+            return entries, readiness
+
+        if not self._runner.submit(read, lambda value: self._loaded(value[0], query, value[1]), self._failed):
             self._failed(None)
             return False
         return True
 
-    def _loaded(self, entries: tuple[ScriptCatalogEntry, ...], query: str | None) -> None:
+    def _loaded(self, entries: tuple[ScriptCatalogEntry, ...], query: str | None, readiness=None) -> None:
         self._loading = False
         self._entries = tuple(entries)
+        self._pack_ready, note = readiness or (False, "Refresh Scripts to check pack readiness.")
+        self.pack_readiness.setText(note)
+        approved = sum(PowerShellService.execution_approved(entry.metadata) for entry in self._entries)
+        available = sum(entry.file_status == AVAILABLE for entry in self._entries)
+        self.summary.setText(f"Shown: {len(self._entries)}   Available files: {available}   Execution approved: {approved}")
+        self.model.removeRows(0, self.model.rowCount())
         with QSignalBlocker(self.table.selectionModel()):
             for entry in self._entries:
                 record = entry.metadata
                 self.model.appendRow([
-                    QStandardItem(record.name), QStandardItem(record.script_code),
+                    QStandardItem(record.name), QStandardItem(record.script_type),
                     QStandardItem(record.category_name or "Not selected"),
                     QStandardItem(_status_text(entry.file_status)),
+                    QStandardItem("Approved" if PowerShellService.execution_approved(record) else "Not approved"),
                 ])
         self.feedback.clear()
         self.empty_state.setText("No scripts match your search." if query is not None
@@ -338,6 +419,9 @@ class ScriptWorkspace(QWidget):
     def _failed(self, error: object) -> None:
         self._loading = False
         self._preferred_code = None
+        self.summary.clear()
+        self._pack_ready = False
+        self.pack_readiness.setText("Pack readiness could not be checked. Refresh Scripts.")
         if isinstance(error, ScriptValidationError):
             self.feedback.setText("Search text is invalid. Edit it and select Search, or select Clear.")
         else:
@@ -371,11 +455,13 @@ class ScriptWorkspace(QWidget):
             f"Description: {record.description or 'Not provided'}",
             f"Type: {record.script_type}",
             f"Runtime: {record.runtime}",
+            f"Version: {record.version or 'Not provided'}",
+            "Execution policy: " + ("Approved (metadata at last refresh; source and runtime checked on Run)" if PowerShellService.execution_approved(record) else "Not approved"),
             f"Risk: {record.risk_level}",
             f"Privilege: {record.privilege_level}",
             f"PowerShell reference: {record.relative_path}",
             f"File status: {status}{status_note}",
         )))
-        self.run_notice.setText(
-            "Run collects OS, uptime, memory and fixed drives on this PC. Read only; Standard User; 60-second limit. Results are kept in memory only."
-            if record.script_code == SYSTEM_SNAPSHOT_CODE else "Execution is unavailable for this script.")
+        spec = APPROVED_DIAGNOSTICS.get(record.script_code)
+        self.run_notice.setText((spec.purpose + " Read only; Standard User; up to 60 seconds execution and 5 seconds cleanup; preparation adds time. Results kept in memory.")
+            if spec and PowerShellService.execution_approved(record) else "Execution is unavailable for this script.")

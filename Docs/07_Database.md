@@ -1,5 +1,11 @@
 # F7Hub Database Architecture
 
+## Slice 053 — Local Baseline Diagnostics
+
+Forward-only data migration `0011_services_snapshot_script.sql` adds exactly one enabled, uncategorized Windows Services Snapshot registration: code `diagnostic.windows.services_snapshot`, description `Collects a local read-only Windows services snapshot.`, path `PowerShell/Diagnostics/Get-ServicesSnapshot.ps1`, DIAGNOSTIC / POWERSHELL_7 / LOW / STANDARD_USER, version 1.0.0, timeout 60, structured output 1 and timestamps `2026-10-03T00:00:00.000Z`. Exact UTF-8 no-BOM CRLF SHA-256: `8a48321800e4d8147f2dd94a9d83eebedace6ac4e45b3e38c00f74d280abc347`. Case-insensitive code and separator-normalized/case-insensitive path conflicts abort atomically without version 11 recorded. Migrations 0001–0010 and the physical schema, six type enum, defaults, relationships and indexes are unchanged. No pack or result rows are created.
+
+Fresh and incremental migration, conflict rollback, exact checksum/history, integrity_check=ok and zero foreign_key_check violations are tested. Real individual and pack runs leave logical SQLite state unchanged. There is no new entity or relationship, so ERD changes are unnecessary.
+
 ## Ticket classification transaction — Slice 051
 
 `TicketService.update_ticket_classification` uses the existing repository writer transaction to compare authoritative priority, ticket_type and exact updated_at before no-op. A real change issues one bound conditional UPDATE affecting only changed classification columns plus a strictly later activity timestamp. It inserts exactly one existing-style PRIORITY_CHANGED event for a priority change and/or TYPE_CHANGED for a type change, then reloads before commit. Event titles contain no field values. UPDATE, either event or reload failure rolls back the entire operation.

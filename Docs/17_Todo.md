@@ -1,13 +1,27 @@
 # F7Hub Todo
 
-## Slice 052 — Controlled System Snapshot execution candidate
+## Slice 053 — Local Baseline Diagnostics
+
+- [x] Literal three-member approval, strict Network/Services contracts, bounded Services source and migration 0011.
+- [x] Sequential reservation, ERROR continuation, abort/skipped results and cleanup quarantine.
+- [x] Supporting Scripts Type/policy/pack/readiness UI and callback ownership.
+- [x] Required regression, native validation, owner documentation and external exact manifest.
+- [ ] Independent read-only review of the exact unstaged/uncommitted Slice 053 candidate.
+
+Validation: Database 438, PowerShell 72, GUI 210, Integration 203 PASS (196 RETAINED methods plus 7 FRESH corrected bootstrap methods; original full exit 1, correction exit 0). Other final suites exit 0, and all supervisors report zero owned survivors. Native Windows 104 assertions PASS at 1000×700/96 DPI, QTest input; real pack and individual Network, synthetic valid ERROR, invalid middle output, actual synthetic timeout containment and cleanup-quarantine scenarios. All 6 captures inspected. Physical hardware input and alternate DPI NOT RUN. Earlier failed fixture/harness/migration-count attempts remain historical evidence with bounded correction records. `native-v5-retry.md` records one accidental unchanged launch and loss of the original v3 JSON; the later v4 duplicate artifact is preserved separately. Final applicability checks bind tested inputs to the documented candidate.
+
+No parameters, generic execution, elevation, remote targets, service control, health baseline, persistence/history, ticket linkage, AI execution or user-defined packs are included.
+
+## Slice 052 — Controlled System Snapshot execution historical candidate
+
+Historical Slice 052 scope, closed through PR #58 and superseded by Slice 053 above.
 
 - [x] Add one fixed execution policy, verified source buffer, sealed artifact, non-elevated PowerShell 7 process, bounded capture, timeout and owned cleanup.
 - [x] Add explicit Scripts Run and in-memory structured result presentation with pending/callback guards.
 - [x] Complete 206 GUI tests and 43 native Windows assertions at 1000×700/96 DPI; inspect all three captures and verify zero owned survivors.
 - [x] Retain applicable 433 Database, 51 PowerShell and 201 Integration passing results with unchanged relevant inputs; preserve earlier failures as historical evidence.
-- [x] Synchronize affected documentation and external candidate/evidence manifest. **READY_FOR_REVIEW**; independent review and integration pending.
-- [ ] Independent read-only review of this exact candidate; integration requires separate authorization.
+- [x] Synchronize affected documentation and external historical candidate/evidence manifest. Slice 052 is CLOSED through PR #58.
+- [x] Slice 052 subsequently closed through PR #58; its earlier pending gate is historical.
 
 Diagnostic packs start in Slice 053. Parameters, history, ticket linkage, remediation and AI execution remain deferred.
 

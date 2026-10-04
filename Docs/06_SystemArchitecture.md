@@ -1,6 +1,16 @@
 # F7Hub System Architecture
 
-## Controlled PowerShell execution boundary — Slice 052 candidate
+## Slice 053 — Local Baseline Diagnostics
+
+System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.
+
+The existing shared PowerShellService, PowerShellGateway and ServiceTaskRunner serve both run modes. A service reservation spans the entire sequential pack. Every member repeats current registration lookup, exact-byte verification, sealed preparation, immediate revalidation, trusted 64-bit PowerShell 7/token checks, separate owned job, bounded capture, contract validation and verified cleanup. Valid collection ERROR/exit 1 continues; a boundary failure aborts with partial attempted results, failure position and skipped remainder, and no aggregate collection status. Cleanup uncertainty latches both run modes blocked.
+
+This extends the existing modular-monolith service policy and result values without replacing the Windows boundary or adding another runner, database entity, dependency, IPC or scheduler. No parameters, generic execution, elevation, remote targets, service control, health baseline, persistence/history, ticket linkage, AI execution or user-defined packs are included.
+
+## Controlled PowerShell execution boundary — Slice 052 historical candidate
+
+Historical Slice 052 scope, closed through PR #58 and superseded by Slice 053 above.
 
 `ScriptWorkspace → ServiceTaskRunner → PowerShellService → ScriptService/ScriptRepository → PowerShellGateway → PowerShell 7` is the one approved execution path. The service rechecks current enabled registration and fixed System Snapshot policy. ScriptService verifies the exact source buffer; the gateway creates a private sealed artifact from those bytes, then starts a non-elevated process in an owned kill-on-close Windows job. Bounded concurrent output capture, deadline, strict result parsing and verified cleanup precede GUI completion. Workspace pending state spans runner dispatch through callback presentation, including the runner idle gap. A valid diagnostic ERROR is a completed diagnostic outcome; launch, integrity, timeout, invalid output and uncertain cleanup are infrastructure failures. No schema, diagnostic writes, parameter API, pack runner, ticket integration, dependency or generic command gateway is introduced.
 

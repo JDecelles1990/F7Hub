@@ -1,8 +1,18 @@
 # F7Hub Roadmap
 
-## Controlled System Snapshot execution — Slice 052 candidate
+## Slice 053 — Local Baseline Diagnostics
 
-Slice 052 is the first application-controlled PowerShell execution increment: the existing Scripts workspace can explicitly run the reviewed read-only Windows System Snapshot through a non-elevated PowerShell 7 gateway and show a validated in-memory result. Required GUI and native validation completed; prior applicable Database, PowerShell and Integration results were retained by unchanged-input comparison. Independent review and integration are pending. Diagnostic packs begin in Slice 053; parameters, persistent history, ticket linkage, remediation and AI execution remain deferred. No schema migration.
+System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.
+
+Slice 053 implementation, required validation and owner documentation are complete at **READY_FOR_REVIEW**. Independent read-only review is the next gate; integration needs separate authorization. No parameters, generic execution, elevation, remote targets, service control, health baseline, persistence/history, ticket linkage, AI execution or user-defined packs are included.
+
+Validation: Database 438, PowerShell 72, GUI 210, Integration 203 PASS (196 RETAINED methods plus 7 FRESH corrected bootstrap methods; original full exit 1, correction exit 0). Other final suites exit 0, and all supervisors report zero owned survivors. Native Windows 104 assertions PASS at 1000×700/96 DPI, QTest input; real pack and individual Network, synthetic valid ERROR, invalid middle output, actual synthetic timeout containment and cleanup-quarantine scenarios. All 6 captures inspected. Physical hardware input and alternate DPI NOT RUN. Earlier failed fixture/harness/migration-count attempts remain historical evidence with bounded correction records. `native-v5-retry.md` records one accidental unchanged launch and loss of the original v3 JSON; the later v4 duplicate artifact is preserved separately. Final applicability checks bind tested inputs to the documented candidate.
+
+## Controlled System Snapshot execution — Slice 052 historical candidate
+
+Historical Slice 052 scope, closed through PR #58 and superseded by Slice 053 above.
+
+Slice 052 is the first application-controlled PowerShell execution increment: the existing Scripts workspace can explicitly run the reviewed read-only Windows System Snapshot through a non-elevated PowerShell 7 gateway and show a validated in-memory result. Required GUI and native validation completed; prior applicable Database, PowerShell and Integration results were retained by unchanged-input comparison. Slice 052 is CLOSED through PR #58; this section preserves its original implementation scope. Diagnostic packs begin in Slice 053; parameters, persistent history, ticket linkage, remediation and AI execution remain deferred. No schema migration.
 
 ## Tickets inline classification — Slice 051 candidate
 

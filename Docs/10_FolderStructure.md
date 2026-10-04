@@ -4,7 +4,15 @@
 
 `Data/AltF7Hub-Troubleshooting-Topics.yaml` preserves the supplied 31-topic reference corpus. [Data/README.md](../Data/README.md) records its verified one-time import into the local development Knowledge Base, content mapping, validation and recovery boundaries. Local SQLite data, backups and import evidence remain outside Git; checking out the corpus does not automatically import it.
 
-## Controlled execution components — Slice 052 candidate
+## Slice 053 — Local Baseline Diagnostics
+
+New source: `PowerShell/Diagnostics/Get-ServicesSnapshot.ps1`. New data migration: `Database/Migrations/0011_services_snapshot_script.sql`. Its targeted `.gitattributes` rule enforces CRLF. Existing `domain/diagnostic_results.py`, `services/powershell_service.py` and `gui/script_workspace.py` own pack values, literal policy/reservation/contracts and presentation respectively. Existing System and Network source bytes and Windows gateway/infrastructure are unchanged.
+
+Tests remain in the existing Database, PowerShell, GUI and Integration directories. Additional regression changes only advance current-chain migration-count expectations from 10 to 11; historical migration fixtures retain their original prefix. External manifests, harnesses, logs, results, captures and report reside under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-053`. No new repository evidence directory is created.
+
+## Controlled execution components — Slice 052 historical candidate
+
+Historical Slice 052 scope, closed through PR #58 and superseded by Slice 053 above.
 
 `Python/f7hub/domain/diagnostic_results.py` holds typed results; `services/powershell_service.py` owns the fixed execution policy and result contract; `infrastructure/powershell_gateway.py` and `infrastructure/windows_execution.py` own the Windows process and sealed-file boundary. Existing bootstrap, ScriptService and Scripts GUI modules compose the path. Focused tests are under `Tests/PowerShell`, `Tests/GUI` and `Tests/Integration`. No migration, diagnostic source or new top-level directory is added. Validation records and captures remain external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-052`.
 

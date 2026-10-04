@@ -1,6 +1,16 @@
 # F7Hub GUI Design
 
-## Scripts diagnostic Run and result panel — Slice 052 candidate
+## Slice 053 — Local Baseline Diagnostics
+
+Scripts shows **Name | Type | Category | File status | Execution**. Code, Version and current metadata policy are in plain-text details. File availability and execution approval are separate; an approved missing file cannot Run. Shown/available/approved counts describe the filtered rows. Pack readiness checks its three registrations independently of search, remains advisory, and execution rechecks bytes/runtime. The pack panel names member order, local read-only scope, memory-only results and per-member limits: up to 60 seconds execution plus 5 seconds cleanup; preparation adds time. Runs cannot be cancelled. Shared pending ownership spans dispatch, runner idle-before-callback and result presentation, including stale-callback, failure, navigation and close guards.
+
+Ordered plain-text pack results include execution outcome, collection outcome or unavailable aggregate on abort, whole and member durations, exit codes, cleanup verification, safe warnings/errors/data and skipped members. Previous result identity remains independent of later row selection. A presentation failure releases only the matching owner and preserves the in-memory result and cleanup quarantine.
+
+Validation: Database 438, PowerShell 72, GUI 210, Integration 203 PASS (196 RETAINED methods plus 7 FRESH corrected bootstrap methods; original full exit 1, correction exit 0). Other final suites exit 0, and all supervisors report zero owned survivors. Native Windows 104 assertions PASS at 1000×700/96 DPI, QTest input; real pack and individual Network, synthetic valid ERROR, invalid middle output, actual synthetic timeout containment and cleanup-quarantine scenarios. All 6 captures inspected. Physical hardware input and alternate DPI NOT RUN. Earlier failed fixture/harness/migration-count attempts remain historical evidence with bounded correction records. `native-v5-retry.md` records one accidental unchanged launch and loss of the original v3 JSON; the later v4 duplicate artifact is preserved separately. Final applicability checks bind tested inputs to the documented candidate.
+
+## Scripts diagnostic Run and result panel — Slice 052 historical candidate
+
+Historical Slice 052 scope, closed through PR #58 and superseded by Slice 053 above.
 
 The existing Scripts page adds an explicit **Run diagnostic** button and a read-only plain-text result panel beside the catalog. Only an available selected **Windows System Snapshot** with the composed execution service enables Run; service policy performs the authoritative eligibility check. The selection shows purpose, local target, Standard User privilege, time limit and memory-only result handling before execution. The shared background runner keeps the GUI responsive. Workspace-owned pending state spans the idle-before-callback gap, suppresses duplicate and conflicting actions, and blocks navigation/close until result presentation and cleanup complete. Completed diagnostic ERROR and execution failure have distinct status text. Native Windows 1000×700/96 DPI captures of ready, completed and timeout states were inspected without observed overlap; input used QTest events. Physical manual input and other DPI are NOT RUN.
 

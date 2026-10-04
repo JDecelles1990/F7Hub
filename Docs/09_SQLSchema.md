@@ -1,5 +1,9 @@
 # F7Hub SQL Schema
 
+## Slice 053 — Local Baseline Diagnostics
+
+Forward-only data migration `0011_services_snapshot_script.sql` adds exactly one enabled, uncategorized Windows Services Snapshot registration: code `diagnostic.windows.services_snapshot`, description `Collects a local read-only Windows services snapshot.`, path `PowerShell/Diagnostics/Get-ServicesSnapshot.ps1`, DIAGNOSTIC / POWERSHELL_7 / LOW / STANDARD_USER, version 1.0.0, timeout 60, structured output 1 and timestamps `2026-10-03T00:00:00.000Z`. Exact UTF-8 no-BOM CRLF SHA-256: `8a48321800e4d8147f2dd94a9d83eebedace6ac4e45b3e38c00f74d280abc347`. Case-insensitive code and separator-normalized/case-insensitive path conflicts abort atomically without version 11 recorded. Migrations 0001–0010 and the physical schema, six type enum, defaults, relationships and indexes are unchanged. No pack or result rows are created.
+
 ## Slice 048 — production reference data only
 
 `0010_network_snapshot_script.sql` adds `diagnostic.windows.network_snapshot`, **Windows Network Configuration Snapshot**, description `Collects a local read-only Windows network configuration snapshot.`, path `PowerShell/Diagnostics/Get-NetworkSnapshot.ps1`, type `DIAGNOSTIC`, runtime `POWERSHELL_7`, risk `LOW`, privilege `STANDARD_USER`, version `1.0.0`, timeout 60, structured output 1, enabled 1 and category NULL. Created/updated timestamps are both `2026-10-02T00:00:00.000Z`. Exact UTF-8-without-BOM CRLF source SHA-256: `aa126985b01c840b588ee3769d4c0a4a43e57ae5415f422cc8c9db1bafcb02b7`.

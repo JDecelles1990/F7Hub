@@ -234,7 +234,7 @@ class ScriptCatalogFlowTests(unittest.TestCase):
             self.wait_idle()
             execute.assert_not_called()
         self.assertEqual(workspace.model.rowCount(), 2)
-        self.assertEqual([workspace.model.item(row, 1).text() for row in range(2)],
+        self.assertEqual([entry.metadata.script_code for entry in workspace._entries],
                          ["missing", "present"])
         self.assertEqual([workspace.model.item(row, 3).text() for row in range(2)],
                          ["MISSING", "AVAILABLE"])
@@ -258,9 +258,9 @@ class ScriptCatalogFlowTests(unittest.TestCase):
             self.window.scripts_action.trigger()
             self.wait_idle()
             self.assertEqual(workspace.model.rowCount(), 1)
-            self.assertEqual([workspace.model.item(0, column).text() for column in range(4)],
-                             ["Windows System Snapshot", "diagnostic.windows.system_snapshot",
-                              "Not selected", "AVAILABLE"])
+            self.assertEqual([workspace.model.item(0, column).text() for column in range(5)],
+                             ["Windows System Snapshot", "DIAGNOSTIC",
+                              "Not selected", "AVAILABLE", "Not approved"])
             details = workspace.details.toPlainText()
             for value in ("Type: DIAGNOSTIC", "Runtime: POWERSHELL_7", "Risk: LOW",
                           "Privilege: STANDARD_USER", "PowerShell reference: PowerShell/Diagnostics/Get-SystemSnapshot.ps1"):
@@ -341,7 +341,7 @@ class ScriptCatalogFlowTests(unittest.TestCase):
             QTest.keyClick(workspace.search_input, Qt.Key.Key_Return)
             self.wait_idle()
             self.assertEqual(workspace.model.rowCount(), 1)
-            self.assertEqual(workspace.model.item(0, 1).text(), "diagnostic.windows.network_snapshot")
+            self.assertEqual(workspace._entries[0].metadata.script_code, "diagnostic.windows.network_snapshot")
             self.assertIn("File status: AVAILABLE", workspace.details.toPlainText())
             self.assertIn("Privilege: STANDARD_USER", workspace.details.toPlainText())
             workspace.copy_button.click()

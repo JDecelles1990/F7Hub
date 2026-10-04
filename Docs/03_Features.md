@@ -1,8 +1,18 @@
 # F7Hub Features
 
-## Controlled System Snapshot execution — Slice 052 candidate
+## Slice 053 — Local Baseline Diagnostics
 
-Slice 052 introduces one controlled production execution path for the registered **Windows System Snapshot** diagnostic. In **Scripts**, the technician explicitly presses **Run diagnostic**. The read-only diagnostic runs under a non-elevated standard-user PowerShell 7 process, returns a validated structured result, and displays it in memory. Registration, approved source bytes, runtime, privilege and output contract must all match the execution policy. Duplicate runs and conflicting navigation are guarded until completion and cleanup. Diagnostic collection ERROR remains distinct from launch, integrity, timeout and output failures. Generic registered-script execution, packs, other scripts, parameters, persistent history, ticket linkage, remediation, elevation and AI-triggered execution remain deferred. This candidate awaits independent review and integration.
+System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.
+
+Scripts shows **Name | Type | Category | File status | Execution**. Code, Version and current metadata policy are in plain-text details. File availability and execution approval are separate; an approved missing file cannot Run. Shown/available/approved counts describe the filtered rows. Pack readiness checks its three registrations independently of search, remains advisory, and execution rechecks bytes/runtime. The pack panel names member order, local read-only scope, memory-only results and per-member limits: up to 60 seconds execution plus 5 seconds cleanup; preparation adds time. Runs cannot be cancelled. Shared pending ownership spans dispatch, runner idle-before-callback and result presentation, including stale-callback, failure, navigation and close guards.
+
+No parameters, generic execution, elevation, remote targets, service control, health baseline, persistence/history, ticket linkage, AI execution or user-defined packs are included.
+
+## Controlled System Snapshot execution — Slice 052 historical candidate
+
+Historical Slice 052 scope, closed through PR #58 and superseded by Slice 053 above.
+
+Slice 052 introduces one controlled production execution path for the registered **Windows System Snapshot** diagnostic. In **Scripts**, the technician explicitly presses **Run diagnostic**. The read-only diagnostic runs under a non-elevated standard-user PowerShell 7 process, returns a validated structured result, and displays it in memory. Registration, approved source bytes, runtime, privilege and output contract must all match the execution policy. Duplicate runs and conflicting navigation are guarded until completion and cleanup. Diagnostic collection ERROR remains distinct from launch, integrity, timeout and output failures. Generic registered-script execution, packs, other scripts, parameters, persistent history, ticket linkage, remediation, elevation and AI-triggered execution remain deferred. Slice 052 is CLOSED through PR #58.
 
 ## Inline ticket Priority and Type — Slice 051 candidate
 

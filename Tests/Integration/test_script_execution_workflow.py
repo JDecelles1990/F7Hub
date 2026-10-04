@@ -12,6 +12,7 @@ from f7hub.infrastructure.powershell_gateway import PowerShellGateway
 from f7hub.repositories.script_repository import ScriptRepository
 from f7hub.services.script_service import ScriptService
 from f7hub.services.powershell_service import PowerShellService, SYSTEM_SNAPSHOT_CODE
+from f7hub.domain.diagnostic_results import LOCAL_BASELINE_PACK
 
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -59,3 +60,33 @@ class ScriptExecutionWorkflowTests(unittest.TestCase):
         source = self.scripts.read_verified_script(SYSTEM_SNAPSHOT_CODE).encode("utf-8")
         self.assertEqual(source, (ROOT/"PowerShell/Diagnostics/Get-SystemSnapshot.ps1").read_bytes())
         self.assertIn(b"\r\n", source)
+
+    def test_real_three_member_pack_then_individuals_leave_logical_database_unchanged(self):
+        before = self.snapshot()
+        pack = self.service.execute_diagnostic_pack(LOCAL_BASELINE_PACK.code)
+        self.assertEqual(pack.classification, "COMPLETED", pack.message)
+        self.assertEqual(tuple(item.script_code for item in pack.diagnostics), LOCAL_BASELINE_PACK.diagnostic_codes)
+        self.assertTrue(pack.cleanup_verified)
+        self.assertEqual(pack.skipped_codes, ())
+        self.assertIn(pack.collection_status, ("PASS", "WARNING", "ERROR"))
+        for code in LOCAL_BASELINE_PACK.diagnostic_codes:
+            run = self.service.execute_diagnostic(code)
+            self.assertEqual(run.classification, "COMPLETED", run.message)
+            self.assertTrue(run.cleanup_verified)
+        self.assertEqual(self.snapshot(), before)
+        with database_connection(self.database) as connection:
+            validate_database_integrity(connection)
+
+    def test_pack_rechecks_registry_after_readiness(self):
+        self.assertTrue(self.service.pack_readiness()[0])
+        middle = LOCAL_BASELINE_PACK.diagnostic_codes[1]
+        with database_connection(self.database) as connection:
+            connection.execute("UPDATE scripts SET is_enabled=0 WHERE script_code=?", (middle,))
+        before = self.snapshot()
+        result = self.service.execute_diagnostic_pack(LOCAL_BASELINE_PACK.code)
+        self.assertEqual(result.classification, "ABORTED")
+        self.assertIsNone(result.collection_status)
+        self.assertEqual(result.failure_classification, "NOT_ELIGIBLE")
+        self.assertEqual(result.aborted_at, middle)
+        self.assertEqual(result.skipped_codes, LOCAL_BASELINE_PACK.diagnostic_codes[2:])
+        self.assertEqual(self.snapshot(), before)

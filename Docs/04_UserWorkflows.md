@@ -1,6 +1,16 @@
 ﻿# F7Hub User Workflows
 
-## Run the Windows System Snapshot — Slice 052 candidate
+## Slice 053 — Local Baseline Diagnostics
+
+Open **Scripts**, review **Local Baseline Diagnostics**, then choose **Run baseline diagnostics**. Search may hide pack members without changing pack readiness. For one diagnostic, select an available, execution-approved row and choose **Run diagnostic**. Read Version, purpose and policy in details before running.
+
+During the run, conflicting copy/manage/refresh/search/selection/navigation/close actions are guarded. Read the ordered result panel: execution outcome and diagnostic collection outcome are separate. A valid collection ERROR continues to the next member; a boundary failure aborts and names skipped members. Verified cleanup restores actions. Unverified cleanup blocks both run modes even after refresh/search; close F7Hub and reconcile owned resources. Results are replaced by the next run and not saved.
+
+No parameters, generic execution, elevation, remote targets, service control, health baseline, persistence/history, ticket linkage, AI execution or user-defined packs are included.
+
+## Run the Windows System Snapshot — Slice 052 historical candidate
+
+Historical Slice 052 scope, closed through PR #58 and superseded by Slice 053 above.
 
 Open **Scripts**, select **Windows System Snapshot**, review the read-only purpose, local target, Standard User privilege and 60-second limit, then choose **Run diagnostic**. F7Hub reloads the enabled registration, checks the reviewed policy and current exact source bytes, and runs a private verified copy through PowerShell 7 without elevation. The page remains responsive while conflicting actions and another run are blocked. The result panel shows execution status, diagnostic collection status and structured output in memory only. A valid diagnostic ERROR describes a completed collection; execution, integrity, timeout or output failure shows a safe message without a diagnostic result. After verified cleanup, another run is available. Other scripts cannot run here; packs, parameters, history, ticket linkage, remediation and AI execution are not part of this workflow.
 
