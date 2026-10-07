@@ -198,6 +198,52 @@ Commit, push, PR creation and merge require their own task authorization; review
 For detailed baseline, candidate identity and integration gates use the delivery skill's [Git safety reference](.agents/skills/vertical-slice-delivery/references/git-safety.md).
 Naming details belong to [Docs/15_NamingConventions.md](Docs/15_NamingConventions.md).
 
+## Cloud and Windows-native validation
+
+F7Hub may be validated in a Linux-based cloud or sandbox environment.
+Validation evidence must identify the environment in which it was produced.
+Use the existing result vocabulary `PASS`, `FAIL`, `NOT RUN` and `BLOCKED`
+together with an environment qualifier such as `CLOUD_PORTABLE` or
+`WINDOWS_NATIVE` (for example, Environment: `CLOUD_PORTABLE`; Result: `PASS`).
+
+`CLOUD_PORTABLE` may establish genuinely platform-independent behavior:
+portable Python logic; platform-independent SQLite schema, migrations,
+constraints, repositories and queries; headless Qt behavior that does not
+depend on Windows-native presentation or window management; portable
+integration tests; documentation/schema/contract validation; portable Mochi
+Python behavior; and static/platform-independent checks. Existing
+`QT_QPA_PLATFORM=offscreen` checks provide headless evidence within this scope.
+
+Cloud validation is not authoritative for AutoHotkey runtime behavior, Windows
+global hotkeys/hotstrings, native window management, Window Spy, Windows shell,
+registry, service, COM or process integration, Windows-native PowerShell
+administration, Windows tray behavior, native DPI/display scaling/rendering,
+Windows-specific filesystem/path/locking behavior, native Mochi desktop
+interaction or other Windows desktop/session-dependent behavior.
+
+A `CLOUD_PORTABLE` `PASS` must never be reported or summarized as a
+`WINDOWS_NATIVE` `PASS`. A slice that changes or depends on Windows-native
+behavior requires separate `WINDOWS_NATIVE` validation before integration
+unless the applicable approved architecture or test contract explicitly
+establishes that native validation is not required.
+
+Mixed suites must classify and report portable and Windows-native portions
+separately. Unsupported Windows behavior in Linux is `NOT RUN`, not `FAIL`;
+a genuine platform-independent failure remains `FAIL`.
+
+Cloud Git/network evidence is environment-specific. A GitHub operation
+succeeding or failing in a cloud sandbox does not by itself establish local
+Windows Git, local authentication, local repository health or Windows-native
+integration state.
+
+Do not modify production source merely to accommodate cloud-environment
+limitations. Prefer environment configuration unless validation identifies a
+genuine platform-independent product defect.
+
+Never configure or expose production secrets, MSP or customer credentials,
+Microsoft 365 credentials, API keys, HaloPSA, NinjaRMM or Keeper credentials,
+or customer data for portable cloud validation.
+
 ## Validation, documentation and completion
 
 Run appropriate required checks for the actual change; cover success, failure, cancellation and recovery where applicable.
