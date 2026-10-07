@@ -5,6 +5,183 @@
 > Project Root: `C:\Dev\F7Hub\`  
 > Purpose: Define mandatory development behavior for Codex and other coding agents working in the F7Hub repository.
 
+## Project Entry Point
+
+For substantial new work, repository orientation, architecture work, major review, or documentation-routing decisions, read `ROOT.md` before selecting task-specific documentation.
+
+For small focused changes where project context is already established, rereading `ROOT.md` is not required.
+
+---
+# 0. Foundation Architecture Bridge
+
+## Foundation Architecture Routing
+
+F7Hub maintains cross-cutting architecture contracts under:
+
+`Docs/Planning/Foundation/`
+
+Foundation-specific agent instructions are defined in:
+
+`Docs/Planning/Foundation/AGENTS.md`
+
+Before making a cross-cutting architectural decision, inspect the Foundation instructions and the relevant approved Foundation contract.
+
+Decision ownership:
+
+- **0A — Master Foundation Architecture**
+  - subsystem ownership
+  - layer boundaries
+  - technology responsibilities
+  - dependency direction
+  - trust/security boundaries
+  - integration ownership
+  - offline/local versus external-system responsibility
+
+- **0B — Global JSON / Interoperability Contract**
+  - cross-process and cross-language contracts
+  - commands, queries, events, results and errors
+  - serialization
+  - correlation
+  - idempotency
+  - interoperability versioning
+  - integration-boundary message rules
+
+- **0C — Taxonomy / Information Vocabulary**
+  - Category
+  - Type / Kind
+  - Entity
+  - Entity Type
+  - Tag
+  - Tag Family
+  - Status
+  - Priority
+  - Relationship
+  - provenance
+  - confidence
+  - normalization
+  - aliases
+  - vocabulary extension rules
+
+- **0D — Settings / Configuration Architecture**
+  - settings ownership
+  - defaults
+  - overrides
+  - precedence
+  - effective values
+  - validation
+  - runtime configuration
+  - integration configuration
+  - configuration versus secrets
+
+- **0E — Foundation Architecture Reconciliation**
+  - cross-document consistency
+  - authority conflicts
+  - terminology conflicts
+  - missing shared architecture
+  - downstream Foundation contract
+
+0E applies only after it exists and has been reviewed.
+
+### Architectural Decision Escalation
+
+Feature work may extend an approved catalog, registry or configuration mechanism through its established extension process.
+
+Feature work must not silently redefine Foundation semantics.
+
+Examples of normal extension:
+
+- adding an approved new Tag
+- adding an Entity Type
+- adding a setting through the approved Settings architecture
+- adding a new integration adapter behind an approved gateway boundary
+
+Examples requiring Foundation consultation:
+
+- changing what a Tag means
+- creating a second Entity system
+- changing the global interoperability envelope
+- changing subsystem ownership
+- bypassing service/repository boundaries
+- changing how secrets are handled
+- changing offline/system-of-record responsibilities
+
+If implementation requires changing a Foundation concept:
+
+1. stop the local architectural decision;
+2. identify the owning Foundation contract;
+3. record the conflict or required extension;
+4. request architecture review rather than creating parallel infrastructure.
+
+### Offline-First Principle
+
+F7Hub must remain useful without internet connectivity or external API availability.
+
+Foundation and feature architecture must distinguish:
+
+- `LOCAL_REQUIRED`
+- `ONLINE_OPTIONAL`
+- `ONLINE_REQUIRED`
+
+Core local workflows classified `LOCAL_REQUIRED` must not depend on an external PSA, RMM, AI provider, password manager, cloud API or other remote service.
+
+External integrations extend F7Hub capabilities. They must not become accidental prerequisites for unrelated local functionality.
+
+Integration architecture must remain vendor-neutral until an approved provider is actually available.
+
+Do not assume HaloPSA, NinjaOne, CIPP, Keeper, Microsoft Graph, a particular AI provider or any other vendor is available unless the current task has verified that integration.
+
+### Employer and Customer Data Boundary
+
+F7Hub development, planning, documentation, examples, tests and fixtures must not require real employer, customer or credential data.
+
+Use synthetic example data wherever representative data is required.
+
+Do not commit or intentionally persist:
+
+- passwords
+- API keys
+- access tokens
+- refresh tokens
+- private keys
+- session cookies
+- recovery codes
+- secrets retrieved from password managers
+- other authentication material
+
+Secrets are not ordinary:
+
+- Settings
+- Clipboard history
+- Case Journal content
+- Analytics input
+- Mochi context
+- documentation
+- test fixtures
+- normal application logs
+
+Future credential integrations should prefer secure references, transient retrieval and approved credential-broker behavior rather than copying secrets into F7Hub persistence.
+
+When sensitivity is uncertain, minimize collection and persistence until the applicable policy and architecture are verified.
+
+### Canonical Documentation Is Living Documentation
+
+The numbered files under `Docs/` describe the current approved F7Hub architecture, behavior and requirements.
+
+They are not immutable historical snapshots.
+
+When approved implementation changes current behavior, update the relevant canonical documentation.
+
+Historical records belong primarily in:
+
+- `Docs/18_ChangeLog.md`
+- Git history
+- completed review/integration records
+- archived or superseded planning artifacts
+
+Do not preserve obsolete current-state documentation merely for historical reasons.
+
+Do not rewrite historical records to make them appear as though a later design always existed.
+
 ---
 
 # 1. Purpose
