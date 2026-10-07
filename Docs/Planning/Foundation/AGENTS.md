@@ -1,18 +1,3 @@
-## Instruction Chain
-
-This file supplements:
-
-- [Repository AGENTS.md](../../../AGENTS.md)
-- [Planning AGENTS.md](../AGENTS.md)
-
-All applicable instructions remain in force.
-
-For files under `Docs/Planning/Foundation/`, this Foundation guidance adds
-more-specific rules but does not replace repository-wide safety,
-architecture, security or documentation requirements.
-
----
-
 # AGENTS.md
 
 ## Scope
