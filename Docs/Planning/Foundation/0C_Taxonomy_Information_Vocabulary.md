@@ -1,4 +1,7 @@
 # F7Hub Phase 0C
+
+## Cross-Subsystem Planning Note
+
 Define shared terms such as action, event, result, observation, validation, evidence, session, resolution, selected context so Diagnostics, Analytics and DynamicHub do not invent competing meanings
 
 # Classification, Taxonomy, Entities, Tags & Relationships Architecture
