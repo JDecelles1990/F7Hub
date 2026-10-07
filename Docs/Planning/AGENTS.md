@@ -1,5 +1,4 @@
 # AGENTS.md
-Add cross-subsystem contract ownership rules, nested-plan precedence, provenance requirements, and a rule against redefining global concepts inside one subsystem
 
 ## Scope
 
@@ -1103,6 +1102,10 @@ decisions.
 
 F7Hub should become more understandable after every development cycle.
 
+
+---
+
+# Cross-Subsystem Contract Ownership
 
 A subsystem planning document may specialize a global contract, but may not silently redefine it.
 
