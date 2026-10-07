@@ -1,4 +1,7 @@
 # F7Hub Phase 0D
+
+## Cross-Subsystem Planning Note
+
 Define which DynamicHub preferences are settings versus runtime state; global/user/workflow settings; safe defaults; future AI/automation feature flags
 
 # Settings & Configuration Architecture Planning Instructions
