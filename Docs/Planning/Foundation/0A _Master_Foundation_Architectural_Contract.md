@@ -1,4 +1,7 @@
 # F7Hub Phase 0A
+
+## Cross-Subsystem Planning Note
+
 Register DynamicHub as a subsystem; establish authoritative selected-ticket context as a shared application concept; define one authority per business concept; add evidence-flow boundaries; show DynamicHub ↔ Diagnostics ↔ Analytics ↔ Clipboard ↔ Mochi dependencies
 
 # Master Foundation Architecture Planning Instructions
