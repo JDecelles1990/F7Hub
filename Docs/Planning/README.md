@@ -1,5 +1,4 @@
 # F7Hub Architecture Planning
-Add DynamicHub to the planning map, explain why its detailed planning lives under DynamicHub\Planning, and document its dependencies on Foundation/Diagnostics/Analytics/etc.
 
 ## Purpose
 
@@ -805,13 +804,24 @@ creating parallel sources of truth
 The final goal is:
 
 > F7Hub should become more understandable after every development cycle.
->
-> Diagnostics\	🔴 Must	Clarify that DynamicHub can request diagnostics and consume structured results, but PowerShell execution remains behind the established diagnostic/service/gateway architecture; stable diagnostic/action IDs should bridge the systems
-Analytics\	🔴 Must	Add the distinction between ticket evidence, workflow telemetry and derived analytics; analytics should consume structured events/results, not generated case-note prose
-Clipboard\	🔴 Must	State that clipboard content can assist a ticket workflow but must never establish ticket identity; clipboard events are not troubleshooting evidence unless explicitly attached to the active session
-Mochi\	🟡 Should	Define Mochi as an advisory consumer of selected-ticket/session context; Mochi may suggest or surface information but must not silently write diagnostic results, claim resolution or change ticket binding
-Archive\	🟢 Minimal	Probably only reinforce that archived planning is historical and cannot override current Foundation/DynamicHub contracts
 
+---
+
+# Cross-Subsystem Planning Notes
+
+These notes identify dependencies that later planning must reconcile. They are planning guidance, not proof of implementation.
+
+| Area | Priority | Planning requirement |
+|---|---|---|
+| Diagnostics | MUST | DynamicHub may request diagnostics and consume structured results, while PowerShell execution remains behind the established diagnostic/service/gateway architecture. Stable diagnostic/action identifiers should bridge the systems. |
+| Analytics | MUST | Distinguish ticket evidence, workflow telemetry and derived analytics. Analytics should consume structured events/results rather than generated case-note prose. |
+| Clipboard | MUST | Clipboard content may assist a ticket workflow but must never establish ticket identity. Clipboard events are not troubleshooting evidence unless explicitly attached to the active session. |
+| Mochi | SHOULD | Mochi is an advisory consumer of selected-ticket/session context. It must not silently write diagnostic results, claim resolution or change ticket binding. |
+| Archive | MINIMAL | Archived planning is historical and cannot override current Foundation or approved cross-subsystem contracts. |
+
+Conceptual dependency sketch:
+
+```text
                 Foundation
                     │
         ┌───────────┼───────────┐
@@ -825,4 +835,4 @@ Archive\	🟢 Minimal	Probably only reinforce that archived planning is historic
              ▼             ▼
         Case Notes       Analytics
         / Closure
-
+```
