@@ -1,5 +1,14 @@
-## Execution Gate
+# F7Hub Phase 2A
+
+# Diagnostic Domain & Registry Architecture
+
+## Cross-Subsystem Planning Note
+
 Clarify that DynamicHub can request diagnostics and consume structured results, but PowerShell execution remains behind the established diagnostic/service/gateway architecture; stable diagnostic/action IDs should bridge the systems
+
+---
+
+## Execution Gate
 
 This planning document may be prepared before its dependencies are approved.
 
