@@ -3,7 +3,7 @@
 > File: `ROOT.md`  
 > Project: F7Hub  
 > Project Root: `C:\Dev\F7Hub\`  
-> Purpose: Provide the concise, stable project entry point for humans and coding agents.  
+> Purpose: Provide the concise, stable project entry point for humans and coding agents.
 > Status: `REVIEW`
 
 ---
