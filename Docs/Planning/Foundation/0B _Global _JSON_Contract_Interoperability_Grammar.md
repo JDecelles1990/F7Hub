@@ -1,4 +1,7 @@
 # F7Hub Phase 0B
+
+## Cross-Subsystem Planning Note
+
 Add shared rules for schema_version, producer/consumer ownership, correlation IDs, ticket_id, session_id, atomic replacement, explicit null/unknown semantics, stale-state detection, and event/result separation
 
 # Global JSON & Interoperability Contract Planning Instructions
