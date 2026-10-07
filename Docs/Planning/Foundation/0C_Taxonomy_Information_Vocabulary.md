@@ -3455,3 +3455,783 @@ where information originated, such as:
 
 Provider-specific provenance must not require Foundation taxonomy to be
 redesigned every time a new integration is added.
+
+---
+
+# EXECUTION REPORT
+
+Execution date: 2026-10-07. ARCHITECT / PLAN: documentation only.
+Authority: architecture candidate awaiting independent review and explicit user approval.
+The original planning text is preserved verbatim. This report evaluates its examples rather than automatically adopting them.
+
+## Summary
+
+RECOMMENDATION: reuse the existing scoped `categories` and flat global `tags` infrastructure. Extend the existing catalog through separately approved feature work when families, aliases, stewardship, lifecycle or additional assignments become necessary. Do not create a parallel Global Tags catalog, universal Type table, generic entity store or graph database.
+
+Keep Category, domain Type/Kind, detected Entity Occurrence, canonical domain record, optional Tag, workflow Status, business Priority, explicit Relationship, derived Metric and explanatory Insight distinct. Shared meaning does not transfer domain ownership or grant execution, persistence, disclosure or workflow authority.
+
+FACT: 0A and 0B are APPROVED / INTEGRATED / CLOSED under explicit task authority and integrated Git history. Their historical execution-report labels do not reopen approval. This 0C report is an unapproved candidate. CORE entries below are a proposed planning minimum, not seeds or implemented System stewardship.
+
+No blocking semantic choice remains for the bounded Settings handoff. Parser implementation, physical persistence, UI, migrations and exact retention policies remain intentionally deferred to their owning plans.
+
+## Baseline / Candidate Identity
+
+| Item | Verified baseline |
+| --- | --- |
+| Canonical checkout / starting branch | `C:\Dev\F7Hub` / `main` |
+| HEAD, local origin/main, live remote main | `41d49d6644727cb324be24e05fda6738cd782eb6` |
+| Origin | `https://github.com/JDecelles1990/F7Hub.git` |
+| Original target Git blob | `9dbf6f69d24d8edd52502a735afa095bb3ec2136` |
+| Original raw checkout SHA-256 | `bae72b99e414dafd7043dc9440d8d42556c89c38959db8c64919c813b9d7174a` |
+| Original bytes / lines | 50,089 / 3,457; UTF-8-sig decoding and splitlines |
+| Baseline tracked/index changes | NONE; diff check clean |
+| Authorized candidate branch | `docs/foundation-0c-execution-20261007`; created after baseline passed |
+| Permitted unrelated untracked path | `AutoHotkey/Troubleshooting_Sections/GuideSettings.ini` |
+
+The protected INI's contents, hash and metadata were not inspected; only its pathname was observed through Git. No backups, DynamicHub external material or mutable development database were opened. No staging or integration was performed.
+
+The completion response records final whole-file raw SHA-256, filtered Git blob (`git hash-object --path`, without `-w`), byte size and line count after closing the file. Those identities bind this entire candidate; embedding a file's own final hash would change that hash. The baseline identity independently verifies the immutable original prefix.
+
+## Repository Areas Inspected
+
+FACT: evidence is tied to the baseline commit. Source inspection and reading test assertions do not establish runtime PASS.
+
+| Evidence ID | Sources / bounded inspection | Purpose and limitation |
+| --- | --- | --- |
+| G | Branch, HEAD, status, remotes, live remote main, log, diff/index/untracked inventories, target blob | Baseline and preservation |
+| A | AGENTS.md, ROOT.md, Docs/19_DocumentationIndex.md, Planning/Foundation scoped guidance | Routing, authority and lifecycle |
+| F0A | [Approved 0A](<0A _Master_Foundation_Architectural_Contract.md>) | Ownership, context, Case Journal, DynamicHub and evidence |
+| F0B | [Approved 0B](<0B _Global _JSON_Contract_Interoperability_Grammar.md>) | Wire grammar, identity, versioning and missing/null semantics |
+| P0C | Complete original plan retained above | Requirements and all acceptance criteria |
+| D | Relevant sections of [database strategy](../../07_Database.md), [ERD](../../08_ERD.md), [physical schema](../../09_SQLSchema.md) | Intended requirements versus migration availability |
+| M2 | Database/Migrations/0002_taxonomy.sql | Exact category/tag keys, columns, constraints, FKs and indexes |
+| M3-7 | Migrations 0003 through 0007: companies/contacts, tickets, Knowledge, FTS, scripts | Concrete domain records, enums and associations |
+| MS | Repository seed/reference searches and later script-registration migrations through 0012 | No category/tag seed catalog found in migrations; script seeds are separate |
+| RC | Python/f7hub/repositories/category_repository.py and tag_repository.py | Current read projections |
+| RT | Ticket repository/service/reference-service category validation paths | Active TICKET scope, domain types/priorities and references |
+| RK | Knowledge repository/service category/tag mutation and filtering/search | Guarded DRAFT metadata, any/all/untagged filters |
+| RS | Script repository/service metadata consumers | Scoped reads, null category registration and literal metadata search |
+| RD | Python/f7hub/domain/diagnostic_results.py; PowerShellService result/pack paths | Separate execution/collection outcomes and memory-only results |
+| T | Tests/Database/test_taxonomy_migration.py, test_category_references.py, test_knowledge_categories.py, test_knowledge_tags.py, test_knowledge_tag_filter.py, test_script_registry.py | Synthetic fixtures and intended assertions; NOT RUN |
+| C | Relevant Docs 03, 04_UserWorkflows, 06, 12, 13 and 14 sections | Current workflow/execution descriptions; no fresh runtime proof |
+| Scoped | PowerShell/AGENTS.md, Mochi/AGENTS.md, AutoHotkey/Troubleshooting_Sections/AGENTS.md | Subsystem boundaries; no Alt source or protected preferences inspected |
+| Skills | .agents/skills filename inventory | Only delivery skill found; implementation lifecycle machinery not applied here |
+| External | Official SQLite and IETF email/URI/IPv6 references below | Narrow normalization facts verified |
+
+NOT VERIFIED: mutable operational rows, live GUI/runtime behavior, employer policy and future feature availability. No historical tests are presented as fresh results.
+
+## Current-State Taxonomy
+
+FACT (M2): Category identity is `category_id`. Slug is globally unique NOCASE, not unique per scope; name is nonblank NOCASE but not unique. Scope is a closed CHECK. Optional parent FK uses SET NULL; direct self-parent CHECK exists, but longer-cycle and compatible-scope enforcement do not. Other fields include description, active flag, order and timestamps. Indexes cover parent and scope/active/order. The repository projection omits slug/parent and implements no hierarchy management.
+
+FACT (M2): Tags are already global flat records: `tag_id`, independently unique NOCASE name and slug, description and creation timestamp. No family, alias, scope, active flag, System/User origin or merge target exists. Built-in NOCASE folds ASCII letters, not full Unicode. [SQLite collation documentation](https://www.sqlite.org/datatype3.html#collation).
+
+FACT (M5/RK): `knowledge_article_tags` is the migrated assignment junction: unique article/tag primary key, cascade FKs, created timestamp and reverse tag/article index. Bounded source searches found no migrated ticket_tags or script_tags. Broader schema/ERD descriptions of those relations express intended architecture, not installed support. Ticket, Knowledge and Script records have optional category FKs.
+
+FACT (RT/RK): new Ticket category selection requires active TICKET scope; Knowledge DRAFT category mutation requires active KNOWLEDGE scope. Current inactive assigned labels remain readable; clearing/replacement uses the owning workflow. DRAFT tag replacement validates unique positive IDs, existence, version and update token in an atomic metadata transaction. Category/tags do not create content revisions or historical classification snapshots.
+
+FACT (RS): Script reads exclude non-SCRIPT category references, admit null categories and do not require category active in that join. Registration currently uses null category. Enabled, available and DIAGNOSTIC are not execution permission.
+
+| Current Category scope | Repository-controlled fixture inventory / current consumer |
+| --- | --- |
+| GENERAL | General only; taxonomy constraint examples including VPN; no general assignment service established |
+| TICKET | Networking, Microsoft 365, Hardware, Legacy Test Category (inactive), Ticket only; active selector/creation |
+| KNOWLEDGE | Outlook KB, Networking, Microsoft 365, microsoft 365, Legacy (inactive); DRAFT assignment/current filters |
+| SCRIPT | PowerShell Test; script fixture helper uses scope-title label; scoped registry read |
+| PROMPT | Defined scope; implemented consumer not established by inspection |
+| CLIPBOARD | Defined scope; implemented consumer not established by inspection |
+| DIAGNOSTIC | Diagnostic Test fixture; defined scope, not persisted run classification |
+
+Fixture IDs/slugs differ across isolated databases: `synthetic-<id>`, `kb-category-<id>`, `networking`, `microsoft-365`. They are not canonical seeds. Same name can exist in multiple scopes or within one scope with distinct slugs. No repository migration seed catalog for categories/tags was found; operational development rows remain NOT VERIFIED and were not needed for canonical architecture. Tag fixtures include Windows, Networking, VPN, Security and Unused; none proves System stewardship. No fixture or seed was executed.
+
+## Existing Taxonomy Reuse Matrix
+
+| Concept | Existing Mechanism | Current Storage / Representation | Used By | Current Owner | Current Scope | Current Constraints | Reuse Treatment | Required Future Change | Evidence | Confidence |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Category | Shared catalog | categories; domain FKs | Ticket/Knowledge/Script | Catalog plus assigning service | Seven scopes | Global slug unique; active/parent/self CHECK | REUSE / EXTEND | Management service scope/cycle checks when authorized | M2, RC, RT, RK, RS | High source confidence |
+| Global Tag | Flat catalog | tags | Knowledge currently | Shared catalog semantics | Global | Unique name/slug; no lifecycle | REUSE / EXTEND | Justified governance on same identity | M2, RC, RK | High |
+| Assignment | Explicit junction | knowledge_article_tags | Knowledge | Knowledge service/repository | Current metadata | Unique pair; cascade; DRAFT/token guards | REUSE / EXTEND per module | Owner junctions/history only when needed | M5, RK, T | High |
+| Families/aliases/stewardship | None migrated found | No current representation | Future consumers | Catalog/domain steward | Proposed shared meaning | Not implemented | NEW CONCEPT REQUIRED; extend catalog | Feature design, no duplicate Tag identity | M2, MS | High bounded absence |
+| Type/Kind | Domain enums | CHECKs/Python validation | Ticket/Script | Domain owner | Domain-specific | Unknown rejected | KEEP DOMAIN-SPECIFIC | Deliberate owner-contract extension | M4, M7 | High |
+| Status/Priority/Risk | Owner fields | CHECKs/result profiles | Owner domains | Owner services | Separate semantics | Not interchangeable | KEEP DOMAIN-SPECIFIC | No generic state or P1-P4 conversion | M4-5, M7, RD | High |
+| Canonical company/contact | Business records | companies/contacts; local IDs | Tickets | Domain services | Local | Email not unique identity | REUSE | Optional explicit resolver links | M3, RT | High |
+| Occurrence/type profile | No general store found | Conceptual future values | Clipboard/Diagnostics future | Source feature/domain resolver | Source-bound | Privacy/lifetime needed | NEW CONCEPT REQUIRED | Feature proves persistence need | MS, F0A | Medium bounded absence |
+| Relationship | Domain FKs/junctions | Ticket-KB, KB-KB | Ticket/Knowledge | Endpoint services | Typed endpoints | FK/unique/self checks | REUSE / ADAPT | Specific new predicates, no generic graph | M3-5 | High |
+| Provenance | Partial owner metadata | note source/is_ai_generated, authors, linked_by | Existing domains | Producer/assigning workflow | Feature-specific | No universal ledger | EXTEND / ADAPT | Separate source/assignment/acceptance | M4-5, F0A | High |
+| Metric/Insight | Approved consumer role | No implementation claimed | Analytics/advisory | Consumer service | Read-derived | Grain/time/uncertainty matter | NOT RELATED to Tag rows | Separate Analytics plan | F0A | Architectural |
+| Settings/secrets | Existing boundary contracts | No 0C configuration | Future 0D | Settings/secret owners | Behavior/display only | Cannot redefine semantic truth | NOT RELATED | Requirements handoff only | F0A/F0B | Architectural |
+
+Matrix confidence refers to evidence, not a probabilistic classification score.
+
+## Classification Vocabulary
+
+| Concept | Shared meaning | Example / boundary |
+| --- | --- | --- |
+| Category | Formal scoped organization of a record | TICKET Networking, not universal topic identity |
+| Type / Kind | Domain discriminator affecting shape/behavior | INCIDENT; content format distinct from Status |
+| Entity | Concrete referent, with occurrence versus canonical record distinguished | PC-1042 observed versus confirmed device reference |
+| Entity Type | Recognition/interpretation profile for concrete values | ipv4_address, not customer/product catalog |
+| Tag | Optional reusable topical annotation | VPN, never a specific user's email |
+| Tag Family | Governed grouping of topic meanings | protocol; no permission/folder hierarchy |
+| Status | State in an owner workflow/observation profile | WAITING or DRAFT; not topic tags |
+| Priority | Owner business urgency/order | Ticket HIGH; Script risk HIGH means something different |
+| Relationship | Explicit link with typed endpoints and predicate | Ticket APPLIED KB article; not shared labels |
+| Metric | Derived quantity with grain/population/time definition | Distinct tickets with accepted VPN annotation |
+| Insight | Supported interpretation with method/uncertainty | Trend conclusion, not taxonomy label or execution instruction |
+
+Independent dimensions can coexist without collapsing. A Windows article may have a scoped Category, future how_to Kind and Windows Tag; a hostname found in its content remains a separate occurrence.
+
+```mermaid
+flowchart LR
+    R[Domain record] --> T[Domain Type or Kind]
+    R --> C[Scoped Category]
+    R --> S[Domain Status and Priority]
+    R --> A[Optional Tag assignments]
+    A --> G[Existing global Tag catalog]
+    R --> O[Source-bound Entity occurrences]
+    R --> L[Explicit typed Relationships]
+    R --> M[Eligible facts for Metrics]
+    M --> I[Supported Insights]
+```
+
+## Classification Decision Tree
+
+Apply in order; a source can carry several independent dimensions.
+
+1. Secret/prohibited value? Exclude from ordinary taxonomy/logs/AI context; route to the approved secure boundary.
+2. Specific person/company/device/address/run/provider object? Use an authoritative domain reference if available; otherwise a source-bound typed occurrence. Never a reusable Tag or automatic new record.
+3. Shape/behavior discriminator? Use owner Type/Kind. JSON/XML/CSV are formats/Kinds when useful, not Entities merely because a container exists.
+4. Workflow state, urgency or operation outcome? Use the corresponding owner field. Pending, needs_review, escalated and resolved are not topical Tags. Successful collection is not verified resolution.
+5. Formal organizational classification within a scope? Use Category with explicit scope/cardinality.
+6. Reusable topic without workflow authority? Reuse a canonical Tag; evaluate alias/scope extension before a new entry. Product mention can suggest a topic without proving a concrete product-instance Entity.
+7. Verifiable predicate between records? Use typed Relationship, not coincident labels.
+8. Derived number/interpretation? Metric/Insight with grain/method/provenance; never taxonomy label.
+9. AI/parser proposal? Advisory until authorized acceptance; retain original source/method provenance.
+10. Ambiguous meaning? Preserve uncertainty, omit authoritative classification and route to owner clarification; do not invent an unknown canonical ID.
+
+## Category Architecture
+
+RECOMMENDATION: retain scoped formal classification and existing one-category-per-record cardinality. GENERAL is a scope, not an automatic wildcard. Future modules explicitly opt into approved scopes through services.
+
+Same displayed label does not justify merging TICKET Networking with KNOWLEDGE Networking; organizational meaning may differ. Reuse the shared catalog rather than duplicating it. If genuinely one definition needs multiple modules, assess applicability extension on the existing catalog in a later feature plan: today's single-scope representation cannot express arbitrary multi-scope categories. A common topical Tag can coexist without converting categories into Tags.
+
+Parents must exist, have compatible scope and form an acyclic tree; service validation owns this, not the current self CHECK alone. Current projections are effectively flat. Descendant expansion requires an explicit future query mode.
+
+Active categories are eligible for new assignments under domain policy. Inactive assignments remain readable and can be replaced/cleared through their owner workflow. Avoid deleting assigned categories to retire them: SET NULL can erase classification. Current labels are current metadata, not historical names/hierarchy; historical reporting needs its own reviewed snapshots/history. Categories never grant execution/provider access. No seeds or management UI are implemented.
+
+## Type / Kind Architecture
+
+| Domain | Current / proposed mechanism | Decision and boundary |
+| --- | --- | --- |
+| Ticket | EXISTING closed CHECK/service INCIDENT, SERVICE_REQUEST, PROBLEM, TASK | REUSE; behavior extension reviewed by Ticket owner |
+| Knowledge | EXISTING status, no article_kind field in M5 | PROPOSED how_to/reference/troubleshooting Kinds if justified; not global knowledge tags |
+| Clipboard | FUTURE content shape/format profile | plain_text/image/file_list candidates; format validation owned by feature |
+| Diagnostic | EXISTING fixed operation/result profiles | Snapshot collection differs from health_test; no health truth inferred |
+| Script | EXISTING DIAGNOSTIC, REMEDIATION, ADMINISTRATIVE, REPORT, UTILITY, INTEGRATION | REUSE metadata enum; Type never grants execution |
+| Automation | FUTURE controlled workflow/action discriminator | Contract/code-owned behavior; no arbitrary Settings Types |
+| Website | FUTURE reference Kind | portal/documentation/tool candidates, not provider capability claims |
+| Prompt | FUTURE task/template discriminator | explanation/summary/draft candidates; no unrestricted execution Kind |
+
+Use closed enums for behavior-bearing discriminators. Controlled reference data can represent extensible documentary Kinds only with owner validation/fallback. A taxonomy catalog requires a real use case. Settings selects supported behavior; it cannot invent semantics. Do not create a universal Type table for symmetry.
+
+## Entity Architecture
+
+RECOMMENDATION: share meaning and versioned recognition/normalization profiles; source features own detection, context, lifetime and persistence. Domain services own canonical records and authorized resolution. This is not a requirement for a new universal Entity table/parser service.
+
+Parser → occurrence → validation/optional normalization → optional authorized resolver → explicit workflow link. Resolver returns no match, one candidate or ambiguity. No parser/AI/PowerShell output creates records automatically. Product topics belong to Tags; installed software-instance observations can be Entities when source context establishes concrete meaning.
+
+## Entity Type Inventory
+
+Proposed new profile keys, not SQL fields or installed wire enums. CORE means reusable planning priority, not simultaneous parser implementation.
+
+| Family | Proposed keys | Disposition | Ownership / interpretation boundary |
+| --- | --- | --- | --- |
+| Network | ipv4_address, ipv6_address, mac_address, hostname, fqdn, url | CORE | Source/network validator; no lookup/access implied |
+| Identity | email_address, account_name | CORE | Identity profile; email alone not Contact equality |
+| Identity | directory_object_id, tenant_id | LIKELY | Provider/object namespace required; GUID alone insufficient |
+| Windows | file_path, registry_path, service_name | CORE | Windows source profile; no read/write/control authorization |
+| Windows | device_name, event_id, process_id, security_identifier | LIKELY | Host/provider/time context; PID/event ID not global stable identity |
+| PowerShell / Command | powershell_command_name, executable_name | LIKELY | Recognition only; arguments/commands remain untrusted text |
+| Error / Diagnostic | error_code, diagnostic_operation_reference | CORE | Namespace/radix/profile required |
+| Error / Diagnostic | error_message, diagnostic_finding_reference | NEEDS REVIEW | Prefer bounded text/observation until typed use justified |
+| Ticketing | ticket_reference, knowledge_reference | CORE | Owner/database namespace; display number differs from PK |
+| Ticketing | external_case_reference | FUTURE | Provider/account namespace; approved read-only integration first |
+| Microsoft | microsoft_resource_reference | FUTURE | Specialist verified provider/type/tenant profile |
+| Security | guid, content_hash | CORE | Syntax not referent; hash algorithm part of identity |
+| Security | certificate_fingerprint, vulnerability_reference | LIKELY | Algorithm/catalog required; not credentials/compromise proof |
+| Temporal | date, timestamp, duration | LIKELY | Locale/zone/unit; ambiguous time is not instant |
+| Software | software_name, software_version | LIKELY | Concrete source observation; ecosystem version rules |
+| Structured content | json, xml, csv, yaml | NEEDS REVIEW: reject as generic Entities | Format/Kind/parser input; nested values may yield occurrences |
+| Authentication material | password, token, recovery_code | NEEDS REVIEW: exclude | Approved secret boundary; no normal extraction/history |
+
+Families group interpretation ownership, not Tag Families or universal business-record types. Specialist additions require context, sensitivity and normalization profiles through controlled extension.
+
+## Entity Occurrence vs Canonical Entity
+
+| Conceptual field | FOUNDATION SEMANTIC REQUIREMENT | FEATURE-SPECIFIC / DEFERRED |
+| --- | --- | --- |
+| Source reference | Attributable bounded source; ephemeral handle allowed | Source kind, record/run identity, persistence |
+| Entity Type | Identifiable interpretation/profile | Registry, exact contract/version representation |
+| raw_value | Preserve permitted source representation separately | Whether raw may be retained; redact/omit before storage |
+| normalized_value | Optional type-specific derived comparison | Exact algorithm/library/version |
+| Provenance | Source/detection origin not fabricated | Minimal actor/method/time/version metadata |
+| Confidence | Optional uncertainty, not forced number | Calibrated score or defined qualitative assessment |
+| start/end offsets | If present, bind source snapshot/version, units and convention | Need for offsets; profile validation/representation |
+| Metadata | Bounded typed allowlist, no secret/provider dump | Feature schema and size limit |
+| Canonical match | Typed target, uncertainty and explicit acceptance | Existing reference/FK, resolver and UX |
+| Lifetime / identity | Occurrence differs from domain PK and follows source policy | Persist only with durable purpose; no mandatory table |
+
+RECOMMENDATION: if offsets are supplied, use an explicitly declared half-open range in the source profile. UTF-8 bytes, UTF-16 units and Unicode characters are not interchangeable; normalized text cannot reuse raw offsets. Expiry/redaction can remove raw evidence; a remaining justified reference must not imply replay is possible.
+
+Synthetic example: PC-1042 in Clipboard is a possible device_name occurrence, not a Device record. Resolver needs authorized company/context, can be ambiguous, and cannot create anything. Only an existing approved device workflow can confirm a link; otherwise the occurrence remains unlinked or expires.
+
+```mermaid
+flowchart LR
+    S[Permitted raw source] --> P[Source parser and validator]
+    P --> O[Typed source-bound occurrence]
+    O --> N[Optional normalization]
+    O --> Q[Optional authorized resolver]
+    Q --> U[No match or ambiguity]
+    Q --> C[Candidate domain reference]
+    C --> W[Explicit workflow acceptance]
+    W --> L[Link to existing record]
+```
+
+## Normalization Architecture
+
+RECOMMENDATION: retain permitted raw evidence; derive comparison values only under declared profiles. Normalized equality is not ownership, reachability or authorization. Failed/ambiguous interpretation must not replace raw text with a guess. No slug renames or backfills occur here.
+
+| Type | Conservative comparison rule | Caution / owner |
+| --- | --- | --- |
+| Email | Parse components, case-insensitive domain | Preserve local-part case; no full lowercase, dot/plus removal or automatic Contact equality; Identity profile |
+| IPv4 | Validated address value in dotted decimal | No octal/noncanonical guess or network lookup; Network profile |
+| IPv6 | Validated value, standard compressed lowercase presentation | Preserve zone/interface context separately; no cross-host scoped collapse |
+| MAC | Validated byte sequence, consistent derived hex | EUI length, interface/randomization context; not permanent device identity |
+| Hostname/FQDN | Declared DNS comparison profile | Short name differs from FQDN; trailing-dot/IDNA/Unicode rules need explicit profile |
+| URL | Parse; scheme/host case-insensitive comparison | Preserve path/query/fragment, ordering/duplicates/signed values; no generic sorting/decoding/lowercase; exclude credential-bearing URLs from logs |
+| File path | Preserve input; explicit Windows/provider comparison | No global lowercase/expansion/resolution, UNC access or traversal removal |
+| Registry path | Typed hive/path/value-name profile | Preserve raw/access/view context; no registry query merely for normalization |
+| Error code | Declared namespace/radix | Integer/HRESULT/provider code are not globally equivalent |
+| Hash | Valid hex plus algorithm; optional lowercase | Equality not proof of safety or execution approval |
+| GUID | Validate/canonicalize syntax if useful | Provider/tenant/object context before domain match |
+| Customer/provider identifier | Preserve owner representation | No leading-zero/punctuation/case removal without owner contract |
+| Temporal / software version | Locale/zone/unit or ecosystem profile | Never invent zone or assume universal version ordering |
+
+Verified technical basis: [RFC 5321 section 2.3.11](https://www.rfc-editor.org/info/rfc5321/) for mailbox case; [RFC 3986 section 6.2.2.1](https://www.rfc-editor.org/info/rfc3986/) for URI components; [RFC 5952 section 4](https://www.rfc-editor.org/info/rfc5952/) for IPv6 presentation. These support conservative semantics, not finished parsers.
+
+Unicode search/display equivalence requires a declared versioned profile preserving originals; do not apply compatibility folding indiscriminately. Existing NOCASE does not enforce bilingual synonym equivalence. New ASCII keys avoid requiring Unicode identity normalization. Before implementation, verify supported parser documentation and meaningful adversarial checks in the feature slice.
+
+
+## Tag Architecture
+
+RECOMMENDATION: one shared identity catalog based on current `tags`. Canonical Tag means reusable topic; Assignment means validated domain association. Alias/translation resolves identity, not separate assignment. Family/suggestion scope aids governance, not permission.
+
+New Foundation keys use stable ASCII lower_snake_case in a named vocabulary namespace (Tag `microsoft_365`, Entity Type `email_address`). Equal strings in different vocabularies are not automatically equivalent. Existing SQL IDs/slugs and hyphenated keys remain valid; no renaming or assumption that slug equals new Foundation key. A reviewed mapping can bind legacy records without duplication. Domain enums and 0B protocol naming stay intact.
+
+Extension: identify need → search definitions/aliases → reuse equivalent concept → alias wording differences → extend applicability if needed → create genuinely new defined concept only if necessary → assess search/analytics/privacy/lifecycle → document owner → approve through catalog/domain mechanism. Meaning/governance changes escalate to Foundation; ordinary approved entry additions need not restart Foundation. This procedure establishes no writable API or authority.
+
+```mermaid
+flowchart LR
+    G[Existing global Tag identity] --> F[Governed family and definition]
+    A[Aliases and translated labels] --> G
+    G --> V[Module suggestion profiles]
+    V --> W[Domain service validation]
+    W --> K[Existing Knowledge assignments]
+    W --> P[Future explicit assignments]
+    K --> Q[Operational filters]
+    P --> Q
+    K --> M[Eligible analytics projection]
+    P --> M
+```
+
+## Tag Family Inventory
+
+| Family | Disposition | Meaning / evaluation |
+| --- | --- | --- |
+| technology | CORE | Language/runtime/storage: PowerShell, Python, AutoHotkey, SQLite |
+| platform | CORE | Environment/platform: Windows; distinct from application product |
+| product | CORE | Named product/service topic, explicit umbrella definition |
+| networking | CORE | Network capability/topic: VPN, Wi-Fi, Routing |
+| protocol | CORE | DNS/DHCP topics, not concrete addresses |
+| identity | CORE | Authentication/MFA/control topics, not usernames |
+| security | CORE | Phenomenon/control, not proof of finding or legal classification |
+| hardware | LIKELY | Hardware topics, not asset/customer identifiers |
+| issue | LIKELY | Defined reusable symptoms; avoid one-off failure labels |
+| automation | LIKELY | Technical topics, not Script Type/status/permission |
+| workflow | NEEDS REVIEW: reject state family | Pending/escalated/needs_review/resolved are workflow fields |
+| knowledge | NEEDS REVIEW: reject Kind family | How-to/reference/troubleshooting evaluated as Knowledge Kinds |
+| custom | FUTURE | User grouping if useful; no System authority or sensitive identifiers |
+
+RECOMMENDATION: one primary stewardship family per governed Tag, flat definitions with clear governance value. Cross-module use need not multiply families. No family table/population is mandated.
+
+## Initial System Tag Inventory
+
+RECOMMENDATION only. CORE is proposed minimum; LIKELY needs demonstrated use; FUTURE excluded initially; NEEDS REVIEW withholds ambiguous meaning. T=Tickets, K=Knowledge, S=Scripts, D=Diagnostics, C=Clipboard are suggestion profiles, not current junction availability.
+
+| Proposed key / label | Family | Disposition | Meaning / suggested use |
+| --- | --- | --- | --- |
+| powershell / PowerShell | technology | CORE | Topic, not execution eligibility; S/K/T/D |
+| python / Python | technology | CORE | Language topic; K/S/T |
+| autohotkey / AutoHotkey | technology | CORE | AHK topic; version remains metadata; K/S/T |
+| sqlite / SQLite | technology | CORE | Technology, not database instance; K/S/T |
+| windows / Windows | platform | CORE | Platform topic; K/T/S/D/C |
+| networking / Networking | networking | CORE | Broad network topic; reuse equivalent legacy tag; K/T/D |
+| dns / DNS | protocol | CORE | No health-test capability implied; K/T/D/S |
+| dhcp / DHCP | protocol | CORE | False observation stays Boolean; K/T/D/S |
+| vpn / VPN | networking | CORE | VPN topic; K/T/D |
+| authentication / Authentication | identity | CORE | No concrete accounts; K/T/D |
+| microsoft_365 / Microsoft 365 | product | LIKELY | Defined suite umbrella; not all Office 365 services; K/T |
+| outlook / Outlook | product | LIKELY | Product topic; K/T |
+| teams / Teams | product | LIKELY | Microsoft Teams topic; specific team IDs are entities; K/T |
+| onedrive / OneDrive | product | LIKELY | Product/service topic; K/T |
+| sharepoint / SharePoint | product | LIKELY | Product/service topic; K/T |
+| exchange_online / Exchange Online | product | LIKELY | Not integration capability claim; K/T |
+| entra_id / Entra ID | product | LIKELY | Directory product topic; K/T |
+| intune / Intune | product | LIKELY | No sync authority; K/T |
+| microsoft_graph / Microsoft Graph | technology | LIKELY | API technology, no configured permissions; K/S/T |
+| wifi / Wi-Fi | networking | LIKELY | Wireless networking; K/T/D |
+| routing / Routing | networking | LIKELY | Routing topic; K/T/D |
+| firewall / Firewall | security | LIKELY | Control, not vendor identity; K/T/D |
+| mfa / MFA | identity | LIKELY | Multifactor authentication; K/T |
+| conditional_access / Conditional Access | identity | LIKELY | Policy/control topic, not access authority; K/T |
+| phishing / Phishing | security | LIKELY | Threat topic, not confirmed incident; K/T |
+| malware / Malware | security | LIKELY | Threat topic, not proof from collection failure; K/T |
+| purview / Purview | product | FUTURE | Initial use not established, suite-specific definition deferred |
+| defender / Defender | product | NEEDS REVIEW | Ambiguous suite/product umbrella; define before entry |
+| fortinet / Fortinet | product | NEEDS REVIEW | Vendor/product ambiguity, no verified workflow/provider dependency |
+
+No seeds/aliases/families/assignments written. Inclusion does not endorse/install a vendor. Workflow states and one-off case summaries are not Tags; proposed System authority is not inferred for legacy/fixture rows.
+
+## Aliases & Multilingual Labels
+
+Identity is stable; label is presentation; alias is alternate wording. Search aliases aid discovery and may be ambiguous with disambiguation. Import aliases need approved source/namespace mappings before automatic assignment. No fuzzy/translated label silently creates or merges identity.
+
+Aliases resolve directly without chains; collision review covers keys/labels/aliases in a declared language/namespace/profile. Ambiguous aliases cannot auto-assign. Search can show related candidates without equating them.
+
+M365 can be an approved search alias for Microsoft 365. Office 365/O365 may differ in product scope; automatic import equivalence requires provider/time-specific approval. PS is ambiguous globally. pwsh is an executable name, not universally the same entity as the PowerShell product topic.
+
+French/English labels (Networking / Réseau where equivalent) present one identity, not two Tags/dimensions. Missing translation falls back to an approved canonical label. Locale routes to 0D; localization/storage/UI to feature planning. SQL uniqueness alone does not govern semantic aliases.
+
+## System vs User Tags
+
+SYSTEM/USER means vocabulary stewardship, not source origin or assignment actor. Technician can assign SYSTEM Tag; AI can suggest USER Tag without authority. Core/module owners are SYSTEM governance roles, not separate catalogs.
+
+| Concern | SYSTEM | USER |
+| --- | --- | --- |
+| Definition/key | Stable controlled meaning | Flexible local meaning within validation/privacy policy |
+| Editability | Authorized label edits; semantic change reviewed | Service-controlled user editing preserves identity/history |
+| Family | Governed primary family | Optional custom grouping, no silent promotion |
+| Collision | Reviewed resolution | Reuse/qualify, never shadow/overwrite |
+| Aliases | Approved equivalence/import mappings | Cannot redefine System rules |
+| Analytics | Accepted canonical dimensions | Separate/custom ID analysis; canonical inclusion requires mapping |
+| Merge/promotion | Reviewed equivalence/owner action | Explicit mapping, original provenance/history retained |
+| Lifecycle | Governed retirement/merge | Authorized transitions with same integrity safeguards |
+
+FACT: current tags have no stewardship field. Do not backfill all SYSTEM from English labels, actor or fixtures. Future migration needs evidence-based mapping or explicitly reviewed legacy-unclassified treatment before System-only rules; storage deferred.
+
+## Tag Scope / Assignment / Lifecycle
+
+Catalog availability, suggestion applicability and assignment authorization are separate. Global catalog can support module suggestion subsets without identity duplication. Service validates target, workflow/concurrency, Tag eligibility and intent. Catalog presence grants no write permission.
+
+Assignments are unique target/canonical Tag pairs; zero valid. Suggestions are not assignments. Automatic rules need separately approved scope/version/authority and owner service; 0C authorizes no auto-tagging. Prefer few useful annotations, no arbitrary numeric cap.
+
+| Proposed state | New assignment | Existing refs | Transition rule |
+| --- | --- | --- | --- |
+| ACTIVE | Eligible under policy | Normal read | Controlled editing preserves meaning |
+| INACTIVE | Ineligible | Readable/retired indication | Reactivate only compatible meaning |
+| MERGED | Approved active target, not source | Source identity/redirect/history retained as justified | Equivalence-only; no self/cycles/unresolved chain |
+
+Current tags have none of these states. Future merge reviews definitions/owners/impact, atomically reassigns explicit junctions without duplicates, preserves approved aliases, retains justified identity/provenance history and redirects to one active canonical target. Reports declare original-identity versus current-mapping semantics. Semantic split is separately reviewed reassignment/history, not merge.
+
+Current cascade deletion can remove Knowledge assignments. Retirement is preferred; physical deletion needs separately authorized proof of safe history/links. No lifecycle/merge API or cleanup implemented.
+
+## Relationship Architecture
+
+RECOMMENDATION: explicit domain FKs/junctions with typed endpoints and service validation. Foundation defines common predicate meaning where needed; domains specialize/own writes. No Tag replacement, unrestricted JSON pointers or generic graph database.
+
+| Predicate / direction | Endpoints / meaning | Authority/lifecycle |
+| --- | --- | --- |
+| Existing Ticket RELATED KB | Ticket → article, neutral association | Token retained, no outcome inferred |
+| Existing Ticket APPLIED KB | Article marked applied | Owner workflow; not automatically resolved/validated |
+| Existing Ticket RESOLUTION_SOURCE KB | Article source for stated resolution | Existing attribution, not proof of validation |
+| Existing KB RELATED/PREREQUISITE/SUPERSEDES/DUPLICATES | Article → article; unique source/target/type and self check | Storage exists; management not claimed; label does not prove symmetry |
+| Proposed EVIDENCE_FOR | Permitted source/reference → explicit case/journal/Ticket | Accepted association; source owner retained, no universal ledger |
+| Proposed RUN_FOR | Run → initiating authorized context | Diagnostics owns results; no later selection retargeting |
+| Proposed USES | Workflow/action → permitted script/resource | Owner validates; USED_BY inverse read, not duplicate fact |
+| Proposed DERIVED_FROM | Artifact/metric/insight → permitted sources | Method/version/lineage, expired raw not replayable |
+| Proposed RESOLVES | Accepted remedy/outcome → specified issue/case | Evidence/acceptance required; run success insufficient |
+| Proposed RELATES_TO | Justified neutral typed link | No catch-all graph or rename of existing RELATED |
+
+Profiles declare direction/symmetry, inverse, endpoint types, cardinality/uniqueness, provenance, history/mutability and deletion. Symmetric profile stores one pair if approved. Acyclicity is predicate-specific, not imposed on ordinary related links.
+
+```mermaid
+flowchart LR
+    T[Ticket] -->|Existing article association| K[Knowledge article]
+    W[Approved workflow coordination] -->|initiates| D[Diagnostic run]
+    D -->|Proposed RUN_FOR| C[Initiating authorized context]
+    D --> O[Owned result and observations]
+    O -->|Proposed accepted EVIDENCE_FOR| J[Case Journal or explicit Ticket]
+    R[Accepted resolution assertion] -->|Proposed RESOLVES| T
+    R -->|Separate validation evidence| V[Validation outcome]
+    K -->|Existing typed article link| K2[Knowledge article]
+```
+
+Conceptual only: no diagnostic history, DynamicHub restoration or Case Journal links claimed implemented.
+
+## Shared Operational Vocabulary
+
+| Concept | Shared meaning | Boundary |
+| --- | --- | --- |
+| Context | Purpose-bound refs/working information | Application resolves freshness; Ticket optional |
+| Selected Context | Deliberately chosen bounded subset | Not whole workspace/dumps; selection not transmission authority |
+| Session | Bounded interaction lifetime/identity | Owner IDs; no universal Session table |
+| Action | Authorized intent or attempted operation | Recommendation ≠ Action; COMMAND not completion |
+| Event | Fact already occurred | 0B EVENT retained; no global store mandate |
+| Result | Valid outcome of operation/request | Action ≠ Result; Result ≠ Resolution |
+| Observation | Source statement/value with method/time/context | No inferred health/root-cause truth |
+| Evidence | Source explicitly associated with claim/workflow | Telemetry ≠ Ticket Evidence; producer authority retained |
+| Diagnostic | Controlled collection/test, stated purpose/profile | Diagnostics results, DynamicHub coordination |
+| Finding | Criteria-supported interpretation | Separate from collection status/verified resolution |
+| Remediation | Authorized change to address issue | Independent execution policy, no AI/Tag authority |
+| Validation | Method/outcome check of stated conditions | Validation ≠ User Confirmation |
+| Resolution | Accepted assertion specified issue addressed | Resolution ≠ Validation; supporting source/scope retained |
+| Recommendation | Advisory next step | Adoption through authorized workflow before Action |
+| Telemetry | Purpose-bound operational measurement/event | Minimal/policy-controlled, not case evidence by default |
+| Generated Output | Produced content/artifact with derivation | Not automatically authoritative; disclosure/source rules |
+
+Diagnostic collection PASS/WARNING/ERROR, execution COMPLETED/ABORTED/failures, Ticket/Knowledge states and project PASS/FAIL/NOT RUN/BLOCKED stay separate. PASS/FAIL/PARTIAL need not globalize. Valid collection ERROR is completed RESULT; boundary failure cannot fabricate DiagnosticResult/resolution.
+
+## Provenance & Confidence
+
+RECOMMENDATION: separate source origin, production/detection method, assignment mechanism and acceptance. Reuse owner metadata when sufficient; extend only for need. One source string must not carry actor/provider/model/approval simultaneously.
+
+| Proposed concept | Interpretation |
+| --- | --- |
+| TECHNICIAN | Declared human input/manual assignment, not truth proof |
+| RULE | Deterministic proposal/assignment under versioned approved policy |
+| PARSER | Detected/validated occurrence with source/profile |
+| IMPORT | Source/namespace/mapping, not automatically trusted |
+| SYSTEM | App-generated source, distinct from SYSTEM Tag stewardship |
+| EXTERNAL_PROVIDER | Provider-supplied source, permitted account/object refs |
+| AI_SUGGESTED | Advisory interpretation, bounded model/method attribution |
+| RESOLVER | Candidate match, ambiguity/acceptance explicit |
+
+Concepts, not installed shared enums. Provider identity is bounded reference, not new origin per vendor. Existing source/is_ai_generated/author fields remain valid local representation, not universal ledger.
+
+Deterministic validation proves profile conformance, not existence/reachability/truth; no invented 1.0 score. Probabilistic classification can carry optional finite 0..1 score or defined qualitative assessment with task/method/version and calibration limits. Missing differs from zero. No fabricated manual score or cross-model comparison without approved basis.
+
+Producer owns uncertainty, workflow acceptance. AI self-confidence is advisory, not objective probability/authority. Threshold can suppress suggestions, never authorize execution/disclosure/canonical creation. Retain AI/import origin after technician acceptance; acceptance attribution separate where needed.
+
+
+## Master Taxonomy Inventory
+
+Separate inventories; detail remains in owning sections. CORE means planning priority, not implementation.
+
+| Class | CORE | LIKELY | FUTURE / NEEDS REVIEW |
+| --- | --- | --- | --- |
+| Categories | Seven existing scopes and current owner eligibility | Formal categories justified by workflow | Multi-scope/hierarchy; fixture labels not seeds |
+| Types / Kinds | Current Ticket/Script, fixed Diagnostic profiles | Knowledge documentary/Clipboard content Kinds | Automation/Website/Prompt contracts |
+| Entity Types | Network/identity/path/code/hash/reference shortlist | Temporal/software/provider-context | Specialist resources; formats rejected, secrets excluded |
+| Tag Families | technology/platform/product/networking/protocol/identity/security | hardware/issue/automation | custom; workflow/knowledge rejected as state/Kind |
+| System Tags | PowerShell/Python/AutoHotkey/SQLite/Windows/Networking/DNS/DHCP/VPN/Authentication | Classified topic/product candidates | Purview deferred; Defender/Fortinet precise meaning needed |
+| Statuses | Ticket NEW/OPEN/IN_PROGRESS/WAITING/RESOLVED/CLOSED/CANCELLED; Knowledge DRAFT/PUBLISHED/ARCHIVED | Proposed tag ACTIVE/INACTIVE/MERGED | No universal state list; observation/execution remain owner-specific |
+| Priorities | Ticket LOW/MEDIUM/HIGH/CRITICAL | Other urgency with owner use case | No P1-P4 remap; Script risk separate |
+| Relationship Types | Current Ticket-KB/KB-KB tokens | EVIDENCE_FOR/RUN_FOR/USES/DERIVED_FROM | RESOLVES workflow; no universal relation table |
+| Operational Concepts | Context/Selected Context/Session/Action/Event/Result/Observation/Evidence/Diagnostic/Validation/Resolution/Recommendation/Generated Output | Finding/Remediation/Telemetry specialization | Vocabulary grants no execution/persistence authority |
+| Provenance Concepts | Origin versus production/assignment/acceptance | Declared mechanisms above | Exact fields/enums/calibration deferred |
+
+## Module Classification Matrix
+
+E=EXISTING source representation/use; P=PROPOSED architecture; F=FUTURE feature; NV=NOT VERIFIED. Per-cell availability matters. Occurrences differ from canonical records.
+
+| Module | Category | Type | Entity | Tags | Status | Priority | Relationships | Provenance | Confidence |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Tickets | E TICKET | E four Types | E company/contact refs; P occurrences | F junction | E lifecycle | E four levels | E company/contact/KB/history | E source/author/timeline; P richer | P suggestions |
+| Knowledge Base | E KNOWLEDGE/DRAFT mutation | P documentary Kind | P occurrences | E current assignment | E three states | F if justified | E Ticket-KB/KB-KB storage | E authors/attribution | P suggestions; no historic score |
+| Clipboard | F scope use | F content Kind | P transient occurrences | F accepted topics | F lifetime | F no urgency assumed | F promoted-source links | P source/parser/acceptance | P uncertainty |
+| Diagnostics | E scope definition; F assignment | E fixed profiles | E observations; P occurrences | F topics | E execution/collection | F no Ticket urgency | P run/context/evidence | E operation/run; P durable | P findings only |
+| PowerShell Scripts | E SCRIPT read | E six Types | E script record; P refs | F junction | E enabled/file/execution | E risk, not priority | E category FK; P use | E version/checksum | F advisory |
+| Automation | F classification | F controlled workflow/action | F permitted refs | F topics | F owner state | F owner ordering | P USES/DERIVED_FROM | P policy/actor/source | P suggestions |
+| Search | E supported filters | E Ticket filters | P normalized match | E KB filters; F aliases | E owner filters | E Ticket filters | P owner traversal | P match explanation | P rank ≠ truth |
+| Analytics | P dimension | P owner dimensions | P Type, no raw IDs default | P accepted canonical | P owner states | P Ticket dimension | P endpoint grain | P origin/mechanism | P method-specific |
+| Mochi | P bounded labels | P task context | F minimal permitted refs | P advisory topics | E cosmetic protocol; P context | P minimal selection | P read-only | P AI origin | P advisory |
+| Companies | F if justified | F owner Kind | E canonical record | F no names-as-tags | E active | F no urgency | E Contacts/Tickets | P import/reference | P resolver |
+| Contacts | F if justified | F owner Kind | E record; email not unique | F no person/email tags | E active | F no urgency | E company/Tickets | P import/reference | P resolver |
+| Devices | F no consumer established | F discriminator | F record; P occurrence | F topics | F device state | F no Ticket urgency | F typed links | P source/resolution | P matching |
+| Websites | F no consumer established | F reference Kind | P URL occurrence, no auto record | F topics | F lifecycle | F no urgency | F reference/use | P source/import | P suggestions |
+| Prompts | F scope use | F task/template Kind | P bounded inputs | F topics | F lifecycle | F no urgency | P derivation/use | P template/model/source | P advisory |
+| DynamicHub | P owner categories | P coordination | P permitted refs | P consumer | P coordinator, not result | P owner urgency | P run/evidence/case | P intent; producer source | P no authority |
+
+Clipboard/Diagnostic plans can reuse occurrence/profile/normalization/provenance semantics without redefining Category/Tag. Snapshot IP observations do not turn collection into health validation. Expired Clipboard does not erase independently accepted durable records. Ticketless local workflows remain valid; explicit association is optional.
+
+## Search Impact
+
+FACT (RK/M6): Knowledge FTS indexes current article code/title/summary/body with unicode61, not category/tag labels. Literal query and bound Category/Status/Tag filters compose; single/any/all/untagged modes return articles at most once. Preserve current ranking/order. Script metadata uses bound literal LIKE over name/code/description, not source FTS.
+
+RECOMMENDATION: exact identity, alias discovery, normalized occurrence, raw text, Tag/Category assignment, Type, Status/Priority and typed traversal are distinct match modes. Alias maps identity before supported assignment filtering; it does not silently alter FTS or authorize import/merge. Descendant/cross-domain expansion needs explicit profiles.
+
+Inactive assignment remains readable in declared views; available-choice filtering does not imply absence of past assignment. Operational uncertain matches carry provenance; Analytics eligibility differs from text retrieval. No new search engine/tokenizer/ranking design.
+
+## Analytics Impact
+
+Dimensions can include accepted canonical Tags, scoped Category IDs, owner Type/Status/Priority, Entity Type, typed Relationship and provenance/mechanism. System/User eligibility explicit. Aliases/localized labels resolve one identity; same category label does not merge scopes.
+
+Metrics declare grain, distinct-count rule, population/time and unclassified handling. Many-tag joins cannot multiply records: use distinct-record or declared assignment grain. Relationships need endpoint/direction/type grain. Multi-tag percentages need not total 100. Current Knowledge metadata cannot reconstruct past assignments from content revisions.
+
+Raw emails/hosts/IP/customer/device values and transient occurrences are not default global dimensions. Deletion/expiry/merge is policy-aware; confidence does not aggregate across incompatible methods as truth. Metrics and Insights remain derived outputs, not taxonomy labels. Analytics retains read-derived role, no core writes/actions.
+
+## Privacy / Sensitivity
+
+Secrets/passwords/tokens/recovery material are excluded from ordinary taxonomy, Settings, logs, metrics and Mochi. Redaction detection does not authorize retention. Names, network IDs, paths, registry values and URLs can expose employer/personal context even if valid.
+
+RECOMMENDATION: purpose-bound minimal local collection, transient processing where sufficient, bounded typed metadata. Redact/omit before storage/logging/export/AI at owning boundaries, not merely UI masking. Predictable hashes are not guaranteed anonymization. Sensitivity tags are descriptive, not access control.
+
+Generic handling can distinguish permitted content, potentially sensitive content needing minimization/review, and excluded secrets. Legal/employer classes, exact enum names and policies are NOT VERIFIED and not adopted. Unknown policy cannot justify broader transmission. Examples are synthetic; no customer rows inspected.
+
+## Retention Interaction
+
+Transient expiry may expire occurrences/unaccepted suggestions. Durable Ticket/Knowledge assignments follow their durable record, not Clipboard lifetime. Promotion requires explicit authorized durable artifact/link; no automatic raw-history retention.
+
+Retirement/merge preserves justified identity/history. Owners define relation deletion; minimal tombstone only where justified, never raw replay after deletion. Aggregates can outlive raw source only under approved privacy/deletion policy; Analytics has no unconditional exemption.
+
+0D receives hooks, source plans define lifetimes/cascade/history/recovery. No TTL/default/job/setting chosen here.
+
+## Mochi Impact
+
+Only bounded approved Selected Context through application services. No unrestricted clipboard/history/diagnostic dumps, secrets, DB access or unnecessary occurrence metadata. Suggestions advisory; authorized workflow revalidates source/target freshness, scope, identity and intent before assignment.
+
+No silent canonical taxonomy/entity creation, Ticket-state change or execution. Retain AI origin after acceptance. Existing cosmetic v1 unchanged. Advisory projection/transport requires separately approved contract and disclosure workflow, including 0B's bounded projection requirement. No provider call, protocol extension or implementation.
+
+## 0A Compatibility
+
+| Approved boundary | 0C alignment |
+| --- | --- |
+| GUI → services → domain → repositories/gateways → infrastructure | Service validates meaning/assignment; widgets select/render; no SQL/shell construction |
+| Catalog / domain workflow | Existing catalog reused, explicit associations, no parallel infrastructure |
+| Ticket state/urgency | Owner values retained; Tags cannot mutate state |
+| Diagnostics | Owns definitions/execution/results; Tags/Type grant no permission |
+| DynamicHub | Conceptual workflow consumer only; no restoration/ownership transfer |
+| Case Journal / ticketless work | Explicit context/source association; no mandatory ledger/second timeline |
+| Workspace / active context | Fresh references; no pending-run/draft retargeting |
+| Analytics / Mochi | Derived/advisory consumers, no direct core writes/actions |
+| PowerShell / AHK / SQLite | Execution/interaction/persistence responsibility unchanged |
+| Offline / security | Local use LOCAL_REQUIRED; optional online AI/lookup not prerequisite |
+
+Architecture comparison PASS, not runtime proof. No ownership redesign.
+
+## 0B Compatibility
+
+Meanings live in owner payload profiles. Envelope, message/correlation identity, timestamps, versions, transport, missing/null and errors remain 0B-owned. Existing Python integers/legacy producer fields unchanged.
+
+| Concern | Binding |
+| --- | --- |
+| References | Owner/type/namespace; applicable new wire profiles use canonical positive decimal strings for local integer IDs, distinct from message/run UUIDs |
+| Naming | New semantic keys lower_snake_case; existing domain/0B protocol enums retain grammar |
+| Classes | COMMAND intent, QUERY read, EVENT occurred fact, RESULT valid outcome, ERROR boundary/contract failure |
+| Collection ERROR | Completed RESULT; infrastructure failure never fabricates DiagnosticResult |
+| Missing/null/empty | Optional absent refs omitted, no invented IDs; null/empty/zero/false distinct; reasons per profile |
+| Evolution | Per-contract rules; closed-enum addition may break; catalog additions not universally wire-compatible |
+| Unknown values | Safe unknown observations only explicitly open profiles; authoritative assignment known/eligible |
+| Normalization/offsets | 0C meaning/source/unit; 0B representation/structural validation |
+| Legacy | PowerShell schemaVersion 1 / cosmetic Mochi v1 strict, unchanged; adapters separately authorized |
+| Authority | Structural validity ≠ permission/reference validity/truth |
+
+Architecture comparison PASS. No JSON Schema/IPC/envelope implementation.
+
+## Settings Inputs for Phase 0D
+
+Requirements only; no Settings store/default/override algorithm or secrets.
+
+| Input | Invariant not configurable | Downstream owner |
+| --- | --- | --- |
+| Label language/order | Stable identity/meaning | 0D + localization feature |
+| Family visibility/module suggestions | Identity/domain eligibility unchanged | 0D + module feature |
+| Suggestion enablement | Optional cannot block local workflow | 0D + parser/AI; disclosure independent |
+| User-tag policy | No System authority/shadowing | 0D + catalog validation |
+| Optional confidence threshold | Task/method-specific, never action/disclosure authority | Producer calibration; 0D only if justified |
+| Alias/label display | Import equivalence/analytics identity governed | Catalog owner; display choice only |
+| Privacy/retention hooks | Secrets excluded, no cosmetic weakening of policy | Security/source feature + 0D |
+| Inactive/history visibility | Eligibility/history intact | Domain/search UI + 0D |
+| Analytics custom-tag inclusion | Declared identity/grain/provenance | Analytics owner |
+
+Definitions, normalization equivalence, enums, relationship authority and provenance are not user-editable truth settings. Catalog editing is governed use case, not direct configuration mutation. Storage/precedence/defaults remain for 0D; not executed.
+
+## Database Impact Assessment
+
+Assessment only: no SQL, migration number, seed, schema edit or connection.
+
+| Concept | Class | Future need / evidence |
+| --- | --- | --- |
+| Current categories/FKs | REUSE | Service management invariants |
+| Category applicability/history | EXTEND if justified | Current single scope/labels insufficient for arbitrary multi-scope/history |
+| Tags/Knowledge junction | REUSE | Existing identities/unique pairs |
+| Family/alias/label/stewardship/lifecycle/redirect | EXTEND | Needed capabilities on same catalog, no duplicate identity |
+| Other assignments | EXTEND | Owner associations/FKs/uniqueness/history |
+| Provenance/acceptance | EXTEND where needed | Minimal typed metadata, no universal ledger |
+| Entity Type profiles | NEW concept; persistence NOT VERIFIED necessary | Code/contract may suffice |
+| Occurrences | NEW concept; durable store NOT VERIFIED necessary | Purpose/source/version/lifetime/privacy first |
+| Resolution | REUSE domain records | Optional typed reference, no duplicate business identity |
+| Relationships | REUSE / EXTEND per use | Endpoint FKs/junctions, not generic graph |
+| Metrics/Insights | NOT VERIFIED storage need | Analytics owns justified snapshots |
+| Settings | NOT VERIFIED database need | 0D owns; no table prescribed |
+
+Future structural work requires separate authorized migration slice/review: immutable applied history/checksums, FK enforcement, documented timeout, transactions, indexes/collision/backfill compatibility and applicable integrity checks. Legacy origin/cascade handling must be deliberate. Planned schema prose does not establish installed junctions.
+
+## Planning Depth Classification
+
+| Decision | Depth | Bounded outcome |
+| --- | --- | --- |
+| Category/Type/Entity/Tag/Status separation | DECIDE NOW | Stable meaning before 0D/features |
+| Existing global Tag direction / flat tags | DECIDE NOW | Reuse evidence, no duplicate catalog/hierarchy |
+| Keys/legacy identity | DECIDE NOW | Compatible meanings without slug migration |
+| Provenance/uncertainty/acceptance | DECIDE NOW | No AI confidence authority |
+| Relationship/resolution principles | DECIDE NOW | Owner boundaries, explicit links |
+| Minimal families/CORE System inventory | DECIDE NOW | Small handoff baseline, not exhaustive seed plan |
+| Catalog storage/aliases/localization UI | DESIGN NEXT | Catalog/localization feature, 0D display inputs |
+| Exact normalization/parser profiles | DESIGN NEXT | Semantics fixed; algorithms need feature validation |
+| Occurrence persistence/lifetime | DEFER UNTIL FEATURE PLAN | No blanket extraction store |
+| New domain Kinds | DEFER UNTIL FEATURE PLAN | Shape/behavior use case first |
+| Every tag/parser, AI auto-tagging, graph visualization | DEFER UNTIL FEATURE PLAN | Independent scope/security justification |
+| SQL/index/backfill/migration implementation | DEFER UNTIL IMPLEMENTATION | After approved feature design/review |
+
+Refinement of original hypotheses: decide a conceptual minimum now for acceptance/handoff; specialist inventory/mechanics stay deferred. Deferred mechanics do not leave core meaning undecided.
+
+
+## Decision Register
+
+RECOMMENDED is not APPROVED; all recommendations await independent review/user approval. No user decision is manufactured where evidence supports a safe recommendation. Deferred product mechanics do not block this bounded handoff.
+
+| Decision | Options | Recommendation | Reason | Consequences | Status | Planning Depth |
+| --- | --- | --- | --- | --- | --- | --- |
+| D01 Global Tags | New/per-module/current catalog | Extend current global tags | M2/RK existing identity | No duplicate seeds/catalog | RECOMMENDED | DECIDE NOW |
+| D02 Families | Cosmetic/governed/none | Minimal governed flat families | Ownership/suggestion value | Storage later, no authority | RECOMMENDED | DECIDE NOW |
+| D03 Tag hierarchy | Tree/graph/flat | Flat Tags | Category formal hierarchy separate | No inherited assignments | RECOMMENDED | DECIDE NOW |
+| D04 User Tags | Ban/equal System/distinct | Controlled USER stewardship later | Flexible without meaning drift | Collision/privacy/report safeguards | RECOMMENDED | DECIDE NOW |
+| D05 Aliases | Duplicate/fuzzy/governed | Canonical identity, search/import distinction | Ambiguity visible | Alias feature before automated imports | RECOMMENDED | DECIDE NOW |
+| D06 Scope | Duplicate/permission/separate | Availability/suggestion/assignment distinct | Owner boundaries | Explicit future junctions; GENERAL not wildcard | RECOMMENDED | DECIDE NOW |
+| D07 System/User | Actor inferred/stewardship | Stewardship separate from source/assignment | Legacy lacks origin evidence | Reviewed legacy mapping needed | RECOMMENDED | DECIDE NOW |
+| D08 Entity Type ownership | Universal/source-incompatible/shared | Shared profiles, feature validators/domain resolvers | Meaning reuse, no transfer | Namespaces required | RECOMMENDED | DECIDE NOW |
+| D09 Occurrence persistence | All/none/purpose-bound | Transient where sufficient; durable for justified need | Minimize privacy/storage | Physical decision feature-owned | DEFERRED | DEFER UNTIL FEATURE PLAN |
+| D10 Canonical resolution | Auto-create/guess/explicit | Optional resolver and accepted link | Observation not identity authority | No automatic domain record creation | RECOMMENDED | DECIDE NOW |
+| D11 Confidence | Forced/none/optional method-specific | Optional uncertainty, deterministic separate | Avoid invented truth/comparison | Calibration/threshold later | RECOMMENDED | DECIDE NOW |
+| D12 Provenance | One string/ledger/owner metadata | Separate origin/production/assignment/acceptance | Reuse existing attribution | Minimal needed extensions | RECOMMENDED | DECIDE NOW |
+| D13 Relationships | Tags/graph/domain links | Explicit typed FKs/junctions | Meaning/integrity | No universal relation table | RECOMMENDED | DECIDE NOW |
+| D14 Category/Tag | Convert/universal/distinct | Scoped formal vs optional topic | Existing consumers separate | Label alone cannot merge | RECOMMENDED | DECIDE NOW |
+| D15 Type governance | Universal table/settings/domain | Closed behavior enum, controlled documentary Kind | Validation/workflow owner | Values reviewed under owner/0B | RECOMMENDED | DECIDE NOW |
+| D16 Multilingual | Duplicate/translated key/labels | One identity, localized labels | Bilingual Analytics consistency | Storage/UI later | RECOMMENDED | DECIDE NOW |
+| D17 Keys | Rewrite slugs/display text/new keys | New lower_snake_case, retain legacy | Stability without migration churn | Explicit mapping if needed | RECOMMENDED | DECIDE NOW |
+| D18 Initial inventory | Exhaustive/none/minimum | Classified CORE shortlist | Actual platform/topics | No seeds; umbrella ambiguity withheld | RECOMMENDED | DECIDE NOW |
+| D19 Normalization | Generic cleanup/type profiles | Preserve raw, conservative derived value | Evidence preservation | Exact parser/adversarial tests later | RECOMMENDED | DESIGN NEXT |
+| D20 Employer policy/live rows | Guess/inspect customer data/unknown | NOT VERIFIED; no data inspection required | Not canonical architecture | Resolve before collection/deployment | NOT_VERIFIED | DEFER UNTIL FEATURE PLAN |
+| D21 Lifecycle/merge | Delete/rename/retire-redirect | Equivalence-only atomic merge | Cascade can erase links | History/redirect design later | RECOMMENDED | DECIDE NOW |
+| D22 Settings boundary | Configurable truth/display-policy | Presentation/behavior inputs only | 0D owns configuration | No Settings execution/files | RECOMMENDED | DECIDE NOW |
+
+## Risk Register
+
+Likelihood uses the qualitative vocabulary LOW, MEDIUM, HIGH, UNKNOWN. Any LOW/MEDIUM/HIGH rating is an architecture estimate, not measured operational evidence. All entries are UNKNOWN because the inspected repository evidence does not support a meaningful likelihood estimate; no probabilities were measured.
+
+| Risk | Trigger / Cause | Likelihood | Impact | Mitigation | Residual Risk | Owner / Downstream Phase | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Taxonomy duplication | Second global/per-module catalog | UNKNOWN | Split identity/search/migration | Reuse/search-before-create | Legacy mapping still needed | Catalog / 0E reconciliation | Mitigation proposed |
+| Taxonomy drift | Changes without definition/owner | UNKNOWN | Silent meaning change | Controlled extension, semantic escalation | Human governance required | Catalog/domain | Mitigation proposed |
+| Tag explosion | Every string/topic becomes tag | UNKNOWN | Unusable catalog/reporting | CORE minimum, alias/need review | Custom growth | Catalog/UI | Mitigation proposed |
+| Over-tagging | Assign every AI/parser match | UNKNOWN | Noisy misleading results | Advisory, explicit acceptance, relevance | Human inconsistency | Assigning feature | Mitigation proposed |
+| Entity explosion | Store all/auto-create records | UNKNOWN | Duplication/privacy | Purpose-bound transient, explicit resolution | Durable needs later | Clipboard/Diagnostics/domain | Mitigation proposed |
+| Privacy leakage | IDs/URLs/provider dump to logs/AI | UNKNOWN | Employer/personal/secret exposure | Minimize/allowlist/redact, exclude secrets | Policy unknown | Security/source/0D hooks | Open policy dependency |
+| Ambiguous categories | Same names/wrong scope | UNKNOWN | Wrong classification/reports | IDs, explicit scope, cycle checks | Legacy name duplication | Catalog/domain | Mitigation proposed |
+| Relationship ambiguity | Infer resolves from tags/success | UNKNOWN | False evidence/outcome | Typed predicates, distinct acceptance/validation | Claims can be wrong | Ticket/workflow/Diagnostics | Mitigation proposed |
+| Migration incompatibility | Slug rename/origin guess/delete | UNKNOWN | Broken refs/history | Preserve IDs, reviewed mapping/transactions | Physical design deferred | Database/catalog slice | Implementation gate |
+| Analytics fragmentation | Label grouping/tag join counts | UNKNOWN | Double counting/split dimensions | Canonical IDs, grain/distinct rule | Historical data unavailable | Analytics | Mitigation proposed |
+| Bilingual duplication | Labels become identities | UNKNOWN | Split catalog/reports | One identity, governed translations | Ambiguous translation | Catalog/localization | Mitigation proposed |
+| AI taxonomy noise | Self-confidence as authority | UNKNOWN | Wrong tags/entities/actions | Advisory/revalidation/acceptance | AI judgements still uncertain | Mochi/workflow | Mitigation proposed |
+| Weak normalization | Lowercase paths/email/query | UNKNOWN | False equality/evidence alteration | Raw preservation, type namespace/profile | Edge cases untested | Source/parser feature | Parser validation deferred |
+| Cross-module coupling | Universal service owns domains | UNKNOWN | Ownership transfer/blocking | Shared semantics, domain APIs/FKs | Contract discipline needed | Foundation/features | Mitigation proposed |
+| History loss | Cascade deletion/current metadata treated historical | UNKNOWN | Lost classification/provenance | Retirement; explicit snapshot need | Existing history absent | Knowledge/catalog/Analytics | Open feature requirement |
+| Wire drift | Closed enum extended silently | UNKNOWN | Consumer rejection | 0B per-contract evolution | Adapters unimplemented | Contract owner | Mitigation proposed |
+| Offset mismatch | Redacted/normalized coordinate basis | UNKNOWN | Wrong attribution | Snapshot/unit/range binding | Replay may be unavailable | Clipboard/parser | Mitigation proposed |
+| Authority leakage | Enabled/type/tag implies execute | UNKNOWN | Unsafe process/provider action | Independent service/gateway intent/policy | Future validation required | Execution/domain | Mitigation proposed |
+
+## Phase 0C Acceptance Criteria
+
+PASS means the inspection/documentation criterion is supported, not implemented or runtime-tested functionality.
+
+| # | Criterion | Status | Evidence / limitation |
+| --- | --- | --- | --- |
+| 1 | Existing taxonomy architecture inspected | PASS | M2/M3-7, RC/RT/RK/RS, reuse matrix |
+| 2 | Current categories inventoried | PASS | All seven scopes, repository-controlled fixtures/consumers; no migration seed catalog; operational mutable rows NOT VERIFIED |
+| 3 | Category/Type/Entity/Tag/Status/Priority/Relationship/Metric/Insight distinguished | PASS | Definitions and decision tree |
+| 4 | Proposed global Entity Type inventory | PASS | Families/profile keys, distinct canonical records |
+| 5 | Proposed global Tag Family inventory | PASS | Governed table, state/Kind families rejected |
+| 6 | Proposed initial System Tag inventory | PASS | CORE/LIKELY/FUTURE/NEEDS REVIEW; no seeds |
+| 7 | Conceptual aliases | PASS | Search/import, collision, direct mapping, multilingual |
+| 8 | Conceptual module scopes | PASS | Availability/suggestion/authorization distinction |
+| 9 | System/User semantics | PASS | Edit/alias/collision/report/merge/lifecycle; legacy unknown |
+| 10 | Occurrence/canonical entity separation | PASS | Field matrix, resolver/acceptance diagram |
+| 11 | Conceptual normalization | PASS | Conservative per-type table; exact parsers deferred |
+| 12 | Confidence rules | PASS | Deterministic versus method-specific optional uncertainty |
+| 13 | Provenance rules | PASS | Origin/production/assignment/acceptance separated |
+| 14 | Relationships | PASS | Existing tokens, new endpoint/direction/lifecycle profiles |
+| 15 | Cross-module mapping | PASS | Fifteen-module matrix, current/proposed/future markings |
+| 16 | Search implications | PASS | Existing FTS/filters retained, match modes distinguished |
+| 17 | Analytics implications | PASS | Dimensions/grain/history/distinct counts/derived meaning |
+| 18 | Privacy | PASS | Secrets excluded, IDs minimized, policy unknown explicit |
+| 19 | Mochi consumption | PASS | Bounded advisory context/service validation, legacy unchanged |
+| 20 | 0D inputs | PASS | Configurable presentation/behavior versus invariant meaning |
+| 21 | Database assessment, no migrations | PASS | REUSE/EXTEND/NEW/NOT VERIFIED; sole documentation change |
+| 22 | Drift mitigation | PASS | Extension governance, identity, registers |
+| 23 | No production implementation | PASS | Git path/index gate, no code/config/test/schema writes |
+| 24 | Clipboard/Diagnostic reuse | PASS | Source lifetime, collection/result/evidence, optional Ticket association |
+
+## Validation
+
+Author-side documentation validation only, not independent architecture review. FRESH means this task's inspection/static evidence.
+
+| Check | Status | Evidence / limit |
+| --- | --- | --- |
+| Current taxonomy inspection | PASS | FRESH migration/repository/service/test-source inspection |
+| Existing category inventory | PASS | Schema/fixtures/consumers; mutable rows NOT VERIFIED |
+| Classification vocabulary | PASS | Distinct meanings/rules |
+| Entity taxonomy | PASS | Profile inventory and occurrence/resolution boundary |
+| Tag taxonomy | PASS | Reuse/family/core/alias/stewardship/scope/lifecycle |
+| Relationship model | PASS | Typed owner/direction/lifecycle, no graph |
+| Normalization model | PASS | Conceptual profiles; parser tests NOT RUN |
+| Confidence/provenance | PASS | Distinct mechanism/acceptance/uncertainty |
+| Search impact review | PASS | Architecture comparison; runtime NOT RUN |
+| Analytics impact review | PASS | Dimensions/grain/history; implementation not claimed |
+| Privacy review | PASS | Safeguards documented; employer policy NOT VERIFIED |
+| Cross-module consistency | PASS | Matrix and approved 0A/0B comparisons |
+| Scope control | PASS | Sole target modification, empty index, permitted untracked path |
+| Production changes | NONE | No code/test/config/canonical numbered doc edits |
+| Database changes | NONE | No SQLite connection, DDL/DML/migration/seed |
+| 0A compatibility | PASS | Ownership comparison |
+| 0B compatibility | PASS | Contract/naming/identity/evolution/missing-value comparison |
+| 0D handoff readiness | PASS | Inputs bounded; 0D NOT RUN |
+| Original prefix preservation | PASS | First 50,089 bytes match original SHA-256; append only |
+| Protected unrelated state | PASS | INI pathname unchanged/untracked; task did not read/hash/edit it |
+| Git scope | PASS | Required final allowlist/index/untracked checks; no integration |
+| Document structure | PASS | Ordered required headings, 24 criteria, balanced fences, four conceptual Mermaid sources |
+| Local links | PASS | Appended relative links resolve; original text unchanged |
+| Mermaid parser/render | NOT RUN | mmdc unavailable; no package installed/renderer run; conceptual source inspected, rendered appearance unverified |
+| Runtime/pytest/GUI/PowerShell/integrity | NOT RUN | Documentation-only scope; no PASS inferred from sources/history |
+| Independent architecture review | NOT RUN | Later exact-candidate gate |
+
+Before completion, run diff check/status/diff paths/staged paths/untracked inventories, verify exact prefix/headings/links/fences, inspect complete target diff, and record final raw SHA-256/filtered Git blob/bytes/lines in accompanying response. No database integrity or runtime validity is claimed. Windows rejected oversized append commands before execution; bounded successful append operations were used, with no additional files created.
+
+## Documentation Impact
+
+Only this report appended to the target; original instructions retained as exact prefix. No CURRENT_STATE/changelog/ERD/schema/numbered-document update is authorized for an unapproved architecture candidate.
+
+After approval/integration, route necessary concise updates to current owners: Docs 06 boundaries, 07/08/09 approved persistence, 03/04/13 delivered workflows, 12 execution/result specialization, and relevant Search/Analytics/Clipboard/Mochi feature contracts via the documentation index. These are potential downstream impacts, not writes/commitments here. Planned schema versus migration availability and historical approval labels were recorded without unrelated cleanup.
+
+## Recommended Next Planning Steps
+
+1. Independent architecture review of the exact final candidate, immutable prefix, 24 mappings and source/proposal/deferred separation.
+2. Explicit user approval, then separately authorized controlled Git integration.
+3. Only then execute 0D with approved 0A/0B/0C and the Settings input table. No 0E execution inferred from file presence/readiness.
+4. Later narrow feature plans may select catalog lifecycle/alias, occurrence extraction or assignment use cases. Verify consumers/legacy compatibility before physical design/seeds/UI. DynamicHub restoration/external material remains excluded.
+
+## Result
+
+READY_FOR_SETTINGS_ARCHITECTURE
+
+Candidate complete enough for independent review and, after explicit approval/integration, input to 0D. No implementation, migrations, seeds, Clipboard work, DynamicHub reintegration, self-independent-review, Git integration or 0D/0E execution authorized. STOP at this candidate gate.
