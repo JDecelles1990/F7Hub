@@ -1,0 +1,239 @@
+{
+  "schema_version": "0.1.0",
+  "catalog_kind": "tag_candidates",
+  "catalog_status": "planning_proposal",
+  "records": [
+    {
+      "proposed_tag_key": "microsoft_365",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "exchange_online",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "entra_id",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "outlook",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "onedrive",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "microsoft_teams",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "microsoft_authenticator",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "mfa",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "conditional_access",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "security",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "microsoft_defender",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "intune",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "azure",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "vpn",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "dns",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "printing",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "windows",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "browser",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "microsoft_edge",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "google_chrome",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "mozilla_firefox",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "powershell",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "sharepoint",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "bitlocker",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "authentication",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "identity",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "licensing",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "automation",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    },
+    {
+      "proposed_tag_key": "networking",
+      "existing_tag_id": null,
+      "existing_tag_key": null,
+      "tag_family_candidate": null,
+      "approval_state": "candidate_reconcile_first",
+      "auto_assign": false
+    }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "schema_version": "0.1.0",
+  "catalog_kind": "alias_review",
+  "catalog_status": "planning_proposal",
+  "records": [
+    {
+      "tool_id": "TOOL-003",
+      "tool_name": "Microsoft Entra admin center",
+      "search_hints": [
+        "Entra ID"
+      ],
+      "reason": "Broad product or capability label should not be assumed equivalent to a specific tool."
+    },
+    {
+      "tool_id": "TOOL-004",
+      "tool_name": "Microsoft Defender portal",
+      "search_hints": [
+        "Microsoft Defender"
+      ],
+      "reason": "Broad product or capability label should not be assumed equivalent to a specific tool."
+    },
+    {
+      "tool_id": "TOOL-007",
+      "tool_name": "Microsoft 365 service health",
+      "search_hints": [
+        "Microsoft 365"
+      ],
+      "reason": "Broad product or capability label should not be assumed equivalent to a specific tool."
+    },
+    {
+      "tool_id": "TOOL-008",
+      "tool_name": "Outlook desktop",
+      "search_hints": [
+        "Outlook"
+      ],
+      "reason": "Broad product or capability label should not be assumed equivalent to a specific tool."
+    },
+    {
+      "tool_id": "TOOL-011",
+      "tool_name": "OneDrive sync client",
+      "search_hints": [
+        "OneDrive"
+      ],
+      "reason": "Broad product or capability label should not be assumed equivalent to a specific tool."
+    },
+    {
+      "tool_id": "TOOL-012",
+      "tool_name": "Microsoft Authenticator",
+      "search_hints": [
+        "MFA"
+      ],
+      "reason": "Broad product or capability label should not be assumed equivalent to a specific tool."
+    },
+    {
+      "tool_id": "TOOL-013",
+      "tool_name": "Windows 10",
+      "search_hints": [
+        "Windows"
+      ],
+      "reason": "Broad product or capability label should not be assumed equivalent to a specific tool."
+    },
+    {
+      "tool_id": "TOOL-014",
+      "tool_name": "Windows 11",
+      "search_hints": [
+        "Windows"
+      ],
+      "reason": "Broad product or capability label should not be assumed equivalent to a specific tool."
+    },
+    {
+      "tool_id": "TOOL-018",
+      "tool_name": "VPN client (unspecified)",
+      "search_hints": [
+        "VPN"
+      ],
+      "reason": "Broad product or capability label should not be assumed equivalent to a specific tool."
+    }
+  ]
+}

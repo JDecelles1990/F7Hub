@@ -1,0 +1,323 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/f7hub/schemas/synthetic_case_seed_v0_1.schema.json",
+  "title": "F7Hub synthetic case seed: unapproved research artifact",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "case_id",
+    "source_class",
+    "synthetic",
+    "review_status",
+    "not_authoritative",
+    "training_allowed",
+    "production_knowledge_allowed",
+    "dataset_split",
+    "domain_key",
+    "proposed_issue_key",
+    "canonical_issue_ref",
+    "titles",
+    "customer_report",
+    "scenario",
+    "symptoms",
+    "diagnostic_steps",
+    "root_cause",
+    "resolution",
+    "validation",
+    "safety_and_escalation",
+    "knowledge",
+    "provenance"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "case_id": {
+      "type": "string",
+      "pattern": "^SYN-IT-[0-9]{4}$"
+    },
+    "source_class": {
+      "const": "SYNTHETIC_ORIGINAL"
+    },
+    "synthetic": {
+      "const": true
+    },
+    "review_status": {
+      "const": "UNREVIEWED"
+    },
+    "not_authoritative": {
+      "const": true
+    },
+    "training_allowed": {
+      "const": false
+    },
+    "production_knowledge_allowed": {
+      "const": false
+    },
+    "dataset_split": {
+      "const": "development_only"
+    },
+    "domain_key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "proposed_issue_key": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "canonical_issue_ref": {
+      "type": "null"
+    },
+    "titles": {
+      "type": "object",
+      "required": [
+        "en",
+        "fr"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "en": {
+          "type": "string",
+          "minLength": 6
+        },
+        "fr": {
+          "type": "string",
+          "minLength": 6
+        }
+      }
+    },
+    "customer_report": {
+      "type": "object",
+      "required": [
+        "en",
+        "fr"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "en": {
+          "type": "string",
+          "minLength": 10
+        },
+        "fr": {
+          "type": "string",
+          "minLength": 10
+        }
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "required": [
+        "environment",
+        "reported_impact",
+        "ticket_kind",
+        "outcome"
+      ],
+      "properties": {
+        "outcome": {
+          "const": "SIMULATED_RESOLVED"
+        },
+        "ticket_kind": {
+          "const": "INCIDENT"
+        }
+      },
+      "additionalProperties": {
+        "type": "string"
+      }
+    },
+    "symptoms": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 10
+      }
+    },
+    "diagnostic_steps": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "required": [
+          "sequence",
+          "check",
+          "simulated_observation",
+          "evidence_origin"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "check": {
+            "type": "string",
+            "minLength": 15
+          },
+          "simulated_observation": {
+            "type": "string",
+            "minLength": 15
+          },
+          "evidence_origin": {
+            "const": "FICTITIOUS_SCENARIO"
+          }
+        }
+      }
+    },
+    "root_cause": {
+      "type": "object",
+      "required": [
+        "hypothesis",
+        "status",
+        "evidence_step_numbers"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "hypothesis": {
+          "type": "string",
+          "minLength": 15
+        },
+        "status": {
+          "const": "CONFIRMED_WITHIN_FICTIONAL_SCENARIO_ONLY"
+        },
+        "evidence_step_numbers": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      }
+    },
+    "resolution": {
+      "type": "object",
+      "required": [
+        "simulated_actions",
+        "authorization_note"
+      ],
+      "properties": {
+        "simulated_actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 15
+          }
+        },
+        "authorization_note": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "validation": {
+      "type": "object",
+      "required": [
+        "simulated_tests",
+        "customer_confirmation",
+        "result"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "simulated_tests": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 15
+          }
+        },
+        "customer_confirmation": {
+          "const": "SIMULATED_ONLY"
+        },
+        "result": {
+          "const": "SIMULATED_PASS"
+        }
+      }
+    },
+    "safety_and_escalation": {
+      "type": "object",
+      "required": [
+        "guardrail",
+        "escalate_if"
+      ],
+      "properties": {
+        "guardrail": {
+          "type": "string",
+          "minLength": 15
+        },
+        "escalate_if": {
+          "type": "string",
+          "minLength": 15
+        }
+      },
+      "additionalProperties": false
+    },
+    "knowledge": {
+      "type": "object",
+      "required": [
+        "vendor_reference_urls",
+        "reference_status",
+        "related_tag_keys_proposed",
+        "related_sop_refs",
+        "related_script_refs"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "vendor_reference_urls": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "reference_status": {
+          "const": "REQUIRES_OFFICIAL_SOURCE_VERIFICATION"
+        },
+        "related_tag_keys_proposed": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "related_sop_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "related_script_refs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": [
+        "method",
+        "contains_real_ticket_data",
+        "human_validated",
+        "model_quality_evaluated"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "method": {
+          "const": "original_synthetic_authoring"
+        },
+        "contains_real_ticket_data": {
+          "const": false
+        },
+        "human_validated": {
+          "const": false
+        },
+        "model_quality_evaluated": {
+          "const": false
+        }
+      }
+    }
+  }
+}

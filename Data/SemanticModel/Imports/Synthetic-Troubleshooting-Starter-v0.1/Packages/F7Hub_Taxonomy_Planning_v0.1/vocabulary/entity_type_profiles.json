@@ -1,0 +1,168 @@
+{
+  "schema_version": "0.1.0",
+  "catalog_kind": "entity_type_profiles",
+  "catalog_status": "planning_proposal",
+  "records": [
+    {
+      "entity_type_key": "ipv4_address",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "ipv6_address",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "mac_address",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "hostname",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "fqdn",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "url",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "email_address",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "account_name",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "directory_object_id",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "tenant_id",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "file_path",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "registry_path",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "service_name",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "device_name",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "event_id",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "process_id",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "security_identifier",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "powershell_command_name",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "error_code",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "ticket_reference",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "knowledge_reference",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "guid",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    },
+    {
+      "entity_type_key": "content_hash",
+      "source": "Foundation 0C planning inventory",
+      "scope": "recognition_profile_only",
+      "automatically_create_entity": false,
+      "persistence_policy": "not_decided"
+    }
+  ]
+}

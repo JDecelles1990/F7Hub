@@ -1,0 +1,115 @@
+{
+  "schema_version": "0.1.0",
+  "catalog_kind": "domain_mappings",
+  "catalog_status": "planning_proposal",
+  "records": [
+    {
+      "domain_code": "IAM",
+      "proposed_key": "identity_entra_id_mfa",
+      "labels": {
+        "en": "Identity, Entra ID & MFA",
+        "fr": "Identité, Entra ID et MFA"
+      },
+      "existing_category_id": null,
+      "existing_category_scope": null,
+      "mapping_status": "requires_repository_reconciliation",
+      "note": "Domain grouping is not automatically an existing ticket/category record."
+    },
+    {
+      "domain_code": "EXO",
+      "proposed_key": "exchange_online_outlook",
+      "labels": {
+        "en": "Exchange Online & Outlook",
+        "fr": "Exchange Online et Outlook"
+      },
+      "existing_category_id": null,
+      "existing_category_scope": null,
+      "mapping_status": "requires_repository_reconciliation",
+      "note": "Domain grouping is not automatically an existing ticket/category record."
+    },
+    {
+      "domain_code": "TMS",
+      "proposed_key": "microsoft_teams",
+      "labels": {
+        "en": "Microsoft Teams",
+        "fr": "Microsoft Teams"
+      },
+      "existing_category_id": null,
+      "existing_category_scope": null,
+      "mapping_status": "requires_repository_reconciliation",
+      "note": "Domain grouping is not automatically an existing ticket/category record."
+    },
+    {
+      "domain_code": "OD",
+      "proposed_key": "onedrive",
+      "labels": {
+        "en": "OneDrive",
+        "fr": "OneDrive"
+      },
+      "existing_category_id": null,
+      "existing_category_scope": null,
+      "mapping_status": "requires_repository_reconciliation",
+      "note": "Domain grouping is not automatically an existing ticket/category record."
+    },
+    {
+      "domain_code": "WEB",
+      "proposed_key": "web_browsers",
+      "labels": {
+        "en": "Web browsers",
+        "fr": "Navigateurs Web"
+      },
+      "existing_category_id": null,
+      "existing_category_scope": null,
+      "mapping_status": "requires_repository_reconciliation",
+      "note": "Domain grouping is not automatically an existing ticket/category record."
+    },
+    {
+      "domain_code": "WIN",
+      "proposed_key": "windows_endpoints",
+      "labels": {
+        "en": "Windows & endpoints",
+        "fr": "Windows et postes de travail"
+      },
+      "existing_category_id": null,
+      "existing_category_scope": null,
+      "mapping_status": "requires_repository_reconciliation",
+      "note": "Domain grouping is not automatically an existing ticket/category record."
+    },
+    {
+      "domain_code": "PRN",
+      "proposed_key": "printing",
+      "labels": {
+        "en": "Printing",
+        "fr": "Impression"
+      },
+      "existing_category_id": null,
+      "existing_category_scope": null,
+      "mapping_status": "requires_repository_reconciliation",
+      "note": "Domain grouping is not automatically an existing ticket/category record."
+    },
+    {
+      "domain_code": "VPN",
+      "proposed_key": "vpn_remote_access",
+      "labels": {
+        "en": "VPN & remote access",
+        "fr": "VPN et accès à distance"
+      },
+      "existing_category_id": null,
+      "existing_category_scope": null,
+      "mapping_status": "requires_repository_reconciliation",
+      "note": "Domain grouping is not automatically an existing ticket/category record."
+    },
+    {
+      "domain_code": "SEC",
+      "proposed_key": "security_incidents",
+      "labels": {
+        "en": "Security & incidents",
+        "fr": "Sécurité et incidents"
+      },
+      "existing_category_id": null,
+      "existing_category_scope": null,
+      "mapping_status": "requires_repository_reconciliation",
+      "note": "Domain grouping is not automatically an existing ticket/category record."
+    }
+  ]
+}

@@ -1,0 +1,148 @@
+{
+  "artifact_kind": "illustrative_typed_diagnostic_graph",
+  "revision": "0.1.0",
+  "authority": "NOT_APPROVED",
+  "source": "editorial_illustration_based_on_existing_outlook_seed_and_user_examples",
+  "guardrails": {
+    "no_canonical_ids_claimed": true,
+    "no_numeric_confidence": true,
+    "no_sql_write": true,
+    "no_test_implies_authorization": true
+  },
+  "nodes": [
+    {
+      "id": "DEMO-SYM-OUTLOOK-001",
+      "kind": "symptom",
+      "label": "Repeated Outlook sign-in prompts"
+    },
+    {
+      "id": "DEMO-HYP-001",
+      "kind": "hypothesis",
+      "label": "Local cached credential or token problem"
+    },
+    {
+      "id": "DEMO-HYP-002",
+      "kind": "hypothesis",
+      "label": "MFA or Conditional Access challenge blocking sign-in"
+    },
+    {
+      "id": "DEMO-HYP-003",
+      "kind": "hypothesis",
+      "label": "Outlook client profile or add-in issue"
+    },
+    {
+      "id": "DEMO-HYP-004",
+      "kind": "hypothesis",
+      "label": "Broader account or service problem"
+    },
+    {
+      "id": "DEMO-CHECK-001",
+      "kind": "diagnostic_check",
+      "label": "Compare authorized Outlook web sign-in and desktop sign-in"
+    },
+    {
+      "id": "DEMO-CHECK-002",
+      "kind": "diagnostic_check",
+      "label": "Review permitted Entra sign-in logs and applicable access policy"
+    },
+    {
+      "id": "DEMO-CHECK-003",
+      "kind": "diagnostic_check",
+      "label": "Check whether other users or devices are affected and permitted service-health data"
+    },
+    {
+      "id": "DEMO-CHECK-004",
+      "kind": "diagnostic_check",
+      "label": "Assess local profile/add-ins and cached credential indicators without clearing data"
+    },
+    {
+      "id": "DEMO-ACT-001",
+      "kind": "remediation",
+      "label": "Authorized targeted remediation based on supported cause"
+    },
+    {
+      "id": "DEMO-VERIFY-001",
+      "kind": "verification",
+      "label": "Confirm client signs in again and intended mail operations work"
+    },
+    {
+      "id": "DEMO-ESC-001",
+      "kind": "escalation",
+      "label": "Escalate when policy, authorization, logs, or evidence are insufficient"
+    }
+  ],
+  "edges": [
+    {
+      "from": "DEMO-SYM-OUTLOOK-001",
+      "predicate": "has_possible_cause",
+      "to": "DEMO-HYP-001",
+      "status": "HYPOTHESIS_NOT_CONFIRMED"
+    },
+    {
+      "from": "DEMO-SYM-OUTLOOK-001",
+      "predicate": "has_possible_cause",
+      "to": "DEMO-HYP-002",
+      "status": "HYPOTHESIS_NOT_CONFIRMED"
+    },
+    {
+      "from": "DEMO-SYM-OUTLOOK-001",
+      "predicate": "has_possible_cause",
+      "to": "DEMO-HYP-003",
+      "status": "HYPOTHESIS_NOT_CONFIRMED"
+    },
+    {
+      "from": "DEMO-SYM-OUTLOOK-001",
+      "predicate": "has_possible_cause",
+      "to": "DEMO-HYP-004",
+      "status": "HYPOTHESIS_NOT_CONFIRMED"
+    },
+    {
+      "from": "DEMO-SYM-OUTLOOK-001",
+      "predicate": "investigate_with",
+      "to": "DEMO-CHECK-001",
+      "status": "PROPOSED"
+    },
+    {
+      "from": "DEMO-HYP-002",
+      "predicate": "investigate_with",
+      "to": "DEMO-CHECK-002",
+      "status": "PROPOSED"
+    },
+    {
+      "from": "DEMO-HYP-004",
+      "predicate": "investigate_with",
+      "to": "DEMO-CHECK-003",
+      "status": "PROPOSED"
+    },
+    {
+      "from": "DEMO-HYP-001",
+      "predicate": "investigate_with",
+      "to": "DEMO-CHECK-004",
+      "status": "PROPOSED"
+    },
+    {
+      "from": "DEMO-HYP-003",
+      "predicate": "investigate_with",
+      "to": "DEMO-CHECK-004",
+      "status": "PROPOSED"
+    },
+    {
+      "from": "DEMO-ACT-001",
+      "predicate": "requires_followup",
+      "to": "DEMO-VERIFY-001",
+      "status": "PROPOSED"
+    }
+  ],
+  "finding_policy": {
+    "check_outcome_values": [
+      "PASS",
+      "FAIL",
+      "INCONCLUSIVE",
+      "NOT_RUN",
+      "COLLECTION_ERROR"
+    ],
+    "condition_specific": "A test finding alone does not confirm a root cause without a tested interpretation profile",
+    "independent_evidence": "Synonyms and near-duplicate notes must not be counted as independent evidence"
+  },
+  "remediation_gate": "Technician-authorized intervention after sufficient contextual evidence; preview cannot execute or modify records"
+}

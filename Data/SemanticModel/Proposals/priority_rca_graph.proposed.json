@@ -1,0 +1,3686 @@
+{
+  "artifact_kind": "f7hub_priority_rca_curation",
+  "version": "0.1.0",
+  "authority": "PLANNING_ONLY",
+  "foundation_baseline": "0A-0E_APPROVED_NO_CHANGES",
+  "canonical_ids_verified": false,
+  "dataset_is_fictional": true,
+  "classification_scores_are_not_probabilities": true,
+  "domains": [
+    "identity_entra",
+    "outlook_exchange",
+    "onedrive",
+    "windows",
+    "vpn_remote",
+    "network"
+  ],
+  "symptom_anchors": [
+    {
+      "id": "DRAFT-SYM-001",
+      "kind": "symptom_anchor",
+      "domain": "identity_entra",
+      "label_en": "MFA enrollment fails after device replacement",
+      "label_fr": "Échec de l’inscription MFA après remplacement du téléphone",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-IDENTITY-ENTRA-001"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-no_usable_enrolled_mfa_method",
+          "check_ref": "DRAFT-CHECK-review_registered_authentication_methods_through_authorized_entra_view",
+          "discriminating_observation": "Available methods do not meet enrollment requirements",
+          "action_ref": "DRAFT-ACTION-follow_approved_identity_verification_and_mfa_re_registration_sop",
+          "finding_ref": "DRAFT-FINDING-available_methods_do_not_meet_enrollment_requirements",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-device_time_or_notification_configuration_problem",
+          "check_ref": "DRAFT-CHECK-compare_authenticator_prompts_and_time_configuration",
+          "discriminating_observation": "Prompt not arriving or device clock incorrect",
+          "action_ref": "DRAFT-ACTION-guide_device_level_authenticator_troubleshooting",
+          "finding_ref": "DRAFT-FINDING-prompt_not_arriving_or_device_clock_incorrect",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm user registers and completes a permitted sign-in without changing security policy",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-002",
+      "kind": "symptom_anchor",
+      "domain": "identity_entra",
+      "label_en": "Conditional Access denies expected sign-in",
+      "label_fr": "L’accès est refusé par l’accès conditionnel",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-IDENTITY-ENTRA-002"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-conditional_access_rule_outcome",
+          "check_ref": "DRAFT-CHECK-review_entra_sign_in_logs_and_applicable_policy_result",
+          "discriminating_observation": "Policy-specific failure or requirement visible",
+          "action_ref": "DRAFT-ACTION-escalate_policy_exception_review_to_authorized_administrator",
+          "finding_ref": "DRAFT-FINDING-policy_specific_failure_or_requirement_visible",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-mfa_method_requirement_unmet",
+          "check_ref": "DRAFT-CHECK-check_sign_in_authentication_requirement_and_method_eligibility",
+          "discriminating_observation": "Required method unavailable",
+          "action_ref": "DRAFT-ACTION-follow_approved_mfa_remediation_sop",
+          "finding_ref": "DRAFT-FINDING-required_method_unavailable",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Reattempt a permitted sign-in and confirm applicable policy is satisfied",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-003",
+      "kind": "symptom_anchor",
+      "domain": "identity_entra",
+      "label_en": "Password change is not recognized",
+      "label_fr": "Le nouveau mot de passe n’est pas reconnu",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-IDENTITY-ENTRA-003"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-directory_sync_or_account_credential_inconsistency",
+          "check_ref": "DRAFT-CHECK-compare_account_state_and_expected_identity_source",
+          "discriminating_observation": "Cloud and directory credentials differ or sync error reported",
+          "action_ref": "DRAFT-ACTION-escalate_directory_synchronization_investigation",
+          "finding_ref": "DRAFT-FINDING-cloud_and_directory_credentials_differ_or_sync_error_reported",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-stale_client_credential_cache",
+          "check_ref": "DRAFT-CHECK-compare_browser_sign_in_with_installed_client",
+          "discriminating_observation": "Browser works but installed app fails",
+          "action_ref": "DRAFT-ACTION-review_client_credential_refresh_under_approved_procedure",
+          "finding_ref": "DRAFT-FINDING-browser_works_but_installed_app_fails",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm new credential works at intended approved sign-in surface",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-004",
+      "kind": "symptom_anchor",
+      "domain": "identity_entra",
+      "label_en": "Account becomes locked after sign-in attempts",
+      "label_fr": "Compte verrouillé après plusieurs tentatives",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-IDENTITY-ENTRA-004"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-repeated_incorrect_credentials",
+          "check_ref": "DRAFT-CHECK-review_approved_sign_in_lockout_logs",
+          "discriminating_observation": "Repeated failed attempts align with lockout",
+          "action_ref": "DRAFT-ACTION-verify_identity_and_follow_approved_unlock_reset_procedure",
+          "finding_ref": "DRAFT-FINDING-repeated_failed_attempts_align_with_lockout",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-background_application_using_outdated_credentials",
+          "check_ref": "DRAFT-CHECK-correlate_lockout_source_and_client_activity",
+          "discriminating_observation": "Same device or application repeats failed logons",
+          "action_ref": "DRAFT-ACTION-resolve_stale_background_credential_after_authorization",
+          "finding_ref": "DRAFT-FINDING-same_device_or_application_repeats_failed_logons",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Verify account sign-in and absence of recurring lockout",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-005",
+      "kind": "symptom_anchor",
+      "domain": "identity_entra",
+      "label_en": "User cannot access an assigned group resource",
+      "label_fr": "L’utilisateur ne peut pas accéder à une ressource de groupe",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-IDENTITY-ENTRA-005"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-group_membership_absent_or_incorrect",
+          "check_ref": "DRAFT-CHECK-compare_required_group_membership_against_authorized_access_request",
+          "discriminating_observation": "Membership differs from approved requirement",
+          "action_ref": "DRAFT-ACTION-request_authorized_group_membership_correction",
+          "finding_ref": "DRAFT-FINDING-membership_differs_from_approved_requirement",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-resource_acl_or_token_not_refreshed",
+          "check_ref": "DRAFT-CHECK-compare_resource_authorization_and_effective_user_session",
+          "discriminating_observation": "Membership exists but effective permission missing",
+          "action_ref": "DRAFT-ACTION-review_permission_propagation_or_user_session_refresh",
+          "finding_ref": "DRAFT-FINDING-membership_exists_but_effective_permission_missing",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm approved resource opens with expected least-privilege access",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-006",
+      "kind": "symptom_anchor",
+      "domain": "identity_entra",
+      "label_en": "Provisioned user cannot open licensed service",
+      "label_fr": "L’utilisateur provisionné ne peut pas ouvrir un service sous licence",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-IDENTITY-ENTRA-006"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-service_license_unavailable_or_disabled",
+          "check_ref": "DRAFT-CHECK-inspect_license_assignment_and_service_plans",
+          "discriminating_observation": "Service plan absent or disabled",
+          "action_ref": "DRAFT-ACTION-request_approved_license_or_service_plan_assignment",
+          "finding_ref": "DRAFT-FINDING-service_plan_absent_or_disabled",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-account_provisioning_not_complete",
+          "check_ref": "DRAFT-CHECK-review_account_provisioning_and_service_state",
+          "discriminating_observation": "Service account or entitlement not ready",
+          "action_ref": "DRAFT-ACTION-wait_or_escalate_provisioning_workflow_according_to_sop",
+          "finding_ref": "DRAFT-FINDING-service_account_or_entitlement_not_ready",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm user can access licensed service with approved identity",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-007",
+      "kind": "symptom_anchor",
+      "domain": "outlook_exchange",
+      "label_en": "Outlook repeatedly requests authentication",
+      "label_fr": "Outlook demande l’authentification à répétition",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-OUTLOOK-001"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-stale_local_authentication_state",
+          "check_ref": "DRAFT-CHECK-compare_outlook_desktop_and_permitted_web_sign_in",
+          "discriminating_observation": "Web sign-in works while client loops",
+          "action_ref": "DRAFT-ACTION-review_supported_outlook_sign_in_state_remediation",
+          "finding_ref": "DRAFT-FINDING-web_sign_in_works_while_client_loops",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-conditional_access_or_mfa_requirement",
+          "check_ref": "DRAFT-CHECK-review_entra_sign_in_failure_detail",
+          "discriminating_observation": "Policy or challenge blocks the attempted sign-in",
+          "action_ref": "DRAFT-ACTION-refer_to_approved_entra_mfa_or_policy_escalation",
+          "finding_ref": "DRAFT-FINDING-policy_or_challenge_blocks_the_attempted_sign_in",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-cloud_service_degradation",
+          "check_ref": "DRAFT-CHECK-check_microsoft_365_service_health_via_approved_portal",
+          "discriminating_observation": "Relevant incident affects authentication",
+          "action_ref": "DRAFT-ACTION-record_incident_and_advise_user_using_msp_incident_workflow",
+          "finding_ref": "DRAFT-FINDING-relevant_incident_affects_authentication",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm Outlook stays connected after a new session and can send/receive test mail",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-008",
+      "kind": "symptom_anchor",
+      "domain": "outlook_exchange",
+      "label_en": "Outlook displays disconnected",
+      "label_fr": "Outlook indique « Déconnecté »",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-OUTLOOK-002"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-device_connectivity_or_dns_problem",
+          "check_ref": "DRAFT-CHECK-compare_browser_cloud_access_and_dns_resolution",
+          "discriminating_observation": "Browser or DNS tests fail on device",
+          "action_ref": "DRAFT-ACTION-follow_networking_diagnostic_branch",
+          "finding_ref": "DRAFT-FINDING-browser_or_dns_tests_fail_on_device",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-local_outlook_profile_malfunction",
+          "check_ref": "DRAFT-CHECK-compare_outlook_web_versus_desktop_behavior",
+          "discriminating_observation": "Web works and desktop cannot connect",
+          "action_ref": "DRAFT-ACTION-review_approved_outlook_profile_repair_workflow",
+          "finding_ref": "DRAFT-FINDING-web_works_and_desktop_cannot_connect",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm Outlook connects and refreshes expected mailbox folders",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-009",
+      "kind": "symptom_anchor",
+      "domain": "outlook_exchange",
+      "label_en": "Outgoing email is not delivered",
+      "label_fr": "Un courriel sortant n’est pas livré",
+      "provenance": {
+        "source_candidate_ids": [],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-transport_or_delivery_rejection",
+          "check_ref": "DRAFT-CHECK-review_message_trace_and_non_delivery_report_through_approved_role",
+          "discriminating_observation": "Trace or NDR reports a specific rejection",
+          "action_ref": "DRAFT-ACTION-follow_targeted_exchange_online_mail_flow_procedure",
+          "finding_ref": "DRAFT-FINDING-trace_or_ndr_reports_a_specific_rejection",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-outlook_client_outbox_or_offline_state",
+          "check_ref": "DRAFT-CHECK-check_client_connection_and_outbox_behavior",
+          "discriminating_observation": "Item remains locally queued",
+          "action_ref": "DRAFT-ACTION-resolve_client_offline_queue_condition_using_approved_sop",
+          "finding_ref": "DRAFT-FINDING-item_remains_locally_queued",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm one authorized test message reaches intended recipient",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-010",
+      "kind": "symptom_anchor",
+      "domain": "outlook_exchange",
+      "label_en": "Incoming email is missing or delayed",
+      "label_fr": "Courriel entrant manquant ou retardé",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-EXCHANGE-ONLINE-002"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-mail_flow_transport_failure",
+          "check_ref": "DRAFT-CHECK-review_message_trace_and_sender_non_delivery_evidence",
+          "discriminating_observation": "Expected message rejected or delayed in transport",
+          "action_ref": "DRAFT-ACTION-escalate_verified_mail_routing_or_connector_condition",
+          "finding_ref": "DRAFT-FINDING-expected_message_rejected_or_delayed_in_transport",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-mailbox_quota_reached",
+          "check_ref": "DRAFT-CHECK-check_recipient_mailbox_usage_and_storage_thresholds",
+          "discriminating_observation": "Mailbox storage restriction confirmed",
+          "action_ref": "DRAFT-ACTION-review_approved_mailbox_capacity_workflow",
+          "finding_ref": "DRAFT-FINDING-mailbox_storage_restriction_confirmed",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-spam_or_quarantine_policy_action",
+          "check_ref": "DRAFT-CHECK-inspect_eligible_quarantine_and_filtering_disposition",
+          "discriminating_observation": "Message held by policy",
+          "action_ref": "DRAFT-ACTION-apply_approved_safe_quarantine_review_workflow",
+          "finding_ref": "DRAFT-FINDING-message_held_by_policy",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm test message received or documented external delivery disposition",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-011",
+      "kind": "symptom_anchor",
+      "domain": "outlook_exchange",
+      "label_en": "Shared mailbox access is denied",
+      "label_fr": "Accès refusé à une boîte aux lettres partagée",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-EXCHANGE-ONLINE-001"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-mailbox_access_permission_missing",
+          "check_ref": "DRAFT-CHECK-compare_effective_permissions_against_approved_request",
+          "discriminating_observation": "Delegation not present",
+          "action_ref": "DRAFT-ACTION-request_approved_shared_mailbox_delegation",
+          "finding_ref": "DRAFT-FINDING-delegation_not_present",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-local_mailbox_mapping_or_cache_failure",
+          "check_ref": "DRAFT-CHECK-compare_access_through_supported_web_and_desktop_paths",
+          "discriminating_observation": "Web access works but desktop mapping fails",
+          "action_ref": "DRAFT-ACTION-review_approved_outlook_shared_mailbox_mapping_procedure",
+          "finding_ref": "DRAFT-FINDING-web_access_works_but_desktop_mapping_fails",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm authorized user can open shared mailbox and intended folder",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-012",
+      "kind": "symptom_anchor",
+      "domain": "outlook_exchange",
+      "label_en": "Outlook search omits expected messages",
+      "label_fr": "La recherche Outlook ne retourne pas les messages attendus",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-OUTLOOK-004"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-client_local_index_not_healthy",
+          "check_ref": "DRAFT-CHECK-compare_server_search_with_local_client_search",
+          "discriminating_observation": "Messages found online but missing locally",
+          "action_ref": "DRAFT-ACTION-review_supported_local_outlook_indexing_diagnostics",
+          "finding_ref": "DRAFT-FINDING-messages_found_online_but_missing_locally",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-ost_cache_corruption",
+          "check_ref": "DRAFT-CHECK-compare_outlook_local_cache_and_server_mailbox_state",
+          "discriminating_observation": "Cached content differs from server state",
+          "action_ref": "DRAFT-ACTION-review_data_preserving_outlook_cache_investigation",
+          "finding_ref": "DRAFT-FINDING-cached_content_differs_from_server_state",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-search_scope_or_filter_excludes_item",
+          "check_ref": "DRAFT-CHECK-review_active_search_location_and_filters",
+          "discriminating_observation": "Message present when scope corrected",
+          "action_ref": "DRAFT-ACTION-correct_search_scope_and_educate_user",
+          "finding_ref": "DRAFT-FINDING-message_present_when_scope_corrected",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm representative messages appear in intended search scope",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-013",
+      "kind": "symptom_anchor",
+      "domain": "outlook_exchange",
+      "label_en": "Distribution group members do not receive messages",
+      "label_fr": "Les membres du groupe de distribution ne reçoivent pas les messages",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-EXCHANGE-ONLINE-003"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-distribution_group_membership_or_delivery_settings",
+          "check_ref": "DRAFT-CHECK-review_approved_group_members_and_delivery_restrictions",
+          "discriminating_observation": "Recipient is absent or external sender blocked",
+          "action_ref": "DRAFT-ACTION-escalate_approved_group_membership_or_delivery_policy_correction",
+          "finding_ref": "DRAFT-FINDING-recipient_is_absent_or_external_sender_blocked",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-mail_flow_or_transport_rejection",
+          "check_ref": "DRAFT-CHECK-compare_message_trace_against_affected_recipients",
+          "discriminating_observation": "Trace shows rejection before group expansion or at recipients",
+          "action_ref": "DRAFT-ACTION-follow_authorized_exchange_online_transport_review",
+          "finding_ref": "DRAFT-FINDING-trace_shows_rejection_before_group_expansion_or_at_recipients",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm approved test message reaches intended group members",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-014",
+      "kind": "symptom_anchor",
+      "domain": "onedrive",
+      "label_en": "OneDrive remains stuck synchronizing",
+      "label_fr": "OneDrive reste bloqué pendant la synchronisation",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-ONEDRIVE-002"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-sync_conflict_or_file_in_use",
+          "check_ref": "DRAFT-CHECK-inspect_sync_client_status_and_conflict_details",
+          "discriminating_observation": "Client identifies conflict",
+          "action_ref": "DRAFT-ACTION-use_supported_conflict_resolution_with_user_confirmation",
+          "finding_ref": "DRAFT-FINDING-client_identifies_conflict",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-onedrive_storage_quota_full",
+          "check_ref": "DRAFT-CHECK-check_storage_capacity_for_affected_account",
+          "discriminating_observation": "Quota exceeded",
+          "action_ref": "DRAFT-ACTION-follow_approved_storage_remediation",
+          "finding_ref": "DRAFT-FINDING-quota_exceeded",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-connectivity_or_sign_in_issue",
+          "check_ref": "DRAFT-CHECK-inspect_onedrive_sign_in_state_and_cloud_reachability",
+          "discriminating_observation": "Client disconnected or session expired",
+          "action_ref": "DRAFT-ACTION-follow_authentication_or_networking_check_branch",
+          "finding_ref": "DRAFT-FINDING-client_disconnected_or_session_expired",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm target file uploads and downloads using supported test",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-015",
+      "kind": "symptom_anchor",
+      "domain": "onedrive",
+      "label_en": "OneDrive sign-in is unsuccessful",
+      "label_fr": "Connexion OneDrive impossible",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-ONEDRIVE-005"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-account_authentication_failure",
+          "check_ref": "DRAFT-CHECK-compare_onedrive_and_browser_identity_sign_in",
+          "discriminating_observation": "Service sign-in blocked",
+          "action_ref": "DRAFT-ACTION-follow_approved_identity_investigation",
+          "finding_ref": "DRAFT-FINDING-service_sign_in_blocked",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-client_account_connection_corrupted",
+          "check_ref": "DRAFT-CHECK-compare_web_access_with_local_client_sign_in",
+          "discriminating_observation": "Web works while desktop client fails",
+          "action_ref": "DRAFT-ACTION-review_supported_onedrive_account_reconnect_procedure",
+          "finding_ref": "DRAFT-FINDING-web_works_while_desktop_client_fails",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm OneDrive client signs in and begins normal sync",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-016",
+      "kind": "symptom_anchor",
+      "domain": "onedrive",
+      "label_en": "Known Folder Move cannot complete",
+      "label_fr": "La sauvegarde des dossiers connus ne se termine pas",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-ONEDRIVE-001"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-folder_redirection_conflict",
+          "check_ref": "DRAFT-CHECK-review_effective_folder_location_and_backup_settings",
+          "discriminating_observation": "Folder is already redirected",
+          "action_ref": "DRAFT-ACTION-escalate_supported_redirection_reconciliation",
+          "finding_ref": "DRAFT-FINDING-folder_is_already_redirected",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-insufficient_storage_or_blocked_path",
+          "check_ref": "DRAFT-CHECK-inspect_onedrive_storage_and_folder_eligibility",
+          "discriminating_observation": "Quota or eligible-path issue reported",
+          "action_ref": "DRAFT-ACTION-apply_approved_folder_eligibility_or_storage_remediation",
+          "finding_ref": "DRAFT-FINDING-quota_or_eligible_path_issue_reported",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm protected folders show correct synchronized location without data loss",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-017",
+      "kind": "symptom_anchor",
+      "domain": "onedrive",
+      "label_en": "OneDrive reports storage full",
+      "label_fr": "OneDrive indique que l’espace de stockage est plein",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-ONEDRIVE-003"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-cloud_storage_quota_reached",
+          "check_ref": "DRAFT-CHECK-check_cloud_quota_versus_observed_upload_demand",
+          "discriminating_observation": "Cloud capacity exceeded",
+          "action_ref": "DRAFT-ACTION-request_approved_storage_allocation_or_retention_aligned_cleanup",
+          "finding_ref": "DRAFT-FINDING-cloud_capacity_exceeded",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-local_storage_constraint",
+          "check_ref": "DRAFT-CHECK-check_device_free_disk_space_and_sync_configuration",
+          "discriminating_observation": "Device cannot stage local files",
+          "action_ref": "DRAFT-ACTION-follow_supported_local_storage_remediation",
+          "finding_ref": "DRAFT-FINDING-device_cannot_stage_local_files",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm file synchronization resumes without unauthorized deletion",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-018",
+      "kind": "symptom_anchor",
+      "domain": "onedrive",
+      "label_en": "File name or path cannot synchronize",
+      "label_fr": "Nom ou chemin de fichier impossible à synchroniser",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-ONEDRIVE-004"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-unsupported_file_name_or_path_pattern",
+          "check_ref": "DRAFT-CHECK-review_sync_error_for_file_path_restrictions",
+          "discriminating_observation": "Specific file rejected for naming/path rule",
+          "action_ref": "DRAFT-ACTION-coordinate_supported_safe_rename_preserving_links",
+          "finding_ref": "DRAFT-FINDING-specific_file_rejected_for_naming_path_rule",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-file_locked_or_unsupported_item",
+          "check_ref": "DRAFT-CHECK-review_file_access_and_sync_item_status",
+          "discriminating_observation": "File locked or excluded",
+          "action_ref": "DRAFT-ACTION-resolve_file_access_or_supported_sync_scope",
+          "finding_ref": "DRAFT-FINDING-file_locked_or_excluded",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm target file syncs and reference links still work",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-019",
+      "kind": "symptom_anchor",
+      "domain": "windows",
+      "label_en": "Windows Update cannot complete",
+      "label_fr": "La mise à jour Windows ne se termine pas",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-WINDOWS-001"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-pending_restart_or_servicing_state",
+          "check_ref": "DRAFT-CHECK-inspect_windows_update_history_and_pending_restart_indicators",
+          "discriminating_observation": "Servicing waits for restart",
+          "action_ref": "DRAFT-ACTION-schedule_approved_restart_and_recheck",
+          "finding_ref": "DRAFT-FINDING-servicing_waits_for_restart",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-insufficient_storage_or_update_error",
+          "check_ref": "DRAFT-CHECK-review_reported_update_error_and_available_storage",
+          "discriminating_observation": "Space or specific update error identified",
+          "action_ref": "DRAFT-ACTION-follow_vendor_supported_remediation_by_error_code",
+          "finding_ref": "DRAFT-FINDING-space_or_specific_update_error_identified",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm update status and successful controlled restart",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-020",
+      "kind": "symptom_anchor",
+      "domain": "windows",
+      "label_en": "Windows user profile fails to load",
+      "label_fr": "Échec de chargement du profil utilisateur Windows",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-WINDOWS-002"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-user_profile_corruption",
+          "check_ref": "DRAFT-CHECK-review_windows_logon_and_user_profile_service_events",
+          "discriminating_observation": "Profile load failure reported",
+          "action_ref": "DRAFT-ACTION-escalate_profile_recovery_preserving_user_data",
+          "finding_ref": "DRAFT-FINDING-profile_load_failure_reported",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-device_or_account_sign_in_problem",
+          "check_ref": "DRAFT-CHECK-validate_affected_account_and_availability_of_another_permitted_profile",
+          "discriminating_observation": "Authentication fails before profile loads",
+          "action_ref": "DRAFT-ACTION-route_to_identity_or_device_diagnostics",
+          "finding_ref": "DRAFT-FINDING-authentication_fails_before_profile_loads",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm user profile opens with expected data and settings",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-021",
+      "kind": "symptom_anchor",
+      "domain": "windows",
+      "label_en": "Workstation starts or runs slowly",
+      "label_fr": "L’ordinateur démarre ou fonctionne lentement",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-WINDOWS-003"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-high_resource_utilization",
+          "check_ref": "DRAFT-CHECK-review_cpu_memory_and_disk_performance_under_load",
+          "discriminating_observation": "Resource bottleneck reproducible",
+          "action_ref": "DRAFT-ACTION-address_authorized_startup_workload_or_capacity",
+          "finding_ref": "DRAFT-FINDING-resource_bottleneck_reproducible",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-disk_health_or_storage_issue",
+          "check_ref": "DRAFT-CHECK-inspect_available_storage_and_disk_diagnostics",
+          "discriminating_observation": "Storage constraints or hardware alert",
+          "action_ref": "DRAFT-ACTION-escalate_drive_and_data_protection_assessment",
+          "finding_ref": "DRAFT-FINDING-storage_constraints_or_hardware_alert",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm normal startup and interactive response over representative workload",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-022",
+      "kind": "symptom_anchor",
+      "domain": "windows",
+      "label_en": "Windows blue screen occurs",
+      "label_fr": "Écran bleu Windows (BSOD)",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-WINDOWS-004"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-driver_incompatibility",
+          "check_ref": "DRAFT-CHECK-collect_safe_stop_code_and_relevant_reliability_events",
+          "discriminating_observation": "Driver change correlates with crash",
+          "action_ref": "DRAFT-ACTION-escalate_approved_driver_rollback_investigation",
+          "finding_ref": "DRAFT-FINDING-driver_change_correlates_with_crash",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-hardware_or_memory_instability",
+          "check_ref": "DRAFT-CHECK-inspect_available_hardware_diagnostics_and_error_events",
+          "discriminating_observation": "Hardware-related error observed",
+          "action_ref": "DRAFT-ACTION-escalate_hardware_investigation_and_backup_review",
+          "finding_ref": "DRAFT-FINDING-hardware_related_error_observed",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm crash no longer reproduces after approved remediation and monitoring",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-023",
+      "kind": "symptom_anchor",
+      "domain": "windows",
+      "label_en": "Windows startup repair loop",
+      "label_fr": "Windows revient en boucle à la réparation du démarrage",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-WINDOWS-005"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-windows_boot_configuration_or_servicing_issue",
+          "check_ref": "DRAFT-CHECK-review_safe_recovery_diagnostics_and_recent_update_history",
+          "discriminating_observation": "Recent servicing or boot error identified",
+          "action_ref": "DRAFT-ACTION-escalate_controlled_recovery_with_data_preservation",
+          "finding_ref": "DRAFT-FINDING-recent_servicing_or_boot_error_identified",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-disk_failure_or_file_system_problem",
+          "check_ref": "DRAFT-CHECK-use_approved_read_only_disk_health_diagnostics",
+          "discriminating_observation": "Drive fault reported",
+          "action_ref": "DRAFT-ACTION-escalate_hardware_data_recovery_avoid_writes",
+          "finding_ref": "DRAFT-FINDING-drive_fault_reported",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm supported reboot reaches sign-in while preserving data",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-024",
+      "kind": "symptom_anchor",
+      "domain": "vpn_remote",
+      "label_en": "VPN cannot establish connection",
+      "label_fr": "Le VPN ne parvient pas à se connecter",
+      "provenance": {
+        "source_candidate_ids": [],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-vpn_client_or_endpoint_unreachable",
+          "check_ref": "DRAFT-CHECK-inspect_client_error_and_endpoint_reachability",
+          "discriminating_observation": "Endpoint inaccessible or client error",
+          "action_ref": "DRAFT-ACTION-follow_approved_vpn_client_and_network_procedure",
+          "finding_ref": "DRAFT-FINDING-endpoint_inaccessible_or_client_error",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-authentication_or_policy_failure",
+          "check_ref": "DRAFT-CHECK-compare_vpn_authentication_outcome_with_approved_identity_checks",
+          "discriminating_observation": "Sign-in or policy failure visible",
+          "action_ref": "DRAFT-ACTION-escalate_vpn_identity_policy_issue",
+          "finding_ref": "DRAFT-FINDING-sign_in_or_policy_failure_visible",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm permitted VPN session establishes and closes normally",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-025",
+      "kind": "symptom_anchor",
+      "domain": "vpn_remote",
+      "label_en": "VPN MFA authentication fails",
+      "label_fr": "Échec d’authentification MFA pour le VPN",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-VPN-REMOTE-002"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-registered_mfa_method_cannot_complete",
+          "check_ref": "DRAFT-CHECK-review_approved_vpn_mfa_prompt_and_method_configuration",
+          "discriminating_observation": "Challenge fails or method unavailable",
+          "action_ref": "DRAFT-ACTION-follow_verified_mfa_re_registration_sop",
+          "finding_ref": "DRAFT-FINDING-challenge_fails_or_method_unavailable",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-vpn_authentication_integration_policy",
+          "check_ref": "DRAFT-CHECK-inspect_approved_vpn_login_or_security_gateway_logs",
+          "discriminating_observation": "Auth policy rejects session",
+          "action_ref": "DRAFT-ACTION-escalate_vpn_authentication_integration_assessment",
+          "finding_ref": "DRAFT-FINDING-auth_policy_rejects_session",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm allowed MFA login succeeds without policy bypass",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-026",
+      "kind": "symptom_anchor",
+      "domain": "vpn_remote",
+      "label_en": "VPN connected but internal share inaccessible",
+      "label_fr": "VPN connecté, mais partage interne inaccessible",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-VPN-REMOTE-001"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-split_tunnel_route_missing",
+          "check_ref": "DRAFT-CHECK-inspect_active_routes_and_approved_resource_path",
+          "discriminating_observation": "Route to resource unavailable",
+          "action_ref": "DRAFT-ACTION-escalate_route_configuration_to_network_owner",
+          "finding_ref": "DRAFT-FINDING-route_to_resource_unavailable",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-vpn_dns_resolution_incomplete",
+          "check_ref": "DRAFT-CHECK-resolve_internal_name_through_approved_dns_diagnostic",
+          "discriminating_observation": "Internal name not resolving",
+          "action_ref": "DRAFT-ACTION-escalate_dns_configuration_or_split_dns_check",
+          "finding_ref": "DRAFT-FINDING-internal_name_not_resolving",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-share_permissions_deny_access",
+          "check_ref": "DRAFT-CHECK-compare_resource_reachability_with_approved_user_permissions",
+          "discriminating_observation": "Host reachable but access denied",
+          "action_ref": "DRAFT-ACTION-route_to_resource_permission_review",
+          "finding_ref": "DRAFT-FINDING-host_reachable_but_access_denied",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm approved share opens without widening user authorization",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-027",
+      "kind": "symptom_anchor",
+      "domain": "vpn_remote",
+      "label_en": "RDP cannot connect to approved computer",
+      "label_fr": "Le Bureau à distance ne rejoint pas l’ordinateur autorisé",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-VPN-REMOTE-003"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-target_host_not_reachable",
+          "check_ref": "DRAFT-CHECK-inspect_authorized_target_reachability_and_vpn_path",
+          "discriminating_observation": "Host inaccessible",
+          "action_ref": "DRAFT-ACTION-escalate_route_availability_or_firewall_checks",
+          "finding_ref": "DRAFT-FINDING-host_inaccessible",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-rdp_authorization_or_host_policy",
+          "check_ref": "DRAFT-CHECK-review_approved_remote_access_entitlement_and_host_policy",
+          "discriminating_observation": "Session denied after network reachability",
+          "action_ref": "DRAFT-ACTION-request_authorized_rdp_access_policy_review",
+          "finding_ref": "DRAFT-FINDING-session_denied_after_network_reachability",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm permitted remote session succeeds for authorized user",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-028",
+      "kind": "symptom_anchor",
+      "domain": "network",
+      "label_en": "Websites fail to load by domain name",
+      "label_fr": "Les sites Web ne chargent pas par leur nom de domaine",
+      "provenance": {
+        "source_candidate_ids": [],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-incorrect_dns_server_configuration",
+          "check_ref": "DRAFT-CHECK-inspect_adapter_dns_settings_and_known_good_resolution",
+          "discriminating_observation": "DNS lookup fails on device",
+          "action_ref": "DRAFT-ACTION-follow_approved_dns_configuration_remediation",
+          "finding_ref": "DRAFT-FINDING-dns_lookup_fails_on_device",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-dns_server_outage_or_filtering",
+          "check_ref": "DRAFT-CHECK-compare_authorized_resolver_answers_and_provider_status",
+          "discriminating_observation": "Resolver consistently fails target names",
+          "action_ref": "DRAFT-ACTION-escalate_dns_service_filtering_investigation",
+          "finding_ref": "DRAFT-FINDING-resolver_consistently_fails_target_names",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm expected hostname resolves and application reconnects",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-029",
+      "kind": "symptom_anchor",
+      "domain": "network",
+      "label_en": "Device has no usable DHCP address",
+      "label_fr": "Aucune adresse DHCP utilisable sur l’appareil",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-NETWORK-002"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-dhcp_lease_unavailable",
+          "check_ref": "DRAFT-CHECK-inspect_adapter_addressing_and_lease_status",
+          "discriminating_observation": "No valid lease or APIPA address",
+          "action_ref": "DRAFT-ACTION-escalate_dhcp_service_relay_or_approved_lease_renewal",
+          "finding_ref": "DRAFT-FINDING-no_valid_lease_or_apipa_address",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-physical_or_wi_fi_link_issue",
+          "check_ref": "DRAFT-CHECK-inspect_link_status_and_connected_network",
+          "discriminating_observation": "Link down or wrong network",
+          "action_ref": "DRAFT-ACTION-resolve_link_ssid_connectivity_before_dhcp_diagnostics",
+          "finding_ref": "DRAFT-FINDING-link_down_or_wrong_network",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm valid address, gateway and expected network reachability",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-030",
+      "kind": "symptom_anchor",
+      "domain": "network",
+      "label_en": "Wi-Fi connected but Internet unavailable",
+      "label_fr": "Wi-Fi connecté, mais Internet inaccessible",
+      "provenance": {
+        "source_candidate_ids": [
+          "CAND-NETWORK-003"
+        ],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-gateway_or_wan_path_unavailable",
+          "check_ref": "DRAFT-CHECK-check_assigned_gateway_and_limited_reachability",
+          "discriminating_observation": "Gateway or upstream unreachable",
+          "action_ref": "DRAFT-ACTION-follow_network_path_and_gateway_escalation",
+          "finding_ref": "DRAFT-FINDING-gateway_or_upstream_unreachable",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-dns_resolution_unavailable",
+          "check_ref": "DRAFT-CHECK-compare_numeric_host_reachability_and_dns_results",
+          "discriminating_observation": "IP path works but required names fail",
+          "action_ref": "DRAFT-ACTION-follow_dns_diagnostic_branch",
+          "finding_ref": "DRAFT-FINDING-ip_path_works_but_required_names_fail",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-proxy_misconfiguration",
+          "check_ref": "DRAFT-CHECK-inspect_effective_proxy_path_for_permitted_application",
+          "discriminating_observation": "Only proxied traffic fails",
+          "action_ref": "DRAFT-ACTION-review_authorized_proxy_configuration",
+          "finding_ref": "DRAFT-FINDING-only_proxied_traffic_fails",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm permitted browsing to multiple known test sites",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    },
+    {
+      "id": "DRAFT-SYM-031",
+      "kind": "symptom_anchor",
+      "domain": "network",
+      "label_en": "Wired device cannot reach local network resources",
+      "label_fr": "L’appareil filaire ne rejoint pas les ressources du réseau local",
+      "provenance": {
+        "source_candidate_ids": [],
+        "generation": "HUMAN_CURATED_MODEL_DRAFT",
+        "vendor_verified": false
+      },
+      "scope_note": "",
+      "branches": [
+        {
+          "cause_ref": "DRAFT-CAUSE-wrong_default_route_or_gateway_address",
+          "check_ref": "DRAFT-CHECK-inspect_effective_ip_and_route_table",
+          "discriminating_observation": "Default gateway unreachable",
+          "action_ref": "DRAFT-ACTION-escalate_route_adapter_configuration",
+          "finding_ref": "DRAFT-FINDING-default_gateway_unreachable",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        },
+        {
+          "cause_ref": "DRAFT-CAUSE-local_network_connectivity_degraded",
+          "check_ref": "DRAFT-CHECK-inspect_wi_fi_ethernet_link_vlan_or_access_point_status",
+          "discriminating_observation": "Link or network segment fails",
+          "action_ref": "DRAFT-ACTION-escalate_network_access_troubleshooting",
+          "finding_ref": "DRAFT-FINDING-link_or_network_segment_fails",
+          "action_policy": "TECHNICIAN_APPROVAL_REQUIRED",
+          "evidence_status": "HYPOTHESIS_NOT_TESTED",
+          "relationship": "POSSIBLE_CAUSE_EVALUATED_BY_CHECK"
+        }
+      ],
+      "verification": "Confirm expected gateway and destination reachability without unsafe changes",
+      "escalation_rule": "Escalate if security risk, required permissions unavailable, diagnostics inconclusive, or authorized remediation fails.",
+      "status": "REQUIRES_TECHNICAL_REVIEW",
+      "canonical_id": null,
+      "calibrated_confidence": null
+    }
+  ],
+  "cause_candidates": [
+    {
+      "id": "DRAFT-CAUSE-no_usable_enrolled_mfa_method",
+      "kind": "cause",
+      "label_en": "No usable enrolled MFA method",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-device_time_or_notification_configuration_problem",
+      "kind": "cause",
+      "label_en": "Device time or notification configuration problem",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-conditional_access_rule_outcome",
+      "kind": "cause",
+      "label_en": "Conditional Access rule outcome",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-mfa_method_requirement_unmet",
+      "kind": "cause",
+      "label_en": "MFA method requirement unmet",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-directory_sync_or_account_credential_inconsistency",
+      "kind": "cause",
+      "label_en": "Directory sync or account credential inconsistency",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-stale_client_credential_cache",
+      "kind": "cause",
+      "label_en": "Stale client credential cache",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-repeated_incorrect_credentials",
+      "kind": "cause",
+      "label_en": "Repeated incorrect credentials",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-background_application_using_outdated_credentials",
+      "kind": "cause",
+      "label_en": "Background application using outdated credentials",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-group_membership_absent_or_incorrect",
+      "kind": "cause",
+      "label_en": "Group membership absent or incorrect",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-resource_acl_or_token_not_refreshed",
+      "kind": "cause",
+      "label_en": "Resource ACL or token not refreshed",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-service_license_unavailable_or_disabled",
+      "kind": "cause",
+      "label_en": "Service license unavailable or disabled",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-account_provisioning_not_complete",
+      "kind": "cause",
+      "label_en": "Account provisioning not complete",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-stale_local_authentication_state",
+      "kind": "cause",
+      "label_en": "Stale local authentication state",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-conditional_access_or_mfa_requirement",
+      "kind": "cause",
+      "label_en": "Conditional Access or MFA requirement",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-cloud_service_degradation",
+      "kind": "cause",
+      "label_en": "Cloud service degradation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-device_connectivity_or_dns_problem",
+      "kind": "cause",
+      "label_en": "Device connectivity or DNS problem",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-local_outlook_profile_malfunction",
+      "kind": "cause",
+      "label_en": "Local Outlook profile malfunction",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-transport_or_delivery_rejection",
+      "kind": "cause",
+      "label_en": "Transport or delivery rejection",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-outlook_client_outbox_or_offline_state",
+      "kind": "cause",
+      "label_en": "Outlook client outbox or offline state",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-mail_flow_transport_failure",
+      "kind": "cause",
+      "label_en": "Mail flow transport failure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-mailbox_quota_reached",
+      "kind": "cause",
+      "label_en": "Mailbox quota reached",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-spam_or_quarantine_policy_action",
+      "kind": "cause",
+      "label_en": "Spam or quarantine policy action",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-mailbox_access_permission_missing",
+      "kind": "cause",
+      "label_en": "Mailbox access permission missing",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-local_mailbox_mapping_or_cache_failure",
+      "kind": "cause",
+      "label_en": "Local mailbox mapping or cache failure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-client_local_index_not_healthy",
+      "kind": "cause",
+      "label_en": "Client local index not healthy",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-ost_cache_corruption",
+      "kind": "cause",
+      "label_en": "OST cache corruption",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-search_scope_or_filter_excludes_item",
+      "kind": "cause",
+      "label_en": "Search scope or filter excludes item",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-distribution_group_membership_or_delivery_settings",
+      "kind": "cause",
+      "label_en": "Distribution group membership or delivery settings",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-mail_flow_or_transport_rejection",
+      "kind": "cause",
+      "label_en": "Mail flow or transport rejection",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-sync_conflict_or_file_in_use",
+      "kind": "cause",
+      "label_en": "Sync conflict or file in use",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-onedrive_storage_quota_full",
+      "kind": "cause",
+      "label_en": "OneDrive storage quota full",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-connectivity_or_sign_in_issue",
+      "kind": "cause",
+      "label_en": "Connectivity or sign-in issue",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-account_authentication_failure",
+      "kind": "cause",
+      "label_en": "Account authentication failure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-client_account_connection_corrupted",
+      "kind": "cause",
+      "label_en": "Client account connection corrupted",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-folder_redirection_conflict",
+      "kind": "cause",
+      "label_en": "Folder redirection conflict",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-insufficient_storage_or_blocked_path",
+      "kind": "cause",
+      "label_en": "Insufficient storage or blocked path",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-cloud_storage_quota_reached",
+      "kind": "cause",
+      "label_en": "Cloud storage quota reached",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-local_storage_constraint",
+      "kind": "cause",
+      "label_en": "Local storage constraint",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-unsupported_file_name_or_path_pattern",
+      "kind": "cause",
+      "label_en": "Unsupported file name or path pattern",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-file_locked_or_unsupported_item",
+      "kind": "cause",
+      "label_en": "File locked or unsupported item",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-pending_restart_or_servicing_state",
+      "kind": "cause",
+      "label_en": "Pending restart or servicing state",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-insufficient_storage_or_update_error",
+      "kind": "cause",
+      "label_en": "Insufficient storage or update error",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-user_profile_corruption",
+      "kind": "cause",
+      "label_en": "User profile corruption",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-device_or_account_sign_in_problem",
+      "kind": "cause",
+      "label_en": "Device or account sign-in problem",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-high_resource_utilization",
+      "kind": "cause",
+      "label_en": "High resource utilization",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-disk_health_or_storage_issue",
+      "kind": "cause",
+      "label_en": "Disk health or storage issue",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-driver_incompatibility",
+      "kind": "cause",
+      "label_en": "Driver incompatibility",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-hardware_or_memory_instability",
+      "kind": "cause",
+      "label_en": "Hardware or memory instability",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-windows_boot_configuration_or_servicing_issue",
+      "kind": "cause",
+      "label_en": "Windows boot configuration or servicing issue",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-disk_failure_or_file_system_problem",
+      "kind": "cause",
+      "label_en": "Disk failure or file system problem",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-vpn_client_or_endpoint_unreachable",
+      "kind": "cause",
+      "label_en": "VPN client or endpoint unreachable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-authentication_or_policy_failure",
+      "kind": "cause",
+      "label_en": "Authentication or policy failure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-registered_mfa_method_cannot_complete",
+      "kind": "cause",
+      "label_en": "Registered MFA method cannot complete",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-vpn_authentication_integration_policy",
+      "kind": "cause",
+      "label_en": "VPN authentication integration policy",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-split_tunnel_route_missing",
+      "kind": "cause",
+      "label_en": "Split-tunnel route missing",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-vpn_dns_resolution_incomplete",
+      "kind": "cause",
+      "label_en": "VPN DNS resolution incomplete",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-share_permissions_deny_access",
+      "kind": "cause",
+      "label_en": "Share permissions deny access",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-target_host_not_reachable",
+      "kind": "cause",
+      "label_en": "Target host not reachable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-rdp_authorization_or_host_policy",
+      "kind": "cause",
+      "label_en": "RDP authorization or host policy",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-incorrect_dns_server_configuration",
+      "kind": "cause",
+      "label_en": "Incorrect DNS server configuration",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-dns_server_outage_or_filtering",
+      "kind": "cause",
+      "label_en": "DNS server outage or filtering",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-dhcp_lease_unavailable",
+      "kind": "cause",
+      "label_en": "DHCP lease unavailable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-physical_or_wi_fi_link_issue",
+      "kind": "cause",
+      "label_en": "Physical or Wi-Fi link issue",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-gateway_or_wan_path_unavailable",
+      "kind": "cause",
+      "label_en": "Gateway or WAN path unavailable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-dns_resolution_unavailable",
+      "kind": "cause",
+      "label_en": "DNS resolution unavailable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-proxy_misconfiguration",
+      "kind": "cause",
+      "label_en": "Proxy misconfiguration",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-wrong_default_route_or_gateway_address",
+      "kind": "cause",
+      "label_en": "Wrong default route or gateway address",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CAUSE-local_network_connectivity_degraded",
+      "kind": "cause",
+      "label_en": "Local network connectivity degraded",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    }
+  ],
+  "diagnostic_check_candidates": [
+    {
+      "id": "DRAFT-CHECK-review_registered_authentication_methods_through_authorized_entra_view",
+      "kind": "check",
+      "label_en": "Review registered authentication methods through authorized Entra view",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_authenticator_prompts_and_time_configuration",
+      "kind": "check",
+      "label_en": "Compare authenticator prompts and time configuration",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_entra_sign_in_logs_and_applicable_policy_result",
+      "kind": "check",
+      "label_en": "Review Entra sign-in logs and applicable policy result",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-check_sign_in_authentication_requirement_and_method_eligibility",
+      "kind": "check",
+      "label_en": "Check sign-in authentication requirement and method eligibility",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_account_state_and_expected_identity_source",
+      "kind": "check",
+      "label_en": "Compare account state and expected identity source",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_browser_sign_in_with_installed_client",
+      "kind": "check",
+      "label_en": "Compare browser sign-in with installed client",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_approved_sign_in_lockout_logs",
+      "kind": "check",
+      "label_en": "Review approved sign-in/lockout logs",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-correlate_lockout_source_and_client_activity",
+      "kind": "check",
+      "label_en": "Correlate lockout source and client activity",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_required_group_membership_against_authorized_access_request",
+      "kind": "check",
+      "label_en": "Compare required group membership against authorized access request",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_resource_authorization_and_effective_user_session",
+      "kind": "check",
+      "label_en": "Compare resource authorization and effective user session",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_license_assignment_and_service_plans",
+      "kind": "check",
+      "label_en": "Inspect license assignment and service plans",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_account_provisioning_and_service_state",
+      "kind": "check",
+      "label_en": "Review account provisioning and service state",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_outlook_desktop_and_permitted_web_sign_in",
+      "kind": "check",
+      "label_en": "Compare Outlook desktop and permitted web sign-in",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_entra_sign_in_failure_detail",
+      "kind": "check",
+      "label_en": "Review Entra sign-in failure detail",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-check_microsoft_365_service_health_via_approved_portal",
+      "kind": "check",
+      "label_en": "Check Microsoft 365 service health via approved portal",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_browser_cloud_access_and_dns_resolution",
+      "kind": "check",
+      "label_en": "Compare browser cloud access and DNS resolution",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_outlook_web_versus_desktop_behavior",
+      "kind": "check",
+      "label_en": "Compare Outlook web versus desktop behavior",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_message_trace_and_non_delivery_report_through_approved_role",
+      "kind": "check",
+      "label_en": "Review message trace and non-delivery report through approved role",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-check_client_connection_and_outbox_behavior",
+      "kind": "check",
+      "label_en": "Check client connection and Outbox behavior",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_message_trace_and_sender_non_delivery_evidence",
+      "kind": "check",
+      "label_en": "Review message trace and sender non-delivery evidence",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-check_recipient_mailbox_usage_and_storage_thresholds",
+      "kind": "check",
+      "label_en": "Check recipient mailbox usage and storage thresholds",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_eligible_quarantine_and_filtering_disposition",
+      "kind": "check",
+      "label_en": "Inspect eligible quarantine and filtering disposition",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_effective_permissions_against_approved_request",
+      "kind": "check",
+      "label_en": "Compare effective permissions against approved request",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_access_through_supported_web_and_desktop_paths",
+      "kind": "check",
+      "label_en": "Compare access through supported web and desktop paths",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_server_search_with_local_client_search",
+      "kind": "check",
+      "label_en": "Compare server search with local client search",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_outlook_local_cache_and_server_mailbox_state",
+      "kind": "check",
+      "label_en": "Compare Outlook local cache and server mailbox state",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_active_search_location_and_filters",
+      "kind": "check",
+      "label_en": "Review active search location and filters",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_approved_group_members_and_delivery_restrictions",
+      "kind": "check",
+      "label_en": "Review approved group members and delivery restrictions",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_message_trace_against_affected_recipients",
+      "kind": "check",
+      "label_en": "Compare message trace against affected recipients",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_sync_client_status_and_conflict_details",
+      "kind": "check",
+      "label_en": "Inspect sync client status and conflict details",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-check_storage_capacity_for_affected_account",
+      "kind": "check",
+      "label_en": "Check storage capacity for affected account",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_onedrive_sign_in_state_and_cloud_reachability",
+      "kind": "check",
+      "label_en": "Inspect OneDrive sign-in state and cloud reachability",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_onedrive_and_browser_identity_sign_in",
+      "kind": "check",
+      "label_en": "Compare OneDrive and browser identity sign-in",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_web_access_with_local_client_sign_in",
+      "kind": "check",
+      "label_en": "Compare web access with local client sign-in",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_effective_folder_location_and_backup_settings",
+      "kind": "check",
+      "label_en": "Review effective folder location and backup settings",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_onedrive_storage_and_folder_eligibility",
+      "kind": "check",
+      "label_en": "Inspect OneDrive storage and folder eligibility",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-check_cloud_quota_versus_observed_upload_demand",
+      "kind": "check",
+      "label_en": "Check cloud quota versus observed upload demand",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-check_device_free_disk_space_and_sync_configuration",
+      "kind": "check",
+      "label_en": "Check device free disk space and sync configuration",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_sync_error_for_file_path_restrictions",
+      "kind": "check",
+      "label_en": "Review sync error for file/path restrictions",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_file_access_and_sync_item_status",
+      "kind": "check",
+      "label_en": "Review file access and sync item status",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_windows_update_history_and_pending_restart_indicators",
+      "kind": "check",
+      "label_en": "Inspect Windows Update history and pending restart indicators",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_reported_update_error_and_available_storage",
+      "kind": "check",
+      "label_en": "Review reported update error and available storage",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_windows_logon_and_user_profile_service_events",
+      "kind": "check",
+      "label_en": "Review Windows logon and user profile service events",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-validate_affected_account_and_availability_of_another_permitted_profile",
+      "kind": "check",
+      "label_en": "Validate affected account and availability of another permitted profile",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_cpu_memory_and_disk_performance_under_load",
+      "kind": "check",
+      "label_en": "Review CPU memory and disk performance under load",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_available_storage_and_disk_diagnostics",
+      "kind": "check",
+      "label_en": "Inspect available storage and disk diagnostics",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-collect_safe_stop_code_and_relevant_reliability_events",
+      "kind": "check",
+      "label_en": "Collect safe stop code and relevant reliability events",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_available_hardware_diagnostics_and_error_events",
+      "kind": "check",
+      "label_en": "Inspect available hardware diagnostics and error events",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_safe_recovery_diagnostics_and_recent_update_history",
+      "kind": "check",
+      "label_en": "Review safe recovery diagnostics and recent update history",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-use_approved_read_only_disk_health_diagnostics",
+      "kind": "check",
+      "label_en": "Use approved read-only disk-health diagnostics",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_client_error_and_endpoint_reachability",
+      "kind": "check",
+      "label_en": "Inspect client error and endpoint reachability",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_vpn_authentication_outcome_with_approved_identity_checks",
+      "kind": "check",
+      "label_en": "Compare VPN authentication outcome with approved identity checks",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_approved_vpn_mfa_prompt_and_method_configuration",
+      "kind": "check",
+      "label_en": "Review approved VPN MFA prompt and method configuration",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_approved_vpn_login_or_security_gateway_logs",
+      "kind": "check",
+      "label_en": "Inspect approved VPN login or security gateway logs",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_active_routes_and_approved_resource_path",
+      "kind": "check",
+      "label_en": "Inspect active routes and approved resource path",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-resolve_internal_name_through_approved_dns_diagnostic",
+      "kind": "check",
+      "label_en": "Resolve internal name through approved DNS diagnostic",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_resource_reachability_with_approved_user_permissions",
+      "kind": "check",
+      "label_en": "Compare resource reachability with approved user permissions",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_authorized_target_reachability_and_vpn_path",
+      "kind": "check",
+      "label_en": "Inspect authorized target reachability and VPN path",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-review_approved_remote_access_entitlement_and_host_policy",
+      "kind": "check",
+      "label_en": "Review approved remote-access entitlement and host policy",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_adapter_dns_settings_and_known_good_resolution",
+      "kind": "check",
+      "label_en": "Inspect adapter DNS settings and known-good resolution",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_authorized_resolver_answers_and_provider_status",
+      "kind": "check",
+      "label_en": "Compare authorized resolver answers and provider status",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_adapter_addressing_and_lease_status",
+      "kind": "check",
+      "label_en": "Inspect adapter addressing and lease status",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_link_status_and_connected_network",
+      "kind": "check",
+      "label_en": "Inspect link status and connected network",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-check_assigned_gateway_and_limited_reachability",
+      "kind": "check",
+      "label_en": "Check assigned gateway and limited reachability",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-compare_numeric_host_reachability_and_dns_results",
+      "kind": "check",
+      "label_en": "Compare numeric-host reachability and DNS results",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_effective_proxy_path_for_permitted_application",
+      "kind": "check",
+      "label_en": "Inspect effective proxy path for permitted application",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_effective_ip_and_route_table",
+      "kind": "check",
+      "label_en": "Inspect effective IP and route table",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-CHECK-inspect_wi_fi_ethernet_link_vlan_or_access_point_status",
+      "kind": "check",
+      "label_en": "Inspect Wi-Fi/Ethernet link, VLAN or access point status",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    }
+  ],
+  "finding_candidates": [
+    {
+      "id": "DRAFT-FINDING-available_methods_do_not_meet_enrollment_requirements",
+      "kind": "finding",
+      "label_en": "Available methods do not meet enrollment requirements",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-prompt_not_arriving_or_device_clock_incorrect",
+      "kind": "finding",
+      "label_en": "Prompt not arriving or device clock incorrect",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-policy_specific_failure_or_requirement_visible",
+      "kind": "finding",
+      "label_en": "Policy-specific failure or requirement visible",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-required_method_unavailable",
+      "kind": "finding",
+      "label_en": "Required method unavailable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-cloud_and_directory_credentials_differ_or_sync_error_reported",
+      "kind": "finding",
+      "label_en": "Cloud and directory credentials differ or sync error reported",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-browser_works_but_installed_app_fails",
+      "kind": "finding",
+      "label_en": "Browser works but installed app fails",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-repeated_failed_attempts_align_with_lockout",
+      "kind": "finding",
+      "label_en": "Repeated failed attempts align with lockout",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-same_device_or_application_repeats_failed_logons",
+      "kind": "finding",
+      "label_en": "Same device or application repeats failed logons",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-membership_differs_from_approved_requirement",
+      "kind": "finding",
+      "label_en": "Membership differs from approved requirement",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-membership_exists_but_effective_permission_missing",
+      "kind": "finding",
+      "label_en": "Membership exists but effective permission missing",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-service_plan_absent_or_disabled",
+      "kind": "finding",
+      "label_en": "Service plan absent or disabled",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-service_account_or_entitlement_not_ready",
+      "kind": "finding",
+      "label_en": "Service account or entitlement not ready",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-web_sign_in_works_while_client_loops",
+      "kind": "finding",
+      "label_en": "Web sign-in works while client loops",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-policy_or_challenge_blocks_the_attempted_sign_in",
+      "kind": "finding",
+      "label_en": "Policy or challenge blocks the attempted sign-in",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-relevant_incident_affects_authentication",
+      "kind": "finding",
+      "label_en": "Relevant incident affects authentication",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-browser_or_dns_tests_fail_on_device",
+      "kind": "finding",
+      "label_en": "Browser or DNS tests fail on device",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-web_works_and_desktop_cannot_connect",
+      "kind": "finding",
+      "label_en": "Web works and desktop cannot connect",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-trace_or_ndr_reports_a_specific_rejection",
+      "kind": "finding",
+      "label_en": "Trace or NDR reports a specific rejection",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-item_remains_locally_queued",
+      "kind": "finding",
+      "label_en": "Item remains locally queued",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-expected_message_rejected_or_delayed_in_transport",
+      "kind": "finding",
+      "label_en": "Expected message rejected or delayed in transport",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-mailbox_storage_restriction_confirmed",
+      "kind": "finding",
+      "label_en": "Mailbox storage restriction confirmed",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-message_held_by_policy",
+      "kind": "finding",
+      "label_en": "Message held by policy",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-delegation_not_present",
+      "kind": "finding",
+      "label_en": "Delegation not present",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-web_access_works_but_desktop_mapping_fails",
+      "kind": "finding",
+      "label_en": "Web access works but desktop mapping fails",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-messages_found_online_but_missing_locally",
+      "kind": "finding",
+      "label_en": "Messages found online but missing locally",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-cached_content_differs_from_server_state",
+      "kind": "finding",
+      "label_en": "Cached content differs from server state",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-message_present_when_scope_corrected",
+      "kind": "finding",
+      "label_en": "Message present when scope corrected",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-recipient_is_absent_or_external_sender_blocked",
+      "kind": "finding",
+      "label_en": "Recipient is absent or external sender blocked",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-trace_shows_rejection_before_group_expansion_or_at_recipients",
+      "kind": "finding",
+      "label_en": "Trace shows rejection before group expansion or at recipients",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-client_identifies_conflict",
+      "kind": "finding",
+      "label_en": "Client identifies conflict",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-quota_exceeded",
+      "kind": "finding",
+      "label_en": "Quota exceeded",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-client_disconnected_or_session_expired",
+      "kind": "finding",
+      "label_en": "Client disconnected or session expired",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-service_sign_in_blocked",
+      "kind": "finding",
+      "label_en": "Service sign-in blocked",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-web_works_while_desktop_client_fails",
+      "kind": "finding",
+      "label_en": "Web works while desktop client fails",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-folder_is_already_redirected",
+      "kind": "finding",
+      "label_en": "Folder is already redirected",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-quota_or_eligible_path_issue_reported",
+      "kind": "finding",
+      "label_en": "Quota or eligible-path issue reported",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-cloud_capacity_exceeded",
+      "kind": "finding",
+      "label_en": "Cloud capacity exceeded",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-device_cannot_stage_local_files",
+      "kind": "finding",
+      "label_en": "Device cannot stage local files",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-specific_file_rejected_for_naming_path_rule",
+      "kind": "finding",
+      "label_en": "Specific file rejected for naming/path rule",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-file_locked_or_excluded",
+      "kind": "finding",
+      "label_en": "File locked or excluded",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-servicing_waits_for_restart",
+      "kind": "finding",
+      "label_en": "Servicing waits for restart",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-space_or_specific_update_error_identified",
+      "kind": "finding",
+      "label_en": "Space or specific update error identified",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-profile_load_failure_reported",
+      "kind": "finding",
+      "label_en": "Profile load failure reported",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-authentication_fails_before_profile_loads",
+      "kind": "finding",
+      "label_en": "Authentication fails before profile loads",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-resource_bottleneck_reproducible",
+      "kind": "finding",
+      "label_en": "Resource bottleneck reproducible",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-storage_constraints_or_hardware_alert",
+      "kind": "finding",
+      "label_en": "Storage constraints or hardware alert",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-driver_change_correlates_with_crash",
+      "kind": "finding",
+      "label_en": "Driver change correlates with crash",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-hardware_related_error_observed",
+      "kind": "finding",
+      "label_en": "Hardware-related error observed",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-recent_servicing_or_boot_error_identified",
+      "kind": "finding",
+      "label_en": "Recent servicing or boot error identified",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-drive_fault_reported",
+      "kind": "finding",
+      "label_en": "Drive fault reported",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-endpoint_inaccessible_or_client_error",
+      "kind": "finding",
+      "label_en": "Endpoint inaccessible or client error",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-sign_in_or_policy_failure_visible",
+      "kind": "finding",
+      "label_en": "Sign-in or policy failure visible",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-challenge_fails_or_method_unavailable",
+      "kind": "finding",
+      "label_en": "Challenge fails or method unavailable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-auth_policy_rejects_session",
+      "kind": "finding",
+      "label_en": "Auth policy rejects session",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-route_to_resource_unavailable",
+      "kind": "finding",
+      "label_en": "Route to resource unavailable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-internal_name_not_resolving",
+      "kind": "finding",
+      "label_en": "Internal name not resolving",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-host_reachable_but_access_denied",
+      "kind": "finding",
+      "label_en": "Host reachable but access denied",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-host_inaccessible",
+      "kind": "finding",
+      "label_en": "Host inaccessible",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-session_denied_after_network_reachability",
+      "kind": "finding",
+      "label_en": "Session denied after network reachability",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-dns_lookup_fails_on_device",
+      "kind": "finding",
+      "label_en": "DNS lookup fails on device",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-resolver_consistently_fails_target_names",
+      "kind": "finding",
+      "label_en": "Resolver consistently fails target names",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-no_valid_lease_or_apipa_address",
+      "kind": "finding",
+      "label_en": "No valid lease or APIPA address",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-link_down_or_wrong_network",
+      "kind": "finding",
+      "label_en": "Link down or wrong network",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-gateway_or_upstream_unreachable",
+      "kind": "finding",
+      "label_en": "Gateway or upstream unreachable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-ip_path_works_but_required_names_fail",
+      "kind": "finding",
+      "label_en": "IP path works but required names fail",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-only_proxied_traffic_fails",
+      "kind": "finding",
+      "label_en": "Only proxied traffic fails",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-default_gateway_unreachable",
+      "kind": "finding",
+      "label_en": "Default gateway unreachable",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-FINDING-link_or_network_segment_fails",
+      "kind": "finding",
+      "label_en": "Link or network segment fails",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    }
+  ],
+  "action_candidates": [
+    {
+      "id": "DRAFT-ACTION-follow_approved_identity_verification_and_mfa_re_registration_sop",
+      "kind": "action",
+      "label_en": "Follow approved identity verification and MFA re-registration SOP",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-guide_device_level_authenticator_troubleshooting",
+      "kind": "action",
+      "label_en": "Guide device-level authenticator troubleshooting",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_policy_exception_review_to_authorized_administrator",
+      "kind": "action",
+      "label_en": "Escalate policy exception review to authorized administrator",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_approved_mfa_remediation_sop",
+      "kind": "action",
+      "label_en": "Follow approved MFA remediation SOP",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_directory_synchronization_investigation",
+      "kind": "action",
+      "label_en": "Escalate directory synchronization investigation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_client_credential_refresh_under_approved_procedure",
+      "kind": "action",
+      "label_en": "Review client credential refresh under approved procedure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-verify_identity_and_follow_approved_unlock_reset_procedure",
+      "kind": "action",
+      "label_en": "Verify identity and follow approved unlock/reset procedure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-resolve_stale_background_credential_after_authorization",
+      "kind": "action",
+      "label_en": "Resolve stale background credential after authorization",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-request_authorized_group_membership_correction",
+      "kind": "action",
+      "label_en": "Request authorized group membership correction",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_permission_propagation_or_user_session_refresh",
+      "kind": "action",
+      "label_en": "Review permission propagation or user session refresh",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-request_approved_license_or_service_plan_assignment",
+      "kind": "action",
+      "label_en": "Request approved license or service-plan assignment",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-wait_or_escalate_provisioning_workflow_according_to_sop",
+      "kind": "action",
+      "label_en": "Wait or escalate provisioning workflow according to SOP",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_supported_outlook_sign_in_state_remediation",
+      "kind": "action",
+      "label_en": "Review supported Outlook sign-in state remediation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-refer_to_approved_entra_mfa_or_policy_escalation",
+      "kind": "action",
+      "label_en": "Refer to approved Entra MFA or policy escalation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-record_incident_and_advise_user_using_msp_incident_workflow",
+      "kind": "action",
+      "label_en": "Record incident and advise user using MSP incident workflow",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_networking_diagnostic_branch",
+      "kind": "action",
+      "label_en": "Follow networking diagnostic branch",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_approved_outlook_profile_repair_workflow",
+      "kind": "action",
+      "label_en": "Review approved Outlook profile repair workflow",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_targeted_exchange_online_mail_flow_procedure",
+      "kind": "action",
+      "label_en": "Follow targeted Exchange Online mail flow procedure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-resolve_client_offline_queue_condition_using_approved_sop",
+      "kind": "action",
+      "label_en": "Resolve client offline/queue condition using approved SOP",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_verified_mail_routing_or_connector_condition",
+      "kind": "action",
+      "label_en": "Escalate verified mail routing or connector condition",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_approved_mailbox_capacity_workflow",
+      "kind": "action",
+      "label_en": "Review approved mailbox capacity workflow",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-apply_approved_safe_quarantine_review_workflow",
+      "kind": "action",
+      "label_en": "Apply approved safe quarantine-review workflow",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-request_approved_shared_mailbox_delegation",
+      "kind": "action",
+      "label_en": "Request approved shared-mailbox delegation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_approved_outlook_shared_mailbox_mapping_procedure",
+      "kind": "action",
+      "label_en": "Review approved Outlook shared mailbox mapping procedure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_supported_local_outlook_indexing_diagnostics",
+      "kind": "action",
+      "label_en": "Review supported local Outlook indexing diagnostics",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_data_preserving_outlook_cache_investigation",
+      "kind": "action",
+      "label_en": "Review data-preserving Outlook cache investigation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-correct_search_scope_and_educate_user",
+      "kind": "action",
+      "label_en": "Correct search scope and educate user",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_approved_group_membership_or_delivery_policy_correction",
+      "kind": "action",
+      "label_en": "Escalate approved group membership or delivery policy correction",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_authorized_exchange_online_transport_review",
+      "kind": "action",
+      "label_en": "Follow authorized Exchange Online transport review",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-use_supported_conflict_resolution_with_user_confirmation",
+      "kind": "action",
+      "label_en": "Use supported conflict resolution with user confirmation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_approved_storage_remediation",
+      "kind": "action",
+      "label_en": "Follow approved storage remediation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_authentication_or_networking_check_branch",
+      "kind": "action",
+      "label_en": "Follow authentication or networking check branch",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_approved_identity_investigation",
+      "kind": "action",
+      "label_en": "Follow approved identity investigation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_supported_onedrive_account_reconnect_procedure",
+      "kind": "action",
+      "label_en": "Review supported OneDrive account reconnect procedure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_supported_redirection_reconciliation",
+      "kind": "action",
+      "label_en": "Escalate supported redirection reconciliation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-apply_approved_folder_eligibility_or_storage_remediation",
+      "kind": "action",
+      "label_en": "Apply approved folder eligibility or storage remediation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-request_approved_storage_allocation_or_retention_aligned_cleanup",
+      "kind": "action",
+      "label_en": "Request approved storage allocation or retention-aligned cleanup",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_supported_local_storage_remediation",
+      "kind": "action",
+      "label_en": "Follow supported local storage remediation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-coordinate_supported_safe_rename_preserving_links",
+      "kind": "action",
+      "label_en": "Coordinate supported safe rename preserving links",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-resolve_file_access_or_supported_sync_scope",
+      "kind": "action",
+      "label_en": "Resolve file access or supported sync scope",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-schedule_approved_restart_and_recheck",
+      "kind": "action",
+      "label_en": "Schedule approved restart and recheck",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_vendor_supported_remediation_by_error_code",
+      "kind": "action",
+      "label_en": "Follow vendor-supported remediation by error code",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_profile_recovery_preserving_user_data",
+      "kind": "action",
+      "label_en": "Escalate profile recovery preserving user data",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-route_to_identity_or_device_diagnostics",
+      "kind": "action",
+      "label_en": "Route to identity or device diagnostics",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-address_authorized_startup_workload_or_capacity",
+      "kind": "action",
+      "label_en": "Address authorized startup workload or capacity",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_drive_and_data_protection_assessment",
+      "kind": "action",
+      "label_en": "Escalate drive and data-protection assessment",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_approved_driver_rollback_investigation",
+      "kind": "action",
+      "label_en": "Escalate approved driver rollback/investigation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_hardware_investigation_and_backup_review",
+      "kind": "action",
+      "label_en": "Escalate hardware investigation and backup review",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_controlled_recovery_with_data_preservation",
+      "kind": "action",
+      "label_en": "Escalate controlled recovery with data preservation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_hardware_data_recovery_avoid_writes",
+      "kind": "action",
+      "label_en": "Escalate hardware/data recovery; avoid writes",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_approved_vpn_client_and_network_procedure",
+      "kind": "action",
+      "label_en": "Follow approved VPN client and network procedure",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_vpn_identity_policy_issue",
+      "kind": "action",
+      "label_en": "Escalate VPN identity/policy issue",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_verified_mfa_re_registration_sop",
+      "kind": "action",
+      "label_en": "Follow verified MFA re-registration SOP",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_vpn_authentication_integration_assessment",
+      "kind": "action",
+      "label_en": "Escalate VPN authentication integration assessment",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_route_configuration_to_network_owner",
+      "kind": "action",
+      "label_en": "Escalate route configuration to network owner",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_dns_configuration_or_split_dns_check",
+      "kind": "action",
+      "label_en": "Escalate DNS configuration or split DNS check",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-route_to_resource_permission_review",
+      "kind": "action",
+      "label_en": "Route to resource permission review",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_route_availability_or_firewall_checks",
+      "kind": "action",
+      "label_en": "Escalate route, availability, or firewall checks",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-request_authorized_rdp_access_policy_review",
+      "kind": "action",
+      "label_en": "Request authorized RDP access policy review",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_approved_dns_configuration_remediation",
+      "kind": "action",
+      "label_en": "Follow approved DNS configuration remediation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_dns_service_filtering_investigation",
+      "kind": "action",
+      "label_en": "Escalate DNS service/filtering investigation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_dhcp_service_relay_or_approved_lease_renewal",
+      "kind": "action",
+      "label_en": "Escalate DHCP service/relay or approved lease renewal",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-resolve_link_ssid_connectivity_before_dhcp_diagnostics",
+      "kind": "action",
+      "label_en": "Resolve link/SSID connectivity before DHCP diagnostics",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_network_path_and_gateway_escalation",
+      "kind": "action",
+      "label_en": "Follow network path and gateway escalation",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-follow_dns_diagnostic_branch",
+      "kind": "action",
+      "label_en": "Follow DNS diagnostic branch",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-review_authorized_proxy_configuration",
+      "kind": "action",
+      "label_en": "Review authorized proxy configuration",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_route_adapter_configuration",
+      "kind": "action",
+      "label_en": "Escalate route/adapter configuration",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    },
+    {
+      "id": "DRAFT-ACTION-escalate_network_access_troubleshooting",
+      "kind": "action",
+      "label_en": "Escalate network access troubleshooting",
+      "authority": "PROPOSED_NOT_VERIFIED",
+      "status": "CURATION_DRAFT"
+    }
+  ],
+  "source_reconciliation": [
+    {
+      "source_candidate_id": "CAND-IDENTITY-ENTRA-001",
+      "source_label": "MFA enrollment fails after phone replacement",
+      "source_domain": "identity_entra",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-001"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-IDENTITY-ENTRA-002",
+      "source_label": "Unexpected conditional access denial",
+      "source_domain": "identity_entra",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-002"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-IDENTITY-ENTRA-003",
+      "source_label": "Password change not synchronized",
+      "source_domain": "identity_entra",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-003"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-IDENTITY-ENTRA-004",
+      "source_label": "Account locked after repeated attempts",
+      "source_domain": "identity_entra",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-004"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-IDENTITY-ENTRA-005",
+      "source_label": "User missing required group access",
+      "source_domain": "identity_entra",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-005"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-IDENTITY-ENTRA-006",
+      "source_label": "Provisioned user cannot access licensed service",
+      "source_domain": "identity_entra",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-006"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-EXCHANGE-ONLINE-001",
+      "source_label": "Shared mailbox access denied",
+      "source_domain": "exchange_online",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-011"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-EXCHANGE-ONLINE-002",
+      "source_label": "Inbound message rejected by mail flow",
+      "source_domain": "exchange_online",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-010"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-EXCHANGE-ONLINE-003",
+      "source_label": "Distribution group delivery issue",
+      "source_domain": "exchange_online",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-013"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-EXCHANGE-ONLINE-004",
+      "source_label": "Message quarantined by policy",
+      "source_domain": "exchange_online",
+      "decision": "POSSIBLE_FINDING",
+      "matched_draft_anchor_ids": [],
+      "matched_related_node_ids": [
+        "DRAFT-FINDING-message_held_by_policy"
+      ],
+      "rationale": "Quarantine is a policy outcome, not necessarily a failure"
+    },
+    {
+      "source_candidate_id": "CAND-EXCHANGE-ONLINE-005",
+      "source_label": "Mailbox exceeds storage quota",
+      "source_domain": "exchange_online",
+      "decision": "POSSIBLE_CAUSE",
+      "matched_draft_anchor_ids": [],
+      "matched_related_node_ids": [
+        "DRAFT-CAUSE-mailbox_quota_reached"
+      ],
+      "rationale": "Quota reached is a possible explanation for failed mail receipt; do not encode the cause into the symptom anchor"
+    },
+    {
+      "source_candidate_id": "CAND-OUTLOOK-001",
+      "source_label": "Repeated password prompts",
+      "source_domain": "outlook",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-007"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-OUTLOOK-002",
+      "source_label": "Outlook cannot connect",
+      "source_domain": "outlook",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-008"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-OUTLOOK-003",
+      "source_label": "OST data cache corruption",
+      "source_domain": "outlook",
+      "decision": "POSSIBLE_CAUSE",
+      "matched_draft_anchor_ids": [],
+      "matched_related_node_ids": [
+        "DRAFT-CAUSE-ost_cache_corruption"
+      ],
+      "rationale": "OST cache corruption is not a user-reported symptom; investigate condition"
+    },
+    {
+      "source_candidate_id": "CAND-OUTLOOK-004",
+      "source_label": "Outlook search returns incomplete results",
+      "source_domain": "outlook",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-012"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-OUTLOOK-005",
+      "source_label": "Calendar events not synchronized",
+      "source_domain": "outlook",
+      "decision": "DEFERRED_NEXT_COHORT",
+      "matched_draft_anchor_ids": [],
+      "matched_related_node_ids": [],
+      "rationale": "Calendar synchronization symptom not covered in this set"
+    },
+    {
+      "source_candidate_id": "CAND-OUTLOOK-006",
+      "source_label": "Outlook add-in blocks startup",
+      "source_domain": "outlook",
+      "decision": "UNSCOPED_POTENTIAL_ISSUE",
+      "matched_draft_anchor_ids": [],
+      "matched_related_node_ids": [],
+      "rationale": "Add-in blocks startup, not equivalent to connection failure"
+    },
+    {
+      "source_candidate_id": "CAND-ONEDRIVE-001",
+      "source_label": "Known Folder Move conflict",
+      "source_domain": "onedrive",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-016"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-ONEDRIVE-002",
+      "source_label": "File sync stalled",
+      "source_domain": "onedrive",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-014"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-ONEDRIVE-003",
+      "source_label": "Storage quota reached",
+      "source_domain": "onedrive",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-017"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-ONEDRIVE-004",
+      "source_label": "File name unsupported",
+      "source_domain": "onedrive",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-018"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-ONEDRIVE-005",
+      "source_label": "OneDrive sign-in failure",
+      "source_domain": "onedrive",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-015"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-WINDOWS-001",
+      "source_label": "Windows update stuck pending restart",
+      "source_domain": "windows",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-019"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-WINDOWS-002",
+      "source_label": "User profile fails to load",
+      "source_domain": "windows",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-020"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-WINDOWS-003",
+      "source_label": "Workstation starts slowly",
+      "source_domain": "windows",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-021"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-WINDOWS-004",
+      "source_label": "Unexpected BSOD",
+      "source_domain": "windows",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-022"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-WINDOWS-005",
+      "source_label": "Startup repair loop",
+      "source_domain": "windows",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-023"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-NETWORK-001",
+      "source_label": "DNS lookup fails on one device",
+      "source_domain": "network",
+      "decision": "POSSIBLE_FINDING",
+      "matched_draft_anchor_ids": [],
+      "matched_related_node_ids": [
+        "DRAFT-FINDING-dns_lookup_fails_on_device"
+      ],
+      "rationale": "DNS lookup failure is a diagnostic observation; user-visible website loading has a separate anchor"
+    },
+    {
+      "source_candidate_id": "CAND-NETWORK-002",
+      "source_label": "DHCP address missing",
+      "source_domain": "network",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-029"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-NETWORK-003",
+      "source_label": "Wi-Fi connected without Internet",
+      "source_domain": "network",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-030"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-NETWORK-004",
+      "source_label": "Gateway unreachable",
+      "source_domain": "network",
+      "decision": "POSSIBLE_FINDING",
+      "matched_draft_anchor_ids": [],
+      "matched_related_node_ids": [
+        "DRAFT-FINDING-default_gateway_unreachable"
+      ],
+      "rationale": "Gateway unreachable is a diagnostic observation; user-visible LAN access failure has a separate anchor"
+    },
+    {
+      "source_candidate_id": "CAND-NETWORK-005",
+      "source_label": "Proxy misconfiguration",
+      "source_domain": "network",
+      "decision": "POSSIBLE_CAUSE",
+      "matched_draft_anchor_ids": [],
+      "matched_related_node_ids": [
+        "DRAFT-CAUSE-proxy_misconfiguration"
+      ],
+      "rationale": "Proxy misconfiguration may affect web access"
+    },
+    {
+      "source_candidate_id": "CAND-VPN-REMOTE-001",
+      "source_label": "VPN connects but internal share inaccessible",
+      "source_domain": "vpn_remote",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-026"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-VPN-REMOTE-002",
+      "source_label": "VPN MFA authentication fails",
+      "source_domain": "vpn_remote",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-025"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-VPN-REMOTE-003",
+      "source_label": "RDP cannot reach permitted host",
+      "source_domain": "vpn_remote",
+      "decision": "SELECTED_SYMPTOM_ANCHOR",
+      "matched_draft_anchor_ids": [
+        "DRAFT-SYM-027"
+      ],
+      "matched_related_node_ids": [],
+      "rationale": "Source label mapped as draft symptom anchor; semantic identity not verified"
+    },
+    {
+      "source_candidate_id": "CAND-VPN-REMOTE-004",
+      "source_label": "Split-tunnel route missing",
+      "source_domain": "vpn_remote",
+      "decision": "POSSIBLE_CAUSE",
+      "matched_draft_anchor_ids": [],
+      "matched_related_node_ids": [
+        "DRAFT-CAUSE-split_tunnel_route_missing"
+      ],
+      "rationale": "Missing split-tunnel route may cause inaccessible internal resources"
+    }
+  ],
+  "validation_contract": {
+    "relationship_endpoints": "typed refs must exist in this proposal",
+    "branch_semantics": "not assertion of causality",
+    "acceptance_required": true,
+    "auto_sqlite_write": false,
+    "auto_tag_creation": false
+  }
+}

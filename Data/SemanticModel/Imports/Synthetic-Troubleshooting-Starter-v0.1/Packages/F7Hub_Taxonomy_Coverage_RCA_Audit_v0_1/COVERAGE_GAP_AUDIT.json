@@ -1,0 +1,1378 @@
+{
+  "artifact_kind": "f7hub_taxonomy_coverage_review",
+  "revision": "0.1.0",
+  "basis": [
+    "coverage_candidates.json",
+    "synthetic_cases.jsonl"
+  ],
+  "authority": "PLANNING_ONLY",
+  "no_database_mutations": true,
+  "metadata": {
+    "domains": 24,
+    "unreviewed_candidates": 106,
+    "synthetic_cases": 24,
+    "cases_missing_canonical_reference": 24,
+    "cases_not_human_reviewed": 24,
+    "simulated_resolved_cases": 24,
+    "cases_with_vendor_urls": 0
+  },
+  "definitions": {
+    "coverage_gap": "missing reviewed linkage, scenario outcome diversity, or source-backed diagnostics; candidate count alone is not validated issue coverage",
+    "review_priority": "subjective curation order, not measured incident prevalence",
+    "proposed_type_hint": "manual review suggestion, not a canonical type"
+  },
+  "domains": [
+    {
+      "domain_key": "identity_entra",
+      "domain_display": "Identity Entra",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 6,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0001"
+      ],
+      "synthetic_case_titles": [
+        "MFA registration fails after phone replacement"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-IDENTITY-ENTRA-001",
+        "CAND-IDENTITY-ENTRA-002",
+        "CAND-IDENTITY-ENTRA-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-IDENTITY-ENTRA-001",
+          "original_label": "MFA enrollment fails after phone replacement",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-IDENTITY-ENTRA-002",
+          "original_label": "Unexpected conditional access denial",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-IDENTITY-ENTRA-003",
+          "original_label": "Password change not synchronized",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-IDENTITY-ENTRA-004",
+          "original_label": "Account locked after repeated attempts",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-IDENTITY-ENTRA-005",
+          "original_label": "User missing required group access",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-IDENTITY-ENTRA-006",
+          "original_label": "Provisioned user cannot access licensed service",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "exchange_online",
+      "domain_display": "Exchange Online",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 5,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0002"
+      ],
+      "synthetic_case_titles": [
+        "Shared mailbox cannot be opened"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-EXCHANGE-ONLINE-001",
+        "CAND-EXCHANGE-ONLINE-002",
+        "CAND-EXCHANGE-ONLINE-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-EXCHANGE-ONLINE-001",
+          "original_label": "Shared mailbox access denied",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-EXCHANGE-ONLINE-002",
+          "original_label": "Inbound message rejected by mail flow",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-EXCHANGE-ONLINE-003",
+          "original_label": "Distribution group delivery issue",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-EXCHANGE-ONLINE-004",
+          "original_label": "Message quarantined by policy",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "observed_state_or_incident",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-EXCHANGE-ONLINE-005",
+          "original_label": "Mailbox exceeds storage quota",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "outlook",
+      "domain_display": "Outlook",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 6,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0003"
+      ],
+      "synthetic_case_titles": [
+        "Outlook repeatedly prompts for credentials"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-OUTLOOK-001",
+        "CAND-OUTLOOK-002",
+        "CAND-OUTLOOK-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-OUTLOOK-001",
+          "original_label": "Repeated password prompts",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "user_visible_symptom",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-OUTLOOK-002",
+          "original_label": "Outlook cannot connect",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-OUTLOOK-003",
+          "original_label": "OST data cache corruption",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "possible_cause_or_condition",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-OUTLOOK-004",
+          "original_label": "Outlook search returns incomplete results",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-OUTLOOK-005",
+          "original_label": "Calendar events not synchronized",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-OUTLOOK-006",
+          "original_label": "Outlook add-in blocks startup",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "issue_or_cause_requires_review",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "microsoft_teams",
+      "domain_display": "Microsoft Teams",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 5,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0004"
+      ],
+      "synthetic_case_titles": [
+        "Teams meeting microphone not detected"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-MICROSOFT-TEAMS-001",
+        "CAND-MICROSOFT-TEAMS-002",
+        "CAND-MICROSOFT-TEAMS-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-MICROSOFT-TEAMS-001",
+          "original_label": "Meeting microphone not detected",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-MICROSOFT-TEAMS-002",
+          "original_label": "User cannot join meeting",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-MICROSOFT-TEAMS-003",
+          "original_label": "Teams login loop",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-MICROSOFT-TEAMS-004",
+          "original_label": "Screen sharing unavailable",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-MICROSOFT-TEAMS-005",
+          "original_label": "Notifications missing",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "onedrive",
+      "domain_display": "Onedrive",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 5,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0005"
+      ],
+      "synthetic_case_titles": [
+        "OneDrive file remains unsynchronized"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-ONEDRIVE-001",
+        "CAND-ONEDRIVE-002",
+        "CAND-ONEDRIVE-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-ONEDRIVE-001",
+          "original_label": "Known Folder Move conflict",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-ONEDRIVE-002",
+          "original_label": "File sync stalled",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "user_visible_symptom",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-ONEDRIVE-003",
+          "original_label": "Storage quota reached",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-ONEDRIVE-004",
+          "original_label": "File name unsupported",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-ONEDRIVE-005",
+          "original_label": "OneDrive sign-in failure",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "sharepoint",
+      "domain_display": "Sharepoint",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0006"
+      ],
+      "synthetic_case_titles": [
+        "SharePoint document library access denied"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-SHAREPOINT-001",
+        "CAND-SHAREPOINT-002",
+        "CAND-SHAREPOINT-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-SHAREPOINT-001",
+          "original_label": "SharePoint document access denied",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-SHAREPOINT-002",
+          "original_label": "Document library fails to load",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-SHAREPOINT-003",
+          "original_label": "Guest access denied",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-SHAREPOINT-004",
+          "original_label": "Office file checked out and locked",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "m365_apps",
+      "domain_display": "M365 Apps",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0007"
+      ],
+      "synthetic_case_titles": [
+        "Word reports an activation problem"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-M365-APPS-001",
+        "CAND-M365-APPS-002",
+        "CAND-M365-APPS-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-M365-APPS-001",
+          "original_label": "Office activation fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-M365-APPS-002",
+          "original_label": "Word cannot save to cloud location",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-M365-APPS-003",
+          "original_label": "Excel add-in prevents startup",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-M365-APPS-004",
+          "original_label": "Office app update fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "windows",
+      "domain_display": "Windows",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 5,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0008"
+      ],
+      "synthetic_case_titles": [
+        "Windows Update repeatedly requests installation"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-WINDOWS-001",
+        "CAND-WINDOWS-002",
+        "CAND-WINDOWS-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-WINDOWS-001",
+          "original_label": "Windows update stuck pending restart",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-WINDOWS-002",
+          "original_label": "User profile fails to load",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-WINDOWS-003",
+          "original_label": "Workstation starts slowly",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-WINDOWS-004",
+          "original_label": "Unexpected BSOD",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-WINDOWS-005",
+          "original_label": "Startup repair loop",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "hardware",
+      "domain_display": "Hardware",
+      "review_priority": "B - proposed next",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0009"
+      ],
+      "synthetic_case_titles": [
+        "External monitor is blank through dock"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-HARDWARE-001",
+        "CAND-HARDWARE-002",
+        "CAND-HARDWARE-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-HARDWARE-001",
+          "original_label": "Docking station monitor not detected",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-HARDWARE-002",
+          "original_label": "Laptop battery not charging",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-HARDWARE-003",
+          "original_label": "USB keyboard stops responding",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-HARDWARE-004",
+          "original_label": "Storage device not detected",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "network",
+      "domain_display": "Network",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 5,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0010"
+      ],
+      "synthetic_case_titles": [
+        "Websites fail by hostname on one PC"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-NETWORK-001",
+        "CAND-NETWORK-002",
+        "CAND-NETWORK-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-NETWORK-001",
+          "original_label": "DNS lookup fails on one device",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "symptom_or_diagnostic_finding",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-NETWORK-002",
+          "original_label": "DHCP address missing",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-NETWORK-003",
+          "original_label": "Wi-Fi connected without Internet",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-NETWORK-004",
+          "original_label": "Gateway unreachable",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "diagnostic_finding_or_issue_requires_context",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-NETWORK-005",
+          "original_label": "Proxy misconfiguration",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "possible_cause",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "vpn_remote",
+      "domain_display": "VPN Remote",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0011"
+      ],
+      "synthetic_case_titles": [
+        "VPN connects but internal file share is unreachable"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-VPN-REMOTE-001",
+        "CAND-VPN-REMOTE-002",
+        "CAND-VPN-REMOTE-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-VPN-REMOTE-001",
+          "original_label": "VPN connects but internal share inaccessible",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "user_visible_symptom",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-VPN-REMOTE-002",
+          "original_label": "VPN MFA authentication fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-VPN-REMOTE-003",
+          "original_label": "RDP cannot reach permitted host",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-VPN-REMOTE-004",
+          "original_label": "Split-tunnel route missing",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "browsers",
+      "domain_display": "Browsers",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 5,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0012"
+      ],
+      "synthetic_case_titles": [
+        "Web portal fails only in Chrome profile"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-BROWSERS-001",
+        "CAND-BROWSERS-002",
+        "CAND-BROWSERS-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-BROWSERS-001",
+          "original_label": "Chrome extension blocks web portal",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-BROWSERS-002",
+          "original_label": "Edge profile sync fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-BROWSERS-003",
+          "original_label": "Firefox user profile corruption",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-BROWSERS-004",
+          "original_label": "Web app certificate warning",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-BROWSERS-005",
+          "original_label": "Browser freezes after update",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "printing",
+      "domain_display": "Printing",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0013"
+      ],
+      "synthetic_case_titles": [
+        "Printer queue stalls on one workstation"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-PRINTING-001",
+        "CAND-PRINTING-002",
+        "CAND-PRINTING-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-PRINTING-001",
+          "original_label": "Print queue blocked by stalled job",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-PRINTING-002",
+          "original_label": "Printer mapping fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-PRINTING-003",
+          "original_label": "Printer driver conflict",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-PRINTING-004",
+          "original_label": "Printer is offline",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "security_defender",
+      "domain_display": "Security Defender",
+      "review_priority": "A - proposed helpdesk-first",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0014"
+      ],
+      "synthetic_case_titles": [
+        "Defender alert blocks approved utility"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-SECURITY-DEFENDER-001",
+        "CAND-SECURITY-DEFENDER-002",
+        "CAND-SECURITY-DEFENDER-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-SECURITY-DEFENDER-001",
+          "original_label": "False-positive malware detection review",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "investigation_task_or_finding",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-SECURITY-DEFENDER-002",
+          "original_label": "Suspicious login investigation",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-SECURITY-DEFENDER-003",
+          "original_label": "Reported phishing email triage",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-SECURITY-DEFENDER-004",
+          "original_label": "Endpoint protection not reporting",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "intune",
+      "domain_display": "Intune",
+      "review_priority": "B - proposed next",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0015"
+      ],
+      "synthetic_case_titles": [
+        "Device compliance does not refresh"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-INTUNE-001",
+        "CAND-INTUNE-002",
+        "CAND-INTUNE-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-INTUNE-001",
+          "original_label": "Compliance policy fails to refresh",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-INTUNE-002",
+          "original_label": "Enrollment blocked by device restriction",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-INTUNE-003",
+          "original_label": "Required app install remains pending",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-INTUNE-004",
+          "original_label": "Configuration profile conflict",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "azure",
+      "domain_display": "Azure",
+      "review_priority": "C - proposed later",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0016"
+      ],
+      "synthetic_case_titles": [
+        "Azure VM operator cannot start a VM"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-AZURE-001",
+        "CAND-AZURE-002",
+        "CAND-AZURE-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-AZURE-001",
+          "original_label": "Azure VM access denied by role",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-AZURE-002",
+          "original_label": "VM private DNS resolution fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-AZURE-003",
+          "original_label": "Storage account network access blocked",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-AZURE-004",
+          "original_label": "Virtual machine unavailable",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "active_directory",
+      "domain_display": "Active Directory",
+      "review_priority": "B - proposed next",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0017"
+      ],
+      "synthetic_case_titles": [
+        "GPO network drive mapping missing"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-ACTIVE-DIRECTORY-001",
+        "CAND-ACTIVE-DIRECTORY-002",
+        "CAND-ACTIVE-DIRECTORY-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-ACTIVE-DIRECTORY-001",
+          "original_label": "GPO drive mapping not applied",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-ACTIVE-DIRECTORY-002",
+          "original_label": "Domain join fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-ACTIVE-DIRECTORY-003",
+          "original_label": "Group membership not reflected",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-ACTIVE-DIRECTORY-004",
+          "original_label": "Computer account trust relationship fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "file_storage",
+      "domain_display": "File Storage",
+      "review_priority": "B - proposed next",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0018"
+      ],
+      "synthetic_case_titles": [
+        "Network share denies read permission"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-FILE-STORAGE-001",
+        "CAND-FILE-STORAGE-002",
+        "CAND-FILE-STORAGE-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-FILE-STORAGE-001",
+          "original_label": "Mapped drive permission denied",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-FILE-STORAGE-002",
+          "original_label": "File share offline",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-FILE-STORAGE-003",
+          "original_label": "Disk volume nearly full",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-FILE-STORAGE-004",
+          "original_label": "File locked by another user",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "software",
+      "domain_display": "Software",
+      "review_priority": "B - proposed next",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0019"
+      ],
+      "synthetic_case_titles": [
+        "Line-of-business app installer fails"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-SOFTWARE-001",
+        "CAND-SOFTWARE-002",
+        "CAND-SOFTWARE-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-SOFTWARE-001",
+          "original_label": "MSI installation blocked by prerequisite",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-SOFTWARE-002",
+          "original_label": "Application crashes on launch",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-SOFTWARE-003",
+          "original_label": "Software updater fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-SOFTWARE-004",
+          "original_label": "Application license not detected",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "certificates",
+      "domain_display": "Certificates",
+      "review_priority": "C - proposed later",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0020"
+      ],
+      "synthetic_case_titles": [
+        "Internal HTTPS portal reports expired certificate"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-CERTIFICATES-001",
+        "CAND-CERTIFICATES-002",
+        "CAND-CERTIFICATES-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-CERTIFICATES-001",
+          "original_label": "Expired TLS certificate warning",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-CERTIFICATES-002",
+          "original_label": "Certificate chain not trusted",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-CERTIFICATES-003",
+          "original_label": "VPN device certificate missing",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-CERTIFICATES-004",
+          "original_label": "Certificate enrollment failure",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "voip",
+      "domain_display": "VoIP",
+      "review_priority": "C - proposed later",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0021"
+      ],
+      "synthetic_case_titles": [
+        "Softphone rings but has no sound"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-VOIP-001",
+        "CAND-VOIP-002",
+        "CAND-VOIP-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-VOIP-001",
+          "original_label": "Softphone has no audio output",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-VOIP-002",
+          "original_label": "VoIP phone fails registration",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-VOIP-003",
+          "original_label": "Intermittent call quality",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-VOIP-004",
+          "original_label": "USB headset microphone muted",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "backup",
+      "domain_display": "Backup",
+      "review_priority": "C - proposed later",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0022"
+      ],
+      "synthetic_case_titles": [
+        "Scheduled backup reports insufficient capacity"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-BACKUP-001",
+        "CAND-BACKUP-002",
+        "CAND-BACKUP-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-BACKUP-001",
+          "original_label": "Scheduled backup job fails",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-BACKUP-002",
+          "original_label": "Restore job reports missing file",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-BACKUP-003",
+          "original_label": "Backup agent is offline",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-BACKUP-004",
+          "original_label": "Backup storage capacity exceeded",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "condition_or_possible_cause",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "msp_tools",
+      "domain_display": "MSP Tools",
+      "review_priority": "B - proposed next",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0023"
+      ],
+      "synthetic_case_titles": [
+        "RMM agent shows offline while PC is online"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-MSP-TOOLS-001",
+        "CAND-MSP-TOOLS-002",
+        "CAND-MSP-TOOLS-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-MSP-TOOLS-001",
+          "original_label": "Remote monitoring agent offline",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-MSP-TOOLS-002",
+          "original_label": "Remote assistance session blocked",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-MSP-TOOLS-003",
+          "original_label": "RMM policy application delayed",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-MSP-TOOLS-004",
+          "original_label": "Ticket notification automation not triggered",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    },
+    {
+      "domain_key": "powershell_automation",
+      "domain_display": "Powershell Automation",
+      "review_priority": "B - proposed next",
+      "candidate_count": 4,
+      "synthetic_case_count": 1,
+      "synthetic_case_ids": [
+        "SYN-IT-0024"
+      ],
+      "synthetic_case_titles": [
+        "PowerShell cmdlet is not recognized"
+      ],
+      "candidate_coverage_assessment": "NOT_ASSESSED - no accepted case-to-canonical-issue mapping",
+      "priority_candidate_ids": [
+        "CAND-POWERSHELL-AUTOMATION-001",
+        "CAND-POWERSHELL-AUTOMATION-002",
+        "CAND-POWERSHELL-AUTOMATION-003"
+      ],
+      "candidates": [
+        {
+          "candidate_id": "CAND-POWERSHELL-AUTOMATION-001",
+          "original_label": "PowerShell module missing",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "possible_cause_or_prerequisite",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-POWERSHELL-AUTOMATION-002",
+          "original_label": "Execution policy prevents local script",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-POWERSHELL-AUTOMATION-003",
+          "original_label": "Graph API command returns insufficient privileges",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        },
+        {
+          "candidate_id": "CAND-POWERSHELL-AUTOMATION-004",
+          "original_label": "Scheduled task returns nonzero exit code",
+          "original_status": "UNREVIEWED_CANDIDATE",
+          "canonical_issue_id": null,
+          "proposed_type_hint": "UNCLASSIFIED_REQUIRES_SEMANTIC_REVIEW",
+          "has_verified_case_mapping": false
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,428 @@
+{
+  "schema_version": "0.1.0",
+  "catalog_kind": "tools",
+  "catalog_status": "planning_proposal",
+  "records": [
+    {
+      "tool_id": "TOOL-001",
+      "name": "Microsoft 365 Admin Center",
+      "category_original": "Cloud administration portal",
+      "use_case_original": "Microsoft 365 licensing, users, service status",
+      "search_hints": [
+        {
+          "text": "M365 Admin Center",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "administration",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-002",
+      "name": "Exchange Admin Center",
+      "category_original": "Email administration portal",
+      "use_case_original": "Mailboxes, permissions, distribution groups, mail flow",
+      "search_hints": [
+        {
+          "text": "EAC",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "administration",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-003",
+      "name": "Microsoft Entra admin center",
+      "category_original": "Identity administration portal",
+      "use_case_original": "Users, groups, sign-in logs, MFA, Conditional Access",
+      "search_hints": [
+        {
+          "text": "Entra ID",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "administration",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-004",
+      "name": "Microsoft Defender portal",
+      "category_original": "Security operations portal",
+      "use_case_original": "Security alerts, investigations, phishing triage",
+      "search_hints": [
+        {
+          "text": "Microsoft Defender",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "security",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-005",
+      "name": "Microsoft Intune admin center",
+      "category_original": "Endpoint management portal",
+      "use_case_original": "Endpoint administration and policy learning",
+      "search_hints": [
+        {
+          "text": "Intune",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "administration",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-006",
+      "name": "Microsoft Purview portal",
+      "category_original": "Security/compliance portal",
+      "use_case_original": "Security and compliance learning (not a stated daily tool)",
+      "search_hints": [
+        {
+          "text": "Microsoft Security & Compliance",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "learning",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-007",
+      "name": "Microsoft 365 service health",
+      "category_original": "Service health feature",
+      "use_case_original": "Check Microsoft 365 service incidents",
+      "search_hints": [
+        {
+          "text": "Microsoft 365",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "diagnostic",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-008",
+      "name": "Outlook desktop",
+      "category_original": "Email client",
+      "use_case_original": "Desktop mail and calendar troubleshooting",
+      "search_hints": [
+        {
+          "text": "Outlook",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "application",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-009",
+      "name": "Outlook on the web",
+      "category_original": "Email web application",
+      "use_case_original": "Compare Outlook web vs desktop behavior",
+      "search_hints": [
+        {
+          "text": "OWA",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        },
+        {
+          "text": "Outlook Web App",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "application",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-010",
+      "name": "Microsoft Teams",
+      "category_original": "Collaboration application",
+      "use_case_original": "Teams sign-in and collaboration support",
+      "search_hints": [
+        {
+          "text": "Teams",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "application",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-011",
+      "name": "OneDrive sync client",
+      "category_original": "Sync application",
+      "use_case_original": "Sync, authentication, backup, storage troubleshooting",
+      "search_hints": [
+        {
+          "text": "OneDrive",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "application",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-012",
+      "name": "Microsoft Authenticator",
+      "category_original": "MFA application",
+      "use_case_original": "Registration and MFA recovery",
+      "search_hints": [
+        {
+          "text": "MFA",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "identity",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-013",
+      "name": "Windows 10",
+      "category_original": "Operating system",
+      "use_case_original": "Workstation troubleshooting",
+      "search_hints": [
+        {
+          "text": "Windows",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "endpoint",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-014",
+      "name": "Windows 11",
+      "category_original": "Operating system",
+      "use_case_original": "Workstation troubleshooting",
+      "search_hints": [
+        {
+          "text": "Windows",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "endpoint",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-015",
+      "name": "Microsoft Edge",
+      "category_original": "Web browser",
+      "use_case_original": "Browser diagnostics",
+      "search_hints": [
+        {
+          "text": "Edge",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "application",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-016",
+      "name": "Google Chrome",
+      "category_original": "Web browser",
+      "use_case_original": "Browser diagnostics",
+      "search_hints": [
+        {
+          "text": "Chrome",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "application",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-017",
+      "name": "Mozilla Firefox",
+      "category_original": "Web browser",
+      "use_case_original": "Browser diagnostics",
+      "search_hints": [
+        {
+          "text": "Firefox",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "application",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-018",
+      "name": "VPN client (unspecified)",
+      "category_original": "Remote access client",
+      "use_case_original": "VPN connectivity and resource access",
+      "search_hints": [
+        {
+          "text": "VPN",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "network",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-019",
+      "name": "HaloPSA",
+      "category_original": "PSA/ticketing platform",
+      "use_case_original": "Ticket triage, lifecycle, SLA documentation",
+      "search_hints": [
+        {
+          "text": "HaloPSA",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "msp_operations",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-020",
+      "name": "NinjaRMM",
+      "category_original": "RMM/remote support platform",
+      "use_case_original": "Remote diagnostics and endpoint support",
+      "search_hints": [
+        {
+          "text": "NinjaRMM",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "msp_operations",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-021",
+      "name": "Keeper",
+      "category_original": "Credential manager",
+      "use_case_original": "Credential access and secure management",
+      "search_hints": [
+        {
+          "text": "Keeper",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "msp_operations",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided HiloTech technology list"
+    },
+    {
+      "tool_id": "TOOL-022",
+      "name": "PowerShell",
+      "category_original": "Scripting and command-line tool",
+      "use_case_original": "Diagnostics and administrative automation (learning)",
+      "search_hints": [
+        {
+          "text": "PowerShell",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "automation",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided OneNote/learning/planning notes"
+    },
+    {
+      "tool_id": "TOOL-023",
+      "name": "Microsoft Azure",
+      "category_original": "Cloud platform",
+      "use_case_original": "Azure / Entra learning and cloud environment context",
+      "search_hints": [
+        {
+          "text": "Azure",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "learning",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided OneNote/learning/planning notes"
+    },
+    {
+      "tool_id": "TOOL-024",
+      "name": "Microsoft OneNote",
+      "category_original": "Documentation application",
+      "use_case_original": "KB, troubleshooting, notes, SOPs",
+      "search_hints": [
+        {
+          "text": "OneNote",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "documentation",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided OneNote/learning/planning notes"
+    },
+    {
+      "tool_id": "TOOL-025",
+      "name": "Microsoft Copilot",
+      "category_original": "AI assistant",
+      "use_case_original": "Documentation and summarization idea, not a verified HiloTech tool",
+      "search_hints": [
+        {
+          "text": "Copilot",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "documentation",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided OneNote/learning/planning notes"
+    },
+    {
+      "tool_id": "TOOL-026",
+      "name": "ChatGPT",
+      "category_original": "AI assistant",
+      "use_case_original": "KB, troubleshooting note and automation prompt ideas",
+      "search_hints": [
+        {
+          "text": "ChatGPT",
+          "language": "und",
+          "review_status": "needs_semantic_review"
+        }
+      ],
+      "original_domain": "documentation",
+      "lifecycle": "proposed",
+      "source_reference": "User-provided OneNote/learning/planning notes"
+    }
+  ]
+}

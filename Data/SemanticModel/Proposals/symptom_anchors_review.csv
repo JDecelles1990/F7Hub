@@ -1,0 +1,32 @@
+﻿draft_id,domain,label_en,label_fr,source_candidate_ids,branches,verified,review_status
+DRAFT-SYM-001,identity_entra,MFA enrollment fails after device replacement,Échec de l’inscription MFA après remplacement du téléphone,CAND-IDENTITY-ENTRA-001,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-002,identity_entra,Conditional Access denies expected sign-in,L’accès est refusé par l’accès conditionnel,CAND-IDENTITY-ENTRA-002,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-003,identity_entra,Password change is not recognized,Le nouveau mot de passe n’est pas reconnu,CAND-IDENTITY-ENTRA-003,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-004,identity_entra,Account becomes locked after sign-in attempts,Compte verrouillé après plusieurs tentatives,CAND-IDENTITY-ENTRA-004,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-005,identity_entra,User cannot access an assigned group resource,L’utilisateur ne peut pas accéder à une ressource de groupe,CAND-IDENTITY-ENTRA-005,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-006,identity_entra,Provisioned user cannot open licensed service,L’utilisateur provisionné ne peut pas ouvrir un service sous licence,CAND-IDENTITY-ENTRA-006,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-007,outlook_exchange,Outlook repeatedly requests authentication,Outlook demande l’authentification à répétition,CAND-OUTLOOK-001,3,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-008,outlook_exchange,Outlook displays disconnected,Outlook indique « Déconnecté »,CAND-OUTLOOK-002,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-009,outlook_exchange,Outgoing email is not delivered,Un courriel sortant n’est pas livré,,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-010,outlook_exchange,Incoming email is missing or delayed,Courriel entrant manquant ou retardé,CAND-EXCHANGE-ONLINE-002,3,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-011,outlook_exchange,Shared mailbox access is denied,Accès refusé à une boîte aux lettres partagée,CAND-EXCHANGE-ONLINE-001,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-012,outlook_exchange,Outlook search omits expected messages,La recherche Outlook ne retourne pas les messages attendus,CAND-OUTLOOK-004,3,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-013,outlook_exchange,Distribution group members do not receive messages,Les membres du groupe de distribution ne reçoivent pas les messages,CAND-EXCHANGE-ONLINE-003,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-014,onedrive,OneDrive remains stuck synchronizing,OneDrive reste bloqué pendant la synchronisation,CAND-ONEDRIVE-002,3,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-015,onedrive,OneDrive sign-in is unsuccessful,Connexion OneDrive impossible,CAND-ONEDRIVE-005,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-016,onedrive,Known Folder Move cannot complete,La sauvegarde des dossiers connus ne se termine pas,CAND-ONEDRIVE-001,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-017,onedrive,OneDrive reports storage full,OneDrive indique que l’espace de stockage est plein,CAND-ONEDRIVE-003,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-018,onedrive,File name or path cannot synchronize,Nom ou chemin de fichier impossible à synchroniser,CAND-ONEDRIVE-004,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-019,windows,Windows Update cannot complete,La mise à jour Windows ne se termine pas,CAND-WINDOWS-001,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-020,windows,Windows user profile fails to load,Échec de chargement du profil utilisateur Windows,CAND-WINDOWS-002,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-021,windows,Workstation starts or runs slowly,L’ordinateur démarre ou fonctionne lentement,CAND-WINDOWS-003,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-022,windows,Windows blue screen occurs,Écran bleu Windows (BSOD),CAND-WINDOWS-004,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-023,windows,Windows startup repair loop,Windows revient en boucle à la réparation du démarrage,CAND-WINDOWS-005,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-024,vpn_remote,VPN cannot establish connection,Le VPN ne parvient pas à se connecter,,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-025,vpn_remote,VPN MFA authentication fails,Échec d’authentification MFA pour le VPN,CAND-VPN-REMOTE-002,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-026,vpn_remote,VPN connected but internal share inaccessible,"VPN connecté, mais partage interne inaccessible",CAND-VPN-REMOTE-001,3,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-027,vpn_remote,RDP cannot connect to approved computer,Le Bureau à distance ne rejoint pas l’ordinateur autorisé,CAND-VPN-REMOTE-003,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-028,network,Websites fail to load by domain name,Les sites Web ne chargent pas par leur nom de domaine,,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-029,network,Device has no usable DHCP address,Aucune adresse DHCP utilisable sur l’appareil,CAND-NETWORK-002,2,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-030,network,Wi-Fi connected but Internet unavailable,"Wi-Fi connecté, mais Internet inaccessible",CAND-NETWORK-003,3,NO,REQUIRES_TECHNICAL_REVIEW
+DRAFT-SYM-031,network,Wired device cannot reach local network resources,L’appareil filaire ne rejoint pas les ressources du réseau local,,2,NO,REQUIRES_TECHNICAL_REVIEW

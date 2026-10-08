@@ -1,0 +1,27 @@
+﻿tool_id,name,category,use_case,aliases,domain,source_reference,status
+TOOL-001,Microsoft 365 Admin Center,Cloud administration portal,"Microsoft 365 licensing, users, service status",M365 Admin Center,administration,User-provided HiloTech technology list,catalogued
+TOOL-002,Exchange Admin Center,Email administration portal,"Mailboxes, permissions, distribution groups, mail flow",EAC,administration,User-provided HiloTech technology list,catalogued
+TOOL-003,Microsoft Entra admin center,Identity administration portal,"Users, groups, sign-in logs, MFA, Conditional Access",Entra ID,administration,User-provided HiloTech technology list,catalogued
+TOOL-004,Microsoft Defender portal,Security operations portal,"Security alerts, investigations, phishing triage",Microsoft Defender,security,User-provided HiloTech technology list,catalogued
+TOOL-005,Microsoft Intune admin center,Endpoint management portal,Endpoint administration and policy learning,Intune,administration,User-provided HiloTech technology list,catalogued
+TOOL-006,Microsoft Purview portal,Security/compliance portal,Security and compliance learning (not a stated daily tool),Microsoft Security & Compliance,learning,User-provided HiloTech technology list,catalogued
+TOOL-007,Microsoft 365 service health,Service health feature,Check Microsoft 365 service incidents,Microsoft 365,diagnostic,User-provided HiloTech technology list,catalogued
+TOOL-008,Outlook desktop,Email client,Desktop mail and calendar troubleshooting,Outlook,application,User-provided HiloTech technology list,catalogued
+TOOL-009,Outlook on the web,Email web application,Compare Outlook web vs desktop behavior,OWA|Outlook Web App,application,User-provided HiloTech technology list,catalogued
+TOOL-010,Microsoft Teams,Collaboration application,Teams sign-in and collaboration support,Teams,application,User-provided HiloTech technology list,catalogued
+TOOL-011,OneDrive sync client,Sync application,"Sync, authentication, backup, storage troubleshooting",OneDrive,application,User-provided HiloTech technology list,catalogued
+TOOL-012,Microsoft Authenticator,MFA application,Registration and MFA recovery,MFA,identity,User-provided HiloTech technology list,catalogued
+TOOL-013,Windows 10,Operating system,Workstation troubleshooting,Windows,endpoint,User-provided HiloTech technology list,catalogued
+TOOL-014,Windows 11,Operating system,Workstation troubleshooting,Windows,endpoint,User-provided HiloTech technology list,catalogued
+TOOL-015,Microsoft Edge,Web browser,Browser diagnostics,Edge,application,User-provided HiloTech technology list,catalogued
+TOOL-016,Google Chrome,Web browser,Browser diagnostics,Chrome,application,User-provided HiloTech technology list,catalogued
+TOOL-017,Mozilla Firefox,Web browser,Browser diagnostics,Firefox,application,User-provided HiloTech technology list,catalogued
+TOOL-018,VPN client (unspecified),Remote access client,VPN connectivity and resource access,VPN,network,User-provided HiloTech technology list,catalogued
+TOOL-019,HaloPSA,PSA/ticketing platform,"Ticket triage, lifecycle, SLA documentation",HaloPSA,msp_operations,User-provided HiloTech technology list,catalogued
+TOOL-020,NinjaRMM,RMM/remote support platform,Remote diagnostics and endpoint support,NinjaRMM,msp_operations,User-provided HiloTech technology list,catalogued
+TOOL-021,Keeper,Credential manager,Credential access and secure management,Keeper,msp_operations,User-provided HiloTech technology list,catalogued
+TOOL-022,PowerShell,Scripting and command-line tool,Diagnostics and administrative automation (learning),PowerShell,automation,User-provided OneNote/learning/planning notes,catalogued
+TOOL-023,Microsoft Azure,Cloud platform,Azure / Entra learning and cloud environment context,Azure,learning,User-provided OneNote/learning/planning notes,catalogued
+TOOL-024,Microsoft OneNote,Documentation application,"KB, troubleshooting, notes, SOPs",OneNote,documentation,User-provided OneNote/learning/planning notes,catalogued
+TOOL-025,Microsoft Copilot,AI assistant,"Documentation and summarization idea, not a verified HiloTech tool",Copilot,documentation,User-provided OneNote/learning/planning notes,catalogued
+TOOL-026,ChatGPT,AI assistant,"KB, troubleshooting note and automation prompt ideas",ChatGPT,documentation,User-provided OneNote/learning/planning notes,catalogued

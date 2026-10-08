@@ -1,0 +1,1062 @@
+[
+  {
+    "candidate_id": "CAND-IDENTITY-ENTRA-001",
+    "domain_key": "identity_entra",
+    "issue_label_en": "MFA enrollment fails after phone replacement",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-IDENTITY-ENTRA-002",
+    "domain_key": "identity_entra",
+    "issue_label_en": "Unexpected conditional access denial",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-IDENTITY-ENTRA-003",
+    "domain_key": "identity_entra",
+    "issue_label_en": "Password change not synchronized",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-IDENTITY-ENTRA-004",
+    "domain_key": "identity_entra",
+    "issue_label_en": "Account locked after repeated attempts",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-IDENTITY-ENTRA-005",
+    "domain_key": "identity_entra",
+    "issue_label_en": "User missing required group access",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-IDENTITY-ENTRA-006",
+    "domain_key": "identity_entra",
+    "issue_label_en": "Provisioned user cannot access licensed service",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-EXCHANGE-ONLINE-001",
+    "domain_key": "exchange_online",
+    "issue_label_en": "Shared mailbox access denied",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-EXCHANGE-ONLINE-002",
+    "domain_key": "exchange_online",
+    "issue_label_en": "Inbound message rejected by mail flow",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-EXCHANGE-ONLINE-003",
+    "domain_key": "exchange_online",
+    "issue_label_en": "Distribution group delivery issue",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-EXCHANGE-ONLINE-004",
+    "domain_key": "exchange_online",
+    "issue_label_en": "Message quarantined by policy",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-EXCHANGE-ONLINE-005",
+    "domain_key": "exchange_online",
+    "issue_label_en": "Mailbox exceeds storage quota",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-OUTLOOK-001",
+    "domain_key": "outlook",
+    "issue_label_en": "Repeated password prompts",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-OUTLOOK-002",
+    "domain_key": "outlook",
+    "issue_label_en": "Outlook cannot connect",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-OUTLOOK-003",
+    "domain_key": "outlook",
+    "issue_label_en": "OST data cache corruption",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-OUTLOOK-004",
+    "domain_key": "outlook",
+    "issue_label_en": "Outlook search returns incomplete results",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-OUTLOOK-005",
+    "domain_key": "outlook",
+    "issue_label_en": "Calendar events not synchronized",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-OUTLOOK-006",
+    "domain_key": "outlook",
+    "issue_label_en": "Outlook add-in blocks startup",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-MICROSOFT-TEAMS-001",
+    "domain_key": "microsoft_teams",
+    "issue_label_en": "Meeting microphone not detected",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-MICROSOFT-TEAMS-002",
+    "domain_key": "microsoft_teams",
+    "issue_label_en": "User cannot join meeting",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-MICROSOFT-TEAMS-003",
+    "domain_key": "microsoft_teams",
+    "issue_label_en": "Teams login loop",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-MICROSOFT-TEAMS-004",
+    "domain_key": "microsoft_teams",
+    "issue_label_en": "Screen sharing unavailable",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-MICROSOFT-TEAMS-005",
+    "domain_key": "microsoft_teams",
+    "issue_label_en": "Notifications missing",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-ONEDRIVE-001",
+    "domain_key": "onedrive",
+    "issue_label_en": "Known Folder Move conflict",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-ONEDRIVE-002",
+    "domain_key": "onedrive",
+    "issue_label_en": "File sync stalled",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-ONEDRIVE-003",
+    "domain_key": "onedrive",
+    "issue_label_en": "Storage quota reached",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-ONEDRIVE-004",
+    "domain_key": "onedrive",
+    "issue_label_en": "File name unsupported",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-ONEDRIVE-005",
+    "domain_key": "onedrive",
+    "issue_label_en": "OneDrive sign-in failure",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SHAREPOINT-001",
+    "domain_key": "sharepoint",
+    "issue_label_en": "SharePoint document access denied",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SHAREPOINT-002",
+    "domain_key": "sharepoint",
+    "issue_label_en": "Document library fails to load",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SHAREPOINT-003",
+    "domain_key": "sharepoint",
+    "issue_label_en": "Guest access denied",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SHAREPOINT-004",
+    "domain_key": "sharepoint",
+    "issue_label_en": "Office file checked out and locked",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-M365-APPS-001",
+    "domain_key": "m365_apps",
+    "issue_label_en": "Office activation fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-M365-APPS-002",
+    "domain_key": "m365_apps",
+    "issue_label_en": "Word cannot save to cloud location",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-M365-APPS-003",
+    "domain_key": "m365_apps",
+    "issue_label_en": "Excel add-in prevents startup",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-M365-APPS-004",
+    "domain_key": "m365_apps",
+    "issue_label_en": "Office app update fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-WINDOWS-001",
+    "domain_key": "windows",
+    "issue_label_en": "Windows update stuck pending restart",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-WINDOWS-002",
+    "domain_key": "windows",
+    "issue_label_en": "User profile fails to load",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-WINDOWS-003",
+    "domain_key": "windows",
+    "issue_label_en": "Workstation starts slowly",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-WINDOWS-004",
+    "domain_key": "windows",
+    "issue_label_en": "Unexpected BSOD",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-WINDOWS-005",
+    "domain_key": "windows",
+    "issue_label_en": "Startup repair loop",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-HARDWARE-001",
+    "domain_key": "hardware",
+    "issue_label_en": "Docking station monitor not detected",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-HARDWARE-002",
+    "domain_key": "hardware",
+    "issue_label_en": "Laptop battery not charging",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-HARDWARE-003",
+    "domain_key": "hardware",
+    "issue_label_en": "USB keyboard stops responding",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-HARDWARE-004",
+    "domain_key": "hardware",
+    "issue_label_en": "Storage device not detected",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-NETWORK-001",
+    "domain_key": "network",
+    "issue_label_en": "DNS lookup fails on one device",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-NETWORK-002",
+    "domain_key": "network",
+    "issue_label_en": "DHCP address missing",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-NETWORK-003",
+    "domain_key": "network",
+    "issue_label_en": "Wi-Fi connected without Internet",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-NETWORK-004",
+    "domain_key": "network",
+    "issue_label_en": "Gateway unreachable",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-NETWORK-005",
+    "domain_key": "network",
+    "issue_label_en": "Proxy misconfiguration",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-VPN-REMOTE-001",
+    "domain_key": "vpn_remote",
+    "issue_label_en": "VPN connects but internal share inaccessible",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-VPN-REMOTE-002",
+    "domain_key": "vpn_remote",
+    "issue_label_en": "VPN MFA authentication fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-VPN-REMOTE-003",
+    "domain_key": "vpn_remote",
+    "issue_label_en": "RDP cannot reach permitted host",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-VPN-REMOTE-004",
+    "domain_key": "vpn_remote",
+    "issue_label_en": "Split-tunnel route missing",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-BROWSERS-001",
+    "domain_key": "browsers",
+    "issue_label_en": "Chrome extension blocks web portal",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-BROWSERS-002",
+    "domain_key": "browsers",
+    "issue_label_en": "Edge profile sync fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-BROWSERS-003",
+    "domain_key": "browsers",
+    "issue_label_en": "Firefox user profile corruption",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-BROWSERS-004",
+    "domain_key": "browsers",
+    "issue_label_en": "Web app certificate warning",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-BROWSERS-005",
+    "domain_key": "browsers",
+    "issue_label_en": "Browser freezes after update",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-PRINTING-001",
+    "domain_key": "printing",
+    "issue_label_en": "Print queue blocked by stalled job",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-PRINTING-002",
+    "domain_key": "printing",
+    "issue_label_en": "Printer mapping fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-PRINTING-003",
+    "domain_key": "printing",
+    "issue_label_en": "Printer driver conflict",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-PRINTING-004",
+    "domain_key": "printing",
+    "issue_label_en": "Printer is offline",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SECURITY-DEFENDER-001",
+    "domain_key": "security_defender",
+    "issue_label_en": "False-positive malware detection review",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SECURITY-DEFENDER-002",
+    "domain_key": "security_defender",
+    "issue_label_en": "Suspicious login investigation",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SECURITY-DEFENDER-003",
+    "domain_key": "security_defender",
+    "issue_label_en": "Reported phishing email triage",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SECURITY-DEFENDER-004",
+    "domain_key": "security_defender",
+    "issue_label_en": "Endpoint protection not reporting",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-INTUNE-001",
+    "domain_key": "intune",
+    "issue_label_en": "Compliance policy fails to refresh",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-INTUNE-002",
+    "domain_key": "intune",
+    "issue_label_en": "Enrollment blocked by device restriction",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-INTUNE-003",
+    "domain_key": "intune",
+    "issue_label_en": "Required app install remains pending",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-INTUNE-004",
+    "domain_key": "intune",
+    "issue_label_en": "Configuration profile conflict",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-AZURE-001",
+    "domain_key": "azure",
+    "issue_label_en": "Azure VM access denied by role",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-AZURE-002",
+    "domain_key": "azure",
+    "issue_label_en": "VM private DNS resolution fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-AZURE-003",
+    "domain_key": "azure",
+    "issue_label_en": "Storage account network access blocked",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-AZURE-004",
+    "domain_key": "azure",
+    "issue_label_en": "Virtual machine unavailable",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-ACTIVE-DIRECTORY-001",
+    "domain_key": "active_directory",
+    "issue_label_en": "GPO drive mapping not applied",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-ACTIVE-DIRECTORY-002",
+    "domain_key": "active_directory",
+    "issue_label_en": "Domain join fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-ACTIVE-DIRECTORY-003",
+    "domain_key": "active_directory",
+    "issue_label_en": "Group membership not reflected",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-ACTIVE-DIRECTORY-004",
+    "domain_key": "active_directory",
+    "issue_label_en": "Computer account trust relationship fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-FILE-STORAGE-001",
+    "domain_key": "file_storage",
+    "issue_label_en": "Mapped drive permission denied",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-FILE-STORAGE-002",
+    "domain_key": "file_storage",
+    "issue_label_en": "File share offline",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-FILE-STORAGE-003",
+    "domain_key": "file_storage",
+    "issue_label_en": "Disk volume nearly full",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-FILE-STORAGE-004",
+    "domain_key": "file_storage",
+    "issue_label_en": "File locked by another user",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SOFTWARE-001",
+    "domain_key": "software",
+    "issue_label_en": "MSI installation blocked by prerequisite",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SOFTWARE-002",
+    "domain_key": "software",
+    "issue_label_en": "Application crashes on launch",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SOFTWARE-003",
+    "domain_key": "software",
+    "issue_label_en": "Software updater fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-SOFTWARE-004",
+    "domain_key": "software",
+    "issue_label_en": "Application license not detected",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-CERTIFICATES-001",
+    "domain_key": "certificates",
+    "issue_label_en": "Expired TLS certificate warning",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-CERTIFICATES-002",
+    "domain_key": "certificates",
+    "issue_label_en": "Certificate chain not trusted",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-CERTIFICATES-003",
+    "domain_key": "certificates",
+    "issue_label_en": "VPN device certificate missing",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-CERTIFICATES-004",
+    "domain_key": "certificates",
+    "issue_label_en": "Certificate enrollment failure",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-VOIP-001",
+    "domain_key": "voip",
+    "issue_label_en": "Softphone has no audio output",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-VOIP-002",
+    "domain_key": "voip",
+    "issue_label_en": "VoIP phone fails registration",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-VOIP-003",
+    "domain_key": "voip",
+    "issue_label_en": "Intermittent call quality",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-VOIP-004",
+    "domain_key": "voip",
+    "issue_label_en": "USB headset microphone muted",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-BACKUP-001",
+    "domain_key": "backup",
+    "issue_label_en": "Scheduled backup job fails",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-BACKUP-002",
+    "domain_key": "backup",
+    "issue_label_en": "Restore job reports missing file",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-BACKUP-003",
+    "domain_key": "backup",
+    "issue_label_en": "Backup agent is offline",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-BACKUP-004",
+    "domain_key": "backup",
+    "issue_label_en": "Backup storage capacity exceeded",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-MSP-TOOLS-001",
+    "domain_key": "msp_tools",
+    "issue_label_en": "Remote monitoring agent offline",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-MSP-TOOLS-002",
+    "domain_key": "msp_tools",
+    "issue_label_en": "Remote assistance session blocked",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-MSP-TOOLS-003",
+    "domain_key": "msp_tools",
+    "issue_label_en": "RMM policy application delayed",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-MSP-TOOLS-004",
+    "domain_key": "msp_tools",
+    "issue_label_en": "Ticket notification automation not triggered",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-POWERSHELL-AUTOMATION-001",
+    "domain_key": "powershell_automation",
+    "issue_label_en": "PowerShell module missing",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-POWERSHELL-AUTOMATION-002",
+    "domain_key": "powershell_automation",
+    "issue_label_en": "Execution policy prevents local script",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-POWERSHELL-AUTOMATION-003",
+    "domain_key": "powershell_automation",
+    "issue_label_en": "Graph API command returns insufficient privileges",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  },
+  {
+    "candidate_id": "CAND-POWERSHELL-AUTOMATION-004",
+    "domain_key": "powershell_automation",
+    "issue_label_en": "Scheduled task returns nonzero exit code",
+    "status": "UNREVIEWED_CANDIDATE",
+    "canonical_id": null,
+    "source": "author_seed_planning",
+    "dedup_review": "PENDING",
+    "reference_verification": "NOT_VERIFIED"
+  }
+]
