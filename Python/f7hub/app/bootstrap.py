@@ -10,6 +10,8 @@ from f7hub.gui.main_window import MainWindow
 from f7hub.infrastructure.database import BootstrapResult, bootstrap_database
 from f7hub.infrastructure.database_paths import resolve_development_database_path
 from f7hub.repositories.ticket_repository import TicketRepository
+from f7hub.repositories.clipboard_repository import ClipboardRepository
+from f7hub.services.clipboard_service import ClipboardService
 from f7hub.services.ticket_service import TicketService
 from f7hub.repositories.company_repository import CompanyRepository
 from f7hub.repositories.contact_repository import ContactRepository
@@ -44,6 +46,8 @@ class ApplicationContext:
     bootstrap_result: BootstrapResult
     ticket_repository: TicketRepository
     ticket_service: TicketService
+    clipboard_repository: ClipboardRepository
+    clipboard_service: ClipboardService
     knowledge_repository: KnowledgeRepository
     knowledge_service: KnowledgeService
     ticket_knowledge_repository: TicketKnowledgeRepository
@@ -76,6 +80,8 @@ def bootstrap_application(
     )
     ticket_repository = TicketRepository(resolved_database_path)
     ticket_service = TicketService(ticket_repository)
+    clipboard_repository = ClipboardRepository(resolved_database_path)
+    clipboard_service = ClipboardService(clipboard_repository)
     knowledge_repository = KnowledgeRepository(resolved_database_path)
     categories = CategoryRepository(resolved_database_path)
     tags = TagRepository(resolved_database_path)
@@ -101,6 +107,7 @@ def bootstrap_application(
         backup_service=DatabaseBackupService(resolved_database_path),
         script_service=script_service,
         powershell_service=powershell_service,
+        clipboard_service=clipboard_service,
         mochi_service=mochi_service,
         altf7hub_service=AltF7HubService(WindowsAltF7HubGateway(resolved_project_root)),
     )
@@ -110,6 +117,8 @@ def bootstrap_application(
         bootstrap_result=bootstrap_result,
         ticket_repository=ticket_repository,
         ticket_service=ticket_service,
+        clipboard_repository=clipboard_repository,
+        clipboard_service=clipboard_service,
         knowledge_repository=knowledge_repository,
         knowledge_service=knowledge_service,
         ticket_knowledge_repository=ticket_knowledge_repository,
