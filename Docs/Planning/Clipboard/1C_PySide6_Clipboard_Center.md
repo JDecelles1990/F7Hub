@@ -10,8 +10,16 @@ Required approved architecture:
 - Phase 0B: APPROVED
 - Phase 0C: APPROVED
 - Phase 0D: APPROVED
+- Phase 0E: APPROVED
 - Phase 1A: APPROVED
 - Phase 1B: APPROVED
+- Workspace S1 / S2: APPROVED
+- Semantic Model 2A / 2B / 2C: APPROVED architecture inputs
+
+Architecture input is distinct from runtime dependency. 2A-2C govern semantic
+presentation/interpretation; opening, browsing or inspecting existing eligible
+Clipboard Items requires no SemanticModel runtime engine or online service.
+The reconciliation addendum below records current input provenance and gates.
 
 If any required dependency is not approved:
 
@@ -137,6 +145,15 @@ Clipboard Domain & Data Lifecycle
 
 Phase 1B
 AHK ↔ Python Clipboard Capture / IPC / Quick HUD
+
+Phase 0E
+Foundation Architecture Reconciliation
+
+Workspace S1 / S2
+Shell / Technician Workspace / DynamicHub Context Actions
+
+Semantic Model 2A / 2B / 2C
+Foundation / Troubleshooting Concepts and Relationships / Lexical Model
 ```
 
 These plans establish:
@@ -1450,7 +1467,10 @@ Search KB
 
 Users may correct a detection later if designed, but the Entities tab should not become Entity Type administration.
 
-Entity taxonomy belongs to global architecture/Settings read-only management if supported.
+Entity Type meaning belongs to taxonomy/domain architecture under 0C and its
+owning domains. Clipboard Center consumes approved definitions; Settings may
+govern supported presentation/preferences under 0D, but does not own semantic
+truth. This tab is not Entity Type administration or a new Entity catalog.
 
 ---
 
@@ -1467,8 +1487,8 @@ RULE
 Networking
 RULE
 
-Needs Review
-USER
+DNS
+Technician assignment
 ```
 
 Potential visual distinction:
@@ -1480,6 +1500,10 @@ suggested
 ```
 
 without relying only on color.
+
+Assigned and suggested Tags are separate sections/states. SYSTEM versus USER
+is catalog stewardship, not the detection method or assignment actor. Show
+origin/method and acceptance separately where supplied by the owner.
 
 ---
 
@@ -1510,7 +1534,9 @@ Suggested
 
 Only if Tag suggestion infrastructure exists.
 
-Do not fake AI suggestions.
+Do not fake AI suggestions. Detection, RULE/AI suggestions and lexical matches
+do not assign Tags. Explicit owner-authorized assignment validates existing
+global identity, eligibility and current target; acceptance retains origin.
 
 ---
 
@@ -1534,13 +1560,10 @@ Potential:
 Manage Tags…
 ```
 
-should navigate to:
-
-```text
-Settings → Tags & Taxonomy
-```
-
-not open a duplicate tag-management implementation.
+may navigate to the owning global Tag administration surface when delivered.
+The exact future route is not established here. A Settings navigation entry,
+if later approved, would not transfer taxonomy meaning to Settings. Until the
+owner surface exists, report unavailable; do not build duplicate management.
 
 ---
 
@@ -1678,7 +1701,10 @@ SOURCE_FOR
 Draft #17
 ```
 
-Use semantic relation labels.
+Use labels supplied by the relationship owner: 0C shared principles/common
+predicates, 2B typed troubleshooting profiles and eligible 2C lexical wording
+where applicable. Show only available owner-created/accepted links with
+compatible endpoint types; the nine 2B predicates are not generic Item links.
 
 ---
 
@@ -1693,7 +1719,9 @@ Create KB Draft
 
 through services.
 
-It should not allow arbitrary relationship types unless explicitly supported.
+Creation/removal is only through an explicitly authorized owning workflow
+with its endpoint, acceptance, privacy and lifecycle checks. Merely displaying
+a predicate grants no creation authority; no generic graph editor is implied.
 
 ---
 
@@ -2353,7 +2381,10 @@ without overwriting stored `preview_text`.
 
 Tag selector should query canonical Tag Catalog.
 
-Do not create free-text tags inside the filter box unless explicitly creating a User Tag through the Tag workflow.
+Filtering selects existing eligible canonical Tag IDs; it cannot create or
+assign free-text Tags. Any future USER Tag creation belongs to the separately
+authorized global Tag workflow, outside this filter. Suggestions are not
+assigned-Tag filter matches.
 
 ---
 
@@ -2368,7 +2399,8 @@ URL
 PowerShell Command
 ```
 
-from canonical Entity Type definitions.
+from approved 0C/owning-domain Entity Type definitions. Matching a source-bound
+occurrence or type label does not resolve a canonical concrete Entity.
 
 ---
 
@@ -2523,7 +2555,9 @@ Tag = PowerShell
 Date = Last 30 Days
 ```
 
-Clipboard Center remains the evidence/detail surface.
+Clipboard Center remains the source/detail presentation surface. Evidence
+status requires an explicit scoped Claim/use association accepted by its
+owning workflow; a drill-down does not make Clipboard Center that authority.
 
 ---
 
@@ -3859,7 +3893,11 @@ Do not bundle new fonts unnecessarily.
 
 # 226. Clipboard Item Kinds in GUI
 
-Display labels should come from taxonomy/reference layer.
+Clipboard Item Kind labels come from approved Clipboard/domain display
+metadata under 0C. Shared Tag/Entity vocabulary follows 0C and its owner;
+troubleshooting concept wording follows eligible owner-reviewed 2C mappings.
+Machine semantic identity differs from display label: label changes never
+change the key. Lexical aliases do not belong in GUI widget code.
 
 Do not hard-code dozens of Kind names into widget code where avoidable.
 
@@ -3867,19 +3905,25 @@ Do not hard-code dozens of Kind names into widget code where avoidable.
 
 # 227. Entity Type Labels
 
-Likewise use canonical display metadata.
+Use approved 0C/owning-domain Entity Type display metadata, preserving stable
+type identity and source-bound occurrence semantics. Localization changes
+wording, not type identity or canonical resolution.
 
 ---
 
 # 228. Tags
 
-Use TagService / shared selectors.
+Reuse global Tag IDs/catalog reads and shared selector patterns through the
+delivered owning service. The generic TagService name is a planned boundary,
+not proof of an installed API; Clipboard assignments remain Clipboard-owned.
 
 ---
 
 # 229. Relationship Names
 
-Use semantic labels defined by relationship architecture.
+Use the owning relationship profile's labels and eligible lexical mapping.
+Preserve its predicate key, direction, endpoint types, modality and accepted
+scope; a display label or inverse view creates no new predicate or authority.
 
 ---
 
@@ -6704,3 +6748,389 @@ READY_FOR_CLIPBOARD_SLICE_PLANNING
 Original contract prefix PASS; Foundation/1A/1B/S1/S2 architecture compatibility PASS; all original and requested matrix/diagram inventories complete; decision/risk registers complete; 32/32 architecture criteria PASS; Requires User Decision NONE; no material unresolved owner conflict. Only 1C modified; unstaged, uncommitted, unpushed, unapproved. No production implementation, database or runtime changes.
 
 Next gate: INDEPENDENT CLIPBOARD 1C ARCHITECTURE REVIEW of the exact candidate identity. STOP. Review record NOT RUN; approval NONE. 2026-10-08 change history: this architecture execution report appended only. No implementation, staging, commit, push, PR, merge, next-phase execution or new AGENTS file is authorized by this result.
+
+
+---
+
+# SEMANTIC / TAXONOMY RECONCILIATION ADDENDUM — 2026-10-08
+
+## Reconciliation Control / Scope
+
+Status: READY_FOR_REVIEW. This is a documentation reconciliation candidate of
+existing integrated 1C, not a new architecture phase or runtime delivery.
+Independent review: NOT RUN. USER reconciliation approval: NONE. Integration:
+NOT AUTHORIZED. No implementation slice is started by this task.
+
+Targeted corrections above address current ownership conflicts. The prior
+EXECUTION REPORT, its baseline facts, AC-01 through AC-32, decisions/risks and
+review-pending result remain historical records of the original candidate.
+Its claim of an unchanged 79,039-byte prefix applies to that earlier execution;
+this reconciliation intentionally makes the enumerated targeted corrections.
+This addendum specializes current semantic consumption without rewriting that
+history. The retained singleton, S1 shared auxiliary lease, async generations,
+typed selection, bounded queries, accessibility and 1A/1B lifecycle/IPC design
+remain reused. CC-01 through CC-15 remain numbered and scoped as before.
+
+Authority order for this reconciliation: explicit USER requirement → approved
+Foundation → approved Semantic Model → approved Clipboard/Workspace → existing
+owning-domain architecture → inspected implementation → engineering inference.
+Missing owning decisions require owner review, not a local semantic workaround.
+
+## Integrated Authorities / Current Evidence
+
+FRESH baseline: live remote main and fetched origin/main both equal
+`ae838de651127694c3003fad981b5a649b40f26c`. The isolated documentation branch is
+`docs/clipboard-1c-semantic-reconciliation`. Canonical main remains
+`8b92fd13dfe340563044acd41ef15c0b905243db`; it was not synchronized or repaired.
+Only this 1C path is authorized for repository edits. Final candidate identity,
+static evidence and review handoff are external to the repository to avoid
+self-referential hashes and additional candidate paths.
+
+| Architecture authority | Inspected owner sections / consumption |
+| --- | --- |
+| [0A](../Foundation/0A_Master_Foundation_Architectural_Contract.md#execution-report) | Data ownership/trust; DynamicHub coordination and ticket-optional Journal; source and case owners distinct |
+| [0B](../Foundation/0B_Global_JSON_Contract_Interoperability_Grammar.md#execution-report) | Contract principles, identities and Clipboard boundary; no new JSON, IPC or transport |
+| [0C](../Foundation/0C_Taxonomy_Information_Vocabulary.md#execution-report) | Entity profiles/resolution, Tag stewardship/assignment/lifecycle, relationships, aliases/localization, provenance/confidence |
+| [0D](../Foundation/0D_Settings_Architecture.md#execution-report) | Non-Settings classification, ownership and localization; preferences never semantic truth |
+| [0E](../Foundation/0E_Foundation_Architecture_Reconciliation.md#execution-report) | Authority matrix, taxonomy/Settings and Evidence/provenance reconciliation, downstream contract |
+| [1A](1A_Clipboard_Domain_Data_Lifecycle.md#execution-report) | Source Item/Event identity, occurrences, Tags, privacy/retention/holds, relationship and eligible FTS ownership |
+| [1B](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#execution-report) | Capture/transport/HUD, action and privacy boundaries, unchanged 1C handoff |
+| [S1](../Workspace/S1_Main_Shell_Technician_Workspace_Navigation.md#execution-report) | Retained workspace, single auxiliary region and guarded navigation |
+| [S2](../Workspace/S2_Mochi_DynamicHub_Context_Actions.md#execution-report) | Immutable invocation binding, purpose projection, late results and separate recording |
+| [Semantic 2A](../SemanticModel/2A_Semantic_Model_Foundation.md) | Object/acceptance ownership; source, claim, evidence; identity, uncertainty and privacy |
+| [Semantic 2B](../SemanticModel/2B_Troubleshooting_Concept_Relationship_Model.md) | Concern/occurrence, Finding/Evidence, nine typed predicates, F-01 causal roles, Result/Validation/Resolution |
+| [Semantic 2C](../SemanticModel/2C_Troubleshooting_Lexical_Model.md) | Target/expression/mapping, lexical eligibility, seven mechanisms, language fallback and 2D handoff |
+
+FACT: explicit USER authority supplies approved inputs. Fresh Git ancestry
+and read-only PR records corroborate integrated 1C [PR #78](https://github.com/JDecelles1990/F7Hub/pull/78),
+2A [PR #85](https://github.com/JDecelles1990/F7Hub/pull/85), corrected/rereviewed
+2B [PR #86](https://github.com/JDecelles1990/F7Hub/pull/86), and 2C
+[PR #87](https://github.com/JDecelles1990/F7Hub/pull/87).
+PR bodies report review/USER approval; raw independent review records were not
+separately retrieved. Historical pending-review prose is not current rejection.
+Architecture approval does not install records, enums or lexical mappings:
+2C's individual alternate expressions/predicate wording remain candidates and
+French language review remains unresolved where its matrix says so.
+
+Additional inspected owners: [system architecture](../../06_SystemArchitecture.md)
+Knowledge/Search sections; [Python architecture](../../13_PythonArchitecture.md)
+Knowledge Tag/search boundaries; [features](../../03_Features.md) Ticket,
+Knowledge, Search and Diagnostics; [schema](../../09_SQLSchema.md) and tracked
+migrations; [Diagnostics planning](../Diagnostics/2A_Diagnostic_Domain_Registry_Architecture.md)
+execution gate. Diagnostics 2A is distinct from Semantic 2A and is not promoted
+from a planning input to approved/delivered capability by this task.
+
+FACT from current source inspection: [TagRepository](../../../Python/f7hub/repositories/tag_repository.py)
+reads global IDs/names; [taxonomy migration](../../../Database/Migrations/0002_taxonomy.sql)
+stores name/slug/description without stewardship or lifecycle fields.
+[KnowledgeService](../../../Python/f7hub/services/knowledge_service.py) owns
+article-specific assignment and literal search; its writer is not a Clipboard
+writer. Existing article Tag dialogs offer reuse patterns, not a delivered
+universal selector. [ClipboardService](../../../Python/f7hub/services/clipboard_service.py)
+and [repository](../../../Python/f7hub/repositories/clipboard_repository.py)
+provide bounded Recent reads; [0013](../../../Database/Migrations/0013_clipboard_items_capture_events.sql)
+stores Items/Events; [ClipboardWorkspace](../../../Python/f7hub/gui/clipboard_workspace.py)
+provides shell/Recent presentation. Earlier no-Clipboard-runtime facts remain
+historical. Searches of tracked Python/f7hub, migrations and Tests did not
+establish a SemanticModel engine, canonical Entity resolver, generic TagService,
+Clipboard Tag assignment/occurrence tables or lexical runtime catalog.
+Operational data, external prototypes and runtime enforcement are NOT VERIFIED.
+No completed slice is restarted; decomposition below is an impact assessment.
+
+## Consumption Rules / Runtime Prerequisites
+
+### Taxonomy, Entity and Tag Presentation
+
+0C and owning domains define Entity Type meaning. Settings under 0D can govern
+supported display/language preferences, never semantic truth. The Center is
+neither Entity Type administration nor a second Entity/Tag catalog.
+
+Recognition ≠ canonical Entity resolution. Display a source-bound occurrence
+with permitted value, Entity Type candidate, source revision, parser/rule/method,
+provenance and optional task-specific confidence/uncertainty. Preserve no match,
+ambiguity and resolver unavailable honestly. A highlight, value filter or
+normalized/fuzzy match cannot create/link a canonical Company/User/Device/Ticket/
+Tenant. An existing resolver/workflow must independently accept a qualified link.
+
+Tags retain global identity, SYSTEM/USER stewardship, eligibility and lifecycle.
+Suggestion ≠ assignment. Detection, RULE or AI advice does not assign or create
+a Tag. The Clipboard assignment owner validates target, intent, authorization
+and eligible global ID; origin survives later acceptance. Read-only assigned-Tag
+filters use canonical IDs, not suggested labels. Reuse shared choice patterns
+when available; no free-text canonical creation or article-writer reuse. Owner
+administration navigation remains unavailable until delivered; a future Settings
+entry would be navigation only. Current source does not prove lifecycle support.
+
+### Labels, Localization, Search and Visual State
+
+Machine semantic identity ≠ display label. 0C/owning domains govern shared
+Tag/Entity and Clipboard Kind vocabulary; 2C governs eligible troubleshooting
+lexical mapping. Where the reusable `troubleshooting_issue_definition` concept
+is displayed, follow the approved English direction **Troubleshooting Concern**
+with that unchanged key. No ordinary English issue/problem, case concern,
+Ticket issue/problem or Ticket Type PROBLEM is renamed. Do not hard-code aliases
+in widgets or assume candidate alternate wording is approved equivalence.
+
+Language-neutral identity can have reviewed EN/FR expressions. Missing French
+detail is allowed. Fallback is eligible approved exact-locale → base-language →
+canonical label, with actual language attribution; otherwise missing label or
+known technical key. Switching language creates no second concept/Tag/Entity.
+Introduce en-CA/fr-CA variants only with evidence of a meaningful difference.
+0D owns supported preference mechanics; no localization engine/key is installed.
+
+Search may consume approved preferred labels, aliases, abbreviations, shorthand,
+eligible Search Cues and Tag/Entity Type labels where owning infrastructure
+exists and admits that use. Existing M05 literal FTS, exact occurrence-value
+filters and 1A eligibility remain Search/data responsibilities. This does not
+add lexical terms to an index or change current query behavior. Search match ≠
+semantic acceptance; fuzzy similarity ≠ canonical identity; Search Cue ≠
+synonym/equivalence; query expansion ≠ assignment. A Search KB route or related
+article likewise proves no finding, causal claim or Resolution.
+
+Highlights, colors and chips denote declared occurrence, assignment, candidate,
+owner state or safety facts using non-color text as well. They must not visually
+promote a source, suggested Tag, search hit or possible cause to accepted truth.
+Existing literal text search needs no 2D extraction. Unavailable label/mapping
+capability degrades honestly while core eligible browse remains usable offline.
+
+### Relationships, Causality and Semantic Roles
+
+The Relationships tab may present multiple domains' available owner-created/
+accepted relationships, preserving profile, typed endpoints, direction, revision,
+scope, modality, provenance and current eligibility. 0C supplies shared principles
+and common predicates; 1A/Ticket/Knowledge/Diagnostics retain their own links.
+2B owns exactly the following troubleshooting predicates, not generic Clipboard
+Item link choices:
+
+| 2B predicate | Compatible conceptual endpoints / acceptance boundary |
+| --- | --- |
+| `has_symptom` | Troubleshooting Concern definition → Symptom Definition; reusable association, not a case diagnosis |
+| `possible_cause_of` | Cause Definition → Symptom/Concern definition; conditioned possibility, not accepted case cause |
+| `investigated_by` | Explicit Symptom/Concern/Cause definition → Diagnostic Step Definition; method relevance, not execution |
+| `supports_claim` | Admitted source/Observation/Finding/Result → scoped Claim; owner-accepted relevance, not proof |
+| `contradicts_claim` | Same admitted material union → scoped Claim; scoped conflict, not automatic rejection |
+| `informs_claim` | Same admitted material union → scoped Claim; relevant unresolved context |
+| `accepted_cause_of` | Accepted causal Claim → bound case concern/Symptom Occurrence; accountable case causal acceptance |
+| `candidate_remediation_for` | Remediation-intent Action Definition → Cause/Concern definition; suitability, not Run or guaranteed cure |
+| `validation_method_for` | Validation Definition → Action Definition; criteria-bearing relevance, not performed/passed |
+
+Full 2B profiles control; the table is a consumption limit, not a replacement
+catalog. An Item is not a Cause Definition or accepted causal Claim merely by
+containing text. Display only when compatible endpoints, owning creation/
+acceptance and an actual available relation are established. Any proposal remains
+labelled separately. Existing EVIDENCE_FOR Ticket/workflow associations retain
+1A meaning; they do not manufacture a 2B Claim or supports_claim association.
+Creation/removal requires separately authorized owner use cases; no graph editor.
+
+F-01: `accepted_cause_of` is the sole accepted case-level causal predicate.
+`ROOT_CAUSE` and `CONTRIBUTING_CAUSE` are owner-designated roles on accepted
+causal claims. Infer neither role from clipboard text, keyword match, Entity
+detection, Search hit, Tag, related Knowledge, successful action or Validation.
+`contributes_to` is not an active predicate or machine alias. Possibility and
+accepted case cause stay separate; uncertainty and contradictory material remain
+visible where available. No copied text or UI confirmation substitutes for the
+owning case causal acceptance criteria.
+
+Clipboard content/detected text can be source material or an attributable
+Observation. It is not automatically Finding, Evidence, Cause, Root Cause or
+Resolution. Finding requires producer/owning criteria and identified inputs.
+Evidence requires source/use admission and explicit association with a scoped
+Claim/use, revision, relevance and owning acceptance. Clipboard can supply the
+source without becoming case-evidence authority. Capture/source origin, accepted
+Ticket association and accepted evidence for a Claim are distinct facts.
+
+Result ≠ Validation ≠ Resolution. A copied diagnostic/script result remains
+Clipboard source text; presentation cannot certify its producer identity or
+validate a condition. A successful result proves no causality. Validation needs
+actual evaluation of declared criteria/scope/coverage; it does not automatically
+establish Resolution. Resolution requires owning case acceptance and does not
+close a Ticket. Context actions open/propose through owners, without rewriting
+producer results, accepting claims or bypassing execution/recording authority.
+
+### Provenance, Privacy and Future Extraction
+
+Inspector distinguishes source origin, detection/production method, suggestion
+mechanism, assignment mechanism, reviewer/acceptance, and semantic target
+identity/revision where applicable and supplied. TECHNICIAN, RULE, PARSER,
+IMPORT, AI_SUGGESTED and RESOLVER are conceptual roles unless an owning runtime
+contract supplies values; no enum is invented. One generic Source badge cannot
+collapse materially different authorities. The table Source application column
+can remain coarse admitted source origin; it is not complete semantic provenance.
+Retain AI/import/rule origin after technician acceptance. Optional confidence is
+method/task-specific, missing differs from zero, and no score transfers authority.
+
+1A owns source privacy, retention and holds. Semantic classification, Entity/Tag
+matches or accepted lexical wording authorize no additional raw-content access
+or disclosure. Search, suggestions, DynamicHub and future extraction independently
+respect source admission, processing permission, retention, indexing, disclosure
+and external-provider rules. Metadata/relationships can themselves be sensitive.
+Protect raw content independently; no secret/raw-history feed, hidden log or
+semantic metadata bypass. S2 exact preview/Send and immutable invocation binding
+still apply; a sent proposal is not owner acceptance or execution permission.
+
+Semantic Model 2D is NOT required for initial slices merely browsing existing
+Items, showing existing Tags/Entity occurrences, filtering/searching existing
+approved fields, displaying provenance/available relationships, or performing
+owner-approved lifecycle actions. Each capability still needs its actual owner
+API; architectural permission does not prove it exists. Existing 1A source-profile
+occurrence presentation is not silently expanded into semantic concept extraction.
+
+2D becomes relevant to automatic extraction of candidate semantic interpretations
+from Clipboard text. Until separately approved and implemented, no automatic
+semantic concept extraction, no automatic Troubleshooting Concern matching
+presented as authoritative, no automatic RCA inference and no lexical similarity
+promoted to accepted mappings. 2C is architecture authority, not a mandatory
+runtime engine/online service; no 2D work is bundled into an early CC slice.
+
+| Separate future mechanism | Input → output / uncertainty | Owner / acceptance limit |
+| --- | --- | --- |
+| Query expansion | Admitted labels/aliases/cues + query context → extra expressions with relevance limits | Search; no assignment or semantic acceptance |
+| Fuzzy discovery | Eligible expressions/comparison context → similar candidates, ambiguity | Search/discovery; similarity never identity approval |
+| Typo tolerance | Reviewed variants/lookup profile → broader retrieval, multiple possibilities | Search; spelling proximity does not approve aliases |
+| Entity recognition | Permitted source + owning type profiles → source-bound occurrence candidates, syntax/profile uncertainty | Source/type owner; resolver/workflow accepts concrete links separately |
+| Tag suggestion | Eligible global Tag refs/governed cues → annotation candidates and rationale | Taxonomy identity; target-domain owner authorizes assignment |
+| Troubleshooting Concern matching | Approved target/revision + eligible wording/case context → relevant candidates, not case truth | Semantic target owner + case workflow; automatic text interpretation waits for 2D |
+| RCA inference | Admitted case evidence + 2B meaning/proposals → possible explanations, contradictions and causal uncertainty | Case owner accepts cause/role; automatic inference remains deferred |
+
+Each mechanism has its own input, output, uncertainty, provenance, owner and
+acceptance authority; none is a generic “AI semantic search” permission. Source,
+method/version and target/context revisions must remain attributable. No common
+score, model, engine, provider, threshold, schema or implementation is selected.
+
+## Bounded Reconciliation Matrix
+
+Status COVERED means author-side architecture treatment, not implementation or
+independent approval. Runtime prerequisites apply only to the named capability;
+missing capability does not block unrelated eligible Clipboard browse.
+
+| Existing 1C concern | Approved owner | 0C / 2A / 2B / 2C rule | 1C treatment | Runtime prerequisite | Implementation slice impact | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| Entity Type meaning | 0C + type domain | Meaning outside Settings | Consume approved definitions, no administration | Owner display/type metadata | CC-06, CC-03 | COVERED |
+| Concrete Entity resolution | Concrete domain/resolver | Recognition ≠ canonical identity | Unlinked/ambiguous/unavailable explicit | Resolver + owner acceptance for links only | CC-06, CC-11 | COVERED |
+| Tag catalog | Global taxonomy | One identity, SYSTEM/USER stewardship | Reuse IDs/choices, owner-neutral administration | Eligible catalog reads; lifecycle only when delivered | CC-07 | COVERED |
+| Tag suggestion | Producer + target domain | Candidate ≠ assignment | Separate proposal and origin | Approved suggestion contract if shown | CC-07, CC-14 | COVERED |
+| Tag assignment | Clipboard workflow | Intent/authorization/eligibility separate | Explicit Apply/remove, provenance retained | Clipboard assignment/token/audit API | CC-07 | COVERED |
+| Display labels | Domain/0C; SemanticModel lexical owner | Identity ≠ label; Concern keeps key | Owner metadata; no widget aliases | Eligible owner label projection | CC-03, CC-05..07, CC-10..15 | COVERED |
+| Multilingual labels | Vocabulary/lexical owner; 0D preference | Reviewed EN/FR mappings, honest fallback | Same identity; missing detail allowed | Approved wording/fallback where available | CC-05..07, CC-13 | COVERED |
+| Lexical aliases | 0C / 2C target steward | Direct scoped reviewed mapping | Consume eligible aliases only | Owner-approved mapping/query adapter | CC-03, CC-11 | COVERED |
+| Search Cues | 2C + Search | Discovery cue ≠ synonym | Explain cue match, no equivalence | Eligible discovery mapping if supported | CC-03 | COVERED |
+| Semantic search | Search + semantic/source owners | Retrieval accepts no facts | Literal/structured baseline retained; mechanisms separate | Actual owner query APIs; no engine for basic search | CC-03, CC-14 | COVERED |
+| Relationship labels | 0C/domain; 2B/2C troubleshooting | Typed endpoints/modality/direction | Available owner links only; no generic nine-type menu | Owner profile/link read projection | CC-10, CC-11, CC-15 | COVERED |
+| Possible cause | SemanticModel + case workflow | Definition possibility ≠ case cause | Display conditioned possibility only if available | Approved definition/relationship reference | CC-14, CC-15 | COVERED |
+| Accepted cause | Case/Journal | P07 only; roles independently designated | No text/Tag/result-derived causal badge | Accepted case claim/role projection | CC-10, CC-14, CC-15 | COVERED |
+| Observation | Source/producer | Attributable statement, not interpretation | Source/method/time/scope, uncertainty honest | Admitted source projection | CC-05, CC-06, CC-08, CC-15 | COVERED |
+| Finding | Producer/investigative owner | Criteria-supported interpretation | Only actual owner Finding, never raw-copy relabel | Inputs/criteria/revision projection | CC-10, CC-15 | COVERED |
+| Evidence | Source + scoped Claim/use owner | Explicit admitted association, not proof | Preserve original source/claim/acceptance/hold distinction | Reviewed association + source policy | CC-10 | COVERED |
+| Result | Diagnostics/operation producer | Outcome not Validation/causality | Preserve producer provenance; copied text remains source | Actual owner run/result reference if claimed | CC-05, CC-15 | COVERED |
+| Validation | Criteria/producer + case workflow | Actual scoped evaluation required | No PASS inherited from success/display | Owner evaluation/coverage projection | CC-15 | COVERED |
+| Resolution | Case workflow; Ticket lifecycle separate | Accepted scoped treatment ≠ Ticket closure | No automatic Resolution or status action | Owner acceptance/criteria, separate Ticket API | CC-10, CC-14, CC-15 | COVERED |
+| Provenance | Source/method/assignment/acceptance owners | Orthogonal dimensions, target revision | Inspector separates supplied roles; no invented enums | Minimal owner metadata, unknown remains unknown | CC-05..08, CC-10, CC-14, CC-15 | COVERED |
+| DynamicHub semantic handoff | Clipboard source + S2 + target owner | Proposal ≠ acceptance; source admission | Minimized preview/Send, immutable binding | Delivered S2 projection/catalog and source policy | CC-14 | COVERED |
+| Future automatic extraction | 2D + source/target owners | Interpretation candidates only; later gate | Deferred; no early CC extraction/RCA | Separately approved/implemented 2D capability | Future authorization only | COVERED |
+
+## CC-01 through CC-15 Semantic Impact
+
+Original outcome/prerequisite rows above are retained. These are added acceptance
+constraints, not renumbering, delivery status or expanded implementation scope.
+
+| Slice | Semantic/taxonomy effect | Bounded treatment / 2D requirement |
+| --- | --- | --- |
+| CC-01 shell | Little/no semantic dependency | Same retained route/unavailable behavior; no engine or 2D |
+| CC-02 Recent | No extraction requirement | Existing eligible page/projection; no semantic dependency or 2D |
+| CC-03 search/filter | Owner labels, Tag IDs, occurrence Type/value when supported | Preserve literal/structured Search behavior; matches accept nothing; no 2D for ordinary search |
+| CC-04 selection/Inspector shell | Stable owner-qualified identity | Selection is not semantic acceptance; no engine/2D |
+| CC-05 Overview/copy | Source/Observation, Result and label provenance | Plain eligible copy does not certify Finding/Evidence/Validation; no 2D |
+| CC-06 Entities | Occurrence versus concrete Entity | Type/method/uncertainty; resolver unavailable explicit; no automatic canonical linking or semantic extraction |
+| CC-07 Tags | Global stewardship/eligibility, proposal/assignment | Existing-ID filters and explicit owner assignment; suggestions separate; no 2D for existing Tags |
+| CC-08 Capture History | Source origin/method/time and dependent copies | Genuine occurrence history is not accepted Evidence; no 2D |
+| CC-09 lifecycle | Privacy/retention/holds remain 1A | Semantic metadata grants no raw access, deletion or release; no 2D |
+| CC-10 Ticket/Evidence | Observation/Finding/Evidence/Claim, owner acceptance | Exact source/use/target and hold; no causal/Resolution/Ticket-status shortcut; no 2D for available associations |
+| CC-11 safe handoff | Search hits, owner labels and typed actions | KB/URL/resource routes accept no identity/cause; no 2D for existing owner routes |
+| CC-12 cached flyout | Safe coarse labels/provenance | Cache does not infer/accept semantics or expand disclosure; no 2D |
+| CC-13 native refinement | Readable labels/chips and honest language fallback | No color-only promotion or new identity through localization; no semantic extraction |
+| CC-14 DynamicHub | Proposal versus acceptance, target revision/privacy | S2 minimized source handoff; no automatic Concern matching/RCA; no 2D for reference-only handoff |
+| CC-15 Diagnostics/Analytics | Producer Result/Finding, Validation and separate Resolution | Owner routes/criteria/execution and grain retained; no copied-result causal proof; no 2D for existing routes |
+
+## Reconciliation Decision / Risk Delta
+
+Existing D09-D13, D20-D21 and Tag clutter/duplicate taxonomy, relationship coupling,
+raw disclosure and wrong-target risks already cover source profiles, assignment,
+owner links and privacy. Reuse them with these constraints; do not rebuild the
+registers. New decisions below are recommendations for this reconciliation's
+independent review, not newly approved architecture or runtime mechanisms.
+
+| ID | Options considered | Recommendation / rationale and owner evidence | Consequence | Status |
+| --- | --- | --- | --- | --- |
+| 1C-SD01 | Require SemanticModel/2D for Center; consume architecture independently | Consume 0C + 2A-2C rules without mandatory engine; 2C/1A source-owner gates | Basic reads/actions stay independently deliverable; extraction separate | RECOMMENDED |
+| 1C-SD02 | Settings taxonomy ownership; domain truth with preferences | 0C/domain meaning, 0D mechanics; owner-neutral management navigation | No new catalog or invented administration route | RECOMMENDED |
+| 1C-SD03 | Generic semantic labels; owner/revision-aware presentation | Eligible lexical mapping, unchanged keys and distinct source/claim/result roles; 2A-2C | Honest missing labels/acceptance, no stronger badge from a match | RECOMMENDED |
+
+| ID / incremental risk | Likelihood | Impact | Mitigation / owner | Residual risk | Status |
+| 1C-SR01 lexical/Settings authority drift | UNKNOWN | HIGH wrong identity or truth | SD02/SD03, reviewed wording and same-key fallback; taxonomy/lexical/presentation owners | Owner metadata/localization APIs not established | OPEN |
+| 1C-SR02 search/detection/proposal promoted to acceptance | UNKNOWN | HIGH wrong Entity/Tag/case assertion | Extend existing Tag/relationship risks with explicit candidate states and seven mechanism limits; source/target owners | Later UI/adapter enforcement not runtime verified | OPEN |
+| 1C-SR03 role collapse or premature RCA | UNKNOWN | HIGH false evidence/cause/Resolution | Scoped Claim/use gate, F-01/P07, separate Result/Validation/Resolution; case/Diagnostics owners | Case acceptance projection unavailable until owning delivery | OPEN |
+| 1C-SR04 provenance collapsed into generic Source | UNKNOWN | HIGH misleading authority | Separate origin/method/suggestion/assignment/acceptance/target revision; Inspector owners | Missing fields remain unknown, not fabricated | OPEN |
+
+## Reconciliation Acceptance Criteria
+
+Original AC-01 through AC-32 and their historical evidence remain unchanged.
+These additional criteria are author-side documentation checks; PASS requires
+inspection of the named rule and static candidate preservation, not runtime.
+
+| ID | Additional criterion | Author-side result / evidence |
+| --- | --- | --- |
+| RC-01 | 0C/domain taxonomy authority; Settings never semantic truth | PASS — Taxonomy rules, SD02; corrected sections 76/81 |
+| RC-02 | Architecture input differs from runtime dependency | PASS — Dependency Gate, SD01; no engine/online prerequisite |
+| RC-03 | Entity occurrence ≠ canonical identity; unavailable resolver honest | PASS — Entity rules and matrix; CC-06 |
+| RC-04 | Global Tag stewardship/eligibility, suggestion ≠ authorized assignment | PASS — Tag rules; corrected 77/79/128; CC-07 |
+| RC-05 | Search Cue ≠ synonym/equivalence | PASS — Search rules, cue matrix and mechanism rows |
+| RC-06 | Search hit/fuzzy/expansion accepts no identity, Tag or case fact | PASS — Search rules and CC-03/11 |
+| RC-07 | Troubleshooting Concern uses unchanged troubleshooting_issue_definition | PASS — Labels; no Ticket PROBLEM/case/ordinary-issue rename |
+| RC-08 | Nine 2B predicates remain endpoint/owner-bound, not generic Item types | PASS — Nine-row table and relationship creation gate |
+| RC-09 | P07 sole accepted case-causal predicate; causal roles never inferred | PASS — F-01; contributes_to excluded, CC-14/15 |
+| RC-10 | Observation/Finding/Evidence/Claim retain source and acceptance owners | PASS — Semantic roles; evidence matrix and CC-10 |
+| RC-11 | Result/Validation/Resolution and Ticket closure remain distinct | PASS — Semantic roles, matrix and CC-15 |
+| RC-12 | Provenance dimensions and task-specific uncertainty distinguishable | PASS — Provenance rules and SR04; no invented enums |
+| RC-13 | EN/FR fallback preserves identity and actual language; regional evidence | PASS — Localization rules; no duplicate concepts |
+| RC-14 | Privacy/source admission applies independently to raw and metadata | PASS — 1A/S2 retained gates; classification grants no access |
+| RC-15 | Basic browse/Tags/occurrences/search/provenance/links/lifecycle need no 2D | PASS — Explicit 2D boundary and all fifteen slice rows |
+| RC-16 | Automatic extraction/Concern authority/RCA/mapping promotion deferred | PASS — 2D boundary and seven mechanism owners |
+| RC-17 | All CC-01..CC-15 scopes/labels retained with semantic constraints | PASS — Original decomposition plus impact table |
+| RC-18 | Reuse GUI design, original AC/register history; targeted changes only | PASS — Reconciliation control, delta and static preservation checks |
+| RC-19 | One unstaged documentation path; no production/test/schema/upstream edit | PASS — External exact candidate/scope/static evidence; review NOT RUN |
+
+## Validation / Downstream Contract / Result
+
+Environment: WINDOWS_NATIVE host. Evidence scope: documentation/static only;
+no Windows-native application behavior is validated. Provenance: FRESH author
+self-checks, not independent review; historical results remain historical.
+External evidence records the final raw SHA-256, Git-normalized blob, manifest
+aggregate and reproducible checks: sole tracked path, empty index/no untracked
+candidate additions, Markdown fences/local links, original headings/AC/CC
+inventory, unchanged historical execution report and unchanged authorities.
+
+Database, GUI, Integration, Windows-native application, PowerShell, AHK and
+ML/vector/extraction suites: NOT RUN — NOT REQUIRED for documentation-only
+reconciliation. Mermaid rendering: NOT RUN — NOT REQUIRED; existing source
+diagrams remain unchanged. Operational database integrity is NOT VERIFIED.
+
+No unresolved upstream architectural conflict requires a new decision at this
+depth. Actual lexical mappings/French review, resolver/assignment/association
+APIs, native presentation and source/employer/provider policy remain owner gates
+for future separately authorized implementation. No new catalog, schema, enum,
+service, algorithm, execution route or online dependency is selected.
+
+After independent review, explicit USER reconciliation approval and separately
+authorized integration, downstream slice planning may consume these presentation
+constraints with original 1C. Reading them grants no implementation authority.
+Reinspect live owner availability and do not restart completed CC-01/CC-02 work.
+A semantic source/match/proposal cannot become an accepted owner fact through UI
+wording, a Settings preference, confidence or successful operation.
+
+Result: CLIPBOARD_1C_SEMANTIC_RECONCILIATION_READY_FOR_REVIEW.
+Next gate: independent architecture review of the exact one-file candidate.
+USER approval NONE; integration NOT AUTHORIZED; implementation slices NOT STARTED
+by this task. No staging, commit, push, PR or merge. STOP at review preparation.
+
+Change history: 2026-10-08 — targeted semantic/taxonomy ownership corrections and
+this bounded reconciliation addendum; historical execution report retained.
