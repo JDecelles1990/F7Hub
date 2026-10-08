@@ -3410,7 +3410,7 @@ Executed document checks used read-only Python stdlib (no F7Hub imports or bytec
 Final observed Git status:
 
 ```text
- M "Docs/Planning/Foundation/0B_Global_JSON_Contract_Interoperability_Grammar.md"
+ M "Docs/Planning/Foundation/0B _Global _JSON_Contract_Interoperability_Grammar.md"
 ?? AutoHotkey/Troubleshooting_Sections/GuideSettings.ini
 ```
 
@@ -3418,7 +3418,7 @@ GuideSettings.ini is protected unrelated user/runtime state, not a Phase 0B cand
 
 ## Files Changed
 
-Only `Docs/Planning/Foundation/0B_Global_JSON_Contract_Interoperability_Grammar.md`: original planning instructions preserved byte-for-byte; appended clearly separated execution report, current-contract inventory, proposed grammar, matrix, diagrams, decision/risk/test strategy and downstream/validation records. Candidate remains unstaged on `docs/foundation-0b-execution-20261007`, HEAD/base/local origin/main `1a7015b500fc0eccbab749e82585c7936d5cb478`.
+Only `Docs/Planning/Foundation/0B _Global _JSON_Contract_Interoperability_Grammar.md`: original planning instructions preserved byte-for-byte; appended clearly separated execution report, current-contract inventory, proposed grammar, matrix, diagrams, decision/risk/test strategy and downstream/validation records. Candidate remains unstaged on `docs/foundation-0b-execution-20261007`, HEAD/base/local origin/main `1a7015b500fc0eccbab749e82585c7936d5cb478`.
 
 Excluded protected state: untracked `AutoHotkey/Troubleshooting_Sections/GuideSettings.ini`. No other Phase 0B write was performed; no implementation or downstream document update is included.
 
