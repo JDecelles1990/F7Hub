@@ -1,5 +1,17 @@
 # F7Hub Python Architecture
 
+## Clipboard D01 — Read-only owner query foundation
+
+`ClipboardService(ClipboardRepository(database_path), clock=...)` exposes `get_recent(*, limit=50) -> ClipboardRecentPage`. The service validates a strict integer 1–100 excluding bool, samples one aware datetime, converts it to canonical UTC milliseconds, and delegates one read. The default clock is current UTC. Clock/repository/infrastructure failures become a fixed safe `ClipboardQueryError`; invalid query arguments raise `ClipboardValidationError`. Repository failures use a safe `ClipboardRepositoryError`; exceptions suppress raw chained feedback and no content-bearing logging is introduced.
+
+The domain module contains frozen `ClipboardItemRef`, `ClipboardRecentItem` and `ClipboardRecentPage` values without Qt/SQLite dependencies. A page contains a tuple of safe rows, has_more, effective limit and as_of. Rows expose the database-scoped Item ID, revision, preview/truncation, latest receipt timestamp, retention intent/pin/expiry, PERMITTED sensitivity and kind=None (classification unavailable). Raw text/hash/Event/source/Entity/Tag/relationship/hold collections are absent.
+
+Repository `get_recent(*, limit, as_of)` validates bounds/time, uses the existing read-only connection option, executes parameterized explicit-column SQL over Item summaries and orders by last_received_at/ID descending. It reads limit+1 sentinel records, fetches only a 241-scalar excerpt and returns at most limit rows. Pure preview normalization outputs at most 240 scalars, replaces control/format/bidi and line-separator characters with spaces, and carries truncation separately. Markup/URLs remain literal plain text; later GUI consumers must render plain text. Stored raw text is unchanged.
+
+`open_database` and `database_connection` accept read_only=False by default; True uses an existing file through encoded URI mode=ro, retains FK/default timeout, creates no storage and rejects :memory:. Missing/wrong-schema/locked/malformed reads fail visibly, never as empty success. Each read owns/closes its connection in its calling thread.
+
+D01 is not composed in bootstrap/MainWindow/ClipboardWorkspace. CC-02 must inject this service and use the existing worker boundary. The fixture helper under Tests/Database is test-only and is never imported by production. There is no capture/privacy detector, production writer, cursor, search, mutation, raw retrieval or external integration.
+
 ## CC-01 — Clipboard shell composition
 
 MainWindow owns `clipboard_workspace`, initially `None`, and a shared QAction with object name `clipboardCenterAction` and data `clipboard.center`. `show_clipboard() -> bool` refuses existing shared-runner, Script-run and Ticket note/creation/status/classification pending states, including callback gaps. A page transition negotiates existing Ticket Discard/Cancel before cleanup or construction. Accepted activation constructs `ClipboardWorkspace(parent)` once, registers it in the existing QStackedWidget and focuses its retained return button.

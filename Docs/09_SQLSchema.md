@@ -841,8 +841,8 @@ prompt_variables
 ## Clipboard
 
 ```text
-clipboard_snippets
-clipboard_history
+clipboard_items
+clipboard_capture_events
 ```
 
 ## Workspaces
@@ -3070,101 +3070,74 @@ It is not itself sufficient protection.
 
 # 87. Clipboard Domain
 
-Persistent clipboard storage and normal Windows clipboard interaction are different concerns.
+D01 migration 0013 delivers the two tables below without seed rows, triggers or FTS. These replace the earlier speculative separate snippets/history schema. PERMITTED assessment metadata never grants capture or execution authority. All stored dates use application-generated UTC millisecond text; SQL checks enforce shape and ordering, while application/fixture validators check real calendar dates.
 
-AHK may handle capture/automation.
+# 88. `clipboard_items`
 
-Python owns persistent storage.
-
----
-
-# 88. `clipboard_snippets`
-
-Purpose:
-
-Store technician-approved reusable text snippets.
+One exact eligible source snapshot and its lifetime capture summary. Raw text is never edited through D01; no production write API exists. Hashes, Kind classification and source-summary columns are not delivered. Saved snippets are a retention view over these Items.
 
 ```sql
-CREATE TABLE clipboard_snippets (
-    clipboard_snippet_id INTEGER PRIMARY KEY,
-
-    category_id INTEGER,
-
-    title TEXT NOT NULL
-        CHECK (length(trim(title)) > 0),
-
-    content_text TEXT NOT NULL,
-
-    content_format TEXT NOT NULL DEFAULT 'PLAIN_TEXT'
-        CHECK (
-            content_format IN (
-                'PLAIN_TEXT',
-                'MARKDOWN',
-                'HTML'
-            )
-        ),
-
-    hotstring_trigger TEXT COLLATE NOCASE UNIQUE,
-
-    is_favorite INTEGER NOT NULL DEFAULT 0
-        CHECK (is_favorite IN (0, 1)),
-
-    is_sensitive INTEGER NOT NULL DEFAULT 0
-        CHECK (is_sensitive IN (0, 1)),
-
-    created_at TEXT NOT NULL,
-    updated_at TEXT NOT NULL,
-
-    FOREIGN KEY (category_id)
-        REFERENCES categories(category_id)
-        ON DELETE SET NULL
+CREATE TABLE clipboard_items (
+    clipboard_item_id INTEGER PRIMARY KEY CHECK (clipboard_item_id > 0),
+    raw_text TEXT NOT NULL CHECK (
+        typeof(raw_text) = 'text' AND length(raw_text) > 0
+        AND instr(raw_text, char(0)) = 0
+        AND length(CAST(raw_text AS BLOB)) <= 65536
+    ),
+    media_type TEXT NOT NULL CHECK (media_type = 'text/plain'),
+    identity_profile TEXT NOT NULL CHECK (identity_profile = 'clipboard_text_exact_v1'),
+    sensitivity TEXT NOT NULL CHECK (sensitivity = 'PERMITTED'),
+    assessment_complete INTEGER NOT NULL CHECK (assessment_complete = 1),
+    assessment_method TEXT NOT NULL CHECK (length(trim(assessment_method)) > 0),
+    assessment_version TEXT NOT NULL CHECK (length(trim(assessment_version)) > 0),
+    retention_intent TEXT NOT NULL CHECK (retention_intent IN ('TEMPORARY', 'SAVED')),
+    is_pinned INTEGER NOT NULL DEFAULT 0 CHECK (is_pinned IN (0, 1)),
+    expires_at TEXT CHECK (
+        expires_at IS NULL OR expires_at GLOB
+        '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9]Z'
+    ),
+    first_received_at TEXT NOT NULL CHECK (first_received_at GLOB
+        '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9]Z'),
+    last_received_at TEXT NOT NULL CHECK (last_received_at GLOB
+        '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9]Z'),
+    captured_total INTEGER NOT NULL CHECK (typeof(captured_total) = 'integer' AND captured_total > 0),
+    revision INTEGER NOT NULL DEFAULT 1 CHECK (typeof(revision) = 'integer' AND revision > 0),
+    CHECK (first_received_at <= last_received_at),
+    CHECK (is_pinned = 0 OR retention_intent = 'SAVED'),
+    CHECK (
+        (retention_intent = 'TEMPORARY' AND expires_at IS NOT NULL AND expires_at > last_received_at)
+        OR (retention_intent = 'SAVED' AND expires_at IS NULL)
+    )
 );
 ```
 
----
+# 89. `clipboard_capture_events`
 
-# 89. `clipboard_history`
-
-This feature is optional and should not be enabled merely because the table exists.
-
-DDL:
+Distinct genuine occurrences referencing one Item. The unique producer/generation/operation tuple is only a database guard while the Event remains; it does not satisfy complete 1A/1B receipt/replay behavior. Optional source classes are coarse allowlisted metadata; source titles, paths and URLs are absent.
 
 ```sql
-CREATE TABLE clipboard_history (
-    clipboard_history_id INTEGER PRIMARY KEY,
-
-    content_text TEXT NOT NULL,
-
-    content_hash TEXT,
-
-    source_application TEXT,
-
-    is_sensitive INTEGER NOT NULL DEFAULT 0
-        CHECK (is_sensitive IN (0, 1)),
-
-    captured_at TEXT NOT NULL,
-
-    expires_at TEXT
+CREATE TABLE clipboard_capture_events (
+    clipboard_capture_event_id INTEGER PRIMARY KEY CHECK (clipboard_capture_event_id > 0),
+    clipboard_item_id INTEGER NOT NULL,
+    received_at TEXT NOT NULL CHECK (received_at GLOB
+        '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9]Z'),
+    observed_at TEXT CHECK (observed_at IS NULL OR observed_at GLOB
+        '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]T[0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9]Z'),
+    capture_method TEXT NOT NULL CHECK (capture_method IN ('F7HUB', 'AHK_MANUAL')),
+    source_class TEXT CHECK (source_class IS NULL OR source_class IN ('terminal', 'browser', 'editor', 'unknown')),
+    producer_binding TEXT NOT NULL CHECK (length(producer_binding) BETWEEN 1 AND 128 AND length(trim(producer_binding)) > 0),
+    ingress_generation TEXT NOT NULL CHECK (length(ingress_generation) BETWEEN 1 AND 128 AND length(trim(ingress_generation)) > 0),
+    operation_id TEXT NOT NULL CHECK (length(operation_id) = 36),
+    FOREIGN KEY (clipboard_item_id) REFERENCES clipboard_items(clipboard_item_id) ON DELETE CASCADE,
+    UNIQUE (producer_binding, ingress_generation, operation_id)
 );
 ```
-
----
 
 # 90. Clipboard History Policy
 
-Clipboard history should be:
+No history/capture is activated by this schema. D01 returns PERMITTED, completely assessed Items where `retention_intent = 'SAVED' OR expires_at > as_of`, ordered by `last_received_at DESC, clipboard_item_id DESC`. The read-only first-page query uses explicit columns, a SQL substring capped at 241 scalars, and limit+1 sentinel; it exposes at most 240 safe preview scalars per returned row. It never reads all raw bodies or derives lifetime summary state from retained Events.
 
-```text
-optional
-configurable
-clearable
-retention-limited
-sensitive-data aware
-```
-
-A later implementation may choose not to create this table until the clipboard-history feature becomes active.
-
-It belongs to the target schema but not the initial migration slice.
+Bounds are default 50, minimum 1, maximum 100; bool/non-int/out-of-range values are rejected. Empty history is an empty successful tuple. Cursor navigation, raw retrieval, capture admission, deduplication writes, replay reconciliation, privacy detection, history clearing, Settings, lifecycle mutations and evidence/hold relationships are deferred.
 
 ---
 
@@ -3629,23 +3602,13 @@ CREATE INDEX idx_prompt_templates_category
 # 108. Clipboard Indexes
 
 ```sql
-CREATE INDEX idx_clipboard_snippets_favorite
-    ON clipboard_snippets(
-        is_favorite,
-        title COLLATE NOCASE
-    );
-
-CREATE INDEX idx_clipboard_snippets_category
-    ON clipboard_snippets(category_id);
-
-CREATE INDEX idx_clipboard_history_captured
-    ON clipboard_history(
-        captured_at DESC
-    );
-
-CREATE INDEX idx_clipboard_history_hash
-    ON clipboard_history(content_hash);
+CREATE INDEX idx_clipboard_items_recent
+    ON clipboard_items(last_received_at DESC, clipboard_item_id DESC);
+CREATE INDEX idx_clipboard_capture_events_item
+    ON clipboard_capture_events(clipboard_item_id);
 ```
+
+The Recent composite index matches ordering; the child index supports Item FK/history lookup. The operation UNIQUE constraint also creates SQLite's integrity index. No speculative hash/search/expiry index is added.
 
 ---
 
@@ -6089,8 +6052,8 @@ Prompts
     prompt_variables
 
 Clipboard
-    clipboard_snippets
-    clipboard_history
+    clipboard_items
+    clipboard_capture_events
 
 Workspaces
     workspaces

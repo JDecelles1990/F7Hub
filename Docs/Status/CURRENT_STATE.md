@@ -1,5 +1,17 @@
 # F7Hub Current State
 
+## D01 — Clipboard persistence and Recent query source candidate
+
+**READY_FOR_REVIEW** on 2026-10-08 (America/Toronto). Candidate worktree `C:/Dev/F7Hub-Clipboard-D01`, branch `feat/clipboard-d01-recent-query-source`, repaired-main baseline/HEAD `df2d91fdcd1abc3c04f921cf47483ecb004bb7d1`; 30 candidate paths before this documentation correction, with exact final count recorded in the external manifest. The fast-forward reconciliation succeeded and preserved the D01 candidate implementation/test bytes. Candidate remains unstaged, uncommitted and unpushed; it is not approved, merged, integrated or closed.
+
+Migration 0013 adds exactly eligible Clipboard Items and distinct Item-owned Capture Events. The owner service/repository returns immutable PERMITTED/complete SAVED-or-unexpired Item projections ordered by lifetime last_received_at and Item ID descending, using read-only SQLite, a limit+1 sentinel, default 50/max 100 and a safe 240-scalar preview. Kind is unavailable; full raw bodies, hashes and child collections are absent. No production writer, capture/privacy detector, complete replay handling, GUI/bootstrap composition, cursor/navigation, search, Inspector, associations or lifecycle mutations are delivered.
+
+Fresh WINDOWS_NATIVE evidence after reconciliation: System Snapshot checksum module 4 PASS and full Database regression 481 PASS, zero failures/errors/skips, exit 0. RETAINED applicable evidence: focused Clipboard 49 PASS; Integration 206 PASS (Qt offscreen), exit 0; integrity_check = ok, foreign_key_check = zero violations; 1,000/10,000-item Recent checks use `idx_clipboard_items_recent` and preserve fixture database bytes. The completed Integration supervisor cleaned three owned companion descendants with zero survivors. The initial 180-second Integration attempt was incomplete; the corrected 600-second rerun completed on unchanged production/test inputs. Separate physical GUI validation is inapplicable to D01, which changes no GUI behavior.
+
+Historical blocker: before reconciliation, the Database regression ran 481 tests with 480 passing and one pre-existing System Snapshot checksum-test failure (exit 1); an exact baseline-source probe reproduced it. The baseline defect was repaired separately and merged through PR #81. D01 then fast-forward reconciled to repaired main; no D01 candidate implementation/test bytes changed. The fresh post-reconciliation Database run passed all 481 tests.
+
+The exact final manifest, implementation report, suite logs/results, baseline probe, reconciliation report and input-applicability mapping are external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-D01`. Database integrity/query-plan evidence uses isolated synthetic fixtures. Runtime tests for this documentation-only reconciliation correction: NOT RUN; retained evidence remains applicable because no production or test input changed. Next gate: **INDEPENDENT D01 REVIEW**. Integration and CC-02 remain separately authorized work.
+
 ## CC-01 — Clipboard workspace shell
 
 **READY_FOR_REVIEW** on 2026-10-08 (America/Toronto), pending independent implementation review. Candidate worktree `C:/Dev/F7Hub-Clipboard-CC01`, branch `feat/clipboard-cc01-workspace-shell`, base/HEAD `2af22c24b188e040080d1a7e3effd24ecf6613ca`; unstaged/uncommitted. This candidate is not integrated into canonical main.

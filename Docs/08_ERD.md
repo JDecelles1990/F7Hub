@@ -1232,52 +1232,17 @@ diagnostic_results
 
 # 46. Clipboard Domain
 
-Clipboard persistence must remain minimal because it may contain sensitive content.
+D01 migration 0013 delivers one content/Item store and one genuine-occurrence store under Clipboard ownership. Persistence/capture activation remains separately gated; raw content is untrusted.
 
-Possible entities:
+# 47. clipboard_items
 
-```text
-clipboard_snippets
-clipboard_history
-```
+An eligible content Item has a stable local ID, exact immutable source text/profile, complete PERMITTED assessment provenance, TEMPORARY/SAVED intent, independent pin property, expiry and lifetime receipt summaries/revision. Saved reusable snippets are Items with SAVED intent, not a second content silo. D01 supplies no capture, deduplication writer, Save/Pin/Delete command, Entity/Tag or evidence relationship.
 
----
+# 48. clipboard_capture_events
 
-# 47. clipboard_snippets
+`clipboard_items` **1 → 0..many** `clipboard_capture_events`. Each genuine accepted occurrence has its own ID, Item FK, receipt time, optional observed time/coarse source class, capture method and bound operation identity. Distinct operations may reference one Item. Item deletion cascades only Item-owned ordinary Event history. Operation uniqueness is a database guard; full replay/receipt lifecycle is deferred.
 
-Purpose:
-
-Store intentional reusable technician text.
-
-Examples:
-
-- ticket templates
-- standard responses
-- escalation wording
-- troubleshooting text
-
-This is safer and more durable than automatically storing all copied content.
-
----
-
-# 48. clipboard_history
-
-Purpose:
-
-Optionally store clipboard history.
-
-This entity should be considered:
-
-```text
-OPTIONAL / CONFIGURABLE
-```
-
-Requirements should support:
-
-- persistence disabled
-- expiration
-- manual clear
-- sensitive-content exclusion
+Event history may eventually expire independently of preserved Items. Item lifetime summaries remain authoritative after Event pruning; D01 does not implement pruning. Later accepted evidence/holds require their own reviewed preservation model.
 
 ---
 
@@ -1940,8 +1905,8 @@ Canonical conceptual inventory:
 | Diagnostics | diagnostic_workflow_articles | Workflow/KB junction | PLANNED |
 | Prompts | prompt_templates | Reusable prompts | PLANNED |
 | Prompts | prompt_variables | Prompt variables | PLANNED |
-| Clipboard | clipboard_snippets | Intentional reusable text | PLANNED |
-| Clipboard | clipboard_history | Optional clipboard history | PLANNED |
+| Clipboard | clipboard_items | Eligible immutable content and lifetime summaries | D01 CANDIDATE |
+| Clipboard | clipboard_capture_events | Genuine occurrences referencing Items | D01 CANDIDATE |
 | Workspaces | workspaces | Saved layouts | PLANNED |
 | Audit | audit_events | Significant actions | PLANNED |
 | Workspaces | workspace_panels | Optional normalized panel state | DEFERRED |

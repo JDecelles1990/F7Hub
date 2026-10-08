@@ -1,5 +1,18 @@
 # F7Hub Todo
 
+## D01 — Minimal Clipboard Persistence and Recent Query Source
+
+- [x] Migration 0013: exact eligible Items and distinct Item-owned Capture Events, constraints and two justified indexes.
+- [x] Read-only connection support; bounded immutable Recent query/service with safe previews and failures.
+- [x] Synthetic transactional fixture helper and 49 focused migration/repository/service/connection/integration tests PASS on Windows.
+- [x] Full Integration: 206 PASS, exit 0, Windows host with Qt offscreen; zero owned survivors after cleanup.
+- [x] Isolated integrity/FK checks and 1,000/10,000-item indexed Recent scale checks PASS; external exact candidate manifest/evidence.
+- [x] After repaired-main fast-forward reconciliation, fresh Windows-native System Snapshot checksum test: 4 PASS; full Database regression: 481 PASS, zero failures/errors/skips.
+- [x] Candidate implementation/test bytes preserved across reconciliation; retained applicable evidence remains 49 focused Clipboard PASS, 206 Integration PASS, integrity/FK PASS and indexed query-plan checks at 1,000/10,000 Items.
+- [ ] Independent D01 review.
+
+**READY_FOR_REVIEW** on baseline/HEAD `df2d91fdcd1abc3c04f921cf47483ecb004bb7d1`, branch `feat/clipboard-d01-recent-query-source`, worktree `C:/Dev/F7Hub-Clipboard-D01`; 30 candidate paths before this documentation correction (verify final count in the external manifest). Unstaged, uncommitted and unpushed. The earlier checksum failure is historical and preserved in the ChangeLog. Next gate: **INDEPENDENT D01 REVIEW**. D01 is not closed or integrated. No production writer/capture, GUI composition, cursor navigation, search, raw retrieval or lifecycle actions are delivered. CC-02 remains separately authorized work.
+
 ## CC-01 — Clipboard workspace shell candidate
 
 - [x] Shared File/toolbar `clipboard.center` action after Scripts and one lazy retained MainWindow page.
