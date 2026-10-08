@@ -5593,3 +5593,1114 @@ READY_FOR_IMPLEMENTATION
 ```
 
 Phase 1C closes Clipboard architecture planning, not implementation.
+
+# EXECUTION REPORT
+
+## Summary
+
+RECOMMENDATION: one retained Clipboard Center inside S1's Technician Workspace stack, with compact internal view selection, bounded database-backed history/search, stable Item selection and a seven-section Inspector occupying S1's single shared auxiliary region. Quick Ticket and DynamicHub use that same region under owner guards. Clipboard services own eligibility, queries, lifecycle and source access; the Center renders safe projections and explicit intent. Existing Qt model/view, task runner, plain-text viewer and owner-bound dialog patterns are reused or extended.
+
+Execution date: 2026-10-08, America/Toronto. Planning status: READY_FOR_REVIEW. Architecture coverage: 32/32 PASS. Result: READY_FOR_CLIPBOARD_SLICE_PLANNING. This is an author-side architecture candidate awaiting independent review, not approval, implementation or runtime verification. Requires User Decision: NONE at this depth. All architectural recommendations below are PLANNED unless explicitly classified FACT about inspected source.
+
+The original contract remains historical input, including its older dependency, sidebar, example-hotkey, sensitivity-label and action examples. The execution report specializes those examples using the now-approved Foundation, 1A, 1B, S1 and S2. It does not change any owning decision or historical byte. No production classes, migrations, runtime behavior or dependencies are created.
+
+## Baseline / Candidate Identity
+
+| Field | FRESH observation / boundary |
+| --- | --- |
+| Workspace | C:\Dev\F7Hub; existing checkout, no separate worktree |
+| Initial branch | main |
+| Initial HEAD = main = origin/main | 254f3c79b301bec0e9099b8835e98330dd50dd9d |
+| Origin | https://github.com/JDecelles1990/F7Hub.git |
+| Baseline 1C Git blob | f13445ed06b15a40d718a4175f67c14d5e6eafef |
+| Original raw checkout | 79,039 bytes; SHA256 31ab1957fadc77efb02989c9e478c60fe19a803fba56aa17c5a36f60dbae4e56 |
+| Original encoding/newlines | UTF-8 without BOM; CRLF (5,594 terminators); no final newline |
+| Baseline check | Raw checkout equals baseline git cat-file --filters output; no tracked/staged modifications; git diff --check clean |
+| Protected unrelated state | Only untracked pathname AutoHotkey/Troubleshooting_Sections/GuideSettings.ini, observed through Git inventory only; no read, hash, metadata inspection or management |
+| Execution branch | docs/clipboard-1c-execution-20261008, created from verified main |
+| Sole authorized tracked edit | Docs/Planning/Clipboard/1C_PySide6_Clipboard_Center.md; append after complete original contract |
+| ORIGINAL CONTRACT PREFIX | PASS: first 79,039 raw bytes equal original checkout and baseline filtered bytes; LF-normalized prefix also equals baseline Git blob |
+| Candidate lifecycle | UNAPPROVED, UNSTAGED, UNCOMMITTED, UNPUSHED; HEAD remains baseline |
+| Final identity | Final response records raw SHA256, Git blob, bytes, encoding, newlines, final newline and diff counts after last edit; deliberately no self-referential final hash here |
+
+Initial commands executed: branch, HEAD/main/origin-main rev-parse, status --short, diff --cached --name-only, diff --check, target blob and remote inventory. Final checks repeat the requested scope/index/whitespace inventory. No fetch or assertion of live remote-ref equality is needed for the user's local baseline gate; live remote main is NOT VERIFIED. Read-only PR inspection corroborates input closure.
+
+## Approved Inputs
+
+FACT: the USER explicitly supplies Foundation 0A-0E, Clipboard 1A/1B and Workspace S1/S2 as approved inputs. Local merge ancestry corroborates integration. Fresh gh pr view 77 reports MERGED at the exact baseline, independent APPROVED, S2 55/55 and S1/S2 reconciliation 25/25; approval provenance is that integration record plus USER direction, not a separate chat-history audit. Earlier authors' next-review/unapproved wording is historical.
+
+| Input / evidence key | Exact baseline Git blob | Consumed authoritative sections / closure evidence |
+| --- | --- | --- |
+| [0A](../Foundation/0A_Master_Foundation_Architectural_Contract.md#execution-report), F-A | b2bfc2f330ea582a224cd6d2c72eb899160725e2 | Data/technology ownership, trust, approved D1 DynamicHub and D2 ticket-optional Journal; integrated PR 66 |
+| [0B](../Foundation/0B_Global_JSON_Contract_Interoperability_Grammar.md#execution-report), F-B | e21c854055ff48a2b4775445ea8438722a0b7cb4 | In-process services versus new envelopes, identities, refs, privacy/inline limits, unchanged legacy contracts; integrated PR 67 and filename normalization |
+| [0C](../Foundation/0C_Taxonomy_Information_Vocabulary.md#execution-report), F-C | 1f830e08bfae472bb1e17db4459dec0b4191abd7 | Occurrence versus canonical Entity, Tags/assignment, relationship predicates, provenance/confidence; integrated PR 68 and normalization |
+| [0D](../Foundation/0D_Settings_Architecture.md#execution-report), F-D | fb63ffa0000169acb4a180e71e62173024b44c90 | Principles, ownership, definitions, validated snapshots, runtime exclusions, activation/secret boundary; integrated PR 70 and normalization |
+| [0E](../Foundation/0E_Foundation_Architecture_Reconciliation.md#execution-report), F-E | 9c150bedd5e759371d502fc3b9cc934e8744433a | Ownership/settings/security/offline, selected context, Evidence, Journal and DynamicHub reconciliation/downstream rules; integrated PR 71 and normalization |
+| [1A](1A_Clipboard_Domain_Data_Lifecycle.md), A | 1ca286e8658dd1a1eca11954e9ff2b9986005532 | Invariants, domain vocabulary, Item/Event, Entities/Tags, sensitivity, retention, relationships, FTS, service/failure and Mochi boundaries; integrated PR 72 |
+| [1B](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#execution-report), B | 9073b664b3e97552862557507ecc57a00ca23aa1 | Manual snapshot/capture ownership, typed refs, disposition, Quick HUD, action routing/privacy and 1C handoff; integrated PR 73 |
+| [S1](../Workspace/S1_Main_Shell_Technician_Workspace_Navigation.md#execution-report), S1 | c730bbef38de22edab3ed5671ff0954d7a6e8164 | Retained stack, routing, flyouts, context, Quick Ticket, status, drafts, responsive/focus/restoration and downstream 1C; integrated PR 76, merge 7c99b4b1326cf52ca565f51258fc6332040b6a29 |
+| [S2](../Workspace/S2_Mochi_DynamicHub_Context_Actions.md#execution-report), S2 | c7da0ed852b32689964bf19edc64ca0aa1c563a7 | Single-slot reconciliation, immutable binding/late result, Action Catalog, privacy, recording/outcome separation and downstream 1C; [PR 77](https://github.com/JDecelles1990/F7Hub/pull/77), merge 254f3c79b301bec0e9099b8835e98330dd50dd9d |
+
+Dependency gate: PASS at architecture depth. No input approval establishes the existence of its proposed runtime components. Diagnostics 2A, Analytics and provider implementation are not substituted as approved authority inputs.
+
+## Repository Areas Inspected
+
+FACT: source inspection establishes code structure, not runtime behavior. All searches are bounded to named source/docs/migration/test trees; no operational database or live Clipboard is read. No Python-scoped AGENTS.md/override was found under the inspected Python tree, and no Clipboard/Workspace-scoped guidance exists in the inspected planning directories.
+
+| Key | Inspected current source / material | Evidence use / limits |
+| --- | --- | --- |
+| G | [AGENTS](../../../AGENTS.md), [ROOT](../../../ROOT.md), [documentation router](../../19_DocumentationIndex.md), [Planning](../AGENTS.md), [Foundation guidance](../Foundation/AGENTS.md); actual .agents/skills inventory | Scope, dependency owners, labels; only delivery skill found, inspected for applicability, no implementation lifecycle imposed on architecture-only work |
+| M | [MainWindow](../../../Python/f7hub/gui/main_window.py), entire source | Singleton stack, menu/toolbar, status, routes/busy/draft/close guards; no implemented rail/flyout/Quick Ticket |
+| C | [bootstrap](../../../Python/f7hub/app/bootstrap.py), entire source | Explicit repositories/services/gateways; frozen dependency ApplicationContext, not selected context |
+| R | [ServiceTaskRunner](../../../Python/f7hub/gui/service_task_runner.py), entire source | Single QThread work item, submit refusal, GUI-thread callback, idle-before-callback gap |
+| T | [TicketWorkspace](../../../Python/f7hub/gui/ticket_workspace.py), model/layout/filter/paging/open/draft/note/reload paths; [creation widget](../../../Python/f7hub/gui/ticket_create_widget.py) inventory | QAbstractTableModel, row identity, explicit paging, detail tabs, current Ticket draft and operation guards |
+| K | [KnowledgeWorkspace](../../../Python/f7hub/gui/knowledge_workspace.py), table/search/filter/selection/task/detail/error paths; [tag filter](../../../Python/f7hub/gui/knowledge_tag_filter_dialog.py), [article tags](../../../Python/f7hub/gui/article_tags_dialog.py), [new](../../../Python/f7hub/gui/new_article_dialog.py)/[edit article](../../../Python/f7hub/gui/edit_article_dialog.py) relevant editor/lifecycle source | Existing global-Tag UI, ANY/ALL selection, safe text, independent filter runners, version tokens; dialogs are article-specific, not universal Tag components |
+| S | [ScriptWorkspace](../../../Python/f7hub/gui/script_workspace.py), layout/catalog/selection/copy/run/result/pending paths | Model/view/readonly plain text, current-selection generation guards, explicit parameterless diagnostic controls |
+| D | [TagRepository](../../../Python/f7hub/repositories/tag_repository.py), taxonomy migration; KnowledgeService literal FTS/filter methods and KnowledgeRepository MATCH/EXISTS query paths; migration inventory 0001-0012 | Global Tag identity and existing search patterns; no Clipboard schema or shared Settings store established |
+| P | [PowerShell guidance](../../../PowerShell/AGENTS.md), [execution architecture](../../12_PowerShellArchitecture.md), [PowerShellService](../../../Python/f7hub/services/powershell_service.py) approved identities/signatures | Fixed local diagnostic boundary; no arbitrary copied text/target parameter API |
+| O | [Mochi guidance](../../../Mochi/AGENTS.md), current bootstrap/control integration and S2 inspected runtime inventory | Current cosmetic controls versus future context/acknowledgement; no cosmetic v1 payload extension |
+| V | [MainWindow tests](../../../Tests/GUI/test_main_window.py), [script execution tests](../../../Tests/GUI/test_script_execution.py), [script catalog flow](../../../Tests/Integration/test_script_catalog_flow.py) relevant assertions; GUI/Integration/Database filename inventory | 1000x700, pending gap, stale completion, verified copy and read-after-write failures; source only, NOT RUN |
+| N | [GUI](../../05_GUI.md), [system](../../06_SystemArchitecture.md), [Python](../../13_PythonArchitecture.md), relevant current slice notes and conceptual Clipboard/Settings headings | Distinguish canonical proposals from delivered behavior; no canonical modification |
+| Q | Official Qt model/thread/plain-text and SQLite FTS5 references checked 2026-10-08 | API cautions only; installed-version/native performance NOT VERIFIED |
+
+SEARCH -> IDENTIFY found existing table/search/dialog/worker/status patterns before recommending new presentation models. Tracked Python/f7hub class/filename searches and migration content searches did not establish ClipboardService/Repository/Workspace, generic TagService/TagSelector/TicketSelector, shared SettingsService, DynamicHub, S1 flyout/auxiliary coordinator or application selected-context implementation. Absence claims are limited to those inspected tracked areas; external/untracked prototypes are NOT VERIFIED. No AutoHotkey guide source is analyzed; protected pathname inventory does not become guide-content inspection.
+
+## Verified Current GUI State
+
+### CURRENT IMPLEMENTATION
+
+| Statement | Classification / evidence |
+| --- | --- |
+| MainWindow is QMainWindow with retained Ticket, optional Knowledge and Scripts pages in QStackedWidget | FACT M/C; existing services centrally injected |
+| File/menu/toolbar expose Tickets, Knowledge, Scripts, guide and backup; Settings currently opens Mochi controls | FACT M; no Clipboard entry currently composed |
+| Ticket has a custom table model, split queue/detail, explicit Previous/Next with bounded page+sentinel query, internal detail/creation stack and detail tabs | FACT T; existing offset paging is a precedent for controls, not a mandate for mutable Clipboard history |
+| Knowledge/Scripts use QTableView with QStandardItemModel, single readonly row selection and plain-text details; Knowledge has independent category/tag runners | FACT K/S; no shared proxy/table factory found |
+| Search uses QLineEdit/Enter/buttons; Tag filtering supports ANY/ALL using global Tag IDs; article Tag editor is specifically Knowledge-owned | FACT K/D; no generic Tag-management API inferred |
+| Task runner clears busy before callback; owner pending flags protect writes/diagnostics through callback and refresh | FACT R/M/T/S; runner.busy alone is insufficient |
+| Ticket departure currently prompts Discard/Cancel and clears drafts; full S1 retained-draft navigation is planned | FACT M/T; approved architecture does not waive existing guards |
+| Existing dialogs preserve entered fields on save failure/block close while submitting; a general idle dirty-draft coordinator is absent in inspected source | FACT K/T; extend guards during delivery |
+| StatusBar and module feedback labels exist; native Qt styling/layouts, plain labels and accessible names are used | FACT M/K/T/S; no common custom icon/theme/proxy framework found in GUI searches; complete asset/style audit NOT VERIFIED |
+| Future shell bands, Narrator/high DPI/mixed-monitor behavior, responsive fit and keyboard collisions | NOT VERIFIED runtime; source 1000x700 assertions are not new native acceptance |
+
+### PLANNED 1C ARCHITECTURE
+
+Use the approved S1/S2 seams once independently delivered. The Center-specific view state, readonly list projection/model and Inspector presentation are NEW feature UI responsibilities; they are not present classes. No formal CQRS, event bus, parallel shell, new Settings store or generic relationship graph is justified.
+
+## Current Clipboard Implementation State
+
+FACT within inspected tracked source: Scripts can copy service-verified source into Qt Clipboard after a current visible selection/generation check (S); this is outbound copy, not Clipboard capture/history. Migrations 0001-0012 contain no Item/Capture Event structures; taxonomy permits CLIPBOARD Category scope and provides global tags (D). Bootstrap has no Clipboard service or Center (C). Current local diagnostic results are in Scripts; generic evidence attachment is not an established runtime API.
+
+INFERENCE: future Clipboard GUI requires separately delivered 1A domain/storage/query and 1B capture capabilities plus S1 shell consumers, rather than inventing persistence/capture inside widgets. Readonly persisted history can be delivered without launching AHK; capture affordances remain unavailable until their authentic owner ingress exists. History off/temporary memory-only work is valid, not a failed database history. Durable and transient refs are different types; never put a transient handle into a durable Item-ID query.
+
+## Foundation Compatibility
+
+| Owner | Required 1C behavior / specialization | Conflict? / assessment |
+| --- | --- | --- |
+| 0A | GUI -> application services -> domain -> repositories/gateways; source owners retain records/effects; DynamicHub coordinates, Ticket optional | No; PASS |
+| 0B | Direct in-process services/signals; consume existing 1B typed ingress without new envelope/transport; request, operation, Item/Event and GUI generation identities distinct | No; PASS |
+| 0C | Kind/Entity/Tag/sensitivity/retention/relationships distinct; source occurrences require explicit owner resolution; no automatic master data or invented confidence | No; PASS |
+| 0D | Shared validated preferences only; view selection/query/lease/draft/pending binding remain runtime state; caps/authorization/secret rules not settings | No; PASS |
+| 0E | Extend named owner seams; no duplicate taxonomy/context/settings/action/execution/persistence authority; missing implementation is a delivery prerequisite | No; PASS |
+
+Foundation compatibility = PASS at architecture depth. A real owner conflict stops that decision for owner review; it cannot be solved by a local service/widget or by editing another input.
+
+## Clipboard 1A Compatibility
+
+| 1A invariant | 1C consumption | Assessment |
+| --- | --- | --- |
+| Item versus genuine Capture Event versus replay | One content row per Item, separate paged occurrence history, explicit lifetime count/horizon; replay adds no GUI capture | PASS |
+| Immutable content and typed durable/transient identity | Readonly source; explicit reassessed derivative only; ref+revision, never row/preview/hash identity | PASS |
+| Mandatory complete assessment; PERMITTED / NEEDS_REVIEW / POSSIBLE_SECRET | Concealed defaults; explicit local raw access if owner permits; blocked/failure has no secret Item/preview/hash or Save Anyway | PASS |
+| TEMPORARY/SAVED; pin implies Save; evidence holds independent | Display intent, pin and each effective hold separately; Unpin stays Saved; deletion requires owner release/transfer first | PASS |
+| Exact identity differs from search normalization | FTS derivative not equality/raw offsets; no case-fold dedup by GUI | PASS |
+| Occurrence scalar offsets, provenance/confidence and global Tags | Validated source-specific highlights; optional method confidence; global IDs, manual assignment through Clipboard owner | PASS |
+| Source expiry, held occurrence metadata, bounded memory/caps | Expired ref unavailable; 64-KiB source/128-KiB ingress ceilings unchanged; event pruning doesn't erase evidence claim | PASS |
+| Eligible FTS and locally required operation | Relational browse independent of FTS; excluded/disabled indexing disclosed; no hidden sensitive fallback | PASS |
+| Domain commands/relationships/audit | Source/target/privacy/revision rechecks through owners; required audit capability gates activation; no direct SQL | PASS |
+
+Clipboard 1A compatibility = PASS; no physical schema or persistence API is approved by 1C.
+
+## Clipboard 1B Compatibility
+
+| 1B decision | 1C consumption | Assessment |
+| --- | --- | --- |
+| Manual current text/plain snapshot; AHK trigger/HUD, Python domain | Capture button requests the same reviewed capture use case/adapter; no new clipboard monitor or widget parsing; source context not fabricated | PASS |
+| Win+Alt+C final chosen capture action | Display actual applied configured binding; historical Ctrl+Alt+C example is not installed by 1C | PASS |
+| Authenticated bounded app ingress and GUI-thread open_center | Adapt clipboard.open_center through S1 guarded typed route; no IPC redesign or raw payload argv | PASS |
+| MEMORY_ONLY/PERSISTED/REDACTED_PERSISTED/BLOCKED and completeness | Truthful local storage/partial/unconfirmed states; HUD acknowledgement is not evidence attachment | PASS |
+| Typed actions/pin/attach/KB/diagnostic.open_request/mochi.ask | Resolve known profile into owning service/navigation; input diagnostics and contextual Mochi unavailable until owner delivery | PASS |
+| No title/process-path/browser-source history; no raw fallback | Source column uses admitted coarse application class; History never reconstructs omitted metadata | PASS |
+| Capture/replay/unknown action outcome | Post-capture UI failure cannot undo capture; receipt reconciliation belongs to 1B/1A, no blind GUI recapture/retry | PASS |
+| Quick HUD separate from full Center | Full history/Inspector only in PySide6; HUD transient ref resolution tolerates expiry and unavailable Center | PASS |
+
+Clipboard 1B compatibility = PASS. Capture runtime and hotkey registration remain NOT RUN.
+
+## S1 / S2 / 1C Architecture Reconciliation
+
+### M01 — S1 + S2 -> Clipboard 1C Architecture Reconciliation
+
+This matrix consumes approved decisions before final recommendations. No upstream decision change is required. Example refinements in the historical 1C contract are consumer specializations, not owning-contract conflicts. PASS below means architecture agreement only.
+
+| Architecture Decision | Owner | Clipboard 1C Consumer | Required Clipboard Behavior | Conflict? | Resolution / Specialization | Evidence | Status |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| MainWindow ownership | S1 / composition | Center host | Internal child, services injected, shell stays owner | No | Extend existing QMainWindow route adapter | S1 MainWindow Integration; M/C | PASS |
+| Technician Workspace hosting | S1 | Center | Substantial module tool, no domain authority | No | Module list/views via owner services | S1 Technician Workspace; F-A | PASS |
+| QStackedWidget / singleton | S1 | Center lifecycle | One retained instance, no MDI/unbounded tabs | No | Lazy once after capability admission; safe retain/hide | S1 Workspace Hosting; M | PASS |
+| Navigation routing | S1 | Item/view/return routes | Closed typed intents, guards and GUI-thread activation | No | clipboard.center plus typed Item/query specialization | S1 MainWindow Integration; B Action Routing | PASS |
+| Navigation flyout | S1 | Clipboard contribution | Reuse one host, no hover/open work or inference | No | Cached generic disposition plus bounded safe refs/actions only | S1 Flyout Mechanics; S2 flyout distinction | PASS |
+| Active Technician Context | S1 application selection | Inspector/action intent | Minimal optional owner refs/revision; browsing doesn't publish identity | No | Local selected Item ref separate from global Ticket | S1 Active Technician Context; S2 Context Architecture | PASS |
+| Active Ticket Context | S1 / Ticket | Associate/Open | Optional exact saved target; none valid; content cannot choose Ticket | No | Explicit target preview and revalidation | S1 Active Ticket; A Relationships | PASS |
+| Quick Ticket | S1 container / Ticket presenter | Quick Note/evidence intent | One shared Ticket draft; never duplicate editor/auto-note | No | Ask shell to replace inspector only after guards | S1 Quick Ticket; S2 Ticket reconciliation | PASS |
+| Shared auxiliary region | S1 | Inspector container | One expanded occupant, no permanent second rail | No; historical illustrative three/four-column model only | Compact view selector and one leased Inspector | S1 Reserved Region; S2 DynamicHub Surface | PASS |
+| Module inspector occupancy | S1 / 1C presenter | Seven-section detail | Retain safe owner state; refuse unsafe replacement | No | One bounded return descriptor, revalidate on restoration | S2 single-slot reconciliation | PASS |
+| DynamicHub occupancy | S1 shell / S2 | Explicit context handoff | Same region; cues cannot displace draft or steal focus | No | Send/request distinct from slot acquisition; indicators first | S2 Trigger/Cooldown; Responsive | PASS |
+| Mochi acknowledgement | S2 / existing companion | Safe action feedback | Optional tiny output, outside lease; no assistant rail | No | App status equivalent, cosmetic v1 unchanged | S2 Mochi acknowledgement; Foundation | PASS |
+| Status/background surface | S1 / operation owner | Query/write outcomes | Safe state/detail route, pending through callback gap | No | Module-specific inline feedback plus shell safe summary | S1 Status; R/T/S | PASS |
+| Focus behavior | S1 | Open/close/completion | Explicit focus only; respect newer intentional focus | No | Origin widget+generation; callback never activateWindow | S1 Focus; B HUD; S2 late results | PASS |
+| Keyboard behavior | S1 / 1B | Center scoped actions | Text editing/modal precedence; Win+Alt+C owner unchanged | No; historical example chords only | Table-scoped Save/Pin/Associate/Delete; no new global hook | S1 Keyboard; B Hotkey; K/T | PASS |
+| Accessibility | S1 / 1C | All controls/content | Non-hover access, names/focus/order/plain states | No | Inspect/menu/keyboard alternatives, concealed accessible labels | S1 Accessibility; V | PASS |
+| Responsive layout | S1 | List/Inspector/filter controls | WIDE/MEDIUM/MINIMUM budgets; primary workflow first | No; historical speculative four columns only | Single selector/table and alternating temporary panels | S1 Responsive; S2 Responsive | PASS |
+| Dirty-draft protection | S1 / feature presenter | Tags/target/retention intent | Bind source/target; don't overwrite draft during refresh | No | Retain only if owner adapter safe, otherwise Apply/Discard/Cancel/refuse | S1 Draft Preservation; K/T | PASS |
+| Workspace restoration | S1 / 0D | View/selection/Inspector | Session-only safe state; no sensitive restart restoration | No | Revalidate refs, clear query/raw on privacy/exit | S1 Restoration; F-D | PASS |
+| Async/background execution | S1 / runner / Clipboard | Reads and commands | Worker service calls, GUI callbacks, finite coalescing | No | Reuse runner instances; generations/owner pending, no scheduler | R; S1 Status; S2 Binding | PASS |
+| Settings boundary | 0D / S1 shared preferences | Presentation defaults | Definitions/snapshots only, no local store/domain truth | No | Safe static defaults until shared owner exists | F-D Settings Ownership; S1 Settings | PASS |
+| Clipboard privacy/sensitivity | 1A / 1B | Every surface/projection | Mandatory complete gate before exposure; no secret overrides | No; historical sensitivity examples only | Use 1A handling labels and generic blocked states | A Sensitivity; B Privacy; S2 Privacy | PASS |
+| Invocation-time operation binding | S2 / effect owner | Copy/association/handoff | Validate and freeze source/action/target/revision at acceptance | No | Selection before acceptance invalidates proposal; later change cannot retarget | S2 Invocation-Time Binding; T note precedent | PASS |
+| Late-result behavior | S2 / source result owner | Action/query callbacks | Reject stale display; preserve original accepted outcome | No | Earlier-context indicator/explicit origin route, no focus/selection overwrite | S2 Late-result reconciliation; S generation | PASS |
+| Ticket association | 1A source + Ticket use case / S2 | Evidence dialog | Separate confirmed association; no human-note substitution | No | Exact source+Ticket+policy, holds/audit and duplicate reconciliation | A Relationships; S2 Ticket Association | PASS |
+| Action Catalog routing | S2 application / source owners | Actions tab/handoffs | Known key/schema/adapter; available UI not permission | No | Consume statically composed definitions, not Clipboard action registry | S2 Action Catalog; B diagnostic.open_request | PASS |
+| Offline / provider unavailable | Foundation / S2 | Local queries/actions | Local operation useful; only invoked online action unavailable | No | No provider-on-open/queued stale action; local deterministic path | F-E Offline; S2 Offline/Failures | PASS |
+
+S1 compatibility = PASS; S2 compatibility = PASS. 1C changes no approved S1/S2/1A/1B decision. If future implementation needs such a change, stop that local decision, identify exact owner/decision/evidence and return REQUIRES_CLIPBOARD_GUI_DECISIONS for architecture review. Missing runtime owner capability instead disables that action and creates a delivery prerequisite.
+
+## Reuse Assessment
+
+### M02 — Workspace / Surface Ownership and Reuse
+
+| Planned primitive / owner | Current equivalent, layer/dependencies/consumers | Treatment | Specialization / reason; testing evidence |
+| --- | --- | --- | --- |
+| Workspace host / S1 | MainWindow QStackedWidget, injected services; all workspaces | REUSE | Singleton central host; M/C/V source tests, no duplicate shell |
+| Navigation action / S1 | QAction and MainWindow show/open methods | EXTEND | Approved typed/guarded S1 adapter; old Ticket discard path cannot be bypassed |
+| Flyout host / S1 | Approved S1 concept, absent in current GUI | DEFERRED | Shared shell delivery prerequisite; Clipboard adds pure safe contribution only |
+| Center workspace / 1C | Ticket/Knowledge/Scripts composition patterns | NEW | Clipboard-specific view/controller only; no equivalent Item history UI |
+| Table/list / 1C | TicketTableModel, QTableView in all workspaces | EXTEND | Reuse model/view pattern; NEW small Item projection model, not Ticket model's domain fields |
+| Search input / 1C | QLineEdit/Enter/Search/Clear in Knowledge/Scripts | REUSE | Scoped input/debounce/query state added; no search framework |
+| Filter controls / 1C | Knowledge combo boxes, ANY/ALL Tag dialog | EXTEND | Extract service-neutral selector only if needed; compact disclosure and stable IDs |
+| Task runner / GUI | ServiceTaskRunner; main/shared and Knowledge local runners | REUSE | Bounded owner-local read runner, command lifecycle guard; no new thread pool/job registry |
+| Inspector container / S1 | Approved shared auxiliary lease; current module splitters/tabs | DEFERRED | Deliver S1 arbiter first; 1C NEW seven-section content, no permanent independent right rail |
+| Plain-text viewer / 1C | Readonly QPlainTextEdit in Knowledge/Scripts | REUSE | Explicit load/full access, wrapping/find and bounded highlights; source mapping tested later |
+| Status / S1 + 1C | QStatusBar/module QLabel | EXTEND | Safe keyed outcomes and accessible errors; no raw content/tooltips/logs |
+| Confirmation / 1C | Cancel-default QMessageBox and focused dialogs | REUSE | Source/target/effect summary, disable uncertain/destructive paths; no generic confirmation framework |
+| Ticket selector / Ticket presentation | Existing queue and get-by-number; no generic picker established | NEW | Thin bounded owner-read selector/target preview only when association exists; no Ticket editor/search engine |
+| Tag picker / taxonomy presentation | KnowledgeTagFilterDialog and article-specific editor | EXTEND | Reuse global-ID choice UI; ClipboardService owns its assignment, not KnowledgeService.set_article_tags |
+| Shared Settings / 0D | Approved future service, current Mochi controls only | DEFERRED | Consume once delivered; no local JSON/INI/store |
+| Action discovery / S2 | Planned static Action Catalog, existing source registries/policy | DEFERRED | Consume exact keys/adapters; local lifecycle buttons use existing owner use cases, no competing catalog |
+| Generic query service / infrastructure | 1A ClipboardService/Repository design | DEFERRED | Use list/detail methods on cohesive service initially; separate read facade only with measured need, no CQRS framework |
+| Bulk/export/drag/drop/Undo/custom theme | No justified initial Clipboard requirement | DEFERRED | No soft-trash (rejected by 1A), no new icon/font dependency, no speculative infrastructure |
+
+NEW means only an architectural responsibility justified after search, not a created production component. Facts/reuse fitness are limited to named inspected source; native suitability is NOT VERIFIED.
+
+## Clipboard Center Role
+
+The Center is the substantial internal operational surface for history, search/filter, classification presentation, inspection, Entities, global Tags, Capture History, relationships, retention/privacy and explicit actions. It renders owner facts/availability. It owns presentation state and local drafts, not Clipboard domain/capture/IPC, Ticket, Diagnostics, DynamicHub, Mochi, Analytics or Settings persistence. Classification correction, if later supported, is a versioned Clipboard command; editing raw source in-place is prohibited.
+
+## MainWindow / Workspace Integration
+
+RECOMMENDATION: clipboard.center is S1's primary route/module key clipboard. Bootstrap later injects approved services and the shell adapters; construct one Center on first valid activation and retain it to application close. Use the same QAction intent for menu, module rail/toolbar and flyout Open Center. A direct request with missing capability gets Center unavailable and a safe existing-tool return, not an empty fake working page.
+
+Activation negotiates affected dirty/pending owners, closes transient flyout, commits shell route and loads one page asynchronously. Module hide invalidates consumer callbacks and pauses irrelevant subscriptions; it retains permitted query/view/selection/drafts in memory, never destroys pending operations. On return, ref/policy revalidation precedes detail/action enablement. Current conservative MainWindow write/close guards remain until separately tested S1 adapters exist. No competing MDI, shell tab strip, second app window or widget-to-widget manipulation.
+
+Context propagation is deliberate: table browsing changes local selected Item only. The application may expose an eligible typed source ref via S1/S2 projection; it never guesses global Company/Device/Tenant/Ticket from detected literals. Active Ticket remains globally reachable. List reads do not acquire auxiliary occupancy; explicit Inspect uses the lease. Clear loading/command status is local with safe shell summaries.
+
+Restoration: session retains bounded view/filter/sort/page anchor/typed selection/tab if still eligible. Restart restores only separately approved nonsensitive module/layout preferences through 0D; not Item IDs, raw/search/Entity values, Ticket choice, drafts or operation queue. Privacy/lock transitions clear raw/query/sensitive cached projections and invalidate generations; return requires explicit eligible reload. Safe owner drafts follow their policy and are not discarded merely by resize.
+
+## Navigation Flyout
+
+Consume S1's reusable H/C/K, focus, finite 275-ms dwell/400-ms leave, clamp and accessibility contract without redefining it. 1C tightens its contribution: opening by hover, click or keyboard never initiates a read, OS capture, expensive count, provider work, AI, Diagnostics/PowerShell or domain persistence. Cache population is from already completed owner events/explicit Center Refresh; absent cache says Not loaded with Open Center. This is compatible with S1's optional small explicit-open local read permission; Clipboard does not exercise that option.
+
+Content order: generic current/recent disposition (Captured, Not saved, Partial, Unconfirmed without raw); up to five combined eligible recent/saved/pinned refs with generic Kind/storage labels; at most three eligible safe actions; Open Clipboard Center. Coalesce current capture/recent duplicates by typed identity. Raw previews, Entity literals, source title/path, sensitive labels and total behavior counts excluded. Unknown availability is not zero. Stale/expired refs disable actions immediately and revalidate on explicit invocation.
+
+Safe quick actions are Open/Inspect route and eligible Save/Pin when domain capability/audit exists; Capture Current is separate explicit 1B intent with real ingress capability. Never expose direct Run or Send AI. Pin/Save/Inspect cannot act on cached label text. Primary Clipboard click routes Center; chevron/Alt+Down opens flyout; hover takes no focus. Disable/omit unavailable actions with reachable plain reasons. Quick HUD remains a separate 1B-owned acknowledgement surface.
+
+## Primary Views
+
+### M03 — View Inventory / Navigation Views
+
+All views are predicates over the same owner query, no duplicate storage/screens. Initial visible choices Recent, Saved, Pinned, URLs; other justified views under More views. Search results use the current view plus text and chips. Owner availability controls each choice; no fake zero for unsupported relationships. Default sort last_received_at descending with stable typed Item-ID tie-break, except separately identified alternative sorts.
+
+| Display name | Purpose / query semantics | Default sort | Empty / capability state |
+| --- | --- | --- | --- |
+| Recent | All eligible unexpired Items in current storage scope, including Saved/held; transient collection separately labelled Not saved | Latest service-received capture, ID | No eligible history; explain history off and transient scope, show applied capture shortcut only when available |
+| Saved | retention_intent=SAVED, independent of holds; Pin implies Saved | Latest capture, ID | No saved Items; accepted Evidence not silently labelled manual Save |
+| Pinned | is_pinned=true; saved invariant | Latest capture, ID | No pinned Items |
+| URLs | primary_kind=url OR validated url occurrence; preserve disjunction as one grouped predicate | Latest capture, ID | No URL Items; no opening on selection |
+| Commands | primary_kind in implemented command-line/powershell_command profiles | Latest capture, ID | No commands; recognition is not Script approval |
+| PowerShell | powershell_command Kind OR accepted mapped PowerShell Tag OR powershell_command_name occurrence | Latest capture, ID | No qualifying Items; no raw keyword substring or invented Tag ID |
+| Errors & Logs | error_message/log Kind OR error_code occurrence; event profile only if delivered | Latest capture, ID | No error/log Items; detected error isn't verified diagnosis |
+| Networking | Accepted mapped Networking Tag OR implemented ipv4_address/ipv6_address/hostname/fqdn occurrences | Latest capture, ID | No networking Items; MAC/CIDR/port added only through owner profiles |
+| Ticket Evidence | Accepted EVIDENCE_FOR Ticket association, optional exact Ticket target chip | Latest capture, ID | No accepted evidence; unavailable until association owner exists |
+| Diagnostic Evidence | Accepted EVIDENCE_FOR durable Diagnostic-owned target only | Latest capture, ID | Unavailable until durable target/association exists; INPUT_TO is distinct Relationships filter |
+| Mixed Content | primary_kind=mixed_text | Latest capture, ID | No mixed Items; Kind from 1A, not arbitrary multi-Entity presence |
+| Privacy review | Deliberate NEEDS_REVIEW eligible local scope, previews concealed | Latest capture, ID | No review-eligible Items; no blocked-secret history store |
+| Retention review | Effective temporary expiry/saved/pinned/held facets; optionally expiry ascending when selected | Latest capture initially; explicit expiry sort | No eligible expiry candidates; held excluded from cleanup eligibility |
+| Unlinked / This Week / size | Secondary chips: no implemented relationships / local week-start UTC interval / >16-KiB to <=64-KiB eligible source | Inherit current view | No matches; larger-than-cap source remains rejected |
+| Recently Used / duplicate-heavy / custom saved views | DEFERRED; no invented usage/read state or new stores | Not enabled | Later proven requirement; capture count already inspectable |
+
+A persistent second wide sidebar is rejected. Wide may offer a bounded compact selector/list only if width survives; default uses a labelled view combo/dropdown at all bands. Switching view clears ad-hoc search/filters and resets paging/selection after draft guard; returning from another module retains current session query. Clear Filters resets only ad-hoc predicates to current view; Clear Search resets text only; Reset to Recent clears both/view/sort. Counts show loaded rows/has-more, not expensive all-view totals on repaint.
+
+## Toolbar / Commands
+
+### M04 — Toolbar / Action Ownership
+
+One action definition/adapter per known intent reused across toolbar, Inspector and context menu. Initial top commands: Refresh, Inspect, Copy, Save, Pin and More; Attach appears once owning association exists. At most five direct commands at minimum width; overflow remains keyboard reachable. No mutation from button enablement alone. Item ref/revision and selected occurrence are captured, never reconstructed from row position/preview.
+
+| Action key / label | Classification / owner | Selection / Entity or Tag prerequisite | Confirmation? | Sync / async | Toolbar? | Inspector? | Context menu? |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| clipboard.center / Open Center | Presentation-only / S1 | None; optional eligible typed ref | Guard only | GUI route + async read | Shell entry | Return/full view | Flyout |
+| clipboard.refresh / Refresh | Query / ClipboardService | Query state, no item required | No | Async | Yes | Tab retry | No |
+| clipboard.inspect / Inspect | Query + presentation / 1C/S1 | One current Item ref | Lease/draft guard | Async read | Yes | Overview | Yes |
+| clipboard.copy / Copy full item | Explicit OS write / Clipboard read owner + GUI adapter | One freshly eligible full-source ref | Explicit intent; privacy gate | Async eligible read then GUI copy | Yes | Overview/Actions | Yes |
+| clipboard.copy_entity / Copy normalized value | Explicit OS write / Clipboard profile | Exact occurrence/source revision; valid normalized value | Explicit distinct normalized choice | Async check then GUI copy | More | Entities | Entity menu |
+| clipboard.capture_current / Capture Current | Domain admission / 1B adapter -> ClipboardService | Authentic current snapshot capability, no selected Item | Explicit capture; no fake source title | Bounded async | More when available | No | Flyout separate intent |
+| clipboard.save / Save | Domain command / ClipboardService | Eligible current Item/typed transient handle | Explicit Save; sensitive purpose review if permitted | Async | Yes | Retention/Actions | Yes |
+| clipboard.unsave / Unsave | Domain command, confirmation-required / ClipboardService | Current Saved; original source+revision | Yes, new TTL/holds; pinned combined Unpin+Unsave explicit | Async | More | Retention | Yes |
+| clipboard.pin_selected / Pin | Domain command / ClipboardService | Current eligible ref; promotion if memory-only | Explicit Pin; sensitive review if required | Async | Yes | Retention/Actions | Yes |
+| clipboard.unpin / Unpin | Domain command / ClipboardService | Current pinned Item | No ordinary confirmation; remains Saved | Async | Same Pin control | Retention/Actions | Yes |
+| clipboard.tags_edit / Add/remove Tag | Domain command / ClipboardService + global catalog | Item+revision, existing eligible Tag ID(s) | Apply reviewed changes; removal explicit | Async | More | Tags | Item/Tag menu |
+| clipboard.attach_to_ticket / Associate / accept Evidence | Ticket association, confirmation-required / owning Ticket-Clipboard use case | Source+exact saved Ticket; accepted relationship kind; eligible durable promotion | Yes: source, target, purpose/hold/independent copy if any | Async | When available | Relationships/Actions | Yes |
+| clipboard.release_evidence / Release hold | Destructive preservation change, confirmation-required / association owner | Exact accepted association+source/revisions | Yes, all holds and post-release retention; never inline Delete substitute | Async | No | Relationships/Retention | No |
+| clipboard.delete / Delete item | Destructive, confirmation-required / ClipboardService | Current unheld eligible ref, latest state | Always Cancel-default; saved/pinned warn; held disabled | Async | More | Retention/Actions | Yes |
+| clipboard.expire / Expire temporary now | Destructive / ClipboardService | Unheld unpinned TEMPORARY; explicit scope | Yes, same protection as Delete; ordinary cleanup not a GUI loop | Async | No initial duplicate | Retention later | No |
+| clipboard.open_url / Open source URL | External-open / approved navigation/URL owner | Selected content url occurrence; safe HTTP(S), no credentials/unsafe scheme | Explicit destination review; privacy gate | Async validation then approved open | More | Overview/Entities/Actions | Entity menu |
+| tickets.open / Open linked Ticket | Presentation + owner query / S1/TicketService | Authoritative association/resolved Ticket ref | Draft guard, ambiguity resolution | Async | More | Relationships | Yes |
+| kb.search / Search KB | Query/navigation / KnowledgeService + S1 | Explicit safe Entity/error/Tag query proposal, user can edit | Explicit submitted query, privacy gate | Async | More | Entities/Actions | Yes |
+| scripts.search / Search registry | Query/navigation / ScriptService + S1 | Safe bounded literal command name, not executable text | Explicit query | Async | No | Entities/Actions | Entity menu |
+| diagnostic.open_request / Send to Diagnostics | Diagnostics handoff / diagnostic owner via approved PowerShellService | Approved key + independently valid input/target; no current arbitrary-Entity API | Preview/planning; separate explicit Run per owner | Async route; no direct execute | More only available | Actions/Entities | Yes if available |
+| mochi.ask / Send to DynamicHub | DynamicHub handoff / source projection + S2 | Eligible selected source/ref; policy-filtered projection; sharing initially off | Explicit projection preview/Send; external policy independently required | Async | More only available | Actions | Yes if available |
+| clipboard.analytics / View Statistics | Presentation / Analytics owner + S1 | Safe scope, aggregate capability | Explicit route; no raw feed | Async owner read | No MVP | More later | No |
+| kb.create_draft / snippets.save / export / bulk | DEFERRED owning domains | Reviewed explicit derivation/independent artifact capability | Own privacy/effect review | Not enabled | No | Future | No |
+
+Keys not already fixed by 1B/S1 are conceptual closed adapter names for future review, not newly registered catalog entries. S2's Action Catalog supplies cross-owner discoverability when delivered; Clipboard's domain buttons do not create a second catalog. Unimplemented actions are omitted from normal primary controls or disabled with accessible reason in the Actions inventory. A current parameterless network diagnostic never becomes Ping/DNS against a detected address by label change.
+
+## Search / Filters
+
+### M05 — Search / Filter Semantics
+
+RECOMMENDATION: one explicit immutable Clipboard view/query state contains view key, storage scope, bounded literal text, structured predicates, allowed sort/direction, page cursor and separate selected ref/Inspector state. Do not put SQL/FTS grammar in widgets. Default text search is literal token search over 1A-eligible FTS content, not preview-only, every column, Tag names or source metadata. Multi-token input uses an explicit ALL-token policy; phrase/operator interpretation is not exposed. Exact Entity-value lookup is a separately named filter with profile-specific normalization. Match beyond preview may use a bounded safe temporary snippet; it cannot overwrite source preview or supply raw highlight offsets.
+
+| Filter | Query semantics | Combinability | Default | Clear / persistence |
+| --- | --- | --- | --- | --- |
+| Search | Owner-escaped literal FTS, ALL tokens; nonempty requires index capability/eligibility | AND current view and every structured family | Empty=no text predicate | Clear Search empties only text; no durable history/logs |
+| Kind | One or multiple delivered canonical keys; OR within chosen Kinds | AND other families; view's grouped predicate stays intact | All admitted Kinds | Clear chip restores All |
+| Saved/pinned | Independent predicates; chosen Saved/Pinned view already supplies base | AND others; no duplicate redundant toggles in primary bar | Any unless view says otherwise | Clear ad-hoc state cannot erase view predicate |
+| Tag | Existing canonical IDs; explicit ANY (default)/ALL mode; Untagged exclusive | OR selected IDs for ANY; ALL each assignment; AND other families | All tags; empty set removes predicate | Canonical choice dialog, no free-text creation; keep valid IDs session-only |
+| Entity Type | EXISTS supported type occurrence; OR selected types | AND families | Any | Type clear removes value constraint too |
+| Entity value | Advanced exact normalized value+declared type/profile; raw exact alternative named if supported | AND selected type/view/families | None | Clear removes literal; sensitive local query purpose-gated, never automatic FTS |
+| Source | Coarse admitted application class from genuine capture Events; EXISTS qualifying Event | OR selected classes; AND others | Any; unknown is real class | Clear removes source predicate; no window/process/browser titles |
+| Date/time | Half-open UTC range over matching capture occurrences, Today/7/30 days/custom/local week; validated local boundaries incl. DST | When Source + Date set, same Event must satisfy both; Item returned once, ordered by Item latest accepted capture | No date bound | Clear dates; changing timezone invalidates converted query |
+| Sensitivity | PERMITTED default browse/search; deliberate NEEDS_REVIEW local structured scope; no POSSIBLE_SECRET rows | AND other eligible predicates; text search cannot widen policy | PERMITTED; sensitive view explicit | Clear tightens to default, never raw disclosure |
+| Relationship | EXISTS supported predicate/qualified target; Any/Linked/Unlinked/Ticket/Diagnostic/KB modes; Evidence specifically accepted EVIDENCE_FOR | OR chosen target classes where admitted; AND families; Unlinked exclusive | Any | Clear removes ad-hoc target; missing owner capability says unavailable |
+| Size/retention | Byte size admitted <=64 KiB; medium >16 KiB; effective expiry/hold state | AND families | Any | Clear restores view defaults; no index-only retention authority |
+
+No filters means current view defaults, not all raw/expired records. Contradictory predicates yield honest No matches. View predicates OR only inside their declared group; family composition AND. Repository uses bound values/allowlisted sort and EXISTS/grouped bounded summaries to prevent duplicate Item rows. No arbitrary user FTS/SQL syntax, client-only filtering of one page masquerading as full search, or implicit broad LIKE fallback.
+
+Text typing increments query generation immediately and coalesces a 250-ms single-shot debounce (within original 150-300-ms range). Enter/Search cancels timer and submits latest once. Structured changes submit one latest query; burst notifications coalesce. Exact debounce is DESIGN DURING SLICE. Changing text/view/filter/sort/storage scope resets cursors; Inspector tab does not. State survives module hide within current session; view switch clears ad-hoc predicates after draft guard. Privacy/exit clears literals/results; only a nonsensitive default view preference may later survive restart.
+
+FTS failure/disabled indexing gives Search unavailable or Only indexed eligible Items searchable, never a full-history success claim. Explicit Clear Search returns relational browse without altering Item data. Sensitive structured scope reports its limitations; Tag/Entity match is not content-search evidence. FTS/source synchronization and eligibility remain 1A repository responsibilities. Official [SQLite FTS5 external-content guidance](https://www.sqlite.org/fts5.html#external_content_tables) requires keeping derived index and source consistent; implementation correctness/benchmarks are NOT VERIFIED.
+
+## Read Model
+
+### M06 — Table / Read Model
+
+Three boundaries: 1A domain Item/Event/hold/occurrence semantics; repository bounded query projection keyed by typed ref/revision; GUI immutable row with safe display strings/status/enablement. GUI rows do not contain full raw bodies/all Events/Entities/links, database connections or execution authority. Owner queries include only admitted facts, top two safe topic labels plus count if justified, type/count/link summaries and completeness/freshness. No one DB column -> one UI column mapping.
+
+| Column | Meaning | Source | Sortable? | Default visible? | Width strategy | Privacy risk / guard |
+| --- | --- | --- | --- | --- | --- | --- |
+| Captured | Item last_received_at, not GUI view time; local display, UTC owner truth | Item operational summary | Yes, server key+ID | Yes | Compact, meaningful date/time | Timestamp can identify behavior; concise eligible scope only |
+| Preview | Eligible <=240-scalar safe excerpt, truncation explicit; Not saved/masked state | Privacy-filtered Item projection | No | Yes | Stretch, fixed row height/elide/wrap only in detail | Never secret; NEEDS_REVIEW generic; no fuller hover/accessibility bypass |
+| Kind | Canonical delivered Kind label | Clipboard profile metadata | Later validated server sort | Yes | Compact readable label | Classification is advisory, not authorization |
+| State | Temporary/Saved + Pinned + held icon/text, with sensitivity/completeness warning | Source intent/pin/effective hold + assessment | No compound sort | Yes | Compact named badges/text | Mandatory privacy/preservation warnings cannot be hidden by column prefs |
+| Source | Coarse class of most recent accepted Event; unknown/omitted explicit | Owner event summary | Later only defined class sort | Wide yes; compact detail | Compact | No full app path/title, browser source URL or customer label |
+| Entities | Bounded type summary + occurrence count/partial indicator | Derived-generation projection | No initial sort | Wide yes; compact detail | Compact type/count | No literal IP/email/host in default row |
+| Tags | Top two eligible topic names + remaining count | Global Tag assignments | No initial sort | Optional | Elided safe summary | No sensitive literals disguised as Tags; avoid join multiplication |
+| Captures (historical Seen) | Lifetime accepted captured_total; genuine duplicates count; retained horizon distinct | 1A maintained operational counter | Later indexed count+ID | Optional | Numeric compact | Never user read count; no fabricated totals if unavailable |
+| Linked / Evidence | Bounded relationship types/count + effective hold indicator | Accepted owner association summary | No | Optional; hold always in State | Compact | No Ticket subject/customer identifiers by default; unavailable distinct from none |
+| Sensitivity | PERMITTED/NEEDS_REVIEW and assessment state | Source policy projection | Optional defined order later | Detail; warning always visible | Text+icon | No GUI legal classes/confidence-as-permission |
+| Size / First captured / Retention / Expiry | Eligible UTF-8 bytes, lifetime first receipt, independent intent/holds/effective deadline | Owner summaries/policy | Only first time/size/expiry once indexed semantics delivered | Detail/optional later | Compact | Absolute + coarse relative expiry; no per-row countdown timers |
+| Item ID/revision/hash/contract details | Diagnostic support metadata | Validated owner projection | No | Hidden; hash omitted initial support view | Dedicated safe details if justified | ID not permission; no raw hash/title debug/log dump; no secret fingerprint |
+
+Initial server sorts: latest capture descending and first capture descending with stable identity tie-break; expiry ascending only in explicit retention review when owner supports it. No proxy-local sort of one page advertised as dataset order. Reuse QTableView/custom QAbstractTableModel pattern and delegates, not QWidget-per-cell or a new proxy framework. Header sort resets cursor/generation through service allowlist. Logical display/accessible state roles are updated only on GUI thread, consistent with official [Qt QAbstractTableModel threading requirements](https://doc.qt.io/qtforpython-6/PySide6/QtCore/QAbstractTableModel.html#thread-safety). All full-source loading is selected-item-only.
+
+## Selection Semantics
+
+### M07 — Selection / Refresh
+
+Single Item selection initially; multi-select/bulk tags/delete/save DEFERRED pending real outcome/atomicity/partial-result requirements. Stable key is owner-qualified durable Item ID or explicitly separate transient handle, plus source/derived revision. Row number/index, preview, hash and last capture message are never command identity. Initial load has no selection/raw detail; an explicit deep link may select only the validated target. Enter/double-click means Inspect, never Copy/Open URL/Run.
+
+| Situation | Selection / Inspector / draft behavior |
+| --- | --- |
+| First load | No automatic first-row selection; safe Select an Item prompt; raw loading waits deliberate inspect/access |
+| Single row choice | Set local ref/generation, read safe Overview; request auxiliary only on explicit Inspect or keep already-owned Inspector bound after its draft guard |
+| Successful refresh | Restore same typed ref if in current query/page and current revision; preserve scroll anchor/tab; revalidate actions; no first-row replacement |
+| New capture / duplicate | Indicator or safe row metadata update; same Item identity, genuine count only; avoid row reorder while technician reads/edits |
+| Filtering / view switch | Guard affected drafts; new query resets page; absent selected key clears visible selection/action/detail, never follows same row index |
+| Paging | Explicit Next/Previous; guard source-bound draft; deselect if ref not on page, preserve no hidden actionable row; return revalidates original key |
+| Delete / expiry | Clear deleted ref and raw caches immediately on known invalidation; no adjacent-row auto-selection; concise Deleted/Expired status |
+| Archive | DEFERRED; 1A has hard deletion/no trash, no invented archive lifecycle |
+| Async search/detail race | Accept only matching query and selection/source/tab generations; retain original operation outcome separately |
+| Dirty Tag/target/retention interaction | Freeze original ref/token; refresh cannot overwrite draft; safe hide/retain or Apply/Discard/Cancel with Cancel default |
+| External source change | Mark details stale/unavailable, disable effects; conflict refresh is explicit, preserving original drafts/values where still policy-eligible |
+
+Known expiry/privacy invalidation removes raw projections even if a draft is open; retain only permitted safe draft choices and original IDs, explain why Apply is unavailable. An ordinary network/database read failure is not proof of deletion. Showing previous rows is allowed only with explicit Stale/as-of state and disabled effect controls; it is never current truth.
+
+## Seen / Read Semantics
+
+DECIDE NOW: REJECT new seen/read/unread/viewed persistence. Historical Seen in original sections 49/267 means capture frequency, implemented presentation label Captures. Viewing, hover, Inspector opening and copy do not add Capture Events or increment captured_total. A genuine duplicate accepted capture does; transport replay does not. Inspector labels Lifetime accepted captures and Retained capture events with available horizon separately. No recently-used history or hidden per-user tracking is created.
+
+## Async / Stale Results
+
+### M08 — Concurrency / Stale Results
+
+RECOMMENDATION: reuse ServiceTaskRunner with a bounded Clipboard-owned read instance (Knowledge already demonstrates owner-local instances), rather than route typing through a runner that globally disables the shell. Integrate its work/pending state into S1 close/draft participants. One active read and one latest queued immutable intent per read consumer; separate overview/tab consumer only if a delivery slice proves need, capped at two simultaneous Clipboard reads overall. Commands initially serialize through existing owning dispatch with a stable presenter/pending guard. No new pool/scheduler/global event bus.
+
+| Identity / phase | Required behavior |
+| --- | --- |
+| Query request | Unique request token + monotonically increasing generation + activation/privacy generation; bind full query fingerprint, storage scope, sort/cursor/page-size |
+| Selection/detail request | Capture typed ref, source/derived revision, selection generation, tab key/generation; list generation alone insufficient |
+| User edits during active read | Increment generation immediately, overwrite one pending latest intent; don't enqueue every keystroke; submit once after active settles and debounce due |
+| Result application | GUI-thread compare all relevant tokens/query/ref/policy generation; obsolete success AND failure cannot replace current state or clear a newer loading/error |
+| Loading indicator | Inline delayed ~150-ms indicator for current request; previous display explicitly stale/nonactionable; latest request alone owns indicator dismissal |
+| Cancellation / hide | Cancel timer/queued unaccepted intent and obsolete callbacks; running QThread remains retained until finish; no unsafe terminate or assumed SQLite interruption |
+| Deadline / shutdown | Owner read uses existing 5000-ms busy timeout and future tested query limits; overdue request marked unavailable/obsolete, not physically cancelled. Keep runner until it settles; close guard reports finishing. Finite performance/native test deadline diagnoses hung query, no relaunch loop |
+| Read failure / retry | Current request gets safe component error + explicit Retry. No automatic retry initially; retry latest accepted query, never all stale queue entries |
+| Mutation proposal | Freeze source, expected token, action definition, explicit target/Ticket including none, privacy/selection revision; reject pre-acceptance changed intent |
+| Accepted command | Owning service establishes immutable operation binding; preserve original refs across hide/context change; pending spans idle-before-callback and post-write refresh |
+| Committed then failed refresh | Saved/Pinned/Associated succeeded; refresh unavailable. Retry read only; never resubmit committed write |
+| Unknown accepted effect | Unconfirmed, reconcile owner operation identity before enabling retry; no fake rollback/cancel/success |
+| Late command result after context B | Preserve owner result for A; safe earlier-context indicator/explicit origin route; never write into B, clear B draft or steal focus |
+
+No heavier synchronous SQL, FTS, entity enumeration or diagnostics on the GUI thread. Workers return immutable safe data; GUI callbacks own all widgets/model API. Superseding a read is presentation obsolescence, not cancellation of a domain effect. Current runner has no timeout/cancellation API; this plan does not claim one. Service query complexity and worker connection lifetime must be verified during delivery before responsive promises.
+
+## Pagination / Performance
+
+### M09 — Performance / Pagination
+
+| Area | Strategy / resource bound | Future validation / limit |
+| --- | --- | --- |
+| Initial history page | 50 visible rows, owner reads page_size+1 sentinel; service maximum 100 per page recommendation | 1k/10k Item fixtures; no SELECT-all |
+| Navigation | Explicit Previous/Next, reusing Ticket control pattern; keyset cursor for mutable capture ordering | Stable tuple last_received_at + Item ID; inverse query for Previous, reverse on return; no OFFSET deep scan for default history |
+| Cursor state | Owner-qualified opaque typed cursor bound to query fingerprint/sort/scope/generation; current boundaries plus at most 20 session anchors | Reject incompatible/stale cursor, explain reset; not an external bearer ref |
+| Mutable ordering | Frozen page display + New captures indicator; structural invalidation on capture/delete/sort mutation resets traversal on explicit Refresh | No perfect cross-transaction snapshot promise; cursor becomes stale, selection restored by ID if still query-eligible |
+| Sort variants | Keyset tuple per approved indexed sort; no arbitrary column SQL/local-page global sorting | Validate indexes/query plans during owning data slice; unsupported header sort disabled |
+| Search | Bounded FTS literal result IDs plus relational predicates; initial chronological order among matches | Relevance sorting DEFERRED to stable ranking/snapshot design, avoiding unstable score cursors |
+| Count | Loaded rows + has_more, optional qualified cached count only | No COUNT-all per repaint/capture; unknown isn't zero |
+| Detail | One selected source <=64-KiB eligible content, <=240-scalar list preview; full content explicit load | No all-row bodies; privacy generation clears viewer/copy/export state |
+| History/relationships | Lazy independent tab reads, 50 Events/links + sentinel, own stable time/ID cursor | 100k Events fixtures, Event horizon/pruning truth; never all occurrences |
+| Entities/Tags | Bound selected source response/profile caps; occurrence cap 1A 1024, paged/grouped display; Tag catalog choices bounded service reads | Avoid N+1 per row and arbitrary Tag-assignment cap; dense values wrap/elide safe |
+| Highlighting | Plain viewer first, selected occurrence highlight; optional first 100 visible validated ranges/chunk initially | Full overlapping decoration DEFERRED; disable highlights on invalid mapping/completeness; plain source remains usable |
+| Live refresh | One coalesced dirty/new-items indicator; metadata patch only for known same ID without reorder; explicit page refresh | No every-capture full reload or polling, bounded subscription lifecycle |
+| Benchmarks | Measure cold/warm/rapid query p50/p95, GUI responsiveness, peak memory, Inspector/event paging and invalidation | <250-ms common warm query is a target to evaluate, not measured PASS; fixture hardware/version recorded |
+
+Keyset paging is an intentional extension of existing explicit paging controls, justified by recapture-driven history ordering and large-data target. A generation invalidated mid-paging must not silently omit/duplicate items while claiming snapshot continuity. Re-fetch first page on explicit Refresh; if owner revision notifies late, revalidation remains mandatory. Infinite scroll, full-data proxy filtering and long-lived DB transactions spanning user interaction are rejected initially.
+
+## Inspector Architecture
+
+One reusable 1C Inspector presenter/content widget with Overview (historical Summary), Entities, Tags, Capture History, Relationships, Retention / Privacy and Actions. No second permanent right rail. Overview is safe summary; full-source access is explicit within it, not a mandatory separate Raw tab/window. Deep work can replace central list with full-width item detail inside the SAME Clipboard singleton via Open Full Tool/detail route; no new shell host or lease bypass.
+
+Occupancy request uses S1 arbiter. If slot is free, explicit Inspect binds it. If Quick Ticket/DynamicHub owns it, retain/hide only after that owner's guard approves; otherwise refuse or offer guarded route/full-width Center detail. Dirty Tag edits, Ticket target selection and retention intent have source/target-bound local drafts; Apply/Discard/Cancel as supported, never fake Save. Pending effects may hide only with retained presenter; cannot dispose or report cancelled.
+
+Replacement keeps one safe return descriptor (module/ref/tab/generation/focus), no raw/draft copy or unbounded panel history. Close restores valid original owner once; context/module/privacy/source drift invalidates restoration without changing global selection. Explicit new replacement supersedes return. Resize collapses presentation only; guards, refs/drafts and pending outcomes survive. Open Full Tool failure/Cancel retains current panel. Focus return only to live enabled origin if no newer intentional focus; modal/editor Escape first, then panel close. Inspector never updates another occupant merely because its source query finished.
+
+## Inspector Tabs
+
+### M10 — Inspector Tabs
+
+| Tab / purpose | Read source / data required | Load strategy | Mutation owner / actions | Empty | Loading / error |
+| --- | --- | --- | --- | --- | --- |
+| Overview (Summary) | Safe Item projection: Kind/size/first/latest/lifetime count, disposition/intent/pin/holds/sensitivity/completeness/source class; full source separately eligible | Safe metadata on selection; Load Full Text explicit fresh read | ClipboardService Save/Pin/Copy; source immutable | Select an Item; unknown field says Not available | Inline metadata/full-text independently; error doesn't load raw fallback |
+| Entities | Source-bound occurrences/type/profile/raw or normalized permitted value, spans, method/version/confidence, accepted canonical links | Lazy, bounded grouped values and paged occurrences; selected-source mapping only | Clipboard/resolution owner confirms existing candidate; safe Copy/Search; Diagnostics only eligible owner handoff | No detected Entities vs extraction incomplete distinguished | Current generation spinner; bad span suppressed; Retry owner read/reprocess only if supported |
+| Tags | Global IDs/labels, assignments/provenance, available eligible catalog and separate suggestions | Lazy independent catalog/assignment reads; choices use shared UI pattern | ClipboardService assign/remove; catalog lifecycle remains global owner; Apply intent | No assigned Tags is valid; no suggestions if unavailable | Catalog unavailable disables new assignment, existing readable assignments marked stale as needed; independent Retry |
+| Capture History | Genuine Event ID, captured/received time, coarse source class/method, retained horizon and lifetime count | Lazy 50+1 Event keyset page | Readonly; Filter by source/date only, no event edits | No retained Events; horizon expired does not mean never captured | Independent paging/loading/error; no erased other tabs |
+| Relationships | Explicit predicate, qualified target/ref/revision/provenance/acceptance/hold state and target availability | Lazy bounded page; summary counts don't load all targets | Owning association service attach/release; S1 Open target; no generic graph edit | No accepted links vs target unavailable distinct | Target read failure labels unavailable, never releases hold; independent Retry |
+| Retention / Privacy | Source assessment/method/completeness, user intent, pin, every hold/reason, nominal/effective expiry, storage/capability | Small safe projection with owner revalidation on mutation | Clipboard/association owner Save/Unsave/Pin/Unpin/Delete; global policy editor via Settings route only when available | Transient Not saved; no permanent hold possible until promotion | Unknown policy/holds disables destructive controls; error/read refresh distinct from write result |
+| Actions | Source-approved eligible keys/reasons, definitions/availability, exact source/target proposal and binding/outcome refs | Deterministic bounded local metadata, lazy; no inference/provider-on-open | Compiled owning adapters; S2 catalog later; 3-5 primary safe choices + More | No eligible actions; no hidden default execution | Capability unknown disabled; explicit owning-tool refresh; no retry on tab/hover |
+
+Every tab has independent safe retry; dependency failure disables only dependent actions. A private full-source load failure cannot erase current safe metadata or expose stale source. Changing tabs preserves local source identity/drafts and never writes read/seen state.
+
+## Entities
+
+### M11 — Entity / Tag Ownership
+
+| Concept | Authority | Center behavior / limits |
+| --- | --- | --- |
+| Detected occurrence | Clipboard source/profile under 0C | Type + source/method/time, optional defined confidence, permissible raw/normalized value; no fabricated score |
+| Canonical record | Existing Company/User/Device/Ticket/Tenant owner | Explicit owner-scoped candidate resolution and technician confirmation; ambiguity/no match stays unlinked; never auto-create/select |
+| Accepted canonical link | Owning resolution/association use case | Navigate only authoritative existing qualified ref after freshness/guards; missing resolver means unavailable |
+| Entity highlight | 1C projection over validated raw snapshot | Scalar half-open offsets, revision/profile checked; convert to Qt document positions with tested scalar/UTF-16/newline mapping; no reused NFC/FTS offsets |
+| Overlap/grouping | Clipboard occurrences remain facts | Group display by type/profile/normalized value with occurrence count; keep each source span. Selected nested occurrence wins decoration; chooser lists others, no loss of provenance |
+| Tag identity / catalog | Existing global taxonomy (0C, tags) | Reuse canonical IDs, aliases/legacy slug mapping only reviewed; no Clipboard-only catalog/master-data editor |
+| Tag assignment/suggestion | ClipboardService/domain | Manual Apply/remove; suggestions separate with RULE/AI/import origin retained after acceptance; no secret/literal/lifecycle Tags |
+
+Readonly full content uses explicit plain-text API and never auto-opens links or rich content. Qt recommends explicit [setPlainText rather than format-guessing setText](https://doc.qt.io/qtforpython-6/PySide6/QtWidgets/QTextEdit.html#PySide6.QtWidgets.QTextEdit.setText). Viewer document normalization may differ from immutable source (especially CRLF); keep source for exact full-item copy and require a validated position map before enabling highlights. Emoji/combining mark/CRLF/bidi/overlap fixtures must prove both map and slice. If mapping is unavailable, Entities table remains usable without misleading highlights.
+
+Manual confirmation resolves a detected hostname/Ticket code through its owner; equal text/normalized value is insufficient identity. IPv4/IP/search/URL/Error actions stay eligible typed data; no Ping/DNS/remote target or provider identity fabricated by parser. Entity Type governance and confidence calibration remain upstream, not editable UI Settings.
+
+## Tags
+
+View assignments with provenance and separate suggestions. Add selects existing eligible IDs via adapted global choice UI; remove is explicit. Search/filter uses canonical IDs and ANY/ALL/Untagged semantics; never free-text Tag creation in the search box. Batch Tag changes DEFERRED with multi-select. Each draft binds Item/revision and initial set; a background catalog/assignment refresh cannot discard checked changes. Apply requires current owner checks; conflict preserves draft for explicit refresh/review instead of overwriting newer assignments. No automatic readdition after manual removal due to duplicate capture/reprocessing.
+
+A global taxonomy management route is DEFERRED until real owner presentation exists; 0C makes Tags reference data, not ordinary Settings. Existing article-specific editor/service cannot save Clipboard assignments. Inactive/merged Tag indications follow delivered owner lifecycle; current schema has no such state, so never claim this UI proves that lifecycle implemented.
+
+## Capture History
+
+One row per genuine accepted Event: source-declared captured_at when admitted, authoritative received_at, capture method and coarse application class; if observation time missing, display Unknown and service receipt separately. Repeated exact content may reuse Item yet adds distinct Events/captured_total; replay returns prior receipt and adds none. Use 1A owner counters for lifetime frequency, not COUNT of only retained Events or Inspector visits.
+
+History has paged recent Events/horizon. Event expiry can coexist with a Saved/held Item: No Events retained for this period is not No captures. Minimal occurrence metadata accepted as Evidence stays protected/promoted through owner association policy even if ordinary Event retention prunes history. No repeated full raw body per event. Omitted titles/process paths/browser URLs stay Not collected, never reconstructed from OS or source label. Click source/date offers a query chip, not launch. Related captures means events of the same Item; cross-Item similarity is DEFERRED unless a justified explicit owner relation exists.
+
+## Relationships
+
+Display typed target sections only for delivered profiles: Item EVIDENCE_FOR Ticket, conditional durable Diagnostic evidence, INPUT_TO Diagnostic as confirmed/requested input distinction, neutral RELATES_TO KB/Script and explicit DERIVED_FROM lineage/inverse. Existing Ticket-KB RELATED is not renamed or repurposed. A source copy/observation isn't evidence until accepted for an explicit claim/workflow. Show original source/time/acceptance and hold reason without customer detail in row/tooltips.
+
+Open target uses S1 route/owner lookup. Missing/deleted/unavailable target is explicit; read error is not deletion. Unreleased orphan Evidence holds remain protected until owning reconciliation; no automatic unlink/transfer. Relationship creation/removal is exact supported intent via owners, never a graph editor or raw junction write. Future diagnostic/input/result/KB derivation remains unavailable until stable target/privacy/lifecycle APIs are delivered. Clipboard deletion never deletes Ticket/Knowledge/Diagnostic records or independently copied artifacts.
+
+## Retention / Privacy
+
+### M12 — Retention / Privacy Lifecycle
+
+| Source state / action | UI truth and permitted intent | Protection / owner gate |
+| --- | --- | --- |
+| MEMORY_ONLY transient | Not saved; bounded idle/session expiry, no durable ID/link | Explicit eligible Save/Pin/promotion; handle expires, no restart recovery |
+| TEMPORARY | Accepted expiry absolute/local + coarse remaining duration | No countdown reloads; query excludes expired unheld source before cleanup |
+| SAVED | User-preserved, ordinary expiry not applicable | Unsave explicitly creates new temporary lifetime; never silent eviction |
+| Pin / Unpin | Pin implies Save; Unpin stays Saved | Service atomic promotion/pin; UI never derives TTL from old history |
+| EVIDENCE protected | User intent independent; list every effective hold/reason | Ordinary Delete/clear/expiry disabled; target disappearance doesn't release |
+| Unsave while pinned | Offer explicit combined Unpin+Unsave preview or refuse | Original source/current revision, new TTL and hold effects; Cancel default |
+| Last hold release | Explicit reviewed accepted association lifecycle | Saved stays Saved; otherwise fresh TTL from release, no immediate cleanup surprise |
+| Delete eligible temporary | Always explicit Cancel-default confirmation | Current source/revision/no holds rechecked atomically by owner |
+| Delete Saved/pinned | Warn permanent removal of preservation intent | Only unheld source; separate approval/owner policy; no undo/raw trash cache |
+| Held Evidence deletion | Disabled, Explain protection/Open association owner | Release/transfer as separate reviewed workflow; no checkbox to bypass hold |
+| NEEDS_REVIEW | Concealed preview; local memory-only baseline, purpose-reviewed persistence if owner permits | Save/Pin/Attach/raw access don't authorize FTS/AI; policy/audit missing disables action |
+| POSSIBLE_SECRET / assessment failed | Generic blocked/error acknowledgement, no source row/body/hash/history | No Save Anyway/reveal override/quarantine; separately sanitized new candidate assessed anew |
+| Later privacy escalation | Immediately hide raw/unsafe projection, disable exposure | Source-governed privacy repair/deletion can require association review; no ordinary cleanup workaround |
+
+### M13 — Surface Privacy Matrix
+
+NEEDS_REVIEW is a feature handling finding, not a legal confidentiality class. Explicit local source access, where owner policy permits it, is separate from onward disclosure. POSSIBLE_SECRET and assessment failure/incompleteness have no inspectable raw snapshot. Full mandatory sensitivity assessment always precedes projection. Defaults below are stricter minimized display, not new domain semantics.
+
+| Surface | PERMITTED, eligible | NEEDS_REVIEW | POSSIBLE_SECRET / failed assessment | Independently reassessed derivative |
+| --- | --- | --- | --- | --- |
+| Table preview | Generic by default; <=240-scalar preview only approved user display preference; safe controls/truncation | Generic Sensitive item, no literals | No Item preview/row; content-free blocked status only | Derivative only, follows its new assessment |
+| Full content | Explicit Load Full Text via current owner eligibility | Explicit purpose-reviewed local access only if permitted; otherwise denied | Never raw reveal/Save Anyway | Only retained derivative; no original backreference/secret offsets |
+| Entities | Type/count summary by default; values only deliberate eligible detail | Type-only/concealed unless authorized local detail | None | Only derivative-bound occurrences |
+| Capture History | Time/method/coarse class within policy; no source title/path | Same minimized metadata if eligible, no raw content | No secret Event history | New derivative provenance; original value/hash omitted |
+| Relationships | Safe type/ref/hold reason, details on explicit guarded route | Minimize identifying target labels | No secret source link | New eligible source association, not old secret persistence |
+| Status / logs | Safe code/outcome/qualified loaded count only; no text/hash/query | Generic state; no identities by default | Generic blocked/check failed, no detector span/value | Safe derivative disposition only |
+| Tooltips / accessible names | Same safe text bounds as visible surface, no full raw hover reveal | Concealed; disabled explanation without literals | Generic only | Same new eligibility |
+| Flyout / HUD | Generic storage/outcome + eligible typed refs; no raw automatic feed | Generic/no source action if forbidden | Generic status/no ref | Separate eligible new ref only |
+| DynamicHub / Mochi / external AI | Minimized selected projection, sharing off, explicit preview/Send | Blocked default, reviewed derivative reassessed; no raw forwarding | Blocked, no hash/value/type leakage from secret | New assessment/purpose; external policy/consent still required |
+
+No source body, Entity value, query, title, URL/path, content hash or provider exception in ordinary logs. Display/action/cache lifetime follows source and current privacy policy. Privacy lock clears transient raw/query/viewer/copy pending data and generations; no automatic raw reopening on unlock. Detector false negatives and physical memory/OS Clipboard/WAL/backup erasure remain residual risks; this architecture makes no perfect detection/zeroization claim.
+
+## Actions
+
+M04 is the complete command classification and surface inventory. Owner-approved deterministic relevance/availability bounds Actions to 3-5 prominent choices with More, not an AI-ranked command wall. A suggested action shows its source/type reason without exposing denied literals; no selection/hover/tab event runs it. Save/Pin/Tag updates appear after owner success, with progress before it; optimistic domain-state presentation rejected initially.
+
+Copy full item requests exact eligible immutable source, captures privacy/selection/activation generation, then writes Qt Clipboard on GUI thread only if still current and explicitly accepted. Failure/stale/privacy transition preserves current OS Clipboard; no automatic paste or restoration over a newer deliberate copy. Viewer Ctrl+C copies deliberately selected displayed text, subject to source-access lifetime; explicit Copy full item uses original source to avoid newline/normalization ambiguity. Copy normalized Entity value is separate and labelled, never overwrites immutable raw. No copied command -> shell -> PowerShell, command interpolation, arbitrary executable path/URL, or script registration by copying. Open URL is deliberate safe HTTP(S) through reviewed owner scheme/destination validation; file/registry/custom schemes are not executable actions.
+
+## Active Ticket / Quick Ticket
+
+### M14 — Ticket / Evidence Actions
+
+| Intent / case | Required behavior / ownership |
+| --- | --- |
+| No Active Ticket | Clipboard local work continues; Associate may select saved target via bounded Ticket read UI; no fabricated Ticket/Quick Note |
+| Associate with Active Ticket | Preview selected source and EXACT saved owner target with freshness/hold/purpose; current context is only proposal |
+| Select another target | TicketService lookup/search through thin picker; namespace/ambiguity validation, no automatic first match or master-data creation |
+| Accept Evidence | Owning association use case validates source/revision/sensitivity, target/permission, durable promotion/hold/audit and duplicate protection; no assumed current API |
+| Open Ticket | S1 guarded route to singleton full Ticket; preserves other drafts or returns Cancel/refusal |
+| Open Quick Ticket | Request shared slot, negotiate 1C draft, reuse one Ticket-owned note draft; no copied content injected automatically |
+| Context A -> B before acceptance | Stale confirmation invalidated, request explicit new source/target preview; never retarget silently |
+| Context A -> B after accepted association O | Original O binds source A/Ticket A including no-Ticket choice; completion updates only matching consumer; B untouched |
+| Source/target missing or privacy invalidated | Refuse effect; hold/original result truth retained where required; no substitute row/Ticket |
+| Commit succeeded / refresh failed | Association confirmed, read retry only; no second insert/note or false Failed |
+| Association unknown / failed recording | Owner reconciliation/recording-only retry using original target/result; no capture/diagnostic/provider rerun |
+| Later association to B | New explicit owner operation, not rewrite of invocation binding or B's human Quick Note |
+
+Clipboard-service and Ticket association implementation is a prerequisite, not a claim that TicketService.add_note creates Evidence. Source/target writer revalidation and hold/audit transaction design belong to 1A/Ticket delivery. Existing TicketKnowledgeService may inform patterns but cannot attach Clipboard through its KB junction. Quick Ticket's input is human-authored; generated observations/accepted evidence retain separate provenance/recording meaning.
+
+## Diagnostics Handoff
+
+### M15 — Diagnostics / DynamicHub Handoff
+
+| Destination | Eligible projection / explicit intent | Validation / target / return | Unavailable behavior |
+| --- | --- | --- | --- |
+| Diagnostics planning | Typed selected source/occurrence ref+revision, eligible approved input value only when owner profile admits it; selected action key | Owner validates profile/source/privacy/target/capability and explicit run preview; diagnostic.open_request opens planning, separate Run; original result owns outcome and route | Current fixed local parameterless operations do not accept copied-IP/host/command inputs; disable input-derived actions, offer guarded existing Scripts diagnostic view |
+| Local registered diagnostic | Known approved current identity, genuine local-machine scope; no copied command or arbitrary arguments | Existing PowerShellService -> ScriptService/approved gateway, not a fabricated DiagnosticService; result/run identity retained in owning tool, collection versus infrastructure outcome distinct | Explain actual runtime/policy unavailability; no fallback terminal or capability-by-checksum |
+| DynamicHub local context | Selected eligible typed Item/revision, Kind, completeness, permitted coarse Entity Types/Tag IDs and relation refs; no raw history/literals/hash by default | Explicit projection preview and Send/Open, S2 validates projection and catalog keys; slot lease separate, deterministic local suggestions; binding frozen on actual action acceptance | Sharing off/unimplemented projection disabled; local Clipboard remains usable |
+| Mochi acknowledgement | Safe truthful generic action/storage/recording state only | Optional tiny output/app equivalent, no focus; current cosmetic v1 has no arbitrary acknowledgement-text transport | App status/result route remains; no new IPC command or sidebar |
+| External AI | Only separately approved minimized selected payload; no baseline raw/NEEDS_REVIEW/secret content | Exact outbound preview + explicit Send + verified employer/provider/credential boundary; advisory output untrusted and limited to catalog candidates | Policy/provider unavailable disables Send, no hidden retry or scrape; local deterministic paths remain |
+
+Diagnostics supplies its result, not Clipboard classification proof or automatic EVIDENCE_FOR. Current result is memory-only and not a durable Session target. Future selected-input diagnostic relation must distinguish requested input from confirmed use, source eligibility from execution authority, and operation completion from Ticket recording. No new Diagnostics runtime/result schema or parameter API is designed here.
+
+## DynamicHub / Mochi Handoff
+
+Consume S2 context/binding/catalog/late-result/recording rules in M01/M08/M14/M15. Local row selection merely provides a possible source; it is not permission for auto-send/inference or a source-service dependency on Mochi. Purpose projection revalidates source/policy each time. Selected-context ref/revision and safe coarse facts are initial permitted candidate fields; literal Entity values or bounded redacted preview need distinct delivered source policy and explicit preview. Raw History, source titles, hashes, customer/Ticket bodies and all secret/failure content excluded.
+
+Opening DynamicHub or a navigation flyout initiates no AI/provider call. Explicit context Send may open/focus the shared surface after owner guards, then deterministic suggestions are local. Actual action acceptance has its own validated immutable binding; later selection changes suggestions only. A late result for source/Ticket A remains identified as earlier-context A and accessible by explicit route, never relabelled B, lost because Inspector closed, or automatically saved to current Ticket B. Provider result/recording state are separate; recording retry cannot rerun provider/diagnostic. No competing AI panel, new context store, current companion text transport or DynamicHub implementation.
+
+## Deep Links
+
+### M16 — Deep Links / Routing
+
+Internal typed route DTOs adapt through S1's navigation seam, not untrusted URIs, SQL, widget references or arbitrary callbacks. Names below specialize clipboard.center; serialization remains 0B/1B owner responsibility only where an existing boundary uses it.
+
+| Intent | Validated arguments | Resolution / missing target |
+| --- | --- | --- |
+| clipboard.center | Optional delivered view key, nonsensitive focus intent | Activate singleton; reject unknown/unavailable view without creating second page |
+| Clipboard specific Item | Owner-qualified durable ID OR typed transient handle; expected revision when needed | Resolve current owner, then select/detail; hidden/missing/expired returns neutral unavailable without revealing existence/body; no adjacent substitute |
+| Filtered Center / search | Bounded allowlisted query DTO: canonical Tag IDs, Entity Type/profile, UTC interval, relationship predicate+qualified target, storage/sort | Validate owner capability/eligibility; explicit route replaces session query after draft guard, resets cursor; no arbitrary FTS expression |
+| Ticket Evidence destination | Explicit accepted Ticket ref plus EVIDENCE_FOR filter | Revalidate target and association capability; no Ticket-number-to-PK guess; missing target safe state |
+| Existing authoritative Entity | Source occurrence plus accepted owner link, not literal | Guarded owning record route; ambiguity/ref expiry prompts resolution/unavailable |
+| Diagnostic/result/Evidence destination | Owner run/result/association ref and exact initiating binding | Current result-in-Scripts route only if retained; durable history route unavailable until owning persistence |
+| Analytics drill-down | Eligible source-owned aggregate scope translated into normal 1C filters/date+Tag/Kind; no raw dataset dump | Owner privacy/target query revalidated; Event grain/horizon versus current Item view explained |
+| S2 / 1B Open Center return | Validated typed source/query ref from existing owner adapter | Same shell guard/GUI-thread activation; missing Center capability returns unavailable; navigation ACK not domain completion |
+
+Routes preserve context unless a separate explicitly accepted owner action changes it. A Ticket evidence filter doesn't select that Ticket globally. Refusal/Cancel preserves previous route/draft/focus. No raw query/customer identifiers in durable navigation history; bounded session only. Restart links revalidate from their owner, no pending operation replay.
+
+## Live Refresh
+
+RECOMMENDATION: owner post-commit targeted notification/ref invalidation through existing signals/adapters, no global bus and no polling. Each relevant accepted capture marks one coalesced New captures / Refresh indicator. Update bounded metadata of a currently visible same Item without reordering or changing selection/tab; count updates use authoritative summaries only. Structural changes mark page cursor stale and require explicit refresh to reconcile latest order. A replay receipt changes no row/counter.
+
+Auto-refresh preference default off. If later enabled, only a clean visible top first page with no selection/draft/pending owner may refresh a bounded page once per coalesced event; it never turns every capture into reload. Hidden pages invalidate safe cache/revalidate on activation, no background full reads. Scroll anchor is typed top-visible Item plus offset; restore if still eligible, otherwise retain closest visual position without selecting new source. Notifications for expiry/privacy invalidate raw and effects immediately, unlike optional new-capture presentation. Missed notifications are handled by operation-time revalidation.
+
+## Loading / Empty / Error States
+
+### M17 — Loading / Error / Empty States
+
+| Surface / condition | Loading | Empty | Partial / stale | Failure | Retry / safe action |
+| --- | --- | --- | --- | --- | --- |
+| List / initial history | Inline current-request spinner; controls accept latest intent | No eligible stored history, distinguish history off/transient Not saved | Explicit as-of label, effects disabled; loaded count qualified | History unavailable, preserve safe view state | Explicit latest list read only |
+| Search | Latest generation owns indicator | No indexed eligible matches, not No history | Index eligibility/horizon limits explicit; never entire-history success | Search unavailable/invalid query | Correct query/Retry or Clear Search to browse; no hidden fallback |
+| Inspector/Overview | Selected safe metadata and full-source load separate | Select an Item / no longer available | Policy/revision stale clears raw/disable effects | Detail unavailable, keep other valid safe views | Retry same current ref; no stale cached raw |
+| Tags | Choices/assignment loaders independent | Zero assignments/suggestions valid | Retired/missing choices explicit only if delivered | Tags unavailable, pending draft preserved | Catalog/assignment read retry separately; never automatic Apply |
+| Entities | Bounded occurrence generation | No Entities vs not processed distinguished | Extraction incomplete/profile unavailable/bad spans suppressed | Entities unavailable | Owner read/reprocess explicitly if supported; no detector bypass |
+| Capture History | Paged current request | No retained Events for horizon | Partial/horizon pruning, lifetime summary separate | History tab unavailable | Page/read retry only, other tabs intact |
+| Relationships | Lazy links/target statuses | No accepted links | Target unknown/orphan hold preserved, not no link | Links unavailable, mutations disabled | Owner read/reconciliation route, not release-on-error |
+| Actions / capability | Safe cached capability check, no providers | No eligible actions | Stale/unknown disabled, reason reachable | Owning action unavailable | Explicit owner recovery route; no tab/hover retry |
+| Item deleted elsewhere | No body load | Requested item no longer available | Clear ref/body, no adjacent selection | Missing != unavailable read | Refresh list, preserve permitted source-bound safe draft |
+| Item expired | No raw fallback | Expired source / no longer retained | Held source must be resolved by owner, not assume expired | Expiry/source unavailable explicit | Return/Refresh; new capture explicit new intent |
+| Privacy-restricted | Generic protected placeholder | No eligible visible content | Clear unsafe projections immediately | Access denied/check failed, no secret echo | Owner privacy review, never Reveal Anyway |
+| Database unavailable | Core read error, no app crash | Do not show fabricated zero | Safe previous data clearly stale/nonactionable | Source unavailable | Explicit bounded read retry, unrelated tools unaffected |
+| Feature disabled | Neutral owner capability/enablement state | Disabled is not empty history | Persisted eligible access follows owner policy, no automatic erase | Controls disabled with applied-state reason | Owning Settings route only when available |
+| Capture subsystem unavailable | History browse can remain local | No capture ready state | Existing saved history not capture health | Capture unavailable/unconfirmed; no fake success | 1B owner recovery, no auto-launch/retry mutation |
+| Save/Pin/Tag/association/delete | Pending original intent, double submit blocked | Not applicable | Success + failed read distinct; original target labelled | Failed vs unconfirmed effect separate | Fresh explicit effect only after owner reconciliation; read retry otherwise |
+
+Errors are concise safe codes/owner guidance, not raw exceptions/SQL/payload. A component error cannot erase independent tabs or unrelated Ticket/Knowledge work. Old request failure cannot clear newer loading state. Disabled actions have adjacent readable reasons, including unavailable future owner, missing selection/target, expired ref, protected Evidence and denied privacy. No transient status word implies saved/recorded/cancelled without authoritative outcome.
+
+## Keyboard / Accessibility
+
+### M18 — Keyboard / Accessibility
+
+Current inspected bindings include Ticket editor Ctrl+Enter/scoped Escape, creation Ctrl+S, app Quit and local Enter searches; approved S1 proposes Ctrl+K global search and rail/Quick Ticket chords. 1B owns Win+Alt+C; configured applied binding is displayed, no new AHK/global shortcut. Proposed table chords below are architecture recommendations requiring installed collision/keyboard-layout validation, not registered or proven collision-free.
+
+| Binding / alternative | Scope / action | Conflicts / editable-widget behavior |
+| --- | --- | --- |
+| Clipboard menu/rail QAction; Tab+Enter/Space | S1 guarded Open Clipboard Center | No new global chord; current menus/rail share action when delivered |
+| Ctrl+F; visible Search | Active Center, focus local search; within full-text viewer focus Find in content | Never overrides another module/editor's Find; explicit scope and current owner focus |
+| Up/Down/Home/End/Page keys | Table rows / view selector standard navigation | No capture when search/tag/target editor focused |
+| Enter / double-click; Inspect button | Current table row, open/focus Inspector through lease | Never triggers URL/diagnostic/AI/Copy implicitly |
+| Ctrl+C; Copy full item button | Table explicit eligible full-item Copy; viewer selection uses normal Copy | Search/tag/target editing retains standard text Copy, no global hijack |
+| Ctrl+S; Save button | Table focus only, eligible source Save | Ticket creation/editor binding preserved outside table; no Ctrl+S capture in nested editors |
+| Ctrl+P; Pin button | Table focus only, eligible Pin/Unpin | Doesn't override text print/other tool behavior; disable on pending/privacy |
+| Ctrl+L; Associate button | Table focus only, choose/preview exact Ticket | Browser/text/address focus outside Center unaffected; unavailable association explanation |
+| Delete; More -> Delete | Table focus only with current unheld source, confirmation | Editable widget Delete remains text deletion; Inspector readonly viewer Delete is not item delete |
+| Ctrl+I / Inspect toggle | Table focus only, request/hide current Inspector | No shell global chord; inner control formatting shortcuts unaffected; menu fallback always |
+| Ctrl+M | NOT ENABLED initial | Historical Ask Mochi candidate DEFERRED until owner availability/collision/privacy review |
+| Tab/Shift+Tab; Ctrl+Tab where standard tabs own it | Search -> view/filter -> commands -> table -> active Inspector sections/actions -> return/status | Do not steal shell/ticket tab navigation; overflow and Close always reachable |
+| Escape / visible Back or Close | Innermost popup/modal/editor first, then current auxiliary panel | Hide/retain or negotiate dirty/pending owner; never global app Exit or auto-clear drafts |
+| Flyout Alt+Down/chevron; Enter/Space | Focused S1 trigger, open/focus cached content | Hover enhancement only, editable combos retain their own Alt+Down |
+| Win+Alt+C help | Display 1B actual applied manual capture binding | 1C does not register/reassign it; historical Ctrl+Alt+C help rejected as current value |
+
+All icons have names/action state and text fallback. Table row/cell accessible descriptions use the same privacy-filtered content, named storage/hold/sensitivity/completeness and current selection; no hidden full-text accessibility bypass. Logical focus order follows shell/active content/active auxiliary, visible focus and keyboard-only operation. Disabled reasons focusable/readable adjacent text, not tooltip-only. Use Qt palette/style/global font if actually supported; no custom rainbow Tag/Kind theme or bundled font. Non-color-only warnings, high contrast/opaque fallback, large font/zoom and mixed DPI must be validated later with Windows Narrator and physical keyboard. Full text is plain readonly, wrapping/find; no HTML/link launch on read. Accessible status announces safe generic outcomes, not customer/source literals. Completion never forces focus from another app or newer interaction.
+
+## Responsive Layout
+
+### M19 — Responsive Layout
+
+Consume S1 usable logical-client bands; exact fit depends on native font/DPI/owner minima. No invented supported size below S1. At every band the single auxiliary lease applies to Inspector, Quick Ticket and DynamicHub; only one expanded surface. No permanent blank AI reservation or second right dock.
+
+| Region | WIDE >=1440, height >=700 | MEDIUM 1180-1439, height >=700 | MINIMUM 1000-1179, height >=700 |
+| --- | --- | --- | --- |
+| Main navigation / global Ticket/Search | S1 labelled rail and compact top context | S1 icon rail/compact context | S1 compact rail and globally reachable Ticket/Search affordances; no clipped target |
+| Internal view navigation | Labelled combo/optional compact bounded choice strip if budget | Combo/dropdown, no second left sidebar | Combo + More views; keyboard labels intact |
+| Main table/list | Stretch Preview, compact Captured/Kind/State; Source/Entities if fit | Core columns only, optional summaries in detail | Core accessible list/table; hide secondary columns, no full raw row tooltip |
+| Inspector | Shared side split ~320-400 only when central approximately >=700 survives | Temporary internal slide-over or explicit full-width same-Center detail | Explicit full available-width internal detail/task panel with Back/Close; list retained |
+| Quick Ticket | Alternative occupant after guards; one Ticket editor | Alternative guarded slide-over, never both | Alternative internal task panel, exact Ticket binding/draft retained |
+| DynamicHub | Alternative occupant, collapsed cue when busy/dirty | Collapsed cue; explicit guarded temporary open | Collapsed cue by default; explicit internal task panel/owning-tool fallback |
+| Toolbar | <=5 primary commands, More | Wrap/reduce to primary + More | Inspect/Copy/Save/Pin/Refresh via compact actions/overflow; all keyboard reachable |
+| Filters | Compact base Kind/Tag/Source/Date; advanced disclosure | Filters popover/internal row, applied chip summary | Filters button -> bounded internal controls; scroll vertically, not narrow clipped inputs |
+| Draft/pending/focus | Preserve owner state on slot/size changes | Collapse cannot submit/discard; focus origin validated | Visible Back/Close, inner editor guard and no focus behind temporary task; completion doesn't steal focus |
+
+Below 1000x700 or when large-font owner minimum exceeds available area: report unsupported/unverified fit or use separately validated compact fallback, never claim success by clipping. Resize/monitor loss clamps/dismisses transient geometry safely and preserves refs/pending outcomes; no domain mutation or automatic new window. Critical privacy/hold state cannot disappear when Source/Entities optional columns hide. Global defaults/theme apply only where delivered, with readable Qt fallback.
+
+## Settings
+
+### Settings Inputs Matrix
+
+Potential semantic definitions, not registered keys or a new configuration source. 0D USER resolution default -> stored override -> explicitly admitted session override; feature owns bounds/meaning, shared Settings owns admission/persistence/effective snapshots. Safe static defaults until that owner exists. Saved preference versus applied consumer state distinguished. A display choice cannot permit secrets/authorization or claim discovered capability.
+
+| Candidate input | Original priority | Classification / default recommendation | Activation / owner boundary |
+| --- | --- | --- | --- |
+| Default view | LIKELY | Nonsensitive preference, Recent | Next activation; allowed delivered view key only |
+| Page size | LIKELY | Bounded 50 default, 100 service maximum recommendation | Next query resets cursor; service hard cap independent |
+| Preview truncation / disclosure | CORE privacy consumer; preference LIKELY | Generic concealed preview default; <=240 scalar ceiling; optional eligible permitted excerpt | Next projection/clear stale cached text; not a secret/sensitive bypass |
+| Auto-refresh | LIKELY | Off, manual indicator baseline | Next eligible clean visible page only; can't change bindings/replay effects |
+| Default sort | LIKELY | Latest capture desc | Next query; fixed allowlisted indexed sorts, no SQL string |
+| Column visibility / order | FUTURE | Secondary nonsensitive layout only; core safety states cannot hide | Next layout, custom layout DEFERRED until need; clamp width |
+| Splitter/panel width | FUTURE | Optional shared UI preference; not required MVP | S1 width budgets override unusable sizes; lease occupancy not persisted |
+| Retention display | LIKELY | Absolute expiry + coarse relative text | Presentation only; TTL/hold/domain changes stay 1A Settings consumer |
+| Current capture hotkey / enablement / history state | CORE read-only owner inputs | Display desired/applied binding/storage truth | 1B/1A/0D owns activation/policy, Center doesn't register/edit files |
+| Flyout enabled/dwell/background opacity | LIKELY global S1 preference | Reuse S1 defaults/high-contrast fallback | Shared shell consumer; no Clipboard-specific duplicate opacity preference |
+| Full-content wrap/monospace/font | LIKELY existing/global where supported | Platform/global font fallback, readonly wrap | Presentation next view; no bundled fonts/theme subsystem |
+| Search history / saved custom views | FUTURE | Off / DEFERRED | Requires separate privacy/domain requirement; not hidden Settings dump |
+| Filter literals/current selection/Item ref/target draft/lease/operation result | NOT NEEDED as Settings | SESSION / RUNTIME STATE | Owner lifetime; no restart replay or sensitive identity restoration |
+| Authorization/capability/safety/retention holds/catalog meanings | NOT NEEDED as Settings | DOMAIN / DERIVED CAPABILITY / INVARIANT | Owners validate; flags may suppress only |
+| Credentials/provider handles/source bodies | NOT NEEDED | SECRET or private domain/runtime; excluded | Reviewed credential boundary only, no ordinary preference store |
+
+Settings change invalidates affected presentation/query generations; accepted operation retains start binding/policy snapshot with current security checks at effect boundary. TTL setting changes neither purge old Items nor release Evidence; no Settings notification triggers domain work.
+
+## Analytics Boundary
+
+Only explicit navigation to future owner aggregate summaries or translated drill-down filters. Clipboard owns operational per-Item first/latest/lifetime accepted count, links and retention facts; no dashboards, rates, comparative trends, reporting store or calculations in Center. Source permissions/retention define what future Analytics may read; 1A coarse eligible projection applies, raw/literals/hashes excluded, NEEDS_REVIEW default excluded. Availability doesn't depend on Analytics/network.
+
+Drill-down states grain/horizon: accepted Event aggregates versus distinct current Item results can differ because Event/source expiry, dedup and current retention. Do not imply 100 capture Events equal 100 Items or a missing old source means historical count was false. Typed Tag/Kind/date/predicate scope enters M16 query and is revalidated. Export, statistical widgets and universal graph are DEFERRED, never created by this plan.
+
+## Concurrency
+
+M07/M08/M09 are the authority for presentation generations, source binding and paging. Capture changes latest time/count; retention can remove unheld Item; Tag/association/another UI can change source revision. Owner invalidation marks affected query/detail stale and clears unsafe data. Every command uses original typed ref/revision and current owner checks; a replacement row at the same position is never target. Missing current transaction/concurrency API is a prerequisite for the mutation slice, not a widget lock masquerading as data integrity.
+
+Tag/target/retention drafts preserve initial token and user changes, block Apply on conflict/known missing source, and offer explicit review/refresh without overwriting. Mutation confirmation freezes exact source/action/target/policy; context change before acceptance invalidates it, after acceptance never retargets. Cleanup versus Save/Attach is decided atomically by 1A writer invariant: if preservation wins, hold blocks cleanup; if cleanup won, source missing and no invented replacement. An orphan hold survives target disappearance for owner reconciliation. Hide/Escape/timeout is never cancellation of committed work.
+
+## Required Matrices
+
+Preserve the original exact inventory (sections 299-310), with mappings to the single detailed owners above rather than duplicate tables. Additional user matrix concerns share these same tables.
+
+| Original requirement | Completed report owner / exact fields | Additional requested concern |
+| --- | --- | --- |
+| 299 Navigation Inventory | M03 display/purpose/query/sort/empty | View Inventory |
+| 300 Table Column Matrix | M06 column/meaning/source/sortable/default/width/privacy | Table / Read Model |
+| 301 Filter Matrix | M05 semantics/combinability/default/clear | Search / Filter Semantics |
+| 302 Inspector Tab Matrix | M10 purpose/data/load/actions/empty/error plus mutation owner | Inspector Tabs |
+| 303 Action Matrix | M04 key/owner/selection/Entity-Tag/confirmation/async/three surfaces | Toolbar/Action Ownership; M14 Ticket/Evidence and M15 handoffs specialize |
+| 304 Keyboard Shortcut Matrix | M18 binding/scope/action/conflicts/editable behavior | Keyboard / Accessibility |
+| 305 Privacy Matrix | M13 all named surfaces x actual sensitivity classes, M12 lifecycle | Retention / Privacy |
+| 306 Loading/Error Matrix | M17 loading/empty/partial/failure/retry incl. all eight original areas | Loading / Error / Empty States |
+| 307 Performance Strategy | M09 pagination/lazy detail/FTS/filters/async/stale/large-content plus M08 | Performance / Pagination; Concurrency / Stale Results |
+| 308 Reuse Assessment | M02 current equivalents/treatment/reason/consumers/test source | Workspace / Surface Ownership |
+| 309 Settings Inputs | Settings Inputs Matrix CORE/LIKELY/FUTURE/NOT NEEDED and classifications | Settings |
+| 310 Integration Inputs | Integration Inputs Matrix below, each actual/future owner/capability | Diagnostics / DynamicHub handoff M15; Ticket actions M14 |
+| Additional reconciliation | M01 all 27 requested concerns and eight required columns | S1/S2/1C Compatibility |
+| Additional selection | M07 scenario/selection/draft/refresh rules | Selection / Refresh |
+| Additional identity | M11 Entity/Tag authority/limits | Entity / Tag Ownership |
+| Additional responsive | M19 all shell/content/auxiliary/filter/command regions x three bands | Responsive Layout |
+| Additional routes | M16 intents/arguments/resolution/missing | Deep Links |
+
+### Integration Inputs Matrix
+
+| Required input | Current implementation / planned capability | 1C boundary / unavailable behavior |
+| --- | --- | --- |
+| ClipboardService / query methods | PLANNED 1A cohesive domain service/repository, not current | List/detail/commands/ref/privacy through same owner; no SQL/read service invented in widgets |
+| TagService / global catalog | Global TagRepository CURRENT; generic TagService not established | Proposed Clipboard assignment owner consumes catalog; extend generic GUI choice pattern only, never article Tag writer |
+| TicketService | CURRENT saved Ticket read/note/status | Exact target read; Clipboard-Evidence association future; no note fallback or fabricated attach API |
+| DiagnosticService | Generic name PLANNED; current approved PowerShellService/ScriptWorkspace real | Existing fixed local identities for explicit owner Run; copied-input operations unavailable |
+| Knowledge Base Service | KnowledgeService CURRENT literal search/Tag filters/drafts | Guarded explicit safe query adapter; no duplicate KB browser or publication |
+| Navigation Service | MainWindow methods CURRENT; S1 typed guarded seam PLANNED | Same host/owner intent adapter, no new independent router |
+| SettingsService | 0D PLANNED, current Mochi control dialog isn't general Settings | Validated snapshots later; static safe defaults meanwhile, no local store |
+| ContextService / Mochi | S1 selected context + S2 projection PLANNED; cosmetic MochiService CURRENT | Privacy-filtered source ref, sharing off; no sensitive cosmetic transport |
+| DynamicHub / Action Catalog | S2 approved PLANNED | Shared auxiliary slot and known owner metadata; unavailable until delivered, no parallel coordinator/catalog |
+| Analytics / durable diagnostic associations | FUTURE | Typed route/read only once owners exist, no invented result/history store |
+
+Dependency rule: presentation imports permitted application/query services, shared GUI/nav/Settings adapters, not AHK internals, PowerShell process internals, raw SQLite, provider SDKs or Analytics implementation. Source services do not depend on Center/S2/Mochi. Authentication/IPC redesign, destructive migrations and major dependencies stay separately reviewed owner work.
+
+## Required Diagrams
+
+Mermaid SOURCE only. Rendering/compilation: NOT RUN; no tooling installed. D01-D04 fulfill original 294-297, D05-D08 explicitly show additional requested flows. These are planned responsibilities, not implemented classes/APIs.
+
+### D01 — MainWindow / workspace / flyout / Inspector (original 294)
+
+```mermaid
+flowchart TB
+    MW[MainWindow S1] --> NAV[Guarded typed navigation]
+    F[Shared S1 flyout - cached Clipboard contribution] -->|Explicit Open Center| NAV
+    NAV --> STACK[Technician Workspace retained stack]
+    STACK --> CW[One Clipboard Center]
+    CW --> V[Compact view selection]
+    CW --> Q[Search and filters]
+    CW --> L[Bounded model-view Item list]
+    L -->|Explicit Inspect and owner guard| LEASE[S1 shared auxiliary lease]
+    LEASE --> I[Clipboard Inspector]
+    LEASE --> QT[Alternative Quick Ticket - Ticket owner]
+    LEASE --> DH[Alternative DynamicHub - S2]
+    I --> O[Overview - historical Summary]
+    I --> E[Entities]
+    I --> T[Tags]
+    I --> H[Capture History]
+    I --> R[Relationships]
+    I --> P[Retention and Privacy]
+    I --> A[Actions]
+```
+
+### D02 — Query/read-model and selection detail (original 295)
+
+```mermaid
+sequenceDiagram
+    actor U as Technician
+    participant C as Clipboard Center
+    participant W as Existing task runner
+    participant S as ClipboardService
+    participant R as ClipboardRepository
+    participant I as Inspector
+    U->>C: Submit view / literal search / filters
+    C->>W: Immutable query and generation
+    W->>S: Bounded owner read
+    S->>R: Parameterized eligible projection
+    R-->>S: One safe row per Item with cursor
+    S-->>W: Safe immutable summaries
+    W-->>C: GUI-thread completion
+    C->>C: Accept matching generation only
+    U->>C: Select typed Item / Inspect
+    C->>W: Safe detail request with ref and revisions
+    W->>S: Revalidate source and privacy
+    S-->>W: Current eligible detail or unavailable
+    W-->>C: Match query / selection / privacy generations
+    C->>I: Render only current selected source
+```
+
+### D03 — Entity action / Diagnostics owner (original 296)
+
+```mermaid
+flowchart LR
+    E[Selected source-bound Entity] --> P[Typed diagnostic.open_request proposal]
+    P --> C[Owner catalog / source / target / privacy validation]
+    C -->|Unsupported copied-input capability| X[Unavailable - no command execution]
+    C -->|Explicit planning route| D[Owning Diagnostics UI - current Scripts]
+    D -->|Separate reviewed Run intent| S[PowerShellService]
+    S --> G[Approved sealed PowerShellGateway]
+    G --> R[Validated original-operation result]
+    R --> D
+```
+
+### D04 — Deep links / owner routing (original 297)
+
+```mermaid
+flowchart LR
+    A[Future Analytics scoped drill-down] --> N[S1 typed guarded navigation]
+    T[Ticket accepted evidence ref] --> N
+    D[Diagnostics owned result ref] --> N
+    M[S2 / Mochi eligible view intent] --> N
+    H[1B authenticated open_center] --> N
+    N --> V[ClipboardService route / source validation]
+    V -->|Current eligible ref| C[Same Clipboard Center - view / query / selection]
+    V -->|Missing / expired / denied| X[Neutral unavailable - no replacement selection]
+```
+
+### D05 — Item / Entities / Tags / Events / relationships
+
+```mermaid
+flowchart TB
+    I[Immutable eligible Clipboard Item] --> E[Source-bound Entity occurrences]
+    I --> T[Assignments to global Tag IDs]
+    I --> C[Genuine Capture Events - separate identities]
+    I --> R[Explicit accepted relationships / holds]
+    E -->|Explicit authorized resolution only| A[Existing authoritative record]
+    R --> K[Exact Ticket or conditional durable Diagnostic / KB target]
+    C --> S[Lifetime count separate from retained-event horizon]
+```
+
+### D06 — Exact Ticket / Evidence binding
+
+```mermaid
+sequenceDiagram
+    actor U as Technician
+    participant C as Center
+    participant S as S1 context
+    participant A as Owning association use case
+    participant T as Ticket owner
+    participant B as Clipboard source owner
+    U->>C: Associate source A with exact Ticket A
+    S-->>C: Optional current Ticket proposal and revision
+    C->>U: Source / target / hold / purpose preview
+    U->>C: Explicit accept
+    C->>A: Frozen proposal and current preconditions
+    A->>T: Validate original saved Ticket / permission
+    A->>B: Validate source / policy / promotion / revision
+    A->>A: Accept immutable operation and coordinated hold/audit commit
+    U->>S: Later select Ticket B
+    A-->>C: Original operation A confirmed or unconfirmed
+    C->>C: Matching consumer update or earlier-context status
+    Note over C,T: No Ticket B write or human Quick Note replacement
+```
+
+### D07 — Privacy-filtered DynamicHub / Mochi handoff
+
+```mermaid
+flowchart LR
+    S[Explicit selected source ref] --> P[Clipboard owner complete current privacy gate]
+    P -->|Blocked / sensitive ineligible / missing| X[No source exposure]
+    P -->|Eligible minimized projection| V[Exact preview and explicit Send]
+    V --> C[S2 context projection / local deterministic suggestions]
+    C --> L[S1 guarded single auxiliary lease]
+    C -->|Separate explicit action| A[Owning service validates immutable binding]
+    A --> R[Original-operation result and separate recording state]
+    R --> U[Owner result / shell safe status]
+    R --> M[Optional tiny acknowledgement - approved renderer only]
+    C -->|External policy reviewed plus separate Send| E[Optional AI adapter - not cosmetic v1]
+```
+
+### D08 — Async stale-result rejection
+
+```mermaid
+sequenceDiagram
+    actor U as Technician
+    participant C as Query presenter
+    participant W as Single active read runner
+    U->>C: Query A generation 1
+    C->>W: Read A token 1
+    U->>C: Query B generation 2
+    C->>C: Invalidate token 1; retain only latest B
+    W-->>C: Late A success or error
+    C->>C: Reject token 1; do not alter B state
+    C->>W: Submit latest B once after debounce/idle
+    W-->>C: B result token 2
+    C->>C: Check query / activation / privacy / source tokens
+    C->>C: Apply B on GUI thread; restore matching Item only
+```
+
+## Decision Register
+
+All decisions are recommendations for independent review; no user approval manufactured. Architectural invariants are DECIDE NOW; exact icons/spacing/widths/wording and optional worker decomposition are DESIGN DURING SLICE. Deferred features cannot masquerade as material unresolved decisions preventing bounded slice planning.
+
+| ID / decision | Options considered | Recommendation / rationale | Evidence | Consequences / depth | Status |
+| --- | --- | --- | --- | --- | --- |
+| 1C-D01 shell/composition | Standalone three-pane shell, MDI, existing S1 stack | Single retained Center in S1; existing composition fits | S1/M/C | No parallel shell; DECIDE NOW | RECOMMENDED |
+| 1C-D02 secondary navigation | Wide permanent sidebar, compact selector, tabs | Compact view selector, bounded More views; distinguish shell routes | S1 Responsive; original 258-262 | Preserve center budget; DECIDE NOW | RECOMMENDED |
+| 1C-D03 default view | All raw, Recent, Saved | Eligible Recent, no initial selection; off-history truth | A Search/Privacy; M03 | No raw auto-load; DECIDE NOW | RECOMMENDED |
+| 1C-D04 columns | All schema columns, sparse list, safe core | Captured/Preview/Kind/State; Source/Entities wide, rest detail | M06; T/K/S | Privacy and width budget; DECIDE NOW | RECOMMENDED |
+| 1C-D05 selection | Single, bulk multi-select | Single stable typed ref; bulk deferred | Original 61-62; M07 | Simple per-source outcome/draft; DECIDE NOW | RECOMMENDED |
+| 1C-D06 pagination | SELECT-all, infinite, offset, keyset | 50+1 keyset with explicit Previous/Next, structural invalidation | A scale/order; Ticket control precedent | No snapshot promise; owning data slice validates cursors; DECIDE NOW | RECOMMENDED |
+| 1C-D07 Inspector tabs | Every feature dialog, one giant pane, seven sections | Overview/Entities/Tags/History/Relationships/Retention-Privacy/Actions | A/B; M10 | Lazy independent errors; DECIDE NOW | RECOMMENDED |
+| 1C-D08 full-content viewer | Rich editable, dedicated raw window, readonly plain | Explicit eligible readonly Load Full Text inside Overview/full-width same module | S/K; A immutable source | Exact full-item Copy source kept distinct from display; DECIDE NOW | RECOMMENDED |
+| 1C-D09 Entity highlighting | Auto all overlaps, selected bounded map, none | Selected validated occurrence first; overlap chooser; decoration capped | A scalar spans; F-C | No invalid FTS/raw map; advanced styling deferred; DECIDE NOW | RECOMMENDED |
+| 1C-D10 Tag editing | Clipboard catalog, article writer, global IDs through Clipboard owner | Adapt choice UI, explicit existing-ID assignment/provenance | K/D; F-C/A | No competing Tag system; DECIDE NOW | RECOMMENDED |
+| 1C-D11 relationship UI | Generic graph/editor, typed list | Typed target/accepted hold list, owner actions only | A Relationships; F-C | Durable Diagnostic links unavailable pending owner; DECIDE NOW | RECOMMENDED |
+| 1C-D12 retention/privacy | GUI TTL/secret override, domain projections | Intent/pin/every hold displayed, Cancel-default protected deletion | A Retention/Sensitivity | No Undo/trash/persist-secret; DECIDE NOW | RECOMMENDED |
+| 1C-D13 search/filter | One DSL, column text scan, literal FTS+predicates | AND families, grouped OR, Tag ANY/ALL, owner escaping | D/A/M05 | Clear/search/view modes explicit; DECIDE NOW | RECOMMENDED |
+| 1C-D14 keyboard | Global hooks/chords, scoped table/editor | M18 scoped actions and menu/Tab alternatives | S1/B/T/K | Actual collisions/layout/Narrator future tests; DECIDE NOW | RECOMMENDED |
+| 1C-D15 deep links | Widget coupling, arbitrary URI, closed typed routes | S1 adapter with current owner refs/bounded query | S1/B/M16 | Missing safely unavailable, no context retarget; DECIDE NOW | RECOMMENDED |
+| 1C-D16 async | Main-thread reads, new pool, existing runner | Bounded owner-read runner with generations/latest coalescing | R/K/S | Pending gap protected, no physical cancellation claim; DECIDE NOW | RECOMMENDED |
+| 1C-D17 collapse / Mochi coexistence | Multiple rails, tabs, one coordinated slot | S1 lease/guarded alternate/full-width detail | S1/S2/M19 | One return descriptor, primary workflow priority; DECIDE NOW | RECOMMENDED |
+| 1C-D18 flyout | Automatic raw/prefetch, cache-only | Generic bounded cached contribution, no work on any opening | S1/S2/A/B | Missing cache -> Open Center; DECIDE NOW | RECOMMENDED |
+| 1C-D19 seen/read | Persistent unread/views, capture count only | REJECT new read state; Captures label / horizon separate | A counts; original 49/267 | Viewing has no domain effect; DECIDE NOW | RECOMMENDED |
+| 1C-D20 operation/Ticket binding | Current-at-completion, original accepted intent | Freeze validated source/target including none; independent recording | S2/T/A | No B misassociation, read-only retry after commit; DECIDE NOW | RECOMMENDED |
+| 1C-D21 Settings/restoration | Local store/raw restart, shared nonsensitive prefs | 0D definitions; session state separated, static defaults until delivery | F-D/S1 | No hidden sensitive restoration; DECIDE NOW | RECOMMENDED |
+| 1C-D22 enhancements | Bulk/export/drag/custom views/AI actions now, later | Defer until owning use case/capabilities and separate review | Original 314/316; S2 | No scope expansion | DEFERRED |
+| 1C-D23 physical schema/read facade | Duplicate tables/CQRS, cohesive 1A owner | 1A data slices determine projections/indexes/tokens; no new query service now | A/D searches | Future independently reviewed storage before GUI mutation | DEFERRED |
+| 1C-D24 exact native fit/performance | Assume static PASS certifies runtime, measure later | Record unknown native fit/collisions/query latency | Q/V; M09/M19 | Required bounded native/performance gates; no implementation claim | NOT_VERIFIED |
+
+## Requires User Decision
+
+NONE at architecture-planning depth. No material unresolved owner conflict, security mechanism choice, technology replacement or large dependency is required to make this candidate reviewable. Future implementation/provider/association/credential capability remains gated by its own plan/review and tests; this recommendation does not grant those authorities.
+
+## Assumptions
+
+| ID | Bounded assumption | Owner / consequence if invalid |
+| --- | --- | --- |
+| AS-01 | Initial 1C consumes text/plain eligible sources within 1A/1B inline limits, not binary/OCR/external file refs | 1A/1B; new format requires owner review, not UI workaround |
+| AS-02 | Domain/query and S1 shell prerequisites can be delivered independently before dependent GUI commands | Source/S1 slice planners; unresolved implementation delays action availability, not fabricates runtime |
+| AS-03 | Initial use is one local technician application session with owner-qualified local refs | Foundation/S1; multi-actor/profile/remote mapping requires relevant owner design |
+| AS-04 | Target 10k Items/100k Events is a meaningful synthetic validation scale within 1A storage policy | Clipboard owner; measurements may require bounded index/presentation extension |
+
+These premises are not FACT about deployed behavior and do not change Foundation semantics.
+
+## Not Verified
+
+Actual Clipboard/S1/S2/Settings/Tag-management/association/Action Catalog runtime availability; operational DB content/integrity; installed Qt/SQLite/FTS build behavior, query plans and latency; compiled/rendered Mermaid; visual layout/fonts/icons/contrast; keyboard collisions/AltGr/Narrator/accessibility; mixed DPI/multi-monitor/pet geometry; real capture/hotkey/IPC; provider permissions/authentication/licenses/outbound policy; employer privacy policy, required audit implementation and physical erase guarantees. External/untracked prototypes are outside the inspected scope. No new runtime readiness follows from approved architecture inputs or static source tests.
+
+## Risk Register
+
+Likelihood is UNKNOWN unless measured evidence exists; impact is qualitative architectural consequence. OPEN mitigations below are requirements/future tests, not deployed safeguards.
+
+| Risk | Likelihood | Impact | Mitigation | Residual Risk | Owner | Status |
+| --- | --- | --- | --- | --- | --- | --- |
+| Large history table / GUI density | UNKNOWN | High responsiveness/readability loss | 50-row model/delegate, safe core columns, M09 benchmarks/compact layout | Actual hardware/font cost unmeasured | 1C / Clipboard query | OPEN |
+| Blocking SQLite query / FTS latency | UNKNOWN | High frozen UI/close | Owner runner, bounded query/page, indexes/plans, finite busy timeout and test deadline | Long CPU query has no current cancellation API | Clipboard data / GUI | OPEN |
+| Stale async success/error | UNKNOWN | High wrong view/privacy | Full query/selection/privacy generations, latest-only queue, both callback paths guarded | Missed invalidation still requires revalidation | 1C presenter | OPEN |
+| Wrong-row mutation | UNKNOWN | High data loss/association | Typed ref+revision captured, never row index, writer current checks | Transaction API not delivered | Clipboard service | OPEN |
+| Raw preview/tooltip/accessibility leakage | UNKNOWN | High customer/secret exposure | Concealed default, purpose-filtered projection, same accessible/tooltip policy | Detector false negatives/screen observation | Clipboard privacy / 1C | OPEN |
+| Sensitive Clipboard AI exposure | UNKNOWN | High external disclosure | Sharing off, no history/raw feed, exact preview/Send and verified policy | Provider/employer policy unknown | Source privacy / S2 | OPEN |
+| Copied-command execution | UNKNOWN | Critical uncontrolled administration | Closed keys, owner adapters, no text->shell path; unavailable input APIs | Future adapters require independent review | Diagnostics / S2 / security | OPEN |
+| Evidence deletion / orphan target hold | UNKNOWN | Critical lost provenance | Writer hold checks, release separate, target loss not release, protected occurrence claim | Future coordinated association lifecycle untested | Source + Ticket/Diagnostics association | OPEN |
+| Ticket misassociation / preacceptance drift | UNKNOWN | High wrong customer record | Exact source+Ticket preview/token; accepted binding frozen incl. none | New owner transaction/reconcile contract required | Association owner / S2 | OPEN |
+| Selection/scroll/tab loss | UNKNOWN | Medium lost workflow | Typed restore/no auto-first selection, anchors, guard drafts | Source may expire; ref unavailable must be honest | 1C | OPEN |
+| Flyout overload / hover side effects | UNKNOWN | High privacy/hidden work | Five refs/three actions, cache-only all opening, no raw/providers | Future contributors must obey bounds | S1 / Clipboard contribution | OPEN |
+| Auxiliary / DynamicHub / Inspector conflict | UNKNOWN | High obscured draft/action | One lease/guard/return descriptor, primary budget/collapsed cue | Shared shell implementation not established | S1 / S2 / 1C | OPEN |
+| Focus theft / keyboard collision | UNKNOWN | High wrong input/action | Scoped chords, inner editor precedence, no callback focus, explicit origin generation | Native layouts/AltGr/apps untested | S1 / 1C accessibility | OPEN |
+| Responsive collapse / DPI/large-font failure | UNKNOWN | High unreachable controls | Three bands, single panel/full-width fallback, native 1000x700+fonts/monitors | Actual minima and geometry unknown | S1 / 1C | NOT_VERIFIED |
+| FTS/query inconsistency / duplicate joins | UNKNOWN | High incorrect search/exposure | 1A atomic eligibility/index sync, EXISTS, literal query, no hidden fallback | Migration/index plan not implemented | Clipboard data/search | OPEN |
+| Retention race / unknown source | UNKNOWN | High wrong deletion/promotion | Save/hold/cleanup writer checks, source missing explicit, no substitute | External changes can race read; owner enforces | Clipboard lifecycle | OPEN |
+| Duplicate capture / Event horizon confusion | UNKNOWN | Medium misleading provenance | Item/Event/replay distinct, lifetime versus retained labels | Users may misread expired Event history | Clipboard / 1C | OPEN |
+| Unbounded live refresh / paging drift | UNKNOWN | High churn/missed Items | Coalesced indicator, frozen page, structural cursor invalidation, explicit Refresh | Notification missed/delayed; operation rechecks | Clipboard / 1C | OPEN |
+| Loading full bodies / Entity clutter | UNKNOWN | High memory/latency/privacy | Selected <=64-KiB body only, 1024 owner cap, lazy/grouped/paged detail, highlight bound | Qt mapping/highlight performance unmeasured | Source parser / 1C | OPEN |
+| Tag clutter / duplicate taxonomy | UNKNOWN | Medium confusing wrong assignments | Global IDs, compact summary, assignment vs suggestion, shared selector pattern | Catalog governance APIs absent | Taxonomy / Clipboard | OPEN |
+| Relationship coupling / fake capabilities | UNKNOWN | High authority bypass | Typed owner profiles, current/future inventory, disable unsupported APIs | Multiple owner delivery prerequisites | Source / integration planners | OPEN |
+| Too many actions / nested navigation | UNKNOWN | Medium usability/unsafe intent | Compact views and 3-5 relevant Actions, More, menus/accessibility | Relevance/usability not measured | 1C / S2 | OPEN |
+| Committed write shown failed / unsafe retry | UNKNOWN | High duplicate/lost truth | Pending through callback gap, separate commit/read outcomes, reconcile unknown | Owner operation receipts/retry API absent | Effect owner / 1C | OPEN |
+| Testing loops | UNKNOWN | High wasted time/uncontrolled native automation | Two unchanged failures stop; bounded assertions/deadline/owned cleanup | New harness must honor contract | Validation owner | OPEN |
+| Protected state / scope drift | UNKNOWN | High unrelated-state damage | Sole tracked allowlist, pathname-only INI, byte prefix/index guards | User may change checkout during task; stop on new drift | Author/reviewer | MITIGATED for this task |
+
+## Recommended Vertical Slices
+
+Planning decomposition only, no assigned repository Slice numbers or implementation authorization. Prerequisites: separately delivered 1A eligible source/query/persistence, 1B capture for capture actions, S1 routes/auxiliary/draft contracts, and each owning mutation/audit API. Reinspect/search current implementation at each slice; don't restart completed delivery or bundle all prerequisites into GUI.
+
+| Label | Independently testable user outcome | Prerequisites / bounded validation / exclusion |
+| --- | --- | --- |
+| CC-01 | Reach read-only Clipboard workspace shell/route with truthful unavailable state | S1 route seam; guard/cancel/singleton/current-tool regression; no database/capture implementation |
+| CC-02 | Browse one bounded readonly Recent page | 1A query source; typed rows/privacy/empty/failure/paging tests; no mutations/raw all-row load |
+| CC-03 | Submit literal search + Kind/source/date filters | Owner FTS/filter APIs; ALL-token/AND/exact Event semantics/rapid stale/cursor reset; no Tag authoring |
+| CC-04 | Stable single selection + leased Inspector shell | S1 shared arbiter; selection/ref/dirty Quick Ticket/replace/return tests; no second rail |
+| CC-05 | Overview with explicit eligible full-text/copy | Owner raw eligibility; exact Copy, expiry/privacy/stale/CRLF tests; no rich execution |
+| CC-06 | Readonly Entities and safe typed Copy/Search | Owner occurrence profiles; Unicode spans/overlap/provenance/no canonical auto-create; no diagnostics inputs |
+| CC-07 | Global Tag filter and explicit Item assignment | Catalog+Clipboard assignment/token/audit APIs; ANY/ALL/remove/conflict/draft tests; no competing catalog |
+| CC-08 | Paged Capture History | Owner Events/horizon/counters; genuine duplicate/replay/pruning/held claim tests; no Event editing |
+| CC-09 | Retention/privacy projection then one lifecycle command at a time | Owner Save/Pin/Unsave/Delete invariants/audit separately; hold/race/failure/unknown/cancel; no combined giant mutation slice |
+| CC-10 | Exact Ticket association/Evidence projection | Reviewed source/Ticket coordinated use case; A->B binding/no-note fallback/hold/duplicate/record-only retry; no Ticket redesign |
+| CC-11 | One remaining safe owner handoff per slice | KB/URL/registry owner adapter; privacy/input/guard/cancel tests; no arbitrary copied command |
+| CC-12 | Clipboard cached navigation flyout | S1 shared host + eligible cache; open/hover zero work, five/three bounds, keyboard/stale/privacy; no capture/AI hidden work |
+| CC-13 | Native responsive/accessibility refinement for exact delivered UI | Three bands, 100/125/150% DPI/large font/Narrator/high contrast/mixed screens/focus; no source-semantic changes |
+| CC-14 | Privacy-filtered DynamicHub context handoff | Delivered S2 projection/catalog/lease and source policy; exact preview, no raw/default send, late A result/B draft intact; external AI separately gated |
+| CC-15 | Diagnostic input handoff or Analytics routes later | Exact owner input/durable result/report capabilities must first exist; portable/native owner tests; no new executor/analytics domain |
+
+Each slice needs its own objective/path allowlist/acceptance criteria, failure/cancel/recovery tests, affected canonical docs, independent review and separately authorized integration. Windows-dependent slices require WINDOWS_NATIVE evidence, not only offscreen. No implementation of these recommendations occurred.
+
+## Testing Strategy
+
+Future unit/contract checks: pure query composition and allowed sorts, scope/ref types, privacy projections, row/action enablement, Tag modes, capture versus read count, typed route validation, cursor invalidation, query/detail/operation generation mismatches, source+Ticket A->B and all partial/unknown outcome distinctions. No tests are written/run in this architecture task.
+
+Future isolated SQLite integration: eligible FTS/source sync, literal tokens/diacritics/Unicode, relational Tag/Entity/source-date/relationship filtering without duplicate Items, cursor limits/order/recapture/deletion, source revision conflicts, hold/Save/cleanup races and transactional association/audit failure. Where schema/data is actually changed, integrity_check=ok and zero foreign_key_check violations required; no operational DB opened here.
+
+Future Qt/headless: empty/loading/partial/failure independence, stale success AND failure, submit refusal/busy-to-callback gap, precise selection/no default raw, draft preservation/Cancel, single slot/return descriptor, Copy failed/stale preserving OS Clipboard, no executed copied command and no provider-on-open. Regression covers existing Ticket creation/note/status/classification, Knowledge drafts/tags/search and Script copy/run/close guards. Headless runtime evidence never becomes WINDOWS_NATIVE presentation evidence.
+
+Future WINDOWS_NATIVE: real shell bands incl. 1000x700 usable window, 100/125/150% DPI, large fonts/high contrast/Narrator, physical keyboard/edit shortcuts/AltGr, source Copy/clipboard behavior, flyout accessible open/close/placement, Inspector/Quick Ticket/DynamicHub single occupancy, dirty/pending targets, long URLs/values, mixed-monitor/negative-coordinate/work-area changes and privacy/focus return. Synthetic fixture screenshots inspected for clipping/overlap/truncation/contrast/incorrect disabled state; no renderer/native automation installed or launched now.
+
+Loop guard: finite assertion/input count, success condition, per-case deadline and maximum total run time recorded before native automation; initial planning recommendation <=60 seconds per focused GUI case and <=5 minutes per bounded smoke run, adjusted only by its reviewed contract. Cleanup only owned process/fixture resources. Same test/check with unchanged candidate/code/hypothesis maximum twice; two identical native/screenshot failures -> STOP, diagnose, record NOT VERIFIED or BLOCKED. No blind rerun/poll/relaunch/focus/screenshot loops. Query performance 10k Items/100k Events benchmarks record cold/warm p50/p95, memory and physical environment, never guessed PASS.
+
+## Documentation Impact / Downstream Contract
+
+Only this 1C append changes tracked content. No canonical docs/ROOT/CURRENT_STATE/ChangeLog/S1/S2/1A/1B/Foundation/AGENTS edits. Later approved validated GUI delivery assesses Docs03/04/05/06/13 and Status/ChangeLog; actual storage changes assess Docs07/08/09, actual capture changes Docs11/1B, execution changes Docs12 only if specifically authorized, Settings/privacy owner docs as relevant. Documentation approval is separate from implementation/native verification.
+
+After independent 1C review, explicit USER approval and separately authorized integration, later slice planning may rely on M01 ownership, single retained Center/slot, M03 views, M05 query semantics, M06 safe models, M07/M08 stable identities/generations, M10 Inspector, M12/M13 privacy/lifecycle, M14 original-target association, M15 handoffs and M16 routes. It may not infer current runtime classes/APIs, bypass upstream policy, execute Clipboard text, invent providers/audit/Settings or build all features in one operation. Owner conflict -> stop, record exact source/decision/impact and request owner architecture review.
+
+## Clipboard Architecture Closure
+
+INFERENCE: approved 1A domain/lifecycle, 1B capture/IPC/HUD and proposed 1C operational presentation form a coherent architecture with approved S1 shell/S2 action-context inputs. No material cross-owner conflict remains at architecture depth; all missing owner runtime capabilities are explicit prerequisites, not local authority substitutions. This author-side closure assessment makes 1C ready for independent architecture review only. The complete Clipboard feature is neither implemented nor runtime verified; independent review/USER approval/integration still precede authoritative downstream use.
+
+## Acceptance Criteria
+
+Every original section-320 criterion is evaluated independently, unchanged, at architecture-planning depth. PASS requires the named design/evidence, not merely repeat of a requirement. Architecture coverage = 32/32 PASS; no runtime PASS implied.
+
+| ID | Original acceptance criterion | Result | Concrete report evidence |
+| --- | --- | --- | --- |
+| AC-01 | Existing PySide6 shell and GUI conventions have been inspected. | PASS | M/C/R/T/K/S actual source; Verified Current GUI State records current stack/menu/dialog/task differences |
+| AC-02 | Reusable GUI components are identified. | PASS | M02 current equivalent/layer/dependency/treatment and source tests; generic missing primitives explicitly bounded |
+| AC-03 | Clipboard Center has a clear place in MainWindow. | PASS | MainWindow Integration clipboard.center retained singleton, injected services and guarded activation |
+| AC-04 | Internal navigation semantics are defined. | PASS | M03 compact selector/current-view predicate and clear/switch/session rules distinct from shell routes |
+| AC-05 | Default Clipboard views are defined. | PASS | M03 Recent/Saved/Pinned/URLs and other bounded views with query/sort/empty/availability |
+| AC-06 | Search semantics are defined. | PASS | M05 eligible literal ALL-token FTS, excluded fields/index truth, separate exact Entity lookup, no raw fallback |
+| AC-07 | Filter architecture is defined. | PASS | M05 AND families/grouped OR/Tag ANY-ALL/same-Event source-date/clear and immutable query |
+| AC-08 | Table columns are defined conceptually. | PASS | M06 every candidate's meaning/source/sort/default/width/privacy, core safety state always visible |
+| AC-09 | Large-data table strategy is defined. | PASS | M09 50+1 keyset/explicit paging/cursor invalidation/10k-100k targets/no all bodies |
+| AC-10 | Selection behavior is defined. | PASS | M07 stable typed identity, initial none, refresh/filter/page/delete/draft/async outcomes |
+| AC-11 | Inspector architecture is defined. | PASS | Single S1 lease, dirty/pending replacement, bounded return and full-width same-Center fallback |
+| AC-12 | Summary content is defined. | PASS | M10 Overview identifies exact safe metadata, explicit full-text eligibility/load, no default raw |
+| AC-13 | Entity presentation is defined. | PASS | M11 occurrence/provenance/confidence/source spans/grouping and tested mapping plan |
+| AC-14 | Entity actions are bounded. | PASS | M04/M11/M15 safe typed copy/search/resolution, no automatic canonical creation or unsupported Ping |
+| AC-15 | Tag integration uses global Tag architecture. | PASS | M11/global catalog identities, Tags Apply/remove/token/conflict and existing choice UI adaptation |
+| AC-16 | Capture History behavior is defined. | PASS | Genuine Events, separate lifetime versus retained horizon, 50+1 paging/coarse source/privacy/held occurrence |
+| AC-17 | Relationship display and actions are defined. | PASS | M10/M14 typed accepted targets/provenance/holds, no graph editor/missing-target release |
+| AC-18 | Retention/privacy display is defined. | PASS | M12 user intent/pin/all holds/effective expiry/demotion/delete and M13 source-safe display |
+| AC-19 | Contextual actions route through owning services. | PASS | M04 exact owners/adapters and Integration Inputs current-versus-future inventory |
+| AC-20 | No arbitrary command execution is possible. | PASS | Planned architecture excludes text->shell, closed catalog/adapters, M15 parameterless current diagnostic limitation; runtime proof NOT RUN |
+| AC-21 | Keyboard behavior is defined. | PASS | M18 scope/action/conflicts/editor behavior; no global hook, actual 1B binding display |
+| AC-22 | Accessibility requirements are defined. | PASS | M18 named state/privacy parity/keyboard/focus/plain warnings and future Narrator/high contrast tests |
+| AC-23 | Sensitive-content presentation is defined. | PASS | M13 every original surface x 1A actual classes, blocked no source/secret override, explicit raw/outbound separation |
+| AC-24 | Loading/error/partial states are defined. | PASS | M17 independent loaders/empty/stale/failure/retry plus deleted/expired/disabled/capture unavailable |
+| AC-25 | Async stale-result handling is defined. | PASS | M08 query/selection/privacy generations, latest-only coalescing, stale success and failure, accepted outcomes preserved |
+| AC-26 | Deep-link architecture is defined. | PASS | M16 typed guarded Item/filter/Ticket/Entity/result paths with unavailable/refusal semantics; D04 |
+| AC-27 | Analytics drill-down compatibility is defined. | PASS | Analytics Boundary and M16 scoped query translation/grain/horizon, no Analytics ownership |
+| AC-28 | Mochi sidebar compatibility is considered. | PASS | M01/M19 single slot/S2 acknowledgement distinct, explicit handoff/privacy/late-result M15 and D07 |
+| AC-29 | Native Windows validation is planned. | PASS | Testing Strategy real bands/DPI/Narrator/physical keys/focus/monitors/screenshots, all runtime NOT RUN |
+| AC-30 | Testing-loop guard is explicit. | PASS | Finite case/total budgets, owned cleanup, two unchanged failures stop/diagnose, no repeated relaunch |
+| AC-31 | No production implementation occurred. | PASS | Sole-file Git scope/index/baseline checks; no F7Hub imports/runtime/DB/tools installation or production edit |
+| AC-32 | Clipboard feature architecture is complete enough to begin vertical implementation planning. | PASS | M01 upstream compatibility, original 299-310 inventory mapping, D01-D08, decisions/risks/prerequisites/bounded slices; independent review still next |
+
+## Validation
+
+Environment: WINDOWS_NATIVE workstation, documentation/source/Git inspection only. Provenance: FRESH author-side static checks; retained source/approval descriptions are identified, no historical runtime suite promoted to fresh PASS. Original section-321 assessment below is architecture coverage, not application execution.
+
+| Original architecture validation | Result | Evidence / limit |
+| --- | --- | --- |
+| Current GUI inspection | PASS | M/C/R/T/K/S/D/V inspected, classified current versus future |
+| MainWindow integration | PASS | S1 clipboard.center guarded singleton/availability/context/focus |
+| Workspace composition | PASS | Compact view/list, single shared leased Inspector; no MDI/second shell |
+| Navigation model | PASS | M03/M16/S1 flyout mechanical contract |
+| Search/filter architecture | PASS | M05 eligibility/literal/structured semantics/debounce/generations |
+| Table architecture | PASS | M06 safe projections/columns/model/view/service sort |
+| Inspector architecture | PASS | M10 + occupancy/draft/return/full-tool rules |
+| Entity presentation | PASS | M11 source-bound values/confidence/provenance/offset/overlap |
+| Tag integration | PASS | Global IDs and owner assignment, shared choice pattern |
+| Relationship UX | PASS | Typed accepted predicates/targets/holds, no generic editor |
+| Retention/privacy UX | PASS | M12/M13 no secret override/hold destruction |
+| Contextual actions | PASS | M04 owners and M14/M15 binding/availability/handoff |
+| Keyboard/accessibility | PASS | M18 scope/non-hover/privacy/contrast/native future matrix |
+| Async/error handling | PASS | M08/M17 latest-only safe callbacks/independent retry/outcome truth |
+| Large-data strategy | PASS | M09 bounded keysets/lazy detail/memory/benchmark plan |
+| Deep-link architecture | PASS | M16 validated owner intents/missing targets |
+| Native validation plan | PASS | Testing Strategy finite physical/native cases; execution NOT RUN |
+| Scope control | PASS | Only 1C appended, baseline HEAD retained/index empty/protected pathname untouched |
+| Production changes | NONE | No production file edits, imports or application startup |
+| Database changes | NONE | No schema/data/DB access or migrations |
+
+| Additional check | Result | FRESH evidence / limitation |
+| --- | --- | --- |
+| Expected baseline branch/SHAs/target blob/index | PASS | Required Git commands match explicit USER identities before branch |
+| Approved input pinning | PASS | Nine baseline blobs and local merged ancestry; USER approval plus fresh PR77 record |
+| Foundation / 1A / 1B / S1 / S2 compatibility | PASS | Named matrices, no unresolved owning decision change |
+| ORIGINAL CONTRACT PREFIX | PASS | Exact first 79,039 raw bytes against baseline checkout-filter bytes and original SHA256; normalized Git blob equality |
+| Original/additional matrix inventory | PASS | 299-310 mapping/all specified fields plus M01-M19 and Settings/Integration tables |
+| Required diagram source presence / fences | PASS | D01-D04 originals and D05-D08 additional; balanced Mermaid fences, ownership self-check |
+| Original acceptance inventory | PASS | AC-01..AC-32 exact source criterion text and individual design evidence; 32/32 architecture coverage |
+| Report sections/registers/local links | PASS | Static required heading/matrix/table/register/link resolution checks; source diagrams not compiled |
+| Whitespace / sole tracked path / empty staging index | PASS | git diff --check, status, diff --name-status, diff --cached --name-only |
+| Candidate immutable identity | PASS | Final raw/Git digest and format/diff record outside file; no hash-object -w or index mutation |
+| Independent 1C architecture review | NOT RUN | Required next gate; author's self-assessment is not independent approval |
+| Application runtime | NOT RUN | Planning only |
+| Database tests / integrity checks | NOT RUN | No operational or test DB opened |
+| GUI tests | NOT RUN | Test source inspection only |
+| Integration tests | NOT RUN | Test source inspection only |
+| AHK tests | NOT RUN | No capture/host/hotkey execution |
+| Clipboard runtime | NOT RUN | No live Clipboard read/write or capture |
+| Native Windows GUI | NOT RUN | No product/screenshot/physical-input validation |
+| PowerShell / Diagnostics runtime | NOT RUN | No approved operation run |
+| Mochi / DynamicHub / Analytics runtime | NOT RUN | No feature/renderer/provider run |
+| Mermaid rendering / compilation | NOT RUN | Source sufficient; no rendering tooling installed |
+| Git stage / commit / push / PR / merge | NOT RUN | Explicit stop boundary; branch-only operation authorized |
+
+Static PASS covers document preservation/structure/scope and author-side architecture agreement, not rendering, performance, source privacy enforcement, database validity or native usability. Checks use standard-library byte/text inspection and Git; no dependencies, F7Hub imports or operational state. Fresh final identity is reported separately after all edits. No runtime evidence is retained as a 1C PASS.
+
+## Result
+
+READY_FOR_CLIPBOARD_SLICE_PLANNING
+
+Original contract prefix PASS; Foundation/1A/1B/S1/S2 architecture compatibility PASS; all original and requested matrix/diagram inventories complete; decision/risk registers complete; 32/32 architecture criteria PASS; Requires User Decision NONE; no material unresolved owner conflict. Only 1C modified; unstaged, uncommitted, unpushed, unapproved. No production implementation, database or runtime changes.
+
+Next gate: INDEPENDENT CLIPBOARD 1C ARCHITECTURE REVIEW of the exact candidate identity. STOP. Review record NOT RUN; approval NONE. 2026-10-08 change history: this architecture execution report appended only. No implementation, staging, commit, push, PR, merge, next-phase execution or new AGENTS file is authorized by this result.
