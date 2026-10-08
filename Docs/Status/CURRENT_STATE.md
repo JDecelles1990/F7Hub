@@ -1,5 +1,17 @@
 # F7Hub Current State
 
+## CC-01 — Clipboard workspace shell
+
+**READY_FOR_REVIEW** on 2026-10-08 (America/Toronto), pending independent implementation review. Candidate worktree `C:/Dev/F7Hub-Clipboard-CC01`, branch `feat/clipboard-cc01-workspace-shell`, base/HEAD `2af22c24b188e040080d1a7e3effd24ecf6613ca`; unstaged/uncommitted. This candidate is not integrated into canonical main.
+
+File menu and toolbar share `clipboard.center`, immediately after Scripts. Accepted guarded activation creates one retained read-only ClipboardWorkspace in the existing stack. It displays **Clipboard Center**, **Clipboard history is not available yet.**, and **Back to Tickets**. The return signal uses existing Tickets navigation. Focus, singleton reuse, existing routes, callback-gap refusal, Discard/Cancel and hidden new-ticket close protection are covered. Clipboard query/history service, persistence, capture, monitoring, OS Clipboard access and IPC remain absent; no later Clipboard functionality is delivered.
+
+Fresh validation against the implemented source/test candidate: workspace 3, MainWindow 23, corrected bootstrap 8, full GUI 221 and full integration 204 tests PASS, exits 0. Automated GUI tests use Qt offscreen on Windows; the integration suite also contains existing real Windows PowerShell execution cases. Separate WINDOWS_NATIVE Qt smoke: 28 assertions PASS at 1000×700/96 DPI, exit 0, one inspected screenshot, clean close and zero owned survivors. Input was synthesized by QTest; physical hardware input, alternate DPI and Narrator NOT RUN.
+
+External evidence: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CC01/implementation-report.md`, `candidate-manifest.json`, suite logs/results, `evidence-applicability.json` and `native-validation.result.json`. Final documentation-only additions are bound to unchanged tested production/test identities. Historical fixture/harness failures and the initial incomplete integration run are retained in the report; the corrected full run completed. Its supervisor terminated three owned companion descendants and verified zero survivors. Existing fixture companion-launch diagnostics are a nonblocking future harness/lifecycle concern, not changed by CC-01.
+
+Canonical checkout remains on main at the approved base, with only protected `AutoHotkey/Troubleshooting_Sections/GuideSettings.ini` observed by pathname. Its contents/metadata were not inspected. No staging, commit, push, PR, merge or CC-02 work occurred.
+
 ## PowerShell diagnostic compliance candidate
 
 The unstaged, uncommitted `feature/powershell-diagnostic-compliance` candidate adds strict mode and concise help to the three existing registered diagnostics. A guarded forward-only data migration refreshes their exact SHA-256 registrations, with matching literal execution-policy digests. The structured result and Local Baseline pack contracts remain unchanged. Validation and exact candidate identity are in the external implementation report; independent read-only review is the next gate.

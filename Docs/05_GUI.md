@@ -1,5 +1,17 @@
 # F7Hub GUI Design
 
+## CC-01 — Clipboard Center workspace shell
+
+The File menu and existing toolbar share one **Clipboard Center** action immediately after Scripts. Its stable action identity is `clipboard.center`. Explicit activation lazily creates one retained read-only page in MainWindow's existing stack. Repeated activation and navigation away/back reuse that page. Startup remains Tickets.
+
+The page displays **Clipboard Center**, **Clipboard history is not available yet.**, and **Back to Tickets**. The return button uses the existing Tickets navigation and receives focus on accepted Clipboard activation. Labels are plain text with accessible names; the unavailable message wraps. Standard Qt palette, font and keyboard button behavior apply. The menu mnemonic adds no dedicated/global shortcut.
+
+Existing shared-runner and Ticket/Script owner-pending guards refuse navigation, including idle-before-callback gaps. Existing Ticket activity Discard/Cancel protection runs before first construction or a page transition; Cancel preserves page, values and focus. Accepted discard uses the existing cleanup. Idle new-ticket creation fields remain retained while hidden, and application close still prompts for the unsaved form. Clipboard adds no draft, timer or worker.
+
+No Clipboard query/history service, persistence, capture, monitoring, IPC, search or Inspector is delivered. The shell does not read the OS Clipboard or display sample history.
+
+Validation on Windows: 221 GUI and 204 integration tests PASS, exit 0, using Qt offscreen; this establishes automated behavior, not native rendering. One separate Windows-native QTest smoke passed 28 assertions at 1000×700/96 DPI, exit 0 and zero owned survivors. Its single client screenshot was inspected without observed clipping/overlap. Physical hardware input, alternate DPI and Narrator remain NOT RUN. CC-01 is an unstaged implementation candidate; independent review is pending.
+
 ## Slice 053 — Local Baseline Diagnostics
 
 Scripts shows **Name | Type | Category | File status | Execution**. Code, Version and current metadata policy are in plain-text details. File availability and execution approval are separate; an approved missing file cannot Run. Shown/available/approved counts describe the filtered rows. Pack readiness checks its three registrations independently of search, remains advisory, and execution rechecks bytes/runtime. The pack panel names member order, local read-only scope, memory-only results and per-member limits: up to 60 seconds execution plus 5 seconds cleanup; preparation adds time. Runs cannot be cancelled. Shared pending ownership spans dispatch, runner idle-before-callback and result presentation, including stale-callback, failure, navigation and close guards.

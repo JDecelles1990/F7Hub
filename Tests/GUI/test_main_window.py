@@ -10,7 +10,7 @@ from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtWidgets import QApplication
+from PySide6.QtWidgets import QApplication, QMessageBox, QToolBar
 from PySide6.QtTest import QTest
 from PySide6.QtCore import QTimer
 
@@ -141,6 +141,141 @@ class MainWindowTests(unittest.TestCase):
         self.assertIs(self.window.pages.currentWidget(), page)
         self.assertEqual(self.window.ticket_create_widget.subject_input.text(), "Unsaved ticket")
         self.assertIn("Guide opened", self.window.statusBar().currentMessage())
+
+    def test_clipboard_action_is_shared_and_follows_scripts(self):
+        action = self.window.clipboard_action
+        self.assertEqual(action.objectName(), "clipboardCenterAction")
+        self.assertEqual(action.data(), "clipboard.center")
+        self.assertTrue(action.shortcut().isEmpty())
+        file_actions = self.window.menuBar().actions()[0].menu().actions()
+        toolbar_actions = self.window.findChildren(QToolBar)[0].actions()
+        for actions in (file_actions, toolbar_actions):
+            self.assertIs(actions[actions.index(self.window.scripts_action) + 1], action)
+        self.assertIsNone(self.window.clipboard_workspace)
+        self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
+
+    def test_clipboard_activation_is_lazy_retained_and_restores_focus(self):
+        count = self.window.pages.count()
+        self.window.clipboard_action.trigger()
+        clipboard = self.window.clipboard_workspace
+        self.assertIsNotNone(clipboard)
+        self.assertIs(self.window.pages.currentWidget(), clipboard)
+        self.assertEqual(self.window.pages.count(), count + 1)
+        self.assertTrue(clipboard.back_button.hasFocus())
+        for _ in range(3):
+            self.assertTrue(self.window.show_clipboard())
+            self.assertIs(self.window.clipboard_workspace, clipboard)
+            self.assertEqual(self.window.pages.count(), count + 1)
+        clipboard.back_button.click()
+        self.wait_idle()
+        self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
+        self.assertTrue(self.window.show_clipboard())
+        self.assertIs(self.window.pages.currentWidget(), clipboard)
+        self.assertTrue(clipboard.back_button.hasFocus())
+        self.window.scripts_action.trigger()
+        self.wait_idle()
+        self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
+        self.window.clipboard_action.trigger()
+        self.assertIs(self.window.pages.currentWidget(), clipboard)
+        self.assertEqual(self.window.pages.count(), count + 1)
+
+    def test_clipboard_without_optional_services_and_idle_close(self):
+        window = MainWindow(self.service)
+        self.addCleanup(window.deleteLater)
+        self.assertFalse(window.knowledge_action.isEnabled())
+        self.assertFalse(window.scripts_action.isEnabled())
+        self.assertTrue(window.clipboard_action.isEnabled())
+        self.assertTrue(window.show_clipboard())
+        self.assertEqual(window.clipboard_workspace.unavailable_message.text(),
+                         "Clipboard history is not available yet.")
+        self.assertTrue(window.close())
+
+    def test_clipboard_pending_owner_guards_cover_idle_callback_gap(self):
+        workspace = self.window.workspace
+        for owner, field, value in (
+            (workspace, "_note_pending", True),
+            (workspace, "_creation_pending", True),
+            (workspace, "status_pending", True),
+            (workspace, "classification_pending", True),
+            (self.window.script_workspace, "_run_identity", object()),
+            (self.window.ticket_create_widget, "_submitting", True),
+        ):
+            with self.subTest(field=field), patch.object(owner, field, value):
+                self.assertFalse(self.window.runner.busy)
+                focus = self.window.focusWidget()
+                self.window._set_busy(False)
+                self.assertFalse(self.window.clipboard_action.isEnabled())
+                self.assertFalse(self.window.show_clipboard())
+                self.assertIsNone(self.window.clipboard_workspace)
+                self.assertIs(self.window.pages.currentWidget(), workspace)
+                self.assertIs(self.window.focusWidget(), focus)
+                self.assertFalse(self.window.close())
+            self.window._set_busy(False)
+        self.assertTrue(self.window.clipboard_action.isEnabled())
+        self.assertTrue(self.window.show_clipboard())
+
+    def test_clipboard_shared_worker_refusal_then_recovery(self):
+        self.scripts.gate = threading.Event()
+        self.window.show_scripts()
+        self.assertTrue(self.window.runner.busy)
+        count = self.window.pages.count()
+        focus = self.window.focusWidget()
+        self.assertFalse(self.window.clipboard_action.isEnabled())
+        self.assertFalse(self.window.show_clipboard())
+        self.assertIsNone(self.window.clipboard_workspace)
+        self.assertEqual(self.window.pages.count(), count)
+        self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
+        self.assertIs(self.window.focusWidget(), focus)
+        self.scripts.gate.set()
+        self.wait_idle()
+        self.assertTrue(self.window.clipboard_action.isEnabled())
+        self.assertTrue(self.window.show_clipboard())
+
+    def test_clipboard_ticket_draft_cancel_preserves_page_values_and_focus(self):
+        workspace = self.window.workspace
+        workspace.note_input.setPlainText("Keep this note")
+        workspace.reason_input.setText("Keep this reason")
+        workspace.subject_search_input.setFocus()
+        focus = self.window.focusWidget()
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Cancel) as prompt:
+            self.assertFalse(self.window.show_clipboard())
+        prompt.assert_called_once()
+        self.assertEqual(prompt.call_args.args[-1], QMessageBox.StandardButton.Cancel)
+        self.assertIsNone(self.window.clipboard_workspace)
+        self.assertIs(self.window.pages.currentWidget(), workspace)
+        self.assertEqual(workspace.note_input.toPlainText(), "Keep this note")
+        self.assertEqual(workspace.reason_input.text(), "Keep this reason")
+        self.assertIs(self.window.focusWidget(), focus)
+
+    def test_clipboard_ticket_discard_cleans_only_after_confirmation(self):
+        workspace = self.window.workspace
+        workspace.note_input.setPlainText("Discard this note")
+        workspace.reason_input.setText("Discard this reason")
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Discard) as prompt:
+            self.assertTrue(self.window.show_clipboard())
+        prompt.assert_called_once()
+        self.assertEqual(workspace.note_input.toPlainText(), "")
+        self.assertEqual(workspace.reason_input.text(), "")
+        with patch.object(workspace, "confirm_discard", side_effect=AssertionError("Repeated activation must not discard")):
+            self.assertTrue(self.window.show_clipboard())
+
+    def test_clipboard_retains_creation_draft_and_hidden_close_guard(self):
+        self.window.show_new_ticket()
+        form = self.window.ticket_create_widget
+        form.subject_input.setText("Keep unsaved creation")
+        self.assertTrue(self.window.show_clipboard())
+        self.assertTrue(self.window.workspace.creating)
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Cancel) as prompt:
+            self.assertFalse(self.window.close())
+        self.assertEqual(prompt.call_args.args[1], "Unsaved new ticket")
+        self.assertEqual(form.subject_input.text(), "Keep unsaved creation")
+        self.assertIs(self.window.pages.currentWidget(), self.window.clipboard_workspace)
+        self.window.clipboard_workspace.back_button.click()
+        self.wait_idle()
+        self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
+        self.assertTrue(self.window.workspace.creating)
+        self.assertEqual(form.subject_input.text(), "Keep unsaved creation")
+        self.assertEqual(self.service.calls, 0)
 
     def test_guide_failure_is_safe_and_retryable(self):
         class Gateway:

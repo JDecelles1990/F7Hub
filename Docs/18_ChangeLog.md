@@ -1,5 +1,15 @@
 # F7Hub ChangeLog
 
+## 2026-10-08 — CC-01: Clipboard workspace shell candidate
+
+Added one lazy retained read-only Clipboard Center page to the existing MainWindow stack, reached by a shared File-menu/toolbar action after Scripts (`clipboard.center`). The page truthfully displays **Clipboard history is not available yet.** and an accessible **Back to Tickets** button. Activation uses existing pending-operation and Discard/Cancel guards; focus, singleton reuse, hidden creation drafts and application close are covered. Bootstrap and service composition are unchanged. No Clipboard data, capture, OS Clipboard access, IPC or later functionality is introduced.
+
+Fresh Windows-host validation: focused workspace 3, MainWindow 23 and corrected bootstrap 8 tests PASS; full GUI 221 and integration 204 PASS, exits 0 with Qt offscreen. One separate native Windows QTest smoke passed 28 assertions at 1000×700/96 DPI, exit 0, zero owned survivors; one screenshot inspected without observed clipping/overlap. Physical input, alternate DPI and Narrator NOT RUN.
+
+Initial failures remain in external evidence: bootstrap readiness-helper race corrected in the new test; external-runner import-path error corrected without production edits; initial integration execution stopped at its 300-second supervisor limit and is INCOMPLETE. The corrected bounded integration run completed. Its supervisor cleaned three owned companion descendants and verified zero survivors; existing fixture companion-launch diagnostics remain a separate nonblocking follow-up. No Mochi changes are included.
+
+CC-01 is READY_FOR_REVIEW, unstaged and uncommitted in `C:/Dev/F7Hub-Clipboard-CC01`. Evidence, manifest and implementation report are external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CC01`. Independent review and integration are pending.
+
 ## 2026-10-03 — PowerShell diagnostic strict-mode compliance candidate
 
 Added strict mode and bounded comment-based help to the three existing registered System, Network and Services snapshots. Corrected stale System and Network execution comments. Forward-only data migration 0012 and the literal execution policy refresh their exact source hashes; no schema, operation, pack membership, privilege, runtime, result or exit-code contract changed. Focused and affected validation is recorded in the external candidate report; independent read-only review remains the next gate.

@@ -9,6 +9,7 @@ from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.knowledge_workspace import KnowledgeWorkspace
 from f7hub.gui.ticket_workspace import TicketWorkspace
 from f7hub.gui.script_workspace import ScriptWorkspace
+from f7hub.gui.clipboard_workspace import ClipboardWorkspace
 from f7hub.services.ticket_reference_service import TicketReferenceService
 from f7hub.services.company_service import CompanyService
 from f7hub.services.contact_service import ContactService
@@ -57,6 +58,7 @@ class MainWindow(QMainWindow):
         self._tickets_started = False
         self.altf7hub_service = altf7hub_service
         self.pages = QStackedWidget(self)
+        self.clipboard_workspace: ClipboardWorkspace | None = None
         self.ticket_create_widget = TicketCreateWidget(
             ticket_service, reference_service=reference_service, company_service=company_service,
             contact_service=contact_service,
@@ -101,7 +103,12 @@ class MainWindow(QMainWindow):
         self.scripts_action = QAction("Scripts", self)
         self.scripts_action.setEnabled(self.script_workspace is not None)
         self.scripts_action.triggered.connect(self.show_scripts)
-        for action in (self.tickets_action, self.knowledge_action, self.scripts_action):
+        self.clipboard_action = QAction("&Clipboard Center", self)
+        self.clipboard_action.setObjectName("clipboardCenterAction")
+        self.clipboard_action.setData("clipboard.center")
+        self.clipboard_action.triggered.connect(self.show_clipboard)
+        for action in (self.tickets_action, self.knowledge_action, self.scripts_action,
+                       self.clipboard_action):
             file_menu.addAction(action)
             toolbar.addAction(action)
         self.backup_action = QAction("Back up database", self)
@@ -169,6 +176,7 @@ class MainWindow(QMainWindow):
         self.tickets_action.setEnabled(not busy)
         self.knowledge_action.setEnabled(not busy and self.knowledge_workspace is not None)
         self.scripts_action.setEnabled(not busy and self.script_workspace is not None)
+        self.clipboard_action.setEnabled(not busy)
         self.backup_action.setEnabled(not busy and self.backup_service is not None)
         self.altf7hub_action.setEnabled(not busy and self.altf7hub_service is not None)
         self.statusBar().showMessage("Working…" if busy else "Ready")
@@ -257,6 +265,23 @@ class MainWindow(QMainWindow):
             self.workspace._clear_drafts()
             self.pages.setCurrentWidget(self.script_workspace)
             self.script_workspace.refresh_list()
+
+    def show_clipboard(self) -> bool:
+        if (self._script_run_pending or self.runner.busy or self.workspace.note_pending
+                or self.workspace.creation_pending or self.workspace.status_pending
+                or self.workspace.classification_pending):
+            return False
+        if self.pages.currentWidget() is not self.clipboard_workspace:
+            if not self.workspace.confirm_discard():
+                return False
+            self.workspace._clear_drafts()
+        if self.clipboard_workspace is None:
+            self.clipboard_workspace = ClipboardWorkspace(self)
+            self.clipboard_workspace.tickets_requested.connect(self.show_tickets)
+            self.pages.addWidget(self.clipboard_workspace)
+        self.pages.setCurrentWidget(self.clipboard_workspace)
+        self.clipboard_workspace.back_button.setFocus()
+        return True
 
     def open_knowledge_article(self, article_id):
         if self._script_run_pending:
