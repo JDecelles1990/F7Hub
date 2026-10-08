@@ -2756,7 +2756,7 @@ RECOMMENDATION: new cross-boundary contracts use a small common envelope, explic
 
 Date: 2026-10-07 (America/Toronto). This is Foundation 0B architecture design only. All new shapes/rules below are RECOMMENDATION awaiting independent architecture review and USER approval. FACT means inspected source/specification at the pinned base, not fresh runtime acceptance. INFERENCE is derived from evidence; ASSUMPTION is explicit; NOT VERIFIED identifies gaps. No production contract, schema file, test, transport, service, database or dependency was implemented. Original planning instructions above are preserved.
 
-Approved [Phase 0A](<0A _Master_Foundation_Architectural_Contract.md#execution-report>) remains authority. 0A-D1 keeps interactive troubleshooting coordination with DynamicHub and diagnostic definitions/execution/results with Diagnostics through existing services/gateways. 0A-D2 preserves pre-ticket/ticketless local Case Journal work, optional Ticket association, reuse-first persistence and existing Ticket activity authority. No envelope universally requires a ticket/session. Local journal storage, drafts and editing remain independent of PSA and AI.
+Approved [Phase 0A](<0A_Master_Foundation_Architectural_Contract.md#execution-report>) remains authority. 0A-D1 keeps interactive troubleshooting coordination with DynamicHub and diagnostic definitions/execution/results with Diagnostics through existing services/gateways. 0A-D2 preserves pre-ticket/ticketless local Case Journal work, optional Ticket association, reuse-first persistence and existing Ticket activity authority. No envelope universally requires a ticket/session. Local journal storage, drafts and editing remain independent of PSA and AI.
 
 ## Baseline
 
@@ -3410,7 +3410,7 @@ Executed document checks used read-only Python stdlib (no F7Hub imports or bytec
 Final observed Git status:
 
 ```text
- M "Docs/Planning/Foundation/0B _Global _JSON_Contract_Interoperability_Grammar.md"
+ M "Docs/Planning/Foundation/0B_Global_JSON_Contract_Interoperability_Grammar.md"
 ?? AutoHotkey/Troubleshooting_Sections/GuideSettings.ini
 ```
 
@@ -3418,7 +3418,7 @@ GuideSettings.ini is protected unrelated user/runtime state, not a Phase 0B cand
 
 ## Files Changed
 
-Only `Docs/Planning/Foundation/0B _Global _JSON_Contract_Interoperability_Grammar.md`: original planning instructions preserved byte-for-byte; appended clearly separated execution report, current-contract inventory, proposed grammar, matrix, diagrams, decision/risk/test strategy and downstream/validation records. Candidate remains unstaged on `docs/foundation-0b-execution-20261007`, HEAD/base/local origin/main `1a7015b500fc0eccbab749e82585c7936d5cb478`.
+Only `Docs/Planning/Foundation/0B_Global_JSON_Contract_Interoperability_Grammar.md`: original planning instructions preserved byte-for-byte; appended clearly separated execution report, current-contract inventory, proposed grammar, matrix, diagrams, decision/risk/test strategy and downstream/validation records. Candidate remains unstaged on `docs/foundation-0b-execution-20261007`, HEAD/base/local origin/main `1a7015b500fc0eccbab749e82585c7936d5cb478`.
 
 Excluded protected state: untracked `AutoHotkey/Troubleshooting_Sections/GuideSettings.ini`. No other Phase 0B write was performed; no implementation or downstream document update is included.
 

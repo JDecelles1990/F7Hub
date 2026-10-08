@@ -3500,8 +3500,8 @@ FACT: evidence is tied to the baseline commit. Source inspection and reading tes
 | --- | --- | --- |
 | G | Branch, HEAD, status, remotes, live remote main, log, diff/index/untracked inventories, target blob | Baseline and preservation |
 | A | AGENTS.md, ROOT.md, Docs/19_DocumentationIndex.md, Planning/Foundation scoped guidance | Routing, authority and lifecycle |
-| F0A | [Approved 0A](<0A _Master_Foundation_Architectural_Contract.md>) | Ownership, context, Case Journal, DynamicHub and evidence |
-| F0B | [Approved 0B](<0B _Global _JSON_Contract_Interoperability_Grammar.md>) | Wire grammar, identity, versioning and missing/null semantics |
+| F0A | [Approved 0A](<0A_Master_Foundation_Architectural_Contract.md>) | Ownership, context, Case Journal, DynamicHub and evidence |
+| F0B | [Approved 0B](<0B_Global_JSON_Contract_Interoperability_Grammar.md>) | Wire grammar, identity, versioning and missing/null semantics |
 | P0C | Complete original plan retained above | Requirements and all acceptance criteria |
 | D | Relevant sections of [database strategy](../../07_Database.md), [ERD](../../08_ERD.md), [physical schema](../../09_SQLSchema.md) | Intended requirements versus migration availability |
 | M2 | Database/Migrations/0002_taxonomy.sql | Exact category/tag keys, columns, constraints, FKs and indexes |

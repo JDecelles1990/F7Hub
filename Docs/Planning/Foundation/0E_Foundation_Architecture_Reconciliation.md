@@ -32,8 +32,8 @@ Authoritative source shorthand used throughout the report:
 
 | Key | Authoritative source / sections most relevant to reconciliation |
 | --- | --- |
-| A | [0A Master Foundation](<0A _Master_Foundation_Architectural_Contract.md#execution-report>); execution report A–O, especially C–F ownership/dependencies, H–I relationships/trust, J configuration, L approved 0A-D1/0A-D2, O downstream contract |
-| B | [0B Interoperability](<0B _Global _JSON_Contract_Interoperability_Grammar.md#execution-report>); Contract Principles, Identity / Correlation Rules, Status and Error Model, Validation Architecture, External Provider / Offline Rules, Decision Register |
+| A | [0A Master Foundation](<0A_Master_Foundation_Architectural_Contract.md#execution-report>); execution report A–O, especially C–F ownership/dependencies, H–I relationships/trust, J configuration, L approved 0A-D1/0A-D2, O downstream contract |
+| B | [0B Interoperability](<0B_Global_JSON_Contract_Interoperability_Grammar.md#execution-report>); Contract Principles, Identity / Correlation Rules, Status and Error Model, Validation Architecture, External Provider / Offline Rules, Decision Register |
 | C | [0C Information Vocabulary](0C_Taxonomy_Information_Vocabulary.md#execution-report); Classification Decision Tree, Entity/Tag/Relationship Architecture, Shared Operational Vocabulary, Provenance & Confidence, Settings Inputs for Phase 0D |
 | D | [0D Settings](0D_Settings_Architecture.md#execution-report); Settings Ownership, Persistence Strategy, Precedence Model, Effective-Value Semantics, Cross-Language Settings Delivery, compatibility and downstream sections |
 | G | [Root agent contract](../../../AGENTS.md), [ROOT](../../../ROOT.md), [documentation router](../../19_DocumentationIndex.md), [Planning guidance](../AGENTS.md), [Foundation guidance](AGENTS.md) |
