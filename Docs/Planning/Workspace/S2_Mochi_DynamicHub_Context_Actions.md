@@ -383,6 +383,43 @@ confirmation current
 
 Do not execute against stale UI context.
 
+### Invocation-Time Operation Binding
+
+**The action's invocation context is immutable for that operation.** When an
+approved action is invoked, the owning service captures the authoritative
+references and decision inputs for its lifetime, including:
+
+```text
+operation_id
+action_key
+invocation-time context revision
+invocation-time target reference(s)
+tenant / provider scope where applicable
+optional Ticket association choice and exact Ticket reference
+capability and safety decision inputs
+requesting technician and required provenance
+```
+
+Changing the current Active Technician Context or Active Ticket Context after
+invocation is navigation/presentation state only. It MUST NOT retarget an
+in-flight operation or rewrite its Ticket association. The current selection
+is never completion-time authority.
+
+A result that completes after the technician has changed context remains a
+valid late result when its execution outcome is valid. Keep it bound to the
+invocation-time target and any invocation-time Ticket association; preserve
+provenance; do not switch the technician's current context or overwrite the
+new context's UI as though the result belongs to it. Surface that the result
+belongs to a different/stale displayed context, allow explicit navigation to
+its originating target or Ticket, and permit viewing the result without
+implying it belongs to the currently active context. Exact visual treatment is
+deferred to S1/S2 execution and UI design.
+
+If an invocation-time target, tenant/provider scope, or captured Ticket
+reference becomes unavailable or invalid, fail or reconcile truthfully through
+the owning service. Never substitute whatever target or Ticket is currently
+active.
+
 ---
 
 ## 12. Action Catalog
@@ -691,6 +728,8 @@ operation_id
 action_key
 context_revision
 target_ref
+tenant / provider scope where applicable
+optional invocation-time Ticket association choice/reference
 validated parameters
 requested_by
 confirmation state
@@ -711,6 +750,8 @@ Conceptual result:
 operation_id
 action_key
 target_ref
+invocation context revision and binding correlation
+captured tenant / provider scope where applicable
 status
 started_at
 completed_at
@@ -804,6 +845,13 @@ They may appear in one Ticket timeline without becoming the same semantic thing.
 ## 27. Ticket Association
 
 If an Active Ticket exists and the technician intentionally runs an action in that context, the result may associate through Ticket/association services.
+
+That choice and the exact Ticket reference are captured at invocation. On
+completion, association is permitted only with that captured reference; never
+infer a Ticket from the then-current Active Ticket Context. If no Ticket
+association was selected at invocation, do not silently associate with a
+Ticket that becomes active later. Any later association is a separate,
+explicit user/service operation with normal validation.
 
 If no Ticket exists:
 
@@ -1154,7 +1202,10 @@ tenant/customer boundary valid?
 
 Do not infer tenant/device/user IDs from display names or prose when authoritative mappings exist.
 
-Target mismatch blocks execution.
+Target mismatch blocks execution. Invocation-time target and tenant/provider
+scope remain authoritative for the operation even if the technician changes
+context while it runs. A context switch cannot transform an in-flight
+operation into another tenant or provider target.
 
 ---
 
@@ -1290,7 +1341,11 @@ Open Result
 Copy Safe Summary
 ```
 
-Retrying Ticket write must not rerun the remote action.
+Retrying Ticket write must not rerun the remote action. Retry only the
+recording/association step, using the original invocation-time Ticket
+reference and normal existence, authorization and freshness validation. Never
+use the Ticket currently active at retry time; if the captured reference is no
+longer valid, report that failure without retargeting.
 
 ---
 
