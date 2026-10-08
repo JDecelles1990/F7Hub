@@ -36,6 +36,7 @@ Inspect actual filenames, status and approval records; documented existence is n
 
 - Planning work must apply [Docs/Planning/AGENTS.md](Docs/Planning/AGENTS.md).
 - Foundation work must additionally apply [Docs/Planning/Foundation/AGENTS.md](Docs/Planning/Foundation/AGENTS.md).
+- Clipboard feature work across planning, database, Python, tests, AHK/IPC, GUI and integrations must apply [Docs/Planning/Clipboard/AGENTS.md](Docs/Planning/Clipboard/AGENTS.md); file location does not transfer Clipboard ownership to another subsystem.
 - Any task reading, analyzing, modifying, testing, reviewing or documenting AltF7Hub or `AutoHotkey/Troubleshooting_Sections/**` MUST explicitly read [its AGENTS.md](AutoHotkey/Troubleshooting_Sections/AGENTS.md) first, including repository-root sessions.
 - Apply [PowerShell/AGENTS.md](PowerShell/AGENTS.md) for work under `PowerShell/`; consult it and the execution architecture for F7Hub PowerShell execution-boundary work.
 - Discover other scoped instructions under the target path; do not assume this list is exhaustive.
