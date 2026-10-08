@@ -1,0 +1,145 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "F7Hub issue_types planning catalog v0.1",
+  "description": "Planning fixtures only. JSON Schema validates structure, not semantic authority or foreign keys.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "catalog_kind",
+    "catalog_status",
+    "records"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1.0"
+    },
+    "catalog_kind": {
+      "const": "issue_types"
+    },
+    "catalog_status": {
+      "const": "planning_proposal"
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "issue_id",
+          "proposed_key",
+          "domain_code",
+          "labels",
+          "search_phrases",
+          "possible_causes",
+          "product_mentions",
+          "related_tool_ids",
+          "related_sop_ids",
+          "tag_keys",
+          "category_mapping",
+          "entity_occurrences",
+          "record_classification",
+          "lifecycle",
+          "source_reference"
+        ],
+        "properties": {
+          "issue_id": {
+            "type": "string",
+            "pattern": "^[A-Z]{2,3}-[0-9]{3}$"
+          },
+          "proposed_key": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "domain_code": {
+            "enum": [
+              "EXO",
+              "IAM",
+              "OD",
+              "PRN",
+              "SEC",
+              "TMS",
+              "VPN",
+              "WEB",
+              "WIN"
+            ]
+          },
+          "labels": {
+            "type": "object",
+            "required": [
+              "en",
+              "fr"
+            ],
+            "properties": {
+              "en": {
+                "type": "string",
+                "minLength": 1
+              },
+              "fr": {
+                "type": "string",
+                "minLength": 1
+              }
+            },
+            "additionalProperties": false
+          },
+          "search_phrases": {
+            "type": "array"
+          },
+          "possible_causes": {
+            "type": "array"
+          },
+          "product_mentions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "related_tool_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^TOOL-[0-9]{3}$"
+            },
+            "uniqueItems": true
+          },
+          "related_sop_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^SOP-[0-9]{3}$"
+            },
+            "uniqueItems": true
+          },
+          "tag_keys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          },
+          "category_mapping": {
+            "type": [
+              "null",
+              "object"
+            ]
+          },
+          "entity_occurrences": {
+            "type": "array"
+          },
+          "record_classification": {
+            "const": "issue_type_definition"
+          },
+          "lifecycle": {
+            "const": "proposed"
+          },
+          "source_reference": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,1590 @@
+{
+  "catalog_version": "0.1.0",
+  "scope": "Source-derived draft taxonomy for F7Hub; not a production DB schema",
+  "source_note": "Combined user-provided OneNote troubleshooting notes, HiloTech experience narrative, and existing catalog from the prior answer. Root causes are illustrative or explicitly stated, not proven for each incident.",
+  "issue_count": 46,
+  "tool_count": 26,
+  "procedure_count": 12,
+  "issues": [
+    {
+      "issue_id": "IAM-001",
+      "domain_code": "IAM",
+      "title_en": "Microsoft 365 / Entra ID sign-in failure",
+      "title_fr": "Échec de connexion à Microsoft 365 / Entra ID",
+      "products": [
+        "Microsoft 365",
+        "Entra ID"
+      ],
+      "aliases_en": [
+        "cloud sign-in failure",
+        "account access issue"
+      ],
+      "possible_causes": [
+        "authentication or account configuration"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-002",
+      "domain_code": "IAM",
+      "title_en": "Windows workstation sign-in failure",
+      "title_fr": "Échec de connexion à un poste Windows",
+      "products": [
+        "Windows 10",
+        "Windows 11"
+      ],
+      "aliases_en": [
+        "Windows login issue",
+        "computer login problem"
+      ],
+      "possible_causes": [
+        "password synchronization",
+        "account status"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-003",
+      "domain_code": "IAM",
+      "title_en": "Account locked out",
+      "title_fr": "Compte verrouillé",
+      "products": [
+        "Entra ID",
+        "Windows"
+      ],
+      "aliases_en": [
+        "user locked out",
+        "login lockout"
+      ],
+      "possible_causes": [
+        "account lockout policy",
+        "repeated failed login attempts"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-003"
+      ],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-004",
+      "domain_code": "IAM",
+      "title_en": "Password reset, recovery, or validation failure",
+      "title_fr": "Échec de réinitialisation, de récupération ou de validation du mot de passe",
+      "products": [
+        "Entra ID",
+        "Microsoft 365"
+      ],
+      "aliases_en": [
+        "password reset issue",
+        "account recovery issue"
+      ],
+      "possible_causes": [
+        "password or recovery workflow issue"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-003"
+      ],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-005",
+      "domain_code": "IAM",
+      "title_en": "Password synchronization failure",
+      "title_fr": "Échec de synchronisation du mot de passe",
+      "products": [
+        "Entra ID",
+        "Windows"
+      ],
+      "aliases_en": [
+        "password desynchronization"
+      ],
+      "possible_causes": [
+        "password synchronization conflicts"
+      ],
+      "source_reference": "User-provided HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-006",
+      "domain_code": "IAM",
+      "title_en": "Microsoft Authenticator / MFA enrollment failure",
+      "title_fr": "Échec de configuration de Microsoft Authenticator / MFA",
+      "products": [
+        "Microsoft Authenticator",
+        "Entra ID"
+      ],
+      "aliases_en": [
+        "MFA registration issue",
+        "Authenticator setup issue"
+      ],
+      "possible_causes": [
+        "enrollment or configuration issue"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-004"
+      ],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-007",
+      "domain_code": "IAM",
+      "title_en": "MFA challenge failure or authentication lockout",
+      "title_fr": "Échec de validation MFA ou blocage de l’authentification",
+      "products": [
+        "Entra ID",
+        "Microsoft Authenticator"
+      ],
+      "aliases_en": [
+        "MFA lockout",
+        "MFA verification issue"
+      ],
+      "possible_causes": [
+        "factor access or verification issue"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-004"
+      ],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-008",
+      "domain_code": "IAM",
+      "title_en": "Conditional Access unexpectedly blocks access",
+      "title_fr": "Blocage d’accès inattendu par l’accès conditionnel",
+      "products": [
+        "Entra ID"
+      ],
+      "aliases_en": [
+        "Conditional Access issue",
+        "policy block"
+      ],
+      "possible_causes": [
+        "policy evaluation or configuration"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-009",
+      "domain_code": "IAM",
+      "title_en": "User provisioning incomplete or incorrect",
+      "title_fr": "Approvisionnement de l’utilisateur incomplet ou incorrect",
+      "products": [
+        "Entra ID",
+        "Microsoft 365"
+      ],
+      "aliases_en": [
+        "user provisioning problem"
+      ],
+      "possible_causes": [
+        "provisioning configuration"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-001",
+        "SOP-002"
+      ],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-010",
+      "domain_code": "IAM",
+      "title_en": "Group membership or user authorization problem",
+      "title_fr": "Problème d’appartenance à un groupe ou d’autorisation",
+      "products": [
+        "Entra ID"
+      ],
+      "aliases_en": [
+        "group membership issue",
+        "access control issue"
+      ],
+      "possible_causes": [
+        "group membership or access permissions"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-002"
+      ],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "IAM-011",
+      "domain_code": "IAM",
+      "title_en": "Microsoft 365 license missing or incorrectly assigned",
+      "title_fr": "Licence Microsoft 365 absente ou mal attribuée",
+      "products": [
+        "Microsoft 365"
+      ],
+      "aliases_en": [
+        "license assignment issue"
+      ],
+      "possible_causes": [
+        "missing or incorrect license assignment"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-001"
+      ],
+      "related_tool_ids": [
+        "TOOL-003",
+        "TOOL-012"
+      ]
+    },
+    {
+      "issue_id": "EXO-001",
+      "domain_code": "EXO",
+      "title_en": "Repeated Outlook authentication prompts",
+      "title_fr": "Demandes répétées d’authentification Outlook",
+      "products": [
+        "Outlook",
+        "Exchange Online"
+      ],
+      "aliases_en": [
+        "Outlook login loop",
+        "Outlook keeps asking for password"
+      ],
+      "possible_causes": [
+        "corrupted authentication tokens",
+        "cached credentials",
+        "Microsoft 365 synchronization conflicts"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-002",
+        "TOOL-008",
+        "TOOL-009"
+      ]
+    },
+    {
+      "issue_id": "EXO-002",
+      "domain_code": "EXO",
+      "title_en": "Outlook desktop or web connectivity failure",
+      "title_fr": "Échec de connexion à Outlook de bureau ou Web",
+      "products": [
+        "Outlook",
+        "Outlook on the web",
+        "Exchange Online"
+      ],
+      "aliases_en": [
+        "Outlook connection issue",
+        "OWA connectivity"
+      ],
+      "possible_causes": [
+        "connectivity or authentication"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-002",
+        "TOOL-008",
+        "TOOL-009"
+      ]
+    },
+    {
+      "issue_id": "EXO-003",
+      "domain_code": "EXO",
+      "title_en": "Outlook local profile or mailbox data malfunction",
+      "title_fr": "Dysfonctionnement du profil local ou des données Outlook",
+      "products": [
+        "Outlook"
+      ],
+      "aliases_en": [
+        "Outlook profile corrupted",
+        "OST corruption",
+        "Outlook add-in issue"
+      ],
+      "possible_causes": [
+        "OST corruption",
+        "profile issues",
+        "add-in conflicts"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-008"
+      ],
+      "related_tool_ids": [
+        "TOOL-002",
+        "TOOL-008",
+        "TOOL-009"
+      ]
+    },
+    {
+      "issue_id": "EXO-004",
+      "domain_code": "EXO",
+      "title_en": "Outlook search failure",
+      "title_fr": "Problème de recherche Outlook",
+      "products": [
+        "Outlook"
+      ],
+      "aliases_en": [
+        "Outlook search problems"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-002",
+        "TOOL-008",
+        "TOOL-009"
+      ]
+    },
+    {
+      "issue_id": "EXO-005",
+      "domain_code": "EXO",
+      "title_en": "Email sending, receiving, or delivery failure",
+      "title_fr": "Échec d’envoi, de réception ou de remise des courriels",
+      "products": [
+        "Exchange Online",
+        "Outlook"
+      ],
+      "aliases_en": [
+        "mail flow issue",
+        "delivery issue"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-002",
+        "TOOL-008",
+        "TOOL-009"
+      ]
+    },
+    {
+      "issue_id": "EXO-006",
+      "domain_code": "EXO",
+      "title_en": "Mailbox or shared mailbox access / permission failure",
+      "title_fr": "Problème d’accès ou d’autorisations de boîte aux lettres partagée ou personnelle",
+      "products": [
+        "Exchange Online",
+        "Outlook"
+      ],
+      "aliases_en": [
+        "shared mailbox issue",
+        "mailbox permissions"
+      ],
+      "possible_causes": [
+        "mailbox access or permissions"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-005"
+      ],
+      "related_tool_ids": [
+        "TOOL-002",
+        "TOOL-008",
+        "TOOL-009"
+      ]
+    },
+    {
+      "issue_id": "EXO-007",
+      "domain_code": "EXO",
+      "title_en": "Distribution list membership or mail delivery problem",
+      "title_fr": "Problème d’adhésion ou de remise de liste de distribution",
+      "products": [
+        "Exchange Online"
+      ],
+      "aliases_en": [
+        "distribution list issue",
+        "distribution group issue"
+      ],
+      "possible_causes": [
+        "group membership or mail delivery"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-002",
+        "TOOL-008",
+        "TOOL-009"
+      ]
+    },
+    {
+      "issue_id": "EXO-008",
+      "domain_code": "EXO",
+      "title_en": "Spam filtering, junk mail, or quarantine problem",
+      "title_fr": "Problème de filtrage du pourriel ou de quarantaine",
+      "products": [
+        "Exchange Online",
+        "Microsoft Defender"
+      ],
+      "aliases_en": [
+        "spam investigation",
+        "quarantine issue"
+      ],
+      "possible_causes": [
+        "filtering or quarantine decision"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-002",
+        "TOOL-008",
+        "TOOL-009"
+      ]
+    },
+    {
+      "issue_id": "EXO-009",
+      "domain_code": "EXO",
+      "title_en": "Calendar synchronization problem",
+      "title_fr": "Problème de synchronisation du calendrier",
+      "products": [
+        "Outlook",
+        "Exchange Online"
+      ],
+      "aliases_en": [
+        "calendar sync issue"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-002",
+        "TOOL-008",
+        "TOOL-009"
+      ]
+    },
+    {
+      "issue_id": "TMS-001",
+      "domain_code": "TMS",
+      "title_en": "Microsoft Teams login failure",
+      "title_fr": "Échec de connexion à Microsoft Teams",
+      "products": [
+        "Microsoft Teams"
+      ],
+      "aliases_en": [
+        "Teams login issue"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-010"
+      ]
+    },
+    {
+      "issue_id": "TMS-002",
+      "domain_code": "TMS",
+      "title_en": "Microsoft Teams collaboration functionality failure",
+      "title_fr": "Dysfonctionnement des fonctions de collaboration Teams",
+      "products": [
+        "Microsoft Teams"
+      ],
+      "aliases_en": [
+        "Teams collaboration issue"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-010"
+      ]
+    },
+    {
+      "issue_id": "OD-001",
+      "domain_code": "OD",
+      "title_en": "OneDrive synchronization failure",
+      "title_fr": "Échec de synchronisation OneDrive",
+      "products": [
+        "OneDrive"
+      ],
+      "aliases_en": [
+        "OneDrive sync error",
+        "OneDrive file synchronization"
+      ],
+      "possible_causes": [
+        "credential desynchronization",
+        "file path limitations",
+        "client configuration"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-011"
+      ]
+    },
+    {
+      "issue_id": "OD-002",
+      "domain_code": "OD",
+      "title_en": "OneDrive storage quota or capacity problem",
+      "title_fr": "Problème de quota ou de capacité de stockage OneDrive",
+      "products": [
+        "OneDrive"
+      ],
+      "aliases_en": [
+        "OneDrive storage issue",
+        "quota full"
+      ],
+      "possible_causes": [
+        "storage quota issue"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-011"
+      ]
+    },
+    {
+      "issue_id": "OD-003",
+      "domain_code": "OD",
+      "title_en": "OneDrive authentication or account connection failure",
+      "title_fr": "Échec d’authentification ou de connexion du compte OneDrive",
+      "products": [
+        "OneDrive"
+      ],
+      "aliases_en": [
+        "OneDrive login issue"
+      ],
+      "possible_causes": [
+        "credentials or client configuration"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-011"
+      ]
+    },
+    {
+      "issue_id": "OD-004",
+      "domain_code": "OD",
+      "title_en": "Known Folder Move / folder backup failure",
+      "title_fr": "Échec de sauvegarde des dossiers connus (KFM)",
+      "products": [
+        "OneDrive",
+        "Windows"
+      ],
+      "aliases_en": [
+        "KFM issue",
+        "known folder backup issue"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-011"
+      ]
+    },
+    {
+      "issue_id": "WEB-001",
+      "domain_code": "WEB",
+      "title_en": "Browser crashes or unexpectedly closes",
+      "title_fr": "Le navigateur plante ou se ferme de façon inattendue",
+      "products": [
+        "Microsoft Edge",
+        "Google Chrome",
+        "Mozilla Firefox"
+      ],
+      "aliases_en": [
+        "Edge crashing",
+        "browser crashes"
+      ],
+      "possible_causes": [
+        "corrupted user profile",
+        "extension conflicts"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-015",
+        "TOOL-016",
+        "TOOL-017"
+      ]
+    },
+    {
+      "issue_id": "WEB-002",
+      "domain_code": "WEB",
+      "title_en": "Browser slow or unresponsive",
+      "title_fr": "Navigateur lent ou qui ne répond pas",
+      "products": [
+        "Microsoft Edge",
+        "Google Chrome",
+        "Mozilla Firefox"
+      ],
+      "aliases_en": [
+        "browser performance issue"
+      ],
+      "possible_causes": [
+        "cache-related issues",
+        "extension conflicts"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-015",
+        "TOOL-016",
+        "TOOL-017"
+      ]
+    },
+    {
+      "issue_id": "WEB-003",
+      "domain_code": "WEB",
+      "title_en": "Browser profile/account synchronization failure",
+      "title_fr": "Échec de synchronisation du profil ou du compte du navigateur",
+      "products": [
+        "Microsoft Edge",
+        "Google Chrome",
+        "Mozilla Firefox"
+      ],
+      "aliases_en": [
+        "Chrome sync issues",
+        "browser sync failure"
+      ],
+      "possible_causes": [
+        "browser profile issue"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-015",
+        "TOOL-016",
+        "TOOL-017"
+      ]
+    },
+    {
+      "issue_id": "WEB-004",
+      "domain_code": "WEB",
+      "title_en": "Website loading, rendering, or compatibility failure",
+      "title_fr": "Échec de chargement, d’affichage ou de compatibilité d’un site Web",
+      "products": [
+        "Microsoft Edge",
+        "Google Chrome",
+        "Mozilla Firefox"
+      ],
+      "aliases_en": [
+        "browser cache issue",
+        "website compatibility",
+        "Firefox profile corruption"
+      ],
+      "possible_causes": [
+        "cache-related issues",
+        "extension conflicts",
+        "profile corruption"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-015",
+        "TOOL-016",
+        "TOOL-017"
+      ]
+    },
+    {
+      "issue_id": "WIN-001",
+      "domain_code": "WIN",
+      "title_en": "Blue Screen of Death / system crash",
+      "title_fr": "Écran bleu (BSOD) ou plantage du système",
+      "products": [
+        "Windows 10",
+        "Windows 11"
+      ],
+      "aliases_en": [
+        "BSOD",
+        "blue screen error"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-013",
+        "TOOL-014",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "WIN-002",
+      "domain_code": "WIN",
+      "title_en": "Windows boot or startup failure",
+      "title_fr": "Échec de démarrage de Windows",
+      "products": [
+        "Windows 10",
+        "Windows 11"
+      ],
+      "aliases_en": [
+        "startup problem",
+        "boot failure"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-013",
+        "TOOL-014",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "WIN-003",
+      "domain_code": "WIN",
+      "title_en": "Slow workstation performance",
+      "title_fr": "Ralentissement du poste de travail",
+      "products": [
+        "Windows 10",
+        "Windows 11"
+      ],
+      "aliases_en": [
+        "slow computer",
+        "Windows performance issue"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-013",
+        "TOOL-014",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "WIN-004",
+      "domain_code": "WIN",
+      "title_en": "Windows Update installation failure",
+      "title_fr": "Échec d’installation des mises à jour Windows",
+      "products": [
+        "Windows 10",
+        "Windows 11"
+      ],
+      "aliases_en": [
+        "Windows update failure"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-013",
+        "TOOL-014",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "WIN-005",
+      "domain_code": "WIN",
+      "title_en": "Device driver malfunction",
+      "title_fr": "Dysfonctionnement du pilote de périphérique",
+      "products": [
+        "Windows 10",
+        "Windows 11"
+      ],
+      "aliases_en": [
+        "driver-related issue"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-013",
+        "TOOL-014",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "WIN-006",
+      "domain_code": "WIN",
+      "title_en": "Application installation or deployment failure",
+      "title_fr": "Échec d’installation ou de déploiement d’application",
+      "products": [
+        "Windows 10",
+        "Windows 11"
+      ],
+      "aliases_en": [
+        "software install problem",
+        "software deployment issue"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-011"
+      ],
+      "related_tool_ids": [
+        "TOOL-013",
+        "TOOL-014",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "WIN-007",
+      "domain_code": "WIN",
+      "title_en": "BitLocker recovery prompt prevents normal access",
+      "title_fr": "Demande de clé de récupération BitLocker empêchant l’accès normal",
+      "products": [
+        "Windows",
+        "BitLocker"
+      ],
+      "aliases_en": [
+        "BitLocker recovery needed"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-009"
+      ],
+      "related_tool_ids": [
+        "TOOL-013",
+        "TOOL-014",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "PRN-001",
+      "domain_code": "PRN",
+      "title_en": "Printer connection or mapping failure",
+      "title_fr": "Échec de connexion ou de mappage d’imprimante",
+      "products": [
+        "Windows",
+        "Printer"
+      ],
+      "aliases_en": [
+        "printer connectivity",
+        "printer mapping failure"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-007"
+      ],
+      "related_tool_ids": [
+        "TOOL-014",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "PRN-002",
+      "domain_code": "PRN",
+      "title_en": "Print job or printing failure",
+      "title_fr": "Échec d’impression ou du traitement de tâche",
+      "products": [
+        "Windows",
+        "Printer"
+      ],
+      "aliases_en": [
+        "printer not printing",
+        "printing failure"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-007"
+      ],
+      "related_tool_ids": [
+        "TOOL-014",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "VPN-001",
+      "domain_code": "VPN",
+      "title_en": "VPN connection or authentication failure",
+      "title_fr": "Échec de connexion ou d’authentification VPN",
+      "products": [
+        "VPN client"
+      ],
+      "aliases_en": [
+        "VPN fails to connect",
+        "VPN login problem"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-006"
+      ],
+      "related_tool_ids": [
+        "TOOL-018",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "VPN-002",
+      "domain_code": "VPN",
+      "title_en": "Remote resource access failure through VPN",
+      "title_fr": "Échec d’accès aux ressources distantes par VPN",
+      "products": [
+        "VPN client",
+        "Windows"
+      ],
+      "aliases_en": [
+        "connected to VPN but cannot access resources"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-006"
+      ],
+      "related_tool_ids": [
+        "TOOL-018",
+        "TOOL-020"
+      ]
+    },
+    {
+      "issue_id": "SEC-001",
+      "domain_code": "SEC",
+      "title_en": "Suspected phishing email or phishing investigation",
+      "title_fr": "Courriel suspecté d’hameçonnage ou enquête d’hameçonnage",
+      "products": [
+        "Microsoft Defender",
+        "Exchange Online"
+      ],
+      "aliases_en": [
+        "phishing investigation"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-010"
+      ],
+      "related_tool_ids": [
+        "TOOL-004",
+        "TOOL-003"
+      ]
+    },
+    {
+      "issue_id": "SEC-002",
+      "domain_code": "SEC",
+      "title_en": "Suspicious sign-in or unauthorized login alert",
+      "title_fr": "Alerte de connexion suspecte ou non autorisée",
+      "products": [
+        "Entra ID",
+        "Microsoft Defender"
+      ],
+      "aliases_en": [
+        "suspicious login alert"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-010"
+      ],
+      "related_tool_ids": [
+        "TOOL-004",
+        "TOOL-003"
+      ]
+    },
+    {
+      "issue_id": "SEC-003",
+      "domain_code": "SEC",
+      "title_en": "Suspected MFA bypass or authentication abuse",
+      "title_fr": "Soupçon de contournement MFA ou d’abus d’authentification",
+      "products": [
+        "Entra ID",
+        "Microsoft Authenticator"
+      ],
+      "aliases_en": [
+        "MFA bypass case"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-004",
+        "TOOL-003"
+      ]
+    },
+    {
+      "issue_id": "SEC-004",
+      "domain_code": "SEC",
+      "title_en": "Suspected or confirmed compromised account",
+      "title_fr": "Compte possiblement ou effectivement compromis",
+      "products": [
+        "Entra ID",
+        "Microsoft 365"
+      ],
+      "aliases_en": [
+        "compromised account"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [],
+      "related_tool_ids": [
+        "TOOL-004",
+        "TOOL-003"
+      ]
+    },
+    {
+      "issue_id": "SEC-005",
+      "domain_code": "SEC",
+      "title_en": "Microsoft Defender security alert or detection investigation",
+      "title_fr": "Enquête sur une alerte ou une détection de Microsoft Defender",
+      "products": [
+        "Microsoft Defender"
+      ],
+      "aliases_en": [
+        "Defender alert",
+        "security alert"
+      ],
+      "possible_causes": [
+        "not specified in source"
+      ],
+      "source_reference": "User-provided OneNote and troubleshooting issue outline; HiloTech MSP experience narrative",
+      "status": "draft",
+      "record_type": "incident",
+      "related_sop_ids": [
+        "SOP-010"
+      ],
+      "related_tool_ids": [
+        "TOOL-004",
+        "TOOL-003"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "tool_id": "TOOL-001",
+      "name": "Microsoft 365 Admin Center",
+      "category": "Cloud administration portal",
+      "use_case": "Microsoft 365 licensing, users, service status",
+      "aliases": "M365 Admin Center",
+      "domain": "administration",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-002",
+      "name": "Exchange Admin Center",
+      "category": "Email administration portal",
+      "use_case": "Mailboxes, permissions, distribution groups, mail flow",
+      "aliases": "EAC",
+      "domain": "administration",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-003",
+      "name": "Microsoft Entra admin center",
+      "category": "Identity administration portal",
+      "use_case": "Users, groups, sign-in logs, MFA, Conditional Access",
+      "aliases": "Entra ID",
+      "domain": "administration",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-004",
+      "name": "Microsoft Defender portal",
+      "category": "Security operations portal",
+      "use_case": "Security alerts, investigations, phishing triage",
+      "aliases": "Microsoft Defender",
+      "domain": "security",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-005",
+      "name": "Microsoft Intune admin center",
+      "category": "Endpoint management portal",
+      "use_case": "Endpoint administration and policy learning",
+      "aliases": "Intune",
+      "domain": "administration",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-006",
+      "name": "Microsoft Purview portal",
+      "category": "Security/compliance portal",
+      "use_case": "Security and compliance learning (not a stated daily tool)",
+      "aliases": "Microsoft Security & Compliance",
+      "domain": "learning",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-007",
+      "name": "Microsoft 365 service health",
+      "category": "Service health feature",
+      "use_case": "Check Microsoft 365 service incidents",
+      "aliases": "Microsoft 365",
+      "domain": "diagnostic",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-008",
+      "name": "Outlook desktop",
+      "category": "Email client",
+      "use_case": "Desktop mail and calendar troubleshooting",
+      "aliases": "Outlook",
+      "domain": "application",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-009",
+      "name": "Outlook on the web",
+      "category": "Email web application",
+      "use_case": "Compare Outlook web vs desktop behavior",
+      "aliases": "OWA|Outlook Web App",
+      "domain": "application",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-010",
+      "name": "Microsoft Teams",
+      "category": "Collaboration application",
+      "use_case": "Teams sign-in and collaboration support",
+      "aliases": "Teams",
+      "domain": "application",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-011",
+      "name": "OneDrive sync client",
+      "category": "Sync application",
+      "use_case": "Sync, authentication, backup, storage troubleshooting",
+      "aliases": "OneDrive",
+      "domain": "application",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-012",
+      "name": "Microsoft Authenticator",
+      "category": "MFA application",
+      "use_case": "Registration and MFA recovery",
+      "aliases": "MFA",
+      "domain": "identity",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-013",
+      "name": "Windows 10",
+      "category": "Operating system",
+      "use_case": "Workstation troubleshooting",
+      "aliases": "Windows",
+      "domain": "endpoint",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-014",
+      "name": "Windows 11",
+      "category": "Operating system",
+      "use_case": "Workstation troubleshooting",
+      "aliases": "Windows",
+      "domain": "endpoint",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-015",
+      "name": "Microsoft Edge",
+      "category": "Web browser",
+      "use_case": "Browser diagnostics",
+      "aliases": "Edge",
+      "domain": "application",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-016",
+      "name": "Google Chrome",
+      "category": "Web browser",
+      "use_case": "Browser diagnostics",
+      "aliases": "Chrome",
+      "domain": "application",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-017",
+      "name": "Mozilla Firefox",
+      "category": "Web browser",
+      "use_case": "Browser diagnostics",
+      "aliases": "Firefox",
+      "domain": "application",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-018",
+      "name": "VPN client (unspecified)",
+      "category": "Remote access client",
+      "use_case": "VPN connectivity and resource access",
+      "aliases": "VPN",
+      "domain": "network",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-019",
+      "name": "HaloPSA",
+      "category": "PSA/ticketing platform",
+      "use_case": "Ticket triage, lifecycle, SLA documentation",
+      "aliases": "HaloPSA",
+      "domain": "msp_operations",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-020",
+      "name": "NinjaRMM",
+      "category": "RMM/remote support platform",
+      "use_case": "Remote diagnostics and endpoint support",
+      "aliases": "NinjaRMM",
+      "domain": "msp_operations",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-021",
+      "name": "Keeper",
+      "category": "Credential manager",
+      "use_case": "Credential access and secure management",
+      "aliases": "Keeper",
+      "domain": "msp_operations",
+      "source_reference": "User-provided HiloTech technology list",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-022",
+      "name": "PowerShell",
+      "category": "Scripting and command-line tool",
+      "use_case": "Diagnostics and administrative automation (learning)",
+      "aliases": "PowerShell",
+      "domain": "automation",
+      "source_reference": "User-provided OneNote/learning/planning notes",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-023",
+      "name": "Microsoft Azure",
+      "category": "Cloud platform",
+      "use_case": "Azure / Entra learning and cloud environment context",
+      "aliases": "Azure",
+      "domain": "learning",
+      "source_reference": "User-provided OneNote/learning/planning notes",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-024",
+      "name": "Microsoft OneNote",
+      "category": "Documentation application",
+      "use_case": "KB, troubleshooting, notes, SOPs",
+      "aliases": "OneNote",
+      "domain": "documentation",
+      "source_reference": "User-provided OneNote/learning/planning notes",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-025",
+      "name": "Microsoft Copilot",
+      "category": "AI assistant",
+      "use_case": "Documentation and summarization idea, not a verified HiloTech tool",
+      "aliases": "Copilot",
+      "domain": "documentation",
+      "source_reference": "User-provided OneNote/learning/planning notes",
+      "status": "catalogued"
+    },
+    {
+      "tool_id": "TOOL-026",
+      "name": "ChatGPT",
+      "category": "AI assistant",
+      "use_case": "KB, troubleshooting note and automation prompt ideas",
+      "aliases": "ChatGPT",
+      "domain": "documentation",
+      "source_reference": "User-provided OneNote/learning/planning notes",
+      "status": "catalogued"
+    }
+  ],
+  "procedures": [
+    {
+      "sop_id": "SOP-001",
+      "title_en": "New user onboarding",
+      "title_fr": "Intégration d’un nouvel utilisateur",
+      "related_issue_ids": [
+        "IAM-009",
+        "IAM-011"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-002",
+      "title_en": "User offboarding",
+      "title_fr": "Départ d’un utilisateur",
+      "related_issue_ids": [
+        "IAM-009",
+        "IAM-010"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-003",
+      "title_en": "Password reset and identity verification",
+      "title_fr": "Réinitialisation de mot de passe et vérification d’identité",
+      "related_issue_ids": [
+        "IAM-003",
+        "IAM-004"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-004",
+      "title_en": "MFA reset / Authenticator re-registration",
+      "title_fr": "Réinitialisation MFA / réinscription Authenticator",
+      "related_issue_ids": [
+        "IAM-006",
+        "IAM-007"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-005",
+      "title_en": "Shared mailbox access provisioning",
+      "title_fr": "Attribution d’accès à une boîte aux lettres partagée",
+      "related_issue_ids": [
+        "EXO-006"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-006",
+      "title_en": "VPN installation and configuration",
+      "title_fr": "Installation et configuration VPN",
+      "related_issue_ids": [
+        "VPN-001",
+        "VPN-002"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-007",
+      "title_en": "Printer installation and mapping",
+      "title_fr": "Installation et mappage d’imprimante",
+      "related_issue_ids": [
+        "PRN-001",
+        "PRN-002"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-008",
+      "title_en": "Outlook profile rebuild",
+      "title_fr": "Recréation du profil Outlook",
+      "related_issue_ids": [
+        "EXO-003"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-009",
+      "title_en": "BitLocker recovery",
+      "title_fr": "Récupération BitLocker",
+      "related_issue_ids": [
+        "WIN-007"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-010",
+      "title_en": "Defender security investigation and escalation",
+      "title_fr": "Enquête Defender et escalade de sécurité",
+      "related_issue_ids": [
+        "SEC-001",
+        "SEC-002",
+        "SEC-005"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-011",
+      "title_en": "Remote software deployment",
+      "title_fr": "Déploiement logiciel à distance",
+      "related_issue_ids": [
+        "WIN-006"
+      ],
+      "status": "draft",
+      "classification": "procedure"
+    },
+    {
+      "sop_id": "SOP-012",
+      "title_en": "Ticket escalation and handoff",
+      "title_fr": "Escalade et transfert de billet",
+      "related_issue_ids": [],
+      "status": "draft",
+      "classification": "procedure"
+    }
+  ]
+}

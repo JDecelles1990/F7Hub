@@ -1,0 +1,13 @@
+﻿sop_id,title_en,title_fr,related_issue_ids,status,classification
+SOP-001,New user onboarding,Intégration d’un nouvel utilisateur,IAM-009|IAM-011,draft,procedure
+SOP-002,User offboarding,Départ d’un utilisateur,IAM-009|IAM-010,draft,procedure
+SOP-003,Password reset and identity verification,Réinitialisation de mot de passe et vérification d’identité,IAM-003|IAM-004,draft,procedure
+SOP-004,MFA reset / Authenticator re-registration,Réinitialisation MFA / réinscription Authenticator,IAM-006|IAM-007,draft,procedure
+SOP-005,Shared mailbox access provisioning,Attribution d’accès à une boîte aux lettres partagée,EXO-006,draft,procedure
+SOP-006,VPN installation and configuration,Installation et configuration VPN,VPN-001|VPN-002,draft,procedure
+SOP-007,Printer installation and mapping,Installation et mappage d’imprimante,PRN-001|PRN-002,draft,procedure
+SOP-008,Outlook profile rebuild,Recréation du profil Outlook,EXO-003,draft,procedure
+SOP-009,BitLocker recovery,Récupération BitLocker,WIN-007,draft,procedure
+SOP-010,Defender security investigation and escalation,Enquête Defender et escalade de sécurité,SEC-001|SEC-002|SEC-005,draft,procedure
+SOP-011,Remote software deployment,Déploiement logiciel à distance,WIN-006,draft,procedure
+SOP-012,Ticket escalation and handoff,Escalade et transfert de billet,,draft,procedure

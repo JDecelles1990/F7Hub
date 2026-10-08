@@ -1,0 +1,4183 @@
+{
+  "schema_version": "0.1.0",
+  "catalog_kind": "search_terms",
+  "catalog_status": "planning_proposal",
+  "records": [
+    {
+      "language": "en",
+      "text": "access control issue",
+      "lookup_form": "access control issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-010",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "account access issue",
+      "lookup_form": "account access issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Account locked out",
+      "lookup_form": "account locked out",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-003",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "account lockout policy",
+      "lookup_form": "account lockout policy",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-003",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "account recovery issue",
+      "lookup_form": "account recovery issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "account status",
+      "lookup_form": "account status",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-002",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "add-in conflicts",
+      "lookup_form": "add-in conflicts",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-003",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Application installation or deployment failure",
+      "lookup_form": "application installation or deployment failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-006",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "authentication or account configuration",
+      "lookup_form": "authentication or account configuration",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-001",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Authenticator setup issue",
+      "lookup_form": "authenticator setup issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-006",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "BitLocker recovery",
+      "lookup_form": "bitlocker recovery",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-009",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "BitLocker recovery needed",
+      "lookup_form": "bitlocker recovery needed",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-007",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "BitLocker recovery prompt prevents normal access",
+      "lookup_form": "bitlocker recovery prompt prevents normal access",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-007",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "blue screen error",
+      "lookup_form": "blue screen error",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Blue Screen of Death / system crash",
+      "lookup_form": "blue screen of death / system crash",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "boot failure",
+      "lookup_form": "boot failure",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "browser cache issue",
+      "lookup_form": "browser cache issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WEB-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "browser crashes",
+      "lookup_form": "browser crashes",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WEB-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Browser crashes or unexpectedly closes",
+      "lookup_form": "browser crashes or unexpectedly closes",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WEB-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "browser performance issue",
+      "lookup_form": "browser performance issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WEB-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "browser profile issue",
+      "lookup_form": "browser profile issue",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WEB-003",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Browser profile/account synchronization failure",
+      "lookup_form": "browser profile/account synchronization failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WEB-003",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Browser slow or unresponsive",
+      "lookup_form": "browser slow or unresponsive",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WEB-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "browser sync failure",
+      "lookup_form": "browser sync failure",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WEB-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "BSOD",
+      "lookup_form": "bsod",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "cache-related issues",
+      "lookup_form": "cache-related issues",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WEB-002",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WEB-004",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "en",
+      "text": "cached credentials",
+      "lookup_form": "cached credentials",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-001",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "calendar sync issue",
+      "lookup_form": "calendar sync issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-009",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Calendar synchronization problem",
+      "lookup_form": "calendar synchronization problem",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-009",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Chrome sync issues",
+      "lookup_form": "chrome sync issues",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WEB-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "client configuration",
+      "lookup_form": "client configuration",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "OD-001",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "cloud sign-in failure",
+      "lookup_form": "cloud sign-in failure",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "compromised account",
+      "lookup_form": "compromised account",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "SEC-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "computer login problem",
+      "lookup_form": "computer login problem",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Conditional Access issue",
+      "lookup_form": "conditional access issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-008",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Conditional Access unexpectedly blocks access",
+      "lookup_form": "conditional access unexpectedly blocks access",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-008",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "connected to VPN but cannot access resources",
+      "lookup_form": "connected to vpn but cannot access resources",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "VPN-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "connectivity or authentication",
+      "lookup_form": "connectivity or authentication",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-002",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "corrupted authentication tokens",
+      "lookup_form": "corrupted authentication tokens",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-001",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "corrupted user profile",
+      "lookup_form": "corrupted user profile",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WEB-001",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "credential desynchronization",
+      "lookup_form": "credential desynchronization",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "OD-001",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "credentials or client configuration",
+      "lookup_form": "credentials or client configuration",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "OD-003",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Defender alert",
+      "lookup_form": "defender alert",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "SEC-005",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Defender security investigation and escalation",
+      "lookup_form": "defender security investigation and escalation",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-010",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "delivery issue",
+      "lookup_form": "delivery issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-005",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Device driver malfunction",
+      "lookup_form": "device driver malfunction",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-005",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "distribution group issue",
+      "lookup_form": "distribution group issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-007",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "distribution list issue",
+      "lookup_form": "distribution list issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-007",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Distribution list membership or mail delivery problem",
+      "lookup_form": "distribution list membership or mail delivery problem",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-007",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "driver-related issue",
+      "lookup_form": "driver-related issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-005",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Edge crashing",
+      "lookup_form": "edge crashing",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WEB-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Email sending, receiving, or delivery failure",
+      "lookup_form": "email sending, receiving, or delivery failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-005",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "enrollment or configuration issue",
+      "lookup_form": "enrollment or configuration issue",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-006",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "extension conflicts",
+      "lookup_form": "extension conflicts",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WEB-001",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WEB-002",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WEB-004",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "en",
+      "text": "factor access or verification issue",
+      "lookup_form": "factor access or verification issue",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-007",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "file path limitations",
+      "lookup_form": "file path limitations",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "OD-001",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "filtering or quarantine decision",
+      "lookup_form": "filtering or quarantine decision",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-008",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Firefox profile corruption",
+      "lookup_form": "firefox profile corruption",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WEB-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "group membership issue",
+      "lookup_form": "group membership issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-010",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "group membership or access permissions",
+      "lookup_form": "group membership or access permissions",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-010",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "group membership or mail delivery",
+      "lookup_form": "group membership or mail delivery",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-007",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Group membership or user authorization problem",
+      "lookup_form": "group membership or user authorization problem",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-010",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "KFM issue",
+      "lookup_form": "kfm issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "OD-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "known folder backup issue",
+      "lookup_form": "known folder backup issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "OD-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Known Folder Move / folder backup failure",
+      "lookup_form": "known folder move / folder backup failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "OD-004",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "license assignment issue",
+      "lookup_form": "license assignment issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-011",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "login lockout",
+      "lookup_form": "login lockout",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "mail flow issue",
+      "lookup_form": "mail flow issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-005",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "mailbox access or permissions",
+      "lookup_form": "mailbox access or permissions",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-006",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Mailbox or shared mailbox access / permission failure",
+      "lookup_form": "mailbox or shared mailbox access / permission failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-006",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "mailbox permissions",
+      "lookup_form": "mailbox permissions",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-006",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "MFA bypass case",
+      "lookup_form": "mfa bypass case",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "SEC-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "MFA challenge failure or authentication lockout",
+      "lookup_form": "mfa challenge failure or authentication lockout",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-007",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "MFA lockout",
+      "lookup_form": "mfa lockout",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-007",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "MFA registration issue",
+      "lookup_form": "mfa registration issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-006",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "MFA reset / Authenticator re-registration",
+      "lookup_form": "mfa reset / authenticator re-registration",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-004",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "MFA verification issue",
+      "lookup_form": "mfa verification issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-007",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Microsoft 365 / Entra ID sign-in failure",
+      "lookup_form": "microsoft 365 / entra id sign-in failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Microsoft 365 license missing or incorrectly assigned",
+      "lookup_form": "microsoft 365 license missing or incorrectly assigned",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-011",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Microsoft 365 synchronization conflicts",
+      "lookup_form": "microsoft 365 synchronization conflicts",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-001",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Microsoft Authenticator / MFA enrollment failure",
+      "lookup_form": "microsoft authenticator / mfa enrollment failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-006",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Microsoft Defender security alert or detection investigation",
+      "lookup_form": "microsoft defender security alert or detection investigation",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-005",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Microsoft Teams collaboration functionality failure",
+      "lookup_form": "microsoft teams collaboration functionality failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "TMS-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Microsoft Teams login failure",
+      "lookup_form": "microsoft teams login failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "TMS-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "missing or incorrect license assignment",
+      "lookup_form": "missing or incorrect license assignment",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-011",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "New user onboarding",
+      "lookup_form": "new user onboarding",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "not specified in source",
+      "lookup_form": "not specified in source",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-004",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-005",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-009",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "OD-004",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "PRN-001",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "PRN-002",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "SEC-001",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "SEC-002",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "SEC-003",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "SEC-004",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "SEC-005",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "TMS-001",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "TMS-002",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "VPN-001",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "VPN-002",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WIN-001",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WIN-002",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WIN-003",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WIN-004",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WIN-005",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WIN-006",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WIN-007",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "en",
+      "text": "OneDrive authentication or account connection failure",
+      "lookup_form": "onedrive authentication or account connection failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "OD-003",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "OneDrive file synchronization",
+      "lookup_form": "onedrive file synchronization",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "OD-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "OneDrive login issue",
+      "lookup_form": "onedrive login issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "OD-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "OneDrive storage issue",
+      "lookup_form": "onedrive storage issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "OD-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "OneDrive storage quota or capacity problem",
+      "lookup_form": "onedrive storage quota or capacity problem",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "OD-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "OneDrive sync error",
+      "lookup_form": "onedrive sync error",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "OD-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "OneDrive synchronization failure",
+      "lookup_form": "onedrive synchronization failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "OD-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "OST corruption",
+      "lookup_form": "ost corruption",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-003",
+          "source_field": "possible_causes"
+        },
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook add-in issue",
+      "lookup_form": "outlook add-in issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook connection issue",
+      "lookup_form": "outlook connection issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook desktop or web connectivity failure",
+      "lookup_form": "outlook desktop or web connectivity failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook keeps asking for password",
+      "lookup_form": "outlook keeps asking for password",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook local profile or mailbox data malfunction",
+      "lookup_form": "outlook local profile or mailbox data malfunction",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-003",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook login loop",
+      "lookup_form": "outlook login loop",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook profile corrupted",
+      "lookup_form": "outlook profile corrupted",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook profile rebuild",
+      "lookup_form": "outlook profile rebuild",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-008",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook search failure",
+      "lookup_form": "outlook search failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-004",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Outlook search problems",
+      "lookup_form": "outlook search problems",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "OWA connectivity",
+      "lookup_form": "owa connectivity",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "password desynchronization",
+      "lookup_form": "password desynchronization",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-005",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "password or recovery workflow issue",
+      "lookup_form": "password or recovery workflow issue",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-004",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Password reset and identity verification",
+      "lookup_form": "password reset and identity verification",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-003",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "password reset issue",
+      "lookup_form": "password reset issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Password reset, recovery, or validation failure",
+      "lookup_form": "password reset, recovery, or validation failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-004",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "password synchronization",
+      "lookup_form": "password synchronization",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-002",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "password synchronization conflicts",
+      "lookup_form": "password synchronization conflicts",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-005",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Password synchronization failure",
+      "lookup_form": "password synchronization failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-005",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "phishing investigation",
+      "lookup_form": "phishing investigation",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "SEC-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "policy block",
+      "lookup_form": "policy block",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-008",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "policy evaluation or configuration",
+      "lookup_form": "policy evaluation or configuration",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-008",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Print job or printing failure",
+      "lookup_form": "print job or printing failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "PRN-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Printer connection or mapping failure",
+      "lookup_form": "printer connection or mapping failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "PRN-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "printer connectivity",
+      "lookup_form": "printer connectivity",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "PRN-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Printer installation and mapping",
+      "lookup_form": "printer installation and mapping",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-007",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "printer mapping failure",
+      "lookup_form": "printer mapping failure",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "PRN-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "printer not printing",
+      "lookup_form": "printer not printing",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "PRN-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "printing failure",
+      "lookup_form": "printing failure",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "PRN-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "profile corruption",
+      "lookup_form": "profile corruption",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "WEB-004",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "profile issues",
+      "lookup_form": "profile issues",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "EXO-003",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "provisioning configuration",
+      "lookup_form": "provisioning configuration",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-009",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "quarantine issue",
+      "lookup_form": "quarantine issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-008",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "quota full",
+      "lookup_form": "quota full",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "OD-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Remote resource access failure through VPN",
+      "lookup_form": "remote resource access failure through vpn",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "VPN-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Remote software deployment",
+      "lookup_form": "remote software deployment",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-011",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "repeated failed login attempts",
+      "lookup_form": "repeated failed login attempts",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "IAM-003",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Repeated Outlook authentication prompts",
+      "lookup_form": "repeated outlook authentication prompts",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "security alert",
+      "lookup_form": "security alert",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "SEC-005",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Shared mailbox access provisioning",
+      "lookup_form": "shared mailbox access provisioning",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-005",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "shared mailbox issue",
+      "lookup_form": "shared mailbox issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-006",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "slow computer",
+      "lookup_form": "slow computer",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Slow workstation performance",
+      "lookup_form": "slow workstation performance",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-003",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "software deployment issue",
+      "lookup_form": "software deployment issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-006",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "software install problem",
+      "lookup_form": "software install problem",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-006",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Spam filtering, junk mail, or quarantine problem",
+      "lookup_form": "spam filtering, junk mail, or quarantine problem",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-008",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "spam investigation",
+      "lookup_form": "spam investigation",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "EXO-008",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "startup problem",
+      "lookup_form": "startup problem",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "storage quota issue",
+      "lookup_form": "storage quota issue",
+      "usages": [
+        {
+          "role": "possible_cause_phrase",
+          "record_ref": "OD-002",
+          "source_field": "possible_causes"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Suspected MFA bypass or authentication abuse",
+      "lookup_form": "suspected mfa bypass or authentication abuse",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-003",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Suspected or confirmed compromised account",
+      "lookup_form": "suspected or confirmed compromised account",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-004",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Suspected phishing email or phishing investigation",
+      "lookup_form": "suspected phishing email or phishing investigation",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "suspicious login alert",
+      "lookup_form": "suspicious login alert",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "SEC-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Suspicious sign-in or unauthorized login alert",
+      "lookup_form": "suspicious sign-in or unauthorized login alert",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Teams collaboration issue",
+      "lookup_form": "teams collaboration issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "TMS-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Teams login issue",
+      "lookup_form": "teams login issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "TMS-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Ticket escalation and handoff",
+      "lookup_form": "ticket escalation and handoff",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-012",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "user locked out",
+      "lookup_form": "user locked out",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "User offboarding",
+      "lookup_form": "user offboarding",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "User provisioning incomplete or incorrect",
+      "lookup_form": "user provisioning incomplete or incorrect",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-009",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "user provisioning problem",
+      "lookup_form": "user provisioning problem",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-009",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "VPN connection or authentication failure",
+      "lookup_form": "vpn connection or authentication failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "VPN-001",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "VPN fails to connect",
+      "lookup_form": "vpn fails to connect",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "VPN-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "VPN installation and configuration",
+      "lookup_form": "vpn installation and configuration",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-006",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "VPN login problem",
+      "lookup_form": "vpn login problem",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "VPN-001",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "website compatibility",
+      "lookup_form": "website compatibility",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WEB-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Website loading, rendering, or compatibility failure",
+      "lookup_form": "website loading, rendering, or compatibility failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WEB-004",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Windows boot or startup failure",
+      "lookup_form": "windows boot or startup failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Windows login issue",
+      "lookup_form": "windows login issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "IAM-002",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Windows performance issue",
+      "lookup_form": "windows performance issue",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-003",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Windows update failure",
+      "lookup_form": "windows update failure",
+      "usages": [
+        {
+          "role": "unreviewed_issue_search_phrase",
+          "record_ref": "WIN-004",
+          "source_field": "aliases_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Windows Update installation failure",
+      "lookup_form": "windows update installation failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-004",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "en",
+      "text": "Windows workstation sign-in failure",
+      "lookup_form": "windows workstation sign-in failure",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-002",
+          "source_field": "title_en"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Alerte de connexion suspecte ou non autorisée",
+      "lookup_form": "alerte de connexion suspecte ou non autorisée",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Approvisionnement de l’utilisateur incomplet ou incorrect",
+      "lookup_form": "approvisionnement de l’utilisateur incomplet ou incorrect",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-009",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Attribution d’accès à une boîte aux lettres partagée",
+      "lookup_form": "attribution d’accès à une boîte aux lettres partagée",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-005",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Blocage d’accès inattendu par l’accès conditionnel",
+      "lookup_form": "blocage d’accès inattendu par l’accès conditionnel",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-008",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Compte possiblement ou effectivement compromis",
+      "lookup_form": "compte possiblement ou effectivement compromis",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-004",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Compte verrouillé",
+      "lookup_form": "compte verrouillé",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-003",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Courriel suspecté d’hameçonnage ou enquête d’hameçonnage",
+      "lookup_form": "courriel suspecté d’hameçonnage ou enquête d’hameçonnage",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Demande de clé de récupération BitLocker empêchant l’accès normal",
+      "lookup_form": "demande de clé de récupération bitlocker empêchant l’accès normal",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-007",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Demandes répétées d’authentification Outlook",
+      "lookup_form": "demandes répétées d’authentification outlook",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Dysfonctionnement des fonctions de collaboration Teams",
+      "lookup_form": "dysfonctionnement des fonctions de collaboration teams",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "TMS-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Dysfonctionnement du pilote de périphérique",
+      "lookup_form": "dysfonctionnement du pilote de périphérique",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-005",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Dysfonctionnement du profil local ou des données Outlook",
+      "lookup_form": "dysfonctionnement du profil local ou des données outlook",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-003",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Départ d’un utilisateur",
+      "lookup_form": "départ d’un utilisateur",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Déploiement logiciel à distance",
+      "lookup_form": "déploiement logiciel à distance",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-011",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Enquête Defender et escalade de sécurité",
+      "lookup_form": "enquête defender et escalade de sécurité",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-010",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Enquête sur une alerte ou une détection de Microsoft Defender",
+      "lookup_form": "enquête sur une alerte ou une détection de microsoft defender",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-005",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Escalade et transfert de billet",
+      "lookup_form": "escalade et transfert de billet",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-012",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Installation et configuration VPN",
+      "lookup_form": "installation et configuration vpn",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-006",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Installation et mappage d’imprimante",
+      "lookup_form": "installation et mappage d’imprimante",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-007",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Intégration d’un nouvel utilisateur",
+      "lookup_form": "intégration d’un nouvel utilisateur",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Le navigateur plante ou se ferme de façon inattendue",
+      "lookup_form": "le navigateur plante ou se ferme de façon inattendue",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WEB-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Licence Microsoft 365 absente ou mal attribuée",
+      "lookup_form": "licence microsoft 365 absente ou mal attribuée",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-011",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Navigateur lent ou qui ne répond pas",
+      "lookup_form": "navigateur lent ou qui ne répond pas",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WEB-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Problème de filtrage du pourriel ou de quarantaine",
+      "lookup_form": "problème de filtrage du pourriel ou de quarantaine",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-008",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Problème de quota ou de capacité de stockage OneDrive",
+      "lookup_form": "problème de quota ou de capacité de stockage onedrive",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "OD-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Problème de recherche Outlook",
+      "lookup_form": "problème de recherche outlook",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-004",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Problème de synchronisation du calendrier",
+      "lookup_form": "problème de synchronisation du calendrier",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-009",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Problème d’accès ou d’autorisations de boîte aux lettres partagée ou personnelle",
+      "lookup_form": "problème d’accès ou d’autorisations de boîte aux lettres partagée ou personnelle",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-006",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Problème d’adhésion ou de remise de liste de distribution",
+      "lookup_form": "problème d’adhésion ou de remise de liste de distribution",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-007",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Problème d’appartenance à un groupe ou d’autorisation",
+      "lookup_form": "problème d’appartenance à un groupe ou d’autorisation",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-010",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Ralentissement du poste de travail",
+      "lookup_form": "ralentissement du poste de travail",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-003",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Recréation du profil Outlook",
+      "lookup_form": "recréation du profil outlook",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-008",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Récupération BitLocker",
+      "lookup_form": "récupération bitlocker",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-009",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Réinitialisation de mot de passe et vérification d’identité",
+      "lookup_form": "réinitialisation de mot de passe et vérification d’identité",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-003",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Réinitialisation MFA / réinscription Authenticator",
+      "lookup_form": "réinitialisation mfa / réinscription authenticator",
+      "usages": [
+        {
+          "role": "procedure_label",
+          "record_ref": "SOP-004",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Soupçon de contournement MFA ou d’abus d’authentification",
+      "lookup_form": "soupçon de contournement mfa ou d’abus d’authentification",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "SEC-003",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de chargement, d’affichage ou de compatibilité d’un site Web",
+      "lookup_form": "échec de chargement, d’affichage ou de compatibilité d’un site web",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WEB-004",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de configuration de Microsoft Authenticator / MFA",
+      "lookup_form": "échec de configuration de microsoft authenticator / mfa",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-006",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de connexion ou de mappage d’imprimante",
+      "lookup_form": "échec de connexion ou de mappage d’imprimante",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "PRN-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de connexion ou d’authentification VPN",
+      "lookup_form": "échec de connexion ou d’authentification vpn",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "VPN-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de connexion à Microsoft 365 / Entra ID",
+      "lookup_form": "échec de connexion à microsoft 365 / entra id",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de connexion à Microsoft Teams",
+      "lookup_form": "échec de connexion à microsoft teams",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "TMS-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de connexion à Outlook de bureau ou Web",
+      "lookup_form": "échec de connexion à outlook de bureau ou web",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de connexion à un poste Windows",
+      "lookup_form": "échec de connexion à un poste windows",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de démarrage de Windows",
+      "lookup_form": "échec de démarrage de windows",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de réinitialisation, de récupération ou de validation du mot de passe",
+      "lookup_form": "échec de réinitialisation, de récupération ou de validation du mot de passe",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-004",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de sauvegarde des dossiers connus (KFM)",
+      "lookup_form": "échec de sauvegarde des dossiers connus (kfm)",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "OD-004",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de synchronisation du mot de passe",
+      "lookup_form": "échec de synchronisation du mot de passe",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-005",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de synchronisation du profil ou du compte du navigateur",
+      "lookup_form": "échec de synchronisation du profil ou du compte du navigateur",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WEB-003",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de synchronisation OneDrive",
+      "lookup_form": "échec de synchronisation onedrive",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "OD-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec de validation MFA ou blocage de l’authentification",
+      "lookup_form": "échec de validation mfa ou blocage de l’authentification",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "IAM-007",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec d’accès aux ressources distantes par VPN",
+      "lookup_form": "échec d’accès aux ressources distantes par vpn",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "VPN-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec d’authentification ou de connexion du compte OneDrive",
+      "lookup_form": "échec d’authentification ou de connexion du compte onedrive",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "OD-003",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec d’envoi, de réception ou de remise des courriels",
+      "lookup_form": "échec d’envoi, de réception ou de remise des courriels",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "EXO-005",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec d’impression ou du traitement de tâche",
+      "lookup_form": "échec d’impression ou du traitement de tâche",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "PRN-002",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec d’installation des mises à jour Windows",
+      "lookup_form": "échec d’installation des mises à jour windows",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-004",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Échec d’installation ou de déploiement d’application",
+      "lookup_form": "échec d’installation ou de déploiement d’application",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-006",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "fr",
+      "text": "Écran bleu (BSOD) ou plantage du système",
+      "lookup_form": "écran bleu (bsod) ou plantage du système",
+      "usages": [
+        {
+          "role": "issue_label",
+          "record_ref": "WIN-001",
+          "source_field": "title_fr"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Azure",
+      "lookup_form": "azure",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-023",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "BitLocker",
+      "lookup_form": "bitlocker",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-007",
+          "source_field": "products"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "ChatGPT",
+      "lookup_form": "chatgpt",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-026",
+          "source_field": "name"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-026",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Chrome",
+      "lookup_form": "chrome",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-016",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Copilot",
+      "lookup_form": "copilot",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-025",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "EAC",
+      "lookup_form": "eac",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-002",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Edge",
+      "lookup_form": "edge",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-015",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Entra ID",
+      "lookup_form": "entra id",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-004",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-005",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-006",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-007",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-008",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-009",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-010",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "SEC-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "SEC-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "SEC-004",
+          "source_field": "products"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-003",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Exchange Admin Center",
+      "lookup_form": "exchange admin center",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-002",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Exchange Online",
+      "lookup_form": "exchange online",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-005",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-006",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-007",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-008",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-009",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "SEC-001",
+          "source_field": "products"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Firefox",
+      "lookup_form": "firefox",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-017",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Google Chrome",
+      "lookup_form": "google chrome",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-004",
+          "source_field": "products"
+        },
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-016",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "HaloPSA",
+      "lookup_form": "halopsa",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-019",
+          "source_field": "name"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-019",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Intune",
+      "lookup_form": "intune",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-005",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Keeper",
+      "lookup_form": "keeper",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-021",
+          "source_field": "name"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-021",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "M365 Admin Center",
+      "lookup_form": "m365 admin center",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-001",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "MFA",
+      "lookup_form": "mfa",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-012",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft 365",
+      "lookup_form": "microsoft 365",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-004",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-009",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-011",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "SEC-004",
+          "source_field": "products"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-007",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Microsoft 365 Admin Center",
+      "lookup_form": "microsoft 365 admin center",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-001",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft 365 service health",
+      "lookup_form": "microsoft 365 service health",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-007",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Authenticator",
+      "lookup_form": "microsoft authenticator",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-006",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-007",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "SEC-003",
+          "source_field": "products"
+        },
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-012",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Azure",
+      "lookup_form": "microsoft azure",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-023",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Copilot",
+      "lookup_form": "microsoft copilot",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-025",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Defender",
+      "lookup_form": "microsoft defender",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-008",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "SEC-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "SEC-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "SEC-005",
+          "source_field": "products"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-004",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Defender portal",
+      "lookup_form": "microsoft defender portal",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-004",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Edge",
+      "lookup_form": "microsoft edge",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-004",
+          "source_field": "products"
+        },
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-015",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Entra admin center",
+      "lookup_form": "microsoft entra admin center",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-003",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Intune admin center",
+      "lookup_form": "microsoft intune admin center",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-005",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft OneNote",
+      "lookup_form": "microsoft onenote",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-024",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Purview portal",
+      "lookup_form": "microsoft purview portal",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-006",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Security & Compliance",
+      "lookup_form": "microsoft security & compliance",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-006",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Microsoft Teams",
+      "lookup_form": "microsoft teams",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "TMS-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "TMS-002",
+          "source_field": "products"
+        },
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-010",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Mozilla Firefox",
+      "lookup_form": "mozilla firefox",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WEB-004",
+          "source_field": "products"
+        },
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-017",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "NinjaRMM",
+      "lookup_form": "ninjarmm",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-020",
+          "source_field": "name"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-020",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "OneDrive",
+      "lookup_form": "onedrive",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "OD-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "OD-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "OD-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "OD-004",
+          "source_field": "products"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-011",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "OneDrive sync client",
+      "lookup_form": "onedrive sync client",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-011",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "OneNote",
+      "lookup_form": "onenote",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-024",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Outlook",
+      "lookup_form": "outlook",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-004",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-005",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-006",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-009",
+          "source_field": "products"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-008",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Outlook desktop",
+      "lookup_form": "outlook desktop",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-008",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Outlook on the web",
+      "lookup_form": "outlook on the web",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "EXO-002",
+          "source_field": "products"
+        },
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-009",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Outlook Web App",
+      "lookup_form": "outlook web app",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-009",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "OWA",
+      "lookup_form": "owa",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-009",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "PowerShell",
+      "lookup_form": "powershell",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-022",
+          "source_field": "name"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-022",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Printer",
+      "lookup_form": "printer",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "PRN-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "PRN-002",
+          "source_field": "products"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Teams",
+      "lookup_form": "teams",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-010",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "VPN",
+      "lookup_form": "vpn",
+      "usages": [
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-018",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "VPN client",
+      "lookup_form": "vpn client",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "VPN-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "VPN-002",
+          "source_field": "products"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "VPN client (unspecified)",
+      "lookup_form": "vpn client (unspecified)",
+      "usages": [
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-018",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed"
+    },
+    {
+      "language": "und",
+      "text": "Windows",
+      "lookup_form": "windows",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-005",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "OD-004",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "PRN-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "PRN-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "VPN-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-007",
+          "source_field": "products"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-013",
+          "source_field": "aliases"
+        },
+        {
+          "role": "unreviewed_tool_search_hint",
+          "record_ref": "TOOL-014",
+          "source_field": "aliases"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Windows 10",
+      "lookup_form": "windows 10",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-004",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-005",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-006",
+          "source_field": "products"
+        },
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-013",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    },
+    {
+      "language": "und",
+      "text": "Windows 11",
+      "lookup_form": "windows 11",
+      "usages": [
+        {
+          "role": "product_mention",
+          "record_ref": "IAM-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-001",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-002",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-003",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-004",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-005",
+          "source_field": "products"
+        },
+        {
+          "role": "product_mention",
+          "record_ref": "WIN-006",
+          "source_field": "products"
+        },
+        {
+          "role": "tool_label",
+          "record_ref": "TOOL-014",
+          "source_field": "name"
+        }
+      ],
+      "review_status": "unreviewed",
+      "collision_review": true
+    }
+  ]
+}

@@ -1,0 +1,145 @@
+{
+  "schema_version": "0.1.0",
+  "catalog_kind": "procedures",
+  "catalog_status": "planning_proposal",
+  "records": [
+    {
+      "sop_id": "SOP-001",
+      "labels": {
+        "en": "New user onboarding",
+        "fr": "Intégration d’un nouvel utilisateur"
+      },
+      "related_issue_ids": [
+        "IAM-009",
+        "IAM-011"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-002",
+      "labels": {
+        "en": "User offboarding",
+        "fr": "Départ d’un utilisateur"
+      },
+      "related_issue_ids": [
+        "IAM-009",
+        "IAM-010"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-003",
+      "labels": {
+        "en": "Password reset and identity verification",
+        "fr": "Réinitialisation de mot de passe et vérification d’identité"
+      },
+      "related_issue_ids": [
+        "IAM-003",
+        "IAM-004"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-004",
+      "labels": {
+        "en": "MFA reset / Authenticator re-registration",
+        "fr": "Réinitialisation MFA / réinscription Authenticator"
+      },
+      "related_issue_ids": [
+        "IAM-006",
+        "IAM-007"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-005",
+      "labels": {
+        "en": "Shared mailbox access provisioning",
+        "fr": "Attribution d’accès à une boîte aux lettres partagée"
+      },
+      "related_issue_ids": [
+        "EXO-006"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-006",
+      "labels": {
+        "en": "VPN installation and configuration",
+        "fr": "Installation et configuration VPN"
+      },
+      "related_issue_ids": [
+        "VPN-001",
+        "VPN-002"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-007",
+      "labels": {
+        "en": "Printer installation and mapping",
+        "fr": "Installation et mappage d’imprimante"
+      },
+      "related_issue_ids": [
+        "PRN-001",
+        "PRN-002"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-008",
+      "labels": {
+        "en": "Outlook profile rebuild",
+        "fr": "Recréation du profil Outlook"
+      },
+      "related_issue_ids": [
+        "EXO-003"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-009",
+      "labels": {
+        "en": "BitLocker recovery",
+        "fr": "Récupération BitLocker"
+      },
+      "related_issue_ids": [
+        "WIN-007"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-010",
+      "labels": {
+        "en": "Defender security investigation and escalation",
+        "fr": "Enquête Defender et escalade de sécurité"
+      },
+      "related_issue_ids": [
+        "SEC-001",
+        "SEC-002",
+        "SEC-005"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-011",
+      "labels": {
+        "en": "Remote software deployment",
+        "fr": "Déploiement logiciel à distance"
+      },
+      "related_issue_ids": [
+        "WIN-006"
+      ],
+      "lifecycle": "proposed"
+    },
+    {
+      "sop_id": "SOP-012",
+      "labels": {
+        "en": "Ticket escalation and handoff",
+        "fr": "Escalade et transfert de billet"
+      },
+      "related_issue_ids": [],
+      "lifecycle": "proposed"
+    }
+  ]
+}

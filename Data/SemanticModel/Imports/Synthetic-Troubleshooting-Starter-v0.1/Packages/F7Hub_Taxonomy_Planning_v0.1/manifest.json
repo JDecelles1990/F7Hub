@@ -1,0 +1,39 @@
+{
+  "schema_version": "0.1.0",
+  "registry_version": "0.1.0",
+  "status": "planning_proposal_not_import_ready",
+  "authority": "Foundation 0C / existing SQLite catalog; this package is a candidate extension, not a replacement",
+  "source_catalog_version": "0.1.0",
+  "counts": {
+    "issues": 46,
+    "tools": 26,
+    "sops": 12,
+    "unique_search_terms": 277,
+    "candidate_tags": 29,
+    "domain_mappings": 9,
+    "entity_type_profiles": 23,
+    "ambiguous_tool_aliases_for_review": 9
+  },
+  "files": [
+    "catalogs/issues.json",
+    "catalogs/procedures.json",
+    "catalogs/tools.json",
+    "vocabulary/domains_review.json",
+    "vocabulary/entity_type_profiles.json",
+    "vocabulary/search_terms.json",
+    "vocabulary/tags_review.json",
+    "vocabulary/tool_alias_ambiguities.json"
+  ],
+  "source_repo_documents": [
+    "Docs/Planning/Foundation/0A_Master_Foundation_Architectural_Contract.md",
+    "Docs/Planning/Foundation/0B_Global_JSON_Contract_Interoperability_Grammar.md",
+    "Docs/Planning/Foundation/0C_Taxonomy_Information_Vocabulary.md",
+    "Docs/Planning/Foundation/0E_Foundation_Architecture_Reconciliation.md"
+  ],
+  "safety": {
+    "no_database_edits": true,
+    "no_automatic_tag_seed": true,
+    "no_automatic_entity_creation": true,
+    "no_automatic_remediation": true
+  }
+}

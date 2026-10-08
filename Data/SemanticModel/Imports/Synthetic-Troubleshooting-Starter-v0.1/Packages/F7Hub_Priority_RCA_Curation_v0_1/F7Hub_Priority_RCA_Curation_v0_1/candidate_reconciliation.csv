@@ -1,0 +1,37 @@
+﻿source_candidate_id,source_label,source_domain,decision,matched_draft_anchor_ids,matched_related_node_ids,rationale
+CAND-IDENTITY-ENTRA-001,MFA enrollment fails after phone replacement,identity_entra,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-001,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-IDENTITY-ENTRA-002,Unexpected conditional access denial,identity_entra,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-002,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-IDENTITY-ENTRA-003,Password change not synchronized,identity_entra,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-003,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-IDENTITY-ENTRA-004,Account locked after repeated attempts,identity_entra,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-004,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-IDENTITY-ENTRA-005,User missing required group access,identity_entra,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-005,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-IDENTITY-ENTRA-006,Provisioned user cannot access licensed service,identity_entra,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-006,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-EXCHANGE-ONLINE-001,Shared mailbox access denied,exchange_online,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-011,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-EXCHANGE-ONLINE-002,Inbound message rejected by mail flow,exchange_online,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-010,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-EXCHANGE-ONLINE-003,Distribution group delivery issue,exchange_online,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-013,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-EXCHANGE-ONLINE-004,Message quarantined by policy,exchange_online,POSSIBLE_FINDING,,DRAFT-FINDING-message_held_by_policy,"Quarantine is a policy outcome, not necessarily a failure"
+CAND-EXCHANGE-ONLINE-005,Mailbox exceeds storage quota,exchange_online,POSSIBLE_CAUSE,,DRAFT-CAUSE-mailbox_quota_reached,Quota reached is a possible explanation for failed mail receipt; do not encode the cause into the symptom anchor
+CAND-OUTLOOK-001,Repeated password prompts,outlook,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-007,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-OUTLOOK-002,Outlook cannot connect,outlook,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-008,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-OUTLOOK-003,OST data cache corruption,outlook,POSSIBLE_CAUSE,,DRAFT-CAUSE-ost_cache_corruption,OST cache corruption is not a user-reported symptom; investigate condition
+CAND-OUTLOOK-004,Outlook search returns incomplete results,outlook,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-012,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-OUTLOOK-005,Calendar events not synchronized,outlook,DEFERRED_NEXT_COHORT,,,Calendar synchronization symptom not covered in this set
+CAND-OUTLOOK-006,Outlook add-in blocks startup,outlook,UNSCOPED_POTENTIAL_ISSUE,,,"Add-in blocks startup, not equivalent to connection failure"
+CAND-ONEDRIVE-001,Known Folder Move conflict,onedrive,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-016,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-ONEDRIVE-002,File sync stalled,onedrive,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-014,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-ONEDRIVE-003,Storage quota reached,onedrive,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-017,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-ONEDRIVE-004,File name unsupported,onedrive,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-018,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-ONEDRIVE-005,OneDrive sign-in failure,onedrive,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-015,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-WINDOWS-001,Windows update stuck pending restart,windows,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-019,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-WINDOWS-002,User profile fails to load,windows,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-020,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-WINDOWS-003,Workstation starts slowly,windows,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-021,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-WINDOWS-004,Unexpected BSOD,windows,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-022,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-WINDOWS-005,Startup repair loop,windows,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-023,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-NETWORK-001,DNS lookup fails on one device,network,POSSIBLE_FINDING,,DRAFT-FINDING-dns_lookup_fails_on_device,DNS lookup failure is a diagnostic observation; user-visible website loading has a separate anchor
+CAND-NETWORK-002,DHCP address missing,network,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-029,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-NETWORK-003,Wi-Fi connected without Internet,network,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-030,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-NETWORK-004,Gateway unreachable,network,POSSIBLE_FINDING,,DRAFT-FINDING-default_gateway_unreachable,Gateway unreachable is a diagnostic observation; user-visible LAN access failure has a separate anchor
+CAND-NETWORK-005,Proxy misconfiguration,network,POSSIBLE_CAUSE,,DRAFT-CAUSE-proxy_misconfiguration,Proxy misconfiguration may affect web access
+CAND-VPN-REMOTE-001,VPN connects but internal share inaccessible,vpn_remote,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-026,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-VPN-REMOTE-002,VPN MFA authentication fails,vpn_remote,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-025,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-VPN-REMOTE-003,RDP cannot reach permitted host,vpn_remote,SELECTED_SYMPTOM_ANCHOR,DRAFT-SYM-027,,Source label mapped as draft symptom anchor; semantic identity not verified
+CAND-VPN-REMOTE-004,Split-tunnel route missing,vpn_remote,POSSIBLE_CAUSE,,DRAFT-CAUSE-split_tunnel_route_missing,Missing split-tunnel route may cause inaccessible internal resources
