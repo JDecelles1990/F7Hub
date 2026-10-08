@@ -34,6 +34,81 @@ class ApplicationBootstrapTests(unittest.TestCase):
         self.assertEqual(service.gateway.project_root, PROJECT_ROOT.resolve())
         self.assertTrue(context.main_window.altf7hub_action.isEnabled())
 
+    def test_clipboard_shell_reuses_real_bootstrap_without_data_or_external_effects(self):
+        with patch("f7hub.services.mochi_service.MochiService.automatic_start", return_value=False):
+            context = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.database_path)
+            window = context.main_window
+            self.addCleanup(window.deleteLater)
+            try:
+                window.show()
+                self.wait_window_idle(window)
+                self.assertIs(window.pages.currentWidget(), window.workspace)
+                self.assertIsNone(window.clipboard_workspace)
+                original_count = window.pages.count()
+                original_bytes = self.database_path.read_bytes()
+                with database_connection(self.database_path) as connection:
+                    original_schema = tuple(connection.execute(
+                        "SELECT type, name, sql FROM sqlite_master ORDER BY type, name"
+                    ))
+                    original_migrations = tuple(connection.execute(
+                        "SELECT * FROM schema_migrations ORDER BY version"
+                    ))
+                with (
+                    patch.object(window.runner, "submit", side_effect=AssertionError("No Clipboard service task")) as submit,
+                    patch.object(QApplication, "clipboard", side_effect=AssertionError("No OS clipboard access")) as clipboard_access,
+                    patch("subprocess.Popen", side_effect=AssertionError("No external process")) as launch,
+                    patch.object(context.mochi_service.gateway, "start", side_effect=AssertionError("No companion IPC")) as ipc,
+                    patch.object(window.altf7hub_service, "show_guide", side_effect=AssertionError("No guide launch")) as guide,
+                ):
+                    window.clipboard_action.trigger()
+                    clipboard = window.clipboard_workspace
+                    self.assertIsNotNone(clipboard)
+                    self.assertIs(window.pages.currentWidget(), clipboard)
+                    self.assertTrue(window.show_clipboard())
+                    self.assertEqual(window.pages.count(), original_count + 1)
+                    submit.assert_not_called()
+                    clipboard_access.assert_not_called()
+                    launch.assert_not_called()
+                    ipc.assert_not_called()
+                    guide.assert_not_called()
+                self.assertEqual(self.database_path.read_bytes(), original_bytes)
+                with database_connection(self.database_path) as connection:
+                    self.assertEqual(tuple(connection.execute(
+                        "SELECT type, name, sql FROM sqlite_master ORDER BY type, name"
+                    )), original_schema)
+                    self.assertEqual(tuple(connection.execute(
+                        "SELECT * FROM schema_migrations ORDER BY version"
+                    )), original_migrations)
+                    self.assertEqual(validate_database_integrity(connection), (("ok",), ()))
+
+                for action, destination in (
+                    (window.tickets_action, window.workspace),
+                    (window.knowledge_action, window.knowledge_workspace),
+                    (window.scripts_action, window.script_workspace),
+                ):
+                    with self.subTest(destination=action.text()):
+                        action.trigger()
+                        self.wait_window_idle(window)
+                        self.assertIs(window.pages.currentWidget(), destination)
+                        window.clipboard_action.trigger()
+                        self.assertIs(window.pages.currentWidget(), clipboard)
+                        self.assertIs(window.clipboard_workspace, clipboard)
+                        self.assertEqual(window.pages.count(), original_count + 1)
+            finally:
+                self.wait_window_idle(window)
+                self.assertTrue(window.close())
+
+    def wait_window_idle(self, window):
+        self.application.processEvents()
+        deadline = time.monotonic() + 5
+        while (window.runner.busy or window.workspace.note_pending
+               or window.workspace.creation_pending or window.workspace.status_pending
+               or window.workspace.classification_pending
+               or (window.knowledge_workspace is not None and window.knowledge_workspace.filter_loading)):
+            if time.monotonic() >= deadline:
+                self.fail("Application work did not settle within five seconds")
+            QTest.qWait(5)
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.application = QApplication.instance() or QApplication([])

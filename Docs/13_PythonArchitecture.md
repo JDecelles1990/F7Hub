@@ -1,5 +1,13 @@
 # F7Hub Python Architecture
 
+## CC-01 — Clipboard shell composition
+
+MainWindow owns `clipboard_workspace`, initially `None`, and a shared QAction with object name `clipboardCenterAction` and data `clipboard.center`. `show_clipboard() -> bool` refuses existing shared-runner, Script-run and Ticket note/creation/status/classification pending states, including callback gaps. A page transition negotiates existing Ticket Discard/Cancel before cleanup or construction. Accepted activation constructs `ClipboardWorkspace(parent)` once, registers it in the existing QStackedWidget and focuses its retained return button.
+
+`ClipboardWorkspace(QWidget)` is presentation only: two plain-text labels, one accessible standard QPushButton and a `tickets_requested` signal. Its module identity is `clipboard`; MainWindow connects the signal to the existing `show_tickets()`. There is no service parameter, database/repository/OS Clipboard access, worker, timer, capture or process boundary. Bootstrap and ApplicationContext remain unchanged because Clipboard query capability is absent. No parallel router, capability registry or draft coordinator is introduced.
+
+Focused presentation/navigation tests and real-bootstrap temporary-database coverage verify retained identity, truthful unavailability, existing routes, guard refusal, draft protection, unchanged schema/migration/data bytes and no Clipboard-only service dispatch, OS Clipboard access, companion IPC or process launch. Full Windows-host GUI/integration validation passed 221/204 methods with Qt offscreen. A separate native Windows smoke passed 28 assertions with one inspected 1000×700/96 DPI capture. These results cover CC-01, not later Clipboard domain/capture functionality; independent implementation review is pending.
+
 ## Slice 053 — Local Baseline Diagnostics
 
 System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.

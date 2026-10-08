@@ -1,5 +1,17 @@
 # F7Hub Todo
 
+## CC-01 — Clipboard workspace shell candidate
+
+- [x] Shared File/toolbar `clipboard.center` action after Scripts and one lazy retained MainWindow page.
+- [x] Exact unavailable message, accessible Back to Tickets and accepted-activation focus.
+- [x] Existing pending/draft/close guards, unchanged bootstrap and no Clipboard data/capture/IPC capability.
+- [x] Focused tests and full GUI 221 / integration 204 PASS on Windows with Qt offscreen; one native 28-assertion smoke and inspected 1000×700/96 DPI screenshot.
+- [x] Delivered-behavior documentation and external review evidence.
+- [ ] Independent CC-01 implementation review.
+- [ ] Separately authorized Git integration after approval.
+
+Candidate only: unstaged/uncommitted on `feat/clipboard-cc01-workspace-shell` in `C:/Dev/F7Hub-Clipboard-CC01`. Later Clipboard persistence, capture, history queries, search, Inspector, classification, associations and handoffs remain deferred to separately authorized slices. No CC-02 work is started.
+
 ## Slice 053 — Local Baseline Diagnostics
 
 - [x] Literal three-member approval, strict Network/Services contracts, bounded Services source and migration 0011.
