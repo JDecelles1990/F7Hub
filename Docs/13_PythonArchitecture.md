@@ -1,5 +1,15 @@
 # F7Hub Python Architecture
 
+## CC-02 — Clipboard Recent composition and presentation
+
+`bootstrap_application` constructs the existing `ClipboardRepository(resolved_database_path)` and `ClipboardService(clipboard_repository)`, exposes both through ApplicationContext, and passes that exact service to MainWindow's optional `clipboard_service` parameter. Accepted `show_clipboard()` retains the existing guards, lazily constructs `ClipboardWorkspace(parent, clipboard_service=...)` once and calls `activate()`. MainWindow performs no Clipboard read or SQL. Direct constructors with no service keep the truthful unavailable fallback.
+
+ClipboardWorkspace owns an existing ServiceTaskRunner independently of MainWindow's shared runner. First accepted activation submits `service.get_recent` without arguments; the D01 default is 50 and its repository reads at most 51 records. Reopening retains the request/page; explicit Refresh or Retry starts a later bounded read. `_loading` covers the runner's idle-before-callback gap so duplicate dispatch and unsafe MainWindow close remain refused until presentation completes. Clipboard busy state is excluded from global navigation disabling. Worker code never touches widgets/models; GUI callbacks reset the small ClipboardRecentTableModel using immutable safe D01 rows.
+
+The model owns four display columns only, with plain safe preview/truncation, explicit UTC receipt time and textual retention/pin state. Table editing, sorting and selection are disabled; there is no stable selected Item contract. Refresh clears old rows and visual/accessibility page feedback. Successful empty, fixed safe failure/Retry and truthful has_more feedback are distinct. No new worker infrastructure, query abstraction, schema, domain/service/repository API, capture, raw retrieval, provider boundary or dependency is introduced.
+
+Fresh CC-02 focused 50, GUI 232 and Integration 209 tests PASS with Qt offscreen on Windows; separate Windows-native 96 assertions and four inspected 1000×700/96 DPI captures PASS, all exits 0 and zero owned survivors. The bootstrap wait helper retains its five-second bound and Qt pumping while yielding Python scheduling time by 1 ms per iteration; cold standard-library imports in a Python worker caused the historical timeout. Historical failures and final candidate/test applicability are preserved externally. Earlier CC-01/D01 records below describe their original delivery snapshots; independent CC-02 review remains pending.
+
 ## Clipboard D01 — Read-only owner query foundation
 
 `ClipboardService(ClipboardRepository(database_path), clock=...)` exposes `get_recent(*, limit=50) -> ClipboardRecentPage`. The service validates a strict integer 1–100 excluding bool, samples one aware datetime, converts it to canonical UTC milliseconds, and delegates one read. The default clock is current UTC. Clock/repository/infrastructure failures become a fixed safe `ClipboardQueryError`; invalid query arguments raise `ClipboardValidationError`. Repository failures use a safe `ClipboardRepositoryError`; exceptions suppress raw chained feedback and no content-bearing logging is introduced.
@@ -10,7 +20,7 @@ Repository `get_recent(*, limit, as_of)` validates bounds/time, uses the existin
 
 `open_database` and `database_connection` accept read_only=False by default; True uses an existing file through encoded URI mode=ro, retains FK/default timeout, creates no storage and rejects :memory:. Missing/wrong-schema/locked/malformed reads fail visibly, never as empty success. Each read owns/closes its connection in its calling thread.
 
-D01 is not composed in bootstrap/MainWindow/ClipboardWorkspace. CC-02 must inject this service and use the existing worker boundary. The fixture helper under Tests/Database is test-only and is never imported by production. There is no capture/privacy detector, production writer, cursor, search, mutation, raw retrieval or external integration.
+D01's original delivery did not compose the service in bootstrap/MainWindow/ClipboardWorkspace; CC-02 now adds the approved composition and existing worker boundary described above. The fixture helper under Tests/Database is test-only and is never imported by production. There is no capture/privacy detector, production writer, cursor, search, mutation, raw retrieval or external integration.
 
 ## CC-01 — Clipboard shell composition
 

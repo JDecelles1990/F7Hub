@@ -19,6 +19,7 @@ from f7hub.services.database_backup_service import DatabaseBackupService
 from f7hub.services.script_service import ScriptService
 from f7hub.gui.mochi_settings_dialog import MochiSettingsDialog
 from f7hub.services.altf7hub_service import AltF7HubService, AltF7HubOpenError
+from f7hub.services.clipboard_service import ClipboardService
 
 from f7hub.gui.ticket_create_widget import (
     TicketCreateWidget,
@@ -43,6 +44,7 @@ class MainWindow(QMainWindow):
         powershell_service=None,
         mochi_service=None,
         altf7hub_service: AltF7HubService | None = None,
+        clipboard_service: ClipboardService | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -57,6 +59,7 @@ class MainWindow(QMainWindow):
         self._mochi_dialog = None
         self._tickets_started = False
         self.altf7hub_service = altf7hub_service
+        self.clipboard_service = clipboard_service
         self.pages = QStackedWidget(self)
         self.clipboard_workspace: ClipboardWorkspace | None = None
         self.ticket_create_widget = TicketCreateWidget(
@@ -276,10 +279,11 @@ class MainWindow(QMainWindow):
                 return False
             self.workspace._clear_drafts()
         if self.clipboard_workspace is None:
-            self.clipboard_workspace = ClipboardWorkspace(self)
+            self.clipboard_workspace = ClipboardWorkspace(self, clipboard_service=self.clipboard_service)
             self.clipboard_workspace.tickets_requested.connect(self.show_tickets)
             self.pages.addWidget(self.clipboard_workspace)
         self.pages.setCurrentWidget(self.clipboard_workspace)
+        self.clipboard_workspace.activate()
         self.clipboard_workspace.back_button.setFocus()
         return True
 
@@ -296,7 +300,8 @@ class MainWindow(QMainWindow):
 
     def closeEvent(self, event):
         if (self._script_run_pending or self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
-                or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading)):
+                or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading)
+                or (self.clipboard_workspace is not None and self.clipboard_workspace.loading)):
             self.statusBar().showMessage("An operation is finishing. Please close again when it completes.")
             event.ignore()
             return

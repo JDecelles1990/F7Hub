@@ -1,5 +1,17 @@
 # F7Hub GUI Design
 
+## CC-02 — Bounded read-only Clipboard Recent page
+
+Production Clipboard Center now consumes the merged D01 service. Accepted navigation lazily constructs and retains one workspace, starts one asynchronous `get_recent()` read with the default 50-item limit, and reuses that page on reopening. An optional absent service retains CC-01's truthful unavailable state. The CC-01 record below describes its original shell delivery; CC-02 supersedes its production no-service/no-worker state.
+
+A read-only Qt table model/view displays exactly **Time**, **Preview**, **Retention**, and **Pinned**. Time is the validated latest receipt instant displayed explicitly in UTC with milliseconds. Preview is only D01's bounded safe plain text, with a textual truncation suffix when flagged; long cells use normal Qt elision in the stretching Preview column. Retention reads Temporary/Saved and pin state Yes/No. There are no fabricated Kind/Entity/Tag/source/relationship columns, sorting controls, stable Item selection, Inspector or mutations.
+
+**Refresh** performs one new first-page read. Loading shows **Loading Clipboard history…**, clears old rows/count (including the accessibility label), and disables only Refresh. Empty success shows **No recent Clipboard history is available.** Failure clears rows and shows only **Clipboard history could not be loaded.**, with explicit **Retry**. Successful feedback is **Showing N recent items.**, adding **More items are available.** only for `has_more`. There is no Next/Previous, cursor, polling, capture or automatic retry.
+
+Clipboard owns an independent existing ServiceTaskRunner. Tickets, Knowledge and Scripts remain usable during Clipboard-only loading; completion does not change the current route or focus. Existing navigation, Ticket Discard/Cancel and Back to Tickets behavior remain. Close is refused while the owned Clipboard worker/callback is finishing, including when the page is hidden. No OS Clipboard access, raw body, SQL, URL/markup interpretation, logging of previews or external handoff is added.
+
+CC-02 validation: focused 50, full GUI 232 and full Integration 209 PASS on a Windows host with Qt offscreen, zero failures/errors/skips, exit 0 and zero owned survivors. Separate WINDOWS_NATIVE validation passed 96 assertions at 1000×700/96 DPI, exit 0, zero survivors. Populated, empty, failure/Retry and loading captures were all inspected without observed control clipping/overlap. QTest input was synthesized; physical input, additional DPI, Narrator and CC-13 refinement remain NOT RUN. Candidate is READY_FOR_REVIEW, unstaged/uncommitted; evidence is external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CC02`. Independent review is next.
+
 ## CC-01 — Clipboard Center workspace shell
 
 The File menu and existing toolbar share one **Clipboard Center** action immediately after Scripts. Its stable action identity is `clipboard.center`. Explicit activation lazily creates one retained read-only page in MainWindow's existing stack. Repeated activation and navigation away/back reuse that page. Startup remains Tickets.

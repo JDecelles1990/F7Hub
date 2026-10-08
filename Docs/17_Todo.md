@@ -1,5 +1,17 @@
 # F7Hub Todo
 
+## CC-02 — Bounded read-only Recent page candidate
+
+- [x] Compose the merged ClipboardRepository/ClipboardService in bootstrap and inject the exact optional service into the lazy retained workspace.
+- [x] Present only Time/Preview/Retention/Pinned using a read-only model/view and default first page; truthful has_more with no pagination controls.
+- [x] Independent existing runner, duplicate refusal, explicit Refresh/Retry, loading/empty/fixed failure and narrow owned-worker close guard; existing routes/drafts/Back preserved.
+- [x] Fresh focused 50, full GUI 232 and full Integration 209 PASS, zero failures/errors/skips, exit 0 and zero owned survivors.
+- [x] WINDOWS_NATIVE 96 assertions PASS at 1000×700/96 DPI; populated/empty/failure/Retry/loading captures inspected, exit 0 and zero survivors.
+- [x] Synchronize five affected owners and external candidate manifest, report, suite/native evidence and applicability.
+- [ ] Independent CC-02 review.
+
+**READY_FOR_REVIEW**, branch `feat/clipboard-cc02-recent-page`, worktree `C:/Dev/F7Hub-Clipboard-CC02`, baseline/HEAD `1991263db17c1a60b37808ab05a82741a0cd7b4d`. Unstaged/uncommitted/unpushed. Full Database regression: NOT RUN — NOT REQUIRED FOR UNCHANGED D01 DATA LAYER; prior D01 481 PASS retained separately. Physical input and additional DPI NOT RUN. CC-03/CC-04, capture, mutations and integration are not started. Evidence: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CC02`. Preceding D01/CC-01 candidate records below are their historical delivery snapshots; their implementations are present in CC-02's required merged baseline.
+
 ## D01 — Minimal Clipboard Persistence and Recent Query Source
 
 - [x] Migration 0013: exact eligible Items and distinct Item-owned Capture Events, constraints and two justified indexes.

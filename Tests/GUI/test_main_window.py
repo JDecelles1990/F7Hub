@@ -17,6 +17,7 @@ from PySide6.QtCore import QTimer
 from f7hub.gui.main_window import MainWindow
 from f7hub.services.ticket_service import TicketService
 from f7hub.services.altf7hub_service import AltF7HubService, AltF7HubOpenError
+from Tests.GUI.test_clipboard_workspace import RecordingClipboardService
 
 
 class RecordingTicketService:
@@ -96,6 +97,15 @@ class MainWindowTests(unittest.TestCase):
         self.wait_idle()
 
     def tearDown(self) -> None:
+        if self.window.clipboard_workspace is not None:
+            service = self.window.clipboard_workspace._service
+            if getattr(service, "gate", None) is not None:
+                service.gate.set()
+            deadline = time.monotonic() + 5
+            while self.window.clipboard_workspace.loading and time.monotonic() < deadline:
+                QTest.qWait(5)
+                time.sleep(0.001)
+            self.assertFalse(self.window.clipboard_workspace.loading)
         if self.service.gate:
             self.service.gate.set()
         if self.backup.gate:
@@ -141,6 +151,64 @@ class MainWindowTests(unittest.TestCase):
         self.assertIs(self.window.pages.currentWidget(), page)
         self.assertEqual(self.window.ticket_create_widget.subject_input.text(), "Unsaved ticket")
         self.assertIn("Guide opened", self.window.statusBar().currentMessage())
+
+    def test_composed_clipboard_has_its_own_runner_and_retains_one_read(self):
+        service = RecordingClipboardService()
+        service.gate = threading.Event()
+        self.addCleanup(service.gate.set)
+        self.window.clipboard_service = service
+        self.assertIsNone(self.window.clipboard_workspace)
+        self.assertTrue(self.window.show_clipboard())
+        clipboard = self.window.clipboard_workspace
+        self.assertIs(clipboard._service, service)
+        self.assertIsNot(clipboard.runner, self.window.runner)
+        self.assertTrue(clipboard.loading)
+        self.assertFalse(self.window.runner.busy)
+        self.assertTrue(self.window.pages.isEnabled())
+        self.assertTrue(self.window.tickets_action.isEnabled())
+        self.assertTrue(self.window.scripts_action.isEnabled())
+        self.assertTrue(self.window.show_clipboard())
+        self.assertIs(self.window.clipboard_workspace, clipboard)
+        self.assertFalse(self.window.close())
+        self.window.show_scripts()
+        self.wait_idle()
+        self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
+        self.window.show_tickets()
+        self.wait_idle()
+        self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
+        self.assertTrue(clipboard.loading)
+        service.gate.set()
+        deadline = time.monotonic() + 5
+        while clipboard.loading and time.monotonic() < deadline:
+            QTest.qWait(5)
+        self.assertFalse(clipboard.loading)
+        self.assertEqual(service.calls, [50])
+        self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
+        self.window.show_clipboard()
+        self.assertEqual(service.calls, [50])
+
+    def test_clipboard_close_guard_covers_idle_before_callback(self):
+        service = RecordingClipboardService()
+        self.window.clipboard_service = service
+        self.window.show_clipboard()
+        clipboard = self.window.clipboard_workspace
+        observed = []
+        clipboard.runner.busy_changed.connect(
+            lambda busy: observed.append(self.window.close()) if not busy else None)
+        deadline = time.monotonic() + 5
+        while clipboard.loading and time.monotonic() < deadline:
+            QTest.qWait(5)
+        self.assertFalse(clipboard.loading)
+        self.assertEqual(observed, [False])
+        self.assertTrue(self.window.close())
+
+    def test_composed_clipboard_cancel_does_not_start_read(self):
+        service = RecordingClipboardService()
+        self.window.clipboard_service = service
+        with patch.object(self.window.workspace, "confirm_discard", return_value=False):
+            self.assertFalse(self.window.show_clipboard())
+        self.assertIsNone(self.window.clipboard_workspace)
+        self.assertEqual(service.calls, [])
 
     def test_clipboard_action_is_shared_and_follows_scripts(self):
         action = self.window.clipboard_action

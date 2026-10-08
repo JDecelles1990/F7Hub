@@ -1,5 +1,17 @@
 # F7Hub Current State
 
+## CC-02 — Bounded read-only Clipboard Recent page candidate
+
+**READY_FOR_REVIEW** on 2026-10-08 (America/Toronto), worktree `C:/Dev/F7Hub-Clipboard-CC02`, branch `feat/clipboard-cc02-recent-page`, baseline/HEAD `1991263db17c1a60b37808ab05a82741a0cd7b4d`. Recovery audit preserved the seven original modified implementation/test files and verified unchanged remote main; final candidate adds only the five affected owner docs. Empty index, unstaged/uncommitted/unpushed. Preceding D01/CC-01 records below describe their original candidate snapshots; their implementations are in the required merged baseline.
+
+Production bootstrap now composes the merged Clipboard repository/service at the resolved database and injects the exact optional service into the lazy retained workspace. One independent existing runner reads the default first page; model/view shows only Time, Preview, Retention and Pinned. Refresh/Retry are explicit, empty success differs from safe failure, has_more is feedback only, duplicate reads are refused and close protects the owned worker/callback gap. Unrelated navigation and prior Ticket Discard/Cancel/Back semantics remain usable. No raw body, GUI SQL, OS Clipboard, capture, selection/Inspector, search, paging controls, mutations or external handoff.
+
+Final FRESH evidence: focused 50 PASS; full GUI 232 PASS; full Integration 209 PASS on Windows host with Qt offscreen, zero failures/errors/skips, exit 0 and zero owned survivors. Separate WINDOWS_NATIVE: 96 assertions PASS at 1000×700/96 DPI, exit 0, zero survivors; four populated/empty/failure/Retry/loading captures opened and inspected without observed control clipping/overlap. QTest input is synthesized. Physical hardware input, alternate DPI, Narrator/high contrast and CC-13 work NOT RUN.
+
+Historical focused 48/49 timeout and failed original zero-test diagnostic remain preserved externally. A bounded corrected diagnostic established cold Python-worker URI imports and Qt-only wait scheduling starvation; a 1 ms scheduling yield fixed the test helper without extending its five-second deadline or modifying D01. Full Database regression: **NOT RUN — NOT REQUIRED FOR UNCHANGED D01 DATA LAYER**. Prior D01 481 PASS is RETAINED separately with 83 relevant inputs verified unchanged; fresh CC-02 isolated integration checks preserve database bytes/logical state and pass integrity/FK checks.
+
+External evidence: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CC02/implementation-report.md`, `candidate-manifest.json`, suite logs/results, `native-validation.result.json`, four screenshots, visual inspection, recovery diagnosis and evidence-applicability records. Final documentation-only additions are bound to unchanged tested production/test identities. Independent review pending; next gate **INDEPENDENT CC-02 REVIEW**. No staging/commit/push/PR/merge or next slice performed.
+
 ## D01 — Clipboard persistence and Recent query source candidate
 
 **READY_FOR_REVIEW** on 2026-10-08 (America/Toronto). Candidate worktree `C:/Dev/F7Hub-Clipboard-D01`, branch `feat/clipboard-d01-recent-query-source`, repaired-main baseline/HEAD `df2d91fdcd1abc3c04f921cf47483ecb004bb7d1`; 30 candidate paths before this documentation correction, with exact final count recorded in the external manifest. The fast-forward reconciliation succeeded and preserved the D01 candidate implementation/test bytes. Candidate remains unstaged, uncommitted and unpushed; it is not approved, merged, integrated or closed.

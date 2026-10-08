@@ -34,7 +34,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
         self.assertEqual(service.gateway.project_root, PROJECT_ROOT.resolve())
         self.assertTrue(context.main_window.altf7hub_action.isEnabled())
 
-    def test_clipboard_shell_reuses_real_bootstrap_without_data_or_external_effects(self):
+    def test_clipboard_recent_uses_one_local_read_without_writes_or_external_effects(self):
         with patch("f7hub.services.mochi_service.MochiService.automatic_start", return_value=False):
             context = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.database_path)
             window = context.main_window
@@ -54,7 +54,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
                         "SELECT * FROM schema_migrations ORDER BY version"
                     ))
                 with (
-                    patch.object(window.runner, "submit", side_effect=AssertionError("No Clipboard service task")) as submit,
+                    patch.object(context.clipboard_service, "get_recent", wraps=context.clipboard_service.get_recent) as recent,
                     patch.object(QApplication, "clipboard", side_effect=AssertionError("No OS clipboard access")) as clipboard_access,
                     patch("subprocess.Popen", side_effect=AssertionError("No external process")) as launch,
                     patch.object(context.mochi_service.gateway, "start", side_effect=AssertionError("No companion IPC")) as ipc,
@@ -65,8 +65,11 @@ class ApplicationBootstrapTests(unittest.TestCase):
                     self.assertIsNotNone(clipboard)
                     self.assertIs(window.pages.currentWidget(), clipboard)
                     self.assertTrue(window.show_clipboard())
+                    self.wait_window_idle(window)
+                    self.assertEqual(clipboard.model.rowCount(), 0)
+                    self.assertEqual(clipboard.status_message.text(), "No recent Clipboard history is available.")
                     self.assertEqual(window.pages.count(), original_count + 1)
-                    submit.assert_not_called()
+                    recent.assert_called_once_with()
                     clipboard_access.assert_not_called()
                     launch.assert_not_called()
                     ipc.assert_not_called()
@@ -104,10 +107,16 @@ class ApplicationBootstrapTests(unittest.TestCase):
         while (window.runner.busy or window.workspace.note_pending
                or window.workspace.creation_pending or window.workspace.status_pending
                or window.workspace.classification_pending
+               or (window.clipboard_workspace is not None and window.clipboard_workspace.loading)
                or (window.knowledge_workspace is not None and window.knowledge_workspace.filter_loading)):
             if time.monotonic() >= deadline:
-                self.fail("Application work did not settle within five seconds")
+                self.fail(f"Application work did not settle: shared={window.runner.busy}, "
+                          f"clipboard={window.clipboard_workspace.loading if window.clipboard_workspace else False}, "
+                          f"filters={window.knowledge_workspace.filter_loading if window.knowledge_workspace else False}")
             QTest.qWait(5)
+            # QTest pumps Qt while retaining the GIL on this binding. Yield to
+            # Python workers too, including cold imports on the first URI read.
+            time.sleep(0.001)
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -140,6 +149,9 @@ class ApplicationBootstrapTests(unittest.TestCase):
         self.addCleanup(context.main_window.deleteLater)
 
         self.assertEqual(context.database_path, self.database_path.resolve())
+        self.assertEqual(context.clipboard_repository._database_path, self.database_path.resolve())
+        self.assertIs(context.clipboard_service._repository, context.clipboard_repository)
+        self.assertIs(context.main_window.clipboard_service, context.clipboard_service)
         self.assertEqual(context.bootstrap_result.integrity_results, ("ok",))
         self.assertIs(
             context.main_window.ticket_create_widget._ticket_service,
