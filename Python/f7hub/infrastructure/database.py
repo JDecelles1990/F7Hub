@@ -56,27 +56,37 @@ def open_database(
     database_path: str | Path,
     *,
     busy_timeout_ms: int = DEFAULT_BUSY_TIMEOUT_MS,
+    read_only: bool = False,
 ) -> sqlite3.Connection:
     """Create or open a configured SQLite connection.
 
-    File-backed database parent directories are created when needed. The caller
-    owns the returned connection and must close it.
+    Writable file-backed connections create parent directories when needed.
+    Read-only connections require an existing file and never create storage.
+    The caller owns the returned connection and must close it.
     """
 
     if isinstance(busy_timeout_ms, bool) or not isinstance(busy_timeout_ms, int):
         raise DatabaseConfigurationError("busy_timeout_ms must be an integer.")
     if busy_timeout_ms < 0:
         raise DatabaseConfigurationError("busy_timeout_ms must not be negative.")
+    if not isinstance(read_only, bool):
+        raise DatabaseConfigurationError("read_only must be a boolean.")
 
     raw_database_path = os.fspath(database_path)
     if not raw_database_path.strip():
         raise DatabaseConfigurationError("database_path must not be empty.")
 
     connection_target = raw_database_path
+    if read_only and raw_database_path == ":memory:":
+        raise DatabaseConfigurationError("Read-only connections require a database file.")
     if raw_database_path != ":memory:":
         expanded_database_path = Path(raw_database_path).expanduser()
-        expanded_database_path.parent.mkdir(parents=True, exist_ok=True)
-        connection_target = os.fspath(expanded_database_path)
+        if read_only:
+            # URI encoding protects literal spaces, percent signs, # and ?.
+            connection_target = expanded_database_path.resolve().as_uri() + "?mode=ro"
+        else:
+            expanded_database_path.parent.mkdir(parents=True, exist_ok=True)
+            connection_target = os.fspath(expanded_database_path)
 
     connection: sqlite3.Connection | None = None
     try:
@@ -84,6 +94,7 @@ def open_database(
             connection_target,
             timeout=busy_timeout_ms / 1_000,
             isolation_level=None,
+            uri=read_only,
         )
         connection.row_factory = sqlite3.Row
         connection.execute("PRAGMA foreign_keys = ON")
@@ -101,10 +112,13 @@ def database_connection(
     database_path: str | Path,
     *,
     busy_timeout_ms: int = DEFAULT_BUSY_TIMEOUT_MS,
+    read_only: bool = False,
 ) -> Iterator[sqlite3.Connection]:
     """Yield a configured connection and always close it cleanly."""
 
-    connection = open_database(database_path, busy_timeout_ms=busy_timeout_ms)
+    connection = open_database(
+        database_path, busy_timeout_ms=busy_timeout_ms, read_only=read_only,
+    )
     try:
         yield connection
     finally:

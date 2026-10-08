@@ -1,5 +1,15 @@
 # F7Hub Database Architecture
 
+## Clipboard D01 — Item/Event persistence and Recent first page
+
+Migration `0013_clipboard_items_capture_events.sql` adds `clipboard_items` and Item-owned `clipboard_capture_events`, with Recent ordering and child-FK indexes. Items retain exact eligible text and lifetime `first_received_at`, `last_received_at`, `captured_total` and `revision`; genuine Events reference Items separately. A producer/generation/operation unique constraint guards duplicate Event insertion while its row exists. It does not implement replay admission, receipts or restart/deletion reconciliation.
+
+D01 permits only PERMITTED, completely assessed ordinary `text/plain` under `clipboard_text_exact_v1`, at most 64 KiB UTF-8, with assessment provenance. Metadata is not proof of a privacy detector: no production writer/admission mechanism is delivered. TEMPORARY Items require expiry later than last receipt; SAVED Items have no expiry; pinning requires SAVED. Later capture writers must update summaries and Events atomically; retained Event aggregation is not lifetime authority. Ordinary Event children cascade with their Item; evidence/hold associations are not delivered.
+
+`ClipboardRepository.get_recent(limit, as_of)` reads one bounded Item page through `database_connection(..., read_only=True)`. The query uses PERMITTED/complete eligibility and SAVED-or-unexpired retention, strict expiry exclusion at equality, and `last_received_at DESC, clipboard_item_id DESC`. It reads at most limit+1 records and at most 241 source scalars per record, returns at most limit safe previews plus has_more, and performs no cleanup or writes. Default service limit is 50, hard maximum 100; no cursor/OFFSET/search/FTS.
+
+The existing connection helpers now accept `read_only: bool = False`. Read-only file connections use encoded SQLite URI mode=ro, retain FK ON and the 5000-ms default busy timeout, create no files/directories and reject :memory:. Existing writable callers retain their behavior. Fixture-only insertion lives under Tests; no operational data is used.
+
 ## Slice 053 — Local Baseline Diagnostics
 
 Forward-only data migration `0011_services_snapshot_script.sql` adds exactly one enabled, uncategorized Windows Services Snapshot registration: code `diagnostic.windows.services_snapshot`, description `Collects a local read-only Windows services snapshot.`, path `PowerShell/Diagnostics/Get-ServicesSnapshot.ps1`, DIAGNOSTIC / POWERSHELL_7 / LOW / STANDARD_USER, version 1.0.0, timeout 60, structured output 1 and timestamps `2026-10-03T00:00:00.000Z`. Exact UTF-8 no-BOM CRLF SHA-256: `8a48321800e4d8147f2dd94a9d83eebedace6ac4e45b3e38c00f74d280abc347`. Case-insensitive code and separator-normalized/case-insensitive path conflicts abort atomically without version 11 recorded. Migrations 0001–0010 and the physical schema, six type enum, defaults, relationships and indexes are unchanged. No pack or result rows are created.

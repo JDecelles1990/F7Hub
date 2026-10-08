@@ -181,7 +181,7 @@ class TicketKnowledgeRepositoryTests(unittest.TestCase):
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
             self.assertEqual(connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 12)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 13)
             row = connection.execute("SELECT ticket_id, knowledge_article_id, relationship_type, linked_at FROM ticket_knowledge_articles").fetchone()
             self.assertEqual(tuple(row), (self.ticket.ticket_id, self.article.knowledge_article_id, "RELATED", "2026-09-06T18:00:00.000Z"))
 
@@ -208,7 +208,7 @@ class TicketKnowledgeRepositoryTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 12)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 13)
 
     def test_unlink_ticket_deleted_distinguishes_missing_ticket(self):
         self.link()
