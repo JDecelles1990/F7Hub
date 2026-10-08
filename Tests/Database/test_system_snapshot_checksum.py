@@ -17,7 +17,9 @@ ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "Database/Migrations"
 SCRIPT = ROOT / "PowerShell/Diagnostics/Get-SystemSnapshot.ps1"
 CODE = "diagnostic.windows.system_snapshot"
-APPROVED = "7389e1b402050da4811270d71b92b1a1c53fff151e5300c2b2c6bdbc3fcef758"
+MIGRATION_0009_CHECKSUM = "7389e1b402050da4811270d71b92b1a1c53fff151e5300c2b2c6bdbc3fcef758"
+# Migration 0012 approves the strict-mode source bytes used by current HEAD.
+CURRENT_STRICT_MODE_CHECKSUM = "c2b3931341a0a6d7e858f8a728e50c9cdc1bfbb41dd5545588c24a11e5103e19"
 
 
 class SystemSnapshotChecksumTests(unittest.TestCase):
@@ -44,10 +46,10 @@ class SystemSnapshotChecksumTests(unittest.TestCase):
         content = SCRIPT.read_bytes()
         self.assertFalse(content.startswith(b"\xef\xbb\xbf"))
         self.assertEqual(content.count(b"\r\n"), content.count(b"\n"))
-        self.assertNotEqual(hashlib.sha256(content).hexdigest(), APPROVED)  # 0012 approves current bytes.
+        self.assertNotEqual(hashlib.sha256(content).hexdigest(), MIGRATION_0009_CHECKSUM)  # 0012 approves current bytes.
         with database_connection(self.database) as connection:
             row = connection.execute("SELECT * FROM scripts WHERE script_code=?", (CODE,)).fetchone()
-            self.assertEqual(row["checksum_sha256"], APPROVED)
+            self.assertEqual(row["checksum_sha256"], MIGRATION_0009_CHECKSUM)
             self.assertEqual(tuple(row[key] for key in (
                 "name", "description", "relative_path", "script_type", "runtime", "risk_level",
                 "privilege_level", "version", "timeout_seconds", "requires_structured_output",
@@ -113,9 +115,9 @@ class SystemSnapshotChecksumTests(unittest.TestCase):
         subprocess.run(("git", "-c", "core.autocrlf=false", "checkout-index", "-f", "--", relative.as_posix()),
                        cwd=checkout, check=True, capture_output=True)
         checked_out = target.read_bytes()
-        self.assertEqual(hashlib.sha256(checked_out).hexdigest(), APPROVED)
+        self.assertEqual(hashlib.sha256(checked_out).hexdigest(), CURRENT_STRICT_MODE_CHECKSUM)
         self.assertFalse(checked_out.startswith(b"\xef\xbb\xbf"))
-        self.assertEqual(checked_out.count(b"\r\n"), 85)
+        self.assertEqual(checked_out.count(b"\r\n"), 91)
         self.assertEqual(checked_out.replace(b"\r\n", b"\n"), blob)
 
 
