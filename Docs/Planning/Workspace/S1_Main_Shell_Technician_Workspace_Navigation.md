@@ -1,9 +1,9 @@
 # F7Hub Workspace Planning S1
 # Main Shell, Technician Workspace & Navigation Architecture Planning Contract
 
-**Status:** `NOT_STARTED`  
-**Mode:** `@ARCHITECT @PLAN`  
-**Future repository path:** `Docs/Planning/Workspace/S1_Main_Shell_Technician_Workspace_Navigation.md`  
+**Status:** `NOT_STARTED`
+**Mode:** `@ARCHITECT @PLAN`
+**Future repository path:** `Docs/Planning/Workspace/S1_Main_Shell_Technician_Workspace_Navigation.md`
 **Implementation authorization:** NONE
 
 ---

@@ -1,9 +1,9 @@
 # F7Hub Workspace Planning S2
 # Mochi, DynamicHub & Context-Aware Technician Actions Architecture Planning Contract
 
-**Status:** `NOT_STARTED`  
-**Mode:** `@ARCHITECT @PLAN`  
-**Future repository path:** `Docs/Planning/Workspace/S2_Mochi_DynamicHub_Context_Actions.md`  
+**Status:** `NOT_STARTED`
+**Mode:** `@ARCHITECT @PLAN`
+**Future repository path:** `Docs/Planning/Workspace/S2_Mochi_DynamicHub_Context_Actions.md`
 **Implementation authorization:** NONE
 
 ---
