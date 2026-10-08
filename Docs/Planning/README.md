@@ -390,7 +390,7 @@ READY_FOR_CLIPBOARD_INTEGRATION_DESIGN
 **File:**
 
 ```text
-Docs/Planning/Clipboard/1B_AHK_Python_Clipboard_Capture,_IPC_Quick_HUD_Architecture.md
+Docs/Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md
 ```
 
 **Status:** `NOT_STARTED`

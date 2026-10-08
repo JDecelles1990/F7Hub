@@ -2756,7 +2756,7 @@ RECOMMENDATION: new cross-boundary contracts use a small common envelope, explic
 
 Date: 2026-10-07 (America/Toronto). This is Foundation 0B architecture design only. All new shapes/rules below are RECOMMENDATION awaiting independent architecture review and USER approval. FACT means inspected source/specification at the pinned base, not fresh runtime acceptance. INFERENCE is derived from evidence; ASSUMPTION is explicit; NOT VERIFIED identifies gaps. No production contract, schema file, test, transport, service, database or dependency was implemented. Original planning instructions above are preserved.
 
-Approved [Phase 0A](<0A _Master_Foundation_Architectural_Contract.md#execution-report>) remains authority. 0A-D1 keeps interactive troubleshooting coordination with DynamicHub and diagnostic definitions/execution/results with Diagnostics through existing services/gateways. 0A-D2 preserves pre-ticket/ticketless local Case Journal work, optional Ticket association, reuse-first persistence and existing Ticket activity authority. No envelope universally requires a ticket/session. Local journal storage, drafts and editing remain independent of PSA and AI.
+Approved [Phase 0A](<0A_Master_Foundation_Architectural_Contract.md#execution-report>) remains authority. 0A-D1 keeps interactive troubleshooting coordination with DynamicHub and diagnostic definitions/execution/results with Diagnostics through existing services/gateways. 0A-D2 preserves pre-ticket/ticketless local Case Journal work, optional Ticket association, reuse-first persistence and existing Ticket activity authority. No envelope universally requires a ticket/session. Local journal storage, drafts and editing remain independent of PSA and AI.
 
 ## Baseline
 
