@@ -7134,3 +7134,265 @@ by this task. No staging, commit, push, PR or merge. STOP at review preparation.
 
 Change history: 2026-10-08 — targeted semantic/taxonomy ownership corrections and
 this bounded reconciliation addendum; historical execution report retained.
+
+---
+
+# CP-00 Current Reconciliation
+
+## Control and current-facing presentation contract
+
+Date: 2026-10-08 (America/Toronto). Architecture/documentation only. Author
+result READY_FOR_REVIEW; independent CP-00 review, approval and integration are
+pending. USER DECISION indicates explicit product direction, not delivered GUI
+behavior. Baseline: `9dc7409e51a8023ba0f0c287e3e840f81bebac66`.
+
+This addendum consumes [1A CP-00 lifecycle/provenance](1A_Clipboard_Domain_Data_Lifecycle.md#cp-00-current-reconciliation)
+and [1B CP-00 actions/native ownership](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#cp-00-current-reconciliation).
+Preserve every preceding byte, including the execution report and integrated
+Semantic / Taxonomy Reconciliation Addendum. That addendum's semantic safeguards,
+S1 retained shell/shared auxiliary region, S2 immutable invocation binding,
+typed selection, bounded queries, async/privacy generations, draft guards and
+accessibility remain intact. Only conflicting shortcut, capture, active-paste,
+source presentation and return-navigation recommendations receive successors.
+
+## Explicit session-only active paste
+
+USER DECISION: future Set for Paste is an explicit owning-service request to
+arm the exact eligible Item and expected source revision. Selecting, inspecting,
+refreshing or capturing a row never implicitly arms it; no default first row,
+preview text, row position or hash can substitute for source identity. Set for
+Paste changes session reference state, not Item retention, a Tag or Settings.
+The trusted Python use case owns that reference and its authorization; 1C
+renders a safe visible Active Paste indicator with a keyboard-accessible Clear.
+
+Indicator uses only admitted safe projection/availability, no reusable hidden
+raw-text cache or full body in a tooltip/accessibility/status label. A different
+current row/view can coexist with the armed reference and must not silently
+retarget it. Revalidate on every paste, and after return/refresh before showing
+current eligibility. Clear on explicit Clear, application exit, confirmed source
+deletion/expiry/invalidation and stale exact-reference validation failure. A
+transient read error is unavailable, not fabricated deletion. Privacy lock or
+workflow disable removes access to paste while effective policy disallows it;
+no old authorized delivery buffer survives as a bypass.
+
+USER DECISION: session-only, no restart persistence and no 15-minute expiration
+timer for active paste. Item retention/expiry and independently bounded transient
+stores still apply. Clear revokes unused pending authorization; already completed
+native effects remain truthful. Accepted operations keep their invocation-bound
+source/target; they cannot switch to a newly armed Item mid-flight.
+
+Paste is a separate explicit action backed by 1B: Python revalidates and
+authorizes full text; AHK writes the normal Windows Clipboard and requests
+Ctrl+V. MVP leaves that text on Windows Clipboard. No automatic ClipboardAll
+restoration, hidden paste buffer or GUI-native shortcut registration. Show
+unavailable, write-completed/input-failed or unconfirmed outcomes accurately;
+an input request does not prove target insertion and cannot be blindly repeated.
+
+## Primary source selector and independent retained views
+
+USER preferred direction / RECOMMENDATION: one Clipboard Center singleton
+inside the S1 shell; F7Hub Clipboard occupies the primary content area by default.
+An accessible View selector can choose F7Hub Clipboard or Windows Clipboard in
+that same area. Do not permanently dedicate half the Center to two tables.
+Source selection is distinct from Recent/Saved/Pinned predicates within the
+F7Hub view; changing source grants neither persistence nor arming.
+
+Prefer QComboBox -> QStackedWidget composition with retained independent child
+views/pages rather than repeatedly repurposing one table model. Each owns its
+model, typed selection, scroll position, column widths, loading/error state and
+future filters. Source switches negotiate relevant drafts, obsolete old consumer
+callbacks, and revalidate restored state; they do not destroy accepted operations
+or propagate one source's errors/selection into the other. Preserve existing
+bounded worker/concurrency limits instead of multiplying workers per retained
+page. Session view state survives only while privacy permits; lock/exit clears
+sensitive projections. Native look/focus/DPI and actual widget integration are
+NOT VERIFIED here. Qt documents stacked-page hosting in [QStackedWidget](https://doc.qt.io/qtforpython-6/PySide6/QtWidgets/QStackedWidget.html).
+
+Future optional Split View may compose those views using QSplitter once
+separately justified/reviewed. It is deferred, not a CP-00 GUI implementation or
+a permanent mandatory layout. Inspector remains within S1's shared auxiliary
+region and no new competing shell/desktop Clipboard application is introduced.
+
+## Windows Clipboard snapshot and current capture
+
+RECOMMENDATION: initial Windows Clipboard view presents a bounded CURRENT
+snapshot only, acquired on deliberate opening/Refresh through the owning
+service/1B Windows adapter, asynchronously with stale/privacy generation checks.
+It is not full Windows Clipboard History or a monitoring subscription. View
+opening does not persist, import, create a Capture Event, arm an Item or send
+content externally. Safe presentation still needs source/privacy admission;
+known secrets/unsupported data get safe unavailable/concealed states rather
+than raw rendering. Snapshot bodies cannot be saved in presentation preferences.
+
+Future explicit Capture routes Windows -> F7Hub using clipboard.capture_current,
+with a fresh bounded current read at invocation rather than silently importing
+a stale displayed snapshot. It does not synthesize Ctrl+C. Confirmation/result
+must identify the actual capture mode and owner disposition. Master history
+enablement and all 1A gates still apply. Full Windows Clipboard History is
+optional/deferred pending a separate native dependency/compatibility feasibility
+review; it is never a prerequisite for manual capture. No automatic history
+import, passive OnClipboardChange listener or GUI Clipboard ownership.
+
+## Concise durable table, details and navigation
+
+USER DECISION: initial durable F7Hub table remains Time, Preview, Retention,
+Pinned. Do not add every occurrence metadata field as a column or expand CC-02
+under this documentation task. Source may be considered later once a useful
+privacy-filtered projection exists. Rich admitted metadata belongs in future
+Inspector Overview, Source, Capture History, Entities, Tags, Relationships,
+Retention / Privacy and Actions. Titles/process provenance come from eligible
+Capture Events under 1A, not from browsing raw Windows context. Omission/truncation,
+observation time and uncertainty remain visible where useful; no source/title
+logs or automatic semantic inference. One Item can show multiple genuine
+occurrences without duplicate Item rows or source-based content identity.
+
+USER DECISION: remove the redundant lower Back to Tickets control in a later
+bounded GUI slice, retaining the accessible top-level Tickets route. FACT:
+CC-02 currently still has that lower control. CP-00 changes no widget. Removal
+must first verify the top-level return route and focus/close/draft regression
+behavior; missing shell capability is not authority to strand users or duplicate
+navigation owners. Existing CC-01/CC-02 acceptance evidence remains historical
+and is not invalidated as a claim of their original delivered behavior.
+
+Shortcut help reads owner applied capability, separately from desired direction:
+Ctrl+Alt+C means future capture-selection; Ctrl+Alt+V means future paste-active;
+current-Clipboard Capture has its own explicit semantics. Until safely delivered
+and actually applied, show unavailable/configured-but-inactive truth instead of
+claiming bindings work. Historical Win+Alt+C help is superseded for the CP
+direction. Excluded/unknown contexts preserve native shortcuts; F7/Alt+F7 are
+independent. No button appearance or row selection authorizes capture/paste.
+
+## Compatibility, status and downstream gates
+
+Setup enablement is the 1A durable-manual-history opt-in, without per-capture
+Save or second consent. Process/title collection remains separately opt-in;
+independent title disablement and safe omission do not become a second history
+gate. PID/HWND/sequence are transient, never persistent view state/Settings or
+semantic identity. No command line, browser URL/UIA history or arbitrary JSON
+metadata bag. Process/title cannot assign Tags, create canonical Entities,
+establish Troubleshooting Concern/RCA/cause or grant execution. SemanticModel
+2A-2C and 1C's semantic addendum remain intact; 2D stays out of scope.
+
+0A owns technology/layers, 0B grammar/version/authentication constraints, 0C
+taxonomy/provenance and 0D Settings mechanics; 0E reconciliation is consumed,
+not replaced. S1 owns shell/navigation/auxiliary mechanics; S2 coordinates
+approved owner actions and cannot arm/paste on hover or infer execution consent.
+No global-owner conflict identified at this planning depth. Later native/IPC/
+Settings/profile/data/API availability and actual privacy policy remain delivery
+gates, never features invented in GUI to satisfy a screenshot.
+
+FRESH CP-00 documentation/static validation covers appended successor consistency,
+historical-prefix preservation, owner links and exact authorized path scope.
+Runtime GUI/AHK/IPC/SQLite/native tests are NOT RUN for this documentation-only
+candidate. The 1B CP-00 section states CP-01's exact prerequisite and fixture-only
+scope; all future GUI/data/paste slices need separate authorization. CP-00 does
+not approve itself, integrate, activate shortcuts or start CP-01.
+
+## CP00-01 successor: full-item copy ownership and native widget copy
+
+Correction after independent review finding CP00-01; author result
+READY_FOR_REREVIEW. This subsection adds a narrow successor to the earlier
+CP-00 list of superseded recommendations. The retained M04 `clipboard.copy`
+action row and Actions paragraph directing explicit **Copy full item** through
+Qt Clipboard are historical for that application action. They remain in the
+preserved report but are not current CP-series implementation instructions.
+No Clipboard copy bridge or action is implemented by this document change.
+
+**Copy full item** is an explicit Clipboard Center domain action, whether
+invoked by button, menu or a future action shortcut. The GUI collects explicit
+intent and a stable typed Item selection; it never places the full Item on the
+Windows Clipboard through Qt. Python's owning application/service command
+resolves the exact Clipboard Item and expected revision through repository
+ownership, revalidates current source, retention, eligibility and privacy, and
+only then authorizes a bounded full-text payload for this purpose. A reviewed
+authenticated Clipboard outbound bridge delivers that authorization to AHK v2;
+AHK alone performs the F7Hub-owned Windows Clipboard write and returns a
+truthful write outcome. Denial, stale revision, unavailable source or bridge
+failure produces no GUI fallback write. The actual bridge/profile and native
+behavior require separately reviewed delivery; CP-00 selects no new endpoint.
+
+| Copy path | GUI | Python / service | AHK v2 | SQLite / domain effect |
+| --- | --- | --- | --- | --- |
+| Explicit **Copy full item** | Collect explicit intent and typed Item/revision; present owner result | Resolve exact source, revalidate eligibility/privacy/retention, authorize bounded full text | Write authorized text to Windows Clipboard through authenticated outbound bridge | Read only through repository/service; no direct GUI SQL, Capture Event or arming |
+| Ordinary Ctrl+C in a standard Qt text widget | Native control-local copy of only user-selected displayed text | No Clipboard-domain command | No F7Hub action | No Item resolution as a copy command, Capture Event, history, retention/deduplication or arming effect |
+
+The second row is an intentionally narrow native text-editing exception. Normal
+Ctrl+C in a selectable preview, read-only/details field or editable Qt text
+control may use the widget/platform copy mechanism, subject to existing safe
+presentation and access rules. It is not **Copy full item**, even when the
+selected visible text came from an Item. It does not invoke
+`clipboard.capture_selection`, `clipboard.capture_current` or
+`clipboard.paste_active`, create F7Hub history, or grant semantic meaning.
+Do not intercept every widget Ctrl+C or route it through AHK. Conversely,
+a full-item action shortcut remains the explicit service/bridge/AHK path, not
+widget-native copy. The GUI is not a second F7Hub Clipboard-domain Windows
+Clipboard adapter. Python remains the authorization/domain owner; 1B retains
+the Windows-facing AHK boundary.
+
+## CP00-02 successor: Clipboard-subsystem Windows writes
+
+Owner decision after the bounded CP00-01 rereview: this rule covers explicit
+Clipboard-domain / Clipboard Center application actions owned by the Clipboard
+subsystem in the CP-series. It does not establish a universal F7Hub Clipboard
+write migration. The existing Scripts feature copy of service-verified source,
+identified in the current-state report above, remains under its Scripts owner;
+CP-00 does not supersede or alter it. Any cross-feature convergence is a
+separate architecture review and is not a CP-01 requirement.
+
+For an explicit Clipboard-subsystem action whose purpose is to put authorized
+Clipboard-owned content onto Windows Clipboard, the current owner flow is:
+
+1. PySide6 GUI collects explicit intent and a typed source/reference.
+2. Python application/service/domain ownership resolves the exact source and
+   revision, performs only the action's already-approved transformation,
+   revalidates current eligibility, privacy and policy, then authorizes the
+   exact bounded textual output.
+3. An authenticated Clipboard outbound bridge transports only that authorized
+   content to AHK v2.
+4. AHK v2 writes the supplied text to Windows Clipboard without trimming,
+   normalizing, changing case/line endings, interpreting or otherwise
+   transforming it.
+
+The GUI does not directly mutate Qt/Windows Clipboard for these explicit
+Clipboard-domain commands. There is no direct Qt fallback when AHK capability
+is unavailable; the action reports unavailable or fails safely. Python owns
+what may be copied and the meaning of any transformation. AHK owns the native
+write. No new bridge endpoint/profile or runtime capability is implemented by
+this documentation successor.
+
+| Clipboard-subsystem path | GUI / widget | Python / service | AHK v2 | Boundary |
+| --- | --- | --- | --- | --- |
+| **Copy full item** (`clipboard.copy`) | Explicit intent and typed Item/revision | Resolve exact source; revalidate; authorize bounded full text | Write authorized text to Windows Clipboard | Repository read through service; no GUI Qt write, Capture Event or arming |
+| **Copy normalized value** | Explicit intent and typed source/reference | Resolve source; use existing approved normalization semantics; revalidate; authorize exact bounded output | Write supplied text unchanged | Do not invent an algorithm; any unresolved normalization detail remains for its owner |
+| **Copy Entity/value** (`clipboard.copy_entity`) | Explicit intent and typed occurrence/source reference | Resolve and authorize the exact approved textual projection | Write supplied text unchanged | Does not create canonical Entity identity, assign Tags, accept semantics, infer RCA or grant execution |
+| Ordinary text-widget Ctrl+C | Native copy of only manually selected visible text | No Clipboard-domain command | Not involved | Control-local editing exception; no capture, item/history/Event, Active Paste, retention or semantic effect |
+| **Copy Selection to F7Hub** (`clipboard.capture_selection`) | Explicit capture intent | Validate and admit fresh received content under 1A | Request native Ctrl+C and acquire only a fresh supported Clipboard update under 1B | Capture input path, not a Clipboard Center output-copy command; never fall back to stale content |
+| **Capture Current Clipboard** (`clipboard.capture_current`) | Explicit capture intent | Validate/admit the current snapshot under 1A | Read existing Windows Clipboard; send no Ctrl+C | Capture input path; no Qt write or automatic import |
+| **Active Paste** (`clipboard.paste_active`) | Explicit paste intent for armed Item/revision | Revalidate and authorize exact full text for this operation | Write authorized text, then request native Ctrl+V | Existing 1B path; no Qt write, automatic previous-Clipboard restoration or repeat |
+| Scripts module copy | Outside Clipboard Center | Existing Scripts owner | Existing ownership | OUT OF CP-00 SCOPE; no change and no CP-01 dependency |
+
+The earlier 1C M04 action rows and Actions/keyboard guidance that describe a
+GUI adapter or GUI copy for explicit full-item, normalized-value or Entity/value
+writes are historical planning. This successor supersedes those ownership
+clauses for Clipboard-subsystem actions. Their explicit-intent and selection
+safety requirements remain. The prior CP00-01 full-item resolution and its
+ordinary widget Ctrl+C exception remain in force, specialized by this broader
+Clipboard-subsystem rule. Ordinary widget Ctrl+C is never **Copy full item**,
+**Copy normalized value**, Entity/value copy, `clipboard.capture_selection`,
+`clipboard.capture_current` or `clipboard.paste_active`; do not route native
+text editing through AHK.
+
+Normalization and displayed values retain their existing owner semantics.
+Python may derive only the approved normalized representation for the selected
+source/profile. If earlier 1C text does not fully define a transformation, that
+detail remains unresolved for its owning implementation review; this successor
+does not supply a new algorithm. AHK receives and writes the exact authorized
+output. Copying a normalized or Entity value grants no semantic acceptance or
+identity authority.
+
+Scripts scope disposition: the current-state fact that Scripts can copy
+service-verified source into Qt Clipboard is classified OTHER-MODULE ACTION.
+It remains under its existing owner pending any separately authorized
+cross-feature review. It is not evidence that Clipboard Center uses Qt Clipboard
+for an explicit Clipboard-domain command, and CP-00 makes no claim about changing
+that implementation.

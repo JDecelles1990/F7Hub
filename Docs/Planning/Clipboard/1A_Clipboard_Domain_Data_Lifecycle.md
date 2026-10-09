@@ -4727,3 +4727,140 @@ READY_FOR_CLIPBOARD_INTEGRATION_DESIGN
 All 30 criteria PASS at architecture depth; no unresolved blocking Foundation conflict and no material 1A user-choice prerequisite identified. This is the author candidate result, not approval/closure or permission to execute 1B. Candidate remains UNAPPROVED, UNSTAGED, UNCOMMITTED, UNPUBLISHED, NOT INTEGRATED.
 
 Review Record: NOT RUN; next gate INDEPENDENT PHASE 1A CLIPBOARD ARCHITECTURE REVIEW. Approval Record: NONE. Change History: 2026-10-07, original planning contract preserved exactly, append-only Execution Report authored and statically checked. Only after independent review, explicit USER approval and controlled integration may 1A close. STOP here: no 1B/1C/Settings/Clipboard/schema/AHK/IPC/GUI/Diagnostics/Analytics/Mochi implementation or further phase execution.
+
+---
+
+# CP-00 Current Reconciliation
+
+## Control, authority and successor scope
+
+Date: 2026-10-08 (America/Toronto). Mode: architecture reconciliation and
+documentation only. Author result: READY_FOR_REVIEW. Independent CP-00 review,
+reconciliation approval and integration remain pending. USER DECISION labels
+below record this task's explicit product decisions; they do not assert review
+approval, runtime delivery or authorization to start CP-01.
+
+This addendum and the corresponding [1B CP-00 contract](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#cp-00-current-reconciliation)
+and [1C CP-00 contract](1C_PySide6_Clipboard_Center.md#cp-00-current-reconciliation)
+form one bounded successor contract. They supersede only conflicting historical
+recommendations on setup history, occurrence provenance, capture/paste actions
+and presentation. All preceding bytes, including planning instructions,
+execution reports and original readiness statements, are retained as history.
+Unchanged lifecycle, identity, secret, retention and hold constraints still apply.
+
+FACT: inspected baseline is remote main
+`9dc7409e51a8023ba0f0c287e3e840f81bebac66`; D01 supplies Item/Event storage and a
+bounded read use case, and CC-02 supplies a read-only Recent page. These do not
+establish capture admission, richer metadata storage, Settings, active paste or
+authenticated capture/paste IPC. Repository facts and test results are distinct.
+
+| USER decision | Architectural owner / current direction |
+| --- | --- |
+| A Windows-facing adapter | 1B; AHK v2 observes/acts on Windows, Python retains trusted application/domain/privacy/persistence and active-paste authorization |
+| B selection capture and C active paste | 1B stable actions/native effects; 1A admission/identity/privacy; 1C explicit intent presentation |
+| D Office exclusions and E executable matching | 1B action-specific policy, separate from F7/Alt+F7 |
+| F setup history opt-in | 1A policy below; 0D shared preference mechanics |
+| G process/title provenance | 1A eligibility/lifetime below; 1B bounded acquisition and transport |
+| H active paste reference | 1A source eligibility/revision; Python use-case authority; 1B native delivery; 1C session presentation |
+| I source views, J Windows snapshot, K concise table, L return navigation | 1C, within S1 shell and S2 action boundaries |
+| M Item/Event distinction | 1A unchanged content identity versus occurrence |
+| N performance and O privacy/semantic limits | 1A safeguards, 1B bounded Windows path, 1C asynchronous presentation; Foundation and SemanticModel retain their owners |
+
+## Setup opt-in and retention
+
+USER DECISION: F7Hub is a personal single-user application. Explicitly choosing
+to enable the Clipboard workflow during setup is the opt-in to durable manual
+history for eligible captures. No second one-time consent screen and no Save
+after every capture are required. Before that explicit choice, or while required
+safety/Settings dependencies are unavailable, durable manual capture stays
+disabled. Setup must explain durable local history and normal retention as part
+of that enabling choice; file existence, an imported preference or app launch
+does not manufacture consent.
+
+This supersedes the historical independently off-default persistence gate and
+separate enablement/consent recommendation for the enabled manual workflow.
+It does not enable passive monitoring, secret retention, external disclosure,
+AI sharing, or automatic preservation as SAVED. Ordinary eligible captures use
+TEMPORARY retention under the current admitted policy; Save/Pin remain optional
+preservation actions with their existing meanings and Evidence holds remain
+independent. Existing expiry/hold/deletion safeguards and bounded capacities
+are unchanged.
+
+0D owns the future master workflow/history preference and retention controls.
+1A contributes meaning and safe bounds through that owner, with no Clipboard
+INI or parallel settings store. Disabling stops future durable captures and
+does not itself delete existing history, SAVED Items or held evidence. Before
+core acceptance the service rechecks current master/privacy admission; a disabled
+workflow cannot acknowledge a new durable capture. Previously committed effects
+remain truthful; a late disable is not a rollback. Re-enable never imports
+missed Windows activity or an entire transient store automatically.
+
+## Bounded Capture Event provenance
+
+USER DECISION: process and title collection are opt-in. Eligible Events may
+retain process basename, bounded source window title, coarse source class,
+capture timestamp/method and capture mode. Window-title collection has its own
+disableable preference; workflow/history consent alone enables none of these
+optional source fields. No separate history consent is reintroduced through
+metadata controls. 0D supplies the admitted per-field effective preferences;
+1A assesses eligibility and omission before persistence, with 1B acquisition.
+
+RECOMMENDATION for the future typed feature profile: process basename at most
+255 Unicode scalars / 1020 UTF-8 bytes; window title at most 256 Unicode scalars /
+1024 UTF-8 bytes, marked if shortened. These bounds are architectural proposals
+for CP-00 review, not released fields or a claim the title is complete. Optional
+metadata must also fit 1B's complete serialized-message ceiling. Source class
+reuses delivered allowlisted meanings; timestamp/method keep observation and
+service-receipt time distinct. Capture mode distinguishes selection-copy from
+current-Clipboard capture without redefining content identity.
+
+Evaluate title privacy independently of eligible content: sensitive, suspected
+secret, malformed, unavailable or disallowed title data is omitted before normal
+IPC/storage/projections. Producer minimization/preflight complements Python's
+authoritative assessment. Neither a title nor its hash belongs in ordinary
+logs. Do not retain a title prefix that still contains prohibited material.
+Omission is explicit where useful, not a fabricated blank source; failure of
+optional enrichment need not reject otherwise eligible content. Failure to
+resolve foreground identity for a hotkey remains a different, fail-closed 1B
+gate. Unknown employer/customer policy remains NOT VERIFIED.
+
+PID, HWND and Clipboard sequence number are transient native context only:
+never durable identity, semantic identity or operation idempotency. No default
+full executable path, process command line, browser source URL, UI Automation
+hierarchy, arbitrary metadata JSON bag or hashed-title substitute. A title may
+incidentally contain a URL or customer identifier; opt-in does not authorize
+harvesting or keeping unsafe identifiers. Event provenance follows Event
+retention and governed privacy deletion; accepted occurrence evidence still
+needs its existing explicit hold/promotion protections.
+
+FACT: released D01 Event storage currently admits method and coarse source
+class, but not durable process basename, source title or capture mode. A future
+bounded data/profile extension must inspect and extend the owning schema and
+validators through a new migration if necessary. Do not repurpose source_class,
+edit migration 0013, or imply CP-00 delivers these fields.
+
+## Identity, active paste and unchanged safety
+
+Same eligible exact text from Outlook, Teams or Edge can resolve one Item and
+three genuine Events with distinct admitted occurrence provenance. Source
+process/title/mode are never deduplication keys. A new selection-copy can create
+an Event even if the newly copied text equals an existing Item; retry/replay of
+one operation creates no additional Event/count/expiry refresh.
+
+The explicit active-paste state is an exact Item reference plus expected source
+revision in application-session memory, separate from row selection and
+Settings. Python revalidates current source existence, revision, privacy and
+full-text authorization on every paste. Stale references cannot silently follow
+a newer revision or neighboring row. No reusable hidden raw-text cache, restart
+restoration or 15-minute active-paste expiration timer. Existing transient-store
+TTL and Item retention are separate lifetimes, not an active-paste timer.
+1C owns visible Set for Paste / Active Paste / Clear presentation; 1B owns the
+native effect and transient delivery constraints.
+
+Process/title provenance confers no Tags, canonical Entity creation,
+Troubleshooting Concern identity, accepted cause, RCA or execution authority.
+0C and SemanticModel 2A-2C distinctions remain intact; 2D is out of scope.
+Clipboard content stays untrusted, secrets stay excluded, no raw content/title
+logging or automatic cloud/provider/AI transmission, and no copied-command
+execution is authorized. Full privacy assessment remains mandatory despite
+setup opt-in. CP-00 creates no schema, runtime policy or acceptance path.
