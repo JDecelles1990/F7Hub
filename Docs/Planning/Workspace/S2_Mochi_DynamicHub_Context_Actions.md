@@ -3008,3 +3008,19 @@ READY_FOR_DYNAMIC_CONTEXT_REVIEW
 S2 execution is complete at architecture-planning depth: retained S1 reconciliation PASS, all required architecture sections/matrices/eight diagram sources/registers/handoff complete, 55/55 original criteria PASS, Requires User Decision NONE, no unresolved material architecture conflict. Candidate unapproved, unstaged, uncommitted and unpushed; exactly one tracked file modified. Runtime and Mermaid rendering NOT RUN.
 
 Next gate: INDEPENDENT S2 ARCHITECTURE REVIEW. STOP. No staging, commit, push, PR, merge, Clipboard 1C execution, production Action Catalog, DynamicHub/Mochi change, provider connection, PowerShell writing, credentials or autonomous action is authorized.
+
+---
+
+## CP-00 Clipboard successor reference — 2026-10-08
+
+Architecture candidate: READY_FOR_REVIEW; CP-00 approval/integration pending.
+Consume [1B CP-00](../Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#cp-00-current-reconciliation)
+for current Ctrl+Alt+C capture-selection / Ctrl+Alt+V paste-active direction;
+S2's retained Win+Alt+C cue is historical for that CP-series direction. Capture
+Current remains distinct. [1C CP-00](../Clipboard/1C_PySide6_Clipboard_Center.md#cp-00-current-reconciliation)
+owns explicit session-only Set for Paste / Clear and source-view presentation;
+Python Clipboard use cases authorize the exact Item/revision, AHK owns native
+effects. S2 retains immutable invocation binding, source/privacy admission,
+purpose-filtered projections and advisory/non-execution authority. Hover,
+selection or context changes cannot arm/paste or infer semantic acceptance.
+No S2 redesign, runtime action or CP-01 authorization occurs here.

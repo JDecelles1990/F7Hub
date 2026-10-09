@@ -4161,3 +4161,244 @@ READY_FOR_CLIPBOARD_GUI_DESIGN
 All 23 criteria PASS at architecture-planning depth; approved 1A semantics and Foundation boundaries preserved; bounded hotkey and actual transport/security/authentication recommendations established; no unresolved material user choice blocks the conditional 1C integration/design contract.
 
 Candidate remains UNAPPROVED / UNSTAGED / UNCOMMITTED / UNPUBLISHED / NOT INTEGRATED. Next gate: INDEPENDENT PHASE 1B ARCHITECTURE REVIEW. Only after independent review, explicit USER approval and controlled integration may Phase 1B be CLOSED and 1C architecture planning become the next Clipboard phase. STOP: no independent approval/integration/1C/Clipboard/Settings/AHK/IPC/HUD/Python/migration/PowerShell/Diagnostics/Analytics/Mochi implementation authorized or performed.
+
+---
+
+# CP-00 Current Reconciliation
+
+## Control and authoritative current direction
+
+Date: 2026-10-08 (America/Toronto). Architecture/documentation only; author
+result READY_FOR_REVIEW. Independent review, CP-00 approval and integration are
+pending. The user's explicit decisions supersede conflicting recommendations;
+the reconciliation candidate itself is not APPROVED, INTEGRATED or CLOSED.
+Baseline: `9dc7409e51a8023ba0f0c287e3e840f81bebac66`.
+
+Consume [1A CP-00 lifecycle/provenance](1A_Clipboard_Domain_Data_Lifecycle.md#cp-00-current-reconciliation)
+and [1C CP-00 intent/presentation](1C_PySide6_Clipboard_Center.md#cp-00-current-reconciliation).
+The entire preceding report remains historical evidence. In particular, the
+Win+Alt+C capture-current recommendation, Win+Alt+V fallback, no-selection-copy
+MVP and coarse-only source policy describe earlier decisions. They must not be
+used to negate the current successor rules below. Current-Clipboard capture
+itself remains a distinct supported architectural use case, with no automatic
+shortcut reassignment or assumed third production binding.
+
+## Action and technology ownership
+
+| Stable action | USER current semantics | Desired future default |
+| --- | --- | --- |
+| clipboard.capture_selection | COPY_SELECTION: native Ctrl+C request, then newly copied eligible text; fresh update required | Ctrl+Alt+C |
+| clipboard.capture_current | CAPTURE_CURRENT_CLIPBOARD: bounded read of existing Windows Clipboard, no Ctrl+C synthesis | Explicit future UI action; no new global binding selected by CP-00 |
+| clipboard.paste_active | Exact explicitly armed Item/revision; Python authorizes full text, AHK writes it to normal Windows Clipboard and requests native Ctrl+V | Ctrl+Alt+V |
+
+These are future action semantics and desired defaults, not registered hotkeys
+or implemented capabilities. Native Ctrl+C/Ctrl+V outside an explicitly invoked
+eligible F7Hub action remain ordinary application behavior. No Ctrl+C hook or
+global Office exclusion is introduced by this plan.
+
+AHK v2 owns shortcuts, cheap foreground awareness, bounded native copy/paste,
+Windows Clipboard acquisition/write and transient Windows context. It stays a
+narrow adapter in the existing shared host, with contained worker mechanics
+where native blocking requires them. Python retains trusted contract/service/
+domain validation, privacy/sensitivity, deduplication, retention, persistence,
+SQLite, exact active-paste authorization and higher-level automation. Neither
+GUI, AHK, JSON validity nor foreground labels grant domain/effect authority.
+
+## Action-specific exclusions and press-cycle seam
+
+USER DECISION: both selection capture and active paste initially exclude the
+following exact executable basenames:
+
+| Initial canonical exclusion | Coverage |
+| --- | --- |
+| WINWORD.EXE | Word |
+| EXCEL.EXE | Excel |
+| OUTLOOK.EXE | Outlook |
+| OLK.EXE | New Outlook, explicitly included |
+| POWERPNT.EXE | PowerPoint |
+
+Use one small Clipboard-specific policy helper after SEARCH -> IDENTIFY ->
+REUSE/EXTEND -> CREATE ONLY IF NECESSARY. Centralize these literals; capture and
+paste retain independent action-owned exclusion sets/preferences even when
+their initial values match. No universal hotkey framework or refactoring of
+F7HotkeyController is justified. F7 tap/hold and Alt+F7 guide behavior remain
+independent and unchanged. These exclusions do not create a content ban on
+manually invoking capture_current from the future Windows snapshot view.
+
+Resolve reliable foreground executable identity, derive its basename once if
+the native provider supplied a full path, validate it, and normalize case once
+before exact equality. Folder/path spelling never controls membership. Unknown,
+empty, malformed or unresolved identity fails closed: no Clipboard dispatch and
+no native shortcut interception. Reject ambiguous basename inputs rather than
+guessing. Prefix, suffix, substring, regex similarity and title matching are not
+exclusion rules. Input fixtures `winword.exe`, `WINWORD.EXE`, `WinWord.Exe`,
+`olk.exe`, `OLK.EXE`, `PowerPnt.exe` match; `WINWORD2.EXE`, `MYOUTLOOK.EXE`,
+`OUTLOOK.EXE.BAK`, `OLKHELPER.EXE`, `POWERPNT2.EXE` do not.
+
+The hotkey eligibility predicate only checks action policy against cheap
+foreground identity. It reads/writes no Clipboard, waits/sleeps on nothing,
+performs no IPC/SQLite/Settings mutation/logging/launch/focus change, and uses
+no title collection, UI Automation, browser URL discovery, PowerShell or
+provider calls. Workflow applied enablement is supplied by its owner outside
+the predicate. Excluded/unknown contexts preserve native chord behavior through
+contextual eligibility; silently consuming and then forwarding a substitute
+Send is not native-shortcut preservation.
+
+Required seam: trigger eligibility -> latch physical press cycle and bind
+transient target -> recheck immediately before dispatch/native input. Recheck
+both action eligibility and the originally bound foreground window/process
+identity; an allowed app B cannot replace allowed app A. No attempt to refocus
+the original target. Change, exclusion or unknown identity aborts the F7Hub
+effect. These checks reduce races; they cannot promise atomicity across OS
+focus changes and input delivery.
+
+One physical shortcut press/release cycle permits at most one operation, even
+after rejection/error/interruption or foreground change. Held autorepeat and
+modifier release/repress cannot create another cycle while the trigger key
+remains physically down. Rearm only after release of the trigger and participating
+modifiers; a new completed cycle may act again. Track/observe release even when
+the contextual action becomes ineligible; entering a permitted app while keys
+are held cannot manufacture a fresh press. Execution/busy cleanup and physical
+rearm are separate: a callback exception must not leave busy state stuck or
+reset a held press to invocable. CP-01 native fixtures must prove this seam,
+including modifier release ordering and an initially excluded/unknown held chord
+moving into an allowed context. Registration alone or direct callbacks are
+insufficient evidence of physical hotkey behavior.
+
+## Selection-copy acquisition contract for later delivery
+
+Check prerequisites and foreground eligibility before any native copy effect.
+Bind original foreground identity and read a transient pre-copy sequence marker;
+recheck before requesting exactly one native Ctrl+C. Use bounded physical
+modifier handling so the emitted action is Ctrl+C, not another Ctrl+Alt+C
+trigger. No user-process elevation, arbitrary application activation or title/
+URL/UIA inspection is a fallback. Input injection is later native validation,
+not CP-00 execution.
+
+Require a fresh supported Clipboard update after that request, then a stable,
+bounded text/plain snapshot under existing worker/size/Unicode/privacy rules.
+No update, timeout, unknown sequence, malformed/unsupported content or ambiguous
+target/race produces safe failure; never read old/current contents as successful
+selection capture. Do not empty the Clipboard to simulate freshness or preserve
+old raw contents merely to restore them. Identical newly copied text is valid
+freshness if change detection succeeds: content equality and update identity
+are different questions.
+
+Microsoft documents sequence as window-station change detection, including
+emptying and delayed-rendering behavior, not source attribution. INFERENCE:
+sequence change alone cannot prove the intended Ctrl+C produced the content;
+retain cheap target/owner stability checks and refuse detected unrelated updates
+or unresolved acquisition ambiguity. Concrete application compatibility and
+residual races need a bounded acquisition slice. No absolute source-attribution
+claim follows from process/title. See [sequence documentation](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber)
+and [Clipboard operations/ownership](https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-operations).
+
+Keep existing containment: finite attempts and an external whole-worker/native
+run deadline effective during blocking APIs. Reuse 1B's proposed read ceiling,
+worker ownership and cleanup; exact copy-wait/write/input sub-budgets must be
+reviewed and measured in their delivery slices. No infinite polling, automatic
+second copy or relaunch. Failed native copying creates no Item/Event. Once an
+eligible immutable snapshot is accepted, transport retry retains original
+operation/message/source/mode; it cannot recopy or capture a later Clipboard.
+
+## Active paste authorization and native effect
+
+USER DECISION: Set for Paste explicitly arms an exact Item/revision in the
+current F7Hub application session; row selection does not arm. Python owns the
+reference and revalidates it on every paste. Bind operation, armed generation,
+exact source revision and original transient target at invocation. Later row,
+Ticket or active-paste changes cannot retarget accepted work; pre-effect
+source/privacy invalidation or Clear revokes pending unused authorization.
+
+Python checks current source/revision, complete privacy admission, workflow
+availability and full-text eligibility before returning a purpose-bound,
+single-operation authorization to the authenticated AHK adapter. Missing/stale/
+deleted/expired/ineligible source returns no raw text; confirmed invalidation
+or stale exact-reference failure clears arming. Temporary owner unavailability
+is no proof of deletion: deny paste and display unavailable rather than silently
+substituting a cached body or newer revision. No reusable hidden raw-text cache
+in GUI, service, AHK, logs or files; a narrowly lived authorized delivery buffer
+for one operation is released promptly.
+
+AHK independently verifies response correlation, bound operation/source/arming
+generation and target context; rechecks foreground/policy immediately before
+Clipboard write and before native Ctrl+V. Source authorization must still be
+valid at the effect boundary, using a reviewed one-use freshness/revocation
+mechanism in the future paste slice. An old response is not a transferable
+paste permission. This is a requirement, not a new token API selected in CP-00.
+
+Write authorized full text to the normal Windows Clipboard, then request native
+Ctrl+V once. USER DECISION: leave pasted text on Windows Clipboard afterward;
+do not automatically restore previous contents in MVP. ClipboardAll preservation/
+restoration is deferred to separately reviewed work. If writing succeeded but
+input was subsequently blocked/failed, report that distinction truthfully:
+Clipboard may already contain authorized text, with no fake rollback or paste
+success. A newer user Clipboard change prevents sending a substituted value;
+do not overwrite it again or restore an older snapshot. Input dispatch is not
+proof the target application inserted text; uncertain delivery must not trigger
+automatic repeat or replay.
+
+## Feature profile extension and future Settings contributions
+
+Reuse 0B envelope, classes, correlation, strict bounded serialization, safe
+errors and compatibility rules and 1B's authenticated, application-owned IPC.
+Retain producer/generation/operation binding, immutable-request replay checks,
+receipt recovery and content-before-authentication prohibition. No new global
+grammar, endpoint or general native-input/shell RPC.
+
+Capture feature profiles must distinguish selection-copy versus current capture
+mode and allow only 1A's admitted bounded source fields. Active-paste profiles
+need exact source/ref revision, arming generation, operation correlation and
+purpose-bound full-text response plus truthful authorization/write/input outcomes.
+PID/HWND/sequence stay local transient Windows context, not ordinary durable
+payload fields. Wire spelling/schema versions/closed enums and native revocation
+mechanics are DESIGN NEXT in separately reviewed contract/security slices.
+Never silently add these semantics to a closed released v1 profile: use 0B's
+breaking-change review and explicit supported-version rules. Existing capture
+result output ceiling cannot be assumed to carry full paste text; the paste
+profile must establish a reviewed bounded response budget within approved
+document/content maxima. No full text in receipts, generic status or logs.
+
+0D future contributions: master workflow/history enablement, separately owned
+selection/paste bindings and action exclusions, independent process/title
+collection, and normal retention. No actual new Settings keys/storage are
+defined here. Use typed definitions and authenticated immutable desired/applied
+projections; persisted desired bindings do not mean active registration.
+Setup opt-in and eligible provenance use 1A CP-00; neither an imported preference
+nor saved boolean grants new permission. Missing secure Settings/IPC/native
+prerequisites keeps production capture/paste unavailable. No CP-00 production
+Ctrl+Alt+C/V registration, OS Clipboard access, copy/paste, ingress or database
+change occurs.
+
+## Performance, CP-01 prerequisite and validation gates
+
+The synchronous native path contains cheap Windows facts and bounded input/
+Clipboard mechanics only. Python validation/interpretation/persistence runs
+outside the GUI thread with GUI-thread presentation. No synchronous OCR, UIA,
+source URL discovery, executable signature inspection, network enrichment or
+ML/AI analysis on the hotkey path. Metadata failure may safely omit enrichment;
+unknown foreground identity cannot bypass the action guard. Normal logs exclude
+raw content and titles; no cloud/provider transmission or semantic acceptance.
+
+CP-00 review/approval/integration is a prerequisite to CP-01, not completed by
+this author report. CP-01 is limited to action-specific policy and press-cycle
+mechanics, using fixture bindings/counters, no Clipboard content/native Ctrl+C/V,
+production bindings, Settings, IPC, migrations or persistence. Native Windows
+validation is mandatory for CP-01, including allowed/excluded/unknown and exact
+mixed-case/prefix/suffix cases; repeat/release/context/recheck/failure cleanup;
+native shortcut preservation; unchanged F7 tap/hold and Alt+F7; bounded owned
+process/key/hotkey cleanup. Later production activation additionally needs
+separately delivered Settings, secure capture, authenticated IPC, domain write
+admission/persistence and native acquisition/paste authorization.
+
+CP-00 author checks cover all A-O decisions and the requested 20 consistency
+criteria through 1A lifecycle/provenance, this action/native contract and 1C
+presentation. Reproducible external evidence records exact raw and Git-normalized
+prefix preservation, unchanged Foundation/Semantic authorities, the five-path
+allowlist, empty index, links/anchors/fences, decision coverage and no runtime
+diff. Evidence: FRESH documentation/static checks on a WINDOWS_NATIVE host;
+not native behavior acceptance or independent review. Runtime/AHK/native/GUI/
+database suites are NOT RUN because CP-00 changes documentation only. No
+operational database validity claim. Remaining acquisition races, native layout/
+AltGr/RDP/app collisions, metadata policy and secure profile delivery remain
+explicit later validation gates. Stop at READY_FOR_REVIEW; no integration or CP-01.

@@ -2188,3 +2188,19 @@ READY_FOR_WORKSPACE_REVIEW
 Author-side execution is complete at architecture-planning depth: dependency gate PASS, current shell/reuse assessed, requested shell/context/navigation/flyout/Quick Ticket/responsive/security boundaries defined, six conceptual diagrams, decision/risk registers, explicit downstream inputs and 44/44 criteria covered. Requires User Decision: NONE at this depth. Candidate remains unapproved, unstaged, uncommitted, unpushed and not integrated; native/runtime behavior NOT RUN / NOT VERIFIED.
 
 Next gate: INDEPENDENT S1 ARCHITECTURE REVIEW -> explicit USER approval -> controlled S1 integration. STOP. S2, Clipboard 1C, implementation, canonical synchronization, Workspace AGENTS creation and Git publication are not authorized by this result.
+
+---
+
+## CP-00 Clipboard successor reference — 2026-10-08
+
+Architecture candidate: READY_FOR_REVIEW; CP-00 approval/integration pending.
+For future CP-series Clipboard work, consume [1B CP-00](../Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#cp-00-current-reconciliation)
+for the USER-selected Ctrl+Alt+C capture-selection / Ctrl+Alt+V paste-active
+direction and action-specific foreground policy; earlier S1 Win+Alt+C reservation
+statements remain historical recommendations. Capture Current remains a distinct
+explicit owner action, not selection-copy or a new shell-owned trigger.
+Consume [1C CP-00](../Clipboard/1C_PySide6_Clipboard_Center.md#cp-00-current-reconciliation)
+for internal retained source views, explicit session-only arming and planned
+redundant lower-return removal. S1 retains shell/Tickets navigation, focus/draft
+guards and shared auxiliary-region ownership. No shortcut, GUI or shell behavior
+is implemented here; review/approval/integration and separate delivery remain gates.
