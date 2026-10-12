@@ -1,5 +1,11 @@
 # F7Hub Entity Relationship Design
 
+## CP-02 Stage 1 — Shared Settings logical model
+
+The candidate adds two Settings-owned structures: a single revision record for the selected database's USER preference set, and zero or more scalar USER overrides identified by stable namespaced setting key. The revision describes the entire override set; it is not a per-setting timestamp or operational capability. Missing override means inheritance from an immutable Python definition/default. Definitions are not database entities.
+
+These structures have no foreign keys to Clipboard Items, Events, Contacts, Tickets, actors or tenants: preferences configure future use, while Clipboard owns its data/eligibility and service lifecycle. Process/title preference Booleans do not create provenance fields or acquire metadata. No generic settings-definition, policy, audit or plugin entity is delivered. Constraints/CAS are specified in [07_Database](07_Database.md#cp-02-stage-1--shared-user-settings-consistency) and exact migration DDL in [09_SQLSchema](09_SQLSchema.md#cp-02-stage-1--shared-settings-physical-schema). Candidate: READY_FOR_REVIEW; integration pending.
+
 > Document: `Docs/08_ERD.md`  
 > Project: F7Hub  
 > Purpose: Define the major F7Hub database entities, their ownership, and their relationships before exact SQL implementation.  

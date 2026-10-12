@@ -1,5 +1,29 @@
 # F7Hub SQL Schema
 
+## CP-02 Stage 1 — Shared Settings physical schema
+
+Implemented candidate migration: `Database/Migrations/0014_shared_settings.sql`. USER-only overrides use exactly this DDL; definitions/defaults are not persisted:
+
+```sql
+-- USER overrides only. Definitions/defaults and operational capability stay in Python.
+CREATE TABLE settings_state (
+    singleton_id INTEGER PRIMARY KEY CHECK (singleton_id = 1),
+    revision INTEGER NOT NULL CHECK (typeof(revision) = 'integer' AND revision >= 0)
+);
+INSERT INTO settings_state (singleton_id, revision) VALUES (1, 0);
+
+CREATE TABLE settings_user_overrides (
+    setting_key TEXT PRIMARY KEY NOT NULL
+        CHECK (typeof(setting_key) = 'text' AND length(setting_key) BETWEEN 3 AND 128),
+    value_type TEXT NOT NULL CHECK (value_type = 'BOOLEAN'),
+    value_text TEXT NOT NULL CHECK (value_text IN ('true', 'false'))
+);
+```
+
+The override primary key is its only required lookup index. The singleton revision is the group CAS token; all SettingsRepository writes compare it inside `BEGIN IMMEDIATE`, increment once only when rows change, and atomically commit rows/revision. Explicit read transactions keep both selects coherent. No-op preserves revision; Reset deletes an admitted override. See [transaction semantics](07_Database.md#cp-02-stage-1--shared-user-settings-consistency).
+
+Unknown keys are preserved/inert; validation on load does not silently delete or rewrite corrupt values. Service-level Boolean validation rejects coercion and key admission restricts writes to composed definitions. Stage 1 delivers saved preferences only; source process/title columns, capture admission, history writers and activation remain deferred. Earlier D01 statements that Settings was deferred describe that slice's historical scope. Migrations 0001–0013 are unchanged; fresh schema history now extends through 0014. Candidate: READY_FOR_REVIEW; independent review/integration pending.
+
 ## Slice 053 — Local Baseline Diagnostics
 
 Forward-only data migration `0011_services_snapshot_script.sql` adds exactly one enabled, uncategorized Windows Services Snapshot registration: code `diagnostic.windows.services_snapshot`, description `Collects a local read-only Windows services snapshot.`, path `PowerShell/Diagnostics/Get-ServicesSnapshot.ps1`, DIAGNOSTIC / POWERSHELL_7 / LOW / STANDARD_USER, version 1.0.0, timeout 60, structured output 1 and timestamps `2026-10-03T00:00:00.000Z`. Exact UTF-8 no-BOM CRLF SHA-256: `8a48321800e4d8147f2dd94a9d83eebedace6ac4e45b3e38c00f74d280abc347`. Case-insensitive code and separator-normalized/case-insensitive path conflicts abort atomically without version 11 recorded. Migrations 0001–0010 and the physical schema, six type enum, defaults, relationships and indexes are unchanged. No pack or result rows are created.

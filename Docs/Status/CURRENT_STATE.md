@@ -1,5 +1,17 @@
 # F7Hub Current State
 
+## CP-02 Stage 1 — Shared Settings backend candidate (2026-10-12)
+
+**READY_FOR_REVIEW**, branch `feature/clipboard-cp02-settings-backend`, isolated worktree `C:/Dev/F7Hub-Clipboard-CP02-S1`, base/HEAD `09bef3e8b4e55ed34b63a062d7b14a9d0b3f92af`. This candidate is unstaged/uncommitted and not integrated. Canonical checkout remains intentionally behind remote main and is preserved. Independent CP-02 Stage 1 review is the next gate.
+
+Implemented/verified: pure Boolean USER definitions and exactly three false-default Clipboard preferences, safe immutable effective snapshots, SQLite overrides/revision, atomic Apply/Reset, stale-write CAS including absent-key/two-process races, explicit coherent refresh, classified failures and bootstrap composition. Disabling master preserves optional process/title preferences. Invalid/unknown rows remain retained; invalid/unavailable sensitive values resolve false. No runtime activation/capability is reported from a saved preference.
+
+WINDOWS_NATIVE noninteractive validation: FRESH final Database **520**, mandatory AC-15 **1**, impacted bootstrap **10** PASS; RETAINED compatible full Integration **211**, GUI **232**, PowerShell **72** PASS, exit 0/no skips. AC-15 uses deterministic pipes/barrier synchronization, 250-ms fixture SQLite busy deadline, finite process/IPC budgets and verified child exit/cleanup. Independently repeat AC-15 during review; repeat on persistence/revision/group/reset/transaction changes. A read-only GUI change alone does not mandate whole concurrency repetition. Qt offscreen; no foreground/manual/DPI/native Clipboard acceptance claim. Isolated SQLite integrity_check=ok / zero foreign_key_check violations PASS. Focused new definition/backend checks also PASS. Evidence, test-input applicability, path hashes and reproducible final manifest: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP02-S1/implementation-20261012`.
+
+Unavailable: Stage 2 setup/consent UI, capture/history ingestion, Ctrl+Alt+C/V production binding, authenticated IPC, source process/title acquisition/fields, active paste and retention execution. Existing ClipboardService remains read-only; AHK, Mochi and AltF7Hub behavior/configuration are unchanged. Operational/customer data and employer policy NOT VERIFIED. No user-owned process was restarted and no foreground native harness was run.
+
+The supplied current handoff identifies CP-00/CP-01 approved, integrated and closed; live remote main is PR #90's CP-01 merge at the stated base. Older CP-01 pending-review paragraphs below are historical candidate metadata, not a rollback target or authority to repeat native automation.
+
 ## CP-01 — Clipboard hotkey policy and press-cycle candidate
 
 **READY_FOR_REVIEW** on 2026-10-08 (America/Toronto). Worktree

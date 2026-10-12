@@ -1,5 +1,11 @@
 # F7Hub Roadmap
 
+## CP-02 Stage 1 — Shared Settings backend candidate
+
+The bounded shared USER Settings foundation is implemented and tested at READY_FOR_REVIEW: Boolean definitions, three independently persisted false-default Clipboard preferences, safe immutable resolution, atomic grouped Apply/Reset, SQLite revision CAS and explicit operation-boundary refresh. Bootstrap composes it around the selected database. Independent CP-02 Stage 1 review is next; integration requires separate authorization.
+
+Stage 2 setup GUI remains pending. Later capture/IPC/ingestion, process/title storage/acquisition and Active Paste are unavailable. A saved true preference cannot activate those features or replace privacy/consent/capability gates. No next stage starts from backend readiness.
+
 ## Slice 053 — Local Baseline Diagnostics
 
 System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.

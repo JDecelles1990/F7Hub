@@ -1,5 +1,11 @@
 # F7Hub Folder Structure
 
+## CP-02 Stage 1 — Shared Settings files
+
+`Python/f7hub/domain/settings.py` holds pure immutable definitions/admission and typed effective snapshots; `domain/clipboard_settings.py` contributes exactly the three CP-00 preference concepts. `repositories/settings_repository.py` owns coherent persistence/CAS, and `services/settings_service.py` owns validation/resolution/Apply/Reset/refresh and targeted in-process subscriptions. Existing `app/bootstrap.py` statically composes these using its selected database.
+
+`Database/Migrations/0014_shared_settings.sql` adds the USER override/revision structure. Focused isolated tests are `Tests/Database/test_settings_definitions.py` and `Tests/Database/test_settings_backend.py`; `Tests/Integration/test_application_bootstrap.py` checks composition/persistence without Clipboard effects. `Tests/Integration/test_settings_cross_process.py` owns required AC-15 and its future/review repeat policy. Existing migration-count assertions advance where they bootstrap the full migration directory. No new configuration tree, database path, GUI file, framework or external dependency is added. Evidence/manifests/reports remain outside the worktree under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP02-S1/implementation-20261012`.
+
 ## AltF7Hub Knowledge corpus — 2026-10-03
 
 `Data/AltF7Hub-Troubleshooting-Topics.yaml` preserves the supplied 31-topic reference corpus. [Data/README.md](../Data/README.md) records its verified one-time import into the local development Knowledge Base, content mapping, validation and recovery boundaries. Local SQLite data, backups and import evidence remain outside Git; checking out the corpus does not automatically import it.
