@@ -1,5 +1,23 @@
 # F7Hub Todo
 
+## CP-01 — Action-specific Clipboard hotkey policy candidate
+
+- [x] Independent capture/paste maps, one initial Office list, exact case-insensitive basename matching and unknown fail-closed resolution.
+- [x] Consumed press-cycle latch, full trigger/modifier release, rejection/error/cancellation cleanup and bound foreground/policy recheck.
+- [x] Focused AHK 147 assertions and Windows native hook/foreground 123 assertions PASS, exit 0, zero owned survivors; test-only bindings/counters.
+- [x] Existing F7 launcher/tap/hold and follower PASS; focused actual Alt+F7 toggle/reuse 9 assertions PASS.
+- [x] Word/New Outlook identity/rejection acceptance PASS without key input; remaining installed Office apps NOT RUN (no safe existing window).
+- [x] Dormant host boundary and synchronized affected documentation; external manifest/results/report.
+- [ ] Independent CP-01 review.
+
+**READY_FOR_REVIEW**, `feature/clipboard-cp01-hotkey-policy`, isolated worktree
+`C:/Dev/F7Hub-Clipboard-CP01`, base/HEAD `988c982f3abbdc1749cf1720dc487941f42899b7`.
+No production Clipboard bindings/effects or CP-02. Automated native input is
+distinct from physical/manual acceptance (NOT RUN). Preserve the broader unchanged
+host harness's SharePoint-topic readiness FAIL as an out-of-scope follow-up;
+the required focused Alt+F7 behavior independently passed. Evidence:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP01/implementation-20261008`.
+
 ## CC-02 — Bounded read-only Recent page candidate
 
 - [x] Compose the merged ClipboardRepository/ClipboardService in bootstrap and inject the exact optional service into the lazy retained workspace.
