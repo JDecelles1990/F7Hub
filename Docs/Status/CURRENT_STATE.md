@@ -1,5 +1,41 @@
 # F7Hub Current State
 
+## CP-01 — Clipboard hotkey policy and press-cycle candidate
+
+**READY_FOR_REVIEW** on 2026-10-08 (America/Toronto). Worktree
+`C:/Dev/F7Hub-Clipboard-CP01`, branch `feature/clipboard-cp01-hotkey-policy`,
+base/HEAD `988c982f3abbdc1749cf1720dc487941f42899b7` (CP-00 merge PR #89).
+Unstaged/uncommitted, not integrated. Canonical checkout remains on its earlier
+HEAD with protected untracked GuideSettings.ini preserved through pathname-only
+Git observation; no synchronization performed.
+
+The dormant AHK foundation provides independent capture-selection/paste-active
+exclusion maps, the centralized five Office basenames, exact case-insensitive
+matching and unknown fail-closed resolution. Every observed trigger press is
+latched, including rejection; trigger/Ctrl/Alt release permits rearm. Fixture
+dispatch rechecks current action policy and original HWND/PID/executable.
+Exceptions/cancellation cannot replay a held cycle or strand busy state.
+No host inclusion/production binding, Ctrl+C/V synthesis, Clipboard content,
+Python/IPC/Settings/database/GUI change or CP-02 is delivered.
+
+FRESH WINDOWS_NATIVE focused AHK **147 assertions PASS**, native hook/foreground
+**123 assertions PASS**, existing F7 launcher/tap/hold and follower **PASS**,
+focused actual Alt+F7 toggle/reuse **9 assertions PASS**; exits 0 and zero owned
+survivors. Native keyboard events are injected with test-only logical key-state
+observation; physical/manual hardware, AltGr/RDP/extra layouts NOT RUN. Word and
+New Outlook foreground identity/both-action rejection PASS without keys/content;
+installed Excel/classic Outlook/PowerPoint acceptance NOT RUN (no safe existing
+window). Broader Python/GUI/database suites NOT RUN because their owner code and
+composition are unchanged and CP-01 is dormant.
+
+One broader unchanged baseline host harness **FAIL** at SharePoint-topic
+rendering/readiness, before its Alt+F7 section; preserved as a separate unrelated
+follow-up, with cause NOT VERIFIED. Native fixture parsing/cleanup failures and
+the zero-app initial Office probe are preserved; corrected required validation
+completed. External evidence, exact candidate manifest and report:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP01/implementation-20261008`.
+Next gate: **INDEPENDENT CP-01 REVIEW**. No staging, commit, push, PR or merge.
+
 ## CC-02 — Bounded read-only Clipboard Recent page candidate
 
 **READY_FOR_REVIEW** on 2026-10-08 (America/Toronto), worktree `C:/Dev/F7Hub-Clipboard-CC02`, branch `feat/clipboard-cc02-recent-page`, baseline/HEAD `1991263db17c1a60b37808ab05a82741a0cd7b4d`. Recovery audit preserved the seven original modified implementation/test files and verified unchanged remote main; final candidate adds only the five affected owner docs. Empty index, unstaged/uncommitted/unpushed. Preceding D01/CC-01 records below describe their original candidate snapshots; their implementations are in the required merged baseline.

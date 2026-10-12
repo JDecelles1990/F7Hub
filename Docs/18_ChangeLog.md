@@ -1,5 +1,43 @@
 # F7Hub ChangeLog
 
+## 2026-10-08 — CP-01: Dormant Clipboard hotkey policy/press-cycle candidate
+
+Added separate Clipboard action policies sharing a centralized initial Office
+exclusion list, exact case-insensitive executable basename matching and reliable
+foreground resolution that fails closed. Added an event-driven press-cycle
+controller binding original HWND/PID/executable, consuming repeats/rejections/
+interruption until complete release and rechecking current policy/target before
+a counter callback. Production host and existing F7 controller remain unchanged;
+no production Clipboard shortcut, capture/paste/content access, IPC, Settings,
+Python, SQLite or GUI capability is activated.
+
+Focused AHK 147 assertions and Windows native hook/foreground 123 assertions
+PASS, exit 0 and zero owned survivors. Native fixtures use test-only Ctrl+Alt+F23/
+F24, renamed AHK runtimes, finite injected events and an external timeout/owned
+process supervisor. Physical hardware/AltGr/RDP acceptance is NOT RUN. Existing
+F7 launcher/tap/hold and follower PASS; focused actual Alt+F7 toggle/reuse 9
+assertions PASS. Real Word/New Outlook identity and both-action rejection PASS
+without keys or Clipboard access; installed Excel/classic Outlook/PowerPoint
+acceptance NOT RUN because no safe existing window was available.
+
+Historical failures retained: initial native fixture parsed a newline-terminated
+HWND without trimming newlines; next run passed all 123 behavior checks but used
+a reversed ProcessWaitClose cleanup return check. Both fixture defects were
+corrected; subsequent native runs passed with verified cleanup. The unchanged
+broader host harness timed out at SharePoint-topic rendering/readiness before
+reaching Alt+F7 checks; no production repair or repeated retry was attempted.
+Focused Alt+F7 regression independently established the required toggle behavior.
+The initial Office probe skipped minimized windows and exercised zero apps;
+bounded restore/re-minimize acceptance subsequently verified two apps.
+
+Four affected docs synchronized. Candidate remains unstaged/uncommitted in
+`C:/Dev/F7Hub-Clipboard-CP01` on `feature/clipboard-cp01-hotkey-policy`, base
+`988c982f3abbdc1749cf1720dc487941f42899b7`. **READY_FOR_REVIEW**, with external
+manifest, exact commands/results and report under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP01/implementation-20261008`.
+Independent review/integration pending; CP-02 not started. Earlier records below
+retain their original historical status and evidence.
+
 ## 2026-10-08 — CC-02: Bounded read-only Clipboard Recent page candidate
 
 Composed the existing D01 ClipboardRepository/ClipboardService in bootstrap and ApplicationContext, with exact optional MainWindow/workspace injection. The retained Clipboard Center now reads one default bounded first page asynchronously through its own existing runner. A read-only model/view renders only Time, safe Preview/truncation, Temporary/Saved and Yes/No pin state. Added explicit Refresh, fixed loading/failure text, Retry, successful empty state and truthful has_more feedback without cursor/page controls. Existing draft/navigation/Back behavior remains; unrelated navigation stays usable while Clipboard reads, and close refuses destruction of a finishing owned worker. No schema/domain/query API, raw body, capture, mutation, OS Clipboard, external handoff or dependency change.

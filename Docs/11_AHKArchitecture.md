@@ -1,5 +1,50 @@
 # F7Hub AutoHotkey v2 Architecture
 
+## CP-01 — Dormant Clipboard policy and press-cycle foundation
+
+CP-01 is a review candidate based on integrated CP-00 (`988c982f…`, PR #89).
+`Helpers/ClipboardHotkeyPolicy.ahk` owns two independent action maps for
+`clipboard.capture_selection` and `clipboard.paste_active`. Both initially use
+one canonical list: WINWORD.EXE, EXCEL.EXE, OUTLOOK.EXE, OLK.EXE and POWERPNT.EXE.
+Membership is exact, case-insensitive executable basename equality; a reliable
+absolute Windows path is reduced to its basename. Unknown/malformed identities
+and unknown actions fail closed. Foreground resolution uses only HWND, PID and
+executable name, without Clipboard access, titles, waiting or external work.
+
+`Hotkeys/ClipboardPressCycleController.ahk` binds that transient target on the
+first observed trigger-down. Held/repeated triggers, modifier represses and
+rejected/interrupted cycles cannot create another operation. Rearm requires
+trigger, Ctrl and Alt release. Immediately before its fixture callback it
+rechecks the current action policy and original HWND/PID/executable; a different
+allowed window is also rejected. Callback failure clears busy state while
+preserving a held-cycle latch. Registration must observe trigger-down and release
+even in excluded/unknown contexts, with native pass-through there; contextual
+eligibility alone cannot supply the release lifecycle. OS focus/input races are
+not atomic and remain a future native-effect concern.
+
+The shared host and F7 controller are unchanged and include neither primitive.
+There are **no production Ctrl+Alt+C/V bindings**, native copy/paste, Clipboard
+reads/writes, IPC, Settings, Python, database or GUI changes. Test-only Ctrl+Alt+F23/
+F24 bindings use counters; renamed test-owned AHK processes prove foreground
+basename resolution and excluded/unknown native input delivery. AHK focused
+147 assertions and native hook/foreground 123 assertions PASS on Windows, exit 0,
+zero owned survivors. Native input is automated SendEvent with a test-only logical
+key-state provider; the default controller uses physical `GetKeyState(..., "P")`.
+Manual hardware, AltGr/RDP and additional keyboard layouts are NOT RUN.
+
+Existing F7 launcher/tap/hold and follower regressions PASS. Focused actual
+Alt+F7 show/focus/hide/reuse regression: 9 assertions PASS. A separate broader
+unchanged host harness failed on SharePoint-topic rendering/readiness before its
+Alt+F7 section; the failure is preserved as an unrelated follow-up, not PASS.
+Word and New Outlook foreground/fixture rejection acceptance PASS without key
+input; Excel/classic Outlook/PowerPoint acceptance NOT RUN (no safe existing
+window; applications are installed). External supervisor, finite events, owned
+PID tracking and key release bound native execution and cleanup.
+
+Candidate/evidence: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP01/implementation-20261008`.
+Status: READY_FOR_REVIEW, unstaged/uncommitted; independent review and integration
+pending. CP-02 and production activation are separately authorized later work.
+
 > Document: `Docs/11_AHKArchitecture.md`  
 > Project: F7Hub  
 > Technology: AutoHotkey v2  
