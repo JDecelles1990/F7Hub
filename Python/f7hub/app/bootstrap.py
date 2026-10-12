@@ -12,6 +12,9 @@ from f7hub.infrastructure.database_paths import resolve_development_database_pat
 from f7hub.repositories.ticket_repository import TicketRepository
 from f7hub.repositories.clipboard_repository import ClipboardRepository
 from f7hub.services.clipboard_service import ClipboardService
+from f7hub.domain.clipboard_settings import CLIPBOARD_SETTING_DEFINITIONS
+from f7hub.repositories.settings_repository import SettingsRepository
+from f7hub.services.settings_service import SettingsService
 from f7hub.services.ticket_service import TicketService
 from f7hub.repositories.company_repository import CompanyRepository
 from f7hub.repositories.contact_repository import ContactRepository
@@ -48,6 +51,8 @@ class ApplicationContext:
     ticket_service: TicketService
     clipboard_repository: ClipboardRepository
     clipboard_service: ClipboardService
+    settings_repository: SettingsRepository
+    settings_service: SettingsService
     knowledge_repository: KnowledgeRepository
     knowledge_service: KnowledgeService
     ticket_knowledge_repository: TicketKnowledgeRepository
@@ -82,6 +87,8 @@ def bootstrap_application(
     ticket_service = TicketService(ticket_repository)
     clipboard_repository = ClipboardRepository(resolved_database_path)
     clipboard_service = ClipboardService(clipboard_repository)
+    settings_repository = SettingsRepository(resolved_database_path)
+    settings_service = SettingsService(settings_repository, CLIPBOARD_SETTING_DEFINITIONS)
     knowledge_repository = KnowledgeRepository(resolved_database_path)
     categories = CategoryRepository(resolved_database_path)
     tags = TagRepository(resolved_database_path)
@@ -120,6 +127,8 @@ def bootstrap_application(
         clipboard_repository=clipboard_repository,
         clipboard_service=clipboard_service,
         knowledge_repository=knowledge_repository,
+        settings_repository=settings_repository,
+        settings_service=settings_service,
         knowledge_service=knowledge_service,
         ticket_knowledge_repository=ticket_knowledge_repository,
         ticket_knowledge_service=ticket_knowledge_service,

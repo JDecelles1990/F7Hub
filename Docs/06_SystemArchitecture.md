@@ -1,5 +1,11 @@
 # F7Hub System Architecture
 
+## CP-02 Stage 1 — Shared Settings backend candidate
+
+Application composition → SettingsService → immutable typed definitions → SettingsRepository → existing SQLite infrastructure now supports saved USER preferences in the selected database. ApplicationContext exposes the service/repository; MainWindow has no new control or Settings dependency. The service validates admitted keys and values, resolves safe source-aware snapshots, coordinates revision-checked Apply/Reset, and publishes only after commit. Definitions/defaults remain pure Python metadata. Feature services still own capability, consent, privacy admission and operational activation.
+
+Exactly three Clipboard Boolean preferences are composed, all default false: `clipboard.workflow_enabled`, `clipboard.source_process_persistence_enabled`, and `clipboard.source_window_title_persistence_enabled`. The master preference represents saved workflow/history intent; the optional process/title preferences persist independently. A true value activates no capture, paste, hotkey, IPC, source acquisition or data ingestion. Stage 2 setup and actual activation remain unavailable. Existing read-only ClipboardService, AHK and subsystem-local Mochi/AltF7Hub configuration are unchanged. Candidate status: READY_FOR_REVIEW; independent review/integration pending. See [Python ownership/API](13_PythonArchitecture.md#cp-02-stage-1--shared-settings-backend-candidate) and [database consistency](07_Database.md#cp-02-stage-1--shared-user-settings-consistency).
+
 ## Slice 053 — Local Baseline Diagnostics
 
 System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.

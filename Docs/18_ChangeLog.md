@@ -1,5 +1,13 @@
 # F7Hub ChangeLog
 
+## 2026-10-12 — CP-02 Stage 1: Shared Settings backend candidate
+
+Added pure immutable Boolean USER definitions, static Clipboard contributions, SettingsRepository, SettingsService and migration 0014 with USER overrides/singleton revision. Bootstrap exposes shared Settings through ApplicationContext. Group Apply/Reset uses transaction-level revision CAS; coherent reads and bounded explicit refresh protect snapshots across writers. Unknown/invalid rows stay available for repair; sensitive invalid/unavailable values fail closed. No-op writes preserve revision and notifications; observer failure is separately reported after commit.
+
+Exactly three Clipboard saved preferences default false; master disable preserves source process/title preferences. No setup GUI, source acquisition/storage extension, Clipboard runtime effect, AHK/IPC change or companion configuration migration was implemented. Migration 0001–0013 content is unchanged. Existing full-history test expectations now admit version 14.
+
+WINDOWS_NATIVE noninteractive validation: FRESH final Database 520, AC-15 1 and impacted bootstrap 10 PASS; RETAINED compatible full Integration 211, GUI 232, PowerShell 72 PASS; exits 0, no skips. AC-15 separately classifies stale revision, SQLite contention and unexpected failure; independently repeat during review. Qt uses offscreen, which establishes no foreground/DPI/manual acceptance. Foreground native Clipboard/AHK tests NOT RUN because no changed native behavior is delivered. Isolated integrity_check=ok and zero foreign_key_check violations PASS. External evidence records bind exact tested inputs to the documented candidate, including the AC-15 amendment and retained-suite input disposition. Full integration and focused bootstrap emitted an existing Mochi QTimer teardown exception after OK; it is a separate unmodified-owner follow-up, not a Settings assertion failure. READY_FOR_REVIEW; no staging/commit/push/integration. Independent Stage 1 review is next.
+
 ## 2026-10-08 — CP-01: Dormant Clipboard hotkey policy/press-cycle candidate
 
 Added separate Clipboard action policies sharing a centralized initial Office

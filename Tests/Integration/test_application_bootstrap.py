@@ -17,6 +17,9 @@ from f7hub.app.bootstrap import bootstrap_application
 from f7hub.app.main import main
 from f7hub.infrastructure.database import database_connection, validate_database_integrity
 from f7hub.infrastructure.migrations import MigrationDiscoveryError
+from f7hub.domain.clipboard_settings import CLIPBOARD_SETTING_DEFINITIONS, WORKFLOW_ENABLED
+from f7hub.repositories.settings_repository import SettingsRepository
+from f7hub.services.settings_service import SettingsService
 from f7hub.services.altf7hub_service import AltF7HubService
 from f7hub.infrastructure.altf7hub_gateway import WindowsAltF7HubGateway
 
@@ -25,6 +28,49 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class ApplicationBootstrapTests(unittest.TestCase):
+    def test_shared_settings_composition_defaults_and_no_clipboard_effects(self):
+        with (
+            patch("f7hub.services.mochi_service.MochiService.automatic_start", return_value=False),
+            patch.object(QApplication, "clipboard", side_effect=AssertionError("No OS Clipboard access")) as clipboard,
+            patch("subprocess.Popen", side_effect=AssertionError("No runtime process")) as launch,
+        ):
+            context = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.database_path)
+            self.addCleanup(context.main_window.deleteLater)
+            self.assertIsInstance(context.settings_repository, SettingsRepository)
+            self.assertIsInstance(context.settings_service, SettingsService)
+            snapshot = context.settings_service.get_snapshot()
+            self.assertEqual(snapshot.revision, 0)
+            self.assertTrue(all(entry.value is False for entry in snapshot.values))
+            self.assertIsNone(context.main_window.clipboard_workspace)
+            self.assertEqual(context.clipboard_service.get_recent().rows, ())
+            self.assertFalse(hasattr(context.clipboard_service, "capture"))
+            with patch.object(context.clipboard_service, "get_recent", side_effect=AssertionError("No Clipboard consumer effect")) as read:
+                result = context.settings_service.apply(
+                    {entry.key: True for entry in CLIPBOARD_SETTING_DEFINITIONS}, expected_revision=0)
+                self.assertTrue(result.snapshot.get(WORKFLOW_ENABLED).value)
+                read.assert_not_called()
+            with database_connection(self.database_path) as connection:
+                self.assertEqual(connection.execute("SELECT COUNT(*) FROM clipboard_items").fetchone()[0], 0)
+                self.assertEqual(connection.execute("SELECT COUNT(*) FROM clipboard_capture_events").fetchone()[0], 0)
+                self.assertEqual(validate_database_integrity(connection), (("ok",), ()))
+            clipboard.assert_not_called()
+            launch.assert_not_called()
+
+    def test_repeat_application_bootstrap_loads_saved_preferences_from_selected_database(self):
+        with patch("f7hub.services.mochi_service.MochiService.automatic_start", return_value=False):
+            first = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.database_path)
+            self.addCleanup(first.main_window.deleteLater)
+            saved = first.settings_service.apply({WORKFLOW_ENABLED: True}, expected_revision=0).snapshot
+            second = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.database_path)
+            self.addCleanup(second.main_window.deleteLater)
+            self.assertEqual(second.settings_service.get_snapshot(), saved)
+            self.assertEqual(second.bootstrap_result.migration_result.applied_versions, ())
+            other_path = Path(self.temporary_directory.name) / "other-selected.db"
+            third = bootstrap_application(project_root=PROJECT_ROOT, database_path=other_path)
+            self.addCleanup(third.main_window.deleteLater)
+            self.assertFalse(third.settings_service.get_snapshot().get(WORKFLOW_ENABLED).value)
+            self.assertEqual(third.settings_service.get_snapshot().revision, 0)
+
     def test_bootstrap_composes_guide_for_the_resolved_checkout(self):
         context = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.database_path)
         self.addCleanup(context.main_window.deleteLater)
@@ -176,7 +222,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
                     "SELECT version FROM schema_migrations ORDER BY version"
                 )
             )
-        self.assertEqual(applied_versions, (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13))
+        self.assertEqual(applied_versions, (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14))
 
     def test_missing_migrations_stop_before_application_composition(self) -> None:
         missing_project_root = Path(self.temporary_directory.name) / "missing-root"
@@ -217,7 +263,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
                 connection.execute(
                     "SELECT COUNT(*) FROM schema_migrations"
                 ).fetchone()[0],
-                13,
+                14,
             )
 
     def test_main_entry_point_reports_startup_failure(self) -> None:

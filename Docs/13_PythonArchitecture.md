@@ -1,5 +1,17 @@
 # F7Hub Python Architecture
 
+## CP-02 Stage 1 — Shared Settings backend candidate
+
+`SettingDefinition` is immutable Python metadata. The bounded Boolean-only USER/SQLite model records stable namespaced key, owner, validated default, source admission, editability, sensitivity, update behavior and Boolean constraints. Duplicate definitions, malformed keys, invalid defaults and unsupported metadata fail admission. Pure `clipboard_settings.py` contributes three false-default privacy-sensitive preferences; bootstrap composes them statically. CP-00 assigns their meanings without exact names; these implementation identifiers follow 0D, superseding no approved key contract.
+
+`SettingsRepository.load_state()` returns coherent revision and stored overrides. `apply(changes=..., resets=..., expected_revision=...)` owns transaction-level CAS and parameterized persistence only. Safe `SettingsConflictError`, `SettingsContentionError` (a SettingsPersistenceError subtype), and `SettingsPersistenceError` distinguish stale state, SQLite busy/locked deadlines, and other storage failures. The AC-15 worker labels stale conflicts STALE_REVISION, contention DATABASE_CONTENTION, and other failures UNEXPECTED_FAILURE. Raw stored rows are repository-level repair/evolution input, excluded from representation/logging, and never become executable definitions.
+
+`SettingsService(repository, definitions)` validates/resolves at composition. `get_snapshot()` returns its immutable cached saved-preference snapshot; `refresh()` performs one coherent repository read for future operation boundaries. Refresh is explicit and emits no subscription event. Snapshot fields include revision (None if unavailable), effective Boolean entries with safe source/diagnostic, storage availability and unknown override count. Storage availability refers solely to Settings storage. There is no runtime Clipboard-ready flag or operational-activation assertion. Invalid ordinary values inherit a default with a diagnostic; invalid/unavailable privacy-sensitive values resolve false and remain save-disabled when storage is unavailable. Invalid persisted values are retained until an explicit admitted Apply/Reset repairs them.
+
+`apply(changes, expected_revision=..., resets=...)` validates the entire group, including editability and strict bool input, before persistence. Revisions belong to drafts loaded/refreshed through that service; transaction CAS remains authoritative against other writers. Unchanged inherited defaults do not seed rows. `reset(keys, expected_revision=...)` deletes explicit overrides. Failure publishes no success/change event. Success publishes the returned committed state, then notifies `subscribe` callbacks with immutable `SettingsChange(snapshot, changed_keys)`; `unsubscribe` removes a callback. `SettingsApplyResult.notification_failures` separates post-commit observer failure from save success. Consumers must marshal GUI updates to the GUI thread; callbacks run on the calling thread after SQLite closes. No-op emits no notification. Old operation snapshots remain immutable.
+
+ApplicationContext exposes `settings_repository` and `settings_service` using its existing selected database path. MainWindow and ClipboardService do not consume these yet. The master saved preference does not certify setup consent, runtime capability or active capture; future Stage 2 owns the explanatory opt-in interaction and later feature consumers must independently authorize activation/privacy/retention. Source preferences remain independent when master or title is disabled. No secret/string/path/command setting, environment/CLI preference override, plugin loader, companion configuration migration or general event bus is introduced. Candidate: READY_FOR_REVIEW; independent review/integration pending.
+
 ## CC-02 — Clipboard Recent composition and presentation
 
 `bootstrap_application` constructs the existing `ClipboardRepository(resolved_database_path)` and `ClipboardService(clipboard_repository)`, exposes both through ApplicationContext, and passes that exact service to MainWindow's optional `clipboard_service` parameter. Accepted `show_clipboard()` retains the existing guards, lazily constructs `ClipboardWorkspace(parent, clipboard_service=...)` once and calls `activate()`. MainWindow performs no Clipboard read or SQL. Direct constructors with no service keep the truthful unavailable fallback.
@@ -2058,20 +2070,7 @@ inside committed JSON, YAML, INI, or Python source.
 
 # 88. Settings Service
 
-Potential:
-
-```text
-SettingsService
-```
-
-Responsibilities:
-
-- retrieve user settings
-- validate changes
-- persist approved settings
-- expose defaults
-
-The GUI should not know how settings are physically stored.
+CP-02 Stage 1 implements the bounded shared SettingsService. See the [current API/ownership contract](#cp-02-stage-1--shared-settings-backend-candidate). The GUI has no Settings controls yet and must not execute Settings SQL.
 
 ---
 

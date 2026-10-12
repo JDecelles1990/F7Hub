@@ -1,5 +1,20 @@
 # F7Hub Todo
 
+## CP-02 Stage 1 — Shared Settings backend candidate
+
+- [x] Immutable Boolean USER definitions and exactly three false-default Clipboard preferences.
+- [x] Additive 0014 schema, coherent reads, grouped Apply/Reset and repository-backed CAS.
+- [x] Safe invalid/unknown/unavailable state, strict input validation and independent source preferences.
+- [x] Bootstrap composition without Clipboard runtime effects; current migration-count expectations adjusted.
+- [x] Isolated migration/upgrade/rollback/integrity and required AC-15 deterministic two-process concurrency validation; affected noninteractive regressions.
+- [ ] Independently repeat mandatory AC-15 during Stage 1 review; persistence/revision/group/reset/transaction changes require future repetition.
+- [x] Affected owner documentation and external manifest/result/report records.
+- [ ] Independent CP-02 Stage 1 review.
+- [ ] Separately authorized integration after approval.
+- [ ] Stage 2 setup GUI/consent interaction, only under a future explicit task.
+
+State: READY_FOR_REVIEW, isolated `C:/Dev/F7Hub-Clipboard-CP02-S1`, branch `feature/clipboard-cp02-settings-backend`, base/HEAD `09bef3e8b4e55ed34b63a062d7b14a9d0b3f92af`. Saved preferences do not activate capture/paste/hotkeys/IPC or acquire source metadata. Historical CP-01 pending-review prose below remains that earlier candidate's record; current supplied handoff and live base identify CP-01 integration through PR #90. No CP-01 source/harness correction is part of this slice.
+
 ## CP-01 — Action-specific Clipboard hotkey policy candidate
 
 - [x] Independent capture/paste maps, one initial Office list, exact case-insensitive basename matching and unknown fail-closed resolution.
