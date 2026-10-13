@@ -1,5 +1,17 @@
 # F7Hub GUI Design
 
+## CP-02 Stage 2 — Clipboard Setup editor
+
+Clipboard Center now retains one **Clipboard Setup** page beside **Recent** when the shared SettingsService is composed. Existing Recent presentation and Back to Tickets remain. Setup loads a coherent authoritative snapshot asynchronously each time a new editing session begins. Exactly three independently editable checkboxes expose workflow/local-history opt-in, optional source executable basename and optional source window title. Values/defaults come from SettingsSnapshot; no GUI defaults or SQL are introduced.
+
+Workflow enablement explains eligible future durable manual captures with normal TEMPORARY retention unless an independently approved preservation action applies. Master disable preserves both optional source preferences and existing history. Titles are explicitly described as potentially sensitive. Saved preferences never assert active capability: production capture, Active Paste and Ctrl+Alt+C/V remain unavailable.
+
+Apply validates changed Booleans through existing definitions and makes one async SettingsService.apply call with the original expected revision. No-op Apply performs no write. Cancel discards only uncommitted edits and restores the latest known saved values. Conflict preserves the complete draft, disables Apply and requires explicit Reload, Discard/Cancel confirmation and deliberate review of the refreshed snapshot. Leaving Setup, changing shell workspace, reopening/reloading and main-window close protect unsaved edits. Pending reads/writes refuse overlapping operations, navigation and close, including the runner completion gap.
+
+Storage-unavailable snapshots show effective safe-disabled values and disable persistence until Reload succeeds. Invalid stored sensitive values show the backend's false fallback with safe feedback. Validation, contention and persistence errors preserve drafts; raw exceptions are never shown/logged. Successful commits update the saved baseline before presentation; observer or display failures remain acknowledged as saved with a separate downstream warning and reload-only recovery for display failure.
+
+Candidate **READY_FOR_REVIEW**, unstaged/uncommitted. FRESH WINDOWS_NATIVE host, noninteractive Qt offscreen: focused 73, GUI 251, Integration 219, Database 520 PASS. Separate user-authorized native Qt run: 74 assertions PASS, exit 0, zero owned survivors; seven captures inspected at 1000×700 and 1180×850/96 DPI. QTest input is synthesized; physical input, alternate DPI, Narrator/high contrast remain NOT RUN. See [current state](Status/CURRENT_STATE.md#cp-02-stage-2--clipboard-setup-editor-2026-10-12) for evidence and limitations.
+
 ## CC-02 — Bounded read-only Clipboard Recent page
 
 Production Clipboard Center now consumes the merged D01 service. Accepted navigation lazily constructs and retains one workspace, starts one asynchronous `get_recent()` read with the default 50-item limit, and reuses that page on reopening. An optional absent service retains CC-01's truthful unavailable state. The CC-01 record below describes its original shell delivery; CC-02 supersedes its production no-service/no-worker state.

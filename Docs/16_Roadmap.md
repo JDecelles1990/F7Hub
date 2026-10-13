@@ -1,10 +1,14 @@
 # F7Hub Roadmap
 
-## CP-02 Stage 1 — Shared Settings backend candidate
+## CP-02 Stage 2 — Clipboard Setup candidate
 
-The bounded shared USER Settings foundation is implemented and tested at READY_FOR_REVIEW: Boolean definitions, three independently persisted false-default Clipboard preferences, safe immutable resolution, atomic grouped Apply/Reset, SQLite revision CAS and explicit operation-boundary refresh. Bootstrap composes it around the selected database. Independent CP-02 Stage 1 review is next; integration requires separate authorization.
+The bounded Clipboard Setup editor is implemented/tested/documented at READY_FOR_REVIEW in the isolated Stage 2 worktree. It retains one async draft editor with three independent Boolean preferences, atomic revision-checked Apply, Cancel, protected departure and explicit conflict Reload. Runtime capture/Active Paste remain unavailable. Independent Stage 2 review is next; candidate remains unstaged/uncommitted and integration requires separate authorization.
 
-Stage 2 setup GUI remains pending. Later capture/IPC/ingestion, process/title storage/acquisition and Active Paste are unavailable. A saved true preference cannot activate those features or replace privacy/consent/capability gates. No next stage starts from backend readiness.
+## CP-02 Stage 1 — Shared Settings backend
+
+The USER Settings foundation is MERGED through PR #91 at remote main 8717e99f4cc77fc723497376dd858d22b8d6f18f, closure pending. Coherent safe snapshots, atomic Apply/Reset and SQLite CAS are reused unchanged by Stage 2. Canonical local main is intentionally preserved behind remote main; Stage 2 does not close Stage 1 or synchronize it.
+
+Later capture/IPC/ingestion, process/title storage/acquisition and Active Paste are unavailable. A saved true preference cannot activate those features or replace privacy/capability gates. CP02-S3 remains unstarted; a new task is required. CP-01's historical native diagnostic root cause is NOT VERIFIED and nonblocking for this GUI slice.
 
 ## Slice 053 — Local Baseline Diagnostics
 

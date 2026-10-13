@@ -1,5 +1,15 @@
 # F7Hub ChangeLog
 
+## 2026-10-12 — CP-02 Stage 2: Clipboard Setup review candidate
+
+Added one retained accessible Clipboard Setup editor beside existing Recent, injected with the composed SettingsService. Exactly three existing Boolean preferences load asynchronously from coherent snapshots. Workflow opt-in explains future eligible durable captures and normal TEMPORARY retention; optional basename/title preferences stay independent with master OFF. No capture or Active Paste is active.
+
+Async Apply submits only changed keys once with the original revision; no-op avoids writes. Cancel restores known saved values, departure/reload/close protect dirty drafts, and pending operations block duplication/departure/destruction. Conflict preserves draft and requires explicit warned Reload/review. Safe messages classify precommit failures; committed saves remain acknowledged through observer/display failures. Existing backend/schema/migrations, Clipboard history and AHK/IPC behavior are unchanged.
+
+FRESH WINDOWS_NATIVE host noninteractive Qt offscreen validation: focused 73, full GUI 251, Integration 219 and Database 520 PASS, exit 0, no skips. Full Integration includes fresh AC-15; 27 retained backend/schema/test inputs were also checked unchanged against Stage 1 review evidence. Separate explicitly authorized native Qt run: 74 assertions, seven inspected captures at 1000×700 and 1180×850/96 DPI, exit 0, zero owned survivors. All suite-owned processes were contained/cleaned. SQLite integrity=ok and zero FK violations in isolated fixtures. Physical input, alternate DPI, Narrator/high contrast NOT RUN. Existing unrelated companion-launch diagnostics remain in regression logs.
+
+Candidate READY_FOR_REVIEW, unstaged/uncommitted; no independent review or integration performed. Stage 1 is MERGED via PR #91, closure pending; canonical main remains intentionally preserved. CP-01's closed historical native diagnosis retains root cause NOT VERIFIED as a nonblocking follow-up, not a production failure. Seven authorized documentation owners updated; prior changelog entries remain historical. External evidence: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP02-S2/implementation-20261012`.
+
 ## 2026-10-12 — CP-02 Stage 1: Shared Settings backend candidate
 
 Added pure immutable Boolean USER definitions, static Clipboard contributions, SettingsRepository, SettingsService and migration 0014 with USER overrides/singleton revision. Bootstrap exposes shared Settings through ApplicationContext. Group Apply/Reset uses transaction-level revision CAS; coherent reads and bounded explicit refresh protect snapshots across writers. Unknown/invalid rows stay available for repair; sensitive invalid/unavailable values fail closed. No-op writes preserve revision and notifications; observer failure is separately reported after commit.

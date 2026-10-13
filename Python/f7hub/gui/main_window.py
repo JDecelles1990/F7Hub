@@ -20,6 +20,7 @@ from f7hub.services.script_service import ScriptService
 from f7hub.gui.mochi_settings_dialog import MochiSettingsDialog
 from f7hub.services.altf7hub_service import AltF7HubService, AltF7HubOpenError
 from f7hub.services.clipboard_service import ClipboardService
+from f7hub.services.settings_service import SettingsService
 
 from f7hub.gui.ticket_create_widget import (
     TicketCreateWidget,
@@ -45,6 +46,7 @@ class MainWindow(QMainWindow):
         mochi_service=None,
         altf7hub_service: AltF7HubService | None = None,
         clipboard_service: ClipboardService | None = None,
+        settings_service: SettingsService | None = None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
@@ -60,6 +62,7 @@ class MainWindow(QMainWindow):
         self._tickets_started = False
         self.altf7hub_service = altf7hub_service
         self.clipboard_service = clipboard_service
+        self.settings_service = settings_service
         self.pages = QStackedWidget(self)
         self.clipboard_workspace: ClipboardWorkspace | None = None
         self.ticket_create_widget = TicketCreateWidget(
@@ -189,7 +192,11 @@ class MainWindow(QMainWindow):
         return self.script_workspace is not None and self.script_workspace.run_pending
 
     def show_new_ticket(self):
-        if self._script_run_pending:
+        if (self._script_run_pending or self.runner.busy or self.workspace.note_pending
+                or self.workspace.creation_pending or self.workspace.status_pending
+                or self.workspace.classification_pending):
+            return
+        if not self._leave_clipboard():
             return
         if (not self.runner.busy and not self.workspace.creation_pending and not self.workspace.status_pending and not self.workspace.classification_pending
                 and not self.workspace.note_pending and self.workspace.creating):
@@ -246,6 +253,8 @@ class MainWindow(QMainWindow):
         if self._script_run_pending:
             return
         if not self.runner.busy and not self.workspace.note_pending and not self.workspace.creation_pending and not self.workspace.status_pending and not self.workspace.classification_pending:
+            if not self._leave_clipboard():
+                return
             self.pages.setCurrentWidget(self.workspace)
             self.workspace.refresh_list()
 
@@ -254,6 +263,8 @@ class MainWindow(QMainWindow):
             return
         if not self.runner.busy and not self.workspace.note_pending and not self.workspace.creation_pending and not self.workspace.status_pending and not self.workspace.classification_pending and self.knowledge_workspace is not None:
             if not self.workspace.confirm_discard():
+                return
+            if not self._leave_clipboard():
                 return
             self.workspace._clear_drafts()
             self.pages.setCurrentWidget(self.knowledge_workspace)
@@ -264,6 +275,8 @@ class MainWindow(QMainWindow):
             return
         if not self.runner.busy and not self.workspace.note_pending and not self.workspace.creation_pending and not self.workspace.status_pending and not self.workspace.classification_pending and self.script_workspace is not None:
             if not self.workspace.confirm_discard():
+                return
+            if not self._leave_clipboard():
                 return
             self.workspace._clear_drafts()
             self.pages.setCurrentWidget(self.script_workspace)
@@ -279,12 +292,22 @@ class MainWindow(QMainWindow):
                 return False
             self.workspace._clear_drafts()
         if self.clipboard_workspace is None:
-            self.clipboard_workspace = ClipboardWorkspace(self, clipboard_service=self.clipboard_service)
+            self.clipboard_workspace = ClipboardWorkspace(
+                self, clipboard_service=self.clipboard_service, settings_service=self.settings_service)
             self.clipboard_workspace.tickets_requested.connect(self.show_tickets)
             self.pages.addWidget(self.clipboard_workspace)
         self.pages.setCurrentWidget(self.clipboard_workspace)
         self.clipboard_workspace.activate()
         self.clipboard_workspace.back_button.setFocus()
+        return True
+
+    def _leave_clipboard(self) -> bool:
+        if self.clipboard_workspace is None:
+            return True
+        if not self.clipboard_workspace.confirm_leave():
+            self.statusBar().showMessage("Finish or discard the Clipboard preference edits before leaving.")
+            return False
+        self.clipboard_workspace.leave()
         return True
 
     def open_knowledge_article(self, article_id):
@@ -294,6 +317,8 @@ class MainWindow(QMainWindow):
             return
         if not self.workspace.confirm_discard():
             return
+        if not self._leave_clipboard():
+            return
         self.workspace._clear_drafts()
         self.pages.setCurrentWidget(self.knowledge_workspace)
         self.knowledge_workspace.open_article_by_id(article_id)
@@ -301,7 +326,8 @@ class MainWindow(QMainWindow):
     def closeEvent(self, event):
         if (self._script_run_pending or self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
                 or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading)
-                or (self.clipboard_workspace is not None and self.clipboard_workspace.loading)):
+                or (self.clipboard_workspace is not None
+                    and (self.clipboard_workspace.loading or self.clipboard_workspace.settings_pending))):
             self.statusBar().showMessage("An operation is finishing. Please close again when it completes.")
             event.ignore()
             return
@@ -317,6 +343,9 @@ class MainWindow(QMainWindow):
             if answer != QMessageBox.StandardButton.Discard:
                 event.ignore()
                 return
+        if not self._leave_clipboard():
+            event.ignore()
+            return
         if self.mochi_service is not None:
             if self._mochi_dialog is not None:
                 self._mochi_dialog.close()

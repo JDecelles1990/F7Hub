@@ -1,5 +1,18 @@
 # F7Hub Todo
 
+## CP-02 Stage 2 — Clipboard Setup review candidate
+
+- [x] One retained accessible Setup page in Clipboard Center with exactly three existing preferences.
+- [x] Async authoritative snapshot, independent optional flags, dirty draft and revision CAS Apply.
+- [x] Cancel, Discard/Cancel departure protection, pending-operation guards and explicit conflict Reload.
+- [x] Safe-disabled storage feedback; precommit errors preserve draft and known commits remain acknowledged after downstream failure.
+- [x] Focused 73, GUI 251, Integration 219, Database 520 FRESH PASS; native 74 assertions/seven inspected captures PASS; isolated integrity/FK PASS.
+- [x] Seven affected owner docs and reproducible external manifest/results/report synchronized.
+- [ ] Independent Stage 2 review of the exact unstaged/uncommitted candidate.
+- [ ] Separately authorized integration after approval.
+
+State: READY_FOR_REVIEW. Worktree `C:/Dev/F7Hub-Clipboard-CP02-S2`; branch `feature/clipboard-cp02-s2-setup-ui`; base/HEAD `8717e99f4cc77fc723497376dd858d22b8d6f18f`. Production capture, Active Paste, Ctrl+Alt+C/V, metadata acquisition, IPC and CP02-S3 remain unavailable/unstarted. Physical input, alternate DPI and Narrator/high contrast NOT RUN.
+
 ## CP-02 Stage 1 — Shared Settings backend candidate
 
 - [x] Immutable Boolean USER definitions and exactly three false-default Clipboard preferences.
@@ -7,13 +20,14 @@
 - [x] Safe invalid/unknown/unavailable state, strict input validation and independent source preferences.
 - [x] Bootstrap composition without Clipboard runtime effects; current migration-count expectations adjusted.
 - [x] Isolated migration/upgrade/rollback/integrity and required AC-15 deterministic two-process concurrency validation; affected noninteractive regressions.
-- [ ] Independently repeat mandatory AC-15 during Stage 1 review; persistence/revision/group/reset/transaction changes require future repetition.
+- [x] Mandatory AC-15 repeated during independent Stage 1 review; persistence/revision/group/reset/transaction changes require future repetition.
 - [x] Affected owner documentation and external manifest/result/report records.
-- [ ] Independent CP-02 Stage 1 review.
-- [ ] Separately authorized integration after approval.
-- [ ] Stage 2 setup GUI/consent interaction, only under a future explicit task.
+- [x] Independent CP-02 Stage 1 review (external independent-review-20261012 report).
+- [x] Separately authorized Stage 1 integration through PR #91; MERGED, closure pending.
+- [ ] Stage 1 closure remains pending; canonical main synchronization is outside this task.
+- [x] Stage 2 setup GUI/opt-in interaction implemented under the explicit CP02-S2 directive; independent review pending.
 
-State: READY_FOR_REVIEW, isolated `C:/Dev/F7Hub-Clipboard-CP02-S1`, branch `feature/clipboard-cp02-settings-backend`, base/HEAD `09bef3e8b4e55ed34b63a062d7b14a9d0b3f92af`. Saved preferences do not activate capture/paste/hotkeys/IPC or acquire source metadata. Historical CP-01 pending-review prose below remains that earlier candidate's record; current supplied handoff and live base identify CP-01 integration through PR #90. No CP-01 source/harness correction is part of this slice.
+State: MERGED through PR #91, closure pending. Remote merge: `8717e99f4cc77fc723497376dd858d22b8d6f18f`. Verified external Stage 1 integration evidence overrides its earlier candidate-status prose. Canonical local main is preserved; Stage 1 is not CLOSED. CP-01 is integrated through PR #90; historical WINWORD2 diagnostic root cause remains NOT VERIFIED, nonblocking for this slice. No CP-01 source/harness repair is included.
 
 ## CP-01 — Action-specific Clipboard hotkey policy candidate
 
