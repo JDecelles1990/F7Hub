@@ -115,6 +115,7 @@ def bootstrap_application(
         script_service=script_service,
         powershell_service=powershell_service,
         clipboard_service=clipboard_service,
+        settings_service=settings_service,
         mochi_service=mochi_service,
         altf7hub_service=AltF7HubService(WindowsAltF7HubGateway(resolved_project_root)),
     )

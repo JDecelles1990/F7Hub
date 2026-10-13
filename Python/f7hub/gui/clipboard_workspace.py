@@ -2,12 +2,15 @@
 
 from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt, Signal
 from PySide6.QtWidgets import (
-    QAbstractItemView, QHeaderView, QLabel, QPushButton, QTableView, QVBoxLayout, QWidget,
+    QAbstractItemView, QHeaderView, QHBoxLayout, QLabel, QPushButton, QStackedWidget,
+    QTableView, QVBoxLayout, QWidget,
 )
 
 from f7hub.domain.clipboard import ClipboardRecentItem, ClipboardRecentPage
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.services.clipboard_service import ClipboardService
+from f7hub.gui.clipboard_setup import ClipboardSetup
+from f7hub.services.settings_service import SettingsService
 
 
 class ClipboardRecentTableModel(QAbstractTableModel):
@@ -58,7 +61,8 @@ class ClipboardWorkspace(QWidget):
 
     tickets_requested = Signal()
 
-    def __init__(self, parent=None, *, clipboard_service: ClipboardService | None = None) -> None:
+    def __init__(self, parent=None, *, clipboard_service: ClipboardService | None = None,
+                 settings_service: SettingsService | None = None) -> None:
         super().__init__(parent)
         self._service = clipboard_service
         self.runner = ServiceTaskRunner(self)
@@ -83,8 +87,31 @@ class ClipboardWorkspace(QWidget):
         self.back_button.setAccessibleName("Back to Tickets")
         self.back_button.clicked.connect(self.tickets_requested.emit)
 
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.heading)
+        outer = QVBoxLayout(self)
+        outer.addWidget(self.heading)
+        self.setup = None
+        self.sections = None
+        if settings_service is not None:
+            navigation = QHBoxLayout()
+            self.recent_button = QPushButton("Recent", self)
+            self.setup_button = QPushButton("Clipboard Setup", self)
+            self.recent_button.setAccessibleName("Recent Clipboard history")
+            self.setup_button.setAccessibleName("Clipboard Setup")
+            self.recent_button.clicked.connect(self.show_recent)
+            self.setup_button.clicked.connect(self.show_setup)
+            navigation.addWidget(self.recent_button)
+            navigation.addWidget(self.setup_button)
+            navigation.addStretch()
+            outer.addLayout(navigation)
+            self.sections = QStackedWidget(self)
+            self.recent_page = QWidget(self)
+            self.sections.addWidget(self.recent_page)
+            self.setup = ClipboardSetup(settings_service, self)
+            self.sections.addWidget(self.setup)
+            outer.addWidget(self.sections, 1)
+            layout = QVBoxLayout(self.recent_page)
+        else:
+            layout = outer
         layout.addWidget(self.status_message)
         self.refresh_button = None
         self.table = None
@@ -119,7 +146,7 @@ class ClipboardWorkspace(QWidget):
             self.page_message.setWordWrap(True)
             layout.addWidget(self.page_message)
             self._set_status("Clipboard history has not been loaded.")
-        layout.addWidget(self.back_button, alignment=Qt.AlignmentFlag.AlignLeft)
+        outer.addWidget(self.back_button, alignment=Qt.AlignmentFlag.AlignLeft)
         if self._service is None:
             layout.addStretch()
 
@@ -127,6 +154,35 @@ class ClipboardWorkspace(QWidget):
     def loading(self) -> bool:
         # Covers the runner's idle-before-callback interval too.
         return self._loading or self.runner.busy
+
+    @property
+    def settings_pending(self) -> bool:
+        return self.setup is not None and self.setup.pending
+
+    def confirm_leave(self) -> bool:
+        if self.setup is None:
+            return True
+        return self.setup.confirm_discard()
+
+    def leave(self) -> None:
+        if self.setup is not None:
+            self.setup.end_session()
+            self.sections.setCurrentWidget(self.recent_page)
+
+    def show_setup(self) -> bool:
+        if self.setup is None or not self.setup.reload():
+            return False
+        self.sections.setCurrentWidget(self.setup)
+        self.setup.reload_button.setFocus()
+        return True
+
+    def show_recent(self) -> bool:
+        if not self.confirm_leave():
+            return False
+        self.leave()
+        if self.refresh_button is not None:
+            self.refresh_button.setFocus()
+        return True
 
     def activate(self) -> bool:
         """Load once on accepted navigation; reuse pending/completed presentation."""
@@ -173,3 +229,10 @@ class ClipboardWorkspace(QWidget):
         self.refresh_button.setText(action)
         self.refresh_button.setAccessibleName(action)
         self.refresh_button.setEnabled(True)
+
+    def closeEvent(self, event):
+        if self.loading or not self.confirm_leave():
+            event.ignore()
+            return
+        self.leave()
+        super().closeEvent(event)
