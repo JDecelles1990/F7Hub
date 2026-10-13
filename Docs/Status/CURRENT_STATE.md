@@ -1,5 +1,15 @@
 # F7Hub Current State
 
+## Clipboard CP-02 lifecycle status (2026-10-12)
+
+**CP02-S1: MERGED — closure pending. CP02-S2: MERGED — closure pending.** Both independently approved implementation slices are merged to `main`; the initial canonical synchronization is verified at `828507f952919662e518b1dd5cfbffdd21ecc5b4`, equal to `origin/main`. PR #91 merged as `8717e99f4cc77fc723497376dd858d22b8d6f18f`; PR #92 merged as `828507f952919662e518b1dd5cfbffdd21ecc5b4`. The Stage 1 and Stage 2 external integration reports record their review approvals, exact scopes, test provenance, and merged trees.
+
+Initial closure verification: FRESH Git verification confirmed both PRs MERGED, both merge commits and feature commits in main ancestry, and canonical HEAD equal to live remote main. Fast-forward synchronization began from `8b92fd13dfe340563044acd41ef15c0b905243db`; the protected untracked `AutoHotkey/Troubleshooting_Sections/GuideSettings.ini` pathname was absent from the target tree and remains untracked. Its contents and metadata were not inspected. The Stage 1 and Stage 2 reviewed implementation trees are unchanged at their merge commits. The documentation reconciliation changes no production or test files. Documentation candidate review, integration, and final canonical synchronization remain pending; see the external closure report.
+
+Evidence provenance: implementation and native evidence remain RETAINED from the independently reviewed reports; this closure pass added FRESH Git/ancestry/state checks only. GitHub reports **NO CHECKS CONFIGURED**, not a CI PASS. Stage 2 stale shell refusal feedback remains a nonblocking focused GUI follow-up. Physical input, alternate DPI, Narrator and high-contrast validation remain NOT RUN. CP-01 historical WINWORD2 failure root cause remains NOT VERIFIED; the subsequent post-merge diagnostic closed without reproducing it. Production Clipboard capture, Active Paste, native Ctrl+Alt+C/V bindings and authenticated Clipboard IPC remain unavailable. CP02-S3 remains unstarted and requires a new task.
+
+Older CP02 implementation-candidate sections below are historical snapshots. They do not override these verified merge/synchronization facts or prior delivery evidence.
+
 ## CP-02 Stage 2 — Clipboard Setup editor (2026-10-12)
 
 **READY_FOR_REVIEW**, isolated worktree `C:/Dev/F7Hub-Clipboard-CP02-S2`, branch `feature/clipboard-cp02-s2-setup-ui`, verified base/HEAD `8717e99f4cc77fc723497376dd858d22b8d6f18f`. Implementation/tests/docs are unstaged/uncommitted. Independent Stage 2 review is the next gate; no staging, commit, push, PR or integration is authorized here. Canonical main remains at `8b92fd13dfe340563044acd41ef15c0b905243db`; its protected untracked GuideSettings.ini was observed only through Git pathname inventory.

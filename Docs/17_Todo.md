@@ -1,6 +1,18 @@
 # F7Hub Todo
 
-## CP-02 Stage 2 — Clipboard Setup review candidate
+## Clipboard CP-02 lifecycle status (2026-10-12)
+
+- [x] CP02-S1 independently approved and merged through PR #91 at `8717e99f4cc77fc723497376dd858d22b8d6f18f`.
+- [x] CP02-S2 independently approved and merged through PR #92 at `828507f952919662e518b1dd5cfbffdd21ecc5b4`.
+- [x] Canonical `main` fast-forwarded from `8b92fd13dfe340563044acd41ef15c0b905243db` to verified `origin/main` at `828507f952919662e518b1dd5cfbffdd21ecc5b4`; both merges and feature commits are ancestors.
+- [x] Protected INI remained pathname-only observed, absent from the target Git tree, and untracked after initial synchronization.
+- [ ] Independently review and integrate this documentation-only lifecycle correction.
+- [ ] Complete final canonical synchronization and closure verification.
+- [ ] CP02-S3 remains unstarted; requires a new task.
+
+Both implementation slices are MERGED; closure remains pending the two unchecked documentation/final-sync gates above. No production capture, Active Paste, native Ctrl+Alt+C/V binding or authenticated Clipboard IPC is activated. Physical input, alternate DPI, Narrator and high contrast remain NOT RUN. Stage 2 stale shell refusal feedback is a nonblocking GUI follow-up. CP-01 historical WINWORD2 root cause remains NOT VERIFIED; later diagnostic closed without reproducing it. Implementation test evidence is RETAINED from the independent review reports; initial closure Git checks are FRESH. GitHub reported NO CHECKS CONFIGURED, not CI PASS. Historical candidate snapshots below retain their original lifecycle meaning.
+
+## Historical CP-02 Stage 2 — Clipboard Setup review candidate
 
 - [x] One retained accessible Setup page in Clipboard Center with exactly three existing preferences.
 - [x] Async authoritative snapshot, independent optional flags, dirty draft and revision CAS Apply.
@@ -11,9 +23,9 @@
 - [ ] Independent Stage 2 review of the exact unstaged/uncommitted candidate.
 - [ ] Separately authorized integration after approval.
 
-State: READY_FOR_REVIEW. Worktree `C:/Dev/F7Hub-Clipboard-CP02-S2`; branch `feature/clipboard-cp02-s2-setup-ui`; base/HEAD `8717e99f4cc77fc723497376dd858d22b8d6f18f`. Production capture, Active Paste, Ctrl+Alt+C/V, metadata acquisition, IPC and CP02-S3 remain unavailable/unstarted. Physical input, alternate DPI and Narrator/high contrast NOT RUN.
+Historical candidate state: READY_FOR_REVIEW at that handoff. The candidate was later approved and merged through PR #92. Production capture, Active Paste, Ctrl+Alt+C/V, metadata acquisition and IPC remain unavailable; CP02-S3 is unstarted. Physical input, alternate DPI and Narrator/high contrast remain NOT RUN.
 
-## CP-02 Stage 1 — Shared Settings backend candidate
+## Historical CP-02 Stage 1 — Shared Settings backend candidate
 
 - [x] Immutable Boolean USER definitions and exactly three false-default Clipboard preferences.
 - [x] Additive 0014 schema, coherent reads, grouped Apply/Reset and repository-backed CAS.
@@ -27,7 +39,7 @@ State: READY_FOR_REVIEW. Worktree `C:/Dev/F7Hub-Clipboard-CP02-S2`; branch `feat
 - [ ] Stage 1 closure remains pending; canonical main synchronization is outside this task.
 - [x] Stage 2 setup GUI/opt-in interaction implemented under the explicit CP02-S2 directive; independent review pending.
 
-State: MERGED through PR #91, closure pending. Remote merge: `8717e99f4cc77fc723497376dd858d22b8d6f18f`. Verified external Stage 1 integration evidence overrides its earlier candidate-status prose. Canonical local main is preserved; Stage 1 is not CLOSED. CP-01 is integrated through PR #90; historical WINWORD2 diagnostic root cause remains NOT VERIFIED, nonblocking for this slice. No CP-01 source/harness repair is included.
+Historical handoff state: MERGED through PR #91, closure pending at that time. The initial canonical synchronization was later verified; final documentation closure remains pending as recorded above. CP-01 historical WINWORD2 diagnostic root cause remains NOT VERIFIED; no CP-01 source/harness repair is included.
 
 ## CP-01 — Action-specific Clipboard hotkey policy candidate
 
