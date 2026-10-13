@@ -1,12 +1,18 @@
 # F7Hub Roadmap
 
-## CP-02 Stage 2 — Clipboard Setup candidate
+## Clipboard CP-02 lifecycle status (2026-10-12)
 
-The bounded Clipboard Setup editor is implemented/tested/documented at READY_FOR_REVIEW in the isolated Stage 2 worktree. It retains one async draft editor with three independent Boolean preferences, atomic revision-checked Apply, Cancel, protected departure and explicit conflict Reload. Runtime capture/Active Paste remain unavailable. Independent Stage 2 review is next; candidate remains unstaged/uncommitted and integration requires separate authorization.
+CP02-S1 and CP02-S2 are **MERGED; closure pending** documentation review/integration and final canonical synchronization. Stage 1 merged through PR #91 (`8717e99f4cc77fc723497376dd858d22b8d6f18f`); Stage 2 merged through PR #92 (`828507f952919662e518b1dd5cfbffdd21ecc5b4`). The initial canonical synchronization is verified at the Stage 2 merge. See `Docs/Status/CURRENT_STATE.md` and the external integration reports and closure report for evidence and provenance.
 
-## CP-02 Stage 1 — Shared Settings backend
+Closure does not activate production capture, Active Paste, native Ctrl+Alt+C/V bindings or authenticated Clipboard IPC. Physical input, alternate DPI, Narrator and high-contrast validation remain NOT RUN. Stage 2 stale shell refusal feedback is a nonblocking focused GUI follow-up. CP-01 historical WINWORD2 root cause remains NOT VERIFIED after a later diagnostic closed without reproducing it. CP02-S3 remains unstarted and needs a new task.
 
-The USER Settings foundation is MERGED through PR #91 at remote main 8717e99f4cc77fc723497376dd858d22b8d6f18f, closure pending. Coherent safe snapshots, atomic Apply/Reset and SQLite CAS are reused unchanged by Stage 2. Canonical local main is intentionally preserved behind remote main; Stage 2 does not close Stage 1 or synchronize it.
+## Historical CP-02 Stage 2 — Clipboard Setup candidate
+
+The dated candidate snapshot below records its original READY_FOR_REVIEW handoff. It was subsequently independently approved and merged through PR #92; current lifecycle status is recorded above.
+
+## Historical CP-02 Stage 1 — Shared Settings backend
+
+The dated candidate snapshot below records Stage 1 after PR #91 merged and before closure synchronization. Initial canonical synchronization was later verified; final documentation closure remains pending as recorded above. Coherent safe snapshots, atomic Apply/Reset and SQLite CAS are reused unchanged by Stage 2.
 
 Later capture/IPC/ingestion, process/title storage/acquisition and Active Paste are unavailable. A saved true preference cannot activate those features or replace privacy/capability gates. CP02-S3 remains unstarted; a new task is required. CP-01's historical native diagnostic root cause is NOT VERIFIED and nonblocking for this GUI slice.
 
