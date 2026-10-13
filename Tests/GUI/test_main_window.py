@@ -10,9 +10,9 @@ from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtWidgets import QApplication, QMessageBox, QToolBar
+from PySide6.QtWidgets import QApplication, QMessageBox, QToolBar, QToolButton, QLabel
 from PySide6.QtTest import QTest
-from PySide6.QtCore import QTimer
+from PySide6.QtCore import QPoint, QTimer, Qt
 
 from f7hub.gui.main_window import MainWindow
 from f7hub.services.ticket_service import TicketService
@@ -121,7 +121,12 @@ class MainWindowTests(unittest.TestCase):
 
     def test_window_hosts_ticket_form_and_application_chrome(self) -> None:
         self.assertEqual(self.window.windowTitle(), "F7Hub")
-        self.assertIs(self.window.centralWidget(), self.window.pages)
+        shell = self.window.centralWidget()
+        self.assertEqual(shell.objectName(), "navigationShell")
+        self.assertIs(shell.layout().itemAt(0).widget(), self.window.navigation_rail)
+        self.assertIs(shell.layout().itemAt(1).widget(), self.window.workspace_viewport)
+        self.assertIs(self.window.workspace_viewport.widget(), self.window.pages)
+        self.assertIs(self.window.pages.parentWidget(), self.window.workspace_viewport.viewport())
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
         self.assertEqual(self.window.statusBar().currentMessage(), "Ready")
         self.assertEqual(self.window.exit_action.objectName(), "exitAction")
@@ -480,7 +485,7 @@ class MainWindowTests(unittest.TestCase):
         workspace.note_input.setPlainText(" \n\t")
         self.assertFalse(workspace.add_note_button.isEnabled())
 
-    def test_quick_note_controls_fit_all_tabs_at_1000_by_700(self):
+    def test_quick_note_controls_remain_reachable_all_tabs_at_1000_by_700(self):
         self.window.show_tickets()
         self.wait_idle()
         self.window.workspace.open_ticket(1)
@@ -494,10 +499,13 @@ class MainWindowTests(unittest.TestCase):
             for control in (workspace.author_input, workspace.note_type,
                             workspace.note_input, workspace.add_note_button):
                 self.assertTrue(control.isVisible())
-                top_left = control.mapTo(self.window, control.rect().topLeft())
-                bottom_right = control.mapTo(self.window, control.rect().bottomRight())
-                self.assertTrue(self.window.rect().contains(top_left))
-                self.assertTrue(self.window.rect().contains(bottom_right))
+                scroll = self.window.workspace_viewport
+                for corner in (control.rect().topLeft(), control.rect().bottomRight()):
+                    point = control.mapTo(self.window.pages, corner)
+                    scroll.ensureVisible(point.x(), point.y(), 1, 1)
+                    self.application.processEvents()
+                    self.assertTrue(scroll.viewport().rect().contains(
+                        control.mapTo(scroll.viewport(), corner)))
 
     def test_backup_action_runs_once_on_worker_and_reports_local_snapshot(self):
         self.assertIn(self.window.backup_action, self.window.menuBar().actions()[0].menu().actions())
@@ -539,6 +547,439 @@ class MainWindowTests(unittest.TestCase):
         while self.window.runner.busy and time.monotonic() < deadline:
             QTest.qWait(5)
         self.assertFalse(self.window.runner.busy, "Background task did not finish")
+
+
+class NavigationRailTests(unittest.TestCase):
+    """Activate the real shared-action controls, including modal Cancel paths."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.application = QApplication.instance() or QApplication([])
+
+    def setUp(self):
+        from Tests.GUI.test_knowledge_workspace import RecordingKnowledgeService
+        from Tests.GUI.test_clipboard_setup import RecordingSettingsService
+        self.service = RecordingTicketService()
+        self.backup = RecordingBackupService()
+        self.scripts = RecordingScriptService()
+        self.knowledge = RecordingKnowledgeService()
+        self.settings = RecordingSettingsService()
+        self.window = MainWindow(
+            self.service, knowledge_service=self.knowledge, script_service=self.scripts,
+            clipboard_service=RecordingClipboardService(), settings_service=self.settings,
+        )
+        self.window.show()
+        self.application.processEvents()
+        self.wait_idle()
+
+    def tearDown(self):
+        if self.window.clipboard_workspace is not None and self.window.clipboard_workspace.setup is not None:
+            self.window.clipboard_workspace.setup.cancel()
+        MainWindowTests.tearDown(self)
+    wait_idle = MainWindowTests.wait_idle
+
+    def active(self, key):
+        self.assertEqual([name for name, button in self.window.navigation_buttons.items()
+                          if button.property("active")], [key])
+
+    def activate(self, key, keyboard=False):
+        button = self.window.navigation_buttons[key]
+        if keyboard:
+            button.setFocus(Qt.FocusReason.TabFocusReason)
+            QTest.keyClick(button, Qt.Key.Key_Space)
+        else:
+            QTest.mouseClick(button, Qt.MouseButton.LeftButton)
+        self.wait_idle()
+        if self.application.platformName() == "offscreen":
+            # Offscreen does not reactivate the owner after a real modal closes.
+            self.window.activateWindow()
+            self.application.processEvents()
+
+    def test_four_accessible_icon_controls_reuse_actions_and_start_on_tickets(self):
+        self.assertEqual(self.window.navigation_rail.width(), 52)
+        self.assertEqual(len(self.window.navigation_rail.findChildren(QToolButton)), 4)
+        self.assertIsNone(self.window.clipboard_workspace)
+        for key, label in (("tickets", "Tickets"), ("knowledge", "Knowledge Base"),
+                           ("scripts", "Scripts"), ("clipboard", "Clipboard Center")):
+            button = self.window.navigation_buttons[key]
+            action = getattr(self.window, key + "_action")
+            self.assertIs(button.defaultAction(), action)
+            self.assertEqual(button.objectName(), key + "NavigationButton")
+            self.assertEqual(button.accessibleName(), label)
+            self.assertEqual(button.toolTip(), label)
+            self.assertEqual(button.focusPolicy(), Qt.FocusPolicy.TabFocus)
+            self.assertEqual(button.toolButtonStyle(), Qt.ToolButtonStyle.ToolButtonIconOnly)
+            self.assertFalse(button.icon().isNull())
+            self.assertFalse(action.isCheckable())
+        self.active("tickets")
+        self.assertEqual(self.window.navigation_buttons["tickets"].accessibleDescription(),
+                         "Current workspace")
+
+    def test_mouse_and_keyboard_reach_all_retained_workspaces(self):
+        for keyboard in (False, True):
+            for key in ("knowledge", "scripts", "clipboard", "tickets"):
+                self.activate(key, keyboard)
+                self.active(key)
+                page = {"tickets": self.window.workspace, "knowledge": self.window.knowledge_workspace,
+                        "scripts": self.window.script_workspace, "clipboard": self.window.clipboard_workspace}[key]
+                self.assertIs(self.window.pages.currentWidget(), page)
+                self.assertFalse(self.window.navigation_buttons[key].icon().isNull())
+        count = self.window.pages.count()
+        clipboard = self.window.clipboard_workspace
+        for _ in range(3):
+            self.activate("clipboard")
+            self.assertIs(self.window.clipboard_workspace, clipboard)
+            self.assertEqual(self.window.pages.count(), count)
+        clipboard.back_button.click()
+        self.wait_idle()
+        self.active("tickets")
+
+    def test_menu_toolbar_new_ticket_and_article_routes_sync_actual_page(self):
+        toolbar = self.window.findChildren(QToolBar)[0]
+        QTest.mouseClick(toolbar.widgetForAction(self.window.scripts_action), Qt.MouseButton.LeftButton)
+        self.wait_idle()
+        self.active("scripts")
+        menu = self.window.menuBar().actions()[0].menu()
+        menu.popup(self.window.mapToGlobal(self.window.rect().topLeft()))
+        self.application.processEvents()
+        QTest.mouseClick(menu, Qt.MouseButton.LeftButton,
+                         pos=menu.actionGeometry(self.window.knowledge_action).center())
+        self.wait_idle()
+        self.active("knowledge")
+        self.window.show_new_ticket()
+        self.active("tickets")
+        self.window.ticket_create_widget.reset_form()
+        self.window.open_knowledge_article(999)
+        self.wait_idle()
+        self.active("knowledge")
+
+    def cancel_dialog(self):
+        dialogs = []
+        def cancel():
+            dialog = QApplication.activeModalWidget()
+            if isinstance(dialog, QMessageBox):
+                dialogs.append(dialog.windowTitle())
+                QTest.mouseClick(dialog.button(QMessageBox.StandardButton.Cancel), Qt.MouseButton.LeftButton)
+        QTimer.singleShot(0, cancel)
+        return dialogs
+
+    def test_real_modal_cancel_preserves_note_selection_page_and_editor_focus(self):
+        workspace = self.window.workspace
+        workspace._activate_row(workspace.model.index(0, 0))
+        self.wait_idle()
+        editor = workspace.note_input
+        for keyboard in (False, True):
+            editor.setPlainText("Keep this unsaved note")
+            cursor = editor.textCursor()
+            cursor.setPosition(5)
+            cursor.setPosition(9, cursor.MoveMode.KeepAnchor)
+            editor.setTextCursor(cursor)
+            editor.setFocus()
+            self.application.processEvents()
+            dialogs = self.cancel_dialog()
+            self.activate("knowledge", keyboard)
+            self.assertEqual(len(dialogs), 1)
+            self.assertIs(self.window.pages.currentWidget(), workspace)
+            self.assertEqual(editor.toPlainText(), "Keep this unsaved note")
+            self.assertEqual(editor.textCursor().selectedText(), "this")
+            self.assertTrue(editor.hasFocus())
+            self.active("tickets")
+            # Restoration is synchronous: a later intentional focus choice wins.
+            workspace.subject_search_input.setFocus()
+            QTest.qWait(5)
+            self.assertTrue(workspace.subject_search_input.hasFocus())
+
+    def test_clipboard_setup_cancel_and_pending_refusal_preserve_focus_and_draft(self):
+        from Tests.GUI.test_clipboard_setup import wait_idle
+        from f7hub.domain.clipboard_settings import WORKFLOW_ENABLED
+        self.activate("clipboard")
+        clipboard = self.window.clipboard_workspace
+        self.assertTrue(clipboard.show_setup())
+        wait_idle(self.application, lambda: clipboard.settings_pending or clipboard.loading)
+        checkbox = clipboard.setup.checkboxes[WORKFLOW_ENABLED]
+        for keyboard in (False, True):
+            checkbox.setChecked(True)
+            checkbox.setFocus()
+            dialogs = self.cancel_dialog()
+            self.activate("scripts", keyboard)
+            self.assertEqual(dialogs, ["Unsaved Clipboard preferences"])
+            self.assertTrue(clipboard.setup.dirty)
+            self.assertTrue(checkbox.isChecked())
+            self.assertTrue(checkbox.hasFocus())
+            self.active("clipboard")
+        for keyboard in (False, True):
+            checkbox.setFocus()
+            with patch.object(clipboard.setup, "_pending", True):
+                self.activate("tickets", keyboard)
+                self.active("clipboard")
+                self.assertTrue(checkbox.hasFocus())
+                self.assertFalse(self.window.close())
+        self.assertEqual(self.settings.calls, [])
+        clipboard.setup.cancel()
+
+    def test_optional_modules_disabled_and_busy_callback_gaps_cannot_route(self):
+        unavailable = MainWindow(self.service)
+        self.addCleanup(unavailable.deleteLater)
+        for key in ("knowledge", "scripts"):
+            button = unavailable.navigation_buttons[key]
+            self.assertFalse(button.isEnabled())
+            button.click()
+            self.assertIs(unavailable.pages.currentWidget(), unavailable.workspace)
+        self.assertTrue(unavailable.close())
+        for owner, field, value in (
+            (self.window.workspace, "_note_pending", True),
+            (self.window.workspace, "_creation_pending", True),
+            (self.window.workspace, "status_pending", True),
+            (self.window.workspace, "classification_pending", True),
+            (self.window.script_workspace, "_run_identity", object()),
+        ):
+            with self.subTest(field=field), patch.object(owner, field, value):
+                self.window._set_busy(False)
+                for key, button in self.window.navigation_buttons.items():
+                    self.assertFalse(button.isEnabled())
+                    QTest.mouseClick(button, Qt.MouseButton.LeftButton)
+                    self.active("tickets")
+                self.assertIsNone(self.window.clipboard_workspace)
+            self.window._set_busy(False)
+        self.scripts.gate = threading.Event()
+        QTest.mouseClick(self.window.navigation_buttons["scripts"], Qt.MouseButton.LeftButton)
+        self.assertTrue(self.window.runner.busy)
+        QTest.mouseClick(self.window.navigation_buttons["clipboard"], Qt.MouseButton.LeftButton)
+        self.assertIsNone(self.window.clipboard_workspace)
+        self.active("scripts")
+        self.scripts.gate.set()
+        self.wait_idle()
+        self.activate("clipboard")
+        self.active("clipboard")
+
+    def test_compact_standard_desktop_keep_rail_visible_and_workspace_reachable(self):
+        for width, height in ((660, 592), (1000, 700), (1180, 850)):
+            self.window.resize(width, height)
+            self.application.processEvents()
+            self.assertEqual(self.window.size().toTuple(), (width, height))
+            for key in ("knowledge", "scripts", "clipboard", "tickets"):
+                self.activate(key)
+                self.active(key)
+                for button in self.window.navigation_buttons.values():
+                    self.assertTrue(button.isVisible())
+                    self.assertTrue(self.window.navigation_rail.rect().contains(button.geometry()))
+                scroll = self.window.workspace_viewport
+                page = self.window.pages.currentWidget()
+                for corner in (page.rect().topLeft(), page.rect().bottomRight()):
+                    point = page.mapTo(self.window.pages, corner)
+                    scroll.ensureVisible(point.x(), point.y(), 1, 1)
+                    self.application.processEvents()
+                    self.assertTrue(scroll.viewport().rect().contains(page.mapTo(scroll.viewport(), corner)))
+
+    def test_creation_draft_survives_rail_routes_and_exit_cancel(self):
+        from Tests.GUI.test_clipboard_setup import wait_idle
+        self.window.show_new_ticket()
+        self.window.ticket_create_widget.subject_input.setText("Keep creation draft")
+        self.activate("clipboard")
+        wait_idle(self.application, lambda: self.window.clipboard_workspace.loading)
+        dialogs = self.cancel_dialog()
+        self.window.exit_action.trigger()
+        self.assertEqual(dialogs, ["Unsaved new ticket"])
+        self.assertTrue(self.window.isVisible())
+        self.active("clipboard")
+        self.activate("tickets")
+        self.assertTrue(self.window.workspace.creating)
+        self.assertEqual(self.window.ticket_create_widget.subject_input.text(), "Keep creation draft")
+        self.assertEqual(self.service.calls, 0)
+
+    def test_classification_cancel_through_rail_preserves_unsaved_value_and_focus(self):
+        workspace = self.window.workspace
+        workspace.open_ticket(1)
+        self.wait_idle()
+        combo = workspace.priority_input
+        combo.setCurrentIndex(combo.findData("HIGH"))
+        combo.setFocus()
+        dialogs = self.cancel_dialog()
+        self.activate("scripts", keyboard=True)
+        self.assertEqual(dialogs, ["Unsaved ticket activity"])
+        self.assertEqual(combo.currentData(), "HIGH")
+        self.assertTrue(combo.hasFocus())
+        self.active("tickets")
+
+    def scroll_values(self):
+        scroll = self.window.workspace_viewport
+        return (scroll.horizontalScrollBar().value(), scroll.verticalScrollBar().value())
+
+    def scroll_source(self):
+        scroll = self.window.workspace_viewport
+        scroll.horizontalScrollBar().setValue(scroll.horizontalScrollBar().maximum())
+        scroll.verticalScrollBar().setValue(scroll.verticalScrollBar().maximum())
+        return self.scroll_values()
+
+    def assert_origin(self, key):
+        QTest.qWait(10)  # Include deferred Qt layout after the accepted route.
+        self.active(key)
+        self.assertEqual(self.scroll_values(), (0, 0))
+        page = self.window.pages.currentWidget()
+        viewport = self.window.workspace_viewport.viewport()
+        heading = next(label for label in page.findChildren(QLabel)
+                       if label.text() == {"tickets": "Tickets", "knowledge": "Knowledge Base",
+                                          "scripts": "Scripts", "clipboard": "Clipboard Center"}[key])
+        self.assertTrue(viewport.rect().contains(heading.mapTo(viewport, heading.rect().topLeft())))
+        self.assertTrue(viewport.rect().contains(heading.mapTo(
+            viewport, QPoint(heading.fontMetrics().horizontalAdvance(heading.text()) - 1,
+                             heading.fontMetrics().height() - 1))))
+        primary = {"tickets": self.window.workspace.subject_search_input,
+                   "knowledge": self.window.knowledge_workspace.search_input,
+                   "scripts": self.window.script_workspace.search_input,
+                   "clipboard": (self.window.clipboard_workspace.refresh_button
+                                 if self.window.clipboard_workspace is not None else None)}[key]
+        self.assertTrue(primary.isVisible())
+        self.assertTrue(viewport.rect().contains(primary.mapTo(viewport, primary.rect().topLeft())))
+
+    def test_scrolled_sources_reset_on_rail_and_clipboard_return_at_three_sizes(self):
+        for size in ((660, 592), (1000, 700), (1180, 850)):
+            with self.subTest(size=size):
+                self.window.resize(*size)
+                QTest.qWait(10)
+                self.activate("tickets")
+                for key in ("knowledge", "scripts", "clipboard"):
+                    before = self.scroll_source()
+                    if size == (660, 592):
+                        self.assertGreater(before[0], 0)
+                        self.assertGreater(before[1], 0)
+                    self.activate(key)
+                    self.assert_origin(key)
+                self.scroll_source()
+                QTest.mouseClick(self.window.clipboard_workspace.back_button, Qt.MouseButton.LeftButton)
+                self.wait_idle()
+                self.assert_origin("tickets")
+
+    def test_scrolled_sources_reset_on_menu_and_toolbar_routes(self):
+        self.window.resize(660, 592)
+        QTest.qWait(10)
+        self.scroll_source()
+        menu = self.window.menuBar().actions()[0].menu()
+        menu.popup(self.window.mapToGlobal(self.window.rect().topLeft()))
+        self.application.processEvents()
+        QTest.mouseClick(menu, Qt.MouseButton.LeftButton,
+                         pos=menu.actionGeometry(self.window.knowledge_action).center())
+        self.wait_idle()
+        self.assert_origin("knowledge")
+        self.scroll_source()
+        toolbar = self.window.findChildren(QToolBar)[0]
+        QTest.mouseClick(toolbar.widgetForAction(self.window.scripts_action), Qt.MouseButton.LeftButton)
+        self.wait_idle()
+        self.assert_origin("scripts")
+
+    def test_ticket_cancel_keeps_both_scrollbars_selection_and_visible_editor_focus(self):
+        self.window.resize(660, 592)
+        workspace = self.window.workspace
+        workspace.open_ticket(1)
+        self.wait_idle()
+        editor = workspace.note_input
+        for keyboard in (False, True):
+            editor.setPlainText("Keep this unsaved note")
+            cursor = editor.textCursor()
+            cursor.setPosition(5)
+            cursor.setPosition(9, cursor.MoveMode.KeepAnchor)
+            editor.setTextCursor(cursor)
+            editor.setFocus()
+            QTest.qWait(10)
+            self.scroll_source()
+            scroll = self.window.workspace_viewport
+            # Keep the selection visible even when the editor is wider than the
+            # offscreen viewport; overflowing control edges need not fit at once.
+            scroll.horizontalScrollBar().setValue(min(
+                scroll.horizontalScrollBar().maximum(),
+                editor.mapTo(self.window.pages, QPoint()).x() - 4))
+            before = self.scroll_values()
+            self.assertGreater(before[0], 0)
+            self.assertGreater(before[1], 0)
+            dialogs = self.cancel_dialog()
+            with patch.object(self.service, "list_tickets", wraps=self.service.list_tickets) as refresh:
+                self.activate("knowledge", keyboard)
+                refresh.assert_not_called()
+            self.assertEqual(dialogs, ["Unsaved ticket activity"])
+            self.assertEqual(self.scroll_values(), before)
+            self.assertIs(self.window.pages.currentWidget(), workspace)
+            self.assertEqual(editor.toPlainText(), "Keep this unsaved note")
+            self.assertEqual(editor.textCursor().selectedText(), "this")
+            self.assertTrue(editor.hasFocus())
+            viewport = self.window.workspace_viewport.viewport()
+            for position in (editor.textCursor().anchor(), editor.textCursor().position()):
+                endpoint = editor.textCursor()
+                endpoint.setPosition(position)
+                self.assertTrue(viewport.rect().contains(editor.viewport().mapTo(
+                    viewport, editor.cursorRect(endpoint).center())))
+            self.active("tickets")
+
+    def test_setup_cancel_and_pending_refusal_keep_both_scrollbars_and_draft(self):
+        from Tests.GUI.test_clipboard_setup import wait_idle
+        from f7hub.domain.clipboard_settings import WORKFLOW_ENABLED
+        self.window.resize(660, 592)
+        self.activate("clipboard")
+        clipboard = self.window.clipboard_workspace
+        self.assertTrue(clipboard.show_setup())
+        wait_idle(self.application, lambda: clipboard.loading or clipboard.settings_pending)
+        checkbox = clipboard.setup.checkboxes[WORKFLOW_ENABLED]
+        checkbox.setChecked(True)
+        for keyboard in (False, True):
+            checkbox.setFocus()
+            scroll = self.window.workspace_viewport
+            scroll.horizontalScrollBar().setValue(10)
+            scroll.verticalScrollBar().setValue(60)
+            before = self.scroll_values()
+            self.assertEqual(before, (10, 60))
+            dialogs = self.cancel_dialog()
+            self.activate("scripts", keyboard)
+            self.assertEqual(dialogs, ["Unsaved Clipboard preferences"])
+            self.assertEqual(self.scroll_values(), before)
+            self.assertTrue(checkbox.hasFocus())
+            self.assertTrue(checkbox.isChecked() and clipboard.setup.dirty)
+            self.active("clipboard")
+            with patch.object(clipboard.setup, "_pending", True):
+                self.activate("tickets", keyboard)
+                self.assertEqual(self.scroll_values(), before)
+                self.assertTrue(checkbox.hasFocus())
+                self.active("clipboard")
+        self.assertEqual(self.settings.calls, [])
+
+    def test_busy_and_hidden_pending_owners_do_not_reset_scroll(self):
+        self.window.resize(660, 592)
+        QTest.qWait(10)
+        for owner, field in ((self.window.runner, "_task"),
+                             (self.window.workspace, "_note_pending"),
+                             (self.window.script_workspace, "_run_identity")):
+            before = self.scroll_source()
+            with patch.object(owner, field, True):
+                self.window._set_busy(False)
+                QTest.mouseClick(self.window.navigation_buttons["knowledge"], Qt.MouseButton.LeftButton)
+                self.assertEqual(self.scroll_values(), before)
+                self.active("tickets")
+            self.window._set_busy(False)
+
+    def test_same_page_activation_preserves_existing_scroll(self):
+        self.window.resize(660, 592)
+        QTest.qWait(10)
+        for key in ("tickets", "knowledge", "scripts", "clipboard"):
+            self.activate(key)
+            before = self.scroll_source()
+            self.activate(key)
+            QTest.qWait(10)
+            self.assertEqual(self.scroll_values(), before, key)
+            self.active(key)
+
+    def test_rapid_accepted_routes_and_later_scroll_have_no_stale_reset(self):
+        self.window.resize(660, 592)
+        self.activate("clipboard")  # Retain the lazy page before the rapid sequence.
+        from Tests.GUI.test_clipboard_setup import wait_idle
+        wait_idle(self.application, lambda: self.window.clipboard_workspace.loading)
+        self.scroll_source()
+        with patch.object(self.window.knowledge_workspace, "refresh_list", return_value=True), \
+                patch.object(self.window.script_workspace, "refresh_list", return_value=True):
+            QTest.mouseClick(self.window.navigation_buttons["knowledge"], Qt.MouseButton.LeftButton)
+            QTest.mouseClick(self.window.navigation_buttons["scripts"], Qt.MouseButton.LeftButton)
+        self.assert_origin("scripts")
+        later = self.scroll_source()
+        QTest.qWait(20)
+        self.assertEqual(self.scroll_values(), later)
+        self.active("scripts")
 
 
 if __name__ == "__main__":

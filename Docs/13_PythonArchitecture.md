@@ -1,5 +1,13 @@
 # F7Hub Python Architecture
 
+## GUI Shell S001 — retained stack and shared-action rail
+
+MainWindow composes `navigationShell` horizontally from `navigationRail` and `workspaceViewport` (QScrollArea), whose widget is the existing `pages` QStackedWidget. The four QToolButtons use `setDefaultAction` with `tickets_action`, `knowledge_action`, `scripts_action` and `clipboard_action`; no new QAction, router, workspace, service or persistence owner is introduced. Clipboard's `clipboardCenterAction` / `clipboard.center` identities and lazy construction remain unchanged. The existing menu/toolbar retain the same action instances and availability policies.
+
+`pages.currentChanged` derives rail selection from actual widget identity, without making the shared actions checkable. Its existing synchronization handler also resets both shell scrollbars synchronously when the signal identifies a page change. Startup synchronization, refused routes and same-page activation do not reset them. No deferred scroll callback, timer loop or per-module scroll manager is introduced. An action-change callback preserves each rail-only icon/tooltip while Qt propagates availability. Qt TabFocus keeps mouse activation from moving editor focus. MainWindow observes focus changes only to remember a descendant of its displayed workspace, and restores it synchronously only after a rail activation leaves that page current and focus remains on the rail. There is no queued focus restoration or global focus manager. Existing navigation, draft, task-runner, callback-gap and close handlers retain ownership.
+
+The shell viewport resolves rail-induced minimum-size pressure through scrolling rather than changing workspace forms. Styling is scoped to the rail; icon artwork is drawn with existing Qt classes at multiple raster sizes. No dependencies, database/schema, Settings, process/IPC, AHK, PowerShell or provider contracts change. GUI/Integration regression and separate native Qt evidence are recorded in [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s001--implementation-candidate-2026-10-13); independent review is pending.
+
 ## CP-02 Stage 2 — Clipboard preference presentation
 
 `ClipboardSetup` is one retained child of ClipboardWorkspace, not a general Settings Center. It consumes only the three existing Clipboard definition keys and SettingsSnapshot effective values. `reload()` runs SettingsService.refresh through the existing ServiceTaskRunner. Captured changed-key input and the original expected_revision bind async Apply; no-op Apply avoids a call/write. Existing definitions validate strict Boolean values; the Settings service owns admission and the repository owns CAS.

@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
-from PySide6.QtGui import QAction, QKeySequence
-from PySide6.QtCore import QTimer
-from PySide6.QtWidgets import QMainWindow, QWidget, QStackedWidget, QMessageBox
+from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPainter, QPen, QPixmap
+from PySide6.QtCore import QPointF, QSize, Qt, QTimer
+from PySide6.QtWidgets import (
+    QApplication, QHBoxLayout, QMainWindow, QWidget, QStackedWidget, QMessageBox,
+    QFrame, QScrollArea, QToolButton, QVBoxLayout,
+)
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.knowledge_workspace import KnowledgeWorkspace
 from f7hub.gui.ticket_workspace import TicketWorkspace
@@ -144,6 +147,158 @@ class MainWindow(QMainWindow):
             self.script_workspace.run_pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
 
         self.statusBar().showMessage("Ready")
+        self._build_navigation_rail()
+
+    def _build_navigation_rail(self):
+        """Present existing actions; the stack remains the routing authority."""
+        shell = QWidget(self)
+        shell.setObjectName("navigationShell")
+        layout = QHBoxLayout(shell)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        self.navigation_rail = QWidget(shell)
+        self.navigation_rail.setObjectName("navigationRail")
+        self.navigation_rail.setAccessibleName("Module navigation")
+        self.navigation_rail.setFixedWidth(52)
+        rail_layout = QVBoxLayout(self.navigation_rail)
+        rail_layout.setContentsMargins(4, 8, 4, 8)
+        rail_layout.setSpacing(6)
+        self.navigation_buttons = {}
+        self._workspace_focus = None
+        self._rail_origin = None
+        for key, label, action in (
+            ("tickets", "Tickets", self.tickets_action),
+            ("knowledge", "Knowledge Base", self.knowledge_action),
+            ("scripts", "Scripts", self.scripts_action),
+            ("clipboard", "Clipboard Center", self.clipboard_action),
+        ):
+            button = QToolButton(self.navigation_rail)
+            button.setObjectName(key + "NavigationButton")
+            button.setDefaultAction(action)
+            button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+            icon = self._navigation_icon(key)
+            button.setIcon(icon)
+            button.setIconSize(QSize(24, 24))
+            button.setFixedSize(44, 44)
+            button.setToolTip(label)
+            button.setAccessibleName(label)
+            # Mouse activation preserves the editor focus; Tab/Space remain native.
+            button.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+            # Action changes also refresh QToolButton's icon/tooltip from QAction.
+            action.changed.connect(
+                lambda b=button, i=icon, title=label: (b.setIcon(i), b.setToolTip(title)))
+            button.pressed.connect(self._rail_action_started)
+            button.triggered.connect(self._rail_action_finished)
+            self.navigation_buttons[key] = button
+            rail_layout.addWidget(button)
+        rail_layout.addStretch()
+        self.navigation_rail.setStyleSheet("""
+            QWidget#navigationRail { background: #202733; }
+            QWidget#navigationRail QToolButton {
+                background: transparent; border: 2px solid transparent;
+                border-radius: 5px;
+            }
+            QWidget#navigationRail QToolButton:hover:enabled { background: #343f50; }
+            QWidget#navigationRail QToolButton[active="true"] {
+                background: #294d65; border-left-color: #74dcff;
+            }
+            QWidget#navigationRail QToolButton:focus { border: 2px solid #74dcff; }
+            QWidget#navigationRail QToolButton:disabled { background: transparent; }
+        """)
+        layout.addWidget(self.navigation_rail)
+        # Existing forms retain their measured minimum sizes. Overflow scrolls
+        # inside the shell instead of widening compact windows or hiding controls.
+        self.workspace_viewport = QScrollArea(shell)
+        self.workspace_viewport.setObjectName("workspaceViewport")
+        self.workspace_viewport.setFrameShape(QFrame.Shape.NoFrame)
+        self.workspace_viewport.setWidgetResizable(True)
+        self.workspace_viewport.setWidget(self.pages)
+        layout.addWidget(self.workspace_viewport, 1)
+        self.setCentralWidget(shell)
+        self.pages.currentChanged.connect(self._sync_navigation_rail)
+        QApplication.instance().focusChanged.connect(self._remember_workspace_focus)
+        self._sync_navigation_rail()
+
+    @staticmethod
+    def _navigation_icon(key):
+        """Original outline artwork, rasterized at multiple sizes for Qt DPI selection."""
+        icon = QIcon()
+        for mode, color in ((QIcon.Mode.Normal, "#d6deeb"),
+                            (QIcon.Mode.Disabled, "#8792a5")):
+            for size in (24, 48, 72, 96):
+                pixmap = QPixmap(size, size)
+                pixmap.fill(Qt.GlobalColor.transparent)
+                painter = QPainter(pixmap)
+                painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+                painter.scale(size / 24, size / 24)
+                painter.setPen(QPen(QColor(color), 1.8, Qt.PenStyle.SolidLine,
+                                    Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
+                if key == "tickets":
+                    painter.drawRoundedRect(3, 5, 18, 14, 2, 2)
+                    painter.drawLine(15, 6, 15, 9)
+                    painter.drawLine(15, 12, 15, 13)
+                    painter.drawLine(15, 16, 15, 18)
+                    painter.drawLine(7, 10, 11, 10)
+                    painter.drawLine(7, 14, 11, 14)
+                elif key == "knowledge":
+                    painter.drawRoundedRect(3, 4, 9, 16, 1, 1)
+                    painter.drawRoundedRect(12, 4, 9, 16, 1, 1)
+                    painter.drawLine(6, 8, 9, 8)
+                    painter.drawLine(15, 8, 18, 8)
+                    painter.drawLine(6, 12, 9, 12)
+                    painter.drawLine(15, 12, 18, 12)
+                elif key == "scripts":
+                    for x1, y1, x2, y2 in ((7, 7, 2, 12), (2, 12, 7, 17),
+                                          (17, 7, 22, 12), (22, 12, 17, 17),
+                                          (14, 5, 10, 19)):
+                        painter.drawLine(QPointF(x1, y1), QPointF(x2, y2))
+                else:
+                    painter.drawRoundedRect(5, 5, 14, 16, 2, 2)
+                    painter.drawRoundedRect(9, 3, 6, 4, 1, 1)
+                    painter.drawLine(9, 11, 15, 11)
+                    painter.drawLine(9, 15, 15, 15)
+                painter.end()
+                icon.addPixmap(pixmap, mode)
+        return icon
+
+    def _sync_navigation_rail(self, _index=None):
+        current = self.pages.currentWidget()
+        if _index is not None:
+            # currentChanged fires only for a different page, never a refused
+            # route or repeated activation. Reset synchronously, without a
+            # queued callback that could override later deliberate scrolling.
+            self.workspace_viewport.horizontalScrollBar().setValue(0)
+            self.workspace_viewport.verticalScrollBar().setValue(0)
+        for key, page in (("tickets", self.workspace),
+                          ("knowledge", self.knowledge_workspace),
+                          ("scripts", self.script_workspace),
+                          ("clipboard", self.clipboard_workspace)):
+            button = self.navigation_buttons[key]
+            active = page is not None and current is page
+            button.setProperty("active", active)
+            button.setAccessibleDescription("Current workspace" if active else "")
+            button.style().unpolish(button)
+            button.style().polish(button)
+            button.update()
+
+    def _remember_workspace_focus(self, _old, new):
+        page = self.pages.currentWidget()
+        if new is not None and page is not None and page.isAncestorOf(new):
+            self._workspace_focus = new
+
+    def _rail_action_finished(self, _action):
+        # QToolButton emits triggered after its default QAction route completes.
+        # Restore only a refused route, synchronously, while focus is still on rail.
+        focus = self.focusWidget()
+        previous = self._workspace_focus
+        page = self.pages.currentWidget()
+        if (page is self._rail_origin and focus in self.navigation_buttons.values() and previous is not None
+                and page.isAncestorOf(previous) and previous.isVisible()
+                and previous.isEnabled()):
+            previous.setFocus(Qt.FocusReason.OtherFocusReason)
+
+    def _rail_action_started(self):
+        self._rail_origin = self.pages.currentWidget()
 
     def showEvent(self, event):
         super().showEvent(event)
