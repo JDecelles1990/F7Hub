@@ -2204,3 +2204,176 @@ for internal retained source views, explicit session-only arming and planned
 redundant lower-return removal. S1 retains shell/Tickets navigation, focus/draft
 guards and shared auxiliary-region ownership. No shortcut, GUI or shell behavior
 is implemented here; review/approval/integration and separate delivery remain gates.
+
+---
+
+## GUI Shell Design Adoption — 2026-10-13
+
+### Adoption control, authority and provenance
+
+This dated successor addendum records the USER's explicit approval of the independently reviewed GUI Shell architecture, its nonblocking notes, decisions U1–U5 as recommended, and an optional animated MP4 background as a deferred enhancement. Approval authority is the 2026-10-13 documentation-adoption directive, attachment `3c7ee709-6fb3-4148-8d8c-af63bf1afed1/Pasted text.txt`. This is DOCUMENTATION-ONLY architecture adoption.
+
+Decision status: **APPROVED by USER**. This documentation candidate's status: **READY_FOR_REVIEW**, pending independent review of the adoption delta and separately authorized Git integration. Implementation status: **NOT IMPLEMENTED by this task**; runtime/native GUI validation: **NOT RUN — NOT APPLICABLE to documentation adoption**. No GUI implementation, multimedia runtime code, dependency change, staging, commit, push, PR or merge is authorized.
+
+Verified authoring baseline: `840e32e425f02c3f7ed4dd595b0eb502d37e1452`, with canonical main, origin/main and live remote main equal before editing. Authoritative owner remains this S1 document. The isolated candidate is at `C:\Dev\F7Hub-GUI-Shell-Design-Adoption`, branch `docs/gui-shell-design-adoption-20261013`; canonical `C:\Dev\F7Hub` is preserved. Final raw/Git-normalized candidate identity, exact diff, manifest, validation, preservation inventory and handoff are stored externally under `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\GUI-Shell-Makeover\adoption-20261013`.
+
+Retained source provenance (external records remain unchanged):
+
+| Source | Identity / significance |
+| --- | --- |
+| Original design report | `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\GUI-Shell-Makeover\plan-20261013-035510\design-report.md`; SHA256 `6e45bc3ea1b8c2974ae30aef8042c41a4ad7d2a4c761332bdbb90b3d2c1cfb4e` |
+| Original planning manifest | Same directory, `plan-manifest.json`; six-artifact aggregate `e43940f62db5720ced439e8e3a73363a93b9957685f10def5b29e1126ec007a7` |
+| Independent architecture review | `%LOCALAPPDATA%\F7Hub\CodexCheckpoints\GUI-Shell-Makeover\independent-review-20261013-044205\independent-review-report.md`; SHA256 `0b146ba966926b07f813524879d9fcac2c0503b2686206ba0520f1b83626f315`; **APPROVED WITH NOTES — design review only**, zero blocking findings |
+| Review completion | Same review directory, `review-completion.md`; preserves the completed review, corrected 32-group static audit, original failed harness attempt and coordinator continuation evidence |
+
+The review's then-pending user choices are resolved only by this later directive. Its technical approval does not independently approve this new document delta or authorize implementation/integration. Original alternatives, rationale, historical statuses, diagrams, acceptance assessments and CP-00 reference above remain verbatim historical evidence. No historical PASS is relabeled as fresh validation of this candidate.
+
+### Successor relationship and preserved architecture
+
+For the bounded GUI Shell makeover, this addendum supersedes earlier provisional recommendations only where explicitly identified below. The final shell uses an icon-only rail at compact, standard and wider sizes rather than the earlier wide labeled rail. Menu/toolbar retention becomes transitional: eventual retirement requires implemented, tested and independently reviewed parity. The approximately 660×592 compact evaluation target supplements 1000×700 and 1180×850; actual supported minima must follow measured Qt/font/layout evidence. No wireframe certifies fit, DPI or accessibility.
+
+U2 supersedes earlier H hover enablement and 275/400-ms activation/leave recommendations for the initial flyout implementation: explicit activation only, with no hover timers or automatic expansion. U3 supersedes no live shortcut until its validation gate is met. U5 adopts the visual direction without freezing historical color examples or final artwork. The new deferred media layering direction supplements the reviewed static presentation; it does not retroactively make video/translucent content part of that review or S001.
+
+Preserve MainWindow, QStackedWidget, one retained workspace per module (Clipboard remains lazy), existing QAction routing, service injection and `PySide6 GUI → Application Services → Domain Logic → Repositories / Gateways → Infrastructure`. No MDI, new framework, custom widget library, parallel Settings store, new database/schema, AHK/IPC contract, execution authority or provider dependency is introduced. Preserve one mutually exclusive shell-owned auxiliary region for later Inspector/Quick Ticket/DynamicHub surfaces. Broader context, draft adapters, Quick Ticket and Search remain deferred owner work.
+
+### U1 — Settings Gear: APPROVED compact utility menu
+
+- Place a Settings gear at the bottom of the left navigation rail when its working menu is delivered.
+- Open a compact utility menu rather than a large Settings launcher panel. Provide access to existing Mochi settings and existing Database Backup; reserve a future Appearance settings area.
+- Preserve existing service ownership, action identity, availability, Backup safety, Mochi dialog lifecycle, guarded Exit/Quit/native close and utility focus behavior. Opening the menu is not workspace departure and must not clear drafts or perform utility work by itself.
+- Create no nonfunctional Settings controls or fake preferences. The future Appearance area is a design reservation until real functionality is authorized and delivered.
+- The gear must have real behavior when introduced. Its visible introduction is deferred during S001 because utility-menu functionality is excluded from that slice.
+
+Original alternatives were a compact native utility menu and a larger launcher panel. The adopted menu reduces new presentation/state work and retains ordinary menu keyboard behavior; a larger panel remains a separately reviewed future proposal.
+
+### U2 — Contextual Flyouts: APPROVED explicit activation only
+
+- Open useful contextual flyouts through click, keyboard or accessible commands; no hover-triggered activation, timers or automatic hover expansion in the initial implementation.
+- Keep primary module activation distinct from explicit secondary flyout access. Preserve explicit Close/Escape behavior, keyboard focus, focus return without overriding newer intentional focus, and unsaved-draft state.
+- Use collapsible or overlay behavior on compact windows, with bounded geometry, reachable controls and the existing single-surface ownership rule.
+- Optional hover enhancements remain future proposals requiring separate review. No capability, provider read, capture, execution or inference is invented to populate a flyout.
+
+The original source considered explicit-only, cached hover plus explicit access, and deferral/omission without useful real content. Explicit-only is adopted; flyouts themselves remain outside S001.
+
+### U3 — Keyboard Navigation: APPROVED provisional mapping
+
+- **Alt+S: Open Settings gear/menu.**
+- **Alt+F: Open Navigation.**
+
+These mappings become implementation requirements only after validating conflicts, mnemonic behavior, window/editor/dialog focus and accessibility. Do not prematurely override existing File or Settings shortcuts while those menus remain active. Before retiring existing menus, validate keyboard parity and document necessary conflict resolution, surviving QAction registration and Quit/native-close behavior. Do not silently change unrelated global shortcuts, F7/Alt+F7, Clipboard chords or editor-owned shortcuts.
+
+The source gives this concrete recommendation without enumerating alternate mnemonic replacements. That limitation is preserved; no historical alternatives or collision-free runtime result are invented. Any necessary replacement of the adopted mapping requires an explicit documented disposition at the retirement gate.
+
+### U4 — Guide Availability: APPROVED independent KB-tools fallback
+
+- Display AltF7Hub to users as **Guide**; locate its normal entry point inside Knowledge Base.
+- Preserve independent access through a discoverable **Knowledge Base tools** fallback when the Knowledge service is unavailable. Successful Knowledge Base data loading must not be required to launch Guide.
+- The fallback must remain reachable when the primary Knowledge action/page is unavailable or disabled; a disabled parent cannot be its sole access path. Use the real existing Guide action and truthful article-unavailable feedback, without fabricating an article page.
+- Preserve AutoHotkey ownership, runtime, shortcuts and technical identifiers, including `altF7HubGuideAction`, unless a later approved migration requires change. Preserve the existing service/task-runner/gateway route, drafts and unconfirmed-request/no-automatic-retry behavior.
+- Do not import Guide records into the Knowledge Base database.
+- The fallback must be functional, discoverable and tested before the old global Guide entry is removed. Keep that global entry throughout S001.
+
+The original alternative was to explicitly exclude Guide-only composition. The USER adopts supported independent fallback; this does not introduce a new launch boundary or content owner.
+
+### U5 — Visual Direction: APPROVED restrained native-compatible styling
+
+Use neutral dark surfaces; blue/cyan accents; an approximately 52-pixel (Qt logical geometry) icon-only navigation rail; consistent outline icons; stable internal action names; accessible tooltips and labels; visible keyboard focus; and clear selected, disabled, loading and error states. Keep typography, margins, spacing, borders and control density consistent. Retain native/system font, palette, high-contrast and input compatibility with narrowly scoped styling.
+
+Validate contrast, icon recognition, resizing, large fonts and DPI behavior during implementation. Exact final icon artwork remains subject to visual validation and provenance/license checks. The original report recommends this direction and bundled SVG/QIcon or suitable native glyphs but does not enumerate alternative overall visual directions. Preserve that source limitation. No new Qt framework or custom widget library is authorized.
+
+### Deferred animated-background contract
+
+Status: **APPROVED design direction / DEFERRED VISUAL ENHANCEMENT**. The looping MP4 is not part of GUI Shell S001 and must not block the initial navigation rail. No multimedia runtime code or dependency changes are authorized here.
+
+The intended background extends across the entire application client area behind the navigation rail, central workspace, content panels and status region. Preserve the native Windows title bar and window controls. This may require later review of status/client-area composition; it is not a reason to restructure the shell during S001.
+
+USER-supplied animation description: approximately 17.73 seconds, 1920 × 1080, 30 FPS, cyan/blue/purple tunnel visuals. An optimized silent MP4 and static poster are reported as prepared separately. These are design assets pending repository asset-location, provenance, license, performance and integration verification; reported metadata is **NOT VERIFIED** by this adoption. Do not copy, move, modify, stage or commit media during this task.
+
+Local asset contract: the animated background must use local, F7Hub-managed assets consisting of a local MP4 animation and a local static poster image. Both must be available through an approved application asset location resolved through established F7Hub application/resource conventions, without assuming a developer-specific absolute filesystem path. The final repository path and packaging mechanism remain subject to inspection and a later implementation decision.
+
+Offline contract: the background feature must operate entirely offline. Normal playback must not require internet connectivity, cloud rendering, streaming services, remote media URLs, authentication to an external service or background downloads. No external network access may be introduced solely to display the animation. Local poster and reduced-motion/static presentation must also remain usable offline, and the application must remain usable without the animated-background feature.
+
+Failure contract: if the MP4 cannot be loaded or decoded, fall back safely to the local static poster when available. If neither asset is usable, retain the existing standard opaque application background. Media failure must not prevent F7Hub startup, workspace navigation or normal technician operations.
+
+Future implementation gate: establish asset provenance and redistribution rights, safe asset loading, supported local resource paths, packaging/installation behavior, absence of remote media dependencies, and appropriate integrity/format validation before delivering this deferred feature. Supplied media is not declared legally cleared or already integrated. This documentation correction authorizes no playback implementation, media commits, new Settings keys, Qt Multimedia composition changes, QML integration, GUI transparency implementation, dependency changes or database migrations; animated-background functionality remains explicitly OUT OF SCOPE for GUI Shell S001.
+
+Conceptual visual layers:
+
+1. Full-window background media or static poster.
+2. Translucent navigation and content surfaces.
+3. Readable text, icons and interactive controls.
+
+Panel transparency must NOT reduce text, icon or focus-indicator opacity. Animation must preserve ordinary navigation, editing, selection, keyboard/mouse input, accessibility, status readability and safe close behavior. Decorative media must not intercept interaction. Use opaque/static fallback when required for accessibility or safe operation.
+
+Future Appearance controls to plan separately: animated-background enable/disable; content-panel opacity; background dimming; reduced-motion/static-background preference; static fallback if media fails; and playback suspension when minimized or otherwise hidden. Exact limits/defaults remain subject to accessibility and performance validation. The reviewer recommended animation off by default; that remains a retained recommendation, not a newly fixed default. Do not invent persistent Settings keys here. Future definitions/consumers must use the approved [Foundation 0D Settings owner](../Foundation/0D_Settings_Architecture.md), with no parallel store or reuse of GuideSettings.ini.
+
+Retain PySide6 and Qt Widgets. A separately authorized technical spike must inspect compatibility with layered translucent QWidget content and determine the safest background-rendering strategy. Candidates to investigate are QMediaPlayer with an appropriate Qt video presentation method, QVideoSink with controlled QWidget painting, and optional QML integration only if justified. These are investigation options, not verified backend choices or upgrade permission.
+
+Require evidence for CPU, GPU, memory, decoding, input/event-loop responsiveness, resizing, RDP, DPI, loop continuity, hidden/minimized suspension, teardown and missing/corrupt/unsupported-media failure. The implementation must fail safely to a static image. Agree performance/accessibility thresholds in that later scope; current playback, compatibility and performance are **NOT RUN / NOT VERIFIED**. Static and reduced-motion use must remain functional independently of animation availability.
+
+### S001 — first implementation slice boundary
+
+S001 is a provisional local planning alias, not an assigned global development number or implementation authorization. It adopts the reviewer's narrower first-slice recommendation.
+
+In scope for a separately authorized S001:
+
+- Working icon-only left rail for exactly four existing module actions: **Tickets**, **Knowledge Base**, **Scripts**, **Clipboard Center**.
+- Reuse existing QAction objects and guarded routing; preserve MainWindow and QStackedWidget. Existing identities remain `tickets_action`, `knowledge_action`, `scripts_action`, `clipboard_action` / `clipboardCenterAction` / `clipboard.center`.
+- Minimal adopted styling, active-navigation indication derived from the actual page after accepted/refused routes, tooltips, keyboard focus and accessibility.
+- Existing draft, close and busy-operation protections, callback-gap/hidden-owner safety, optional-service behavior, startup and lazy Clipboard identity.
+- Focused and regression testing plus native Windows visual testing. Test actual rail mouse/keyboard activation and cancellation restoration of prior editor focus, selection, draft, page and active indication; direct-handler tests alone are insufficient.
+
+Out of scope for S001:
+
+- Settings gear; Database Backup relocation; Mochi relocation; Guide relocation.
+- Menu-bar removal; toolbar removal; Clipboard Back to Tickets removal.
+- Contextual flyouts; animated MP4 background; content-panel transparency.
+- Case Journal persistence; Script Drafts; database changes; root-file maintenance.
+
+Keep the current menu bar, toolbar, global Guide entry and Clipboard return button during S001. They remain functional fallbacks while the rail is independently validated. New rail-induced clipping cannot be deferred as a baseline limitation: assess compact ≈660×592 as well as standard 1000×700 and desktop 1180×850 with measured font/layout evidence. Native keyboard, contrast/recognition and DPI evidence belong to implementation; documentation adoption establishes none of them.
+
+### Provisional later GUI slice refinement
+
+These are reviewer-recommended separated boundaries, not authorization, final identifiers or a single combined implementation task. Give each future candidate its own exact allowlist, acceptance criteria, relevant tests, native evidence, independent review and integration gate.
+
+| Order | Bounded responsibility / retirement gate |
+| --- | --- |
+| 1 | Navigation rail: S001 as bounded above, retaining existing fallbacks |
+| 2 | Settings and utility relocation: immediately functional compact gear/menu, existing Mochi/Backup/Exit safety; future Appearance reservation only |
+| 3 | Guide relocation and KB-unavailable fallback: independent reachability, truthful availability and launch/focus tests before global Guide retirement |
+| 4 | Menu and toolbar retirement: complete action/keyboard parity, provisional U3 conflict disposition and surviving action registration before removing containers |
+| 5 | Clipboard redundant-control removal: independently validated Tickets route plus atomic replacement of `back_button` references/focus expectations and location-sensitive tests; preserve Recent/Setup draft/pending/close behavior |
+| 6 | Responsive layouts and optional explicit flyouts: adapt one module at a time, preserve widget/model state and one auxiliary region; no work on hover |
+| 7 | Animated-background feasibility then implementation: separately authorize the technical spike and any implementation, asset/Settings decisions and accessibility/performance evidence |
+
+Do not combine unrelated cross-module changes merely because they affect the shell. Compact measurement begins early; wider native acceptance/refinement does not waive earlier safety or fit checks.
+
+### Future Case Journal and note-link boundary
+
+Preserve the previously approved direction as future owner work: Case Journal will become the authoritative technician-note owner. One authoritative note may have multiple governed links. Clipboard Center will eventually provide **Add Note**, with three optional destinations: **Active Ticket**, **Knowledge Base article**, and **Unofficial PowerShell Script Draft**. Put **Cancel** at bottom left and **Save Note** at bottom right.
+
+Scripts saved as drafts must remain separate from approved, hash-verified and executable Script Catalog entries. Linking a note neither grants script execution nor automatically publishes a Knowledge article or external Ticket note. No composer, persistence, database/link model, extraction behavior or Script Draft workflow is implemented or authorized by this shell-documentation task. Historical Quick Ticket/Ticket note recommendations do not transfer Case Journal's future authoritative ownership to the shell or Clipboard.
+
+### Preserved independent-review notes and future evidence
+
+| Note | Original nonblocking classification / adopted handling |
+| --- | --- |
+| GS-R01 — transitional gear | LOW, nonblocking: an inert enabled gear would confuse users. Resolved at documentation scope by excluding the visible gear from S001; working utility presentation remains a future requirement |
+| GS-R02 — U3/U5 option inventory | LOW, nonblocking: alternative mnemonic/overall visual directions were not enumerated. Preserve that limitation and the original recommendations; explicit USER adoption resolves choices, not runtime validation |
+| GS-R03 — rail-trigger Cancel focus | MEDIUM, nonblocking execution risk: test actual mouse/keyboard control activation and restoration after Cancel. Carried forward as an S001 acceptance prerequisite; NOT RUN here |
+
+Retain smaller delivery boundaries, actual compact/DPI/theme/accessibility gates, optional media feasibility, Case Journal/link separation, existing CP02 stale shell refusal feedback (deferred; no global status refactor), and broader S1/S2/SemanticModel exclusions. Reviewer nominal contrast calculations do not establish actual composed video/translucency contrast, final icon pixels, Narrator behavior or physical input. Existing reviewer audit results are historical/retained design evidence only; they cannot independently approve this new adoption delta.
+
+### Documentation impact, validation and stop gate
+
+Only this existing S1 planning document is edited. No duplicate GUI Shell planning owner is created. Preserve root/canonical documents, production code, tests, database, assets, other worktrees and untracked media. Protected `AutoHotkey/Troubleshooting_Sections/GuideSettings.ini` receives only Git pathname inventory observation; no individual read, stat, hash, copy, inspection or modification, and no claim about its bytes/metadata.
+
+Future synchronization, separately scoped after the appropriate approved/validated change: [05 GUI](../../05_GUI.md) for actual navigation/style/focus locations; [13 Python Architecture](../../13_PythonArchitecture.md) for concrete shell/action composition; [04 User Workflows](../../04_UserWorkflows.md) for utility/Guide/keyboard/return behavior; short [Clipboard 1C](../Clipboard/1C_PySide6_Clipboard_Center.md) successor/focus references; [11 AHK Architecture](../../11_AHKArchitecture.md) and the [Guide README](../../../AutoHotkey/Troubleshooting_Sections/README.md) only for changed user-facing launch references; [06 System Architecture](../../06_SystemArchitecture.md) only if an approved ownership/composition change or short reference is required; and [CURRENT_STATE](../../Status/CURRENT_STATE.md), Roadmap/Todo/ChangeLog for honest delivered status/history. Foundation, database and SemanticModel contracts remain unchanged; escalate owning-contract conflicts rather than patching around them. No unrelated synchronization is performed now.
+
+FRESH adoption checks must verify U1–U5 and provisional-keyboard/fallback coherence, deferred media/S001 separation, four unchanged module actions, preserved historical architecture, Markdown links/fences/structure, sole allowlisted unstaged diff, empty index, raw prefix and Git-normalized identity, exact manifest/diff reproducibility and unrelated-state preservation. These are author-side static checks on a Windows host, not independent review or runtime GUI evidence. External validation/result artifacts record actual results after the last document edit; this text does not preclaim PASS. Runtime/native GUI tests are NOT APPLICABLE and NOT RUN for documentation-only adoption. Independent review of this delta is the next gate.
+
+Change history: 2026-10-13 — appended this successor addendum only; recorded explicit USER design adoption, preserved original history/review limitations, narrowed S001, and added the deferred full-client-area media contract without implementation.
+
+**GUI SHELL DESIGN ADOPTION — READY_FOR_REVIEW**
+
+The updated document remains unstaged and uncommitted. Do not begin S001 until this documentation update passes independent review, is integrated through a separately authorized Git process, and S001 receives its own explicit implementation authorization. No GUI implementation or Git integration is authorized yet. STOP.
