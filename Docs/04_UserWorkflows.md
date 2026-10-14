@@ -1,5 +1,13 @@
 ﻿# F7Hub User Workflows
 
+## GUI Shell S004 — sidebar and utility keyboard access (2026-10-14 candidate)
+
+Use the left rail for Tickets, Knowledge Base, Scripts and Clipboard Center; the redundant top menus and Tickets toolbar are retired. Press **Alt+F** to focus the current enabled destination, then use Tab/Shift+Tab and Space or Return to navigate. If that destination is disabled, focus goes to the first enabled destination in rail order, or the gear while all destinations are disabled. Alt+F itself keeps your workspace and drafts. Escape returns to the still-valid workspace control from which navigation focus was requested.
+
+Press **Alt+S**, click the gear, or Tab to **Settings and utilities** and press Space/Return. The menu offers Mochi settings, Back up database, Exit and **Knowledge Base tools → Guide**. Escape from the submenu returns to the parent menu; Escape from the root dismisses it and restores invocation focus. Opening/dismissing menus runs no command and changes no workspace or drafts. Subject/Summary mnemonics in separate editor dialogs remain owned by those dialogs.
+
+Guide in the KB header and the gear tools submenu share the existing show/focus command. The gear fallback remains available when KnowledgeService is absent, KB construction fails or article loading fails. Alt+F7 remains the existing global AHK toggle; F7 remains the launcher. Ctrl+Q follows protected Exit: pending work refuses close and drafts require confirmation. Clipboard Back to Tickets and editor-owned Save shortcuts remain. Earlier S002/S003 sections below describe historical candidate locations superseded by this S004 section.
+
 ## GUI Shell S003 — Guide workflow (2026-10-14 candidate)
 
 Use **Guide** in the Knowledge Base header to open or focus the AHK reference window, whose title is exactly **Guide**. **File → Knowledge Base tools → Guide** is an independent fallback when the Knowledge Base service/page is unavailable or article loading fails. The old toolbar button and direct File entry are removed. Both routes retain your current workspace, article selection/search/filters, Ticket drafts and any unsaved Guide editor content. A busy or pending operation temporarily prevents dispatch. An unconfirmed request offers retry or **Alt+F7**; it never automatically sends a second request.

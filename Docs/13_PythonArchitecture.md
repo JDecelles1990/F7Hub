@@ -1,5 +1,13 @@
 # F7Hub Python Architecture
 
+## GUI Shell S004 — surviving action and keyboard ownership
+
+MainWindow retains its QStackedWidget, 52px rail, four setDefaultAction navigation buttons and eight MainWindow-owned command QActions. File/Settings menus and the Tickets QToolBar are omitted from construction. The utility QMenu retains Mochi/Backup/Exit and owns knowledgeBaseToolsMenu, whose Guide action remains altF7HubGuideAction shared with the KB header. Optional Knowledge composition/loading does not own fallback availability. The existing Exit action is associated with MainWindow through addAction so its Quit registration survives popup/container retirement; the conditional Windows Ctrl+Q mapping and single close connection remain.
+
+Exactly two local QShortcuts implement Alt+S and Alt+F with WidgetWithChildrenShortcut and auto-repeat disabled. Separate top-level editor/Mochi dialogs retain mnemonic priority. Popup ShortcutOverride preserves native popup input; utility-menu lifetime suspends these two shortcuts and re-enables them after dismissal dispatch. Alt+F chooses a visible enabled focus target from actual current-page rail state without triggering an action and cancels obsolete pending rail focus. Escape restoration is rail-local and checks invoking page/control, visibility, enabled state and lifetime. Accessible shell/gear descriptions expose the mappings.
+
+ServiceTaskRunner, application services, guarded Guide gateway/client, backup service, pending-owner flags and close/draft lifecycle are unchanged. Clipboard keeps its independent runner and lazy workspace identity. No router, duplicate service dispatch, global hotkey, persistence, IPC, dependency or Settings mechanism is added. Earlier composition snapshots remain historical; [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s004--menu-and-toolbar-retirement-candidate-2026-10-14) identifies this uncommitted candidate and validation limits.
+
 ## GUI Shell S003 — shared Guide action (2026-10-14 candidate)
 
 MainWindow constructs the existing `altF7HubGuideAction` with display text **Guide** and supplies it to KnowledgeWorkspace as an optional presentation dependency. The KB header's QToolButton uses `setDefaultAction`; KnowledgeWorkspace owns no Guide command, service or gateway. MainWindow also installs that same QAction in **File → Knowledge Base tools → Guide**, outside KnowledgeService/page availability. A failed KnowledgeWorkspace constructor is isolated to that optional page: the article action is disabled with an unavailable tooltip, and logs contain only the exception type; Guide and the shell remain available. The old toolbar/direct File action positions are removed.

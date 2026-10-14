@@ -1,5 +1,11 @@
 # F7Hub ChangeLog
 
+## 2026-10-14 — GUI Shell S004 menu and toolbar retirement candidate
+
+Retired MainWindow's redundant File/Settings menu bar and Tickets toolbar while retaining the 52px rail, four shared navigation QActions, native controls and status bar. Existing Mochi/Backup/Exit utility actions remain; the gear now owns the independent Knowledge Base tools → Guide fallback using the same Guide QAction/service as the KB header. Scoped Alt+S opens utilities; Alt+F moves focus without activating a workspace. Popup/dialog input, editor Save, existing Ctrl+Q and draft/pending-operation protections remain.
+
+No service/worker/IPC, AHK runtime, database, global hotkey, dependency or media change. This is an unstaged/uncommitted review candidate; independent review and integration are separate gates. Exact evidence, corrected fixture failures and native/manual limits are recorded in [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s004--menu-and-toolbar-retirement-candidate-2026-10-14) and external S004 evidence. Historical records below retain their original meaning.
+
 ## 2026-10-12 — Clipboard CP-02 Stage 1 and Stage 2 lifecycle reconciliation
 
 Reconciled the lifecycle handoff after verifying both independently approved slices merged to `main` and synchronizing canonical local `main` to verified `origin/main` at `828507f952919662e518b1dd5cfbffdd21ecc5b4`. CP02-S1 merged through PR #91 at `8717e99f4cc77fc723497376dd858d22b8d6f18f`; CP02-S2 merged through PR #92 at `828507f952919662e518b1dd5cfbffdd21ecc5b4`. Both feature commits and merge commits are ancestors of canonical main. The prior stage-specific implementation and review evidence is retained with its original provenance; this reconciliation adds fresh Git and lifecycle verification, not new test execution. GitHub checks were reported as NO CHECKS CONFIGURED. The documentation correction is READY_FOR_REVIEW; integration and final canonical synchronization remain required before closure.

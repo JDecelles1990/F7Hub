@@ -88,7 +88,9 @@ class GuideRelocationTests(unittest.TestCase):
         self.assertIs(w.knowledge_workspace.guide_button.defaultAction(), action)
         self.assertEqual(w.knowledge_tools_menu.title(), "Knowledge Base tools")
         self.assertEqual(w.knowledge_tools_menu.actions(), [action])
-        self.assertNotIn(action, w.menuBar().actions()[0].menu().actions())
+        self.assertIn(w.knowledge_tools_menu.menuAction(), w.utility_menu.actions())
+        self.assertIs(w.knowledge_tools_menu.parent(), w.utility_menu)
+        self.assertIsNone(w.menuWidget())
         for toolbar in w.findChildren(QToolBar):
             self.assertNotIn(action, toolbar.actions())
         self.assertEqual(w.knowledge_workspace.findChildren(QToolButton, "knowledgeGuideButton"),
