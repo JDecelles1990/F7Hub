@@ -1,5 +1,6 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Off
+SetTitleMatchMode(3)
 #Include ../../AutoHotkey/Troubleshooting_Sections/GuideRequest.ahk
 
 global Passed := 0, HostPid := 0
@@ -38,8 +39,9 @@ try {
     Check(endpoint != 0, "Checkout-specific endpoint published")
     HostPid := WinGetPID(endpoint)
     FileAppend("OWNED_HOST pid=" HostPid " fixture=" Fixture "`n", "*")
-    hwnd := WinWait("Help Desk & Interview Guide ahk_pid " HostPid, , 3)
+    hwnd := WinWait("Guide ahk_pid " HostPid, , 3)
     Check(hwnd != 0, "Guide visible after acknowledged cold request")
+    Check(WinGetTitle(hwnd) == "Guide", "Main window title is exactly Guide")
     WinActivate(hwnd)
     Check(WinWaitActive(hwnd, , 3), "Guide becomes active")
     controls := FindControls(hwnd)
@@ -218,12 +220,15 @@ Check(condition, description) {
 }
 WaitFor(predicate) {
     deadline := A_TickCount + 8000
-    while !predicate.Call() && A_TickCount < deadline
+    while A_TickCount < deadline {
+        ; A render can temporarily hide Notes between successive reads. Return
+        ; on one observed ready result; only report timeout after the full bound.
+        if predicate.Call()
+            return
         Sleep(20)
-    if !predicate.Call() {
-        FileAppend("TIMEOUT foreground=" WinActive(hwnd) " focus=" ControlGetFocus(hwnd) " query=" ControlGetText(search) " title=" NativeTitle(hwnd) "`n", "*")
-        throw Error("Native observable readiness timed out")
     }
+    FileAppend("TIMEOUT foreground=" WinActive(hwnd) " focus=" ControlGetFocus(hwnd) " query=" ControlGetText(search) " title=" NativeTitle(hwnd) "`n", "*")
+    throw Error("Native observable readiness timed out")
 }
 FindControls(hwnd) {
     result := {Notes:0, List:0, Slider:0, Search:0}

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import sys
+import logging
 
 from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPainter, QPalette, QPen, QPixmap
 from PySide6.QtCore import QEvent, QPoint, QPointF, QSize, Qt, QTimer
@@ -66,6 +67,10 @@ class MainWindow(QMainWindow):
         self._mochi_dialog = None
         self._tickets_started = False
         self.altf7hub_service = altf7hub_service
+        self.altf7hub_action = QAction("Guide", self)
+        self.altf7hub_action.setObjectName("altF7HubGuideAction")
+        self.altf7hub_action.setEnabled(self.altf7hub_service is not None)
+        self.altf7hub_action.triggered.connect(self.show_altf7hub)
         self.clipboard_service = clipboard_service
         self.settings_service = settings_service
         self.pages = QStackedWidget(self)
@@ -80,11 +85,15 @@ class MainWindow(QMainWindow):
             create_widget=self.ticket_create_widget,
         )
         self.workspace.knowledge_article_requested.connect(self.open_knowledge_article)
-        self.knowledge_workspace = (
-            KnowledgeWorkspace(knowledge_service, self.runner, self)
-            if knowledge_service is not None
-            else None
-        )
+        self.knowledge_workspace = None
+        if knowledge_service is not None:
+            try:
+                self.knowledge_workspace = KnowledgeWorkspace(
+                    knowledge_service, self.runner,
+                    guide_action=self.altf7hub_action)
+            except Exception as error:
+                logging.getLogger(__name__).warning(
+                    "Knowledge Base workspace unavailable: %s", type(error).__name__)
         self.script_workspace = (
             ScriptWorkspace(script_service, self.runner, self, powershell_service=powershell_service)
             if script_service is not None
@@ -110,6 +119,10 @@ class MainWindow(QMainWindow):
         self.tickets_action.triggered.connect(self.show_tickets)
         self.knowledge_action = QAction("Knowledge Base", self)
         self.knowledge_action.setEnabled(self.knowledge_workspace is not None)
+        if self.knowledge_workspace is None:
+            self.knowledge_action.setToolTip(
+                "Knowledge Base is unavailable. Use File → Knowledge Base tools → Guide "
+                "for the reference guide.")
         self.knowledge_action.triggered.connect(self.show_knowledge)
         self.scripts_action = QAction("Scripts", self)
         self.scripts_action.setEnabled(self.script_workspace is not None)
@@ -123,12 +136,9 @@ class MainWindow(QMainWindow):
             file_menu.addAction(action)
             toolbar.addAction(action)
         self.backup_action = QAction("Back up database", self)
-        self.altf7hub_action = QAction("AltF7Hub Guide", self)
-        self.altf7hub_action.setObjectName("altF7HubGuideAction")
-        self.altf7hub_action.setEnabled(self.altf7hub_service is not None)
-        self.altf7hub_action.triggered.connect(self.show_altf7hub)
-        file_menu.addAction(self.altf7hub_action)
-        toolbar.addAction(self.altf7hub_action)
+        self.knowledge_tools_menu = file_menu.addMenu("Knowledge Base tools")
+        self.knowledge_tools_menu.setObjectName("knowledgeBaseToolsMenu")
+        self.knowledge_tools_menu.addAction(self.altf7hub_action)
         self.backup_action.setObjectName("backupDatabaseAction")
         self.backup_action.setEnabled(self.backup_service is not None)
         self.backup_action.triggered.connect(self.back_up_database)
@@ -617,15 +627,15 @@ class MainWindow(QMainWindow):
 
         def completed(outcome):
             self.statusBar().showMessage(
-                "AltF7Hub editor focused." if outcome == "FOCUSED_EDITOR" else "AltF7Hub Guide opened.",
+                "Guide editor focused." if outcome == "FOCUSED_EDITOR" else "Guide opened.",
                 5_000,
             )
 
         def failed(error):
             message = (str(error) if isinstance(error, AltF7HubOpenError) else
                        "The guide open request was not confirmed. Retry or use Alt+F7.")
-            self.statusBar().showMessage("AltF7Hub open request not confirmed.", 5_000)
-            QMessageBox.warning(self, "AltF7Hub could not open", message)
+            self.statusBar().showMessage("Guide open request not confirmed.", 5_000)
+            QMessageBox.warning(self, "Guide could not open", message)
 
         self.runner.submit(self.altf7hub_service.show_guide, completed, failed)
 

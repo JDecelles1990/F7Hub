@@ -1,5 +1,10 @@
 # F7Hub Features
 
+## GUI Shell S003 — current Guide entry points (2026-10-14 candidate)
+
+The user-facing name is now **Guide**, with a Knowledge Base header button and independent **File → Knowledge Base tools → Guide** fallback. The original toolbar/direct File positions described in the historical Slice 046 record below are superseded; that record's validation counts remain historical. Guide stays an AHK reference overlay using the existing shared host and Alt+F7. See [GUI](05_GUI.md) and [current candidate status](Status/CURRENT_STATE.md).
+
+
 ## Slice 053 — Local Baseline Diagnostics
 
 System → Network → Services is the fixed, code-defined **Local Baseline Diagnostics** pack (`diagnostic.pack.local_baseline`). The technician explicitly runs the pack or one approved member. Results remain in memory. Script Type describes the script; the literal execution policy grants permission. Exactly the three reviewed DIAGNOSTIC identities may execute; unknown diagnostics and all five other types are rejected.

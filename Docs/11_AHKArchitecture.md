@@ -1,5 +1,12 @@
 # F7Hub AutoHotkey v2 Architecture
 
+## GUI Shell S003 — Guide window identity (2026-10-14 candidate)
+
+`GuideCore.ahk` now titles the main AHK GUI exactly **Guide**; the shared host tray tooltip uses the same name. Internal AltF7Hub identifiers, checkout-specific `F7Hub.AltF7Hub.Ready.v1` endpoint, registered `F7Hub.AltF7Hub.Show.v1` message, fixed payload/ACK values, client timeouts and shared-host ownership are unchanged. Alt+F7 retains toggle/editor-focus semantics, and F7 launch/follow hotkeys are unchanged.
+
+After the ACK, `GuideRequest.ahk` confirms a visible `AutoHotkeyGUI` in the endpoint's PID with case-sensitive exact title **Guide**, **Edit topic** or **Create topic**, according to the ACK. It does not accept an arbitrary window containing Guide/topic, a hidden target or another process's matching title. The guarded pre-dispatch fallback uses the same exact lookup with hidden-window enumeration where required. A dispatched rejection/timeout never sends another request or toggle. Guide topics, editor save behavior, settings, formatting and endpoints retain their existing ownership.
+
+
 ## CP-01 — Dormant Clipboard policy and press-cycle foundation
 
 CP-01 is a review candidate based on integrated CP-00 (`988c982f…`, PR #89).

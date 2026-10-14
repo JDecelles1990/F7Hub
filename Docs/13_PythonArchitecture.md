@@ -1,5 +1,12 @@
 # F7Hub Python Architecture
 
+## GUI Shell S003 — shared Guide action (2026-10-14 candidate)
+
+MainWindow constructs the existing `altF7HubGuideAction` with display text **Guide** and supplies it to KnowledgeWorkspace as an optional presentation dependency. The KB header's QToolButton uses `setDefaultAction`; KnowledgeWorkspace owns no Guide command, service or gateway. MainWindow also installs that same QAction in **File → Knowledge Base tools → Guide**, outside KnowledgeService/page availability. A failed KnowledgeWorkspace constructor is isolated to that optional page: the article action is disabled with an unavailable tooltip, and logs contain only the exception type; Guide and the shell remain available. The old toolbar/direct File action positions are removed.
+
+The handler still dispatches `AltF7HubService.show_guide()` through the shared ServiceTaskRunner and `WindowsAltF7HubGateway` to the fixed AHK client, using the existing argument array, timeout, success tokens and no-shell boundary. Busy/pending guards, draft/close safety and no-automatic-retry behavior remain. User-visible completion/failure/runtime/file messages now call the subsystem **Guide**. No new IPC, persistence, process launcher, dependency or Settings mechanism is introduced. Native and regression evidence is recorded in CURRENT_STATE.
+
+
 ## GUI Shell S002 — shared-action utility menu
 
 `MainWindow` adds one bottom rail `QToolButton` and one native `QMenu` containing the existing `mochi_action`, `backup_action` and `exit_action` objects. Menu presentation is a GUI concern; selection follows the original connected handlers and service ownership. The menu has no second QAction, route, task runner, database operation or close path. The gear uses the S001 palette-based icon rendering and rail focus styling, and Tab traversal includes it before the first workspace control. Return and Enter explicitly activate the button; Space uses Qt button behavior. The File and Settings menus and their mnemonics remain registered. The provisional Alt+F/Alt+S bindings are deferred because they conflict with those mnemonics.

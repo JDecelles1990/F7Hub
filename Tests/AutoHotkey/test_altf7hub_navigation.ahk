@@ -1,5 +1,6 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Off
+SetTitleMatchMode(3)
 #Include ../../AutoHotkey/Troubleshooting_Sections/GuideRequest.ahk
 #Include ../../AutoHotkey/Troubleshooting_Sections/GuideCore.ahk
 
@@ -31,7 +32,7 @@ try {
     Check(RunWait('"' A_AhkPath '" /ErrorStdOut=UTF-8 "' client '" --show', , "Hide") = 0, "Host starts and acknowledges show")
     endpoint := FindGuideEndpoint(host)
     HostPid := WinGetPID(endpoint)
-    hwnd := WinWait("Help Desk & Interview Guide ahk_pid " HostPid, , 3)
+    hwnd := WinWait("Guide ahk_pid " HostPid, , 3)
     WinActivate(hwnd)
     Check(WinWaitActive(hwnd, , 3), "Native guide foreground ready")
     notes := 0, list := 0, search := 0

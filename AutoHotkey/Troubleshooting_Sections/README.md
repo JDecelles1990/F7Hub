@@ -1,10 +1,10 @@
-﻿# Help Desk & Interview Guide
+﻿# Guide
 
 An English AutoHotkey v2 reference overlay for help desk calls and interview preparation. Topics contain unnumbered keyword reminders. The app displays notes; it does not run troubleshooting commands.
 
 ## Start
 
-Run the parent `AutoHotkey/F7Hub.ahk` with AutoHotkey v2 installed, then press **Alt+F7**. F7Hub's Python toolbar/File action **AltF7Hub Guide** also starts or reuses this host. The Python route expects the standard 64-bit v2 installation under Program Files.
+Run the parent `AutoHotkey/F7Hub.ahk` with AutoHotkey v2 installed, then press **Alt+F7**. F7Hub's **Guide** button in the Knowledge Base header or **File → Knowledge Base tools → Guide** also starts or reuses this host. The File fallback is independent of KnowledgeService and article loading. The main AHK window title is exactly **Guide**; internal AltF7Hub names and endpoint identities remain unchanged. The Python route expects the standard 64-bit v2 installation under Program Files.
 
 Double-clicking `Troubleshooting_Quick_Guide.ahk` starts/reuses the same host without immediately showing the guide; `--show` shows/focuses it. Repeated launches preserve an open editor and its unsaved content. Keep this directory beneath the complete F7Hub `AutoHotkey` tree; the entry is now a request client, not a separate persistent GUI script. The parent host includes `GuideHost.ahk`, `GuideCore.ahk` and `GuideRequest.ahk` and supplies this directory explicitly.
 
@@ -45,7 +45,7 @@ Formatting in the guide is saved immediately. Formatting in the editor is saved 
 | Up / Down, with notes/list focused | Previous / next visible topic; wrap at both ends |
 | Left / Right, with notes/list focused | Lower / raise opacity by 1%; holding repeats; stop at 60–100% |
 | Page Up / Page Down / mouse wheel | Scroll notes or use native topic-list page navigation |
-| F7Hub toolbar/File: AltF7Hub Guide | Always show/focus; preserve workspace and ticket/editor drafts |
+| Knowledge Base header: Guide; File → Knowledge Base tools → Guide | Always show/focus; preserve workspace and ticket/editor drafts |
 | Topic letter / interview number, with notes/list focused | Open topic or cycle its explicit group; clear search |
 | C / E, with notes/list focused | Create / edit |
 | Script button | Open the entry script in Notepad |
