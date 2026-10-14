@@ -4,7 +4,7 @@ import logging
 from html import escape
 
 from PySide6.QtCore import QItemSelectionModel, QSignalBlocker, Qt
-from PySide6.QtGui import QStandardItem, QStandardItemModel
+from PySide6.QtGui import QAction, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
     QAbstractItemView,
     QComboBox,
@@ -45,6 +45,8 @@ class KnowledgeWorkspace(QWidget):
         service: KnowledgeService,
         runner: ServiceTaskRunner,
         parent=None,
+        *,
+        guide_action: QAction | None = None,
     ) -> None:
         super().__init__(parent)
         self._service = service
@@ -76,6 +78,16 @@ class KnowledgeWorkspace(QWidget):
 
         heading = QLabel("Knowledge Base", self)
         heading.setObjectName("knowledgeHeading")
+        self.guide_button = QToolButton(self)
+        self.guide_button.setObjectName("knowledgeGuideButton")
+        self.guide_button.setAccessibleName("Guide")
+        self.guide_button.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
+        self.guide_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextOnly)
+        if guide_action is not None:
+            self.guide_button.setDefaultAction(guide_action)
+        else:
+            self.guide_button.setText("Guide")
+            self.guide_button.setEnabled(False)
         self.new_button = QPushButton("New Article", self)
         self.new_button.clicked.connect(self.open_new_article)
         self.edit_button = QPushButton("Edit Article", self)
@@ -94,6 +106,7 @@ class KnowledgeWorkspace(QWidget):
         self.version_history_button.clicked.connect(self.open_version_history)
         top = QHBoxLayout()
         top.addWidget(heading)
+        top.addWidget(self.guide_button)
         top.addStretch()
         top.addWidget(self.new_button)
         top.addWidget(self.edit_button)

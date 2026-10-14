@@ -11,7 +11,7 @@ launcher := F7HubLauncher(projectRoot)
 follower := MagneticWindowFollower(ObjBindMethod(launcher, "IsF7HubWindow"))
 f7Controller := F7HotkeyController(launcher, follower)
 InitializeGuideHost(A_ScriptDir "\Troubleshooting_Sections", A_ScriptFullPath)
-A_IconTip := "F7Hub - F7: launch/follow; Alt+F7: Help Desk & Interview Guide"
+A_IconTip := "F7Hub - F7: launch/follow; Alt+F7: Guide"
 
 F7:: {
     global f7Controller

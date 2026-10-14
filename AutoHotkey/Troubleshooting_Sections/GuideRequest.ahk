@@ -9,6 +9,15 @@ GuideEndpointTitle(hostPath) {
 
 FindGuideEndpoint(hostPath) => DllCall("FindWindowW", "Str", "AutoHotkeyGUI", "Str", GuideEndpointTitle(hostPath), "Ptr")
 
+; The short display title must never match another application's Guide or a
+; similarly named window in this host. Enumeration also avoids title-mode drift.
+FindGuideWindow(pid, title, visibleOnly := true) {
+    for window in WinGetList("ahk_pid " pid " ahk_class AutoHotkeyGUI")
+        if WinGetTitle(window) == title && (!visibleOnly || DllCall("IsWindowVisible", "Ptr", window))
+            return window
+    return 0
+}
+
 CanUseGuideKeyboardFallback(dispatched, ready, visible, editorOpen) => !dispatched && ready && !visible && !editorOpen
 
 WriteGuideClientOutput(text, stream := "*") {
@@ -66,11 +75,9 @@ RequestGuideUnlocked(hostPath, show, deadline) {
         "UPtr", 1, "Ptr", 0, "UInt", 0x23, "UInt", 3000, "UPtr*", &response, "Ptr")
     if !sent || (response != 1 && response != 2)
         throw Error("The guide open request was not confirmed. Retry or use Alt+F7.")
-    title := response = 2 ? "topic" : "Help Desk & Interview Guide"
-    found := false
-    for window in WinGetList("ahk_pid " pid)
-        if DllCall("IsWindowVisible", "Ptr", window) && InStr(WinGetTitle(window), title)
-            found := true
+    found := response = 2
+        ? (FindGuideWindow(pid, "Edit topic") || FindGuideWindow(pid, "Create topic"))
+        : FindGuideWindow(pid, "Guide")
     if !found
         throw Error("The guide open request was not confirmed. Retry or use Alt+F7.")
     return response = 2 ? "FOCUSED_EDITOR" : "SHOWN"
@@ -80,8 +87,8 @@ GuideKeyboardFallback(pid, dispatched, ready) {
     oldHidden := A_DetectHiddenWindows
     DetectHiddenWindows(true)
     try {
-        guide := WinExist("Help Desk & Interview Guide ahk_pid " pid)
-        editor := WinExist("Edit topic ahk_pid " pid) || WinExist("Create topic ahk_pid " pid)
+        guide := FindGuideWindow(pid, "Guide", false)
+        editor := FindGuideWindow(pid, "Edit topic", false) || FindGuideWindow(pid, "Create topic", false)
         visible := guide && DllCall("IsWindowVisible", "Ptr", guide)
         if !CanUseGuideKeyboardFallback(dispatched, ready, visible, editor != 0)
             throw Error("The guide open request was not confirmed. Use Alt+F7.")
@@ -92,7 +99,7 @@ GuideKeyboardFallback(pid, dispatched, ready) {
         SendEvent("!{F7}")
         deadline := A_TickCount + 3000
         while A_TickCount < deadline {
-            guide := WinExist("Help Desk & Interview Guide ahk_pid " pid)
+            guide := FindGuideWindow(pid, "Guide")
             if guide && DllCall("IsWindowVisible", "Ptr", guide)
                 return "SHOWN"
             Sleep(25)

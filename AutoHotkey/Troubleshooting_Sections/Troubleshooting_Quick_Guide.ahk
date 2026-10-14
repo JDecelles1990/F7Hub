@@ -14,6 +14,6 @@ try {
     if A_Args.Length
         WriteGuideClientOutput(requestError.Message, "**")
     else
-        MsgBox(requestError.Message, "AltF7Hub could not start", 48)
+        MsgBox(requestError.Message, "Guide could not start", 48)
     ExitApp(1)
 }

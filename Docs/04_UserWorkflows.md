@@ -1,5 +1,12 @@
 ﻿# F7Hub User Workflows
 
+## GUI Shell S003 — Guide workflow (2026-10-14 candidate)
+
+Use **Guide** in the Knowledge Base header to open or focus the AHK reference window, whose title is exactly **Guide**. **File → Knowledge Base tools → Guide** is an independent fallback when the Knowledge Base service/page is unavailable or article loading fails. The old toolbar button and direct File entry are removed. Both routes retain your current workspace, article selection/search/filters, Ticket drafts and any unsaved Guide editor content. A busy or pending operation temporarily prevents dispatch. An unconfirmed request offers retry or **Alt+F7**; it never automatically sends a second request.
+
+**Alt+F7** remains the existing global toggle: it shows/focuses a hidden Guide, hides the active Guide and focuses an open editor without losing its unsaved text. Python requests always show/focus. Internal AltF7Hub subsystem/endpoint names and the shared F7 launcher remain unchanged.
+
+
 ## GUI Shell S002 — utility access (2026-10-14 candidate)
 
 Tab to the bottom **Settings and utilities** gear on the left rail, then press Space or Enter, or click it. The compact menu offers the existing Mochi settings, local database backup and Exit commands. Use arrow keys and Enter to choose a menu action, or Escape to close it. Opening or dismissing the menu keeps the current workspace and unsaved draft; it starts no backup or other command. The existing File and Settings menus continue to offer the same actions and shortcuts. On Windows, Ctrl+Q invokes the same protected Exit action when Qt supplies no native Quit shortcut; a valid platform Quit mapping is preserved. Backup still reports completion or a bounded failure through its existing worker; Exit still refuses pending work and requests confirmation before discarding drafts. Alt+F and Alt+S remain the existing menu mnemonics while the menu bar is present. S001 was merged through PR #96 before this S002 candidate.
@@ -66,7 +73,7 @@ Manual Wave loops until another valid command. The first application-session gre
 
 ## AltF7Hub Guide — Slice 046
 
-Start the canonical `AutoHotkey/F7Hub.ahk`, or use **AltF7Hub Guide** in the Python toolbar/File menu. Alt+F7 toggles the guide; an open editor is focused and its unsaved text is preserved. The Python action always shows/focuses rather than toggling, and retains the current workspace and ticket draft. The standalone guide entry starts/reuses the same host; `--show` opens it immediately.
+At Slice 046 delivery, the routes were the canonical `AutoHotkey/F7Hub.ahk` and **AltF7Hub Guide** in the Python toolbar/direct File menu. S003 above supersedes that Python entry placement and user-facing name. Alt+F7 toggles the guide; an open editor is focused and its unsaved text is preserved. The Python action always shows/focuses rather than toggling, and retains the current workspace and ticket draft. The standalone guide entry starts/reuses the same host; `--show` opens it immediately.
 
 With notes/list focused, topic letters select assigned subjects, Up/Down wrap within current search results or archive view, and Left/Right adjust opacity by 1% with held-key repeat. Search/editor/dialog keys remain native. Use Page Up/Page Down or the mouse wheel to scroll notes; Ctrl+Page Up/Down also navigate topics. Preferences persist beside the guide. An unconfirmed open request offers retry or manual Alt+F7; a possibly dispatched request never triggers an automatic toggle. Ticket-driven topic selection is deferred.
 

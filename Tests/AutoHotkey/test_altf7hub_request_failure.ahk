@@ -7,7 +7,20 @@ fixtureHost := A_ScriptDir "\fixtures\guide_request_host.ahk"
 counter := A_Temp "\F7Hub-s046-requests-" DllCall("GetCurrentProcessId") ".txt"
 pid := 0
 try {
-    for mode in ["reject", "slow"] {
+    ; An exact-title Guide in another process and substring decoys in the host
+    ; must never satisfy a positive ACK. The test's Guide is deliberately visible.
+    otherGuide := Gui(, "Guide")
+    otherGuide.Show("w240 h100")
+    ownPid := DllCall("GetCurrentProcessId")
+    Check(FindGuideWindow(ownPid, "Guide") = otherGuide.Hwnd, "Exact owned title accepted")
+    Check(!FindGuideWindow(ownPid, "guide"), "Title comparison is case-sensitive")
+    otherGuide.Hide()
+    Check(!FindGuideWindow(ownPid, "Guide"), "Hidden window cannot confirm visible presentation")
+    DetectHiddenWindows(true)
+    Check(FindGuideWindow(ownPid, "Guide", false) = otherGuide.Hwnd, "Hidden exact window available to guarded fallback")
+    DetectHiddenWindows(false)
+    otherGuide.Show()
+    for mode in ["reject", "slow", "decoy-guide", "decoy-editor", "wrong-process"] {
         if FileExist(counter)
             FileDelete(counter)
         Run('"' A_AhkPath '" /ErrorStdOut=UTF-8 "' fixtureHost '" ' mode ' "' counter '"', , "Hide", &pid)

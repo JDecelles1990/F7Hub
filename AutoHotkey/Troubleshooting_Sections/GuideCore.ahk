@@ -493,7 +493,7 @@ CreateGuide() {
     global ArchiveButton, ArchiveViewButton, CreateButton, EditButton
     global AutoFitCheck
     global StatusHwnd
-    Guide := Gui("+Resize +MinSize860x560", "Help Desk & Interview Guide")
+    Guide := Gui("+Resize +MinSize860x560", "Guide")
     Guide.BackColor := "151719"
     Guide.SetFont("s10 cF1F3F4", "Segoe UI")
     Guide.AddText("x16 y14 w55", "Opacity")

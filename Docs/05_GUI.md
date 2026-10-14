@@ -1,5 +1,12 @@
 # F7Hub GUI Design
 
+## GUI Shell S003 — Guide access (2026-10-14 candidate)
+
+The Knowledge Base header contains one keyboard-accessible **Guide** button. It uses the existing MainWindow `altF7HubGuideAction`, now labeled **Guide**, through `QToolButton.setDefaultAction`. **File → Knowledge Base tools → Guide** exposes the same action independently of KnowledgeService composition or successful article loading. Its direct File-menu and top-toolbar positions are removed. A KnowledgeWorkspace construction failure leaves the article action unavailable with explanatory feedback while the shell and Guide fallback remain available. There is no new Guide page, service or command.
+
+Guide opens or focuses the retained AHK Guide/editor without navigating the stack or changing the current article, search, filters, selected record, Ticket drafts or unsaved AHK editor content. Existing shared-runner, pending-operation and close protections remain authoritative; unconfirmed requests produce safe feedback without automatic retry. Availability depends on the Guide service and existing busy/pending guards. Compact layouts retain the shell scrollbars for control reachability. Candidate validation and limitations are in [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s003--guide-relocation-and-window-title-candidate-2026-10-14).
+
+
 ## GUI Shell S002 — Settings utility menu (2026-10-14 candidate)
 
 The 52px navigation rail has a bottom-aligned, icon-only **Settings and utilities** button with a tooltip, accessible name and visible keyboard focus. Click, Space or Enter opens a compact Qt menu; Escape dismisses it without changing the selected workspace or invoking a command. Its three entries use the existing **Mochi…**, **Back up database** and **E&xit** QAction instances, so their enabled states match the retained Settings and File menus. Mochi opens the existing modeless dialog, backup uses the existing asynchronous guarded service, and Exit uses the normal protected close path. Opening the menu does not change drafts, pages or scroll position. The gear is not a workspace or Settings Center, and no Appearance control is present.
@@ -107,7 +114,7 @@ Controls are Start/Show, Hide, Idle, Wave, Pause/Resume and Exit. Animation swit
 
 ## AltF7Hub Guide — Slice 046
 
-MainWindow adds **AltF7Hub Guide** to its existing toolbar and File menu. The action is enabled when its service is composed and the shared runner is idle; launch work runs through ServiceTaskRunner and preserves page selection and drafts. Completion distinguishes guide opening from editor focusing. Safe failures offer installation/file checks or retry without exposing internal diagnostics.
+At original Slice 046 delivery, MainWindow added **AltF7Hub Guide** to its toolbar and direct File menu; S003 above supersedes those entry positions and labels. The action is enabled when its service is composed and the shared runner is idle; launch work runs through ServiceTaskRunner and preserves page selection and drafts. Completion distinguishes guide opening from editor focusing. Safe failures offer installation/file checks or retry without exposing internal diagnostics.
 
 The reference overlay retains its AHK GUI ownership and existing controls. Opening focuses notes while preserving selection and scroll position. Arrow navigation is scoped to notes/list and wraps visible topics; opacity keys support repeat and share the slider, label, native alpha and saved preference. Native Python action, overlay and editor captures were inspected at 96 DPI after observable worker/callback readiness; no new controls were clipped. Transparency naturally reveals the underlying window.
 

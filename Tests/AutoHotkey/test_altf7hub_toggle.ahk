@@ -1,5 +1,7 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Off
+#Include ../../AutoHotkey/Troubleshooting_Sections/GuideRequest.ahk
+SetTitleMatchMode(3)
 ; Focused regression in an external runtime copy supplied by the supervisor.
 ; Exercises the unchanged shared host's actual global Alt+F7 hook.
 if A_Args.Length != 1
@@ -10,19 +12,25 @@ SendLevel 1
 SetKeyDelay 25, 25
 try {
     Run('"' A_AhkPath '" /ErrorStdOut "' root '\AutoHotkey\F7Hub.ahk"', root, , &hostPid)
-    DetectHiddenWindows true
-    if !WinWait(root "\AutoHotkey\F7Hub.ahk ahk_class AutoHotkey", , 5)
+    deadline := A_TickCount + 5000
+    endpoint := FindGuideEndpoint(root "\AutoHotkey\F7Hub.ahk")
+    while !endpoint && A_TickCount < deadline {
+        Sleep(25)
+        endpoint := FindGuideEndpoint(root "\AutoHotkey\F7Hub.ahk")
+    }
+    if !endpoint || WinGetPID(endpoint) != hostPid
         throw Error("Shared host startup timeout")
-    DetectHiddenWindows false
     Loop 3 {
         SendEvent "!{F7}"
-        hwnd := WinWait("Help Desk & Interview Guide ahk_pid " hostPid, , 3)
+        hwnd := WinWait("Guide ahk_pid " hostPid, , 3)
         if !hwnd || !WinWaitActive(hwnd, , 2)
             throw Error("Alt+F7 did not show/focus the owned guide")
+        if WinGetTitle(hwnd) != "Guide"
+            throw Error("Owned guide title is not exactly Guide")
         passed++
         currentPid := WinGetPID(hwnd)
         SendEvent "!{F7}"
-        if !WinWaitClose("Help Desk & Interview Guide ahk_pid " hostPid, , 3)
+        if !WinWaitClose("Guide ahk_pid " hostPid, , 3)
             throw Error("Alt+F7 did not hide the owned guide")
         DetectHiddenWindows true
         if !WinExist(hwnd) || WinGetPID(hwnd) != currentPid
