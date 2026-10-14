@@ -150,6 +150,41 @@ Foundation remains authoritative for:
 - provenance
 
 
+## Current Contract and Phase 2 Handoff
+
+Consume the bounded current successors in
+[1A](1A_Clipboard_Domain_Data_Lifecycle.md#phase-1-current-contract-2026-10-14),
+[1B](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#phase-1-current-contract-2026-10-14)
+and [1C](1C_PySide6_Clipboard_Center.md#phase-1-current-contract-2026-10-14).
+They reconcile approved decisions and verified implementation at their stated
+baseline. New Phase 2 composition/profile details remain proposals requiring
+approval; this guidance grants no delivery authority. Reverify live availability
+on resumption. Earlier dated reports remain historical, not current gates.
+
+Reuse delivered Item/Event storage/read-only Recent, Shared Settings and the
+retained Setup editor. Saved preferences never establish capture, native hotkey,
+authenticated IPC, snapshot, outbound copy or paste capability. D01 is delivered
+with the bounded Recent limits below; reinspection precedes extension, not restart.
+S005 retired the lower return button: use the guarded shell Tickets route and
+active-section/rail focus. Do not resurrect menu/toolbar/return controls from
+historical examples or infer the shared Inspector/DynamicHub runtime is delivered.
+
+Preserve one Center and the intended F7Hub/Windows source distinction. Windows
+viewing is an explicit private current snapshot, never automatic persistence,
+history import, monitoring or arming. Missing 1B native/security/privacy/service
+prerequisites yield honest unavailable states; CC-xx must not implement them in
+widgets. Dxx, CC-xx and Capture/IPC remain separate owning slice families.
+Capture selection, capture current, Active Paste and explicit outbound copy remain
+distinct. Clipboard-domain writes use Python authorization plus authenticated
+AHK delivery; ordinary text-widget Ctrl+C is the narrow editing exception.
+Ctrl+Alt+C/V are future semantics, not active production bindings.
+
+Use the delivery skill's lifecycle, manifests, evidence provenance and independent
+review requirements. Documentation-only reconciliation uses bounded static checks;
+no runtime result follows from source inspection. Inspect verified closure records
+and carry-forwards rather than equating MERGED with CLOSED. A requested review gate
+preserves the exact candidate unstaged/uncommitted; no self-approval/integration.
+
 ## Core Clipboard Invariants
 
 The following are architectural invariants unless an owning contract is
@@ -547,20 +582,27 @@ Do not place real employer/customer Clipboard contents in:
 Production modules must never import test fixture helpers.
 
 
-## Loop Guard
+## RT-R01 — Failure Circuit Breaker
 
-Do not repeat the same failed test, screenshot check, launch, focus attempt or
-IPC validation more than twice with:
+Apply the existing [vertical-slice-delivery v0.4 TEST rule](../../../.agents/skills/vertical-slice-delivery/references/lifecycle.md#bounded-execution-and-correction).
+After the **first** failed, timed-out, hung or inconclusive execution, or uncertain
+owned-process cleanup/state, stop automatic retries of that execution. Preserve
+the command, environment, candidate/input identities, actual outcome and evidence;
+inspect owned survivors and diagnose before choosing a corrective action.
 
-- unchanged candidate
-- unchanged environment/state
-- unchanged hypothesis
+Rerun only after a verified, recorded relevant correction plausibly addresses
+the failure and process/fixture/state preconditions are safe. Restarting unchanged,
+increasing only the timeout/retry count, calling it flaky, or needing review/full
+regression is not sufficient. A materially different bounded diagnostic may test
+a named hypothesis; it is not permission to rerun the unchanged failing harness.
 
-After two identical unchanged failures:
+Honor stricter user attempt limits. A maximum attempt count never grants an
+unchanged retry. An unresolved mandatory check remains FAIL or BLOCKED and cannot
+be promoted to PASS/readiness. Preserve incomplete/failure artifacts. This current
+rule supersedes historical two-failure agent-validation thresholds in 1B/1C and
+broader Planning/Foundation text; it adds no competing lifecycle. Separately
+approved bounded product lock/readiness protocols retain their owner semantics.
 
-`STOP → DIAGNOSE → REPORT`
-
-Do not enter retry spirals.
 
 
 ## Documentation Routing
