@@ -2,11 +2,17 @@
 
 ## GUI Shell S001 — Scripts keyboard follow-up (2026-10-14)
 
-- [x] Independent final rereview accepted the six-file S001 correction as **APPROVED_WITH_NOTES**.
-- [ ] Independently review the four-document reconciliation delta before separately authorized PR #96 publication and integration.
+- [x] Independent review accepted the six-file implementation/test correction as **APPROVED_WITH_NOTES**; its published implementation/test blobs remain unchanged.
+- [x] The complete approved 11-path S001 candidate was published to PR #96 at `c19490287ad5ae21586eacf17b1228a26af17a6a`.
+- [x] Independent final published-head review verified PR identity and scope, recommended **RESOLVED** for all three P2 threads, and identified stale lifecycle documentation as the blocking issue; no thread state was changed.
+- [ ] Independently review this exact three-document lifecycle correction.
+- [ ] Reconcile the three GitHub review threads after the corrected-head review.
+- [ ] Obtain merge authorization and merge PR #96.
+- [ ] Synchronize canonical `main`, then complete final integration and launcher verification.
+- [ ] Complete S001 closure verification.
 - [ ] **Future Scripts Workspace redesign: physical keyboard refinement.** After refresh with visibly restored focus, three physical forward Tab presses reached Search where the native Qt test expected Refresh. Reverse traversal and general keyboard access remained available. The user accepted the discrepancy and independent review classified it as nonblocking for S001; the exact skipped or reordered stop is **NOT VERIFIED**, and the complete physical forward sequence is **NOT PASS**. Future acceptance must record every physical Tab and Shift+Tab destination on a fresh build, confirm visible focus distinct from selection, disabled-control skipping and no keyboard traps, and preserve deliberate focus choices and draft/navigation guards. Physical forward Tab traversal must follow the displayed Scripts toolbar order: Run diagnostic → Copy Script → Manage scripts → Refresh. Physical Shift+Tab traversal must follow the reverse order. Disabled or otherwise ineligible controls must be skipped naturally without changing the relative order of eligible controls.
 
-S001 remains unmerged; this follow-up does not authorize redesign implementation. See [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s001--implementation-candidate-2026-10-13) for candidate identity, retained validation, manual acceptance and the unresolved post-summary Mochi timer observation.
+PR #96 remains OPEN and UNMERGED. This checklist does not authorize publication, merge, canonical synchronization or Scripts redesign implementation. See [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s001--implementation-candidate-2026-10-13) for candidate identity, implementation evidence, manual acceptance and the unresolved post-summary Mochi timer observation.
 
 ## Clipboard CP-02 lifecycle status (2026-10-12)
 
