@@ -1,5 +1,14 @@
 # F7Hub Todo
 
+## GUI Shell S004 — bounded delivery (2026-10-14 candidate)
+
+- [x] Retire redundant File/Settings menu bar and Tickets toolbar; preserve eight shared command actions and guarded handlers.
+- [x] Keep the 52px rail and utility menu; move independent Knowledge Base tools → Guide fallback under the gear.
+- [x] Add focus-only Alt+F and utility Alt+S, preserving separate dialog mnemonics, popup input, protected Ctrl+Q and editor shortcuts.
+- [ ] Independent review of exact unstaged/uncommitted candidate and validation; controlled integration remains separately authorized.
+
+S001, S002 and S003 integrated through PRs #96, #97 and #98; their earlier candidate checklists below are historical, superseded by external closure records. Preserve the accepted physical Scripts forward-Tab limitation, Clipboard stale-refusal feedback and unrelated Mochi QTimer diagnostic as separate follow-ups. S005 Clipboard return-button retirement, Settings Center, Appearance/media and Scripts redesign remain outside S004 and unstarted. Current evidence and limitations belong to [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s004--menu-and-toolbar-retirement-candidate-2026-10-14).
+
 ## GUI Shell S001 — Scripts keyboard follow-up (2026-10-14)
 
 - [x] Independent review accepted the six-file implementation/test correction as **APPROVED_WITH_NOTES**; its published implementation/test blobs remain unchanged.

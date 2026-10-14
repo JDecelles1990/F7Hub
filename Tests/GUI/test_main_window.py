@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
-from PySide6.QtWidgets import QApplication, QMessageBox, QToolBar, QToolButton, QLabel
+from PySide6.QtWidgets import QApplication, QMessageBox, QToolBar, QToolButton, QLabel, QMenuBar, QPushButton
 from PySide6.QtTest import QSignalSpy, QTest
 from PySide6.QtCore import QEvent, QPoint, QTimer, Qt
 from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPalette, QShortcut
@@ -208,6 +208,7 @@ class MainWindowTests(unittest.TestCase):
         self.assertTrue(QTest.qWaitForWindowActive(self.window))
         if self.window.pages.isAncestorOf(control):
             self.window.workspace_viewport.ensureWidgetVisible(control)
+        self.application.processEvents()
         control.setFocus(Qt.FocusReason.OtherFocusReason)
         self.application.processEvents()
         self.assertIs(self.application.focusWidget(), control)
@@ -271,22 +272,24 @@ class MainWindowTests(unittest.TestCase):
         self.assertEqual(triggered.count(), 1)
         self.assertFalse(self.window.isVisible())
 
-    def test_quit_file_and_utility_routes_share_action_and_close_guard(self):
+    def test_quit_registered_and_utility_routes_share_action_and_close_guard(self):
         self.window.workspace.open_ticket(1)
         self.wait_idle()
         editor = self.window.workspace.note_input
         editor.setPlainText("Keep the same draft through both Exit routes")
-        file_menu = self.window.menuBar().actions()[0].menu()
-        self.assertIn(self.window.exit_action, file_menu.actions())
+        self.assertIn(self.window.exit_action, self.window.actions())
         self.assertIs(self.window.utility_menu.actions()[2], self.window.exit_action)
         triggered = QSignalSpy(self.window.exit_action.triggered)
         with patch("f7hub.gui.main_window.QMessageBox.question",
                    return_value=QMessageBox.StandardButton.Cancel) as question:
-            for menu in (file_menu, self.window.utility_menu):
-                if menu is self.window.utility_menu:
-                    self.window.settings_button.click()
-                else:
-                    menu.popup(self.window.menuBar().mapToGlobal(QPoint(0, 0)))
+            for route in ("shortcut", "menu"):
+                menu = self.window.utility_menu
+                if route == "shortcut":
+                    self._send_quit_shortcut(editor)
+                    self.assertTrue(self.window.isVisible())
+                    self.assertEqual(editor.toPlainText(), "Keep the same draft through both Exit routes")
+                    continue
+                self.window.settings_button.click()
                 self.application.processEvents()
                 self.assertTrue(menu.isVisible())
                 menu.setActiveAction(self.window.exit_action)
@@ -297,12 +300,11 @@ class MainWindowTests(unittest.TestCase):
         self.assertEqual(question.call_count, 2)
         self.assertEqual(triggered.count(), 2)
 
-    def test_quit_shortcut_coexists_with_mnemonics_and_save(self):
-        file_action, settings_action = self.window.menuBar().actions()[:2]
-        self.assertEqual(file_action.text(), "&File")
-        self.assertEqual(settings_action.text(), "&Settings")
-        self.assertEqual(QKeySequence.mnemonic(file_action.text()), QKeySequence("Alt+F"))
-        self.assertEqual(QKeySequence.mnemonic(settings_action.text()), QKeySequence("Alt+S"))
+    def test_quit_shortcut_coexists_with_shell_bindings_and_save(self):
+        self.assertIsNone(self.window.menuWidget())
+        self.assertFalse(self.window.findChildren(QMenuBar))
+        self.assertEqual(self.window._navigation_shortcut.key(), QKeySequence("Alt+F"))
+        self.assertEqual(self.window._settings_shortcut.key(), QKeySequence("Alt+S"))
         save = self.window.ticket_create_widget._save_shortcut
         self.assertEqual(save.key(), QKeySequence(QKeySequence.StandardKey.Save))
         self.assertEqual(save.context(), Qt.ShortcutContext.WidgetWithChildrenShortcut)
@@ -323,7 +325,8 @@ class MainWindowTests(unittest.TestCase):
         self.assertFalse(button.icon().isNull())
         self.assertEqual(menu.actions(), [self.window.mochi_action,
                                           self.window.backup_action,
-                                          self.window.exit_action])
+                                          self.window.exit_action,
+                                          self.window.knowledge_tools_menu.menuAction()])
         self.assertFalse(self.window.mochi_action.isEnabled())
         self.assertTrue(self.window.backup_action.isEnabled())
         self.window.backup_action.setEnabled(False)
@@ -379,7 +382,7 @@ class MainWindowTests(unittest.TestCase):
         self.window.mochi_service = MochiService(FakeGateway())
         self.window.mochi_action.setEnabled(True)
         action = self.window.utility_menu.actions()[0]
-        self.assertIs(action, self.window.menuBar().actions()[1].menu().actions()[0])
+        self.assertIs(action, self.window.mochi_action)
         action.trigger()
         dialog = self.window._mochi_dialog
         self.assertIsNotNone(dialog)
@@ -478,10 +481,9 @@ class MainWindowTests(unittest.TestCase):
         self.assertEqual(action.objectName(), "clipboardCenterAction")
         self.assertEqual(action.data(), "clipboard.center")
         self.assertTrue(action.shortcut().isEmpty())
-        file_actions = self.window.menuBar().actions()[0].menu().actions()
-        toolbar_actions = self.window.findChildren(QToolBar)[0].actions()
-        for actions in (file_actions, toolbar_actions):
-            self.assertIs(actions[actions.index(self.window.scripts_action) + 1], action)
+        buttons = tuple(self.window.navigation_buttons.values())
+        self.assertIs(buttons[2].defaultAction(), self.window.scripts_action)
+        self.assertIs(buttons[3].defaultAction(), action)
         self.assertIsNone(self.window.clipboard_workspace)
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
 
@@ -689,7 +691,7 @@ class MainWindowTests(unittest.TestCase):
 
     def test_scripts_action_opens_stacked_workspace_and_loads_catalog(self):
         self.assertEqual(self.window.scripts_action.text(), "Scripts")
-        self.assertIn(self.window.scripts_action, self.window.menuBar().actions()[0].menu().actions())
+        self.assertIs(self.window.navigation_buttons["scripts"].defaultAction(), self.window.scripts_action)
         self.assertIn(self.window.scripts_action, self.window.findChildren(type(self.window.scripts_action)))
         self.assertEqual(self.window.pages.indexOf(self.window.script_workspace), 1)
         self.window.scripts_action.trigger()
@@ -766,7 +768,7 @@ class MainWindowTests(unittest.TestCase):
                         control.mapTo(scroll.viewport(), corner)))
 
     def test_backup_action_runs_once_on_worker_and_reports_local_snapshot(self):
-        self.assertIn(self.window.backup_action, self.window.menuBar().actions()[0].menu().actions())
+        self.assertIn(self.window.backup_action, self.window.utility_menu.actions())
         self.assertEqual(self.window.backup_action.text(), "Back up database")
         self.backup.gate = threading.Event()
         with patch("f7hub.gui.main_window.QMessageBox.information") as message:
@@ -935,7 +937,7 @@ class NavigationRailTests(unittest.TestCase):
             self.wait_idle()
             self.application.processEvents()
             self.assertIs(self.application.focusWidget(), self.window.navigation_buttons["scripts"])
-            chosen = self.window.menuBar()
+            chosen = self.window.settings_button
             chosen.setFocus()
             self.application.processEvents()
             QTest.qWait(5)
@@ -1044,9 +1046,10 @@ class NavigationRailTests(unittest.TestCase):
             self.application.processEvents()
         QTest.keyClick(self.window.navigation_buttons["scripts"], Qt.Key.Key_Space)
         self.assertTrue(self.window.runner.busy)
-        chosen = self.window.menuBar()
+        chosen = self.window.settings_button
         chosen.setFocus()
         self.application.processEvents()
+        QTest.keyClick(chosen, Qt.Key.Key_F12)
         self.scripts.gate.set()
         self.wait_idle()
         self.application.processEvents()
@@ -1104,16 +1107,11 @@ class NavigationRailTests(unittest.TestCase):
         self.wait_idle()
         self.active("tickets")
 
-    def test_menu_toolbar_new_ticket_and_article_routes_sync_actual_page(self):
-        toolbar = self.window.findChildren(QToolBar)[0]
-        QTest.mouseClick(toolbar.widgetForAction(self.window.scripts_action), Qt.MouseButton.LeftButton)
+    def test_rail_new_ticket_and_article_routes_sync_actual_page(self):
+        QTest.mouseClick(self.window.navigation_buttons["scripts"], Qt.MouseButton.LeftButton)
         self.wait_idle()
         self.active("scripts")
-        menu = self.window.menuBar().actions()[0].menu()
-        menu.popup(self.window.mapToGlobal(self.window.rect().topLeft()))
-        self.application.processEvents()
-        QTest.mouseClick(menu, Qt.MouseButton.LeftButton,
-                         pos=menu.actionGeometry(self.window.knowledge_action).center())
+        QTest.mouseClick(self.window.navigation_buttons["knowledge"], Qt.MouseButton.LeftButton)
         self.wait_idle()
         self.active("knowledge")
         self.window.show_new_ticket()
@@ -1323,20 +1321,17 @@ class NavigationRailTests(unittest.TestCase):
                 self.wait_idle()
                 self.assert_origin("tickets")
 
-    def test_scrolled_sources_reset_on_menu_and_toolbar_routes(self):
+    def test_scrolled_sources_reset_on_mouse_and_keyboard_rail_routes(self):
         self.window.resize(660, 592)
         QTest.qWait(10)
         self.scroll_source()
-        menu = self.window.menuBar().actions()[0].menu()
-        menu.popup(self.window.mapToGlobal(self.window.rect().topLeft()))
-        self.application.processEvents()
-        QTest.mouseClick(menu, Qt.MouseButton.LeftButton,
-                         pos=menu.actionGeometry(self.window.knowledge_action).center())
+        QTest.mouseClick(self.window.navigation_buttons["knowledge"], Qt.MouseButton.LeftButton)
         self.wait_idle()
         self.assert_origin("knowledge")
         self.scroll_source()
-        toolbar = self.window.findChildren(QToolBar)[0]
-        QTest.mouseClick(toolbar.widgetForAction(self.window.scripts_action), Qt.MouseButton.LeftButton)
+        button = self.window.navigation_buttons["scripts"]
+        button.setFocus(Qt.FocusReason.TabFocusReason)
+        QTest.keyClick(button, Qt.Key.Key_Space)
         self.wait_idle()
         self.assert_origin("scripts")
 
@@ -1554,7 +1549,7 @@ class ScriptsFocusLifecycleTests(unittest.TestCase):
         QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Space)
         self.record("toolbar Refresh pending")
         self.assertTrue(self.window.runner.busy)
-        chosen = self.window.menuBar()
+        chosen = self.window.settings_button
         chosen.setFocus(Qt.FocusReason.OtherFocusReason)
         self.application.processEvents()
         self.finish_scripts()
@@ -1850,6 +1845,222 @@ class NavigationRenderingTests(unittest.TestCase):
             self.window.scripts_action.setEnabled(True)
             self.application.setPalette(original)
             self.application.processEvents()
+
+
+class ShellRetirementTests(unittest.TestCase):
+    """S004 exercises registered shortcuts through focused Qt controls."""
+
+    setUpClass = classmethod(MainWindowTests.setUpClass.__func__)
+    setUp = MainWindowTests.setUp
+    tearDown = MainWindowTests.tearDown
+    wait_idle = MainWindowTests.wait_idle
+
+    def focus(self, control):
+        self.window.raise_()
+        self.window.activateWindow()
+        self.assertTrue(QTest.qWaitForWindowActive(self.window, 5000))
+        if self.window.pages.isAncestorOf(control):
+            self.window.workspace_viewport.ensureWidgetVisible(control)
+        self.application.processEvents()
+        control.setFocus(Qt.FocusReason.OtherFocusReason)
+        self.application.processEvents()
+        self.assertIs(self.application.focusWidget(), control)
+
+    def alt(self, control, key):
+        QTest.keyClick(control, key, Qt.KeyboardModifier.AltModifier)
+        self.application.processEvents()
+
+    def test_retired_containers_and_all_eight_surviving_command_identities(self):
+        w = self.window
+        self.assertIsNone(w.menuWidget())
+        self.assertFalse(w.findChildren(QMenuBar))
+        self.assertFalse(w.findChildren(QToolBar))
+        actions = (w.tickets_action, w.knowledge_action, w.scripts_action, w.clipboard_action,
+                   w.altf7hub_action, w.mochi_action, w.backup_action, w.exit_action)
+        self.assertEqual(len(set(actions)), 8)
+        for action in actions:
+            self.assertIs(action.parent(), w)
+        for button, action in zip(w.navigation_buttons.values(), actions[:4]):
+            self.assertIs(button.defaultAction(), action)
+        self.assertEqual(w.utility_menu.actions()[:3], list(actions[5:]))
+        self.assertEqual(w.knowledge_tools_menu.actions(), [w.altf7hub_action])
+        self.assertIn(w.exit_action, w.actions())
+        self.assertEqual(w.navigation_rail.width(), 52)
+
+    def test_alt_f_focuses_selected_without_navigation_and_escape_restores_editor(self):
+        w = self.window
+        w.show_new_ticket()
+        editor = w.ticket_create_widget.subject_input
+        editor.setText("Retain S004 keyboard draft")
+        self.focus(editor)
+        before = (w.pages.currentWidget(), w.pages.count(), self.service.calls, self.scripts.calls)
+        self.alt(editor, Qt.Key.Key_F)
+        self.assertIs(self.application.focusWidget(), w.navigation_buttons["tickets"])
+        self.assertEqual((w.pages.currentWidget(), w.pages.count(), self.service.calls,
+                          self.scripts.calls), before)
+        self.assertIsNone(w.clipboard_workspace)
+        QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Escape)
+        self.application.processEvents()
+        self.assertIs(self.application.focusWidget(), editor)
+        self.assertEqual(editor.text(), "Retain S004 keyboard draft")
+
+    def test_alt_f_selected_scripts_and_disabled_destination_fallback(self):
+        w = self.window
+        w.show_scripts()
+        self.wait_idle()
+        self.focus(w.script_workspace.search_input)
+        before = self.scripts.calls
+        self.alt(self.application.focusWidget(), Qt.Key.Key_F)
+        self.assertIs(self.application.focusWidget(), w.navigation_buttons["scripts"])
+        self.assertEqual(self.scripts.calls, before)
+        w.scripts_action.setEnabled(False)
+        self.focus(w.settings_button)
+        self.alt(w.settings_button, Qt.Key.Key_F)
+        self.assertIs(self.application.focusWidget(), w.navigation_buttons["tickets"])
+        self.assertIs(w.pages.currentWidget(), w.script_workspace)
+        w._set_busy(False)
+
+    def test_alt_f_busy_gear_fallback_cancels_obsolete_focus_request(self):
+        w = self.window
+        self.backup.gate = threading.Event()
+        with patch("f7hub.gui.main_window.QMessageBox.information"):
+            w.backup_action.trigger()
+            self.focus(w.settings_button)
+            w._rail_pending_focus = (w._rail_generation, w.pages.currentWidget(),
+                                     w.navigation_buttons["tickets"], w.settings_button)
+            self.alt(w.settings_button, Qt.Key.Key_F)
+            self.assertIsNone(w._rail_pending_focus)
+            self.assertIs(self.application.focusWidget(), w.settings_button)
+            self.assertTrue(w.runner.busy)
+            self.backup.gate.set()
+            self.wait_idle()
+        self.assertIs(self.application.focusWidget(), w.settings_button)
+        self.assertEqual(self.backup.calls, 1)
+
+    def test_alt_s_opens_once_and_escape_restores_invoking_editor(self):
+        w = self.window
+        w.show_new_ticket()
+        editor = w.ticket_create_widget.subject_input
+        editor.setText("Retain menu draft")
+        self.focus(editor)
+        opened = QSignalSpy(w.utility_menu.aboutToShow)
+        before = (w.pages.currentWidget(), w.pages.count())
+        self.alt(editor, Qt.Key.Key_S)
+        self.assertTrue(w.utility_menu.isVisible())
+        self.alt(w.utility_menu, Qt.Key.Key_S)
+        self.assertEqual(opened.count(), 1)
+        self.assertEqual((w.pages.currentWidget(), w.pages.count()), before)
+        self.assertEqual(self.backup.calls, 0)
+        QTest.keyClick(w.utility_menu, Qt.Key.Key_Escape)
+        self.application.processEvents()
+        self.assertFalse(w.utility_menu.isVisible())
+        self.assertIs(self.application.focusWidget(), editor)
+        self.assertEqual(editor.text(), "Retain menu draft")
+
+    def test_shell_shortcuts_do_not_steal_modeless_or_modal_subject_mnemonic(self):
+        from f7hub.gui.edit_ticket_subject_dialog import EditTicketSubjectDialog
+        for modal in (False, True):
+            dialog = EditTicketSubjectDialog(self.service, self.window.runner,
+                                             self.service.ticket, self.window)
+            try:
+                dialog.setModal(modal)
+                dialog.show()
+                dialog.raise_()
+                dialog.activateWindow()
+                self.assertTrue(QTest.qWaitForWindowActive(dialog, 5000))
+                dialog.cancel_button.setFocus()
+                self.application.processEvents()
+                self.alt(dialog.cancel_button, Qt.Key.Key_S)
+                self.assertIs(self.application.focusWidget(), dialog.subject_input)
+                self.assertFalse(self.window.utility_menu.isVisible())
+                self.alt(dialog.subject_input, Qt.Key.Key_F)
+                self.assertIs(self.application.focusWidget(), dialog.subject_input)
+            finally:
+                dialog.reject()
+                dialog.deleteLater()
+                self.application.processEvents()
+
+    def test_popup_retains_focus_and_native_escape_instead_of_shell_navigation(self):
+        combo = self.window.ticket_create_widget.priority_input
+        self.window.show_new_ticket()
+        self.wait_idle()
+        self.focus(combo)
+        combo.showPopup()
+        deadline = time.monotonic() + 5
+        while self.application.activePopupWidget() is None and time.monotonic() < deadline:
+            QTest.qWait(5)
+        popup = self.application.activePopupWidget()
+        self.assertIsNotNone(popup)
+        before = self.window.pages.currentWidget()
+        self.alt(popup, Qt.Key.Key_F)
+        self.assertIs(self.application.activePopupWidget(), popup)
+        self.assertFalse(self.window.utility_menu.isVisible())
+        self.assertIs(self.window.pages.currentWidget(), before)
+        self.alt(popup, Qt.Key.Key_S)
+        self.assertFalse(self.window.utility_menu.isVisible())
+        QTest.keyClick(popup, Qt.Key.Key_Escape)
+        self.application.processEvents()
+        self.assertIsNone(self.application.activePopupWidget())
+        self.assertIs(self.application.focusWidget(), combo)
+
+    def test_article_summary_and_mochi_modeless_dialog_keep_shell_shortcuts_local(self):
+        from f7hub.gui.new_article_dialog import NewArticleDialog
+        from Tests.GUI.test_knowledge_workspace import RecordingKnowledgeService
+        from Tests.GUI.test_mochi_controls import FakeGateway
+        from f7hub.services.mochi_service import MochiService
+        w = self.window
+        dialog = NewArticleDialog(RecordingKnowledgeService(), w.runner, w)
+        try:
+            dialog.show()
+            dialog.raise_()
+            dialog.activateWindow()
+            self.assertTrue(QTest.qWaitForWindowActive(dialog, 5000))
+            dialog.code_input.setFocus()
+            self.application.processEvents()
+            self.alt(dialog.code_input, Qt.Key.Key_S)
+            self.assertIs(self.application.focusWidget(), dialog.summary_input)
+            self.assertFalse(w.utility_menu.isVisible())
+        finally:
+            dialog.reject()
+            dialog.deleteLater()
+            self.application.processEvents()
+        w.mochi_service = MochiService(FakeGateway())
+        w.mochi_action.setEnabled(True)
+        w.mochi_action.trigger()
+        dialog = w._mochi_dialog
+        try:
+            dialog.raise_()
+            dialog.activateWindow()
+            self.assertTrue(QTest.qWaitForWindowActive(dialog, 5000))
+            control = dialog.findChild(QPushButton, "mochi_close")
+            self.assertIsNotNone(control)
+            control.setFocus()
+            self.application.processEvents()
+            self.alt(control, Qt.Key.Key_S)
+            self.assertFalse(w.utility_menu.isVisible())
+            self.alt(control, Qt.Key.Key_F)
+            self.assertIs(self.application.activeWindow(), dialog)
+            self.assertIs(w.pages.currentWidget(), w.workspace)
+        finally:
+            dialog.close()
+
+    def test_scoped_shortcut_owners_and_editor_save_dispatch_once(self):
+        w = self.window
+        shortcuts = w.findChildren(QShortcut)
+        for key in ("Alt+F", "Alt+S"):
+            owners = [s for s in shortcuts if s.key() == QKeySequence(key)]
+            self.assertEqual(len(owners), 1)
+            self.assertEqual(owners[0].context(), Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            self.assertFalse(owners[0].autoRepeat())
+        w.show_new_ticket()
+        editor = w.ticket_create_widget.subject_input
+        editor.setText("Synthetic Save")
+        self.focus(editor)
+        save = QSignalSpy(w.ticket_create_widget._save_shortcut.activated)
+        QTest.keyClick(editor, Qt.Key.Key_S, Qt.KeyboardModifier.ControlModifier)
+        self.wait_idle()
+        self.assertEqual(save.count(), 1)
+        self.assertFalse(w.utility_menu.isVisible())
 
 
 if __name__ == "__main__":

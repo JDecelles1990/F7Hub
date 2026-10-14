@@ -1,5 +1,15 @@
 # F7Hub GUI Design
 
+## GUI Shell S004 — menu and toolbar retirement (2026-10-14 candidate)
+
+The existing 52px rail is the sole primary navigation surface for Tickets, Knowledge Base, Scripts and Clipboard Center. MainWindow no longer constructs the redundant File/Settings menu bar or Tickets toolbar. The four rail buttons retain their shared QActions and guarded routes; native window controls, the status bar and workspace-local controls remain. Clipboard stays lazy and retained, including its Back to Tickets button.
+
+The Settings gear retains Mochi, Back up database and Exit and now contains **Knowledge Base tools → Guide**. The submenu uses the same MainWindow-owned Guide action as the KB header, independently of KnowledgeService availability, workspace construction or article loading. Missing Guide service disables Guide truthfully; busy/pending guards remain authoritative. The unavailable KB tooltip identifies the surviving gear fallback.
+
+**Alt+S** opens utilities. **Alt+F** focuses the selected enabled rail destination, then the first enabled destination in rail order, then the enabled gear when every destination is disabled. It never activates a route or discards drafts. Separate editor dialogs retain mnemonic priority; popups retain native input. Escape dismisses the root menu back to its invocation focus, returns from the tools submenu to its parent, or returns from Alt+F navigation focus to its still-valid workspace invocation control. Tab/Shift+Tab, Space/Return, accessible names, visible focus and current-workspace descriptions remain. Utility-popup lifetime temporarily suspends the two shell shortcuts to prevent another activation during native Alt dismissal.
+
+Ctrl+Q remains on the existing Exit action registered with MainWindow; keyboard, menu and native close retain pending-operation and draft confirmation protections. No service, worker, IPC, database or global hotkey contract changes. S001–S003 sections below preserve historical candidate evidence and access locations superseded here. See [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s004--menu-and-toolbar-retirement-candidate-2026-10-14) for exact validation and physical accessibility limits.
+
 ## GUI Shell S003 — Guide access (2026-10-14 candidate)
 
 The Knowledge Base header contains one keyboard-accessible **Guide** button. It uses the existing MainWindow `altF7HubGuideAction`, now labeled **Guide**, through `QToolButton.setDefaultAction`. **File → Knowledge Base tools → Guide** exposes the same action independently of KnowledgeService composition or successful article loading. Its direct File-menu and top-toolbar positions are removed. A KnowledgeWorkspace construction failure leaves the article action unavailable with explanatory feedback while the shell and Guide fallback remain available. There is no new Guide page, service or command.

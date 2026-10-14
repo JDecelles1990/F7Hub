@@ -5,7 +5,7 @@ from __future__ import annotations
 import sys
 import logging
 
-from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPainter, QPalette, QPen, QPixmap
+from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPainter, QPalette, QPen, QPixmap, QShortcut
 from PySide6.QtCore import QEvent, QPoint, QPointF, QSize, Qt, QTimer
 from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QMainWindow, QWidget, QStackedWidget, QMessageBox,
@@ -107,21 +107,17 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.pages)
         self.ticket_create_widget.ticket_created.connect(self._ticket_created)
 
-        file_menu = self.menuBar().addMenu("&File")
-        settings_menu = self.menuBar().addMenu('&Settings')
         self.mochi_action = QAction('Mochi…', self)
         self.mochi_action.setObjectName('mochiSettingsAction')
         self.mochi_action.setEnabled(mochi_service is not None)
         self.mochi_action.triggered.connect(self.show_mochi_settings)
-        settings_menu.addAction(self.mochi_action)
-        toolbar = self.addToolBar("Tickets")
         self.tickets_action = QAction("Tickets", self)
         self.tickets_action.triggered.connect(self.show_tickets)
         self.knowledge_action = QAction("Knowledge Base", self)
         self.knowledge_action.setEnabled(self.knowledge_workspace is not None)
         if self.knowledge_workspace is None:
             self.knowledge_action.setToolTip(
-                "Knowledge Base is unavailable. Use File → Knowledge Base tools → Guide "
+                "Knowledge Base is unavailable. Use Settings gear → Knowledge Base tools → Guide "
                 "for the reference guide.")
         self.knowledge_action.triggered.connect(self.show_knowledge)
         self.scripts_action = QAction("Scripts", self)
@@ -131,18 +127,10 @@ class MainWindow(QMainWindow):
         self.clipboard_action.setObjectName("clipboardCenterAction")
         self.clipboard_action.setData("clipboard.center")
         self.clipboard_action.triggered.connect(self.show_clipboard)
-        for action in (self.tickets_action, self.knowledge_action, self.scripts_action,
-                       self.clipboard_action):
-            file_menu.addAction(action)
-            toolbar.addAction(action)
         self.backup_action = QAction("Back up database", self)
-        self.knowledge_tools_menu = file_menu.addMenu("Knowledge Base tools")
-        self.knowledge_tools_menu.setObjectName("knowledgeBaseToolsMenu")
-        self.knowledge_tools_menu.addAction(self.altf7hub_action)
         self.backup_action.setObjectName("backupDatabaseAction")
         self.backup_action.setEnabled(self.backup_service is not None)
         self.backup_action.triggered.connect(self.back_up_database)
-        file_menu.addAction(self.backup_action)
         exit_action = QAction("E&xit", self)
         exit_action.setObjectName("exitAction")
         quit_shortcut = QKeySequence(QKeySequence.StandardKey.Quit)
@@ -150,7 +138,9 @@ class MainWindow(QMainWindow):
             quit_shortcut = QKeySequence("Ctrl+Q")
         exit_action.setShortcut(quit_shortcut)
         exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
+        # Parentage retains the command; association registers its shortcut
+        # independently of the utility menu's popup visibility.
+        self.addAction(exit_action)
         self.exit_action = exit_action
         self.runner.busy_changed.connect(self._set_busy)
         self.runner.completion_finished.connect(self._queue_rail_focus)
@@ -175,6 +165,7 @@ class MainWindow(QMainWindow):
         self.navigation_rail = QWidget(shell)
         self.navigation_rail.setObjectName("navigationRail")
         self.navigation_rail.setAccessibleName("Module navigation")
+        self.navigation_rail.setAccessibleDescription("Alt+F focuses navigation without changing workspace.")
         self.navigation_rail.setFixedWidth(52)
         rail_layout = QVBoxLayout(self.navigation_rail)
         rail_layout.setContentsMargins(4, 8, 4, 8)
@@ -189,6 +180,7 @@ class MainWindow(QMainWindow):
         self._rail_displaced_focus = None
         self._rail_pending_focus = None
         self._rail_queued_generation = None
+        self._navigation_return_focus = None
         for key, label, action in (
             ("tickets", "Tickets", self.tickets_action),
             ("knowledge", "Knowledge Base", self.knowledge_action),
@@ -202,7 +194,7 @@ class MainWindow(QMainWindow):
             button.setIcon(self._navigation_icon(key, QApplication.palette(), False))
             button.setIconSize(QSize(24, 24))
             button.setFixedSize(44, 44)
-            button.setToolTip(label)
+            button.setToolTip(action.toolTip() if key == "knowledge" and self.knowledge_workspace is None else label)
             button.setAccessibleName(label)
             # Mouse activation preserves the editor focus; Tab/Space remain native.
             button.setFocusPolicy(Qt.FocusPolicy.TabFocus)
@@ -212,7 +204,8 @@ class MainWindow(QMainWindow):
                 lambda b=button, k=key, title=label: (
                     b.setIcon(self._navigation_icon(k, QApplication.palette(),
                                                    bool(b.property("active")), b.underMouse())),
-                    b.setToolTip(title)))
+                    b.setToolTip(self.knowledge_action.toolTip()
+                                 if k == "knowledge" and self.knowledge_workspace is None else title)))
             button.pressed.connect(self._rail_action_started)
             button.triggered.connect(self._rail_action_finished)
             self.navigation_buttons[key] = button
@@ -222,6 +215,9 @@ class MainWindow(QMainWindow):
         self.utility_menu.setObjectName("settingsUtilityMenu")
         for action in (self.mochi_action, self.backup_action, self.exit_action):
             self.utility_menu.addAction(action)
+        self.knowledge_tools_menu = self.utility_menu.addMenu("Knowledge Base tools")
+        self.knowledge_tools_menu.setObjectName("knowledgeBaseToolsMenu")
+        self.knowledge_tools_menu.addAction(self.altf7hub_action)
         self.settings_button = QToolButton(self.navigation_rail)
         self.settings_button.setObjectName("settingsUtilityButton")
         self.settings_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
@@ -229,6 +225,7 @@ class MainWindow(QMainWindow):
         self.settings_button.setFixedSize(44, 44)
         self.settings_button.setToolTip("Settings and utilities")
         self.settings_button.setAccessibleName("Settings and utilities")
+        self.settings_button.setAccessibleDescription("Alt+S opens Settings and utilities.")
         self.settings_button.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         self.settings_button.installEventFilter(self)
         self.settings_button.clicked.connect(self._show_utility_menu)
@@ -256,6 +253,15 @@ class MainWindow(QMainWindow):
         self.pages.currentChanged.connect(self._sync_navigation_rail)
         QApplication.instance().focusChanged.connect(self._remember_workspace_focus)
         QApplication.instance().installEventFilter(self)
+        self._settings_shortcut = QShortcut(QKeySequence("Alt+S"), self)
+        self._navigation_shortcut = QShortcut(QKeySequence("Alt+F"), self)
+        for shortcut in (self._settings_shortcut, self._navigation_shortcut):
+            shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+            shortcut.setAutoRepeat(False)
+        self._settings_shortcut.activated.connect(self._show_utility_menu)
+        self._navigation_shortcut.activated.connect(self._focus_navigation)
+        self.utility_menu.aboutToShow.connect(self._suspend_shell_shortcuts)
+        self.utility_menu.aboutToHide.connect(self._resume_shell_shortcuts)
         self._sync_navigation_rail()
 
     def changeEvent(self, event):
@@ -266,6 +272,28 @@ class MainWindow(QMainWindow):
             self._refresh_navigation_palette()
 
     def eventFilter(self, watched, event):
+        if (event.type() == QEvent.Type.ShortcutOverride
+                and QApplication.activePopupWidget() is not None
+                and event.modifiers() == Qt.KeyboardModifier.AltModifier
+                and event.key() in (Qt.Key.Key_F, Qt.Key.Key_S)):
+            # Popups keep their native keyboard handling; Qt's child shortcut
+            # context otherwise includes them as an exception to window scope.
+            event.accept()
+            return True
+        if (event.type() == QEvent.Type.KeyPress and event.key() == Qt.Key.Key_Escape
+                and watched in (*getattr(self, "navigation_buttons", {}).values(),
+                                getattr(self, "settings_button", None))
+                and watched.hasFocus() and QApplication.activePopupWidget() is None
+                and self._navigation_return_focus is not None):
+            page, previous = self._navigation_return_focus
+            self._navigation_return_focus = None
+            try:
+                if (self.pages.currentWidget() is page and previous.isVisible()
+                        and previous.isEnabled() and previous.window() is self):
+                    previous.setFocus(Qt.FocusReason.OtherFocusReason)
+                    return True
+            except RuntimeError:
+                pass  # The invoking control was destroyed; no stale focus.
         if (watched is getattr(self, "settings_button", None)
                 and event.type() == QEvent.Type.KeyPress and watched.hasFocus()
                 and event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter)):
@@ -310,6 +338,8 @@ class MainWindow(QMainWindow):
         return super().eventFilter(watched, event)
 
     def _show_utility_menu(self):
+        if QApplication.activePopupWidget() is not None or QApplication.activeModalWidget() is not None:
+            return
         anchor = self.settings_button.mapToGlobal(QPoint(self.settings_button.width(), 0))
         available = self.settings_button.screen().availableGeometry()
         size = self.utility_menu.sizeHint()
@@ -318,6 +348,40 @@ class MainWindow(QMainWindow):
             max(available.top(), min(anchor.y(), available.bottom() - size.height() + 1)),
         )
         self.utility_menu.popup(position)
+
+    def _suspend_shell_shortcuts(self):
+        for shortcut in (self._settings_shortcut, self._navigation_shortcut):
+            shortcut.setEnabled(False)
+
+    def _resume_shell_shortcuts(self):
+        # Native Alt can dismiss a popup before completing its key sequence.
+        # Re-enable on the next event turn, never within that same dispatch.
+        QTimer.singleShot(0, self, self._enable_shell_shortcuts)
+
+    def _enable_shell_shortcuts(self):
+        if not self.utility_menu.isVisible():
+            for shortcut in (self._settings_shortcut, self._navigation_shortcut):
+                shortcut.setEnabled(True)
+
+    def _focus_navigation(self):
+        """Move focus only; shared actions remain the routing authority."""
+        if QApplication.activePopupWidget() is not None or QApplication.activeModalWidget() is not None:
+            return
+        self._rail_pending_focus = None
+        self._rail_generation += 1
+        buttons = tuple(self.navigation_buttons.values())
+        eligible = lambda button: button.isVisible() and button.isEnabled()
+        target = next((button for button in buttons
+                       if button.property("active") and eligible(button)), None)
+        if target is None:
+            target = next((button for button in buttons if eligible(button)), None)
+        if target is None and eligible(self.settings_button):
+            target = self.settings_button
+        if target is not None:
+            previous = self.focusWidget()
+            if previous is not None and self.pages.currentWidget().isAncestorOf(previous):
+                self._navigation_return_focus = (self.pages.currentWidget(), previous)
+            target.setFocus(Qt.FocusReason.ShortcutFocusReason)
 
     def _refresh_navigation_palette(self):
         """Use the effective Qt palette, including runtime system/app changes."""
@@ -497,6 +561,8 @@ class MainWindow(QMainWindow):
             button.update()
 
     def _remember_workspace_focus(self, _old, new):
+        if new not in (*self.navigation_buttons.values(), self.settings_button):
+            self._navigation_return_focus = None
         if _old is self._rail_keyboard_button and new is not _old:
             self._rail_focus_displaced = True
             self._rail_displaced_focus = new
