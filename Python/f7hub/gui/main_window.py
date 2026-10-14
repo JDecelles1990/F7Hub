@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPainter, QPen, QPixmap
-from PySide6.QtCore import QPointF, QSize, Qt, QTimer
+from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPainter, QPalette, QPen, QPixmap
+from PySide6.QtCore import QEvent, QPointF, QSize, Qt, QTimer
 from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QMainWindow, QWidget, QStackedWidget, QMessageBox,
     QFrame, QScrollArea, QToolButton, QVBoxLayout,
@@ -176,35 +176,26 @@ class MainWindow(QMainWindow):
             button.setObjectName(key + "NavigationButton")
             button.setDefaultAction(action)
             button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
-            icon = self._navigation_icon(key)
-            button.setIcon(icon)
+            button.setIcon(self._navigation_icon(key, QApplication.palette(), False))
             button.setIconSize(QSize(24, 24))
             button.setFixedSize(44, 44)
             button.setToolTip(label)
             button.setAccessibleName(label)
             # Mouse activation preserves the editor focus; Tab/Space remain native.
             button.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+            button.installEventFilter(self)
             # Action changes also refresh QToolButton's icon/tooltip from QAction.
             action.changed.connect(
-                lambda b=button, i=icon, title=label: (b.setIcon(i), b.setToolTip(title)))
+                lambda b=button, k=key, title=label: (
+                    b.setIcon(self._navigation_icon(k, QApplication.palette(),
+                                                   bool(b.property("active")), b.underMouse())),
+                    b.setToolTip(title)))
             button.pressed.connect(self._rail_action_started)
             button.triggered.connect(self._rail_action_finished)
             self.navigation_buttons[key] = button
             rail_layout.addWidget(button)
         rail_layout.addStretch()
-        self.navigation_rail.setStyleSheet("""
-            QWidget#navigationRail { background: #202733; }
-            QWidget#navigationRail QToolButton {
-                background: transparent; border: 2px solid transparent;
-                border-radius: 5px;
-            }
-            QWidget#navigationRail QToolButton:hover:enabled { background: #343f50; }
-            QWidget#navigationRail QToolButton[active="true"] {
-                background: #294d65; border-left-color: #74dcff;
-            }
-            QWidget#navigationRail QToolButton:focus { border: 2px solid #74dcff; }
-            QWidget#navigationRail QToolButton:disabled { background: transparent; }
-        """)
+        self._refresh_navigation_palette()
         layout.addWidget(self.navigation_rail)
         # Existing forms retain their measured minimum sizes. Overflow scrolls
         # inside the shell instead of widening compact windows or hiding controls.
@@ -219,19 +210,133 @@ class MainWindow(QMainWindow):
         QApplication.instance().focusChanged.connect(self._remember_workspace_focus)
         self._sync_navigation_rail()
 
+    def changeEvent(self, event):
+        super().changeEvent(event)
+        if (event.type() in (QEvent.Type.ApplicationPaletteChange,
+                             QEvent.Type.PaletteChange, QEvent.Type.StyleChange)
+                and hasattr(self, "navigation_rail") and not getattr(self, "_updating_navigation_palette", False)):
+            self._refresh_navigation_palette()
+
+    def eventFilter(self, watched, event):
+        if (isinstance(watched, QToolButton)
+                and watched in getattr(self, "navigation_buttons", {}).values()
+                and event.type() in (QEvent.Type.Enter, QEvent.Type.Leave)):
+            # Styles may request Normal even on hover (non-auto-raised buttons).
+            # Choose the foreground from the actual background, not icon mode.
+            key = next(key for key, button in self.navigation_buttons.items() if button is watched)
+            watched.setIcon(self._navigation_icon(
+                key, QApplication.palette(), bool(watched.property("active")),
+                event.type() == QEvent.Type.Enter))
+        return super().eventFilter(watched, event)
+
+    def _refresh_navigation_palette(self):
+        """Use the effective Qt palette, including runtime system/app changes."""
+        self._updating_navigation_palette = True
+        try:
+            palette = QApplication.palette()
+            color = lambda group, role: palette.color(group, role).name()
+            active = QPalette.ColorGroup.Active
+            role = QPalette.ColorRole
+            # Keep the adopted rail only for the verified stock Windows dark
+            # palette. Any other system/application palette uses its own roles.
+            stock_dark = self._navigation_uses_stock_dark(palette)
+            background = "#202733" if stock_dark else color(active, role.Window)
+            hover = "#343f50" if stock_dark else color(active, role.Button)
+            selection = "#294d65" if stock_dark else color(active, role.Highlight)
+            indicator = "#74dcff" if stock_dark else color(active, role.WindowText)
+            hover_indicator = "#74dcff" if stock_dark else color(active, role.ButtonText)
+            selected_indicator = "#74dcff" if stock_dark else color(active, role.HighlightedText)
+            self.navigation_rail.setStyleSheet(f"""
+                QWidget#navigationRail {{ background: {background}; }}
+                QWidget#navigationRail QToolButton {{
+                    background: transparent; border: 2px solid transparent;
+                    border-radius: 5px;
+                }}
+                QWidget#navigationRail QToolButton:hover:enabled {{
+                    background: {hover};
+                }}
+                QWidget#navigationRail QToolButton[active="true"],
+                QWidget#navigationRail QToolButton[active="true"]:hover:enabled {{
+                    background: {selection};
+                    border-left-color: {selected_indicator};
+                }}
+                QWidget#navigationRail QToolButton:focus {{
+                    border: 2px dashed {indicator};
+                }}
+                QWidget#navigationRail QToolButton:hover:focus:enabled {{
+                    border: 2px dashed {hover_indicator};
+                }}
+                QWidget#navigationRail QToolButton[active="true"]:focus,
+                QWidget#navigationRail QToolButton[active="true"]:hover:focus:enabled {{
+                    border: 2px dashed {selected_indicator};
+                    border-left: 2px solid {selected_indicator};
+                }}
+                QWidget#navigationRail QToolButton:disabled {{
+                    background: transparent; border-color: transparent;
+                }}
+            """)
+            for key, button in self.navigation_buttons.items():
+                button.setIcon(self._navigation_icon(key, palette, bool(button.property("active")),
+                                                     button.underMouse()))
+        finally:
+            self._updating_navigation_palette = False
+
     @staticmethod
-    def _navigation_icon(key):
+    def _navigation_uses_stock_dark(palette):
+        return tuple(palette.color(QPalette.ColorGroup.Active, role).name() for role in (
+            QPalette.ColorRole.Window, QPalette.ColorRole.WindowText,
+            QPalette.ColorRole.Button, QPalette.ColorRole.Highlight,
+        )) == ("#1e1e1e", "#ffffff", "#3c3c3c", "#0078d4")
+
+    @staticmethod
+    def _navigation_icon(key, palette, selected, hovered=False):
         """Original outline artwork, rasterized at multiple sizes for Qt DPI selection."""
         icon = QIcon()
-        for mode, color in ((QIcon.Mode.Normal, "#d6deeb"),
-                            (QIcon.Mode.Disabled, "#8792a5")):
+        foreground = palette.color(
+            QPalette.ColorGroup.Active,
+            QPalette.ColorRole.HighlightedText if selected else
+            QPalette.ColorRole.ButtonText if hovered else QPalette.ColorRole.WindowText)
+        background = (QColor("#202733") if MainWindow._navigation_uses_stock_dark(palette)
+                      else palette.color(QPalette.ColorGroup.Active, QPalette.ColorRole.Window))
+        disabled = palette.color(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText)
+
+        def luminance(color):
+            return sum(weight * (value / 12.92 if value <= .04045 else
+                                 ((value + .055) / 1.055) ** 2.4)
+                       for value, weight in zip((color.redF(), color.greenF(), color.blueF()),
+                                                (.2126, .7152, .0722)))
+
+        def contrast(color):
+            low, high = sorted((luminance(color), luminance(background)))
+            return (high + .05) / (low + .05)
+
+        # Some stock palettes make Disabled WindowText too faint for an icon.
+        # Keep it when discernible; otherwise move toward its paired foreground,
+        # retaining a muted color for as long as the rendered contrast allows.
+        if contrast(disabled) < 3:
+            target = palette.color(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText)
+            source = disabled
+            for fraction in (.2, .4, .6, .8, 1):
+                disabled = QColor.fromRgbF(*(
+                    start + (end - start) * fraction for start, end in zip(
+                        (source.redF(), source.greenF(), source.blueF()),
+                        (target.redF(), target.greenF(), target.blueF()))))
+                if contrast(disabled) >= 3:
+                    break
+        # Explicit modes prevent Qt from synthesizing a palette-incompatible tint.
+        for mode, color in (
+            (QIcon.Mode.Normal, foreground),
+            (QIcon.Mode.Active, foreground),
+            (QIcon.Mode.Selected, foreground),
+            (QIcon.Mode.Disabled, disabled),
+        ):
             for size in (24, 48, 72, 96):
                 pixmap = QPixmap(size, size)
                 pixmap.fill(Qt.GlobalColor.transparent)
                 painter = QPainter(pixmap)
                 painter.setRenderHint(QPainter.RenderHint.Antialiasing)
                 painter.scale(size / 24, size / 24)
-                painter.setPen(QPen(QColor(color), 1.8, Qt.PenStyle.SolidLine,
+                painter.setPen(QPen(color, 1.8, Qt.PenStyle.SolidLine,
                                     Qt.PenCapStyle.RoundCap, Qt.PenJoinStyle.RoundJoin))
                 if key == "tickets":
                     painter.drawRoundedRect(3, 5, 18, 14, 2, 2)
@@ -258,7 +363,8 @@ class MainWindow(QMainWindow):
                     painter.drawLine(9, 11, 15, 11)
                     painter.drawLine(9, 15, 15, 15)
                 painter.end()
-                icon.addPixmap(pixmap, mode)
+                for state in (QIcon.State.Off, QIcon.State.On):
+                    icon.addPixmap(pixmap, mode, state)
         return icon
 
     def _sync_navigation_rail(self, _index=None):
@@ -276,6 +382,7 @@ class MainWindow(QMainWindow):
             button = self.navigation_buttons[key]
             active = page is not None and current is page
             button.setProperty("active", active)
+            button.setIcon(self._navigation_icon(key, QApplication.palette(), active, button.underMouse()))
             button.setAccessibleDescription("Current workspace" if active else "")
             button.style().unpolish(button)
             button.style().polish(button)

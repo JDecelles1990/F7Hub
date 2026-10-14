@@ -6,13 +6,15 @@ from types import SimpleNamespace
 import threading
 import time
 import unittest
+from collections import Counter
 from unittest.mock import patch
 
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtWidgets import QApplication, QMessageBox, QToolBar, QToolButton, QLabel
 from PySide6.QtTest import QTest
-from PySide6.QtCore import QPoint, QTimer, Qt
+from PySide6.QtCore import QEvent, QPoint, QTimer, Qt
+from PySide6.QtGui import QColor, QIcon, QPalette
 
 from f7hub.gui.main_window import MainWindow
 from f7hub.services.ticket_service import TicketService
@@ -118,6 +120,74 @@ class MainWindowTests(unittest.TestCase):
         self.window.close()
         self.window.deleteLater()
         self.application.processEvents()
+
+    @staticmethod
+    def _icon_colors(button, mode=QIcon.Mode.Normal):
+        image = button.icon().pixmap(24, 24, mode).toImage()
+        return {image.pixelColor(x, y).name() for y in range(image.height())
+                for x in range(image.width()) if image.pixelColor(x, y).alpha() == 255}
+
+    def test_navigation_rail_uses_effective_palette_at_creation_and_runtime(self):
+        original = QPalette(self.application.palette())
+        try:
+            for background, foreground, hover, highlight, selected in (
+                ("#000000", "#ffff00", "#008800", "#ff00ff", "#000000"),
+                ("#ffffff", "#000080", "#dddddd", "#0000aa", "#ffffff"),
+            ):
+                palette = QPalette(original)
+                palette.setColor(QPalette.ColorRole.Window, QColor(background))
+                palette.setColor(QPalette.ColorRole.WindowText, QColor(foreground))
+                palette.setColor(QPalette.ColorRole.Button, QColor(hover))
+                palette.setColor(QPalette.ColorRole.ButtonText, QColor(foreground))
+                palette.setColor(QPalette.ColorRole.Highlight, QColor(highlight))
+                palette.setColor(QPalette.ColorRole.HighlightedText, QColor(selected))
+                palette.setColor(QPalette.ColorGroup.Disabled,
+                                 QPalette.ColorRole.WindowText, QColor("#777777"))
+                self.application.setPalette(palette)
+                self.application.processEvents()
+                rail = self.window.navigation_rail
+                tickets = self.window.navigation_buttons["tickets"]
+                scripts = self.window.navigation_buttons["scripts"]
+                self.assertIn(f"background: {background}", rail.styleSheet())
+                self.assertIn(f"background: {hover}", rail.styleSheet())
+                self.assertIn(f"background: {highlight}", rail.styleSheet())
+                self.assertIn(f"border: 2px dashed {foreground}", rail.styleSheet())
+                self.assertTrue(tickets.property("active"))
+                self.assertIn(selected, self._icon_colors(tickets))
+                self.assertIn(foreground, self._icon_colors(self.window.navigation_buttons["clipboard"]))
+                self.assertIn("#777777", self._icon_colors(scripts, QIcon.Mode.Disabled))
+                self.assertEqual(tickets.grab().toImage().pixelColor(38, 22).name(), highlight)
+                self.window.scripts_action.setEnabled(False)
+                self.application.processEvents()
+                self.assertFalse(scripts.isEnabled())
+                self.assertIn("#777777", self._icon_colors(scripts, QIcon.Mode.Disabled))
+                self.window.scripts_action.setEnabled(True)
+                tickets.setFocus()
+                self.application.processEvents()
+                self.assertTrue(tickets.hasFocus())
+                QTest.mouseMove(tickets, QPoint(12, 12))
+                self.application.processEvents()
+                self.assertEqual(tickets.grab().toImage().pixelColor(1, 22).name(), selected)
+                clipboard = self.window.navigation_buttons["clipboard"]
+                QTest.mouseMove(clipboard, QPoint(12, 12))
+                self.application.processEvents()
+                if self.application.platformName() == "offscreen":
+                    self.assertTrue(clipboard.underMouse())
+                    self.assertEqual(clipboard.grab().toImage().pixelColor(38, 22).name(), hover)
+
+            alternate = MainWindow(RecordingTicketService())
+            try:
+                alternate.show()
+                self.application.processEvents()
+                self.assertIn("#ffffff", alternate.navigation_rail.styleSheet())
+                self.assertIn("#ffffff", self._icon_colors(alternate.navigation_buttons["tickets"]))
+            finally:
+                alternate.close()
+                alternate.deleteLater()
+                self.application.processEvents()
+        finally:
+            self.application.setPalette(original)
+            self.application.processEvents()
 
     def test_window_hosts_ticket_form_and_application_chrome(self) -> None:
         self.assertEqual(self.window.windowTitle(), "F7Hub")
@@ -980,6 +1050,167 @@ class NavigationRailTests(unittest.TestCase):
         QTest.qWait(20)
         self.assertEqual(self.scroll_values(), later)
         self.active("scripts")
+
+
+class NavigationRenderingTests(unittest.TestCase):
+    """Measure actual button glyphs and focus edges across paired palette roles."""
+
+    setUpClass = classmethod(MainWindowTests.setUpClass.__func__)
+    setUp = MainWindowTests.setUp
+    tearDown = MainWindowTests.tearDown
+    wait_idle = MainWindowTests.wait_idle
+
+    @staticmethod
+    def contrast(first, second):
+        def luminance(color):
+            channels = (color.redF(), color.greenF(), color.blueF())
+            return sum(weight * (value / 12.92 if value <= .04045 else
+                                ((value + .055) / 1.055) ** 2.4)
+                       for value, weight in zip(channels, (.2126, .7152, .0722)))
+        low, high = sorted((luminance(first), luminance(second)))
+        return (high + .05) / (low + .05)
+
+    def palettes(self, original):
+        yield "original", original
+        for name, values in (
+            ("split-role", ("#000000", "#ffffff", "#ffffff", "#000000", "#ffffff", "#000000")),
+            ("yellow-magenta", ("#000000", "#ffff00", "#008800", "#ffff00", "#ff00ff", "#000000")),
+            ("navy-white", ("#ffffff", "#000080", "#dddddd", "#000080", "#0000aa", "#ffffff")),
+        ):
+            palette = QPalette(original)
+            for role, color in zip((QPalette.ColorRole.Window, QPalette.ColorRole.WindowText,
+                                    QPalette.ColorRole.Button, QPalette.ColorRole.ButtonText,
+                                    QPalette.ColorRole.Highlight, QPalette.ColorRole.HighlightedText), values):
+                palette.setColor(role, QColor(color))
+            palette.setColor(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText, QColor("#777777"))
+            yield name, palette
+
+    def hover(self, button, enabled):
+        # QTest delivers real Qt Enter/Leave on native and offscreen platforms.
+        # Move away first: a stationary OS cursor need not generate another Enter.
+        QTest.mouseMove(self.window, QPoint(500, 20))
+        QTest.qWait(20)
+        if enabled:
+            QTest.mouseMove(button, QPoint(12, 12))
+            QTest.qWait(20)
+        if button.underMouse() != enabled:
+            # Deterministic Qt event injection for a noninteractive native desktop.
+            QApplication.sendEvent(button, QEvent(QEvent.Type.Enter if enabled else QEvent.Type.Leave))
+            self.application.processEvents()
+        self.assertEqual(button.underMouse(), enabled)
+
+    def capture(self, name, button, minimum_pixels=60):
+        self.application.processEvents()
+        # Capture through the parent so transparent normal/disabled controls
+        # include the actual rail fill rather than transparent black pixels.
+        window_image = self.window.grab().toImage()
+        dpr = window_image.devicePixelRatio()
+        origin = button.mapTo(self.window, QPoint(0, 0))
+        image = window_image.copy(round(origin.x()*dpr), round(origin.y()*dpr),
+                                  round(button.width()*dpr), round(button.height()*dpr))
+        # Use a whole clear strip to establish the rendered fill, and a full
+        # glyph region to include antialiased strokes at every supported DPR.
+        backgrounds = Counter(image.pixelColor(x, y).rgba()
+                              for y in range(round(10*dpr), round(34*dpr))
+                              for x in range(round(35*dpr), round(39*dpr)))
+        background = QColor.fromRgba(backgrounds.most_common(1)[0][0])
+        visible = sum(self.contrast(image.pixelColor(x, y), background) >= 3
+                      for y in range(round(10*dpr), round(34*dpr))
+                      for x in range(round(10*dpr), round(34*dpr)))
+        metrics = dict(name=name, background=background.name(), glyph_pixels=visible, dpr=dpr)
+        self.assertGreaterEqual(visible, minimum_pixels*dpr*dpr, metrics)
+        return image, background, metrics
+
+    def test_rendered_focus_is_distinct_from_selection_with_and_without_hover(self):
+        original = QPalette(self.application.palette())
+        try:
+            self.window.activateWindow()
+            self.application.processEvents()
+            for name, palette in self.palettes(original):
+                self.application.setPalette(palette)
+                self.application.processEvents()
+                for key in ("tickets", "clipboard"):
+                    button = self.window.navigation_buttons[key]
+                    for hovered in (False, True):
+                        with self.subTest(palette=name, key=key, hover=hovered):
+                            self.hover(button, hovered)
+                            button.clearFocus()
+                            before, background, _ = self.capture(f"{name}-{key}-{hovered}-unfocused", button)
+                            button.setFocus(Qt.FocusReason.TabFocusReason)
+                            self.application.processEvents()
+                            self.assertTrue(button.hasFocus())
+                            after, _, _ = self.capture(f"{name}-{key}-{hovered}-focused", button)
+                            dpr = after.devicePixelRatio()
+                            # Three perimeter bands exclude the solid left selection
+                            # marker. Focus must add visible pixels elsewhere.
+                            edge = [(x, y) for y in range(after.height()) for x in range(after.width())
+                                    if ((6*dpr <= x < 38*dpr and (y < 3*dpr or y >= 41*dpr))
+                                        or (x >= 41*dpr and 6*dpr <= y < 38*dpr))]
+                            visible_changes = sum(before.pixelColor(x, y) != after.pixelColor(x, y)
+                                                  and self.contrast(after.pixelColor(x, y), background) >= 3
+                                                  for x, y in edge)
+                            self.assertGreaterEqual(visible_changes, 40*dpr*dpr,
+                                                    (name, key, hovered, visible_changes))
+                            # The solid selection marker survives while focus adds
+                            # a distinct dashed indicator on the other three sides.
+                            if key == "tickets":
+                                marker = sum(self.contrast(after.pixelColor(x, y), background) >= 3
+                                             for x in range(round(2*dpr))
+                                             for y in range(round(8*dpr), round(36*dpr)))
+                                self.assertGreaterEqual(marker, 40*dpr*dpr)
+                            button.clearFocus()
+        finally:
+            self.application.setPalette(original)
+            self.application.processEvents()
+
+    def test_rendered_hover_disabled_icon_modes_and_runtime_palette_return(self):
+        original = QPalette(self.application.palette())
+        clipboard = self.window.navigation_buttons["clipboard"]
+        tickets = self.window.navigation_buttons["tickets"]
+        scripts = self.window.navigation_buttons["scripts"]
+        try:
+            self.hover(clipboard, False)
+            clipboard.clearFocus()
+            initial, _, _ = self.capture("original-before", clipboard)
+            for name, palette in self.palettes(original):
+                self.application.setPalette(palette)
+                self.application.processEvents()
+                for key in ("tickets", "clipboard"):
+                    button = self.window.navigation_buttons[key]
+                    for hovered in (False, True):
+                        with self.subTest(palette=name, key=key, hover=hovered):
+                            self.hover(button, hovered)
+                            _, background, _ = self.capture(f"{name}-{key}-{hovered}-icon", button)
+                            for mode in (QIcon.Mode.Normal, QIcon.Mode.Active, QIcon.Mode.Selected):
+                                for state in (QIcon.State.Off, QIcon.State.On):
+                                    image = button.icon().pixmap(24, 24, mode, state).toImage()
+                                    visible = sum(image.pixelColor(x, y).alpha() >= 200
+                                                  and self.contrast(image.pixelColor(x, y), background) >= 3
+                                                  for y in range(image.height()) for x in range(image.width()))
+                                    self.assertGreaterEqual(visible, 60, (name, key, hovered, mode, state))
+                            # QAction icon refresh must retain the hovered/selected
+                            # foreground rather than reverting to Normal artwork.
+                            button.defaultAction().setIcon(tickets.icon())
+                            self.capture(f"{name}-{key}-{hovered}-action-refresh", button)
+                self.window.scripts_action.setEnabled(False)
+                self.hover(scripts, False)
+                # The Scripts chevrons are sparser than the rectangular icons.
+                _, background, _ = self.capture(f"{name}-disabled", scripts, minimum_pixels=32)
+                image = scripts.icon().pixmap(24, 24, QIcon.Mode.Disabled).toImage()
+                self.assertGreaterEqual(sum(image.pixelColor(x, y).alpha() >= 200
+                                            and self.contrast(image.pixelColor(x, y), background) >= 3
+                                            for y in range(24) for x in range(24)), 32)
+                self.window.scripts_action.setEnabled(True)
+            self.application.setPalette(original)
+            self.application.processEvents()
+            self.hover(clipboard, False)
+            clipboard.clearFocus()
+            restored, _, _ = self.capture("original-restored", clipboard)
+            self.assertEqual(initial, restored)
+        finally:
+            self.window.scripts_action.setEnabled(True)
+            self.application.setPalette(original)
+            self.application.processEvents()
 
 
 if __name__ == "__main__":
