@@ -2,6 +2,11 @@
 # AHK ↔ Python Clipboard Capture, IPC & Quick HUD Architecture Planning Instructions
 Existing AHK/hotkey/AltF7Hub integration inventory; manual capture semantics; Clipboard snapshot behavior; source process/window metadata; privacy policy; hotkey ownership and conflicts; AHK/Python responsibility matrix; actual IPC transport recommendation; authentication; endpoint discovery; timeout/retry policy; transport idempotency vs content deduplication; F7Hub-running/not-running behavior; Quick HUD states; HUD action routing; native Windows validation; explicit loop/retry guard.
 
+> Current contract: [Phase 1 successor](#phase-1-current-contract-2026-10-14).
+> Earlier dated planning instructions and reports retain their historical scope;
+> use the successor for current availability, approved decisions and execution gates.
+
+
 ## Retry and Loop Safety Contract
 
 Every retrying operation must define:
@@ -4402,3 +4407,107 @@ database suites are NOT RUN because CP-00 changes documentation only. No
 operational database validity claim. Remaining acquisition races, native layout/
 AltGr/RDP/app collisions, metadata policy and secure profile delivery remain
 explicit later validation gates. Stop at READY_FOR_REVIEW; no integration or CP-01.
+
+---
+
+# Phase 1 Current Contract (2026-10-14)
+
+## Current owner decisions and runtime boundary
+
+Documentation reconciliation candidate: READY_FOR_REVIEW; no Phase 2 approval
+or implementation authority. FACT baseline:
+`48d0fbcbbe0f26d8ad533113eb075605b249a806`. Consume
+[1A current lifecycle](1A_Clipboard_Domain_Data_Lifecycle.md#phase-1-current-contract-2026-10-14),
+[1C current presentation/handoff](1C_PySide6_Clipboard_Center.md#phase-1-current-contract-2026-10-14),
+and [RT-R01](AGENTS.md#rt-r01--failure-circuit-breaker).
+The earlier execution report is historical, including Win+Alt recommendations,
+no-selection-copy and coarse-only source policy. The approved
+[CP-00 successor](#cp-00-current-reconciliation) governs those changed choices.
+1B owns native effects, hotkey behavior, capture transport and Quick HUD; 0A/0B
+retain technology/trust and global grammar/version ownership. No replacement
+database, service, protocol, Settings store or resident bridge is introduced.
+
+| Intent | Approved effect | Availability at this baseline |
+| --- | --- | --- |
+| `clipboard.capture_selection` | Explicit future Ctrl+Alt+C; one native Ctrl+C, fresh update, bounded eligible snapshot, 1A admission | APPROVED_NOT_IMPLEMENTED; no production binding |
+| `clipboard.capture_current` | Explicit fresh read of existing Windows Clipboard; no Ctrl+C; separate 1A capture admission | APPROVED_NOT_IMPLEMENTED; no extra global binding selected |
+| `clipboard.paste_active` | Explicit future Ctrl+Alt+V; exact armed Item/revision, Python authorization, AHK write then one native Ctrl+V | APPROVED_NOT_IMPLEMENTED; no production binding |
+| Explicit outbound full Item / normalized / Entity-value copy | Typed intent → Python resolution/approved transform/revalidation/authorization → authenticated bridge → AHK writes supplied text unchanged | APPROVED_NOT_IMPLEMENTED; unavailable without bridge, no Qt fallback |
+| Proposed Windows view opening / Refresh | One privacy-admitted current snapshot for viewing only; no capture admission or persistence | PROPOSED_REQUIRES_APPROVAL; native prerequisites missing |
+| Ordinary Ctrl+C within a standard text widget | Native copy of manually selected displayed text under presentation privacy rules | Existing narrow editing behavior; does not invoke a Clipboard-domain action |
+
+The outbound rule is [CP00-02](1C_PySide6_Clipboard_Center.md#cp00-02-successor-clipboard-subsystem-windows-writes).
+It covers Clipboard-owned commands. Scripts' existing service-verified Qt copy
+remains a separate owning-module action. Copy, capture, snapshot viewing and
+paste do not grant semantic acceptance, canonical identity or execution rights.
+Active Paste is explicit session-only Item/revision state, independent of row
+selection and Settings, with visible Set/Clear, no 15-minute arming timer and no
+hidden reusable raw cache. Paste leaves authorized text on Windows Clipboard;
+write success and input failure/unconfirmed insertion remain distinct outcomes.
+
+## CP-01 is verified dormant infrastructure
+
+FACT: [ClipboardHotkeyPolicy](../../../AutoHotkey/Helpers/ClipboardHotkeyPolicy.ahk)
+and [ClipboardPressCycleController](../../../AutoHotkey/Hotkeys/ClipboardPressCycleController.ahk)
+are delivered dormant primitives, IMPLEMENTED_AND_VERIFIED for the reviewed
+policy/fixture scope. CP-01 is CLOSED; its native fixture and later diagnostic
+results are historical evidence, not production capture/paste validation. The
+historical WINWORD2 failure remains FAIL with root cause NOT VERIFIED despite
+later successful native attempts.
+
+Exact case-insensitive exclusions remain WINWORD.EXE, EXCEL.EXE, OUTLOOK.EXE,
+OLK.EXE and POWERPNT.EXE, in separate action maps. Prefix/suffix lookalikes remain
+allowed; unknown/malformed foreground identity fails closed. Bind the physical
+press cycle and original target, recheck before effect, never refocus a substitute
+target or rearm while keys are held. F7/Alt+F7 remain independent. The production
+[shared host](../../../AutoHotkey/F7Hub.ahk) neither includes these primitives nor
+registers Ctrl+Alt+C/V. Preference storage does not change that fact.
+
+## Safe Windows snapshot prerequisites and unavailable state
+
+FACT from the tracked source/bootstrap/migration inventory: no production
+Clipboard native snapshot worker, privacy preflight/admission pipeline,
+authenticated Clipboard inbound/outbound bridge, receipt service, Active Paste
+controller or Quick HUD is composed. Existing guide show/focus and Mochi cosmetic
+channels are not sensitive-content channels. Title/executable names, same-user
+access, valid JSON or a documented Named Pipe do not establish authentication.
+The approved 1B application-owned authenticated Named Pipe architecture is
+APPROVED_NOT_IMPLEMENTED. Delivery of the proposed Windows view's native read
+is BLOCKED by these missing prerequisites; Phase 1 static reconciliation is not.
+
+Before real snapshot presentation, separately approved Capture/IPC delivery must
+establish the relevant existing 1B seams: verified application/host ownership and
+singleton/enrollment/discovery lifecycle; reciprocal live peer authentication;
+closed bounded 0B-compatible operation/result profiles; a fixed AHK native worker
+with private handoff, Unicode/format/byte limits, stable acquisition and external
+deadline/owned cleanup; producer credential preflight and Python authoritative
+privacy admission; and an application-service read-only snapshot projection.
+The viewing profile must be separately reviewed and express zero domain writes;
+do not reuse `clipboard.capture` with side effects or invent its wire spelling,
+new endpoint or arbitrary native-input RPC in this reconciliation.
+
+Reuse the approved worker/transport boundaries and 64-KiB content/128-KiB complete
+document ceilings; measure format/escaped sizes and review the snapshot response
+budget rather than assuming the 16-KiB HUD-result budget carries full source.
+No in-widget Qt Clipboard/Win32 call, GUI-to-AHK shortcut, unauthenticated fallback,
+file spool, operational database fixture, elevation or host restart is a remedy.
+Known/suspected secrets and failed/incomplete privacy assessment expose no raw
+snapshot. Empty, unsupported, too large, locked, unstable, timed out, denied and
+unavailable states remain distinguishable, generic and free of raw logs/titles.
+Viewing needs no durable capture writer or history enablement; history opt-in
+must not be repurposed as consent to save the view.
+
+Until these prerequisites pass their independent contract/security and
+WINDOWS_NATIVE gates, 1C may show a reachable unavailable explanation with
+Refresh disabled. Do not report successful empty Clipboard or offer working
+Capture/Copy/Paste buttons. A later explicit Capture Current uses fresh native
+acquisition plus complete 1A admission/receipt prerequisites in a separate slice.
+Keep unknown dispatched effects unconfirmed and reconcile authoritative state;
+no automatic repeat of copy/write/paste or false cancellation after completion.
+
+The earlier two-failure validation threshold is historical. Current agent
+execution follows RT-R01 after the first failed, timed-out, hung, inconclusive or
+uncertain-cleanup run. This rule does not redesign separately approved bounded
+product lock/readiness protocols; it prevents unchanged harness re-execution.
+No runtime, native capture, AHK, IPC, GUI, PowerShell or database test is run for
+this documentation-only delta; source inspection establishes availability only.

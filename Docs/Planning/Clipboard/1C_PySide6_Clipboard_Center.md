@@ -2,6 +2,11 @@
 # PySide6 Clipboard Center Architecture Planning Instructions
 Existing MainWindow/workspace/navigation conventions; reusable Qt components; Clipboard Center shell integration; internal views; query semantics; search/filter model; list/read models; table columns; pagination; Inspector architecture; Entities, Tags, Capture History, Relationships, Retention/Privacy and Actions tabs; deep links; keyboard/accessibility; async loading; stale-result handling; error/empty states; large-dataset strategy; responsive layout; future Mochi-sidebar coexistence; vertical-slice implementation decomposition.
 
+> Current contract: [Phase 1 successor](#phase-1-current-contract-2026-10-14).
+> Earlier dated planning instructions and reports retain their historical scope;
+> use the successor for current availability, approved decisions and execution gates.
+
+
 ## Dependency Gate
 
 Required approved architecture:
@@ -7396,3 +7401,154 @@ It remains under its existing owner pending any separately authorized
 cross-feature review. It is not evidence that Clipboard Center uses Qt Clipboard
 for an explicit Clipboard-domain command, and CP-00 makes no claim about changing
 that implementation.
+
+---
+
+# Phase 1 Current Contract (2026-10-14)
+
+## Current authority and delivered Center
+
+Documentation reconciliation candidate: READY_FOR_REVIEW; new Phase 2 design
+details below are PROPOSED_REQUIRES_APPROVAL. FACT baseline:
+`48d0fbcbbe0f26d8ad533113eb075605b249a806`. Earlier dated reports/AC/CC identifiers,
+decisions and evidence remain historical. This section consumes approved
+[CP-00](#cp-00-current-reconciliation) and
+[CP00-02 outbound ownership](#cp00-02-successor-clipboard-subsystem-windows-writes),
+[1A current lifecycle](1A_Clipboard_Domain_Data_Lifecycle.md#phase-1-current-contract-2026-10-14),
+[1B current native prerequisites](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#phase-1-current-contract-2026-10-14)
+and [Clipboard guidance](AGENTS.md). No new approval, runtime or integration claim
+is supplied by an author-side static PASS.
+
+1C owns presentation, local view/draft state and focus. [S1](../Workspace/S1_Main_Shell_Technician_Workspace_Navigation.md)
+owns shell/navigation/shared auxiliary mechanics; [S2](../Workspace/S2_Mochi_DynamicHub_Context_Actions.md)
+owns shared contextual action presentation/binding. Their proposed flyouts,
+Inspector lease, Quick Ticket, DynamicHub and contextual Mochi are not established
+as runtime capabilities by the delivered rail. Foundation and the integrated
+semantic addendum retain taxonomy/provenance/privacy ownership; semantic
+interpretation never follows from viewing, a Tag, copied text or an action.
+
+FACT: [ClipboardWorkspace](../../../Python/f7hub/gui/clipboard_workspace.py)
+is one lazy retained page in [MainWindow](../../../Python/f7hub/gui/main_window.py).
+Recent is the bounded read-only D01 service page: Time, Preview, Retention,
+Pinned; no row selection, sorting, Inspector, full-body retrieval, paging controls
+or capture. Refresh performs one read; Retry follows safe read failure, with no
+automatic polling/retry. `has_more` is feedback only. Owned loading/pending guards
+cover the runner callback gap, including hidden-page close. With Settings present,
+one retained [ClipboardSetup](../../../Python/f7hub/gui/clipboard_setup.py) sits
+beside Recent, exposing only the three delivered 1A keys through Shared Settings.
+Apply uses captured revision CAS; conflict preserves draft for explicit Reload;
+saved preferences do not activate Clipboard effects.
+
+GUI Shell S005 is CLOSED with nonblocking notes: [PR #101](https://github.com/JDecelles1990/F7Hub/pull/101)
+merged at the baseline and its external closure report verified synchronization.
+The 52px rail/shared Tickets QAction and guarded `show_tickets()`/
+`_leave_clipboard()` route replace the lower Back to Tickets button/signal.
+Clipboard activation chooses a usable active-section control or its rail button;
+same-page activation preserves valid user focus. The historical lower-button,
+menu/toolbar, unconditional return-focus and larger minimum-layout examples are
+not instructions to recreate retired shell controls. Approved shared auxiliary
+ownership remains intact without claiming it is delivered.
+
+Recent, Setup and shell changes are IMPLEMENTED_AND_VERIFIED within the inspected
+independent synthetic/offscreen and Windows Qt evidence. Broader physical-device,
+Narrator, actual High Contrast, alternate/mixed DPI, RDP and AltGr acceptance is
+IMPLEMENTED_NOT_FULLY_VERIFIED. Compact Setup horizontal overflow remains a
+nonblocking limitation. Historical test results remain historical; this Phase 1
+does not execute runtime or native acceptance tests.
+
+## Phase 2 two-source handoff
+
+Preserve the user-directed two-source concept in one retained Clipboard Center:
+
+| Source | Intended child surface | Domain effects of opening/switching |
+| --- | --- | --- |
+| F7Hub Clipboard (default) | Eligible SQLite Items; reuse existing Recent and Setup. Saved/Pinned/Inspector remain future owner-gated features | Existing bounded reads and explicit Settings editing only; no capture or automatic arming |
+| Windows Clipboard | Current bounded privacy-admitted snapshot on deliberate opening or Refresh; truthful unavailable until 1B prerequisites exist | No Item/Event, persistence/import, expiry/count update, monitoring, arming or external disclosure |
+
+RECOMMENDATION: a labelled noneditable QComboBox with stable source keys and an
+inner QStackedWidget is the simplest compatible composition identified. Existing
+MainWindow and Recent/Setup already use retained stacks; it adds no dependency,
+new shell or shared model reset. Qt's official
+[stacked-widget documentation](https://doc.qt.io/qtforpython-6/PySide6/QtWidgets/QStackedWidget.html)
+describes combo-driven page switching; [combo signals](https://doc.qt.io/qtforpython-6/PySide6/QtWidgets/QComboBox.html)
+distinguish explicit activation from programmatic changes. This is engineering
+inference, subject to final Phase 2 approval and native layout/focus validation.
+No widgets are implemented here. Split View remains DEFERRED.
+
+Keep F7Hub Recent/Setup inside their source child; a source selector is not a
+replacement Recent/Saved/Pinned predicate. Each source retains its own permitted
+model, typed identity, scroll/widths, loading/error state and future query state.
+Recent currently has no selection contract; do not invent one in the first
+composition slice. Preserve existing Setup pending refusal and Discard/Cancel:
+Cancel keeps source/section/draft/focus, and accepted discard follows the existing
+owner cleanup. Retention of child widgets does not promise dirty-draft survival
+across a departure whose approved guard discards that draft.
+
+Guard a source change before committing selector/stack state; on refusal restore
+the selector without triggering another read. Programmatic initialization,
+restoration, hover/highlight, repaint and async completion initiate no native
+read. Only a deliberate accepted Windows-source opening or explicit Refresh may
+request a snapshot; repeated same-source selection need not reacquire, and
+Refresh is the discoverable way to obtain a newer one. A reopened retained
+snapshot is an as-of observation requiring current privacy/lifetime validation,
+never a claim of still-current content without a fresh authorized read.
+
+Use bounded existing workers and owner services; do not multiply queues/runners
+per retained page without demonstrated need. Future snapshot callbacks check
+source/request/activation/privacy generations on success and failure. Hide,
+switch, lock, expiry and shutdown obsolete exposure; workers remain owned until
+settled. Stale completion cannot replace the other source's model, error, focus
+or Setup draft. Clear unsafe snapshot bodies on privacy/lifetime transitions;
+no snapshot in Settings, navigation restoration, tooltip bypass or reusable
+paste cache. Switching a view never cancels or retargets an accepted domain effect.
+
+Missing authenticated native acquisition/privacy prerequisites yield a reachable
+Windows Clipboard unavailable explanation, disabled Refresh and absent/disabled
+effect actions. Unavailable is not empty Clipboard; no sample content, GUI-native
+read or Qt fallback. F7Hub Recent and Setup remain useful offline independently.
+Future available snapshots render plain safe text/status with observed time;
+empty/unsupported/too-large/locked/unstable/denied/timeout remain distinct safe
+states. No full Windows Clipboard History dependency or passive monitor.
+
+## Smallest separately approved delivery sequence and acceptance
+
+These are handoff recommendations, not new CC numbers or CP02-S3 authorization:
+
+1. CC-xx presentation composition: source selector/retained children, reuse
+   Recent/Setup and existing shell guards, Windows unavailable state only.
+2. Capture/IPC prerequisites in separate bounded slices: reuse approved 1B
+   singleton/enrollment/discovery/security, content-free authenticated transport
+   and supervised AHK snapshot/privacy boundaries. Review each native trust,
+   worker and cleanup gate; deliver no capture writer merely to view.
+3. Dxx/service read-only snapshot use case plus the reviewed viewing profile:
+   safe short-lived projection, no Item/Event/Settings writes; no duplicated
+   ClipboardService or GUI-native adapter. Gate on the preceding native/privacy
+   capabilities; backend integration remains within the 1B owner contract.
+4. CC-xx Windows snapshot presentation: explicit opening/Refresh through that
+   service, bounded async states, stale-success/failure rejection, privacy clearing
+   and native keyboard/layout/focus acceptance.
+
+Production selection capture, capture-current ingestion, outbound copy, Active
+Paste and Quick HUD are later distinct owner slices. `clipboard.capture_current`
+requires a fresh current read plus 1A admission/receipt gates, not persistence of
+the viewed body. Ctrl+Alt+C/V remain future applied-binding semantics from 1B;
+show unavailable until activation is independently verified. Ordinary text-widget
+Ctrl+C remains the narrow editing exception; explicit Clipboard-domain output
+copy uses Python authorization and authenticated AHK delivery.
+
+Phase 2 acceptance must establish one retained Center/two independent sources;
+default F7Hub with unchanged bounded Recent/Setup semantics; guarded source and
+module navigation/close, pending callback gaps and no focus theft; Cancel keeps
+the exact draft/source; truthful Windows unavailability before prerequisites;
+and, after their delivery, explicit bounded private snapshot reads with zero
+domain writes/monitoring/import and safe failure/recovery. Cover stale successes
+and failures, privacy clearing and unchanged operational content using synthetic
+fixtures only. Native-dependent slices require WINDOWS_NATIVE evidence at the
+actual supported compact/standard sizes and reachable controls after scrolling;
+offscreen evidence does not establish native presentation. Apply
+[RT-R01](AGENTS.md#rt-r01--failure-circuit-breaker) to agent executions.
+
+No material new architecture contradiction requiring a user decision was found.
+Final Phase 2 approval, each slice plan, independent review and authorized
+integration remain outstanding gates. Full acceptance inventory, dependencies,
+carry-forwards and evidence identity are in the external Phase 1 report.

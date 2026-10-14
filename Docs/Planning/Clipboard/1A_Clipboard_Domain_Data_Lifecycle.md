@@ -2,6 +2,11 @@
 # Clipboard Domain & Data Lifecycle Architecture Planning Instructions
 Clipboard Item vs Capture Event; raw/normalized content; hash/deduplication semantics; primary Kind; Entity occurrences; Tag assignments; sensitivity handling; secret detection; persistence boundaries; temporary/saved/pinned/evidence semantics; retention and expiration; cleanup rules; large-content policy; Ticket/Diagnostic/KB relationships; FTS/search requirements; Analytics facts; Mochi-safe context; transaction boundaries; failure/partial-processing rules.
 
+> Current contract: [Phase 1 successor](#phase-1-current-contract-2026-10-14).
+> Earlier dated planning instructions and reports retain their historical scope;
+> use the successor for current availability, approved decisions and execution gates.
+
+
 Clipboard Invariants section
 Before database design, I want explicit rules such as:
 ## Clipboard Domain Invariants
@@ -4864,3 +4869,108 @@ Clipboard content stays untrusted, secrets stay excluded, no raw content/title
 logging or automatic cloud/provider/AI transmission, and no copied-command
 execution is authorized. Full privacy assessment remains mandatory despite
 setup opt-in. CP-00 creates no schema, runtime policy or acceptance path.
+
+---
+
+# Phase 1 Current Contract (2026-10-14)
+
+## Authority and historical provenance
+
+Documentation reconciliation candidate: READY_FOR_REVIEW; independent review
+and user approval of this delta remain outstanding. FACT baseline:
+`48d0fbcbbe0f26d8ad533113eb075605b249a806`. This section records verified
+implementation and consumes approved successors; it does not approve Phase 2.
+Earlier dated contracts/reports retain their original baselines, outcomes and
+approval-pending wording. Conflicting historical recommendations are superseded
+only by the named later owner decisions, not retrospectively rewritten.
+
+1A owns Item/Event identity, admission, privacy, retention and persistence.
+[1B current contract](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#phase-1-current-contract-2026-10-14)
+owns native operations/IPC; [1C current contract](1C_PySide6_Clipboard_Center.md#phase-1-current-contract-2026-10-14)
+owns presentation and the proposed two-source handoff. Foundation ownership
+remains with [0E's authority matrix](../Foundation/0E_Foundation_Architecture_Reconciliation.md#foundation-authority-matrix)
+and its 0A–0D owners; shared Settings mechanics remain
+[0D-owned](../Foundation/0D_Settings_Architecture.md#settingsservice--repository-boundary).
+
+FACT lifecycle: CP-00 architecture CLOSED through [PR #89](https://github.com/JDecelles1990/F7Hub/pull/89),
+merge `988c982f3abbdc1749cf1720dc487941f42899b7`; CP-01 dormant policy CLOSED
+through [PR #90](https://github.com/JDecelles1990/F7Hub/pull/90), merge
+`09bef3e8b4e55ed34b63a062d7b14a9d0b3f92af`. CP02-S1 and CP02-S2 are CLOSED,
+supported by implementation [PR #91](https://github.com/JDecelles1990/F7Hub/pull/91)
+and [PR #92](https://github.com/JDecelles1990/F7Hub/pull/92), documentation
+[PR #93](https://github.com/JDecelles1990/F7Hub/pull/93), and the final external
+closure report at `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP02-Closure/documentation-20261012/closure-report.md`.
+CP-00's completed integration session and CP-01's external integration report
+provide their closure evidence. Merge ancestry alone is not closure. The Phase 1
+external report binds those records and historical validation to the live base.
+CP02-S3 remains unstarted; completed prerequisite slices must not be restarted.
+
+## Implemented persistence and its limits
+
+FACT: [migration 0013](../../../Database/Migrations/0013_clipboard_items_capture_events.sql),
+[domain projections](../../../Python/f7hub/domain/clipboard.py),
+[ClipboardRepository](../../../Python/f7hub/repositories/clipboard_repository.py)
+and [ClipboardService](../../../Python/f7hub/services/clipboard_service.py)
+implement eligible Item/Event storage and one read-only Recent page. These
+bounded capabilities are IMPLEMENTED_AND_VERIFIED within their independently
+reviewed synthetic SQLite/service evidence; no operational database validity or
+production capture is implied. 0014 adds shared Settings overrides, not another
+Clipboard store; there is no subsequent migration at this baseline.
+
+Recent reads PERMITTED, assessment-complete Items that are SAVED or strictly
+unexpired TEMPORARY, ordered by `last_received_at DESC, clipboard_item_id DESC`.
+Default limit 50, maximum 100, `limit + 1` sentinel and bounded 241-scalar excerpt
+yield at most 240 presentation-safe scalars plus a truncation flag. `has_more`
+does not supply paging. Reads neither update summaries nor prune expired data.
+The Event unique producer/generation/operation tuple is a storage constraint;
+it does not implement authenticated admission, receipts, replay after deletion,
+restart fencing, a detector or a production writer. Test fixtures are not an
+ingestion pipeline, and stored assessment claims are not detector execution.
+
+APPROVED_NOT_IMPLEMENTED: the remaining approved lifecycle responsibilities,
+including exact-content resolution/deduplication, privacy admission, transient
+acceptance/promotion, atomic receipt/core writes, Save/Pin commands, holds,
+cleanup, extraction, Tag assignments and eligible FTS. The approved architecture
+must be delivered and validated in bounded Dxx/owning integration slices; schema
+columns for SAVED/pinned do not establish corresponding service or GUI actions.
+Released migration 0013 remains immutable.
+
+## Setup consent, source metadata and Windows viewing
+
+The [approved CP-00 setup/provenance successor](#cp-00-current-reconciliation)
+replaces the historical second consent gate and coarse-only source restriction.
+Explicit setup workflow enablement is opt-in for future eligible durable manual
+history; no second one-time history consent or Save after every capture is
+required. Disabling stops future admission without deleting existing history.
+Secrets remain excluded and all privacy/retention gates still apply.
+
+FACT: [delivered definitions](../../../Python/f7hub/domain/clipboard_settings.py)
+are exactly `clipboard.workflow_enabled`,
+`clipboard.source_process_persistence_enabled` and
+`clipboard.source_window_title_persistence_enabled`, all false-default USER
+Booleans. Shared Settings and the retained Setup editor save preferences only.
+True values do not activate capture/paste, IPC, native bindings or source reads.
+Historical `capture_enabled`/`persistence_enabled` examples are not additional
+installed keys or a reason to add a parallel Settings framework.
+
+Process basename and bounded title remain separately opt-in under CP-00, with
+independent title control and privacy omission before transport/storage. Current
+Events store method/coarse class/time, not process basename/title/capture mode.
+Their future data/profile extension is APPROVED_NOT_IMPLEMENTED and needs a new
+reviewed migration if necessary. PID/HWND/sequence remain transient; no full path,
+command line, browser source URL, title hash or arbitrary metadata bag.
+
+The proposed Windows source is a bounded current snapshot on explicit opening
+or Refresh. Viewing is not capture: no Item, Capture Event, lifetime-count/expiry
+update, persistence, arming, import or external transmission. Safe display still
+requires complete privacy admission and short-lived source access. Explicit
+`clipboard.capture_current` separately acquires a fresh current snapshot under
+1B and applies 1A; it cannot silently persist the stale displayed body.
+Full Windows Clipboard History, passive monitoring, binary/OCR and restoration
+remain DEFERRED. Native snapshot prerequisites are missing, as specified in 1B;
+GUI presentation may truthfully report unavailable until separately delivered.
+
+Validation of this reconciliation is static only. Runtime, database integrity,
+GUI, AHK and PowerShell checks are NOT RUN for this documentation delta. Evidence
+labels describe capability-specific historical verification, not a fresh runtime
+PASS. Lifecycle/evidence and RT-R01 follow [Clipboard guidance](AGENTS.md#rt-r01--failure-circuit-breaker).
