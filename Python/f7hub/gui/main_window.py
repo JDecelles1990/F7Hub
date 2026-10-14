@@ -138,6 +138,7 @@ class MainWindow(QMainWindow):
         file_menu.addAction(exit_action)
         self.exit_action = exit_action
         self.runner.busy_changed.connect(self._set_busy)
+        self.runner.completion_finished.connect(self._queue_rail_focus)
         self.workspace.note_pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
         self.workspace.creation_pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
         self.workspace.status_pending_changed.connect(lambda _pending: self._set_busy(self.runner.busy))
@@ -166,6 +167,13 @@ class MainWindow(QMainWindow):
         self.navigation_buttons = {}
         self._workspace_focus = None
         self._rail_origin = None
+        self._rail_generation = 0
+        self._rail_keyboard_intent = None
+        self._rail_keyboard_button = None
+        self._rail_focus_displaced = False
+        self._rail_displaced_focus = None
+        self._rail_pending_focus = None
+        self._rail_queued_generation = None
         for key, label, action in (
             ("tickets", "Tickets", self.tickets_action),
             ("knowledge", "Knowledge Base", self.knowledge_action),
@@ -206,8 +214,17 @@ class MainWindow(QMainWindow):
         self.workspace_viewport.setWidget(self.pages)
         layout.addWidget(self.workspace_viewport, 1)
         self.setCentralWidget(shell)
+        # The scroll area participates in Tab traversal, while its viewport
+        # proxies focus back to it. Put the rail between that entry and the
+        # first Tickets control after the complete shell has been composed.
+        QWidget.setTabOrder(self.workspace_viewport, self.navigation_buttons["tickets"])
+        for first, second in zip(tuple(self.navigation_buttons.values()),
+                                 tuple(self.navigation_buttons.values())[1:]):
+            QWidget.setTabOrder(first, second)
+        QWidget.setTabOrder(self.navigation_buttons["clipboard"], self.workspace.new_ticket_button)
         self.pages.currentChanged.connect(self._sync_navigation_rail)
         QApplication.instance().focusChanged.connect(self._remember_workspace_focus)
+        QApplication.instance().installEventFilter(self)
         self._sync_navigation_rail()
 
     def changeEvent(self, event):
@@ -218,6 +235,28 @@ class MainWindow(QMainWindow):
             self._refresh_navigation_palette()
 
     def eventFilter(self, watched, event):
+        if watched is self and event.type() == QEvent.Type.WindowDeactivate:
+            self._rail_pending_focus = None
+        if self._rail_pending_focus is not None and event.type() in (
+                QEvent.Type.MouseButtonPress, QEvent.Type.KeyPress):
+            # An input event after activation is an intentional new choice.
+            if isinstance(watched, QWidget) and (watched is self or self.isAncestorOf(watched)):
+                self._rail_pending_focus = None
+        elif (self._rail_pending_focus is not None
+                and event.type() == QEvent.Type.FocusIn
+                and event.reason() in (Qt.FocusReason.TabFocusReason, Qt.FocusReason.BacktabFocusReason)
+                and isinstance(watched, QWidget) and self.isAncestorOf(watched)):
+            # Qt also uses TabFocusReason when disabling a focused control.
+            # Real Tab/click input cleared the request above; track subsequent
+            # automatic displacement without treating it as newer user intent.
+            generation, page, button, _displaced = self._rail_pending_focus
+            self._rail_pending_focus = (generation, page, button, watched)
+        if watched in getattr(self, "navigation_buttons", {}).values():
+            if (event.type() == QEvent.Type.KeyPress and watched.hasFocus()
+                    and event.key() in (Qt.Key.Key_Space, Qt.Key.Key_Return, Qt.Key.Key_Enter)):
+                self._rail_keyboard_intent = watched
+            elif event.type() == QEvent.Type.MouseButtonPress:
+                self._rail_keyboard_intent = None
         if (isinstance(watched, QToolButton)
                 and watched in getattr(self, "navigation_buttons", {}).values()
                 and event.type() in (QEvent.Type.Enter, QEvent.Type.Leave)):
@@ -274,6 +313,9 @@ class MainWindow(QMainWindow):
                 QWidget#navigationRail QToolButton:disabled {{
                     background: transparent; border-color: transparent;
                 }}
+                QWidget#navigationRail QToolButton[active="true"]:disabled {{
+                    background: {selection}; border-left: 2px solid {selected_indicator};
+                }}
             """)
             for key, button in self.navigation_buttons.items():
                 button.setIcon(self._navigation_icon(key, palette, bool(button.property("active")),
@@ -296,8 +338,11 @@ class MainWindow(QMainWindow):
             QPalette.ColorGroup.Active,
             QPalette.ColorRole.HighlightedText if selected else
             QPalette.ColorRole.ButtonText if hovered else QPalette.ColorRole.WindowText)
-        background = (QColor("#202733") if MainWindow._navigation_uses_stock_dark(palette)
-                      else palette.color(QPalette.ColorGroup.Active, QPalette.ColorRole.Window))
+        background = (QColor("#294d65" if selected else "#202733")
+                      if MainWindow._navigation_uses_stock_dark(palette)
+                      else palette.color(QPalette.ColorGroup.Active,
+                                         QPalette.ColorRole.Highlight if selected else
+                                         QPalette.ColorRole.Window))
         disabled = palette.color(QPalette.ColorGroup.Disabled, QPalette.ColorRole.WindowText)
 
         def luminance(color):
@@ -314,7 +359,9 @@ class MainWindow(QMainWindow):
         # Keep it when discernible; otherwise move toward its paired foreground,
         # retaining a muted color for as long as the rendered contrast allows.
         if contrast(disabled) < 3:
-            target = palette.color(QPalette.ColorGroup.Active, QPalette.ColorRole.WindowText)
+            target = palette.color(QPalette.ColorGroup.Active,
+                                   QPalette.ColorRole.HighlightedText if selected else
+                                   QPalette.ColorRole.WindowText)
             source = disabled
             for fraction in (.2, .4, .6, .8, 1):
                 disabled = QColor.fromRgbF(*(
@@ -389,6 +436,9 @@ class MainWindow(QMainWindow):
             button.update()
 
     def _remember_workspace_focus(self, _old, new):
+        if _old is self._rail_keyboard_button and new is not _old:
+            self._rail_focus_displaced = True
+            self._rail_displaced_focus = new
         page = self.pages.currentWidget()
         if new is not None and page is not None and page.isAncestorOf(new):
             self._workspace_focus = new
@@ -399,13 +449,39 @@ class MainWindow(QMainWindow):
         focus = self.focusWidget()
         previous = self._workspace_focus
         page = self.pages.currentWidget()
+        if (self._rail_keyboard_button is not None and self._rail_focus_displaced
+                and (page is not self._rail_origin or self.runner.busy)):
+            self._rail_pending_focus = (self._rail_generation, page,
+                                        self._rail_keyboard_button, self._rail_displaced_focus)
+        self._rail_keyboard_button = None
         if (page is self._rail_origin and focus in self.navigation_buttons.values() and previous is not None
                 and page.isAncestorOf(previous) and previous.isVisible()
                 and previous.isEnabled()):
             previous.setFocus(Qt.FocusReason.OtherFocusReason)
 
     def _rail_action_started(self):
+        self._rail_generation += 1
+        self._rail_pending_focus = None
         self._rail_origin = self.pages.currentWidget()
+        self._rail_keyboard_button = (self.sender() if self.sender() is self._rail_keyboard_intent
+                                      else None)
+        self._rail_keyboard_intent = None
+        self._rail_focus_displaced = False
+        self._rail_displaced_focus = None
+
+    def _reconcile_rail_focus(self, generation):
+        self._rail_queued_generation = None
+        pending = self._rail_pending_focus
+        if pending is None or pending[0] != generation or generation != self._rail_generation:
+            return
+        _, page, button, displaced = pending
+        if (not self.isVisible() or not self.isActiveWindow()
+                or self.pages.currentWidget() is not page or self.runner.busy or self.runner.completing
+                or not self.pages.isEnabled() or not button.isVisible() or not button.isEnabled()):
+            return
+        self._rail_pending_focus = None
+        if self.focusWidget() in (None, displaced):
+            button.setFocus(Qt.FocusReason.OtherFocusReason)
 
     def showEvent(self, event):
         super().showEvent(event)
@@ -438,8 +514,10 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage(f"Created ticket {ticket_number}.", 5_000)
 
     def _set_busy(self, busy):
-        busy = busy or self._script_run_pending
+        busy = busy or self.runner.busy or self._script_run_pending
         busy = busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
+        if busy and self._rail_keyboard_button is not None and self.focusWidget() is self._rail_keyboard_button:
+            self._rail_focus_displaced = True
         self.pages.setEnabled(not busy)
         self.tickets_action.setEnabled(not busy)
         self.knowledge_action.setEnabled(not busy and self.knowledge_workspace is not None)
@@ -447,7 +525,20 @@ class MainWindow(QMainWindow):
         self.clipboard_action.setEnabled(not busy)
         self.backup_action.setEnabled(not busy and self.backup_service is not None)
         self.altf7hub_action.setEnabled(not busy and self.altf7hub_service is not None)
+        if busy and self._rail_focus_displaced:
+            self._rail_displaced_focus = self.focusWidget()
+        elif not busy:
+            self._queue_rail_focus()
         self.statusBar().showMessage("Working…" if busy else "Ready")
+
+    def _queue_rail_focus(self):
+        # busy_changed(False) precedes callback execution. Wait for the outer
+        # callback to finish, including any nested task/event dispatch.
+        if not self.runner.busy and not self.runner.completing and self._rail_pending_focus is not None:
+            generation = self._rail_pending_focus[0]
+            if self._rail_queued_generation != generation:
+                self._rail_queued_generation = generation
+                QTimer.singleShot(0, self, lambda: self._reconcile_rail_focus(generation))
 
     @property
     def _script_run_pending(self):

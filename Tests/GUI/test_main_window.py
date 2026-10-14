@@ -652,6 +652,204 @@ class NavigationRailTests(unittest.TestCase):
         self.assertEqual([name for name, button in self.window.navigation_buttons.items()
                           if button.property("active")], [key])
 
+    def test_startup_tab_enters_rail_before_workspace_and_reverse_order(self):
+        self.assertIs(self.application.activeWindow(), self.window)
+        self.assertIs(self.window.focusWidget(), self.window.workspace_viewport)
+        keys = ("tickets", "knowledge", "scripts", "clipboard")
+        for key in keys:
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+            self.application.processEvents()
+            self.assertIs(self.application.focusWidget(), self.window.navigation_buttons[key])
+        QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+        self.application.processEvents()
+        self.assertIs(self.application.focusWidget(), self.window.workspace.new_ticket_button)
+        for key in reversed(keys):
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Backtab)
+            self.application.processEvents()
+            self.assertIs(self.application.focusWidget(), self.window.navigation_buttons[key])
+
+    def test_ticket_queue_tab_route_exits_and_preserves_keyboard_selection(self):
+        """Traverse from the active window; never inject focus into the queue."""
+        workspace = self.window.workspace
+        second_ticket = SimpleNamespace(**{**vars(self.service.ticket), "ticket_id": 2,
+                                           "ticket_number": "TKT-1002"})
+        workspace.model.replace_tickets((self.service.ticket, second_ticket))
+        path = []
+
+        def step(key):
+            before = self.application.focusWidget()
+            QTest.keyClick(before, key)
+            self.application.processEvents()
+            after = self.application.focusWidget()
+            path.append((type(before).__name__, before.objectName(),
+                         key.name, type(after).__name__, after.objectName(),
+                         workspace.table.currentIndex().row(),
+                         workspace.table.currentIndex().column()))
+            return after
+
+        try:
+            self.assertIs(self.application.activeWindow(), self.window)
+            self.assertIs(self.application.focusWidget(), self.window.workspace_viewport)
+            for rail_key in ("tickets", "knowledge", "scripts", "clipboard"):
+                self.assertIs(step(Qt.Key.Key_Tab), self.window.navigation_buttons[rail_key])
+            self.assertIs(step(Qt.Key.Key_Tab), workspace.new_ticket_button)
+            for rail_key in ("clipboard", "scripts", "knowledge", "tickets"):
+                self.assertIs(step(Qt.Key.Key_Backtab), self.window.navigation_buttons[rail_key])
+            for _ in range(4):
+                step(Qt.Key.Key_Tab)
+            self.assertIs(self.application.focusWidget(), workspace.new_ticket_button)
+
+            for _ in range(24):
+                if self.application.focusWidget() is workspace.table:
+                    break
+                step(Qt.Key.Key_Tab)
+            self.assertIs(self.application.focusWidget(), workspace.table)
+            self.assertFalse(workspace.table.tabKeyNavigation())
+            selected = workspace.table.currentIndex()
+            self.assertTrue(selected.isValid())
+            step(Qt.Key.Key_Down)
+            self.assertIs(self.application.focusWidget(), workspace.table)
+            self.assertEqual(workspace.table.currentIndex().row(), 1)
+            self.assertTrue(workspace.table.selectionModel().isRowSelected(1))
+            step(Qt.Key.Key_Space)
+            self.assertEqual(workspace.table.currentIndex().row(), 1)
+            selected = workspace.table.currentIndex()
+            left = step(Qt.Key.Key_Backtab)
+            self.assertIsNot(left, workspace.table)
+            self.assertTrue(left.isEnabled())
+            self.assertIs(step(Qt.Key.Key_Tab), workspace.table)
+            self.assertEqual(workspace.table.currentIndex(), selected)
+            right = step(Qt.Key.Key_Tab)
+            self.assertIsNot(right, workspace.table)
+            self.assertTrue(right.isEnabled())
+            self.assertEqual(workspace.table.currentIndex(), selected)
+            self.assertIs(step(Qt.Key.Key_Backtab), workspace.table)
+            # The rail remains reachable by reverse traversal after queue entry.
+            for _ in range(24):
+                if self.application.focusWidget() is self.window.navigation_buttons["scripts"]:
+                    break
+                step(Qt.Key.Key_Backtab)
+            self.assertIs(self.application.focusWidget(), self.window.navigation_buttons["scripts"])
+            self.scripts.gate = threading.Event()
+            calls = self.scripts.calls
+            step(Qt.Key.Key_Space)
+            self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
+            self.assertEqual(self.scripts.calls, calls + 1)
+            self.scripts.gate.set()
+            self.wait_idle()
+            self.application.processEvents()
+            self.assertIs(self.application.focusWidget(), self.window.navigation_buttons["scripts"])
+            chosen = self.window.menuBar()
+            chosen.setFocus()
+            self.application.processEvents()
+            QTest.qWait(5)
+            self.assertIs(self.application.focusWidget(), chosen)
+        except AssertionError:
+            self.fail(f"Ticket keyboard path: {path!r}")
+
+    def test_ticket_queue_enter_keeps_existing_open_action(self):
+        path = []
+        table = self.window.workspace.table
+        try:
+            self.assertIs(self.application.focusWidget(), self.window.workspace_viewport)
+            for _ in range(24):
+                before = self.application.focusWidget()
+                if before is table:
+                    break
+                QTest.keyClick(before, Qt.Key.Key_Tab)
+                self.application.processEvents()
+                after = self.application.focusWidget()
+                path.append((type(before).__name__, before.objectName(),
+                             type(after).__name__, after.objectName()))
+            self.assertIs(self.application.focusWidget(), table)
+            with patch.object(self.service, "get_ticket_details",
+                              wraps=self.service.get_ticket_details) as details:
+                QTest.keyClick(table, Qt.Key.Key_Return)
+                self.wait_idle()
+                details.assert_called_once_with(self.service.ticket.ticket_id)
+            self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
+            self.assertTrue(table.currentIndex().isValid())
+        except AssertionError:
+            self.fail(f"Ticket Enter path: {path!r}")
+
+    def test_tab_skips_unavailable_modules(self):
+        window = MainWindow(self.service)
+        try:
+            window.show()
+            self.application.processEvents()
+            deadline = time.monotonic() + 5
+            while window.runner.busy and time.monotonic() < deadline:
+                QTest.qWait(5)
+            self.assertFalse(window.runner.busy)
+            self.assertFalse(window.navigation_buttons["knowledge"].isEnabled())
+            self.assertFalse(window.navigation_buttons["scripts"].isEnabled())
+            window.workspace_viewport.setFocus()
+            self.application.processEvents()
+            for key in ("tickets", "clipboard"):
+                QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+                self.application.processEvents()
+                self.assertIs(self.application.focusWidget(), window.navigation_buttons[key])
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Backtab)
+            self.application.processEvents()
+            self.assertIs(self.application.focusWidget(), window.navigation_buttons["tickets"])
+        finally:
+            window.close()
+            window.deleteLater()
+            self.window.activateWindow()
+            self.application.processEvents()
+
+    def test_tab_traversal_after_lazy_clipboard_creation(self):
+        self.activate("clipboard")
+        self.assertIsNotNone(self.window.clipboard_workspace)
+        self.window.workspace_viewport.setFocus()
+        self.application.processEvents()
+        keys = ("tickets", "knowledge", "scripts", "clipboard")
+        for key in keys:
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+            self.application.processEvents()
+            self.assertIs(self.application.focusWidget(), self.window.navigation_buttons[key])
+        QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+        self.application.processEvents()
+        focus = self.application.focusWidget()
+        self.assertIsNotNone(focus)
+        self.assertTrue(self.window.clipboard_workspace.isAncestorOf(focus))
+        self.assertTrue(focus.isVisible() and focus.isEnabled())
+        for key in reversed(keys):
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Backtab)
+            self.application.processEvents()
+            self.assertIs(self.application.focusWidget(), self.window.navigation_buttons[key])
+
+    def test_keyboard_route_restores_focus_after_pending_scripts_refresh(self):
+        self.scripts.gate = threading.Event()
+        for key in ("tickets", "knowledge", "scripts"):
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+            self.application.processEvents()
+            self.assertIs(self.application.focusWidget(), self.window.navigation_buttons[key])
+        button = self.window.navigation_buttons["scripts"]
+        QTest.keyClick(button, Qt.Key.Key_Space)
+        self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
+        self.assertTrue(self.window.runner.busy)
+        self.assertFalse(button.isEnabled())
+        self.scripts.gate.set()
+        self.wait_idle()
+        self.application.processEvents()
+        self.assertIs(self.application.focusWidget(), button)
+
+    def test_deliberate_focus_choice_wins_over_pending_rail_restore(self):
+        self.scripts.gate = threading.Event()
+        for _ in range(3):
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+            self.application.processEvents()
+        QTest.keyClick(self.window.navigation_buttons["scripts"], Qt.Key.Key_Space)
+        self.assertTrue(self.window.runner.busy)
+        chosen = self.window.menuBar()
+        chosen.setFocus()
+        self.application.processEvents()
+        self.scripts.gate.set()
+        self.wait_idle()
+        self.application.processEvents()
+        self.assertIs(self.application.focusWidget(), chosen)
+
     def activate(self, key, keyboard=False):
         button = self.window.navigation_buttons[key]
         if keyboard:
@@ -1052,6 +1250,193 @@ class NavigationRailTests(unittest.TestCase):
         self.active("scripts")
 
 
+class ScriptsFocusLifecycleTests(unittest.TestCase):
+    """Keyboard navigation through real runner callbacks and Qt focus events."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.application = QApplication.instance() or QApplication([])
+    setUp = NavigationRailTests.setUp
+    tearDown = NavigationRailTests.tearDown
+    wait_idle = MainWindowTests.wait_idle
+
+    def record(self, stage):
+        focus = self.application.focusWidget()
+        record = {"stage": stage, "focus_class": type(focus).__name__,
+                  "focus_name": focus.objectName() if focus else None,
+                  "busy": self.window.runner.busy,
+                  "loading": self.window.script_workspace._loading,
+                  "active": self.application.activeWindow() is self.window,
+                  "scripts_page": self.window.pages.currentWidget() is self.window.script_workspace}
+        print(f"focus evidence: {record!r}", flush=True)
+        return focus
+
+    def start_scripts(self):
+        self.scripts.gate = threading.Event()
+        self.assertIs(self.application.activeWindow(), self.window)
+        for key in ("tickets", "knowledge", "scripts"):
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+            self.application.processEvents()
+            self.record("Tab to " + key)
+            self.assertIs(self.application.focusWidget(), self.window.navigation_buttons[key])
+        self.actions = []
+        self.window.scripts_action.triggered.connect(lambda: self.actions.append("scripts"))
+        QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Space)
+        self.record("Space / pending")
+        self.assertEqual(self.actions, ["scripts"])
+        self.assertTrue(self.window.runner.busy)
+
+    def finish_scripts(self):
+        self.scripts.gate.set()
+        self.wait_idle()
+        self.application.processEvents()
+        self.record("completion settled")
+
+    def test_normal_completion_restores_scripts(self):
+        self.start_scripts()
+        self.finish_scripts()
+        focus = self.record("normal result")
+        self.assertIs(focus, self.window.navigation_buttons["scripts"])
+        self.assertTrue(focus.isEnabled() and focus.isVisible())
+
+    def test_toolbar_follows_visual_order_from_rail_and_in_reverse(self):
+        self.start_scripts()
+        self.finish_scripts()
+        page = self.window.script_workspace
+        header = (page.run_button, page.copy_button, page.manage_button, page.refresh_button)
+        positions = [control.mapTo(self.window, QPoint()).x() for control in header]
+        self.assertEqual(positions, sorted(positions))
+        self.assertFalse(page.run_button.isEnabled())
+        self.assertFalse(page.copy_button.isEnabled())
+        scripts = self.window.navigation_buttons["scripts"]
+        self.assertIs(self.record("restored Scripts before toolbar traversal"), scripts)
+        focused_image = scripts.grab().toImage()
+        forward = (self.window.navigation_buttons["clipboard"], page.manage_button,
+                   page.refresh_button, page.search_input, page.search_button,
+                   page.clear_search_button)
+        for target in forward:
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+            self.application.processEvents()
+            self.assertIs(self.record("forward toolbar/search traversal"), target)
+            self.assertTrue(target.isEnabled() and target.isVisible())
+        # Compare the restored focus border with the same selected button after
+        # traversal; the selected-module marker alone must not satisfy this check.
+        selected_image = scripts.grab().toImage()
+        edge_changes = sum(focused_image.pixelColor(x, y) != selected_image.pixelColor(x, y)
+                           for x in range(focused_image.width())
+                           for y in range(focused_image.height())
+                           if y < 3 or y >= focused_image.height() - 3
+                           or x >= focused_image.width() - 3)
+        print(f"restored Scripts focus edge changes: {edge_changes}", flush=True)
+        self.assertGreaterEqual(edge_changes, 20)
+        for target in (*reversed(forward[:-1]), scripts):
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Backtab)
+            self.application.processEvents()
+            self.assertIs(self.record("reverse toolbar/search traversal"), target)
+
+    def test_toolbar_refresh_preserves_later_deliberate_focus(self):
+        self.start_scripts()
+        self.finish_scripts()
+        page = self.window.script_workspace
+        for target in (self.window.navigation_buttons["clipboard"],
+                       page.manage_button, page.refresh_button):
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+            self.application.processEvents()
+            self.assertIs(self.record("route to Refresh"), target)
+        self.scripts.gate = threading.Event()
+        calls = self.scripts.calls
+        QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Space)
+        self.record("toolbar Refresh pending")
+        self.assertTrue(self.window.runner.busy)
+        chosen = self.window.menuBar()
+        chosen.setFocus(Qt.FocusReason.OtherFocusReason)
+        self.application.processEvents()
+        self.finish_scripts()
+        self.assertIs(self.record("deliberate focus after toolbar Refresh"), chosen)
+        self.assertEqual(self.scripts.calls, calls + 1)
+
+    def test_automatic_clipboard_displacement_is_repaired_without_user_input(self):
+        clipboard = self.window.navigation_buttons["clipboard"]
+        loaded = self.window.script_workspace._loaded
+
+        def complete(*args):
+            loaded(*args)
+            # Boundary fixture: the same TabFocusReason Qt emits automatically
+            # when Scripts is disabled. No key or mouse event accompanies it.
+            clipboard.setFocus(Qt.FocusReason.TabFocusReason)
+            self.record("automatic Clipboard displacement in callback")
+
+        with patch.object(self.window.script_workspace, "_loaded", side_effect=complete):
+            self.start_scripts()
+            self.finish_scripts()
+        self.assertIs(self.record("automatic displacement result"),
+                      self.window.navigation_buttons["scripts"])
+        self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
+
+    def test_deliberate_tab_to_clipboard_wins(self):
+        clipboard = self.window.navigation_buttons["clipboard"]
+        loaded = self.window.script_workspace._loaded
+
+        def complete(*args):
+            loaded(*args)
+            # Controls have been reenabled; the callback is still completing.
+            for _ in range(24):
+                if self.application.focusWidget() is clipboard:
+                    break
+                QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+                self.application.processEvents()
+                self.record("deliberate Tab during completion")
+            self.assertIs(self.application.focusWidget(), clipboard)
+
+        with patch.object(self.window.script_workspace, "_loaded", side_effect=complete):
+            self.start_scripts()
+            self.finish_scripts()
+        self.assertIs(self.record("deliberate Tab result"), clipboard)
+        self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
+
+    def test_deactivation_cancels_obsolete_restore_without_reactivation(self):
+        from PySide6.QtWidgets import QWidget
+        other = QWidget()
+        other.setObjectName("syntheticFocusDestination")
+        try:
+            self.start_scripts()
+            other.show()
+            other.activateWindow()
+            self.application.processEvents()
+            self.assertIs(self.application.activeWindow(), other)
+            self.finish_scripts()
+            self.assertIs(self.application.activeWindow(), other)
+            self.assertIsNone(self.window._rail_pending_focus)
+        finally:
+            other.close()
+            other.deleteLater()
+            self.window.activateWindow()
+            self.application.processEvents()
+
+    def test_reentrant_completion_waits_for_outer_callback(self):
+        loaded = self.window.script_workspace._loaded
+        inside = []
+        nested = []
+
+        def complete(*args):
+            self.application.processEvents()
+            inside.append(self.record("inside callback after nested event dispatch"))
+            self.assertTrue(self.window.runner.submit(lambda: None,
+                            lambda _: nested.append("finished"), self.fail))
+            deadline = time.monotonic() + 5
+            while not nested and time.monotonic() < deadline:
+                QTest.qWait(5)
+            self.assertEqual(nested, ["finished"])
+            inside.append(self.record("after reentrant task / outer callback pending"))
+            loaded(*args)
+
+        with patch.object(self.window.script_workspace, "_loaded", side_effect=complete):
+            self.start_scripts()
+            self.finish_scripts()
+        self.assertNotIn(self.window.navigation_buttons["scripts"], inside)
+        self.assertIs(self.record("reentrant result"), self.window.navigation_buttons["scripts"])
+
+
 class NavigationRenderingTests(unittest.TestCase):
     """Measure actual button glyphs and focus edges across paired palette roles."""
 
@@ -1121,6 +1506,15 @@ class NavigationRenderingTests(unittest.TestCase):
         self.assertGreaterEqual(visible, minimum_pixels*dpr*dpr, metrics)
         return image, background, metrics
 
+    def marker_coverage(self, image):
+        """Count straight-edge rows whose full marker contrasts with selected fill."""
+        dpr = image.devicePixelRatio()
+        width = round(2*dpr)
+        rows = range(round(10*dpr), round(34*dpr))
+        return sum(all(self.contrast(image.pixelColor(x, y),
+                                     image.pixelColor(round(6*dpr), y)) >= 3
+                       for x in range(width)) for y in rows)
+
     def test_rendered_focus_is_distinct_from_selection_with_and_without_hover(self):
         original = QPalette(self.application.palette())
         try:
@@ -1159,6 +1553,45 @@ class NavigationRenderingTests(unittest.TestCase):
                                              for y in range(round(8*dpr), round(36*dpr)))
                                 self.assertGreaterEqual(marker, 40*dpr*dpr)
                             button.clearFocus()
+        finally:
+            self.application.setPalette(original)
+            self.application.processEvents()
+
+    def test_rendered_active_disabled_marker_survives_in_contrasting_palettes(self):
+        original = QPalette(self.application.palette())
+        try:
+            # The inherited application palette can vary with suite order and
+            # platform; the three explicit palettes define this contrast case.
+            for name, palette in tuple(self.palettes(original))[1:]:
+                with self.subTest(palette=name):
+                    self.application.setPalette(palette)
+                    self.application.processEvents()
+                    selected = self.window.navigation_buttons["tickets"]
+                    inactive = self.window.navigation_buttons["scripts"]
+                    selected.setEnabled(False)
+                    inactive.setEnabled(False)
+                    self.application.processEvents()
+                    active_image, _, _ = self.capture(name + "-active-disabled", selected)
+                    inactive_image, _, _ = self.capture(name + "-inactive-disabled", inactive,
+                                                         minimum_pixels=32)
+                    dpr = active_image.devicePixelRatio()
+                    marker_rows = self.marker_coverage(active_image)
+                    hidden = active_image.copy()
+                    for y in range(round(10*dpr), round(34*dpr)):
+                        fill_color = active_image.pixelColor(round(6*dpr), y)
+                        for x in range(round(2*dpr)):
+                            hidden.setPixelColor(x, y, fill_color)
+                    hidden_rows = self.marker_coverage(hidden)
+                    fill = sum(active_image.pixelColor(x, y) != inactive_image.pixelColor(x, y)
+                               for x in range(round(35*dpr), round(39*dpr))
+                               for y in range(round(10*dpr), round(34*dpr)))
+                    print(f"marker {name}: {marker_rows}/{round(24*dpr)} rows, "
+                          f"hidden control {hidden_rows}, fill {fill} pixels, DPR {dpr}")
+                    self.assertGreaterEqual(marker_rows, round(18*dpr))
+                    self.assertEqual(hidden_rows, 0)
+                    self.assertGreaterEqual(fill, 60*dpr*dpr)
+                    selected.setEnabled(True)
+                    inactive.setEnabled(True)
         finally:
             self.application.setPalette(original)
             self.application.processEvents()

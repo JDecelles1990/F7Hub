@@ -1,5 +1,13 @@
 # F7Hub Todo
 
+## GUI Shell S001 — Scripts keyboard follow-up (2026-10-14)
+
+- [x] Independent final rereview accepted the six-file S001 correction as **APPROVED_WITH_NOTES**.
+- [ ] Independently review the four-document reconciliation delta before separately authorized PR #96 publication and integration.
+- [ ] **Future Scripts Workspace redesign: physical keyboard refinement.** After refresh with visibly restored focus, three physical forward Tab presses reached Search where the native Qt test expected Refresh. Reverse traversal and general keyboard access remained available. The user accepted the discrepancy and independent review classified it as nonblocking for S001; the exact skipped or reordered stop is **NOT VERIFIED**, and the complete physical forward sequence is **NOT PASS**. Future acceptance must record every physical Tab and Shift+Tab destination on a fresh build, confirm visible focus distinct from selection, disabled-control skipping and no keyboard traps, and preserve deliberate focus choices and draft/navigation guards. Physical forward Tab traversal must follow the displayed Scripts toolbar order: Run diagnostic → Copy Script → Manage scripts → Refresh. Physical Shift+Tab traversal must follow the reverse order. Disabled or otherwise ineligible controls must be skipped naturally without changing the relative order of eligible controls.
+
+S001 remains unmerged; this follow-up does not authorize redesign implementation. See [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s001--implementation-candidate-2026-10-13) for candidate identity, retained validation, manual acceptance and the unresolved post-summary Mochi timer observation.
+
 ## Clipboard CP-02 lifecycle status (2026-10-12)
 
 - [x] CP02-S1 independently approved and merged through PR #91 at `8717e99f4cc77fc723497376dd858d22b8d6f18f`.

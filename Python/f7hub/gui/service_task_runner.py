@@ -23,14 +23,21 @@ class ServiceTaskRunner(QObject):
     """Retain workers until finished; never update widgets from run()."""
 
     busy_changed = Signal(bool)
+    completion_finished = Signal()
 
     def __init__(self, parent: QObject | None = None) -> None:
         super().__init__(parent)
         self._task = None
+        self._completion_depth = 0
 
     @property
     def busy(self) -> bool:
         return self._task is not None
+
+    @property
+    def completing(self) -> bool:
+        """A completion callback (possibly reentrant) is still on the stack."""
+        return self._completion_depth > 0
 
     def submit(self, work: Callable, on_success: Callable, on_error: Callable) -> bool:
         if self.busy:
@@ -50,8 +57,14 @@ class ServiceTaskRunner(QObject):
         self._task = None
         self._success = self._error = None
         task.deleteLater()
-        self.busy_changed.emit(False)
-        if task.error is None:
-            success(task.result)
-        else:
-            error(task.error)
+        self._completion_depth += 1
+        try:
+            self.busy_changed.emit(False)
+            if task.error is None:
+                success(task.result)
+            else:
+                error(task.error)
+        finally:
+            self._completion_depth -= 1
+            if not self.completing:
+                self.completion_finished.emit()
