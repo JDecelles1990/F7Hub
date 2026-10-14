@@ -287,6 +287,9 @@ class TicketWorkspace(QWidget):
         self.table.setSelectionBehavior(QAbstractItemView.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QAbstractItemView.SelectionMode.SingleSelection)
         self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        # This read-only queue uses arrow keys for records; Tab must leave the
+        # table instead of cycling indefinitely through its four columns.
+        self.table.setTabKeyNavigation(False)
         self.table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
         self.table.activated.connect(self._activate_row)
         queue_layout.addWidget(self.table)

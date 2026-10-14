@@ -106,6 +106,36 @@ class ScriptWorkspaceTests(unittest.TestCase):
         self.assertEqual(self.workspace.empty_state.text(), "No scripts available.")
         self.assertEqual(self.workspace.details.toPlainText(), "")
 
+    def test_available_toolbar_buttons_follow_visual_order_with_real_eligibility(self):
+        from Tests.GUI.test_script_execution import entry as approved_entry
+        self.workspace.close()
+        self.workspace.deleteLater()
+        self.service.entries = (approved_entry(),)
+        powershell = SimpleNamespace(pack_readiness=lambda: (False, "Synthetic unavailable pack"))
+        self.workspace = ScriptWorkspace(self.service, self.runner, powershell_service=powershell)
+        self.workspace.show()
+        self.application.processEvents()
+        self.workspace.refresh_list()
+        self.wait_idle()
+        controls = (self.workspace.run_button, self.workspace.copy_button,
+                    self.workspace.manage_button, self.workspace.refresh_button)
+        self.assertTrue(all(control.isEnabled() for control in controls))
+        self.assertEqual([control.x() for control in controls],
+                         sorted(control.x() for control in controls))
+        # This isolated owner test starts on Run; the shell regression separately
+        # verifies entry from a normally activated window and the navigation rail.
+        controls[0].setFocus(Qt.FocusReason.TabFocusReason)
+        self.application.processEvents()
+        for target in controls[1:]:
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Tab)
+            self.application.processEvents()
+            self.assertIs(self.application.focusWidget(), target)
+        for target in reversed(controls[:-1]):
+            QTest.keyClick(self.application.focusWidget(), Qt.Key.Key_Backtab)
+            self.application.processEvents()
+            self.assertIs(self.application.focusWidget(), target)
+        self.assertEqual(self.service.read_calls, [])
+
     def test_populated_selection_detail_and_keyboard(self):
         self.service.entries = (entry("ONE"), entry("TWO", description="Second"))
         self.workspace.refresh_list()

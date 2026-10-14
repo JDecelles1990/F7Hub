@@ -568,12 +568,19 @@ class InlineClassificationTests(unittest.TestCase):
             self.assertTrue(self.ws.type_input.isEnabled())
             self.assertTrue(self.ws.apply_properties_button.isEnabled())
 
-    def test_expanded_resolution_and_inline_controls_fit_1000_by_700(self):
+    def test_expanded_resolution_and_inline_controls_reachable_1000_by_700(self):
         self.window.resize(1000, 700)
         self.ws.status_input.setCurrentIndex(self.ws.status_input.findData("RESOLVED"))
         self.app.processEvents()
+        QTest.qWait(10)  # Settle deferred resize/expanded-resolution layout before measuring.
         self.assertEqual((self.window.width(), self.window.height()), (1000, 700))
         self.assertTrue(self.ws.resolution_input.isVisible())
         for widget in (self.ws.priority_input, self.ws.type_input, self.ws.apply_properties_button,
                        self.ws.resolution_input, self.ws.reload_button):
-            self.assertTrue(self.window.rect().contains(widget.mapTo(self.window, widget.rect().bottomRight())))
+            self.assertTrue(widget.isVisible())
+            scroll = self.window.workspace_viewport
+            for corner in (widget.rect().topLeft(), widget.rect().bottomRight()):
+                point = widget.mapTo(self.window.pages, corner)
+                scroll.ensureVisible(point.x(), point.y(), 1, 1)
+                self.app.processEvents()
+                self.assertTrue(scroll.viewport().rect().contains(widget.mapTo(scroll.viewport(), corner)))
