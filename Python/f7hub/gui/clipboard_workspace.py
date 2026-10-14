@@ -1,6 +1,6 @@
 """Bounded read-only Recent presentation using Clipboard owner projections."""
 
-from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt, Signal
+from PySide6.QtCore import QAbstractTableModel, QModelIndex, Qt
 from PySide6.QtWidgets import (
     QAbstractItemView, QHeaderView, QHBoxLayout, QLabel, QPushButton, QStackedWidget,
     QTableView, QVBoxLayout, QWidget,
@@ -59,8 +59,6 @@ class ClipboardRecentTableModel(QAbstractTableModel):
 class ClipboardWorkspace(QWidget):
     """Own one independent asynchronous first-page read and its presentation."""
 
-    tickets_requested = Signal()
-
     def __init__(self, parent=None, *, clipboard_service: ClipboardService | None = None,
                  settings_service: SettingsService | None = None) -> None:
         super().__init__(parent)
@@ -82,11 +80,6 @@ class ClipboardWorkspace(QWidget):
         self.unavailable_message.setWordWrap(True)
         self.unavailable_message.setAccessibleName(self.unavailable_message.text())
         self.status_message = self.unavailable_message
-        self.back_button = QPushButton("Back to Tickets", self)
-        self.back_button.setObjectName("clipboardBackToTicketsButton")
-        self.back_button.setAccessibleName("Back to Tickets")
-        self.back_button.clicked.connect(self.tickets_requested.emit)
-
         outer = QVBoxLayout(self)
         outer.addWidget(self.heading)
         self.setup = None
@@ -146,9 +139,30 @@ class ClipboardWorkspace(QWidget):
             self.page_message.setWordWrap(True)
             layout.addWidget(self.page_message)
             self._set_status("Clipboard history has not been loaded.")
-        outer.addWidget(self.back_button, alignment=Qt.AlignmentFlag.AlignLeft)
         if self._service is None:
             layout.addStretch()
+
+    def activation_focus_target(self) -> QWidget | None:
+        """Choose a usable control in the displayed section, if one exists."""
+        if self.setup is not None and self.sections.currentWidget() is self.setup:
+            if self.setup.pending:
+                candidates = (self.setup_button,)
+            else:
+                candidates = (*self.setup.checkboxes.values(), self.setup.reload_button,
+                              self.setup.cancel_button, self.setup_button)
+        else:
+            candidates = (self.refresh_button,)
+            if self.sections is not None:
+                candidates += (self.recent_button,)
+        for widget in candidates:
+            if widget is not None:
+                try:
+                    if (widget.isVisible() and widget.isEnabled()
+                            and widget.focusPolicy() != Qt.FocusPolicy.NoFocus):
+                        return widget
+                except RuntimeError:
+                    pass  # Qt may have destroyed a previously retained control.
+        return None
 
     @property
     def loading(self) -> bool:

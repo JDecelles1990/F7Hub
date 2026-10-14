@@ -1,5 +1,9 @@
 # F7Hub Python Architecture
 
+## GUI Shell S005 — Clipboard focus and route composition
+
+`ClipboardWorkspace` no longer creates `back_button` or declares `tickets_requested`; MainWindow no longer connects that signal or focuses the retired button. MainWindow retains its Tickets QAction, `show_tickets()` and `_leave_clipboard()` setup-confirmation route. ClipboardWorkspace selects a currently visible, enabled, focusable control in its active Recent or Setup section; MainWindow falls back to the Clipboard rail button. A same-page activation preserves a valid current focus. The choice is synchronous after `activate()`, so independent read completion and later deliberate input do not trigger a focus override. No service, repository, worker, Settings persistence, AHK or IPC contract changes. Earlier CC-01 and S004 records below remain historical.
+
 ## GUI Shell S004 — surviving action and keyboard ownership
 
 MainWindow retains its QStackedWidget, 52px rail, four setDefaultAction navigation buttons and eight MainWindow-owned command QActions. File/Settings menus and the Tickets QToolBar are omitted from construction. The utility QMenu retains Mochi/Backup/Exit and owns knowledgeBaseToolsMenu, whose Guide action remains altF7HubGuideAction shared with the KB header. Optional Knowledge composition/loading does not own fallback availability. The existing Exit action is associated with MainWindow through addAction so its Quit registration survives popup/container retirement; the conditional Windows Ctrl+Q mapping and single close connection remain.

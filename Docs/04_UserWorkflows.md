@@ -1,5 +1,9 @@
 ﻿# F7Hub User Workflows
 
+## GUI Shell S005 — returning from Clipboard Center (2026-10-14 candidate)
+
+Select **Tickets** in the left rail to leave Clipboard Center. For keyboard use, press **Alt+F** to focus navigation, move to Tickets with Tab or Shift+Tab, then press Space or Return. The retired lower Back to Tickets button has no replacement inside Clipboard Center. When Clipboard Setup has unsaved changes, Cancel keeps the Setup page and values; Discard allows the existing guarded departure without saving them. A pending preference operation refuses departure and close. Recent loading, failure and Retry feedback remain available. Reopening Clipboard preserves the retained workspace and normal Recent/Setup session rules. This candidate awaits independent review and integration; the S004 section below remains historical.
+
 ## GUI Shell S004 — sidebar and utility keyboard access (2026-10-14 candidate)
 
 Use the left rail for Tickets, Knowledge Base, Scripts and Clipboard Center; the redundant top menus and Tickets toolbar are retired. Press **Alt+F** to focus the current enabled destination, then use Tab/Shift+Tab and Space or Return to navigate. If that destination is disabled, focus goes to the first enabled destination in rail order, or the gear while all destinations are disabled. Alt+F itself keeps your workspace and drafts. Escape returns to the still-valid workspace control from which navigation focus was requested.

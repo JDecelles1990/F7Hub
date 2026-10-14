@@ -339,6 +339,25 @@ class ClipboardSetupShellTests(unittest.TestCase):
         self.assertEqual(self.workspace.findChildren(ClipboardSetup), [self.editor])
         self.assertEqual(self.editor.loaded_revision, 9)
 
+    def test_setup_activation_focus_preserves_dirty_edit_and_pending_selector(self):
+        field = self.editor.checkboxes[WORKFLOW_ENABLED]
+        self.assertIs(self.workspace.activation_focus_target(), field)
+        field.setChecked(True)
+        field.setFocus()
+        self.assertTrue(self.window.show_clipboard())
+        self.assertTrue(field.hasFocus())
+        self.assertTrue(self.editor.dirty)
+        self.service.gate = threading.Event()
+        self.assertTrue(self.editor.apply())
+        self.assertTrue(self.editor.pending)
+        self.window.navigation_buttons["clipboard"].setFocus()
+        self.assertIs(self.workspace.activation_focus_target(), self.workspace.setup_button)
+        self.assertTrue(self.window.show_clipboard())
+        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
+        self.service.gate.set()
+        self.wait()
+        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
+
     def test_all_shell_and_section_navigation_protect_dirty_draft(self):
         self.editor.checkboxes[WORKFLOW_ENABLED].setChecked(True)
         with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Cancel) as prompt:
@@ -351,7 +370,7 @@ class ClipboardSetupShellTests(unittest.TestCase):
                 self.assertTrue(self.editor.dirty)
             self.assertEqual(prompt.call_count, 7)
         with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Discard):
-            self.workspace.back_button.click()
+            QTest.mouseClick(self.window.navigation_buttons["tickets"], Qt.MouseButton.LeftButton)
         self.wait()
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
         self.assertFalse(self.editor.dirty)

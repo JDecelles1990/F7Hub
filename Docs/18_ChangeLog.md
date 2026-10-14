@@ -1,5 +1,11 @@
 # F7Hub ChangeLog
 
+## 2026-10-14 — GUI Shell S005 Clipboard return control candidate
+
+Removed Clipboard Center's redundant lower Back to Tickets button, its private signal and MainWindow connection/focus reference. The existing Tickets rail QAction and guarded route remain. A synchronous focus choice uses eligible controls in the active Recent or Setup section, with the Clipboard rail as fallback and same-page focus preserved. No Clipboard read, Settings persistence, service, database, AHK, IPC or unrelated module behavior was intentionally changed.
+
+Affected GUI and Clipboard integration checks and Windows-native Qt layout/focus checks passed as recorded in [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s005--clipboard-return-control-retirement-candidate-2026-10-14). Earlier failed fixture attempts remain historical FAIL evidence. This candidate is unstaged and uncommitted, READY_FOR_REVIEW; independent review and integration are pending. The S004 and earlier entries below retain their historical delivery meaning.
+
 ## 2026-10-14 — GUI Shell S004 menu and toolbar retirement candidate
 
 Retired MainWindow's redundant File/Settings menu bar and Tickets toolbar while retaining the 52px rail, four shared navigation QActions, native controls and status bar. Existing Mochi/Backup/Exit utility actions remain; the gear now owns the independent Knowledge Base tools → Guide fallback using the same Guide QAction/service as the KB header. Scoped Alt+S opens utilities; Alt+F moves focus without activating a workspace. Popup/dialog input, editor Save, existing Ctrl+Q and draft/pending-operation protections remain.
