@@ -1,5 +1,14 @@
 # F7Hub Todo
 
+## GUI Shell S005 — independent review pending (2026-10-14)
+
+- [x] Retire Clipboard's lower Back to Tickets button, signal and MainWindow references while retaining the Tickets rail route.
+- [x] Add bounded focus selection and update GUI tests for Recent/Setup/loading/Retry, optional-service absence, draft protection and keyboard/mouse rail return.
+- [x] Run affected GUI/Integration checks and bounded native Windows Qt layout/focus validation at 660×592, 1000×700 and 1180×850; see [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s005--clipboard-return-control-retirement-candidate-2026-10-14).
+- [ ] Independent read-only review of the exact S005 candidate; integration requires separate authorization.
+
+The older S004 candidate checklist below is historical. The accepted Scripts physical forward-Tab issue and unrelated Mochi deleted-QTimer diagnostic remain separate follow-ups.
+
 ## GUI Shell S004 — bounded delivery (2026-10-14 candidate)
 
 - [x] Retire redundant File/Settings menu bar and Tickets toolbar; preserve eight shared command actions and guarded handlers.

@@ -494,17 +494,17 @@ class MainWindowTests(unittest.TestCase):
         self.assertIsNotNone(clipboard)
         self.assertIs(self.window.pages.currentWidget(), clipboard)
         self.assertEqual(self.window.pages.count(), count + 1)
-        self.assertTrue(clipboard.back_button.hasFocus())
+        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
         for _ in range(3):
             self.assertTrue(self.window.show_clipboard())
             self.assertIs(self.window.clipboard_workspace, clipboard)
             self.assertEqual(self.window.pages.count(), count + 1)
-        clipboard.back_button.click()
+        QTest.mouseClick(self.window.navigation_buttons["tickets"], Qt.MouseButton.LeftButton)
         self.wait_idle()
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
         self.assertTrue(self.window.show_clipboard())
         self.assertIs(self.window.pages.currentWidget(), clipboard)
-        self.assertTrue(clipboard.back_button.hasFocus())
+        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
         self.window.scripts_action.trigger()
         self.wait_idle()
         self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
@@ -515,13 +515,78 @@ class MainWindowTests(unittest.TestCase):
     def test_clipboard_without_optional_services_and_idle_close(self):
         window = MainWindow(self.service)
         self.addCleanup(window.deleteLater)
+        window.show()
+        self.application.processEvents()
+        deadline = time.monotonic() + 5
+        while not window.clipboard_action.isEnabled() and time.monotonic() < deadline:
+            QTest.qWait(5)
+        self.assertTrue(window.clipboard_action.isEnabled())
         self.assertFalse(window.knowledge_action.isEnabled())
         self.assertFalse(window.scripts_action.isEnabled())
         self.assertTrue(window.clipboard_action.isEnabled())
         self.assertTrue(window.show_clipboard())
         self.assertEqual(window.clipboard_workspace.unavailable_message.text(),
                          "Clipboard history is not available yet.")
+        self.assertTrue(window.navigation_buttons["clipboard"].hasFocus())
         self.assertTrue(window.close())
+
+    def test_clipboard_recent_loading_retry_and_later_focus_choice(self):
+        service = RecordingClipboardService()
+        service.gate = threading.Event()
+        self.window.clipboard_service = service
+        self.assertTrue(self.window.show_clipboard())
+        clipboard = self.window.clipboard_workspace
+        self.assertFalse(clipboard.refresh_button.isEnabled())
+        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
+        service.gate.set()
+        deadline = time.monotonic() + 5
+        while clipboard.loading and time.monotonic() < deadline:
+            QTest.qWait(5)
+        self.assertFalse(clipboard.loading)
+        self.assertTrue(clipboard.refresh_button.isEnabled())
+        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
+        clipboard.refresh_button.setFocus()
+        self.assertTrue(self.window.show_clipboard())
+        self.assertTrue(clipboard.refresh_button.hasFocus())
+        service.error = RuntimeError("synthetic private read failure")
+        clipboard.refresh_button.click()
+        deadline = time.monotonic() + 5
+        while clipboard.loading and time.monotonic() < deadline:
+            QTest.qWait(5)
+        self.assertFalse(clipboard.loading)
+        self.assertEqual(clipboard.refresh_button.text(), "Retry")
+        self.window.show_tickets()
+        self.wait_idle()
+        self.assertTrue(self.window.show_clipboard())
+        self.assertTrue(clipboard.refresh_button.hasFocus())
+
+    def test_clipboard_repeated_activation_keeps_rail_focus(self):
+        self.assertTrue(self.window.show_clipboard())
+        rail = self.window.navigation_buttons["clipboard"]
+        self.assertTrue(rail.hasFocus())
+        self.assertTrue(self.window.show_clipboard())
+        self.assertTrue(rail.hasFocus())
+
+    def test_clipboard_recent_with_settings_focus_during_loading_and_after_return(self):
+        from Tests.GUI.test_clipboard_setup import RecordingSettingsService
+        service = RecordingClipboardService()
+        service.gate = threading.Event()
+        self.window.clipboard_service = service
+        self.window.settings_service = RecordingSettingsService()
+        self.assertTrue(self.window.show_clipboard())
+        workspace = self.window.clipboard_workspace
+        self.assertFalse(workspace.refresh_button.isEnabled())
+        self.assertTrue(workspace.recent_button.hasFocus())
+        service.gate.set()
+        deadline = time.monotonic() + 5
+        while workspace.loading and time.monotonic() < deadline:
+            QTest.qWait(5)
+        self.assertFalse(workspace.loading)
+        self.assertTrue(workspace.recent_button.hasFocus())
+        QTest.mouseClick(self.window.navigation_buttons["tickets"], Qt.MouseButton.LeftButton)
+        self.wait_idle()
+        self.assertTrue(self.window.show_clipboard())
+        self.assertTrue(workspace.refresh_button.hasFocus())
 
     def test_clipboard_pending_owner_guards_cover_idle_callback_gap(self):
         workspace = self.window.workspace
@@ -603,7 +668,7 @@ class MainWindowTests(unittest.TestCase):
         self.assertEqual(prompt.call_args.args[1], "Unsaved new ticket")
         self.assertEqual(form.subject_input.text(), "Keep unsaved creation")
         self.assertIs(self.window.pages.currentWidget(), self.window.clipboard_workspace)
-        self.window.clipboard_workspace.back_button.click()
+        QTest.mouseClick(self.window.navigation_buttons["tickets"], Qt.MouseButton.LeftButton)
         self.wait_idle()
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
         self.assertTrue(self.window.workspace.creating)
@@ -1103,7 +1168,7 @@ class NavigationRailTests(unittest.TestCase):
             self.activate("clipboard")
             self.assertIs(self.window.clipboard_workspace, clipboard)
             self.assertEqual(self.window.pages.count(), count)
-        clipboard.back_button.click()
+        self.activate("tickets", keyboard=True)
         self.wait_idle()
         self.active("tickets")
 
@@ -1317,7 +1382,7 @@ class NavigationRailTests(unittest.TestCase):
                     self.activate(key)
                     self.assert_origin(key)
                 self.scroll_source()
-                QTest.mouseClick(self.window.clipboard_workspace.back_button, Qt.MouseButton.LeftButton)
+                QTest.mouseClick(self.window.navigation_buttons["tickets"], Qt.MouseButton.LeftButton)
                 self.wait_idle()
                 self.assert_origin("tickets")
 

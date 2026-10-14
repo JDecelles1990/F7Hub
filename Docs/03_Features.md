@@ -1,5 +1,9 @@
 # F7Hub Features
 
+## GUI Shell S005 — Clipboard return through the rail (2026-10-14 candidate)
+
+Clipboard Center uses the existing Tickets button in the 52px module rail for return navigation. Its redundant lower Back to Tickets control is retired. Recent history and Clipboard Setup remain in the same retained, lazy workspace; reads, preferences, drafts, pending work and close protections keep their existing owners. S005 is an unstaged READY_FOR_REVIEW candidate, not integrated. The S004 and earlier sections below describe the behavior delivered at those historical stages.
+
 ## GUI Shell S004 — current shell access (2026-10-14 candidate)
 
 The four existing module commands use the 52px sidebar; the redundant top menu bar and Tickets toolbar are retired. The Settings gear retains Mochi, local database backup and protected Exit, with independent **Knowledge Base tools → Guide** access alongside the KB header Guide button. Alt+S opens utilities and Alt+F focuses navigation without activating a workspace. Existing services, drafts, optional availability and F7/Alt+F7 remain. This successor replaces the S003 File fallback below for the S004 candidate; historical slice validation retains its original meaning. See [GUI](05_GUI.md) and [current state](Status/CURRENT_STATE.md).

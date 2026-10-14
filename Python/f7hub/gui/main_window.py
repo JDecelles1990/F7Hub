@@ -774,11 +774,28 @@ class MainWindow(QMainWindow):
         if self.clipboard_workspace is None:
             self.clipboard_workspace = ClipboardWorkspace(
                 self, clipboard_service=self.clipboard_service, settings_service=self.settings_service)
-            self.clipboard_workspace.tickets_requested.connect(self.show_tickets)
             self.pages.addWidget(self.clipboard_workspace)
+        same_page = self.pages.currentWidget() is self.clipboard_workspace
         self.pages.setCurrentWidget(self.clipboard_workspace)
         self.clipboard_workspace.activate()
-        self.clipboard_workspace.back_button.setFocus()
+        current_focus = self.focusWidget()
+        rail_button = self.navigation_buttons["clipboard"]
+        if same_page and current_focus is not None:
+            try:
+                if (current_focus is rail_button or self.clipboard_workspace.isAncestorOf(current_focus)):
+                    if (current_focus.isVisible() and current_focus.isEnabled()
+                            and current_focus.focusPolicy() != Qt.FocusPolicy.NoFocus):
+                        return True
+            except RuntimeError:
+                pass  # A removed widget cannot retain focus.
+        target = self.clipboard_workspace.activation_focus_target() or rail_button
+        try:
+            if (target.isVisible() and target.isEnabled()
+                    and target.focusPolicy() != Qt.FocusPolicy.NoFocus):
+                target.setFocus(Qt.FocusReason.OtherFocusReason)
+        except RuntimeError:
+            if target is not rail_button and rail_button.isVisible() and rail_button.isEnabled():
+                rail_button.setFocus(Qt.FocusReason.OtherFocusReason)
         return True
 
     def _leave_clipboard(self) -> bool:

@@ -1,5 +1,11 @@
 # F7Hub GUI Design
 
+## GUI Shell S005 — Clipboard return control retirement (2026-10-14 candidate)
+
+ClipboardWorkspace no longer contains the lower Back to Tickets button. MainWindow's existing Tickets rail QAction and guarded `show_tickets()` route remain the return path; `_leave_clipboard()` still owns Setup confirmation and accepted-session cleanup. No return control or shortcut was added to Clipboard Center. The retained Recent and Setup sections, read-only history, lazy construction, safe close and pending/draft guards remain.
+
+On an accepted Clipboard page change, focus goes to enabled visible Refresh/Retry in Recent; while Refresh is disabled for loading, it goes to the Recent section selector when Settings exists, otherwise the Clipboard rail button. Setup's first enabled checkbox is preferred when editing is available; its enabled Reload/Cancel or section selector are fallbacks. Pending Setup uses its section selector, with the rail as fallback. When both optional services are absent, the rail is the only interactive landing point. Repeated activation preserves an existing valid user focus, section and scroll state. Async completion does not later steal focus. Qt native validation and exact limits are recorded in [CURRENT_STATE](Status/CURRENT_STATE.md#gui-shell-s005--clipboard-return-control-retirement-candidate-2026-10-14). Earlier S004/CC-01 descriptions of the button are historical.
+
 ## GUI Shell S004 — menu and toolbar retirement (2026-10-14 candidate)
 
 The existing 52px rail is the sole primary navigation surface for Tickets, Knowledge Base, Scripts and Clipboard Center. MainWindow no longer constructs the redundant File/Settings menu bar or Tickets toolbar. The four rail buttons retain their shared QActions and guarded routes; native window controls, the status bar and workspace-local controls remain. Clipboard stays lazy and retained, including its Back to Tickets button.
