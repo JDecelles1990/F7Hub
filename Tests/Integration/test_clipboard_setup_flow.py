@@ -183,6 +183,53 @@ class ClipboardSetupFlowTests(unittest.TestCase):
                 window.deleteLater()
                 self.application.processEvents()
 
+    def test_source_guard_and_true_preferences_preserve_database_and_capability(self):
+        with patch("f7hub.services.mochi_service.MochiService.automatic_start", return_value=False):
+            context = bootstrap_application(project_root=ROOT, database_path=self.path)
+            window = context.main_window
+            try:
+                window.show_clipboard()
+                workspace = window.clipboard_workspace
+                wait_idle(self.application, lambda: workspace.loading)
+                workspace.show_setup()
+                self.wait(workspace.setup)
+                self.save(workspace.setup, (WORKFLOW_ENABLED, SOURCE_TITLE_ENABLED))
+                editor = workspace.setup
+                editor.checkboxes[SOURCE_PROCESS_ENABLED].setChecked(True)
+                draft = dict(editor._draft)
+                before_bytes = self.path.read_bytes()
+                with database_connection(self.path, read_only=True) as connection:
+                    before_rows = tuple(connection.iterdump())
+                revision = context.settings_service.get_snapshot().revision
+                with (patch.object(QApplication, "clipboard", side_effect=AssertionError("OS Clipboard forbidden")),
+                      patch("subprocess.Popen", side_effect=AssertionError("Process forbidden")),
+                      patch.object(context.settings_service, "apply", side_effect=AssertionError("Switch write forbidden")),
+                      patch.object(context.settings_service, "refresh", side_effect=AssertionError("Switch read forbidden")),
+                      patch.object(context.clipboard_service, "get_recent", side_effect=AssertionError("Switch read forbidden"))):
+                    with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Cancel) as prompt:
+                        self.assertFalse(workspace.select_source("windows"))
+                    self.assertEqual(prompt.call_count, 1)
+                    self.assertEqual(editor._draft, draft)
+                    self.assertEqual(workspace.source_selector.currentData(), "f7hub")
+                    with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Discard) as prompt:
+                        self.assertTrue(workspace.select_source("windows"))
+                    self.assertEqual(prompt.call_count, 1)
+                    self.assertFalse(editor.dirty)
+                    self.assertFalse(workspace.windows_refresh_button.isEnabled())
+                    self.assertTrue(workspace.select_source("f7hub"))
+                    self.assertIs(workspace.setup, editor)
+                    self.assertIs(editor._service, context.settings_service)
+                self.assertEqual(context.settings_service.get_snapshot().revision, revision)
+                self.assertEqual(self.path.read_bytes(), before_bytes)
+                with database_connection(self.path, read_only=True) as connection:
+                    self.assertEqual(tuple(connection.iterdump()), before_rows)
+                    self.assertEqual(validate_database_integrity(connection), (("ok",), ()))
+            finally:
+                workspace.setup.cancel()
+                window.close()
+                window.deleteLater()
+                self.application.processEvents()
+
 
 if __name__ == "__main__":
     unittest.main()

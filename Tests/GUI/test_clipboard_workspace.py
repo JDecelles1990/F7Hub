@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QApplication, QAbstractItemView, QPushButton
 
 from f7hub.gui.clipboard_workspace import ClipboardWorkspace
 from f7hub.domain.clipboard import ClipboardItemRef, ClipboardRecentItem, ClipboardRecentPage
+from f7hub.gui.service_task_runner import ServiceTaskRunner
 
 
 def recent_page(*, rows=None, has_more=False):
@@ -117,7 +118,7 @@ class ClipboardWorkspaceTests(unittest.TestCase):
         self.assertEqual(self.workspace.table.selectionMode(), QAbstractItemView.SelectionMode.NoSelection)
         self.assertFalse(self.workspace.table.isSortingEnabled())
         self.assertEqual([b.text() for b in self.workspace.findChildren(QPushButton)],
-                         ["Refresh"])
+                         ["Refresh", "Refresh"])
 
     def test_loading_refuses_duplicates_and_has_no_enabled_recent_control(self):
         self.compose()
@@ -125,7 +126,7 @@ class ClipboardWorkspaceTests(unittest.TestCase):
         self.assertTrue(self.workspace.activate())
         self.assertEqual(self.workspace.status_message.text(), "Loading Clipboard history…")
         self.assertFalse(self.workspace.refresh_button.isEnabled())
-        self.assertIsNone(self.workspace.activation_focus_target())
+        self.assertIs(self.workspace.activation_focus_target(), self.workspace.source_selector)
         self.assertFalse(self.workspace.activate())
         self.assertFalse(self.workspace.refresh())
         self.service.gate.set()
@@ -199,15 +200,174 @@ class ClipboardWorkspaceTests(unittest.TestCase):
         self.assertEqual(self.workspace.heading.textFormat(), Qt.TextFormat.PlainText)
         self.assertEqual(self.workspace.unavailable_message.textFormat(), Qt.TextFormat.PlainText)
         self.assertTrue(self.workspace.unavailable_message.wordWrap())
-        self.assertEqual(self.workspace.findChildren(QAbstractItemView), [])
-        self.assertEqual(self.workspace.findChildren(QPushButton), [])
-        self.assertIsNone(self.workspace.activation_focus_target())
+        self.assertEqual(self.workspace.f7hub_page.findChildren(QAbstractItemView), [])
+        self.assertIsNotNone(self.workspace.source_selector.view())
+        self.assertEqual(self.workspace.findChildren(QPushButton), [self.workspace.windows_refresh_button])
+        self.assertIs(self.workspace.activation_focus_target(), self.workspace.source_selector)
         self.assertEqual(self.workspace.property("moduleKey"), "clipboard")
 
     def test_unavailable_information_remains_accessible(self):
         self.assertEqual(self.workspace.accessibleName(), "Clipboard Center")
         self.assertEqual(self.workspace.unavailable_message.accessibleName(),
                          self.workspace.unavailable_message.text())
+
+    def test_two_sources_default_and_truthful_selectable_windows(self):
+        w = self.workspace
+        self.assertEqual([(w.source_selector.itemText(i), w.source_selector.itemData(i))
+                          for i in range(w.source_selector.count())],
+                         [("F7Hub Clipboard", "f7hub"), ("Windows Clipboard", "windows")])
+        self.assertEqual(w.source_key, "f7hub")
+        self.assertIs(w.source_pages.currentWidget(), w.f7hub_page)
+        self.assertEqual(w.source_selector.accessibleName(), "Clipboard source")
+        self.assertFalse(w.source_selector.isEditable())
+        self.assertIs(w.source_label.buddy(), w.source_selector)
+        self.assertNotIn("&", w.source_label.text())
+        self.assertTrue(w.select_source("windows"))
+        self.assertIs(w.source_pages.currentWidget(), w.windows_page)
+        self.assertEqual(w.windows_unavailable_message.text(), "Windows Clipboard snapshot is not available yet.")
+        self.assertEqual(w.windows_unavailable_message.accessibleName(), w.windows_unavailable_message.text())
+        self.assertEqual(w.windows_unavailable_message.textFormat(), Qt.TextFormat.PlainText)
+        self.assertTrue(w.windows_unavailable_message.wordWrap())
+        self.assertFalse(w.windows_refresh_button.isEnabled())
+        self.assertIn("not available", w.windows_refresh_button.accessibleDescription())
+        self.assertIs(w.activation_focus_target(), w.source_selector)
+        self.assertFalse(w.activate())
+
+    def test_switches_retain_model_widgets_workers_and_do_not_dispatch(self):
+        self.compose()
+        w = self.workspace
+        w.activate()
+        self.wait_idle()
+        identities = (w.f7hub_page, w.windows_page, w.table, w.model, w.runner, w._service)
+        resets = []
+        w.model.modelReset.connect(lambda: resets.append(True))
+        w.table.setColumnWidth(2, 121)
+        with (patch.object(QApplication, "clipboard", side_effect=AssertionError("OS access forbidden")),
+              patch("subprocess.Popen", side_effect=AssertionError("Process forbidden"))):
+            for _ in range(4):
+                self.assertTrue(w.select_source("windows"))
+                self.assertFalse(w.refresh())
+                self.assertTrue(w.select_source("windows"))
+                self.assertTrue(w.select_source("f7hub"))
+            self.assertFalse(w.select_source("unknown"))
+        self.assertEqual(identities, (w.f7hub_page, w.windows_page, w.table, w.model, w.runner, w._service))
+        self.assertEqual(w.findChildren(ServiceTaskRunner), [w.runner])
+        self.assertEqual(self.service.calls, [50])
+        self.assertEqual(resets, [])
+        self.assertEqual(w.table.columnWidth(2), 121)
+        self.assertEqual(w.model.rowCount(), 2)
+
+    def test_pending_and_completion_gap_restore_selector_without_switch(self):
+        self.compose()
+        w = self.workspace
+        self.service.gate = threading.Event()
+        w.activate()
+        observed = []
+        w.runner.busy_changed.connect(
+            lambda busy: observed.append(w.select_source("windows")) if not busy else None)
+        w.source_selector.setCurrentIndex(1)
+        w.source_selector.activated.emit(1)
+        self.assertEqual(w.source_selector.currentData(), "f7hub")
+        self.assertIs(w.source_pages.currentWidget(), w.f7hub_page)
+        self.assertIn("finishing", w.source_message.text())
+        self.service.gate.set()
+        self.wait_idle()
+        self.assertEqual(observed, [False])
+        self.assertTrue(w.select_source("windows"))
+        self.assertEqual(w.source_message.accessibleName(), "")
+
+    def test_obsolete_success_and_failure_cannot_replace_windows_or_focus(self):
+        self.compose()
+        w = self.workspace
+        w.activate()
+        self.wait_idle()
+        old_generation = w._recent_generation
+        w.refresh()
+        self.wait_idle()
+        w.select_source("windows")
+        before = (w.model._rows, w.status_message.text(), w.windows_unavailable_message.text())
+        w.source_selector.setFocus()
+        w._recent_completed(old_generation, recent_page(rows=()))
+        w._recent_completed(old_generation, RuntimeError("PRIVATE"), failed=True)
+        self.assertEqual((w.model._rows, w.status_message.text(), w.windows_unavailable_message.text()), before)
+        self.assertEqual(w.source_key, "windows")
+        self.assertTrue(w.source_selector.hasFocus())
+
+    def test_source_scroll_callbacks_are_independent_synchronous_and_noop_safe(self):
+        w = self.workspace
+        position, restored = [12, 34], []
+        w._capture_scroll = lambda: tuple(position)
+        w._restore_scroll = lambda value: restored.append(value)
+        self.assertTrue(w.select_source("windows"))
+        self.assertEqual(restored, [(0, 0)])
+        position[:] = [7, 19]
+        self.assertTrue(w.select_source("f7hub"))
+        self.assertEqual(restored[-1], (12, 34))
+        self.assertTrue(w.select_source("windows"))
+        self.assertEqual(restored[-1], (7, 19))
+        count = len(restored)
+        w.select_source("windows")
+        self.application.processEvents()
+        self.assertEqual(len(restored), count)
+
+    def test_selector_keyboard_switch_and_table_tab_escape(self):
+        self.compose()
+        w = self.workspace
+        w.activate()
+        self.wait_idle()
+        w.source_selector.setFocus()
+        QTest.keyClick(w.source_selector, Qt.Key.Key_Down)
+        self.application.processEvents()
+        self.assertEqual(w.source_key, "windows")
+        QTest.keyClick(w.source_selector, Qt.Key.Key_Up)
+        self.application.processEvents()
+        self.assertEqual(w.source_key, "f7hub")
+        QTest.keyClick(w.source_selector, Qt.Key.Key_Tab)
+        self.assertTrue(w.refresh_button.hasFocus())
+        QTest.keyClick(w.refresh_button, Qt.Key.Key_Backtab)
+        self.assertTrue(w.source_selector.hasFocus())
+        w.table.setFocus()
+        QTest.keyClick(w.table, Qt.Key.Key_Tab)
+        self.assertFalse(w.table.hasFocus())
+        self.assertFalse(w.table.tabKeyNavigation())
+
+    def test_failed_recent_status_is_retained_separately_from_windows(self):
+        self.compose()
+        self.service.error = RuntimeError("PRIVATE")
+        self.workspace.activate()
+        self.wait_idle()
+        self.workspace.select_source("windows")
+        self.assertNotIn("could not be loaded", self.workspace.windows_unavailable_message.text())
+        self.workspace.select_source("f7hub")
+        self.assertEqual(self.workspace.refresh_button.text(), "Retry")
+        self.assertEqual(self.service.calls, [50])
+        self.service.error = None
+        self.workspace.refresh_button.click()
+        self.wait_idle()
+        self.assertEqual(self.workspace.model.rowCount(), 2)
+
+    def test_optional_services_do_not_change_source_choices_or_create_workers(self):
+        from Tests.GUI.test_clipboard_setup import RecordingSettingsService
+        for history, preferences in ((False, False), (True, False), (False, True), (True, True)):
+            with self.subTest(history=history, preferences=preferences):
+                service = RecordingClipboardService() if history else None
+                settings = RecordingSettingsService() if preferences else None
+                w = ClipboardWorkspace(clipboard_service=service, settings_service=settings)
+                try:
+                    self.assertEqual(w.source_selector.count(), 2)
+                    self.assertEqual(w.source_pages.count(), 2)
+                    self.assertTrue(w.select_source("windows"))
+                    self.assertFalse(w.activate())
+                    self.assertTrue(w.select_source("f7hub"))
+                    self.assertEqual(len(w.findChildren(ServiceTaskRunner)), 2 if preferences else 1)
+                    if service is not None:
+                        self.assertEqual(service.calls, [])
+                    if settings is not None:
+                        self.assertEqual(settings.reads, 0)
+                finally:
+                    w.close()
+                    w.deleteLater()
+        self.application.processEvents()
 
 
 if __name__ == "__main__":

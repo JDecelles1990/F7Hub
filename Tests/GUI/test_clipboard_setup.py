@@ -339,6 +339,63 @@ class ClipboardSetupShellTests(unittest.TestCase):
         self.assertEqual(self.workspace.findChildren(ClipboardSetup), [self.editor])
         self.assertEqual(self.editor.loaded_revision, 9)
 
+    def test_source_cancel_keeps_exact_draft_section_focus_and_selector(self):
+        field = self.editor.checkboxes[WORKFLOW_ENABLED]
+        field.setChecked(True)
+        field.setFocus()
+        self.application.processEvents()
+        before = (dict(self.editor._draft), self.editor.loaded_revision, self.service.reads)
+        self.workspace.source_selector.setFocus()
+        self.workspace.source_selector.setCurrentIndex(1)
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Cancel) as prompt:
+            self.workspace.source_selector.activated.emit(1)
+        self.assertEqual(prompt.call_count, 1)
+        self.assertEqual(self.workspace.source_key, "f7hub")
+        self.assertEqual(self.workspace.source_selector.currentData(), "f7hub")
+        self.assertIs(self.workspace.sections.currentWidget(), self.editor)
+        self.assertEqual((self.editor._draft, self.editor.loaded_revision, self.service.reads), before)
+        self.assertTrue(field.hasFocus())
+        self.assertEqual(self.service.calls, [])
+
+    def test_source_discard_ends_session_once_without_write_or_recreation(self):
+        self.editor.checkboxes[WORKFLOW_ENABLED].setChecked(True)
+        generation = self.editor._generation
+        reads = self.service.reads
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Discard) as prompt:
+            self.assertTrue(self.workspace.select_source("windows"))
+        self.assertEqual(prompt.call_count, 1)
+        self.assertFalse(self.editor.dirty)
+        self.assertEqual(self.editor._generation, generation + 1)
+        self.assertIs(self.workspace.sections.currentWidget(), self.workspace.recent_page)
+        self.assertTrue(self.workspace.select_source("f7hub"))
+        self.assertIs(self.workspace.setup, self.editor)
+        self.assertEqual(self.service.reads, reads)
+        self.assertEqual(self.service.calls, [])
+
+    def test_pending_load_save_and_completion_gap_refuse_source_switch(self):
+        for operation in ("load", "save"):
+            with self.subTest(operation=operation):
+                self.service.gate = threading.Event()
+                if operation == "load":
+                    self.editor.reload()
+                else:
+                    self.editor.checkboxes[WORKFLOW_ENABLED].setChecked(True)
+                    self.editor.apply()
+                observations = []
+                callback = lambda busy: observations.append(self.workspace.select_source("windows")) if not busy else None
+                self.editor.runner.busy_changed.connect(callback)
+                before = dict(self.editor._draft)
+                with patch.object(QMessageBox, "question", side_effect=AssertionError("No pending dialog")):
+                    self.assertFalse(self.workspace.select_source("windows"))
+                    self.assertEqual(self.workspace.source_selector.currentData(), "f7hub")
+                    self.assertEqual(self.editor._draft, before)
+                self.service.gate.set()
+                self.wait()
+                self.editor.runner.busy_changed.disconnect(callback)
+                self.assertEqual(observations, [False])
+                self.assertIs(self.workspace.sections.currentWidget(), self.editor)
+        self.assertEqual(len(self.service.calls), 1)
+
     def test_setup_activation_focus_preserves_dirty_edit_and_pending_selector(self):
         field = self.editor.checkboxes[WORKFLOW_ENABLED]
         self.assertIs(self.workspace.activation_focus_target(), field)

@@ -494,7 +494,7 @@ class MainWindowTests(unittest.TestCase):
         self.assertIsNotNone(clipboard)
         self.assertIs(self.window.pages.currentWidget(), clipboard)
         self.assertEqual(self.window.pages.count(), count + 1)
-        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
+        self.assertTrue(clipboard.source_selector.hasFocus())
         for _ in range(3):
             self.assertTrue(self.window.show_clipboard())
             self.assertIs(self.window.clipboard_workspace, clipboard)
@@ -504,7 +504,7 @@ class MainWindowTests(unittest.TestCase):
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
         self.assertTrue(self.window.show_clipboard())
         self.assertIs(self.window.pages.currentWidget(), clipboard)
-        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
+        self.assertTrue(clipboard.source_selector.hasFocus())
         self.window.scripts_action.trigger()
         self.wait_idle()
         self.assertIs(self.window.pages.currentWidget(), self.window.script_workspace)
@@ -527,7 +527,7 @@ class MainWindowTests(unittest.TestCase):
         self.assertTrue(window.show_clipboard())
         self.assertEqual(window.clipboard_workspace.unavailable_message.text(),
                          "Clipboard history is not available yet.")
-        self.assertTrue(window.navigation_buttons["clipboard"].hasFocus())
+        self.assertTrue(window.clipboard_workspace.source_selector.hasFocus())
         self.assertTrue(window.close())
 
     def test_clipboard_recent_loading_retry_and_later_focus_choice(self):
@@ -537,14 +537,14 @@ class MainWindowTests(unittest.TestCase):
         self.assertTrue(self.window.show_clipboard())
         clipboard = self.window.clipboard_workspace
         self.assertFalse(clipboard.refresh_button.isEnabled())
-        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
+        self.assertTrue(clipboard.source_selector.hasFocus())
         service.gate.set()
         deadline = time.monotonic() + 5
         while clipboard.loading and time.monotonic() < deadline:
             QTest.qWait(5)
         self.assertFalse(clipboard.loading)
         self.assertTrue(clipboard.refresh_button.isEnabled())
-        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
+        self.assertTrue(clipboard.source_selector.hasFocus())
         clipboard.refresh_button.setFocus()
         self.assertTrue(self.window.show_clipboard())
         self.assertTrue(clipboard.refresh_button.hasFocus())
@@ -563,9 +563,67 @@ class MainWindowTests(unittest.TestCase):
     def test_clipboard_repeated_activation_keeps_rail_focus(self):
         self.assertTrue(self.window.show_clipboard())
         rail = self.window.navigation_buttons["clipboard"]
+        rail.setFocus()
         self.assertTrue(rail.hasFocus())
         self.assertTrue(self.window.show_clipboard())
         self.assertTrue(rail.hasFocus())
+
+    def test_windows_source_retains_center_and_uses_valid_focus_without_reads(self):
+        service = RecordingClipboardService()
+        self.window.clipboard_service = service
+        self.window.show_clipboard()
+        clipboard = self.window.clipboard_workspace
+        deadline = time.monotonic() + 5
+        while clipboard.loading and time.monotonic() < deadline:
+            QTest.qWait(5)
+        self.assertFalse(clipboard.loading)
+        identities = (clipboard, clipboard.source_pages, clipboard.f7hub_page, clipboard.windows_page,
+                      clipboard.runner, clipboard._service)
+        self.assertTrue(clipboard.select_source("windows"))
+        self.window.show_tickets()
+        self.wait_idle()
+        self.window.show_clipboard()
+        self.assertEqual(clipboard.source_key, "windows")
+        self.assertTrue(clipboard.source_selector.hasFocus())
+        self.assertTrue(self.window.show_clipboard())
+        self.assertEqual(service.calls, [50])
+        self.assertEqual(identities, (self.window.clipboard_workspace, clipboard.source_pages,
+                                     clipboard.f7hub_page, clipboard.windows_page, clipboard.runner, clipboard._service))
+        clipboard.source_selector.setEnabled(False)
+        self.window.show_tickets()
+        self.wait_idle()
+        self.window.show_clipboard()
+        self.assertTrue(self.window.navigation_buttons["clipboard"].hasFocus())
+
+    def test_source_scroll_restoration_clamps_and_does_not_touch_hidden_module(self):
+        self.window.show_clipboard()
+        clipboard = self.window.clipboard_workspace
+        clipboard.setMinimumSize(1800, 1200)
+        self.application.processEvents()
+        scroll = self.window.workspace_viewport
+        scroll.horizontalScrollBar().setValue(23)
+        scroll.verticalScrollBar().setValue(17)
+        captured = self.window._capture_clipboard_scroll()
+        self.assertEqual(captured, (23, 17))
+        clipboard.select_source("windows")
+        self.assertEqual(clipboard._source_scroll["f7hub"], captured)
+        self.assertEqual(self.window._capture_clipboard_scroll(), (0, 0))
+        scroll.verticalScrollBar().setValue(21)
+        clipboard.select_source("f7hub")
+        self.assertEqual(clipboard._source_scroll["windows"], (0, 21))
+        self.assertEqual(self.window._capture_clipboard_scroll(), captured)
+        self.window.show_tickets()
+        self.wait_idle()
+        before = self.window._capture_clipboard_scroll()
+        self.window._restore_clipboard_scroll((99999, 99999))
+        self.assertEqual(self.window._capture_clipboard_scroll(), before)
+        self.window.show_clipboard()
+        self.window.navigation_buttons["clipboard"].setFocus()
+        self.window._restore_clipboard_scroll((-9, 99999))
+        self.assertEqual(scroll.horizontalScrollBar().value(), 0)
+        self.assertEqual(scroll.verticalScrollBar().value(), scroll.verticalScrollBar().maximum())
+        self.application.processEvents()
+        self.assertEqual(scroll.verticalScrollBar().value(), scroll.verticalScrollBar().maximum())
 
     def test_clipboard_recent_with_settings_focus_during_loading_and_after_return(self):
         from Tests.GUI.test_clipboard_setup import RecordingSettingsService

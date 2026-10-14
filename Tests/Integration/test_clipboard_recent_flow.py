@@ -135,6 +135,17 @@ class ClipboardRecentGuiFlowTests(ClipboardDatabaseTestCase):
                     self.assertIs(clipboard._service, context.clipboard_service)
                     self.assertTrue(window.show_clipboard())
                     recent.assert_called_once_with()
+                    retained = (clipboard, clipboard.model, clipboard.table, clipboard.runner,
+                                clipboard.f7hub_page, clipboard.windows_page, clipboard.setup)
+                    for _ in range(4):
+                        self.assertTrue(clipboard.select_source("windows"))
+                        self.assertFalse(clipboard.windows_refresh_button.isEnabled())
+                        self.assertFalse(clipboard.activate())
+                        self.assertTrue(clipboard.select_source("f7hub"))
+                    self.assertEqual(retained, (window.clipboard_workspace, clipboard.model,
+                                               clipboard.table, clipboard.runner, clipboard.f7hub_page,
+                                               clipboard.windows_page, clipboard.setup))
+                    recent.assert_called_once_with()
                     self.assertEqual(clipboard.model.rowCount(), expected_count)
                     self.assertEqual(clipboard.model.columnCount(), 4)
                     self.assertEqual(clipboard.page_message.text(), f"Showing {expected_count} recent items." +
