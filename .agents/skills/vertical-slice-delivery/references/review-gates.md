@@ -44,6 +44,8 @@ Independently verify:
 
 Run required independent checks and inspect actual outputs/artifacts. Record reviewer identity, environment, candidate, commands/results, finding severity/location and limitations in the [review report](../templates/review-report.md).
 
+The independent reviewer MUST verify the [test-impact matrix](lifecycle.md#mandatory-selection-before-execution), dependency analysis, mandatory gate sources and execution/reuse decisions rather than simply repeating every implementer suite. Run fresh checks sufficient to independently validate changed behavior and critical failure paths, including transitively affected boundaries. Record selection before execution and any reason to broaden or repeat testing. Applicable prior execution may remain RETAINED; independent approval still requires every mandatory gate to be satisfied, including any requirement for fresh independent execution.
+
 Review MUST use the implementation report's new/changed trust boundaries, invariants and risk surfaces as inspection inputs, verifying the claims independently. Focus fresh evidence on changed concurrency/transaction, filesystem/process/security and data-integrity boundaries while still verifying scope, candidate identity, baseline compatibility, regression evidence and lifecycle compliance. Include unchanged but transitively affected areas; risk focus does not waive applicable gates.
 
 ## Native GUI record
@@ -55,6 +57,18 @@ Screenshots alone do not prove process success; exit 0 alone does not prove visu
 ## Retained evidence
 
 Retained evidence requires an accessible prior command/result, applicable environment, and verified unchanged relevant inputs: production code, tests, schema, configuration, dependencies, and other transitive inputs that could affect that suite. An identical whole-candidate content identity suffices for input comparison; otherwise justify the unchanged relevant inputs explicitly. If any relevant input changed, rerun the affected suite. Label retained evidence and record its applicability rationale, not a fresh PASS. Missing results, an inaccessible artifact, or an implementation report saying PASS is not proof. Required unavailable evidence blocks approval; do not waive it merely for runtime or token savings.
+
+Before claiming RETAINED PASS, independently verify and record:
+
+- Original candidate and tested-input identity, including the originating command/suite and relevant acceptance contract.
+- Production code, schema and transitive dependencies relevant to that execution, compared with the current candidate/base.
+- Test and harness identity, including assertions, fixtures and relevant execution inputs.
+- Configuration and environment applicability, including native Windows requirements where applicable.
+- Accessible original logs/results, successful completion and actual outcome; recover missing completion evidence only under [continuity recovery](token-continuity.md#long-tests-and-incremental-evidence).
+- Prior failures, incomplete attempts, skips and limitations, their resolution or continued applicability; an old PASS must not conceal a later relevant failure or unsatisfied criterion.
+- Why the evidence still applies and, for REQUIRED BY GATE, how it satisfies that specific requirement.
+
+Do not turn an old PASS into FRESH PASS. A fresh inspection of an old artifact remains distinct from the retained execution. If applicability cannot be established for a required gate, record NOT RUN or BLOCKED and execute necessary validation before approval. Unchanged suites without required coverage may be left NOT RUN with a rationale; do not fabricate retained success.
 
 ## Correction and candidate drift matrix
 
