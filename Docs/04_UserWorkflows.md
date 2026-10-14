@@ -1,5 +1,17 @@
 ﻿# F7Hub User Workflows
 
+## Clipboard Phase 2A — choosing a source (2026-10-14 candidate)
+
+Open **Clipboard Center** through its existing sidebar route. A newly constructed Center starts with **F7Hub Clipboard**. Use **Source:** to choose F7Hub Clipboard or Windows Clipboard inside the same retained Center.
+
+F7Hub keeps **Recent**, **Refresh/Retry** and **Clipboard Setup**. Changing source does not refresh history, save preferences, capture, copy or paste. Windows is selectable and explains **Windows Clipboard snapshot is not available yet.** Its Refresh is disabled. No content is acquired/imported, and saved Setup preferences do not activate native access.
+
+If Setup has unsaved edits, changing source asks whether to discard them. **Cancel** keeps F7Hub, the Setup section, complete draft and valid prior focus. **Discard** follows existing cleanup and opens Windows once without saving that draft. While an operation is finishing, source changes are refused; choose again after completion. Existing sidebar departure and close guards still apply.
+
+Tab/Shift+Tab reach the selector and enabled displayed controls. Standard combo keys select a source; Escape closes its popup without a source departure. Accepted switching keeps selector focus; Tab skips disabled Windows Refresh. Same-page Center activation preserves valid focus. Each source retains permitted local state/scroll, adjusted when necessary to keep focus reachable; normal sidebar module changes keep the existing shell leading-position behavior.
+
+Candidate: READY_FOR_REVIEW. FRESH Windows-host checks passed: 124 focused GUI and 15 affected Integration/bootstrap tests, Qt offscreen; 202 native Qt observations at 660×592, 1000×700 and 1180×850 with 18 inspected captures. Native input was Qt-synthesized; physical input, Narrator, actual High Contrast, alternate/mixed DPI, RDP and AltGr are NOT RUN. Compact Setup explanatory text still requires horizontal scrolling in places; controls remain reachable. Earlier dated entries remain historical.
+
 ## GUI Shell S005 — returning from Clipboard Center (2026-10-14 candidate)
 
 Select **Tickets** in the left rail to leave Clipboard Center. For keyboard use, press **Alt+F** to focus navigation, move to Tickets with Tab or Shift+Tab, then press Space or Return. The retired lower Back to Tickets button has no replacement inside Clipboard Center. When Clipboard Setup has unsaved changes, Cancel keeps the Setup page and values; Discard allows the existing guarded departure without saving them. A pending preference operation refuses departure and close. Recent loading, failure and Retry feedback remain available. Reopening Clipboard preserves the retained workspace and normal Recent/Setup session rules. This candidate awaits independent review and integration; the S004 section below remains historical.

@@ -773,7 +773,9 @@ class MainWindow(QMainWindow):
             self.workspace._clear_drafts()
         if self.clipboard_workspace is None:
             self.clipboard_workspace = ClipboardWorkspace(
-                self, clipboard_service=self.clipboard_service, settings_service=self.settings_service)
+                self, clipboard_service=self.clipboard_service, settings_service=self.settings_service,
+                capture_scroll=self._capture_clipboard_scroll,
+                restore_scroll=self._restore_clipboard_scroll)
             self.pages.addWidget(self.clipboard_workspace)
         same_page = self.pages.currentWidget() is self.clipboard_workspace
         self.pages.setCurrentWidget(self.clipboard_workspace)
@@ -797,6 +799,23 @@ class MainWindow(QMainWindow):
             if target is not rail_button and rail_button.isVisible() and rail_button.isEnabled():
                 rail_button.setFocus(Qt.FocusReason.OtherFocusReason)
         return True
+
+    def _capture_clipboard_scroll(self):
+        return (self.workspace_viewport.horizontalScrollBar().value(),
+                self.workspace_viewport.verticalScrollBar().value())
+
+    def _restore_clipboard_scroll(self, position):
+        if self.pages.currentWidget() is not self.clipboard_workspace:
+            return
+        self.pages.layout().activate()
+        for bar, value in zip((self.workspace_viewport.horizontalScrollBar(),
+                               self.workspace_viewport.verticalScrollBar()), position):
+            bar.setValue(max(bar.minimum(), min(bar.maximum(), value)))
+        # Focus reachability takes precedence over retaining an off-screen
+        # offset. Never scroll the hidden Clipboard source or another module.
+        focus = self.focusWidget()
+        if focus is not None and self.clipboard_workspace.isAncestorOf(focus):
+            self.workspace_viewport.ensureWidgetVisible(focus, 0, 0)
 
     def _leave_clipboard(self) -> bool:
         if self.clipboard_workspace is None:

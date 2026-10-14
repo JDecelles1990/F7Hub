@@ -1,5 +1,13 @@
 # F7Hub ChangeLog
 
+## 2026-10-14 — Clipboard Phase 2A two-source presentation candidate
+
+Added a labelled F7Hub Clipboard/Windows Clipboard selector and two retained children to the existing Clipboard Center, with F7Hub default and original Recent/Setup/service ownership. Windows is an accessible unavailable page with disabled Refresh; no native content/effect is activated. Source changes preserve selector/page consistency, reuse Setup Cancel/Discard and pending/completing guards, retain safe independent state/scroll through a narrow MainWindow viewport seam, and preserve usable focus and S005 navigation/close behavior.
+
+FRESH WINDOWS_NATIVE workstation: focused GUI 124 and affected Integration/two exact bootstrap checks 15 PASS, Qt offscreen, exit 0/no skips; native Qt `windows` 202 observations PASS at 660×592, 1000×700, 1180×850, with all 18 captures opened/inspected. Initial GUI/native failures remain FAIL; relevant assertion/readiness/reachability/post-modal corrections and diagnostic observations are retained under RT-R01. Physical input, Narrator, actual High Contrast, alternate DPI/RDP/AltGr remain NOT RUN; existing compact Setup explanatory horizontal overflow remains a disclosed nonblocking limitation.
+
+Exact scope: two production, five test, four documentation files. No service/repository/domain/Settings/runner/bootstrap/migration/AHK/IPC/dependency change. Candidate is READY_FOR_REVIEW, unstaged/uncommitted in isolated Phase2A at base `01900ab420e5cf2f316b7039319b3d9171c58e7f`; independent review/integration pending. External evidence/manifest/report: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-Phase2/implementation-20261014T193711Z`. Canonical work and opaque GuideSettings.ini are preserved; S005 is not repaired/pruned. No Phase 2B or later work started. Earlier records retain historical meaning.
+
 ## 2026-10-14 — GUI Shell S005 Clipboard return control candidate
 
 Removed Clipboard Center's redundant lower Back to Tickets button, its private signal and MainWindow connection/focus reference. The existing Tickets rail QAction and guarded route remain. A synchronous focus choice uses eligible controls in the active Recent or Setup section, with the Clipboard rail as fallback and same-page focus preserved. No Clipboard read, Settings persistence, service, database, AHK, IPC or unrelated module behavior was intentionally changed.
