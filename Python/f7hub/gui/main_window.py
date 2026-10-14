@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+import sys
+
 from PySide6.QtGui import QAction, QColor, QIcon, QKeySequence, QPainter, QPalette, QPen, QPixmap
-from PySide6.QtCore import QEvent, QPointF, QSize, Qt, QTimer
+from PySide6.QtCore import QEvent, QPoint, QPointF, QSize, Qt, QTimer
 from PySide6.QtWidgets import (
     QApplication, QHBoxLayout, QMainWindow, QWidget, QStackedWidget, QMessageBox,
-    QFrame, QScrollArea, QToolButton, QVBoxLayout,
+    QFrame, QMenu, QScrollArea, QToolButton, QVBoxLayout,
 )
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.gui.knowledge_workspace import KnowledgeWorkspace
@@ -133,7 +135,10 @@ class MainWindow(QMainWindow):
         file_menu.addAction(self.backup_action)
         exit_action = QAction("E&xit", self)
         exit_action.setObjectName("exitAction")
-        exit_action.setShortcut(QKeySequence.StandardKey.Quit)
+        quit_shortcut = QKeySequence(QKeySequence.StandardKey.Quit)
+        if quit_shortcut.isEmpty() and sys.platform == "win32":
+            quit_shortcut = QKeySequence("Ctrl+Q")
+        exit_action.setShortcut(quit_shortcut)
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
         self.exit_action = exit_action
@@ -203,6 +208,21 @@ class MainWindow(QMainWindow):
             self.navigation_buttons[key] = button
             rail_layout.addWidget(button)
         rail_layout.addStretch()
+        self.utility_menu = QMenu(self.navigation_rail)
+        self.utility_menu.setObjectName("settingsUtilityMenu")
+        for action in (self.mochi_action, self.backup_action, self.exit_action):
+            self.utility_menu.addAction(action)
+        self.settings_button = QToolButton(self.navigation_rail)
+        self.settings_button.setObjectName("settingsUtilityButton")
+        self.settings_button.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonIconOnly)
+        self.settings_button.setIconSize(QSize(24, 24))
+        self.settings_button.setFixedSize(44, 44)
+        self.settings_button.setToolTip("Settings and utilities")
+        self.settings_button.setAccessibleName("Settings and utilities")
+        self.settings_button.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        self.settings_button.installEventFilter(self)
+        self.settings_button.clicked.connect(self._show_utility_menu)
+        rail_layout.addWidget(self.settings_button)
         self._refresh_navigation_palette()
         layout.addWidget(self.navigation_rail)
         # Existing forms retain their measured minimum sizes. Overflow scrolls
@@ -221,7 +241,8 @@ class MainWindow(QMainWindow):
         for first, second in zip(tuple(self.navigation_buttons.values()),
                                  tuple(self.navigation_buttons.values())[1:]):
             QWidget.setTabOrder(first, second)
-        QWidget.setTabOrder(self.navigation_buttons["clipboard"], self.workspace.new_ticket_button)
+        QWidget.setTabOrder(self.navigation_buttons["clipboard"], self.settings_button)
+        QWidget.setTabOrder(self.settings_button, self.workspace.new_ticket_button)
         self.pages.currentChanged.connect(self._sync_navigation_rail)
         QApplication.instance().focusChanged.connect(self._remember_workspace_focus)
         QApplication.instance().installEventFilter(self)
@@ -235,6 +256,11 @@ class MainWindow(QMainWindow):
             self._refresh_navigation_palette()
 
     def eventFilter(self, watched, event):
+        if (watched is getattr(self, "settings_button", None)
+                and event.type() == QEvent.Type.KeyPress and watched.hasFocus()
+                and event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter)):
+            watched.click()
+            return True
         if watched is self and event.type() == QEvent.Type.WindowDeactivate:
             self._rail_pending_focus = None
         if self._rail_pending_focus is not None and event.type() in (
@@ -266,7 +292,22 @@ class MainWindow(QMainWindow):
             watched.setIcon(self._navigation_icon(
                 key, QApplication.palette(), bool(watched.property("active")),
                 event.type() == QEvent.Type.Enter))
+        if (watched is getattr(self, "settings_button", None)
+                and event.type() in (QEvent.Type.Enter, QEvent.Type.Leave)):
+            watched.setIcon(self._navigation_icon(
+                "settings", QApplication.palette(), False,
+                event.type() == QEvent.Type.Enter))
         return super().eventFilter(watched, event)
+
+    def _show_utility_menu(self):
+        anchor = self.settings_button.mapToGlobal(QPoint(self.settings_button.width(), 0))
+        available = self.settings_button.screen().availableGeometry()
+        size = self.utility_menu.sizeHint()
+        position = QPoint(
+            max(available.left(), min(anchor.x(), available.right() - size.width() + 1)),
+            max(available.top(), min(anchor.y(), available.bottom() - size.height() + 1)),
+        )
+        self.utility_menu.popup(position)
 
     def _refresh_navigation_palette(self):
         """Use the effective Qt palette, including runtime system/app changes."""
@@ -320,6 +361,8 @@ class MainWindow(QMainWindow):
             for key, button in self.navigation_buttons.items():
                 button.setIcon(self._navigation_icon(key, palette, bool(button.property("active")),
                                                      button.underMouse()))
+            self.settings_button.setIcon(self._navigation_icon(
+                "settings", palette, False, self.settings_button.underMouse()))
         finally:
             self._updating_navigation_palette = False
 
@@ -404,6 +447,14 @@ class MainWindow(QMainWindow):
                                           (17, 7, 22, 12), (22, 12, 17, 17),
                                           (14, 5, 10, 19)):
                         painter.drawLine(QPointF(x1, y1), QPointF(x2, y2))
+                elif key == "settings":
+                    painter.drawEllipse(QPointF(12, 12), 7, 7)
+                    painter.drawEllipse(QPointF(12, 12), 2.5, 2.5)
+                    for x1, y1, x2, y2 in ((12, 2, 12, 5), (12, 19, 12, 22),
+                                          (2, 12, 5, 12), (19, 12, 22, 12),
+                                          (5, 5, 7, 7), (17, 17, 19, 19),
+                                          (5, 19, 7, 17), (17, 7, 19, 5)):
+                        painter.drawLine(x1, y1, x2, y2)
                 else:
                     painter.drawRoundedRect(5, 5, 14, 16, 2, 2)
                     painter.drawRoundedRect(9, 3, 6, 4, 1, 1)

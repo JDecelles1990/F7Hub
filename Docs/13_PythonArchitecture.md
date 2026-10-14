@@ -1,5 +1,13 @@
 # F7Hub Python Architecture
 
+## GUI Shell S002 — shared-action utility menu
+
+`MainWindow` adds one bottom rail `QToolButton` and one native `QMenu` containing the existing `mochi_action`, `backup_action` and `exit_action` objects. Menu presentation is a GUI concern; selection follows the original connected handlers and service ownership. The menu has no second QAction, route, task runner, database operation or close path. The gear uses the S001 palette-based icon rendering and rail focus styling, and Tab traversal includes it before the first workspace control. Return and Enter explicitly activate the button; Space uses Qt button behavior. The File and Settings menus and their mnemonics remain registered. The provisional Alt+F/Alt+S bindings are deferred because they conflict with those mnemonics.
+
+This candidate changes no persistence, IPC, AHK, PowerShell, Mochi controller or backup service contract. S001's historical candidate wording below predates its PR #96 merge at `76bd643c8b44e13f4967f2fad5c736bcabc8ecde`.
+
+The existing `exit_action` resolves `QKeySequence.StandardKey.Quit` and retains a nonempty platform mapping. When that mapping is empty on Windows, it registers Ctrl+Q on the same QAction. The existing `triggered → close → closeEvent` connection remains authoritative. A source search and assembled-window QAction/QShortcut audit found no Ctrl+Q collision; the existing Save binding and File/Settings mnemonics remain. Synthesized native Windows Qt tests cover focused Ticket draft cancellation, pending backup refusal/recovery, successful exit and both shared menu routes. No global hotkey or extra shortcut event filter is introduced.
+
 ## GUI Shell S001 — retained stack and shared-action rail
 
 MainWindow composes `navigationShell` horizontally from `navigationRail` and `workspaceViewport` (QScrollArea), whose widget is the existing `pages` QStackedWidget. The four QToolButtons use `setDefaultAction` with `tickets_action`, `knowledge_action`, `scripts_action` and `clipboard_action`; no new QAction, router, workspace, service or persistence owner is introduced. Clipboard's `clipboardCenterAction` / `clipboard.center` identities and lazy construction remain unchanged. The existing menu/toolbar retain the same action instances and availability policies.

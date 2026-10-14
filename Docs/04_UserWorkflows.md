@@ -1,5 +1,9 @@
 ﻿# F7Hub User Workflows
 
+## GUI Shell S002 — utility access (2026-10-14 candidate)
+
+Tab to the bottom **Settings and utilities** gear on the left rail, then press Space or Enter, or click it. The compact menu offers the existing Mochi settings, local database backup and Exit commands. Use arrow keys and Enter to choose a menu action, or Escape to close it. Opening or dismissing the menu keeps the current workspace and unsaved draft; it starts no backup or other command. The existing File and Settings menus continue to offer the same actions and shortcuts. On Windows, Ctrl+Q invokes the same protected Exit action when Qt supplies no native Quit shortcut; a valid platform Quit mapping is preserved. Backup still reports completion or a bounded failure through its existing worker; Exit still refuses pending work and requests confirmation before discarding drafts. Alt+F and Alt+S remain the existing menu mnemonics while the menu bar is present. S001 was merged through PR #96 before this S002 candidate.
+
 ## Slice 053 — Local Baseline Diagnostics
 
 Open **Scripts**, review **Local Baseline Diagnostics**, then choose **Run baseline diagnostics**. Search may hide pack members without changing pack readiness. For one diagnostic, select an available, execution-approved row and choose **Run diagnostic**. Read Version, purpose and policy in details before running.
