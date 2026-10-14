@@ -1,5 +1,11 @@
 # F7Hub GUI Design
 
+## GUI Shell S002 — Settings utility menu (2026-10-14 candidate)
+
+The 52px navigation rail has a bottom-aligned, icon-only **Settings and utilities** button with a tooltip, accessible name and visible keyboard focus. Click, Space or Enter opens a compact Qt menu; Escape dismisses it without changing the selected workspace or invoking a command. Its three entries use the existing **Mochi…**, **Back up database** and **E&xit** QAction instances, so their enabled states match the retained Settings and File menus. Mochi opens the existing modeless dialog, backup uses the existing asynchronous guarded service, and Exit uses the normal protected close path. Opening the menu does not change drafts, pages or scroll position. The gear is not a workspace or Settings Center, and no Appearance control is present.
+
+The button joins ordinary Tab traversal after Clipboard and before the Tickets workspace. The shared Exit action preserves a valid native Quit shortcut and falls back to Ctrl+Q on Windows when Qt supplies none; keyboard activation follows the same draft and pending-operation guards as menu Exit. Existing `&File` and `&Settings` menu mnemonics remain; the proposed Alt+F and Alt+S rail bindings conflict with them and are deferred to the menu/toolbar retirement slice. The S001 section below records its earlier candidate and validation history; S001 later merged through PR #96 at `76bd643c8b44e13f4967f2fad5c736bcabc8ecde`. S002 remains an uncommitted implementation candidate pending independent rereview of the Quit correction.
+
 ## GUI Shell S001 — four-module navigation rail (2026-10-13)
 
 The implementation candidate adds a 52-logical-pixel left rail for **Tickets**, **Knowledge Base**, **Scripts** and **Clipboard Center**. Four 44×44 icon-only Qt controls reuse the existing File-menu/toolbar QAction objects and guarded handlers. Original Qt-painted outline icons, tooltips, accessible names, a textual current-workspace description, visible selection/focus indicators, hover feedback and action-matched disabled states are confined to the rail. Existing menus, toolbar, Guide route, status bar, native title bar and Clipboard return remain.
