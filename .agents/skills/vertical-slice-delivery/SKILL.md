@@ -5,7 +5,7 @@ description: Plan, implement, test, document, independently review, integrate, o
 
 # F7Hub Vertical Slice Delivery
 
-Version: 0.3
+Version: 0.4
 
 Own slice state, scope, transitions, evidence, continuity, recovery, reporting, and Git/GitHub safety. Preserve explicit user scope and authorization. This skill does not authorize external actions merely by being loaded.
 
@@ -56,6 +56,12 @@ Every transition needs recorded evidence. Read [lifecycle](references/lifecycle.
 Before a substantive operation, assess GREEN / AMBER / RED / UNKNOWN using reliable host capacity if available, otherwise observable pressure signals without invented counts. TOKEN PRESSURE NEVER ADVANCES A LIFECYCLE GATE.
 
 Read [token continuity](references/token-continuity.md) at task entry and whenever pressure or session continuity changes. RED or untrustworthy continuity means checkpoint and stop, with no new substantive work or Git/GitHub mutations. RESUME means CHECKPOINTED -> RECOVERING -> original interrupted phase, after reconciliation; it never means start over or advance automatically.
+
+## Risk-based validation
+
+Before running a suite, inspect the candidate diff and dependencies and record a compact test-impact matrix under [lifecycle TEST](references/lifecycle.md#test). Classify DIRECTLY AFFECTED, TRANSITIVELY AFFECTED, UNCHANGED / EVIDENCE APPLICABLE, or NOT APPLICABLE; identify REQUIRED BY GATE separately wherever an explicit requirement applies. These are test-selection categories, not lifecycle states or test outcomes.
+
+Run fresh focused changed-behavior checks, then affected integration/regression. Reuse independently verified applicable evidence for unchanged suites under [retained evidence](references/review-gates.md#retained-evidence). Broader regression requires an actual gate, unresolved risk, relevant input drift, or concrete failure; a previous slice running a suite is not sufficient reason to repeat it. Independent review verifies selection and runs sufficient fresh checks of changed behavior and critical failure paths. Risk-based selection never waives mandatory validation, native Windows requirements, security, database integrity, manifests, candidate-drift analysis, or authorization gates.
 
 ## Ownership and escalation
 

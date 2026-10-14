@@ -56,7 +56,64 @@ Implementation reports MUST identify new/changed trust boundaries and invariants
 
 ## TEST
 
-Testing is its own semantic state: generated code is untrusted. Determine applicable unit, database, service, GUI, integration, native Windows, and regression coverage using specialized guidance. Prefer focused tests, then affected suites, then full required regression; runtime alone never waives a required suite. Cover success, failure, state recovery, and data integrity where applicable. Record why a category is inapplicable; never relabel an unexecuted required test as inapplicable to pass a gate.
+Testing is its own semantic state: generated code is untrusted. Determine applicable unit, database, service, GUI, integration, native Windows, and regression coverage using specialized guidance and the selection procedure below. Runtime alone never waives a required suite. Cover success, failure, cancellation, state recovery, and data integrity where applicable. Record why a category is inapplicable; never relabel an unexecuted required test as inapplicable to pass a gate.
+
+### Mandatory selection before execution
+
+Before running any suite, classify its relationship to the candidate and record its evidence or execution disposition. Selection categories are neither lifecycle states nor PASS / FAIL outcomes.
+
+| Selection category | Relationship and required disposition |
+|---|---|
+| DIRECTLY AFFECTED | Changed functionality or acceptance contract; fresh focused validation required. |
+| TRANSITIVELY AFFECTED | A shared service, dependency, API, state, security or execution boundary could affect it; fresh relevant regression required. |
+| UNCHANGED / EVIDENCE APPLICABLE | No relevant input change and independently verified prior evidence meets provenance requirements; RETAINED PASS permitted. |
+| NOT APPLICABLE | No technical relationship to the change; record the rationale and do not execute automatically. |
+| REQUIRED BY GATE | Explicit project, safety, security, user or review requirement; must run unless valid retained evidence satisfies that specific gate. |
+
+REQUIRED BY GATE also applies alongside an impact category; record the requirement source and whether it demands fresh execution. It cannot be displaced by NOT APPLICABLE, and retained evidence cannot replace a gate that explicitly requires a fresh run. Unchanged behavior without applicable prior evidence does not qualify for UNCHANGED / EVIDENCE APPLICABLE; record unchanged inputs and missing evidence, then execute validation if required.
+
+Use a compact matrix in the existing implementation/review evidence rather than introducing another framework:
+
+| Suite / criterion | Impact category and dependency rationale | Mandatory gate / source, or none | Relevant input identities / prior evidence | Planned execution or reuse and rationale |
+|---|---|---|---|---|
+| | | | | |
+
+Apply this order:
+
+1. Inspect the candidate diff and dependencies, including transitive inputs.
+2. Build the compact test-impact matrix.
+3. Identify explicit mandatory validation gates.
+4. Run focused tests of changed behavior.
+5. Run affected integration and regression tests.
+6. Reuse independently verified applicable evidence for unchanged suites under [retained evidence](review-gates.md#retained-evidence).
+7. Run broader regression only for an actual gate, unresolved risk, relevant input drift, or concrete failure; record the reason and affected scope.
+
+Never rerun a full suite simply because a previous slice ran it. Required unavailable evidence remains NOT RUN or BLOCKED and must be resolved through necessary validation before approval; it cannot support READY_FOR_REVIEW.
+
+### Cross-language impact
+
+For a Python -> AHK UI integration change, validate the changed integration contract with fresh evidence; do not automatically rerun the entire AHK feature suite. If the change affects the shared host, input routing, IPC acknowledgments, editor persistence, security or process lifecycle, include focused tests of those affected boundaries. Broaden coverage only when dependency impact or an explicit gate justifies it. Native Windows validation remains required where applicable; mocked or offscreen checks do not establish native behavior.
+
+### Bounded execution and correction
+
+- Failure circuit breaker: after any execution that fails, hangs, times out, terminates inconclusively, or leaves potentially surviving test-owned processes or uncertain state, Codex MUST stop automatic retries of that execution. Preserve failure/completion status, command, environment, candidate and relevant input evidence; safely inspect the failure and surviving state; determine whether an implementation, harness, fixture or environment cause is identifiable; record the diagnosis and next corrective action. Resume affected testing only when the conditions below and safe process/fixture/state preconditions are satisfied.
+- Verified relevant correction: rerun failed or inconclusive execution only after verifying and recording a change that plausibly addresses the observed failure, such as corrected production implementation, harness or fixture, a repaired environment dependency, or a resolved process, lock or resource condition. Merely increasing the timeout, restarting an unchanged harness or modifying a retry counter is not sufficient.
+- Materially different diagnostic probe: a separate bounded diagnostic may investigate a specific failure hypothesis without changing production code, but MUST differ meaningfully in purpose, execution path, instrumentation or controlled conditions. Record the hypothesis and changed probe; do not disguise the original failing execution as another attempt. The diagnostic does not authorize rerunning the unchanged failing harness afterward; that rerun still requires a verified relevant correction and safe state.
+- No unchanged automatic retries merely because the failure is described as flaky, a rationale was documented, the retry count is finite, more time or tokens are available, full regression or independent review remains required, a passing result is desired, or the unchanged test previously passed. Required fresh independent checks are not an exception to the failure circuit breaker. If a mandatory check cannot safely complete, report FAIL for an established failure or BLOCKED for unresolved safe execution/completion, preserve evidence and stop; never manufacture completion through repeated unchanged execution.
+- Do not restart an entire regression suite after every unrelated documentation correction. Corrections trigger testing of affected behavior and dependencies, not automatic repetition of every historical suite.
+- Use bounded execution time and deterministic cleanup of test-owned processes/fixtures; preserve unrelated processes and user state. Apply scoped native safeguards, including external termination where in-process timers cannot stop a blocked callback.
+- Preserve failed or incomplete execution evidence under [long-test continuity](token-continuity.md#long-tests-and-incremental-evidence). A timeout is not PASS.
+- Define bounded attempts before execution and honor user/scoped retry limits. An attempt limit does not authorize an unchanged retry after the failure circuit breaker applies. Verify surviving-process ownership, cleanup and fixture/state safety before any permitted execution; preserve unrelated processes and user state.
+
+### Selection examples
+
+These examples illustrate dependency analysis, not automatic waivers or instructions to run against an in-progress candidate.
+
+| Change | Fresh validation | Retained evidence / broader coverage |
+|---|---|---|
+| A: Rename AHK Guide window | Exact title; Python -> AHK open/focus; window identity and acknowledgment; Alt+F7 toggle; negative confirmation path. | Topic navigation, formatting, archive, opacity, and unchanged GUI/Integration regressions may remain RETAINED only when their relevant inputs and environment are verified unchanged. Shared-host/routing/persistence/security/process changes require affected focused regressions; broaden for demonstrated dependency impact or mandatory gates. |
+| B: New SQLite migration | Migration, constraints, foreign keys, transactions, affected queries/services, failure and recovery paths; applicable integrity_check must return ok and foreign_key_check zero violations on isolated validation data. | Shared-schema changes may require broader database regression. Prior evidence cannot validate changed schema or affected dependencies. |
+| C: Documentation-only correction | Documentation accuracy, references, manifest/aggregate and unchanged relevant input verification. | Do not rerun application suites solely because Markdown changed. Changed acceptance contracts, dependencies or explicit gates still require applicable validation. |
 
 Record exact command, candidate identity, environment, result, counts, exit status and evidence location per suite. For native GUI checks, use the observable readiness gate in [review gates](review-gates.md). Required FAIL enters FAILED_VALIDATION; required NOT RUN or BLOCKED prevents readiness. A focused pass does not replace required regression. Follow [continuity](token-continuity.md) for long tests and lost output.
 
