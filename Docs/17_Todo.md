@@ -1,5 +1,15 @@
 # F7Hub Todo
 
+## Clipboard D02 — dormant persistence implementation candidate (2026-10-15)
+
+- [x] Implement Checkpoint A: additive receipt migration 0015, constraints, deletion survival and immutable original outcome contracts.
+- [x] Implement Checkpoint B: injected fail-closed admission, internally issued generations/operations, exact deduplication, atomic Item/Event/receipt writes, replay/conflict/recovery and bounded explicit receipt maintenance.
+- [x] Add focused synthetic domain/database/integration tests and synchronize the affected database/Python owners.
+- [x] Complete final validation/evidence gate; see the D02 entry in [CURRENT_STATE](Status/CURRENT_STATE.md).
+- [ ] Separate independent read-only D02 review of the exact manifest candidate.
+
+Implementation only in `C:/Dev/F7Hub-Clipboard-D02`; no staging, commit, publication, PR, merge or activation is authorized. Native/privacy/transport/capture/Item-cleanup delivery requires separate scope. Earlier checklists retain their original historical meaning.
+
 ## GUI Shell S005 — independent review pending (2026-10-14)
 
 - [x] Retire Clipboard's lower Back to Tickets button, signal and MainWindow references while retaining the Tickets rail route.

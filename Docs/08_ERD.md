@@ -1,5 +1,15 @@
 # F7Hub Entity Relationship Design
 
+## Clipboard D02 — deletion-surviving operation receipt (2026-10-15)
+
+The dormant D02 candidate adds `clipboard_operation_receipts` under Clipboard ownership. Operation identity is unique by producer binding + ingress generation + operation ID. Item/Event/receipt acceptance is atomic; multiple genuine operations may refer to one exact-text Item.
+
+`clipboard_items` **1 → 0..many** live receipt references; a receipt's live Item link is nullable and uses ON DELETE SET NULL. Historical Item/Event numeric IDs remain independent scalar facts without foreign keys. Ordinary Events still cascade with their Item under immutable migration 0013. After deletion, the receipt records original completion without reconstructing source, verifying a changed retry payload, or linking to a reused Item ID. No additional history/content entity is introduced.
+
+The original outcome snapshots count/revision, duplicate/preservation state, Item expiry and acceptance/receipt expiry. Bounded request/profile/assessment/policy metadata supports replay comparison while exact immutable content exists in its Item. Receipts contain no text, preview, title or text-derived hash. New TEMPORARY retention is seven days; receipt lifetime is fourteen days with bounded explicit maintenance, independent of Item deletion and without a scheduler. This supersedes D01's original deferral of receipt implementation only; capture activation remains unavailable by default.
+
+Exact constraints/indexes belong to [09_SQLSchema](09_SQLSchema.md#clipboard-d02--operation-receipt-physical-schema); fencing, atomicity and retention behavior belong to [07_Database](07_Database.md#clipboard-d02--dormant-atomic-persistence-candidate-2026-10-15).
+
 ## CP-02 Stage 1 — Shared Settings logical model
 
 The candidate adds two Settings-owned structures: a single revision record for the selected database's USER preference set, and zero or more scalar USER overrides identified by stable namespaced setting key. The revision describes the entire override set; it is not a per-setting timestamp or operational capability. Missing override means inheritance from an immutable Python definition/default. Definitions are not database entities.

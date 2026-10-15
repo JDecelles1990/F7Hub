@@ -1,12 +1,20 @@
-"""Read-only Clipboard use case; capture and production writes remain deferred."""
+"""Clipboard use cases; dormant persistence defaults to unavailable admission."""
 
+from dataclasses import dataclass
 from datetime import datetime, timezone
+import math
 import sqlite3
-from typing import Callable
+import threading
+import time
+from typing import Callable, Protocol
+from uuid import uuid4
 
 from f7hub.domain.clipboard import (
     ClipboardRecentPage, ClipboardValidationError, RECENT_DEFAULT_LIMIT,
     validate_recent_limit, validate_utc_timestamp,
+    ClipboardAdmissionBinding, ClipboardAdmissionDecision, ClipboardCaptureCommand,
+    ClipboardOperation, ClipboardReceiptResult, ClipboardPersistenceCode as Code,
+    ClipboardPersistenceError, ReplayDisposition, validate_token,
 )
 from f7hub.repositories.clipboard_repository import ClipboardRepository
 
@@ -15,13 +23,187 @@ class ClipboardQueryError(RuntimeError):
     """Safe application failure; history unavailability is not an empty result."""
 
 
+class ClipboardAdmissionAuthority(Protocol):
+    """Trusted composition dependency, never a caller-supplied decision parameter.
+
+    Assessments must already be complete. This interface performs no detection.
+    Only an explicitly reviewed future composition may provide a real authority.
+    """
+
+    def authorize(self, binding: ClipboardAdmissionBinding) -> ClipboardAdmissionDecision | None: ...
+
+
+class _UnavailableAdmission:
+    def authorize(self, binding: ClipboardAdmissionBinding) -> None:
+        return None
+
+
+@dataclass(frozen=True, slots=True, eq=False)
+class ClipboardAdmissionContext:
+    """Process-local handle. Only the issuing service's exact live object is valid."""
+
+    producer_binding: str
+    ingress_generation: str
+
+
+MAX_GENERATION_SECONDS = 300
+MAX_GENERATION_OPERATIONS = 1024
+CLOCK_DRIFT_TOLERANCE_SECONDS = 60
+
+
 class ClipboardService:
     """Validate one first-page intent and delegate to the Clipboard owner."""
 
     def __init__(self, repository: ClipboardRepository, *,
-                 clock: Callable[[], datetime] | None = None) -> None:
+                 clock: Callable[[], datetime] | None = None,
+                 admission: ClipboardAdmissionAuthority | None = None,
+                 monotonic: Callable[[], float] | None = None) -> None:
         self._repository = repository
         self._clock = clock if clock is not None else lambda: datetime.now(timezone.utc)
+        self._admission = admission if admission is not None else _UnavailableAdmission()
+        self._monotonic = monotonic if monotonic is not None else time.monotonic
+        self._lock = threading.RLock()
+        self._context = None
+        self._deadline = 0.0
+        self._operations: dict[str, str] = {}
+        self._last_sample = None
+        self._clock_anomaly = False
+
+    def open_admission_context(self, producer_binding: str) -> ClipboardAdmissionContext:
+        """Issue a fresh generation; issuance alone grants no storage permission."""
+        validate_token(producer_binding, 128)
+        with self._lock:
+            _, monotonic = self._sample()
+            self._context = ClipboardAdmissionContext(producer_binding, str(uuid4()))
+            self._deadline = monotonic + MAX_GENERATION_SECONDS
+            self._operations = {}
+            return self._context
+
+    def new_operation(self, context: ClipboardAdmissionContext) -> ClipboardOperation:
+        """Issue a fresh identity; caller UUIDs cannot mint genuine operations."""
+        with self._lock:
+            _, monotonic = self._sample()
+            self._require_context(context, monotonic)
+            self._require_capacity()
+            operation = ClipboardOperation(context.producer_binding, context.ingress_generation, str(uuid4()))
+            self._operations[operation.operation_id] = "issued"
+            return operation
+
+    def capture_manual_text(self, context: ClipboardAdmissionContext,
+                            command: ClipboardCaptureCommand) -> ClipboardReceiptResult:
+        if type(command) is not ClipboardCaptureCommand:
+            raise ClipboardValidationError("Clipboard capture requires an immutable command.")
+        # Serializes local fencing/assessment; separate repository connections still
+        # reserve the SQLite writer across services/workers/processes.
+        with self._lock:
+            _, monotonic = self._sample()
+            self._require_context(context, monotonic)
+            operation = command.operation
+            if (operation.producer_binding, operation.ingress_generation) != (
+                    context.producer_binding, context.ingress_generation):
+                raise ClipboardPersistenceError(Code.GENERATION_STALE)
+            state = self._operations.get(operation.operation_id)
+            if state is None:
+                self._require_capacity()
+                self._operations[operation.operation_id] = "rejected"
+                raise ClipboardPersistenceError(Code.OPERATION_REJECTED)
+            if state == "rejected":
+                raise ClipboardPersistenceError(Code.OPERATION_REJECTED)
+            if state == "uncertain":
+                raise ClipboardPersistenceError(Code.UNCERTAIN)
+            try:
+                binding = ClipboardAdmissionBinding(command, self._repository.database_scope)
+                decision = self._admission.authorize(binding)
+            except Exception:
+                self._operations[operation.operation_id] = "rejected"
+                raise ClipboardPersistenceError(Code.ADMISSION_UNAVAILABLE) from None
+            if decision is None:
+                self._operations[operation.operation_id] = "rejected"
+                raise ClipboardPersistenceError(Code.ADMISSION_UNAVAILABLE)
+            if (type(decision) is not ClipboardAdmissionDecision or decision.binding != binding
+                    or not decision.policy.permits_history):
+                self._operations[operation.operation_id] = "rejected"
+                raise ClipboardPersistenceError(Code.ADMISSION_DENIED)
+            # Assessment and preparation precede writer opening; recheck the lease.
+            accepted_at, monotonic = self._sample()
+            self._require_context(context, monotonic)
+            if state == "done":
+                # Receipt loss/expiry is never permission to execute a consumed ID.
+                known = self._repository.lookup_receipt(operation, as_of=accepted_at)
+                if known.disposition == ReplayDisposition.UNKNOWN_OR_EXPIRED:
+                    raise ClipboardPersistenceError(Code.GENERATION_STALE)
+            try:
+                result = self._repository._persist_admitted(binding, decision.policy, accepted_at=accepted_at)
+            except ClipboardPersistenceError as error:
+                if error.code == Code.UNCERTAIN:
+                    self._operations[operation.operation_id] = "uncertain"
+                elif error.code not in (Code.NOT_STARTED, Code.ROLLED_BACK, Code.OPERATION_CONFLICT):
+                    self._operations[operation.operation_id] = "rejected"
+                raise
+            self._operations[operation.operation_id] = "done"
+            return result
+
+    def lookup_receipt(self, operation: ClipboardOperation) -> ClipboardReceiptResult:
+        """Query-only recovery, including after restart/lease expiry/source deletion."""
+        if type(operation) is not ClipboardOperation:
+            raise ClipboardValidationError("Clipboard receipt lookup requires a typed operation.")
+        with self._lock:
+            as_of, _ = self._sample()
+            return self._repository.lookup_receipt(operation, as_of=as_of)
+
+    def maintain_receipts(self) -> int:
+        """Explicit bounded cleanup: at most five transactions of 100 receipts."""
+        with self._lock:
+            total = 0
+            for _ in range(5):
+                as_of, monotonic = self._sample()
+                if self._clock_anomaly:
+                    raise ClipboardPersistenceError(Code.CLOCK_ANOMALY)
+                protected = None
+                if self._context is not None and monotonic < self._deadline:
+                    protected = (self._context.producer_binding, self._context.ingress_generation)
+                removed = self._repository._delete_expired_receipts(as_of=as_of, protected_generation=protected)
+                total += removed
+                if removed < 100:
+                    break
+            return total
+
+    def _require_context(self, context, monotonic):
+        if (type(context) is not ClipboardAdmissionContext or context is not self._context
+                or monotonic >= self._deadline):
+            raise ClipboardPersistenceError(Code.GENERATION_STALE)
+
+    def _require_capacity(self):
+        if len(self._operations) >= MAX_GENERATION_OPERATIONS:
+            self._context = None
+            self._operations = {}
+            raise ClipboardPersistenceError(Code.CAPACITY_EXHAUSTED)
+
+    def _sample(self):
+        try:
+            instant = self._clock()
+            monotonic = self._monotonic()
+            if (type(instant) is not datetime or instant.utcoffset() is None
+                    or type(monotonic) not in (int, float) or not math.isfinite(monotonic)):
+                raise ValueError()
+            instant = instant.astimezone(timezone.utc)
+            as_of = instant.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+            validate_utc_timestamp(as_of)
+            if self._last_sample is not None:
+                old_instant, old_monotonic = self._last_sample
+                wall_elapsed = (instant - old_instant).total_seconds()
+                elapsed = monotonic - old_monotonic
+                if elapsed < 0:
+                    self._context = None
+                    raise ValueError()
+                if wall_elapsed < 0 or abs(wall_elapsed - elapsed) > CLOCK_DRIFT_TOLERANCE_SECONDS:
+                    self._clock_anomaly = True
+            self._last_sample = (instant, monotonic)
+            return as_of, monotonic
+        except Exception:
+            self._clock_anomaly = True
+            self._context = None
+            raise ClipboardPersistenceError(Code.CLOCK_ANOMALY) from None
 
     def get_recent(self, *, limit: int = RECENT_DEFAULT_LIMIT) -> ClipboardRecentPage:
         validate_recent_limit(limit)

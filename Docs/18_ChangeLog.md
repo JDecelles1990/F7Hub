@@ -1,5 +1,13 @@
 # F7Hub ChangeLog
 
+## 2026-10-15 — Clipboard D02 dormant atomic persistence candidate
+
+Added migration 0015 for bounded content-free operation receipts with historical Item/Event IDs and a nullable ON DELETE SET NULL live Item reference. Extended the existing immutable Clipboard domain, service and repository with trusted injected admission (default unavailable), five-minute process-local generations, service-issued operation identities, exact-text deduplication, atomic Item/Event/receipt writes, original-outcome replay/conflict handling and explicit bounded receipt maintenance. TEMPORARY defaults to seven days and receipts to fourteen; no timer or exact physical-deletion promise is introduced. Released migrations 0001–0014 remain unchanged.
+
+Focused synthetic checks cover success, rejection, deletion/ID reuse, stale/restarted/expired generations, clock changes, concurrency/Windows process locking, each write failure, rollback/commit uncertainty and post-commit presentation failure. Full-chain migration expectations extend to 0015 only where current full-directory bootstrap is actually used; historical migration-specific assertions remain intact. Final validation and exact candidate identity are recorded in [CURRENT_STATE](Status/CURRENT_STATE.md) and external `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-D02/` evidence. Final coverage is 665 distinct passing methods: Unit 17, Database 552 and Integration 96, exit 0 for each final group/module. Evidence is retained on resumption after input verification. Initial discovery failure, grouped Integration timeout, stale count failures and the recovery-selection RT-R01 error remain preserved with their corrections; no historical attempt is relabeled PASS.
+
+Candidate only, in isolated `feature/clipboard-d02-atomic-persistence` at base/HEAD `cc0c3839e2500b3c9fe68545e8f899b718e6734e`. Default bootstrap remains dormant, without native Clipboard access, privacy detector, AHK/IPC/GUI capture, monitoring, Settings additions or Item/Event cleanup. Independent review, publication and integration remain pending and separately authorized. Earlier records retain their historical candidate-era scope.
+
 ## 2026-10-15 — Clipboard Phase 2B S01 inert protocol candidate
 
 Added snapshot 1.0 immutable request/result/error validation in the existing
