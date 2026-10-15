@@ -1,12 +1,53 @@
 # F7Hub Current State
 
+## Clipboard Phase 2B S01 — inert snapshot protocol candidate (2026-10-15)
+
+**READY_FOR_INDEPENDENT_REREVIEW**, unstaged/uncommitted in
+`C:/Dev/F7Hub-Clipboard-Phase2B-S01-Reconciled`, branch
+`feature/clipboard-phase2b-s01-reconciled`, base/HEAD
+`4250f5f326ca1b8c0c867aed056fa6724882ed81`. The original seven-path
+aggregate `43676fbda41096b936484f55194ec7b9cfea18c078c8d6d6e5ea504f3a2e1f01`
+at base `418e3bfa3a01e27351e756befdab61d1d4bb9c4c` received independent
+APPROVED_WITH_NOTES. Scope here remains exactly seven files:
+infrastructure protocol module, local schema, focused unit tests and four owner/
+status/history documents. The provisional domain module was replaced by a module
+inside the existing infrastructure package under the explicit S01 placement gate.
+
+Delivered: strict immutable inert 1.0 request/result/error DTOs, Foundation 0B
+envelope, closed/status-body validation, bounded UTF-8/Unicode/JSON parsing and
+serialization, caller-supplied operation/generation/producer-binding consistency,
+safe content-free exceptions and hidden result text representations. Structural
+schema fixture parity is checked; no full JSON Schema engine is claimed.
+
+Original reviewed execution: 28 focused synthetic unit tests PASS, exit 0, zero
+skips, 2026-10-14 Windows workstation, portable inert Python behavior only.
+FRESH Windows-host focused run on the reconciled base: 28 PASS, exit 0, zero
+skips, portable inert Python behavior. All five tested inputs match the original.
+The new seven-path manifest and fresh result are external under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-Phase2B/S01/reconciliation-20261015/`;
+original review evidence is in its parent directory.
+
+Native Clipboard capability remains NOT IMPLEMENTED. Runtime auth/enrollment,
+transport, worker, privacy assessment, replay tables, service/GUI connection,
+60-second expiry enforcement and capture persistence remain separate S02–S07 or
+owning capture slices. Native Clipboard tests are NOT APPLICABLE to this inert
+module; unrelated GUI/AHK/PowerShell/Mochi/database suites are NOT RUN.
+
+Fresh fetch and live remote query match canonical main at the integrated
+Documentation Reconciliation 01 merge `4250f5f326ca1b8c0c867aed056fa6724882ed81`
+(PR #104). Its newer Foundation/Clipboard planning remains in this candidate.
+The original approved implementation bytes are preserved. This combined
+documentation/base requires independent rereview; integration is separate.
+Canonical user files, opaque GuideSettings.ini and existing worktrees remain
+untouched.
+
 ## Documentation Reconciliation 01 — current boundary (2026-10-15)
 
-**READY_FOR_REVIEW**, documentation-only, unstaged/uncommitted on canonical main
-at `418e3bfa3a01e27351e756befdab61d1d4bb9c4c`. The
-[DR01 register](../Planning/Foundation/0A_Master_Foundation_Architectural_Contract.md#documentation-reconciliation-01--decision-register-2026-10-15)
+**INTEGRATED** through PR #104 at `4250f5f326ca1b8c0c867aed056fa6724882ed81`
+on canonical and live remote main. The earlier review-candidate wording below
+is a dated planning snapshot. The [DR01 register](../Planning/Foundation/0A_Master_Foundation_Architectural_Contract.md#documentation-reconciliation-01--decision-register-2026-10-15)
 routes approved functional requirements; no application capability is delivered
-by this reconciliation. Independent review/approval of this candidate is pending.
+by this reconciliation. The former review gate is historical.
 
 FACT from local ancestry: shell S001–S005 and Clipboard Phase 2A are merged through
 PR #103 (`418e3bf`). Their candidate-stage passages below are historical, including

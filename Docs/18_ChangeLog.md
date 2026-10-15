@@ -1,5 +1,27 @@
 # F7Hub ChangeLog
 
+## 2026-10-15 — Clipboard Phase 2B S01 inert protocol candidate
+
+Added snapshot 1.0 immutable request/result/error validation in the existing
+infrastructure package, local JSON Schema 2020-12 specification and focused
+synthetic unit tests. Strict closed shapes, Foundation envelope/correlation,
+caller binding, Unicode/JSON/byte limits and safe diagnostics remain inert: no
+native Clipboard, authenticated transport, privacy detector, service/GUI binding
+or persistence writer is activated. Original reviewed 2026-10-14 execution:
+28 PASS, exit 0, no skips. FRESH reconciled Windows-host focused run:
+28 PASS, exit 0, no skips. Schema fixture evaluation is limited to its declared keyword subset, not a full engine.
+
+Original seven-file candidate at base `418e3bfa3a01e27351e756befdab61d1d4bb9c4c`
+received independent APPROVED_WITH_NOTES at aggregate
+`43676fbda41096b936484f55194ec7b9cfea18c078c8d6d6e5ea504f3a2e1f01`.
+Reconciliation is unstaged/uncommitted against integrated main
+`4250f5f326ca1b8c0c867aed056fa6724882ed81`; combined documentation and
+base require independent rereview. Original evidence is under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-Phase2B/S01/`; fresh result
+and manifest are in its `reconciliation-20261015/` child. No S01
+publication, merge, or S02 work has occurred. Earlier entries retain historical
+meaning.
+
 ## 2026-10-14 — Clipboard Phase 2A two-source presentation candidate
 
 Added a labelled F7Hub Clipboard/Windows Clipboard selector and two retained children to the existing Clipboard Center, with F7Hub default and original Recent/Setup/service ownership. Windows is an accessible unavailable page with disabled Refresh; no native content/effect is activated. Source changes preserve selector/page consistency, reuse Setup Cancel/Discard and pending/completing guards, retain safe independent state/scroll through a narrow MainWindow viewport seam, and preserve usable focus and S005 navigation/close behavior.

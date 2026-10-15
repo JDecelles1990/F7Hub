@@ -1,0 +1,301 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "F7Hub inert Clipboard snapshot profiles 1.0",
+  "description": "Local structural specification only. No endpoint, authentication, authorization, privacy assessment, replay tracking or lifetime enforcement. References are local fragments only.",
+  "$comment": "Python additionally enforces strict UTF-8/no BOM, duplicate rejection, full serialized bytes including whitespace/escaping, text UTF-8 bytes, real UTC millisecond dates, fresh correlated replies and caller binding/operation consistency. Framing is outside this profile; future snapshot lifetime is 60 seconds. Format annotations alone do not establish date semantics.",
+  "x-max-result-document-bytes": 131072,
+  "x-max-ordinary-document-bytes": 16384,
+  "x-max-depth": 4,
+  "x-max-object-members": 16,
+  "x-max-nodes": 128,
+  "x-future-snapshot-lifetime-seconds": 60,
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$",
+      "minLength": 36,
+      "maxLength": 36
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$",
+      "format": "date-time",
+      "minLength": 24,
+      "maxLength": 24
+    },
+    "request": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.snapshot_read"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "COMMAND"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "f7hub.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "operation_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "admission_generation": {
+              "$ref": "#/$defs/uuid"
+            },
+            "producer_binding": {
+              "$ref": "#/$defs/uuid"
+            }
+          },
+          "required": [
+            "operation_id",
+            "admission_generation",
+            "producer_binding"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "result": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.snapshot_read_result"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "RESULT"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ahk.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "operation_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "admission_generation": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "producer_binding": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "const": "SUCCESS"
+                },
+                "observed_at": {
+                  "$ref": "#/$defs/timestamp"
+                },
+                "format": {
+                  "const": "text/plain"
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 65536,
+                  "pattern": "^[^\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\uD800-\\uDFFF]+$",
+                  "x-max-utf8-bytes": 65536
+                }
+              },
+              "required": [
+                "operation_id",
+                "admission_generation",
+                "producer_binding",
+                "status",
+                "observed_at",
+                "format",
+                "text"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operation_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "admission_generation": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "producer_binding": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "EMPTY",
+                    "DENIED",
+                    "UNAVAILABLE",
+                    "TIMED_OUT",
+                    "FAILED",
+                    "UNSUPPORTED",
+                    "TOO_LARGE",
+                    "LOCKED",
+                    "UNSTABLE"
+                  ]
+                }
+              },
+              "required": [
+                "operation_id",
+                "admission_generation",
+                "producer_binding",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload",
+        "correlation_id"
+      ],
+      "additionalProperties": false
+    },
+    "error": {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "contract.error"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "ERROR"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ahk.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "CONTRACT_VALIDATION_FAILED",
+                "UNSUPPORTED_VERSION",
+                "UNKNOWN_CONTRACT",
+                "AUTHORIZATION_DENIED",
+                "EXECUTION_BOUNDARY_FAILED",
+                "TIMEOUT",
+                "PAYLOAD_LIMIT_EXCEEDED",
+                "PROVIDER_UNAVAILABLE",
+                "INTERNAL_ERROR"
+              ]
+            },
+            "message": {
+              "const": "The snapshot request failed."
+            },
+            "retryable": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "additionalProperties": false
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload",
+        "correlation_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/request"
+    },
+    {
+      "$ref": "#/$defs/result"
+    },
+    {
+      "$ref": "#/$defs/error"
+    }
+  ]
+}
