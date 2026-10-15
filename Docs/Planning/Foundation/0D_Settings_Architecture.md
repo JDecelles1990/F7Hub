@@ -1,5 +1,24 @@
 # F7Hub Phase 0D
 
+## Reconciled feature inputs (2026-10-15)
+
+The [1A successor](../Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#automatic-capture-and-retention-direction-2026-10-15)
+now owns the approved seven-day temporary default and opt-in automatic-capture
+direction; older deferred/default examples below are historical proposals.
+The delivered [three Boolean definitions](../../../Python/f7hub/domain/clipboard_settings.py)
+remain the entire installed Clipboard preference set. Saving them activates no
+capture, native binding, picker, cleanup or disclosure capability. Later delivery
+must explain automatic capture in workflow consent, fail closed when disabled,
+and apply source-process/title opt-ins independently. No new key is admitted here.
+
+Reuse Shared Settings for admitted user preferences, keeping desired/saved/applied
+state distinct. [S1 recovery](../Workspace/S1_Main_Shell_Technician_Workspace_Navigation.md#workspace-continuity-direction-2026-10-15)
+separates layout preferences, transient context and protected owner drafts;
+[S2](../Workspace/S2_Mochi_DynamicHub_Context_Actions.md#activity-questions-and-website-reminders-2026-10-15)
+owns privacy-conscious activity/reminder inputs. Drafts, event records, capability
+facts and secrets do not become ordinary Settings. Exact future definitions,
+draft persistence/privacy and activation contracts require separate owner review.
+
 ## Cross-Subsystem Planning Note
 
 Define which DynamicHub preferences are settings versus runtime state; global/user/workflow settings; safe defaults; future AI/automation feature flags

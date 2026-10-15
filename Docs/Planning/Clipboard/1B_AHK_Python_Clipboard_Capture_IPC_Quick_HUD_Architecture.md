@@ -2,12 +2,16 @@
 # AHK ↔ Python Clipboard Capture, IPC & Quick HUD Architecture Planning Instructions
 Existing AHK/hotkey/AltF7Hub integration inventory; manual capture semantics; Clipboard snapshot behavior; source process/window metadata; privacy policy; hotkey ownership and conflicts; AHK/Python responsibility matrix; actual IPC transport recommendation; authentication; endpoint discovery; timeout/retry policy; transport idempotency vs content deduplication; F7Hub-running/not-running behavior; Quick HUD states; HUD action routing; native Windows validation; explicit loop/retry guard.
 
-> Current contract: [Phase 1 successor](#phase-1-current-contract-2026-10-14).
+> Current direction: [2026-10-15 picker/capture](#quick-picker-and-automatic-capture-direction-2026-10-15),
+> with the [Phase 1 successor](#phase-1-current-contract-2026-10-14) for unchanged contracts.
 > Earlier dated planning instructions and reports retain their historical scope;
 > use the successor for current availability, approved decisions and execution gates.
 
 
 ## Retry and Loop Safety Contract
+
+Current agent execution follows [RT-R01](AGENTS.md#rt-r01--failure-circuit-breaker);
+the two-failure wording below is historical and does not authorize an unchanged retry.
 
 Every retrying operation must define:
 
@@ -31,6 +35,37 @@ REPORT BLOCKED
 
 Do not continue automated retries.
 
+
+## Quick Picker and automatic capture direction (2026-10-15)
+
+USER-approved capability, **NOT IMPLEMENTED**. The proposed shortcut is
+**Ctrl+Win+Alt+V**, AutoHotkey v2 `^#!v`; it is not registered or conflict-validated.
+Preserve native Win+V, existing F7/Alt+F7 and the independently owned capture/paste
+directions. Before activation, inspect the actual shared AHK host/bindings and
+validate conflicts, focus/modifier scope, target identity and native input.
+
+The compact F7Hub Clipboard picker opens near the cursor, clamped to the visible
+monitor work area. It searches persistent eligible history, supports keyboard and
+mouse selection, and dismisses safely without losing history or owner drafts.
+Offer two reviewed plain-text outputs: exact original text, or text plus selected
+privacy-allowed metadata (category/type, safe source, approved tags, capture date).
+Never automatically append customer identifiers, full titles, sensitive URLs or
+credentials. Search and presentation remain service-backed, bounded and privacy-admitted.
+
+Selecting a snippet for paste is explicit intent; Python must resolve and
+authorize the exact Item/revision and permitted output, with AHK performing the
+native effects through the existing 1B authenticated, bounded worker/action
+contracts. Keep write/input/confirmed outcome distinctions and safe dismissal.
+Do not create a parallel IPC path, arbitrary paste endpoint or hidden raw cache.
+Whether this picker shares a HUD presentation is a later design choice, not a
+second approved architecture or a change to session-only Active Paste.
+
+[1A automatic capture](1A_Clipboard_Domain_Data_Lifecycle.md#automatic-capture-and-retention-direction-2026-10-15)
+owns opt-in/admission/identity/retention. Automatic monitoring is approved future
+product direction; native hooks, own-write suppression, privacy preflight and
+profile/version changes still require separately reviewed capture delivery.
+Existing dormant CP-01 primitives and saved Settings activate none of these
+capabilities. Runtime/native picker and capture validation: NOT RUN in this task.
 
 ## Mode
 

@@ -1125,7 +1125,15 @@ Templates may use variables such as:
 Priority: P2  
 Requirements: `FR-PROMPT-004`
 
-The user should be able to inspect generated prompts before submission where appropriate.
+Require exact prompt review before external disclosure; see `FR-PROMPT-004`.
+
+## FEAT-PROMPT-004 — Manual external LLM workflow
+
+Requirement: `FR-PROMPT-005`. USER-approved direction (2026-10-15), PLANNED.
+Extend Prompt Library/Context Builder with the
+[reviewed local export workflow](04_UserWorkflows.md#manual-external-llm-prompt-builder-2026-10-15).
+The initial workflow needs no provider API/key; optional future response import
+remains a separate reviewed capability. Reuse existing template/variable concepts.
 
 ---
 

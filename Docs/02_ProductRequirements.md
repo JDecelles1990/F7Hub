@@ -1237,7 +1237,18 @@ Example:
 
 Priority: P2
 
-The user should be able to inspect the final generated prompt before submission where appropriate.
+The user must inspect and approve the exact final prompt before external disclosure.
+
+## FR-PROMPT-005 — Manual external LLM prompt export
+
+USER-approved direction (2026-10-15); PLANNED, not implemented. Support a
+provider-independent local Prompt Builder without an API key or corporate API:
+select an existing template and authorized Ticket/Case Journal/KB/Diagnostic
+context, filter/de-identify, preview the exact prompt, then explicitly copy the
+approved plain text for manual use in an employer-permitted external LLM.
+No automatic ticket/customer transmission. De-identification does not guarantee
+anonymity; employer policy governs use. The [owning workflow](04_UserWorkflows.md#manual-external-llm-prompt-builder-2026-10-15)
+defines structured troubleshooting output and future reviewed import boundaries.
 
 ---
 

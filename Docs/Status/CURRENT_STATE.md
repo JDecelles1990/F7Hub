@@ -1,5 +1,28 @@
 # F7Hub Current State
 
+## Documentation Reconciliation 01 — current boundary (2026-10-15)
+
+**READY_FOR_REVIEW**, documentation-only, unstaged/uncommitted on canonical main
+at `418e3bfa3a01e27351e756befdab61d1d4bb9c4c`. The
+[DR01 register](../Planning/Foundation/0A_Master_Foundation_Architectural_Contract.md#documentation-reconciliation-01--decision-register-2026-10-15)
+routes approved functional requirements; no application capability is delivered
+by this reconciliation. Independent review/approval of this candidate is pending.
+
+FACT from local ancestry: shell S001–S005 and Clipboard Phase 2A are merged through
+PR #103 (`418e3bf`). Their candidate-stage passages below are historical, including
+then-pending integration statements. Source inspection confirms retained rail/
+utility routes and two Clipboard source children: F7Hub Recent/Setup plus Windows
+unavailable feedback/disabled Refresh. No fresh runtime or native acceptance is
+claimed. Existing Shared Settings stores only its admitted Boolean preferences.
+
+Automatic capture, seven-day cleanup execution, recognition, Quick Picker,
+authenticated Clipboard bridge, durable workspace recovery, contextual Mochi
+forms/reminders and manual Prompt Builder remain future delivery. Approved intent
+does not activate them. The nine placed Workspace/DataReadiness candidate files
+remain unreviewed and unadopted. Synthetic data is not production-ready evidence.
+Validation here is documentation/static only; no production or database change,
+seeding, hotkey registration, dependency installation or Git integration occurs.
+
 ## Clipboard Phase 2A — two-source composition candidate (2026-10-14)
 
 **READY_FOR_REVIEW**, unstaged/uncommitted in `C:/Dev/F7Hub-Clipboard-Phase2A`, branch `feature/clipboard-phase2a-two-source-composition`, base/HEAD `01900ab420e5cf2f316b7039319b3d9171c58e7f`. Local/fetched/live main and PR #102 integration matched before isolation. Phase 1 is CLOSED_WITH_NON_BLOCKING_NOTES through #102; its author-stage readiness passages and dated predecessor candidate sections below remain historical. Independent approval and integration are pending.

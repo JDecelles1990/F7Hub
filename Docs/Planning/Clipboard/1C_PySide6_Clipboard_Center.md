@@ -2,10 +2,29 @@
 # PySide6 Clipboard Center Architecture Planning Instructions
 Existing MainWindow/workspace/navigation conventions; reusable Qt components; Clipboard Center shell integration; internal views; query semantics; search/filter model; list/read models; table columns; pagination; Inspector architecture; Entities, Tags, Capture History, Relationships, Retention/Privacy and Actions tabs; deep links; keyboard/accessibility; async loading; stale-result handling; error/empty states; large-dataset strategy; responsive layout; future Mochi-sidebar coexistence; vertical-slice implementation decomposition.
 
-> Current contract: [Phase 1 successor](#phase-1-current-contract-2026-10-14).
+> Current presentation direction: [2026-10-15 recognition](#recognition-presentation-direction-2026-10-15),
+> with the [Phase 1 successor](#phase-1-current-contract-2026-10-14) for unchanged contracts.
 > Earlier dated planning instructions and reports retain their historical scope;
 > use the successor for current availability, approved decisions and execution gates.
 
+
+## Recognition presentation direction (2026-10-15)
+
+Consume [1A's approved capture/recognition/promotion direction](1A_Clipboard_Domain_Data_Lifecycle.md#automatic-capture-and-retention-direction-2026-10-15)
+and [1B's Quick Picker](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#quick-picker-and-automatic-capture-direction-2026-10-15).
+Clipboard Center remains the single operational Center; its planned line/block
+organization and table presentation must show whole-Item Kind separately from
+multiple recognized occurrences, source spans, provenance and classification
+confidence. Original source remains intact; normalized/annotated views and
+metadata-enriched output are separate, explicitly labelled projections.
+Technician acceptance of promotion routes through the target module's service;
+selection or classification is not acceptance, execution or publication.
+
+FACT at `418e3bf` / PR #103: the Center has two retained source children,
+F7Hub Recent/Setup and a Windows unavailable view with disabled Refresh.
+This composition supplies no native read, history search, recognition, Quick
+Picker or capture/paste. Missing owner services yield truthful unavailable states;
+do not implement classification, acquisition or writes in widgets to fill a gap.
 
 ## Dependency Gate
 

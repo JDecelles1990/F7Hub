@@ -1,5 +1,30 @@
 # F7Hub Semantic Model 2A
 
+## Reconciled semantic and data-readiness boundary (2026-10-15)
+
+USER reaffirmation ([DR01-11](../Foundation/0A_Master_Foundation_Architectural_Contract.md#documentation-reconciliation-01--decision-register-2026-10-15)):
+reuse one [0C vocabulary](../Foundation/0C_Taxonomy_Information_Vocabulary.md)
+across modules, with distinct concept identity, aliases, occurrences and typed
+relationships. Keep raw text separate from derived semantics and preserve
+provenance/review status. Classification confidence, evidence confidence and query
+relevance remain different assessments; important knowledge relationships need
+human acceptance. Basic recognition/search is local/offline-first; embeddings
+and model training are optional future work, not prerequisites or new authorities.
+Consume [2B](2B_Troubleshooting_Concept_Relationship_Model.md),
+[2C](2C_Troubleshooting_Lexical_Model.md) and
+[2D source/span/admission contracts](2D_Case_Note_Semantic_Extraction_Pipeline.md).
+
+FACT from current source inspection: the [synthetic starter](../../../Data/SemanticModel/Synthetic/synthetic_cases.jsonl)
+contains 24 fictional records. Its [audit README](../../../Data/SemanticModel/Imports/Synthetic-Troubleshooting-Starter-v0.1/Packages/F7Hub_Taxonomy_Coverage_RCA_Audit_v0_1/README.md)
+identifies uniformly simulated-success, unreviewed cases, unsuitable for probability
+calibration. Stage imported concept candidates for reviewed canonical mapping;
+schema conformance and fictional success do not establish technical correctness,
+production readiness, operational evidence or permission to train/import.
+Keep LAB inputs/results distinct from operational records and real validation.
+The [DataReadiness proposal](../DataReadiness/Synthetic_Lab_Readiness_DRAFT.md)
+remains unapproved; it does not execute/adopt 2E or authorize seeding, new catalogs
+or changes to the immutable source package. No database is seeded in this task.
+
 ## Document Control
 
 | Field | Value |

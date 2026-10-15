@@ -1,5 +1,49 @@
 # F7Hub Phase 0A
 
+## Documentation Reconciliation 01 — decision register (2026-10-15)
+
+This compact extension of the existing 0A register indexes the USER's approved
+functional direction in the **Documentation Reconciliation 01** directive.
+Approval date for these additions: 2026-10-15, America/Toronto; DR01-02 also
+records the same-session explicit Restore/access-revalidation answer. Approval
+of intent does not approve candidate mechanisms or establish implementation.
+Historical decisions, approvals and superseded alternatives below retain their
+original dates and meaning. This documentation candidate stops at READY_FOR_REVIEW.
+
+| Stable ID | Approved decision / current status | Authoritative requirement | Verified integrated evidence / limit |
+| --- | --- | --- | --- |
+| DR01-01 | Share references and authorized context/actions; preserve module ownership. APPROVED | [Interoperability boundary](#reconciled-interoperability-boundary) | Foundation 0A–0E merged through PR #71; new consumers remain planned |
+| DR01-02 | Distinct Technician/Diagnostic Workspaces; optional detach, Dock/Dock All, pin/topmost and explicit eligible session recovery. APPROVED intent; mechanism review pending | [S1 recovery/hosting](../Workspace/S1_Main_Shell_Technician_Workspace_Navigation.md#workspace-continuity-direction-2026-10-15) | Embedded shell slices through PR #101; detachment/durable recovery NOT IMPLEMENTED |
+| DR01-03 | Privacy-conscious application activity; transient context, operational records, history and aggregates remain distinct. APPROVED intent | [S2 activity](../Workspace/S2_Mochi_DynamicHub_Context_Actions.md#activity-questions-and-website-reminders-2026-10-15) | No new activity pipeline verified |
+| DR01-04 | Opt-in automatic eligible Unicode-text capture, exact source, seven-day temporary default and independent holds/preservation. APPROVED | [1A capture/lifecycle](../Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#automatic-capture-and-retention-direction-2026-10-15) | Migration 0013/read-only Recent and Settings delivered; capture/cleanup NOT IMPLEMENTED |
+| DR01-05 | Compact searchable Quick Picker with plain-text/allowed-metadata output. APPROVED capability; Ctrl+Win+Alt+V remains PROPOSED | [1B picker](../Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#quick-picker-and-automatic-capture-direction-2026-10-15) | Native acquisition, authenticated bridge and picker NOT IMPLEMENTED |
+| DR01-06 | Local multi-type recognition; technician approval before cross-owner permanent promotion. APPROVED | [1A recognition](../Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#automatic-capture-and-retention-direction-2026-10-15), [1C presentation](../Clipboard/1C_PySide6_Clipboard_Center.md#recognition-presentation-direction-2026-10-15) | Taxonomy/SemanticModel architecture exists; Clipboard recognition NOT IMPLEMENTED |
+| DR01-07 | Provider-independent reviewed prompt export without an API. APPROVED intent | [Prompt workflow](../../04_UserWorkflows.md#manual-external-llm-prompt-builder-2026-10-15) | Existing prompt_templates/prompt_variables are planned schema; no delivered Prompt Builder verified |
+| DR01-08 | Mochi may ask contextual questions; module services own answers/records and evidence acceptance. APPROVED direction; advanced interaction DEFERRED | [S2 questions](../Workspace/S2_Mochi_DynamicHub_Context_Actions.md#activity-questions-and-website-reminders-2026-10-15) | Existing Mochi cosmetic controls do not implement business forms |
+| DR01-09 | Copied/opened/clicked/confirmed-visited are distinct; reminders require explicit action and bounded suppression. APPROVED intent | [S2 website reminders](../Workspace/S2_Mochi_DynamicHub_Context_Actions.md#activity-questions-and-website-reminders-2026-10-15) | Browser monitoring NOT IMPLEMENTED; separately optional and default disabled |
+| DR01-10 | Remove eligible deleted source and owned derivatives; no default recoverable trash or physical-erasure promise. APPROVED objective | [Database privacy/deletion](../../07_Database.md#deletion-and-retention-objectives-2026-10-15), [1A lifecycle](../Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#automatic-capture-and-retention-direction-2026-10-15) | Cleanup/security implementation requires separate reviewed delivery |
+| DR01-11 | One shared semantic vocabulary; synthetic LAB data and imported concepts remain reviewed candidates. APPROVED reaffirmation | [2A semantic/data readiness](../SemanticModel/2A_Semantic_Model_Foundation.md#reconciled-semantic-and-data-readiness-boundary-2026-10-15) | 2A–2D architecture integrated through PR #94; source presence is not production readiness |
+| DR01-12 | Preserve U1–U5; defer animated backgrounds, magnetic F7 and advanced features. APPROVED deferral | [S1 approved design](../Workspace/S1_Main_Shell_Technician_Workspace_Navigation.md#gui-shell-design-adoption--2026-10-13), [governance](../../19_DocumentationIndex.md#documentation-reconciliation-governance-2026-10-15) | Design adoption PR #95 / 8e6e7bb; no new aesthetic approval |
+| DR01-G01 | Concise single-owner requirements, stable decision traceability and separate approval/delivery evidence. APPROVED | [Documentation governance](../../19_DocumentationIndex.md#documentation-reconciliation-governance-2026-10-15) | Existing phase registers reused; no competing register created |
+
+Evidence boundary: local main `418e3bfa3a01e27351e756befdab61d1d4bb9c4c`
+contains the named merge records. Current implementation inspection is source
+evidence, not fresh runtime validation or renewed approval of historical reports.
+No decision's implementation status advances merely because this index exists.
+
+### Reconciled interoperability boundary
+
+Tickets/Case Journal, Clipboard, KB, Diagnostics, Scripts, Websites, Prompt/AI,
+Search, Analytics, DynamicHub and Mochi exchange stable owner-qualified references
+and purpose-approved projections through application services and validated action
+contracts. Reuse [0B](0B_Global_JSON_Contract_Interoperability_Grammar.md),
+[0C](0C_Taxonomy_Information_Vocabulary.md),
+[0E](0E_Foundation_Architecture_Reconciliation.md) and S1/S2; do not duplicate
+stores, rules or services. Cross-module mutations require the target owner's
+service, current authorization and privacy admission at each boundary. Invocation,
+dispatch and confirmed successful completion remain separate facts. A projection
+or shared selection grants no write, disclosure or execution authority.
+
 ## Cross-Subsystem Planning Note
 
 Register DynamicHub as a subsystem; establish authoritative selected-ticket context as a shared application concept; define one authority per business concept; add evidence-flow boundaries; show DynamicHub ↔ Diagnostics ↔ Analytics ↔ Clipboard ↔ Mochi dependencies

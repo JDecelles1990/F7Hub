@@ -1759,8 +1759,35 @@ Related Features:
 - `FEAT-PROMPT-001`
 - `FEAT-PROMPT-002`
 - `FEAT-PROMPT-003`
+- `FEAT-PROMPT-004`
 
-## Workflow
+## Manual external LLM Prompt Builder (2026-10-15)
+
+USER-approved direction; PLANNED. This extends the existing Prompt Library and
+AI Context Builder without requiring a provider API, API key or network access
+for local composition/review/copy. External LLM use remains manual and subject
+to employer permission and availability.
+
+1. Select an existing prompt template and purpose.
+2. Select authorized context from the active Ticket, ticket-optional Case Journal,
+   KB or Diagnostics through their owning services; do not harvest whole histories.
+3. Apply privacy filtering and de-identification; omit credentials and unauthorized
+   identifiers. De-identification does not guarantee anonymity or employer approval.
+4. Show the exact generated plain-text prompt for technician review/edit/approval.
+5. Copy that approved text only on explicit action. The technician manually pastes
+   it into an employer-permitted external LLM; F7Hub sends nothing automatically.
+6. Request structured troubleshooting output: ordered tests, expected results,
+   actual-result fields, Not Tested / Pass / Fail / Inconclusive checkbox choices,
+   evidence/interpretation, missing-information questions and next steps. Separate
+   hypotheses from verified findings; only owning evidence workflows verify claims.
+
+Future structured-response import may propose a Diagnostic checklist after
+validation and technician review. Importing instructions is not execution
+permission: approved operation identity, validated inputs, normal services/
+gateways and explicit technician control remain mandatory. No importer, automatic
+test completion or AI administrative execution is authorized by this workflow.
+
+## General library workflow
 
 ```text
 Open Prompt Library
