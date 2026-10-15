@@ -1953,6 +1953,18 @@ Responsibilities:
 
 Prompt rendering should be deterministic before AI submission.
 
+USER-approved manual-export direction (2026-10-15), PLANNED: reuse the existing
+Prompt Library/Context Builder responsibilities for authorized context selection,
+privacy filtering, exact preview and explicit plain-text copy under
+[the owning workflow](04_UserWorkflows.md#manual-external-llm-prompt-builder-2026-10-15).
+Local composition/export must work independently of AIService/provider availability
+or an API key; provider calls remain a separate optional, explicitly authorized
+path. Reuse planned `prompt_templates`/`prompt_variables` instead of duplicate
+stores or gateways. These tables appear in the documented planned schema, not
+the released migrations inspected at `418e3bf`; no PromptService/Builder runtime
+is established by those declarations. Future response import validates untrusted
+data and requires review before checklist adoption or separately authorized action.
+
 ---
 
 # 79. AI Service

@@ -2,10 +2,53 @@
 # Clipboard Domain & Data Lifecycle Architecture Planning Instructions
 Clipboard Item vs Capture Event; raw/normalized content; hash/deduplication semantics; primary Kind; Entity occurrences; Tag assignments; sensitivity handling; secret detection; persistence boundaries; temporary/saved/pinned/evidence semantics; retention and expiration; cleanup rules; large-content policy; Ticket/Diagnostic/KB relationships; FTS/search requirements; Analytics facts; Mochi-safe context; transaction boundaries; failure/partial-processing rules.
 
-> Current contract: [Phase 1 successor](#phase-1-current-contract-2026-10-14).
+> Current decisions: [2026-10-15 direction](#automatic-capture-and-retention-direction-2026-10-15),
+> with the [Phase 1 successor](#phase-1-current-contract-2026-10-14) for unchanged contracts.
 > Earlier dated planning instructions and reports retain their historical scope;
 > use the successor for current availability, approved decisions and execution gates.
 
+
+## Automatic capture and retention direction (2026-10-15)
+
+USER-approved functional successor, indexed by
+[DR01-04/06/10](../Foundation/0A_Master_Foundation_Architectural_Contract.md#documentation-reconciliation-01--decision-register-2026-10-15).
+This supersedes the earlier manual-only product horizon and proposed 24-hour
+temporary default; it does not activate monitoring or replace Item/Event identity.
+Automatic capture remains **APPROVED intent / NOT IMPLEMENTED**, disabled until
+explicit workflow opt-in and separately reviewed native/security delivery.
+
+- Once the workflow is explicitly enabled with automatic-capture disclosure,
+  capture eligible text copied through ordinary Windows operations while preserving
+  native Ctrl+C. Persist only privacy-admitted plain Unicode text, preserving the
+  complete eligible original exactly; exclude HTML/RTF/formatting payloads.
+  Keep the existing 64-KiB UTF-8 Item bound and reject unsupported/oversize content
+  safely. No secret override, password/token retention or raw-content logging.
+- Eligible history is durable across PC restarts. TEMPORARY retention defaults to
+  **seven days**; SAVED intent, pinning and evidence holds retain their independently
+  governed lifecycles. This default does not retroactively purge or rewrite Items.
+  Stop future admission when disabled; disabling alone does not delete history.
+- Preserve genuine capture provenance within CP-00's independent source/privacy
+  permissions. Retry/replay and F7Hub's own clipboard writes must not manufacture
+  captures; genuine repeat captures remain distinct Events under existing rules.
+- Recognize locally using deterministic rules before optional AI: URLs; PowerShell
+  commands/scripts/errors/output; Windows error codes; file/registry paths; logs;
+  JSON/structured text; symptoms, diagnostic results and technical concepts/entities.
+  Keep whole-Item Kind separate from multiple source-bound occurrences; preserve
+  spans, provenance and task-specific confidence under 0C and SemanticModel 2A–2D.
+  Classification establishes neither correctness, root cause nor accepted evidence.
+- Automatic classification may organize eligible content. Technician approval is
+  required before promotion to a permanent KB article, Script Library entry or
+  independently owned record, through that owner's service. No automatic publication.
+- Eligible deletion removes source and owned derivatives subject to holds and owner
+  policy; independently promoted Ticket/KB/Diagnostic records survive unless their
+  owner authorizes deletion. [Database privacy objectives](../../07_Database.md#deletion-and-retention-objectives-2026-10-15)
+  own removal limits and review requirements; no default recoverable trash.
+
+FACT at `418e3bf`: migration 0013 supplies bounded Item/Event storage and the
+service supplies read-only Recent. Its closed methods are F7HUB/AHK_MANUAL, not an
+automatic-ingress profile. Capture admission, automatic ingestion, recognition,
+cleanup and cross-owner promotion are not delivered. Keep released migrations
+immutable; later automatic method/profile/storage changes need separate review.
 
 Clipboard Invariants section
 Before database design, I want explicit rules such as:

@@ -43,6 +43,49 @@ Do not compensate by inventing replacement architecture.
 
 ---
 
+## Workspace continuity direction (2026-10-15)
+
+USER-approved functional direction, indexed by
+[DR01-02](../Foundation/0A_Master_Foundation_Architectural_Contract.md#documentation-reconciliation-01--decision-register-2026-10-15).
+Technician Workspace coordinates ticket/case work; Diagnostic Workspace owns
+the investigation presentation (hypotheses, tests, findings, results and evidence).
+Diagnostics retains one authoritative engine/service boundary. The same Diagnostic
+Workspace must be reachable through Technician Workspace and an independent main
+navigation route; these are access paths, not competing engines or duplicated data.
+
+Optional detachment of eligible F7Hub-owned workspaces, individual **Dock into
+F7Hub**, **Dock All**, optional context pinning and independent Always on Top are
+approved product direction for later delivery. Preserve MainWindow/QStackedWidget,
+embedded-first navigation, owner services and one logical draft; reject classic
+and tabbed MDI as before. This direction extends the MVP hosting horizon without
+selecting a new window framework, allowing duplicate concurrent module editors,
+or adopting the candidate's proposed identity/schema/snapshot mechanisms.
+
+Presentation changes must preserve eligible drafts, input text, checked/unchecked
+controls, selections and active section. Closing a detached view must negotiate
+owner drafts/pending operations and offer safe return/recovery. Dock All applies
+only to eligible registered F7Hub workspaces, reporting individual failures;
+existing cosmetic Mochi and unrelated Windows applications are outside that scope.
+Context pinning is local to the workspace and cannot retarget accepted operations.
+
+Durable recovery after close/restart is approved intent, **NOT IMPLEMENTED**.
+The USER selected an explicit **Restore previous session** action with current
+access/owner-reference revalidation before restoring eligible work. Preserve the
+privacy boundary against automatic restoration of sensitive context or drafts.
+Recover the active workspace and relevant eligible state only after that action;
+never replay pending administration, paste, provider calls or confirmations.
+Revalidate monitor bounds/availability; retain newer drafts and show persistence
+or recovery failures truthfully. Only successfully checkpointed state can be
+promised after a crash. Owner-specific draft privacy, storage, retention, conflict
+handling and failure/close policy require separate review; no generic widget
+serialization, Settings-as-draft-store or new database contract is approved here.
+
+The [pre-existing detachment draft](Workspace_Continuity_And_Detachment_DRAFT.md)
+is unreviewed proposal input; its extra mechanisms remain unapproved. F7-held
+magnetic/follow behavior remains DEFERRED. Preserve the [U1–U5 adoption](#gui-shell-design-adoption--2026-10-13)
+and its dates/references; no new aesthetic specification. Prior session-only MVP
+and no-automatic-restore passages below remain bounded historical baseline rules.
+
 ## 3. Approved Architectural Anchor
 
 The root architecture already allows a first-class `Technician Workspace` inside the primary PySide6 application. It may host substantial technician tools, internal tabs, activation, layout, split views, context propagation, restoration and tool lifecycle.

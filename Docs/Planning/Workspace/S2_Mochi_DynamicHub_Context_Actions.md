@@ -1632,6 +1632,68 @@ Produce Mermaid source for:
 
 ---
 
+## Activity, questions and website reminders (2026-10-15)
+
+USER-approved functional direction, indexed by
+[DR01-03/08/09](../Foundation/0A_Master_Foundation_Architectural_Contract.md#documentation-reconciliation-01--decision-register-2026-10-15).
+These are future owner-service consumers, not delivered Mochi/DynamicHub features
+or approval of the separate activity draft's JSON, template library or storage.
+
+### Application activity
+
+Support minimal structured facts about F7Hub-owned navigation, button/command
+invocation, context selection, meaningful form interaction, diagnostic workflow,
+website actions initiated by F7Hub and authorized cross-module outcomes. Reuse
+Foundation 0B event/result semantics, S1 context, existing Settings and Analytics
+contracts; no competing generic event bus or telemetry schema. Invocation is
+distinct from accepted/completed/failed/cancelled/unconfirmed outcome. Correlate
+and deduplicate observations rather than counting a dispatch as success.
+
+Keep transient current context, durable operational owner records, permitted
+activity history and Analytics aggregates separate in purpose/access/retention.
+Exclude global keystroke recording, sensitive field values, raw secret-bearing
+Clipboard content and unnecessary customer identifiers. Activity is not a hidden
+draft store, extraction source or consent to disclose. Exact permitted collection,
+retention and preference definitions remain owner-reviewed; no universal capture
+of every control value or automatic historical transcript is authorized.
+
+### Contextual questions
+
+Mochi may later render compact radio-button, checkbox and short-answer forms with
+explicit submission, to clarify symptoms, test completion/missing evidence,
+closed-case knowledge, KB terminology, concept associations/synonyms/distinctions
+and classification/confidence feedback. Use fresh purpose-filtered S1/SemanticModel
+projections and existing S2 action routing. Mochi remains advisory: Tickets,
+Diagnostics, KB and taxonomy services validate and own submitted records/review.
+Answers are claims, not automatically verified root cause or accepted evidence.
+Keep closed-ticket history intact; use reviewed annotations or owner workflows
+for retrospective improvements. Detailed dialogue mechanisms and advanced
+interaction remain deferred; no automatic external AI request or authority gain.
+
+### Copied URLs and reminders
+
+Privacy-admitted recognized Clipboard URLs may be associated with Websites
+through its owning workflow. Distinguish **copied**, **open requested/opened**,
+**clicked** and **confirmed visited**; an open request or process-launch success
+does not prove a visit. Evaluate eligible subsequent activity against the copy
+timestamp and known observation coverage. Lack of a confirmation normally means
+**visit status unknown**, not proven **not visited**; use the latter only with
+sufficient authorized evidence for the relevant interval and definition.
+
+Mochi/DynamicHub may suggest opening a link with no confirmed later visit, stating
+that uncertainty. Opening requires an explicit technician action through the
+existing contextual action mechanism. Dismiss/postpone and existing generation/
+cooldown suppression prevent repeated intrusive reminders. Track only permitted
+F7Hub-initiated website actions by default; raw sensitive URLs are not ordinary
+activity/Analytics dimensions or automatic reminder text.
+
+General browser-history monitoring is separately optional and **disabled by
+default**. Chrome, Edge and Firefox support would be independently reviewed
+capabilities; no extension/native-messaging host/history schema is selected here.
+Estimated active-view duration additionally needs focus, active-tab and idle-state
+signals; browser history alone is insufficient and duration never proves reading.
+Advanced monitoring/duration tracking remains DEFERRED, not a reminder prerequisite.
+
 ## 67. Decision Register
 
 At minimum decide:

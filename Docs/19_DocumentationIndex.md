@@ -1,5 +1,33 @@
 # F7Hub Documentation Index
 
+## Documentation reconciliation governance (2026-10-15)
+
+Record approved requirements once in their existing owner; use short contracts,
+acceptance criteria and links elsewhere. Extend existing documents before adding
+files; avoid speculative volume and arbitrary length limits. Recommend
+consolidation where useful without silently relocating authoritative material.
+Use the [existing 0A decision register extension](Planning/Foundation/0A_Master_Foundation_Architectural_Contract.md#documentation-reconciliation-01--decision-register-2026-10-15)
+for DR01 IDs, verified approval dates, status, owner links and implementation
+evidence. Implementation status advances only with verified integrated delivery.
+Preserve meaningful dates, superseded approvals and verified Git/PR traceability.
+Remove only demonstrably obsolete/redundant current instructions; ask a focused
+question before resolving an ambiguous authority conflict, continuing independent
+work where possible. Approval, implementation and validation remain separate.
+
+The nine pre-existing Workspace/DataReadiness candidate files, including their
+scoped guidance and Data/SemanticModel guidance, remain **DRAFT / UNAPPROVED**;
+package placement is not adoption. Their proposed identities, keys, JSON and seed
+mechanisms do not amend S1/S2, Foundation or database contracts. Approved direction
+is routed through the DR01 owners; no new canonical authority is created.
+
+Freeze new aesthetic specification. Preserve [S1 U1–U5](Planning/Workspace/S1_Main_Shell_Technician_Workspace_Navigation.md#gui-shell-design-adoption--2026-10-13)
+and existing references. S1's substantial historical visual material is a future
+DESIGN.md consolidation candidate, with no relocation in this task. Animated
+full-window backgrounds, further themes/animations, browser extensions/advanced
+view-duration tracking, automatic KB publication, autonomous AI administration,
+large-scale embeddings/training, magnetic F7 and advanced Mochi interaction remain
+deferred. Functional semantics and data integrity take priority.
+
 ## AltF7Hub Knowledge corpus import — 2026-10-03
 
 Read [Data/README.md](../Data/README.md) for the 31-topic YAML corpus, verified local Knowledge import, article mapping, validation provenance and recovery limits. [The source YAML](../Data/AltF7Hub-Troubleshooting-Topics.yaml) is versioned reference content; the local development database is not an automatic seed or synchronized copy.

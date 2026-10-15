@@ -1315,6 +1315,38 @@ The design should support:
 
 The clipboard database design must not assume all copied text is safe to retain.
 
+## Deletion and retention objectives (2026-10-15)
+
+USER-approved privacy objective; implementation is separately reviewed.
+[Clipboard 1A](Planning/Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#automatic-capture-and-retention-direction-2026-10-15)
+owns the seven-day temporary default, SAVED/pin/hold eligibility and source lifecycle.
+Eligible deletion should actually remove source content and owned derivatives,
+with no default hidden trash or indefinite recoverable `deleted_at` record. Avoid
+per-item deletion timestamps without a justified need. Remove/invalidate owned
+FTS/search entries, classifications, semantic projections, caches and stale
+references according to ownership; do not cascade into independently owned
+Ticket/KB/Diagnostic records without their owner's authorization. Preserve only
+justified, genuinely non-identifying statistical aggregates; any aggregate
+deletion policy needs its own review. Holds and employer/legal obligations must
+be resolved explicitly rather than bypassed or silently extended indefinitely.
+
+Logical deletion is not guaranteed physical erasure. SQLite's
+[secure_delete](https://www.sqlite.org/pragma.html#pragma_secure_delete) and
+[FTS5 secure-delete](https://www.sqlite.org/fts5.html#the_secure_delete_configuration_option)
+have separate limitations and compatibility/performance implications; removing
+query results alone does not establish removal of older index/file content.
+[WAL, journals and temporary files](https://www.sqlite.org/tempfiles.html), existing
+backups, filesystem snapshots/cloud copies and storage-device recovery require
+separate threat/retention review. F7Hub deletion cannot promise deletion from
+Windows Clipboard history or independently retained external copies. Employer
+policy and legal retention remain NOT VERIFIED where not established.
+
+No production PRAGMA, cleanup, backup, migration or data behavior changes here.
+Before delivery, inspect actual runtime/FTS configuration and all owned derivative
+lifecycles; review security-sensitive changes and any new migration separately,
+including isolated deletion/invalidation, integrity and recovery checks. Existing
+archive guidance applies to its owning records, not a new Clipboard recycle bin.
+
 ---
 
 # 58. Integration Data
