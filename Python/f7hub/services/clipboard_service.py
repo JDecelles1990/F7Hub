@@ -8,6 +8,7 @@ import threading
 import time
 from typing import Callable, Protocol
 from uuid import uuid4
+from pathlib import Path
 
 from f7hub.domain.clipboard import (
     ClipboardRecentPage, ClipboardValidationError, RECENT_DEFAULT_LIMIT,
@@ -15,8 +16,12 @@ from f7hub.domain.clipboard import (
     ClipboardAdmissionBinding, ClipboardAdmissionDecision, ClipboardCaptureCommand,
     ClipboardOperation, ClipboardReceiptResult, ClipboardPersistenceCode as Code,
     ClipboardPersistenceError, ReplayDisposition, validate_token,
+    ClipboardPrivacyPolicy, CONSENT_POLICY,
 )
 from f7hub.repositories.clipboard_repository import ClipboardRepository
+from f7hub.domain.clipboard_privacy import assess_manual_text, ClipboardPrivacyFinding
+from f7hub.domain.clipboard_settings import WORKFLOW_ENABLED, CLIPBOARD_SETTING_DEFINITIONS
+from f7hub.repositories.settings_repository import SettingsPersistenceError
 
 
 class ClipboardQueryError(RuntimeError):
@@ -57,10 +62,15 @@ class ClipboardService:
     def __init__(self, repository: ClipboardRepository, *,
                  clock: Callable[[], datetime] | None = None,
                  admission: ClipboardAdmissionAuthority | None = None,
-                 monotonic: Callable[[], float] | None = None) -> None:
+                 monotonic: Callable[[], float] | None = None,
+                 settings=None) -> None:
         self._repository = repository
         self._clock = clock if clock is not None else lambda: datetime.now(timezone.utc)
         self._admission = admission if admission is not None else _UnavailableAdmission()
+        self._settings = settings
+        self._real_assessment = settings is not None and admission is None
+        if settings is not None and Path(settings._repository._database_path).resolve() != Path(repository._database_path).resolve():
+            raise ValueError('Clipboard and Settings must use the same database.')
         self._monotonic = monotonic if monotonic is not None else time.monotonic
         self._lock = threading.RLock()
         self._context = None
@@ -68,6 +78,32 @@ class ClipboardService:
         self._operations: dict[str, str] = {}
         self._last_sample = None
         self._clock_anomaly = False
+
+    def refresh_setup(self):
+        """Coherent preference/consent projection; reading never grants consent."""
+        if self._settings is None or self._repository.profile_scope is None:
+            raise SettingsPersistenceError('Clipboard Setup authority is unavailable.')
+        return self._settings._load_clipboard_setup(self._repository.database_scope, self._repository.profile_scope)
+
+    @property
+    def supports_setup(self):
+        return self._settings is not None
+
+    def enable_history_from_setup(self, changes, *, expected_revision, expected_epoch):
+        """Explicit affirmative Setup use case in trusted local composition.
+
+        General Settings Apply has no route/flag to this action. This does not
+        authenticate a human against malicious code executing in this process.
+        """
+        if self._settings is None or self._repository.profile_scope is None:
+            raise SettingsPersistenceError('Clipboard Setup authority is unavailable.')
+        if (not isinstance(changes, dict) or changes.get(WORKFLOW_ENABLED) is not True
+                or set(changes) - {d.key for d in CLIPBOARD_SETTING_DEFINITIONS}
+                or (expected_epoch is not None and (type(expected_epoch) is not int or not 1 <= expected_epoch < 2**63))):
+            raise ClipboardValidationError('Clipboard Setup action is invalid.')
+        return self._settings._apply_clipboard_setup(changes, expected_revision=expected_revision,
+            expected_epoch=expected_epoch, database_scope=self._repository.database_scope,
+            profile_scope=self._repository.profile_scope)
 
     def open_admission_context(self, producer_binding: str) -> ClipboardAdmissionContext:
         """Issue a fresh generation; issuance alone grants no storage permission."""
@@ -113,7 +149,19 @@ class ClipboardService:
                 raise ClipboardPersistenceError(Code.UNCERTAIN)
             try:
                 binding = ClipboardAdmissionBinding(command, self._repository.database_scope)
-                decision = self._admission.authorize(binding)
+                # Bind the epoch/revision before expensive assessment; a later
+                # grant or settings change must not retarget this preparation.
+                consent = self._repository._prepare_consent() if (
+                    self._real_assessment or not isinstance(self._admission, _UnavailableAdmission)) else None
+                if self._real_assessment:
+                    assessment = assess_manual_text(command.source)
+                    if assessment.finding != ClipboardPrivacyFinding.PERMITTED or not assessment.assessment_complete:
+                        raise ClipboardPersistenceError(Code.ADMISSION_DENIED)
+                    decision = ClipboardAdmissionDecision(binding, ClipboardPrivacyPolicy(
+                        assessment.assessment_method, assessment.assessment_version, CONSENT_POLICY,
+                        'PERMITTED', True, True))
+                else:
+                    decision = self._admission.authorize(binding)
             except Exception:
                 self._operations[operation.operation_id] = "rejected"
                 raise ClipboardPersistenceError(Code.ADMISSION_UNAVAILABLE) from None
@@ -133,7 +181,8 @@ class ClipboardService:
                 if known.disposition == ReplayDisposition.UNKNOWN_OR_EXPIRED:
                     raise ClipboardPersistenceError(Code.GENERATION_STALE)
             try:
-                result = self._repository._persist_admitted(binding, decision.policy, accepted_at=accepted_at)
+                result = self._repository._persist_admitted(binding, decision.policy, accepted_at=accepted_at,
+                                                            consent=consent)
             except ClipboardPersistenceError as error:
                 if error.code == Code.UNCERTAIN:
                     self._operations[operation.operation_id] = "uncertain"

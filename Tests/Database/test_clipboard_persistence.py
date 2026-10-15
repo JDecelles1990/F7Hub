@@ -18,6 +18,7 @@ from f7hub.services.clipboard_service import ClipboardService
 from Tests.Database.clipboard_fixtures import ClipboardDatabaseTestCase, seed_item
 from Tests.Database.test_clipboard_receipts_migration import insert_receipt
 from Tests.Unit.test_clipboard_capture_contract import SyntheticAuthority, SyntheticClock
+from Tests.Database.test_clipboard_consent import grant_synthetic_consent
 
 
 class FaultConnection:
@@ -58,9 +59,10 @@ class FaultConnection:
 class ClipboardPersistenceTests(ClipboardDatabaseTestCase):
     def setUp(self):
         super().setUp()
+        grant_synthetic_consent(self.database_path)
         self.clock = SyntheticClock()
         self.authority = SyntheticAuthority()
-        self.repository = ClipboardRepository(self.database_path)
+        self.repository = ClipboardRepository(self.database_path, profile_scope='b'*64)
         self.service = ClipboardService(self.repository, admission=self.authority,
             clock=self.clock.utc, monotonic=self.clock.monotonic)
         self.context = self.service.open_admission_context("synthetic")
@@ -156,7 +158,7 @@ class ClipboardPersistenceTests(ClipboardDatabaseTestCase):
     def test_restart_lookup_is_content_free_and_does_not_activate_old_generation(self):
         command = self.command()
         first = self.capture(command)
-        restarted = ClipboardService(ClipboardRepository(self.database_path), clock=self.clock.utc)
+        restarted = ClipboardService(ClipboardRepository(self.database_path, profile_scope='b'*64), clock=self.clock.utc)
         result = restarted.lookup_receipt(command.operation)
         self.assertEqual(result.disposition, ReplayDisposition.KNOWN_COMMITTED)
         self.assertFalse(result.payload_equality_verified)
@@ -217,7 +219,8 @@ class ClipboardPersistenceTests(ClipboardDatabaseTestCase):
         from Tests.Database.clipboard_fixtures import PROJECT_ROOT
         other = self.root / "other.db"
         bootstrap_database(other, PROJECT_ROOT / "Database/Migrations")
-        repository = ClipboardRepository(other)
+        grant_synthetic_consent(other)
+        repository = ClipboardRepository(other, profile_scope='b'*64)
         service = ClipboardService(repository, admission=self.authority, clock=self.clock.utc)
         context = service.open_admission_context("synthetic")
         result = service.capture_manual_text(context, replace(command, operation=service.new_operation(context)))
@@ -293,9 +296,9 @@ class ClipboardPersistenceTests(ClipboardDatabaseTestCase):
         binding = ClipboardAdmissionBinding(command, self.repository.database_scope)
         barrier = threading.Barrier(2)
         def worker():
-            repository = ClipboardRepository(self.database_path)
+            repository = ClipboardRepository(self.database_path, profile_scope='b'*64)
             barrier.wait(timeout=5)
-            return repository._persist_admitted(binding, self.authority.policy, accepted_at="2026-10-15T12:00:00.000Z")
+            return repository._persist_admitted(binding, self.authority.policy, accepted_at="2026-10-15T12:00:00.000Z", consent=repository._prepare_consent())
         with ThreadPoolExecutor(max_workers=2) as workers:
             futures = [workers.submit(worker) for _ in range(2)]
             results = [future.result(timeout=10) for future in futures]
@@ -307,10 +310,10 @@ class ClipboardPersistenceTests(ClipboardDatabaseTestCase):
         commands = (self.command(), self.command())
         barrier = threading.Barrier(2)
         def worker(command):
-            repository = ClipboardRepository(self.database_path)
+            repository = ClipboardRepository(self.database_path, profile_scope='b'*64)
             binding = ClipboardAdmissionBinding(command, repository.database_scope)
             barrier.wait(timeout=5)
-            return repository._persist_admitted(binding, self.authority.policy, accepted_at="2026-10-15T12:00:00.000Z")
+            return repository._persist_admitted(binding, self.authority.policy, accepted_at="2026-10-15T12:00:00.000Z", consent=repository._prepare_consent())
         with ThreadPoolExecutor(max_workers=2) as workers:
             futures = [workers.submit(worker, command) for command in commands]
             results = [future.result(timeout=10) for future in futures]
@@ -322,11 +325,11 @@ class ClipboardPersistenceTests(ClipboardDatabaseTestCase):
         commands = (command, replace(command, source=AdmittedManualText("Conflicting synthetic text")))
         barrier = threading.Barrier(2)
         def worker(command):
-            repository = ClipboardRepository(self.database_path)
+            repository = ClipboardRepository(self.database_path, profile_scope='b'*64)
             binding = ClipboardAdmissionBinding(command, repository.database_scope)
             barrier.wait(timeout=5)
             try:
-                return repository._persist_admitted(binding, self.authority.policy, accepted_at="2026-10-15T12:00:00.000Z").disposition
+                return repository._persist_admitted(binding, self.authority.policy, accepted_at="2026-10-15T12:00:00.000Z", consent=repository._prepare_consent()).disposition
             except ClipboardPersistenceError as error:
                 return error.code
         with ThreadPoolExecutor(max_workers=2) as workers:

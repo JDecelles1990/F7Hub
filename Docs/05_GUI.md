@@ -1,5 +1,21 @@
 # F7Hub GUI Design
 
+## S05 Clipboard Setup consent status (2026-10-15 candidate)
+
+The existing retained Setup surface distinguishes saved workflow preference from
+eligible manual-history consent. Explicit enable+Apply records consent through the
+Clipboard service. Saved true without evidence requires deliberate reaffirmation;
+no-op Apply or Reload does not grant. Cancel, stale-draft conflict and pending-work
+guards remain. The visible workflow opt-in and its accessible description explain
+that TEMPORARY Clipboard content is retained locally for 7 days by default,
+detected sensitive content is rejected, and detection cannot guarantee that all
+secrets are identified; an approved preservation action may use a different policy.
+An uncertain save preserves the draft and requires Reload, with no
+false “nothing saved” claim. No second dialog or native capture/paste action is
+added. Runtime capture/Active Paste remain unavailable; automatic monitoring is
+not authorized by this manual-purpose consent. The owner is
+[Clipboard 1C](Planning/Clipboard/1C_PySide6_Clipboard_Center.md).
+
 ## Clipboard Phase 2A — retained source composition (2026-10-14 candidate)
 
 The retained Clipboard Center has a labelled, noneditable **Clipboard source** selector below its heading. Its only choices are **F7Hub Clipboard** (default on new construction) and **Windows Clipboard**. Stable local keys `f7hub` and `windows` select two retained QStackedWidget children. The original Recent table/model, optional Recent/Setup stack, ClipboardSetup, services and runners are composed once and reused. This presentation candidate awaits independent review; dated predecessor entries below preserve their historical scope/evidence.

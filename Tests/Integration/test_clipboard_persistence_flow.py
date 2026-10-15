@@ -21,6 +21,7 @@ from f7hub.repositories.clipboard_repository import ClipboardRepository
 from f7hub.services.clipboard_service import ClipboardService
 from Tests.Database.clipboard_fixtures import ClipboardDatabaseTestCase, PROJECT_ROOT
 from Tests.Unit.test_clipboard_capture_contract import SyntheticAuthority, SyntheticClock
+from Tests.Database.test_clipboard_consent import grant_synthetic_consent
 
 
 def _hold_writer(path, ready, release):
@@ -35,7 +36,8 @@ def _persist_worker(path, binding, policy, start, result):
     if not start.wait(10):
         raise RuntimeError("Synthetic start gate expired")
     try:
-        outcome = ClipboardRepository(path)._persist_admitted(binding, policy, accepted_at="2026-10-15T12:00:00.000Z")
+        repository = ClipboardRepository(path, profile_scope='b'*64)
+        outcome = repository._persist_admitted(binding, policy, accepted_at="2026-10-15T12:00:00.000Z", consent=repository._prepare_consent())
         result.put((outcome.disposition.value, outcome.outcome.historical_item_id))
     except ClipboardPersistenceError as error:
         result.put((error.code.value, None))
@@ -48,9 +50,11 @@ class ClipboardPersistenceFlowTests(ClipboardDatabaseTestCase):
 
     def setUp(self):
         super().setUp()
+        if self._testMethodName != 'test_default_real_bootstrap_remains_denied_even_after_settings_enable':
+            grant_synthetic_consent(self.database_path)
         self.clock = SyntheticClock()
         self.authority = SyntheticAuthority()
-        self.repository = ClipboardRepository(self.database_path)
+        self.repository = ClipboardRepository(self.database_path, profile_scope='b'*64)
         self.service = ClipboardService(self.repository, admission=self.authority,
             clock=self.clock.utc, monotonic=self.clock.monotonic)
         self.context = self.service.open_admission_context("synthetic")
@@ -71,7 +75,7 @@ class ClipboardPersistenceFlowTests(ClipboardDatabaseTestCase):
             before = self.database_path.read_bytes()
             with self.assertRaises(ClipboardPersistenceError) as caught:
                 app.clipboard_service.capture_manual_text(context, command)
-            self.assertEqual(caught.exception.code, Code.ADMISSION_UNAVAILABLE)
+            self.assertEqual(caught.exception.code, Code.ADMISSION_DENIED)
             self.assertEqual(self.database_path.read_bytes(), before)
             with database_connection(self.database_path) as connection:
                 for table in ("clipboard_items", "clipboard_capture_events", "clipboard_operation_receipts"):
@@ -91,7 +95,7 @@ class ClipboardPersistenceFlowTests(ClipboardDatabaseTestCase):
         self.assertEqual(recent.rows[0].preview, "Synthetic first line  second line")
         self.assertEqual(recent.rows[0].revision, 2)
         self.assertEqual(recent.rows[0].item_ref, first.live_item_ref)
-        restarted = ClipboardService(ClipboardRepository(self.database_path), clock=self.clock.utc)
+        restarted = ClipboardService(ClipboardRepository(self.database_path, profile_scope='b'*64), clock=self.clock.utc)
         before = self.database_path.read_bytes()
         self.assertEqual(restarted.lookup_receipt(command.operation).outcome, first.outcome)
         self.assertEqual(self.database_path.read_bytes(), before)

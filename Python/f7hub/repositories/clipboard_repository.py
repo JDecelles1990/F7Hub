@@ -12,8 +12,10 @@ from f7hub.domain.clipboard import (
     ClipboardAdmissionBinding, ClipboardPrivacyPolicy, ClipboardOperation,
     ClipboardCaptureOutcome, ClipboardReceiptResult, ReplayDisposition,
     ClipboardPersistenceCode as Code, ClipboardPersistenceError, RECEIPT_DAYS,
+    ClipboardConsentSnapshot,
 )
 from f7hub.infrastructure.database import DatabaseError, database_connection, open_database
+from f7hub.repositories.settings_repository import _eligible_consent, SettingsPersistenceError
 
 
 _RECENT_SQL = """
@@ -34,8 +36,17 @@ class ClipboardRepositoryError(RuntimeError):
 class ClipboardRepository:
     """Own SQL; the service alone composes and invokes trusted admission."""
 
-    def __init__(self, database_path: str | Path) -> None:
+    def __init__(self, database_path: str | Path, *, profile_scope: str | None = None) -> None:
         self._database_path = database_path
+        self.profile_scope = profile_scope
+
+    def _prepare_consent(self):
+        try:
+            with database_connection(self._database_path, read_only=True) as connection:
+                connection.execute('BEGIN')
+                return _eligible_consent(connection, self.database_scope, self.profile_scope)
+        except (sqlite3.Error, OSError, DatabaseError, ValueError, TypeError, SettingsPersistenceError):
+            return None
 
     @property
     def database_scope(self) -> str:
@@ -70,18 +81,26 @@ class ClipboardRepository:
             raise ClipboardPersistenceError(Code.LOOKUP_UNAVAILABLE) from None
 
     def _persist_admitted(self, binding: ClipboardAdmissionBinding, policy: ClipboardPrivacyPolicy,
-                          *, accepted_at: str) -> ClipboardReceiptResult:
+                          *, accepted_at: str, consent: ClipboardConsentSnapshot | None = None) -> ClipboardReceiptResult:
         """Service-only prepared core. No admission callbacks run under the lock."""
         if (type(binding) is not ClipboardAdmissionBinding or type(policy) is not ClipboardPrivacyPolicy
-                or not policy.permits_history or binding.database_scope != self.database_scope):
+                or not policy.permits_history or binding.database_scope != self.database_scope
+                or type(consent) is not ClipboardConsentSnapshot):
             raise ClipboardPersistenceError(Code.ADMISSION_DENIED)
         validate_utc_timestamp(accepted_at)
         instant = datetime.strptime(accepted_at, "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc)
         temporary_expiry = _utc(instant + timedelta(days=policy.temporary_days))
         receipt_expiry = _utc(instant + timedelta(days=RECEIPT_DAYS))
         metadata = _request_metadata(binding, policy)
-        return self._write(lambda connection: _capture(connection, binding, metadata, accepted_at,
-                                                       temporary_expiry, receipt_expiry))
+        def persist(connection):
+            try:
+                current = _eligible_consent(connection, self.database_scope, self.profile_scope)
+            except (sqlite3.Error, ValueError, TypeError, SettingsPersistenceError):
+                current = None
+            if current is None or current != consent:
+                raise ClipboardPersistenceError(Code.ADMISSION_DENIED)
+            return _capture(connection, binding, metadata, accepted_at, temporary_expiry, receipt_expiry)
+        return self._write(persist)
 
     def _delete_expired_receipts(self, *, as_of: str,
                                  protected_generation: tuple[str, str] | None) -> int:

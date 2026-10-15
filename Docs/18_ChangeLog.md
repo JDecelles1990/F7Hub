@@ -1,5 +1,42 @@
 # F7Hub ChangeLog
 
+## 2026-10-15 — S05 Checkpoint B implementation candidate
+
+- Added empty-by-default migration 0016 for content-free manual consent; released
+  migrations unchanged. Existing backup/restore implementation untouched.
+- Connected explicit retained Setup enable/reaffirm to atomic Settings+consent
+  persistence; generic preference changes cannot grant and workflow changes revoke.
+- Composed A's preserved pure assessment with D02; bound consent before assessment
+  and rechecked current evidence under its writer reservation before atomic effects.
+- Preserved receipt/dedup/Unicode/rollback semantics and truthful uncertain-save
+  feedback. Added synthetic consent/GUI/native-process race coverage.
+- Recorded focused, broader Database and native Qt evidence externally; retained
+  prior failures/diagnoses rather than erasing them. This is an unstaged candidate,
+  not an independent approval, publication or integration. See CURRENT_STATE.
+
+## 2026-10-15 — Clipboard Phase 2B S05 partial implementation; consent BLOCKED
+
+Added an uncomposed pure local Clipboard privacy assessment and two synthetic
+test modules. It preserves exact source Unicode, uses bounded credential/token/
+key/code and ambiguous-sensitive rules, emits fixed content-free findings and
+fails closed on malformed input, detector exceptions and resource limits. Finite
+rules retain false-positive/false-negative risks; a result grants no consent.
+
+Checkpoint B stopped at its mandatory pre-implementation gate: Settings Booleans
+and CAS revision lack durable explicit-Setup provenance. A reviewed persistent
+consent mechanism and revocation/commit consistency contract are required. No
+migration, authority composition, Settings/GUI/native Clipboard/hotkey/IPC change
+was made. D02's default unavailable admission, writer, retention and replay are
+unchanged. Fresh synthetic Windows-host checks: privacy/boundaries 24, D02 49,
+Settings 39, D02 integration 5; 117 PASS, exit 0 per group, zero failures or skips.
+Temporary SQLite checks cover integrity/FK; Qt is offscreen. Native Clipboard/
+hotkeys and positive trusted consent/revocation races remain NOT RUN / BLOCKED.
+
+Candidate remains unstaged/uncommitted in
+`feature/clipboard-s05-privacy-admission`, base
+`8edb7a2b056d2ff605f84b7e8473cf44c5b437b1`; no independent S05 review or integration.
+See [CURRENT_STATE](Status/CURRENT_STATE.md) and its external evidence location.
+
 ## 2026-10-15 — Clipboard D02 dormant atomic persistence candidate
 
 Added migration 0015 for bounded content-free operation receipts with historical Item/Event IDs and a nullable ON DELETE SET NULL live Item reference. Extended the existing immutable Clipboard domain, service and repository with trusted injected admission (default unavailable), five-minute process-local generations, service-issued operation identities, exact-text deduplication, atomic Item/Event/receipt writes, original-outcome replay/conflict handling and explicit bounded receipt maintenance. TEMPORARY defaults to seven days and receipts to fourteen; no timer or exact physical-deletion promise is introduced. Released migrations 0001–0014 remain unchanged.

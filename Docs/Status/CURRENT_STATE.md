@@ -1,5 +1,105 @@
 # F7Hub Current State
 
+## S05 Checkpoint B — READY_FOR_INDEPENDENT_REVIEW (2026-10-15 candidate)
+
+Candidate in `C:/Dev/F7Hub-Clipboard-Phase2B-S05`, branch
+`feature/clipboard-s05-privacy-admission`, base/HEAD
+`8edb7a2b056d2ff605f84b7e8473cf44c5b437b1`. User R1–R6 approval authorizes
+implementation/testing/documentation only. Lifecycle READY_FOR_REVIEW; requested
+handoff disposition READY_FOR_INDEPENDENT_REVIEW. No independent review, staging,
+commit, push, PR or merge has occurred. The earlier B-blocked and D02 candidate
+passages below retain their historical meaning; Git establishes D02 merged via PR106.
+
+Implemented: additive empty consent migration 0016, trusted retained Setup
+enable/reaffirm, atomic preference/evidence grant and workflow revocation, real
+exact-source pure assessment composition, pre-assessment consent binding and final
+writer-transaction authorization. Missing/stale/revoked/incompatible evidence denies.
+Checkpoint A's implementation and tests remain unchanged. No native producer,
+hotkey, paste, automatic monitor, popup, IPC or semantic feature is activated.
+
+FRESH final affected run: **184 methods PASS**, zero failures/errors/skips, exit 0,
+covering Settings, consent, profile paths, A assessment/boundaries, D02 contracts/
+persistence, Setup GUI/flow, bootstrap and separate-process Settings/consent races.
+Broader Database run: **582 methods PASS**, exit 0, before the final preparation-read
+ordering correction and one added targeted test. That exact delta is documented;
+all affected modules were rerun in the final 184-method PASS. The 582-method result
+is RETAINED where unchanged/applicable, not a fresh whole-suite claim for the final
+candidate. Earlier A 117-method evidence is historical, not combined S05 validation.
+
+WINDOWS_NATIVE separate-process writer-order/interruption assertions passed in the
+focused run. Native Qt windows-backend Setup check PASS at actual 1000x760: exposed/
+idle readiness, keyboard reaffirmation, reload and visible controls; screenshots
+inspected. Its Setup-path evidence remains applicable after a capture-only ordering
+change. Synthetic input does not certify physical input, Narrator, High Contrast,
+DPI, RDP or compact-layout accessibility. Offscreen checks are identified separately.
+Temporary fixtures assert integrity_check=ok, zero FK violations, FK ON and 5000-ms
+busy timeout. No operational DB/customer data or native Clipboard was accessed.
+
+Evidence, failed attempts/diagnoses, exact candidate manifest/input hashes and
+independent-review handoff are under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-Phase2B/S05/B-implementation/`.
+Protected canonical state/worktrees and the opaque INI are preserved. Full A+B
+independent review remains NOT RUN.
+
+Approved transfer policy is preserved: complete backups may contain historical
+consent; future managed restore/import must invalidate before admission and require
+explicit Setup. Restore/replacement, snapshot sanitization, lifecycle coordination
+and MT01–MT18 remain DEFERRED / NOT RUN. Arbitrary external same-path/profile DB
+replacement is outside the detection guarantee; normal unchanged-DB restart keeps
+valid consent. Finite-rule false negatives/positives and composed-code trust remain
+explicit limits, with no external authority or malicious same-process resistance claim.
+
+## Clipboard Phase 2B S05 — Checkpoint A implemented, Checkpoint B BLOCKED (2026-10-15)
+
+**BLOCKED**, with an independently testable Checkpoint A candidate. Isolated
+worktree `C:/Dev/F7Hub-Clipboard-Phase2B-S05`, branch
+`feature/clipboard-s05-privacy-admission`, base/HEAD
+`8edb7a2b056d2ff605f84b7e8473cf44c5b437b1`. Fresh remote main matched that
+expected reviewed baseline before isolation. D02 is integrated through PR #106;
+its candidate-era paragraphs below retain their historical meaning.
+
+Checkpoint A adds a deterministic bounded offline assessment in the existing
+Clipboard domain. Fixed content-free findings preserve PERMITTED, NEEDS_REVIEW,
+POSSIBLE_SECRET and failed/incomplete distinctions. The module does not change
+original Unicode or return/persist source, previews, hashes or match spans.
+Finite local rules cannot detect every secret; ambiguity, recognized risks and
+failed assessment deny automatic eligibility. The module is uncomposed.
+
+Checkpoint B stopped before implementation: current Settings revision/USER source
+cannot prove explicit Setup consent across restart or distinguish imported and
+programmatic enablement. A new persistent consent representation/security review
+is needed, including scope/restore and atomic revocation/commit ordering. No
+migration, extra Boolean, in-memory bypass or real authority was implemented.
+Positive consent-authorized capture and revocation/commit race tests remain
+BLOCKED / NOT RUN. Default bootstrap remains unable to capture. Disabling
+preferences leaves existing committed historical Items/Events unchanged.
+
+FRESH Windows-host synthetic checks: privacy/negative boundaries 24, D02
+contract/persistence/receipt migration regressions 49, Settings definition/backend
+regressions 39 and isolated D02 integration 5: **117 PASS**, exit 0 per group,
+zero failures/errors/skips. Pure Python/SQLite and offscreen Qt evidence does not
+certify native Clipboard, hotkeys, IPC, physical input, DPI or accessibility. Two
+unchanged D02 integration methods explicitly exercise Windows separate-process
+locking/races. Temporary fixtures verify integrity_check=ok, zero FK violations,
+foreign keys ON and 5000-ms busy timeout. Whole-repository regression and S05
+independent review are NOT RUN. The tested and final manifests differ only by the
+four affected owner/status/history documents; external verification compares the
+unchanged production/test inputs.
+
+Exactly seven unstaged/uncommitted paths: one new domain module, two new test
+modules, and `13_PythonArchitecture.md`, Clipboard 1A, this status document and
+`18_ChangeLog.md`. External evidence under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-Phase2B/S05/` includes the consent
+assessment, test selection/results/logs, reproducible manifest and implementation
+report. Canonical unrelated work and existing worktrees are preserved;
+GuideSettings.ini remains opaque pathname-only state. Next required gate is
+separate approval of the B consent mechanism. The combined slice is not
+READY_FOR_INDEPENDENT_REVIEW; nothing is staged, committed or published.
+
+User-intended future workflow: Win+Alt+C copies to F7Hub Clipboard; Win+Alt+V
+pastes its last appended item. S05 excludes registration, native acquisition/
+paste, IPC, monitoring and any runtime producer activation.
+
 ## Clipboard D02 — dormant atomic persistence candidate (2026-10-15)
 
 Implementation candidate in `C:/Dev/F7Hub-Clipboard-D02`, branch `feature/clipboard-d02-atomic-persistence`, base/HEAD `cc0c3839e2500b3c9fe68545e8f899b718e6734e`. Remote main was freshly fetched and equal before isolation. This baseline includes S01 via merge PR #105; earlier S01 rereview/candidate text below is historical metadata and does not override that Git fact. Canonical unrelated work and worktree registrations are preserved; the protected INI is observed only by pathname inventory.

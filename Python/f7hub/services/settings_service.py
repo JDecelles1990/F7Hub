@@ -45,6 +45,20 @@ class SettingsService:
 
     def apply(self, changes: Mapping[str, bool], *, expected_revision: int,
               resets: Iterable[str] = ()) -> SettingsApplyResult:
+        return self._apply(changes, expected_revision=expected_revision, resets=resets)
+
+    def _apply_clipboard_setup(self, changes, *, expected_revision, expected_epoch,
+                               database_scope, profile_scope):
+        return self._apply(changes, expected_revision=expected_revision,
+                           setup=(expected_epoch, database_scope, profile_scope))
+
+    def _load_clipboard_setup(self, database_scope, profile_scope):
+        with self._gate:
+            state, epoch, consent = self._repository._load_clipboard_setup(database_scope, profile_scope)
+            self._snapshot = self._resolve(state)
+            return self._snapshot, epoch, consent is not None
+
+    def _apply(self, changes, *, expected_revision, resets=(), setup=None):
         validate_revision(expected_revision)
         if not isinstance(changes, Mapping) or isinstance(resets, (str, bytes)):
             raise SettingsValidationError("Settings changes/reset group is invalid.")
@@ -74,8 +88,14 @@ class SettingsService:
                         if not (self._snapshot.get(key).source == "DEFAULT"
                                 and self._snapshot.get(key).diagnostic is None
                                 and self._snapshot.get(key).value == value)}
-            result = self._repository.apply(changes=proposed, resets=reset_keys,
-                                            expected_revision=expected_revision)
+            if setup is None:
+                result = self._repository.apply(changes=proposed, resets=reset_keys,
+                                                expected_revision=expected_revision)
+            else:
+                epoch, scope, profile = setup
+                result = self._repository._apply_clipboard_setup(changes=proposed,
+                    expected_revision=expected_revision, expected_epoch=epoch,
+                    database_scope=scope, profile_scope=profile)
             # The repository returns the coherent state read before its successful
             # commit, avoiding a second read that could fail or observe a later writer.
             snapshot = self._resolve(result.state)

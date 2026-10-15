@@ -1,5 +1,74 @@
 # F7Hub Python Architecture
 
+## Clipboard S05 B — trusted Setup and real in-process admission (2026-10-15 candidate)
+
+This candidate succeeds the earlier B-blocked status below; historical A and D02
+records retain their original meaning. `ClipboardService.enable_history_from_setup`
+is the explicit feature-owned action, using SettingsService's private coordinated
+path and the existing SettingsRepository CAS transaction. Public Settings Apply
+has no origin/grant flag. `refresh_setup` reads a coherent Settings/consent
+projection; it never grants. The retained editor receives the existing Clipboard
+service through workspace composition; there is no second service/dialog family.
+
+Bootstrap supplies the same selected database and configured local profile label
+to the real assessment composition. Preparation binds consent before calling A's
+unchanged `assess_manual_text`. The original exact text/command/operation remains
+bound through D02; repository `_persist_admitted` requires prepared evidence and
+rechecks it on the reserved writer connection before `_capture`. No detector or
+external callback runs under that reservation. Default construction without the
+required composition stays unavailable. A constructible policy/evidence DTO is
+not permission. The trust boundary is composed local Python code, not protection
+against malicious same-process callers or unrestricted DB tampering.
+
+`local_profile_scope` derives a non-secret label through existing path infrastructure;
+missing/relative profile configuration denies consent. No OS-user authentication,
+IPC, external authority, native Clipboard producer, monitoring or paste is added.
+Save acknowledgement uncertainty uses `SettingsUncertainError`; the editor keeps
+the draft, disables saving and requires Reload to inspect current persisted state.
+Post-commit observer/presentation failure cannot undo committed evidence.
+See [Clipboard 1A](Planning/Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md) and
+[CURRENT_STATE](Status/CURRENT_STATE.md) for current boundary/evidence.
+
+## Clipboard Phase 2B S05 — assessment candidate, consent blocked (2026-10-15)
+
+The uncommitted S05 candidate adds `domain/clipboard_privacy.py` beside the
+existing pure Clipboard domain contracts, reusing `AdmittedManualText`, its exact
+identity profile and 65,536-byte ceiling. No production consumer imports or
+composes it. `assess_manual_text(source)` returns a frozen content-free
+finding/reason, fixed method `clipboard_local_rules`, version `1` and derived
+completeness. Findings use 1A's PERMITTED, NEEDS_REVIEW, POSSIBLE_SECRET,
+ASSESSMENT_FAILED and INCOMPLETE semantics; they are neither consent nor a D02
+`ClipboardAdmissionDecision` or `ClipboardPrivacyPolicy`.
+
+Finite offline rules check credential assignments, authentication/session headers,
+token/key shapes, private-key markers, credential-bearing connection strings,
+recognizable authentication codes and ambiguous/sensitive input. Original Unicode
+is never changed. A bounded NFKC detection view catches some compatibility forms;
+source and view are both scanned. Unsupported/malformed input, size/normalization
+limits and detector exceptions deny eligibility. No content, hash, preview, match
+span or exception detail leaves the module. No caller detector/permission flag or
+secret override exists. PERMITTED means no recognized risk under this finite
+profile, not proof of safety. NEEDS_REVIEW never automatically becomes PERMITTED.
+
+Checkpoint B is **BLOCKED before implementation**. Shared Settings stores Boolean
+overrides and a CAS revision, with no durable Setup action/disclosure/consent
+origin. Setup invokes general `SettingsService.apply`; USER source and revision
+cannot distinguish Setup from imported/programmatic values after restart. A
+reviewed persistent consent representation is necessary (an additive migration
+for a relational solution), including scope/import/restore and revocation rules.
+Refreshing Settings before invoking D02's writer leaves a revocation race; a
+reviewed commit consistency mechanism and race tests are still required.
+
+No migration, new Settings key/store or real authority is implemented. The
+existing `ClipboardService`, admission protocol/binding/decision/policy,
+repository and bootstrap remain unchanged and default admission unavailable,
+even after preference enablement or a standalone PERMITTED assessment. D02 keeps
+seven-day TEMPORARY retention, fourteen-day receipts, exact deduplication,
+Item/Event/receipt atomicity, generation fencing and replay/uncertainty behavior.
+The [1A S05 record](Planning/Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#phase-2b-s05--privacy-assessment-candidate-consent-gate-blocked-2026-10-15)
+owns privacy limitations; [CURRENT_STATE](Status/CURRENT_STATE.md) records
+validation and the incomplete lifecycle. No native Clipboard producer is active.
+
 ## Clipboard D02 — trusted in-process persistence boundary
 
 The dormant D02 candidate extends `domain/clipboard.py`, `services/clipboard_service.py` and `repositories/clipboard_repository.py`, retaining Recent APIs and existing bootstrap composition. This is an injected in-process persistence core, not an active capture feature. No module, framework, connection infrastructure, S01 protocol/schema, GUI, AHK or Settings change is introduced. Earlier D01 no-writer statements describe that historical slice.

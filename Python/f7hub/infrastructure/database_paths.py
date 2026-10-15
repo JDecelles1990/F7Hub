@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import hashlib
 from pathlib import Path
 
 
@@ -12,6 +13,15 @@ RUNTIME_DATABASE_RELATIVE_PATH = Path("F7Hub", "Data", "f7hub.db")
 
 class DatabasePathError(ValueError):
     """Raised when a database path cannot be resolved safely."""
+
+
+def local_profile_scope() -> str:
+    """Configured local profile label, not an authenticated OS identity."""
+    raw = os.environ.get("LOCALAPPDATA")
+    if not raw or not Path(raw).is_absolute():
+        raise DatabasePathError("Local application profile is unavailable.")
+    path = os.path.normcase(str((Path(raw) / "F7Hub").resolve()))
+    return hashlib.sha256(path.encode("utf-8")).hexdigest()
 
 
 def resolve_development_database_path(project_root: str | Path) -> Path:
