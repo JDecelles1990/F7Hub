@@ -1,5 +1,85 @@
 # F7Hub Phase 1B
 # AHK ↔ Python Clipboard Capture, IPC & Quick HUD Architecture Planning Instructions
+## Phase 2B S01 — inert snapshot profile candidate (2026-10-15)
+
+S01 delivers only inert protocol validation in
+`Python/f7hub/infrastructure/clipboard_snapshot_protocol.py`, using the existing
+technical-boundary package and standard library. It is not an authenticated or
+operational transport. No module is introduced into the domain layer; the existing
+legacy Mochi wire profile is unchanged. A local JSON Schema 2020-12 structural
+specification is `Config/JSON/clipboard_snapshot_v1.schema.json`.
+
+The exact-version profiles are `clipboard.snapshot_read` / COMMAND / `1.0` and
+`clipboard.snapshot_read_result` / RESULT / `1.0`. They use 0B's seven required
+fields: `contract`, `schema_version`, `message_class`, `message_id`, `created_at`,
+`producer`, `payload`. Reply-only `correlation_id` equals the accepted request's
+message ID; the reply has a fresh UUID v4. IDs are canonical lowercase UUID v4;
+timestamps are real-calendar UTC instants with exactly millisecond precision.
+Unknown fields, versions, classes and wrong types reject without coercion.
+
+The closed request payload contains `operation_id`, `admission_generation` and
+`producer_binding`, each UUID v4. The latter two form a caller-supplied immutable
+`SnapshotBinding`; they are comparison tokens, not enrollment/authentication proof.
+Request producer component is `f7hub.clipboard`; reply component is `ahk.clipboard`.
+The decoder compares request/result operation, caller binding and correlation.
+No replay table, live peer authentication or session owner is implemented here.
+
+The closed RESULT payload repeats those three binding fields and `status`.
+`SUCCESS` alone requires `observed_at`, exact `format: text/plain` and nonempty
+`text`. `EMPTY`, `DENIED`, `UNAVAILABLE`, `TIMED_OUT`, `FAILED`, `UNSUPPORTED`,
+`TOO_LARGE`, `LOCKED` and `UNSTABLE` prohibit all three body fields, including null.
+Text preserves original Unicode exactly: no trimming, normalization or replacement
+decoding. TAB/LF/CR are permitted; other C0, DEL/C1, NUL and surrogates reject.
+
+Supported `contract.error` / ERROR / `1.0` is a narrow 0B-compatible subset:
+payload `code` plus fixed safe `message: The snapshot request failed.` and optional
+strict Boolean `retryable`; omission means unknown, never true. Only the nine
+0B proposed shared codes enumerated by the module/schema are accepted. Arbitrary
+messages/details/raw bodies are not supported. Correlation and current caller
+binding are checked via the accepted request; no new generation fields are added
+to the common error envelope. Binding is not transport authentication.
+
+Complete unframed RESULT documents are at most 128 KiB, text at most 65,536 strict
+UTF-8 bytes, ordinary request/error documents at most 16 KiB. Incoming whitespace
+counts toward document size; outgoing escaping expansion counts too. Oversize
+fails without successful truncation. Parsing rejects UTF-8 BOM, malformed UTF-8,
+duplicates, trailing documents/garbage, nonfinite/float numbers and undeclared
+arrays. Limits are four container levels, 16 members per object and 128 visited
+nodes (keys and values). Document bytes and nesting are bounded before JSON
+parsing. Immutable DTOs validate on construction. Raw result text is excluded
+from representation; decoder failures expose a fixed classification, without
+retaining raw JSON/Unicode decoder exceptions as their exception context.
+
+Schema fixtures check structural agreement using a test-only evaluator of the
+declared keyword subset. This is not full JSON Schema conformance validation.
+UTF-8/serialized byte counts, duplicate keys, real dates, correlation and caller
+binding remain explicit Python gates; schema annotations alone do not prove them.
+No external schema runtime dependency or remote-reference loading is introduced.
+
+Original reviewed evidence: 28 focused synthetic unit tests PASS, exit 0, no
+skips, on the Windows workstation on 2026-10-14. All five tested inputs match
+that candidate on the new base. A FRESH focused run on the reconciled Windows
+worktree also found 28 PASS, exit 0, no skips. Its clean-process check guards
+forbidden dependencies/effects while importing and round-tripping a request.
+Evidence lives under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-Phase2B/S01/`
+and its `reconciliation-20261015/` child.
+
+Native Clipboard capability remains NOT IMPLEMENTED. S02 enrollment, S03
+authenticated IPC, S04 supervised worker, S05 real privacy assessment, S06
+orchestration and S07 GUI connection remain separate future gates. Structurally
+valid text is not a PERMITTED/COMPLETELY ASSESSED privacy verdict; future service
+admission must enforce it. The future 60-second lifetime is documented as a
+constant, not enforced by this inactive module. No Qt/database/AHK/Clipboard
+access, capture writer, Settings change or production caller is composed.
+
+The original seven-path aggregate `43676fbda41096b936484f55194ec7b9cfea18c078c8d6d6e5ea504f3a2e1f01`
+at base `418e3bfa3a01e27351e756befdab61d1d4bb9c4c` received independent
+APPROVED_WITH_NOTES. The candidate here is a new, unstaged/uncommitted
+reconciliation on integrated main `4250f5f326ca1b8c0c867aed056fa6724882ed81`.
+The current [picker/capture direction](#quick-picker-and-automatic-capture-direction-2026-10-15)
+remains approved future capability, not an S01 wire or runtime activation. The
+new documentation aggregate requires independent rereview before integration.
+
 Existing AHK/hotkey/AltF7Hub integration inventory; manual capture semantics; Clipboard snapshot behavior; source process/window metadata; privacy policy; hotkey ownership and conflicts; AHK/Python responsibility matrix; actual IPC transport recommendation; authentication; endpoint discovery; timeout/retry policy; transport idempotency vs content deduplication; F7Hub-running/not-running behavior; Quick HUD states; HUD action routing; native Windows validation; explicit loop/retry guard.
 
 > Current direction: [2026-10-15 picker/capture](#quick-picker-and-automatic-capture-direction-2026-10-15),

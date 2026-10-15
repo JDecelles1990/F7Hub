@@ -1,5 +1,23 @@
 # F7Hub Python Architecture
 
+## Clipboard Phase 2B S01 — inert protocol boundary (2026-10-15)
+
+`f7hub.infrastructure.clipboard_snapshot_protocol` owns the inert snapshot 1.0
+wire DTO/serialization boundary, using only dataclasses, datetime, json and re.
+The existing infrastructure and application package initializers remain inert.
+Domain models acquire no transport dependency, and no service/bootstrap imports
+the new module. Frozen validated request/result/error DTOs, strict closed shape,
+Unicode/size checks and request/caller-binding correlation do not establish
+authentication, privacy admission, live replay rejection or lifetime enforcement.
+The exact fields, limits and safe-error subset are owned by
+[Clipboard 1B](Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#phase-2b-s01--inert-snapshot-profile-candidate-2026-10-15).
+Local schema plus synthetic tests introduce no runtime schema dependency.
+The original reviewed candidate had a 28-test PASS. The reconciled candidate
+ran the same focused 28 tests FRESH on a Windows host: PASS, exit 0, no skips,
+including guarded clean-process inert import/use. These portable checks do not
+validate future native operations. Native read, privacy pipeline,
+snapshot service, GUI binding and persistence writer remain NOT IMPLEMENTED.
+
 ## GUI Shell S005 — Clipboard focus and route composition
 
 `ClipboardWorkspace` no longer creates `back_button` or declares `tickets_requested`; MainWindow no longer connects that signal or focuses the retired button. MainWindow retains its Tickets QAction, `show_tickets()` and `_leave_clipboard()` setup-confirmation route. ClipboardWorkspace selects a currently visible, enabled, focusable control in its active Recent or Setup section; MainWindow falls back to the Clipboard rail button. A same-page activation preserves a valid current focus. The choice is synchronous after `activate()`, so independent read completion and later deliberate input do not trigger a focus override. No service, repository, worker, Settings persistence, AHK or IPC contract changes. Earlier CC-01 and S004 records below remain historical.
