@@ -1,5 +1,17 @@
 # F7Hub Current State
 
+## Clipboard D02 — dormant atomic persistence candidate (2026-10-15)
+
+Implementation candidate in `C:/Dev/F7Hub-Clipboard-D02`, branch `feature/clipboard-d02-atomic-persistence`, base/HEAD `cc0c3839e2500b3c9fe68545e8f899b718e6734e`. Remote main was freshly fetched and equal before isolation. This baseline includes S01 via merge PR #105; earlier S01 rereview/candidate text below is historical metadata and does not override that Git fact. Canonical unrelated work and worktree registrations are preserved; the protected INI is observed only by pathname inventory.
+
+Checkpoint A implements additive receipt migration 0015 and immutable original-outcome contracts. Checkpoint B implements trusted source/operation/database/policy admission (default unavailable), service-issued generation and operation identities, monotonic fencing, binary-exact deduplication, one atomic Item/Event/receipt core, original-outcome replay, deleted-source receipt survival and bounded explicit maintenance. Same-operation changed semantics conflict; missing source yields known completion without equality verification or recreation; unknown/expired receipts never initiate capture. UNCERTAIN remains separate from confirmed rollback and requires receipt lookup.
+
+**READY_FOR_INDEPENDENT_REVIEW** (delivery lifecycle READY_FOR_REVIEW), unstaged/uncommitted. Checkpoint A focused 6, domain/admission 17, persistence 26, D02 integration 5, full Database regression 552 and seven affected Integration modules 91 PASS, exit 0 for each completed group/module, no skips. Total distinct passing methods: 665 (focused Database methods are included in 552). Executions were FRESH on the Windows host and are RETAINED on resumption after relevant-input/log/exit verification; no suite was repeated for resumption. D02 includes real separate-process Windows locking/races; other Qt evidence is offscreen. Initial discovery FAIL, grouped Integration timeout and stale migration-count FAIL remain preserved. The recovery selector mistakenly repeated that known failed count check before correction; this RT-R01 procedural error is explicitly recorded in correction-03.md. The assertion was then corrected 14 to 15 before successful bootstrap and final isolated module executions. No independent review or approval has occurred.
+
+No bootstrap, connection infrastructure, S01 protocol/schema, AHK, GUI, native Clipboard or Settings production files changed. Default bootstrap remains unable to persist text even after saved Settings are enabled. The injected test authority is test-only; a future real privacy authority/transport composition requires separate review. Local Python/SQLite validation does not certify native Clipboard, AHK/hotkeys, IPC authentication, accessibility/DPI or actual secret detection. No operational DB or real Clipboard contents are used.
+
+Candidate manifest, input hashes, reproducible aggregate, commands/full logs/exit statuses, implementation report and architecture/security limitations are external under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-D02/`. Nothing is staged, committed or published. Next gate: separate independent read-only D02 review of the external candidate manifest; no automatic review or integration cycle.
+
 ## Clipboard Phase 2B S01 — inert snapshot protocol candidate (2026-10-15)
 
 **READY_FOR_INDEPENDENT_REREVIEW**, unstaged/uncommitted in
