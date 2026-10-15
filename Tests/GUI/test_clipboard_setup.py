@@ -10,7 +10,7 @@ os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
-from PySide6.QtWidgets import QApplication, QMessageBox
+from PySide6.QtWidgets import QApplication, QLabel, QMessageBox
 
 from f7hub.domain.clipboard_settings import (
     CLIPBOARD_SETTING_DEFINITIONS, WORKFLOW_ENABLED, SOURCE_PROCESS_ENABLED, SOURCE_TITLE_ENABLED,
@@ -147,6 +147,16 @@ class ClipboardSetupTests(unittest.TestCase):
         descriptions = " ".join(c.accessibleDescription() for c in self.editor.checkboxes.values())
         for text in ("explicit setup opt-in", "eligible durable manual captures", "TEMPORARY", "does not delete", "basename", "sensitive", "independent"):
             self.assertIn(text, descriptions)
+        disclosure = self.editor.checkboxes[WORKFLOW_ENABLED].accessibleDescription()
+        labels = [label for label in self.editor.findChildren(QLabel)
+                  if label.text() == disclosure and label.isVisible()]
+        self.assertEqual(len(labels), 1)
+        self.assertEqual(labels[0].accessibleName(), disclosure)
+        for text in ("TEMPORARY Clipboard content", "7 days by default",
+                     "Content detected as sensitive is rejected",
+                     "cannot guarantee all secrets are identified"):
+            self.assertIn(text, labels[0].text())
+            self.assertIn(text, disclosure)
         self.assertIn("not implemented or active", self.editor.runtime_message.text())
         self.assertIn("unavailable", self.editor.runtime_message.text())
 
@@ -457,6 +467,76 @@ class ClipboardSetupShellTests(unittest.TestCase):
         self.wait()
         self.assertIs(self.window.pages.currentWidget(), self.window.workspace)
         self.assertEqual(len(self.service.calls), 1)
+
+
+class ClipboardSetupConsentTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.application = QApplication.instance() or QApplication([])
+
+    def setUp(self):
+        import tempfile
+        from pathlib import Path
+        from f7hub.infrastructure.database import bootstrap_database
+        from f7hub.repositories.settings_repository import SettingsRepository
+        from f7hub.repositories.clipboard_repository import ClipboardRepository
+        from f7hub.services.settings_service import SettingsService
+        from f7hub.services.clipboard_service import ClipboardService
+        self.temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(self.temporary.cleanup)
+        self.path = Path(self.temporary.name)/'synthetic.db'
+        bootstrap_database(self.path,Path(__file__).resolve().parents[2]/'Database/Migrations')
+        self.settings = SettingsService(SettingsRepository(self.path),CLIPBOARD_SETTING_DEFINITIONS)
+        self.owner = ClipboardService(ClipboardRepository(self.path,profile_scope='b'*64),settings=self.settings)
+        self.editor = ClipboardSetup(self.settings,clipboard_service=self.owner)
+        self.editor.show()
+        self.editor.reload()
+        self.wait()
+
+    def wait(self):
+        wait_idle(self.application,lambda:self.editor.pending)
+
+    def tearDown(self):
+        self.wait();self.editor.cancel();self.editor.close();self.editor.deleteLater()
+        self.application.processEvents()
+
+    def test_explicit_keyboard_enable_then_cancel_and_reload(self):
+        checkbox=self.editor.checkboxes[WORKFLOW_ENABLED]
+        checkbox.setFocus()
+        QTest.keyClick(checkbox,Qt.Key.Key_Space)
+        self.assertTrue(self.editor.dirty)
+        self.assertFalse(self.owner.refresh_setup()[2])
+        self.editor.apply();self.wait()
+        self.assertTrue(self.owner.refresh_setup()[2])
+        checkbox.setChecked(False)
+        self.editor.cancel()
+        self.assertTrue(checkbox.isChecked())
+        self.editor.reload();self.wait()
+        self.assertTrue(self.owner.refresh_setup()[2])
+
+    def test_imported_true_noop_then_deliberate_reaffirmation(self):
+        self.settings.apply({WORKFLOW_ENABLED:True},expected_revision=0)
+        self.editor.reload();self.wait()
+        self.editor.apply();self.wait()
+        self.assertFalse(self.owner.refresh_setup()[2])
+        self.assertIn('ineligible',self.editor.consent_message.text())
+        checkbox=self.editor.checkboxes[WORKFLOW_ENABLED]
+        checkbox.setChecked(False);checkbox.setChecked(True)
+        self.assertTrue(self.editor.dirty)
+        self.editor.apply();self.wait()
+        self.assertTrue(self.owner.refresh_setup()[2])
+
+    def test_uncertain_save_preserves_draft_and_requires_read_only_reload(self):
+        from f7hub.repositories.settings_repository import SettingsUncertainError
+        self.editor.checkboxes[WORKFLOW_ENABLED].setChecked(True)
+        with patch.object(self.owner,'enable_history_from_setup',side_effect=SettingsUncertainError('a'*32)):
+            self.editor.apply();self.wait()
+        self.assertIn('may have committed',self.editor.status_message.text())
+        self.assertTrue(self.editor.dirty)
+        self.assertFalse(self.editor.apply_button.isEnabled())
+        with patch('f7hub.gui.clipboard_setup.QMessageBox.question',return_value=QMessageBox.StandardButton.Discard):
+            self.editor.reload();self.wait()
+        self.assertFalse(self.owner.refresh_setup()[2])
 
 
 if __name__ == "__main__":

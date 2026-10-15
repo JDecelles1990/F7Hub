@@ -1,4 +1,53 @@
 # F7Hub Phase 1A
+
+## S05 Checkpoint B successor — durable manual consent (2026-10-15 candidate)
+
+User approval of R1–R6 authorizes this bounded implementation candidate, not
+independent review or integration. It succeeds the earlier B-blocked candidate
+description below without rewriting its historical evidence. A's pure assessment
+implementation and tests are preserved.
+
+Explicit Setup enable+Apply persists workflow preference and fixed-version manual
+history consent atomically through the existing Settings CAS transaction. Generic
+Apply/Reset/imported enabled preferences, USER precedence, revision numbers and
+public DTOs cannot grant. Actual workflow override changes revoke current evidence
+and advance its epoch atomically; source-process/title preferences stay independent.
+Regrant needs a new explicit Setup action, expected revision and expected consent
+epoch. Consent-only reaffirmation advances epoch without pretending a generic
+no-op preference changed. Consent records contain no Clipboard content, preview,
+content-derived hash, source title, secret or arbitrary origin string.
+
+The retained Setup editor supports deliberate uncheck/recheck+Apply when imported
+workflow=true lacks valid consent. Launch, reload, no-op Apply and Cancel do not
+grant. There is no second consent dialog. Valid original-scope evidence survives
+normal restart; unsupported policy/disclosure, missing/invalid profile/evidence,
+revoked/exhausted epoch and inconsistent revisions deny. Database/profile scope
+labels do not authenticate a Windows user or prove a physical human action.
+
+The real composed service snapshots scope/instance/epoch/Settings revision before
+expensive complete exact-source assessment. Only completed PERMITTED proceeds.
+D02 rechecks current enablement and that evidence inside its own `BEGIN IMMEDIATE`
+writer transaction before all Item/Event/Receipt effects. Revocation committed
+first prevents capture; capture that validates first may commit before the waiting
+revocation. No detector, GUI, subscriber or external callback runs under the writer.
+Exact Unicode identity, seven-day TEMPORARY semantics, genuine-operation dedup,
+receipt conflicts/deletion, rollback and uncertain-commit reconciliation remain.
+Revoked mutating admission denies; historical receipt lookup is read-only and never
+grants new effects. Epoch exhaustion also denies because safe further revocation
+cannot be represented. Local finite rules still cannot certify every possible secret.
+
+Approved R1/R2 transfer boundary: complete backups remain unchanged and can contain
+historical evidence. Future supported managed restores/imports must invalidate
+consent before capture resumes and require explicit Setup regrant. Restore/import,
+backup sanitization and replacement/lifecycle coordination are DEFERRED, not
+implemented here. SQLite-contained evidence cannot detect arbitrary external
+same-path/profile replacement; that is outside the supported detection guarantee.
+No external consent store is introduced. Automatic capture requires its own future
+disclosure/admission contract; this manual-purpose consent does not authorize it.
+
+The candidate adds no native acquisition, hotkeys, transport, paste, history import,
+monitoring, popup or semantic integration. Verification and exact review handoff
+are recorded in [CURRENT_STATE](../../Status/CURRENT_STATE.md) and external S05 evidence.
 # Clipboard Domain & Data Lifecycle Architecture Planning Instructions
 Clipboard Item vs Capture Event; raw/normalized content; hash/deduplication semantics; primary Kind; Entity occurrences; Tag assignments; sensitivity handling; secret detection; persistence boundaries; temporary/saved/pinned/evidence semantics; retention and expiration; cleanup rules; large-content policy; Ticket/Diagnostic/KB relationships; FTS/search requirements; Analytics facts; Mochi-safe context; transaction boundaries; failure/partial-processing rules.
 
@@ -7,6 +56,52 @@ Clipboard Item vs Capture Event; raw/normalized content; hash/deduplication sema
 > Earlier dated planning instructions and reports retain their historical scope;
 > use the successor for current availability, approved decisions and execution gates.
 
+
+## Phase 2B S05 — privacy assessment candidate, consent gate BLOCKED (2026-10-15)
+
+Implementation candidate only, based on integrated D02 at
+`8edb7a2b056d2ff605f84b7e8473cf44c5b437b1`. Checkpoint A implements a pure
+[local assessment](../../../Python/f7hub/domain/clipboard_privacy.py) for admitted
+exact text/plain, retaining this owner's sensitivity/completeness semantics. It
+returns only fixed finding/reason/method/version metadata. PERMITTED is a finite
+rule outcome, never human consent or a safety certificate. POSSIBLE_SECRET,
+NEEDS_REVIEW and incomplete/failed work cannot enter D02 through default
+composition; no raw secret, preview, hash, span or quarantine is produced.
+
+Detection covers recognized credential assignments, auth/session headers, API/
+service key shapes, private-key markers, credential-bearing connection strings,
+recognizable authentication/recovery codes and ambiguous/sensitive profiles.
+Malformed/unsupported sources and bounded-resource/detector failures deny
+eligibility. Original Unicode remains exact; NFKC is detection-only. Rules have
+false positives and false negatives: unknown languages, encodings, confusables,
+unlabelled/novel credentials and obfuscation can evade recognition. No exhaustive
+secret detection, legal classification or physical memory erasure is claimed.
+The app must not add an override to resolve false positives.
+
+Checkpoint B is **BLOCKED at the requested pre-implementation gate**. Approved
+explicit Setup workflow enablement remains the manual-history opt-in; no second
+dialog or Save-per-capture is proposed. Current Settings persists only Booleans
+and one revision. The common Apply API, USER precedence source and revision do
+not prove Setup origin after restart; imported and programmatic enablement can
+resolve identically. Durable scope-bound consent evidence requires separate
+review/approval of a persistent representation (a new additive migration for a
+relational implementation), import/restore/re-enable semantics, and atomic
+Settings/consent revalidation at D02 commit. A refresh before the writer alone
+does not close the revocation race. No such mechanism is selected or implemented
+by this candidate, and revocation safety is NOT VERIFIED.
+
+The existing three Settings keys and independent process/title opt-ins remain
+unchanged. No source metadata is acquired. No real authority or runtime producer
+is composed, and D02 admission defaults unavailable. Seven-day TEMPORARY history,
+fourteen-day receipts, exact identity, atomic writes, generations and replay/
+uncertainty remain unchanged. Off stops new default-denied attempts without
+rewriting committed history. Monitoring still needs separate disclosure and
+activation. Win+Alt+C/V express the user's intended future copy-to-F7Hub and
+paste-last-appended actions; registration/native actions are outside S05.
+
+The external consent assessment, test matrix and manifest/report are located via
+[CURRENT_STATE](../../Status/CURRENT_STATE.md). Checkpoint A is implemented/tested
+but unreviewed/unintegrated; the combined S05 disposition is BLOCKED.
 
 ## Automatic capture and retention direction (2026-10-15)
 

@@ -19,11 +19,11 @@ class ClipboardMigrationTests(ClipboardDatabaseTestCase):
             versions = tuple(row[0] for row in connection.execute("SELECT version FROM schema_migrations ORDER BY version"))
             objects = tuple((row[0], row[1]) for row in connection.execute(
                 "SELECT type, name FROM sqlite_master WHERE name LIKE 'clipboard_%' OR name LIKE 'idx_clipboard_%' ORDER BY name"))
-            self.assertEqual(versions, tuple(range(1, 16)))
+            self.assertEqual(versions, tuple(range(1, 17)))
             self.assertEqual(set(objects), {("table", "clipboard_items"), ("table", "clipboard_capture_events"),
                 ("index", "idx_clipboard_items_recent"), ("index", "idx_clipboard_capture_events_item"),
                 ("table", "clipboard_operation_receipts"), ("index", "idx_clipboard_receipts_expiry"),
-                ("index", "idx_clipboard_receipts_live_item")})
+                ("index", "idx_clipboard_receipts_live_item"), ("table", "clipboard_history_consent")})
             self.assertEqual(connection.execute("PRAGMA foreign_keys").fetchone()[0], 1)
             self.assertEqual(validate_database_integrity(connection), (("ok",), ()))
             for table in ("clipboard_items", "clipboard_capture_events"):
@@ -55,7 +55,7 @@ class ClipboardMigrationTests(ClipboardDatabaseTestCase):
             prior = tuple(tuple(row) for row in connection.execute("SELECT * FROM schema_migrations ORDER BY version"))
             scripts = tuple(tuple(row) for row in connection.execute("SELECT * FROM scripts ORDER BY script_id"))
         result = bootstrap_database(path, PROJECT_ROOT / "Database/Migrations")
-        self.assertEqual(result.migration_result.applied_versions, (13, 14, 15))
+        self.assertEqual(result.migration_result.applied_versions, (13, 14, 15, 16))
         with database_connection(path) as connection:
             self.assertEqual(prior, tuple(tuple(row) for row in connection.execute("SELECT * FROM schema_migrations WHERE version <= 12 ORDER BY version")))
             self.assertEqual(scripts, tuple(tuple(row) for row in connection.execute("SELECT * FROM scripts ORDER BY script_id")))

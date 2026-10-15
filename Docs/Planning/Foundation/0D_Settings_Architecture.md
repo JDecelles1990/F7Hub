@@ -1,5 +1,18 @@
 # F7Hub Phase 0D
 
+## S05 feature extension — preferences remain separate from consent (2026-10-15 candidate)
+
+The approved Clipboard R1–R6 implementation candidate extends existing Settings
+transaction ownership with feature-owned consent evidence; it does not add a
+preference key, general audit store, actor hierarchy or new precedence source.
+Generic Apply/Reset can revoke, never grant. Explicit Clipboard Setup uses private
+coordination to atomically persist consent and enablement under revision/epoch CAS.
+Observers run after commit; uncertain saves require read-only reload rather than
+claiming no change or automatically replaying. Normal restart preserves valid
+original-scope evidence. Complete backups remain unchanged; managed receiving-side
+invalidation is required for a future restore/import but is not implemented by S05.
+Domain policy is owned by the [Clipboard 1A successor](../Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md).
+
 ## Reconciled feature inputs (2026-10-15)
 
 The [1A successor](../Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#automatic-capture-and-retention-direction-2026-10-15)

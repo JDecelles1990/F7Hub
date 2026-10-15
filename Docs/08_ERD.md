@@ -1,5 +1,17 @@
 # F7Hub Entity Relationship Design
 
+## Clipboard S05 B — current consent evidence (2026-10-15 candidate)
+
+`clipboard_history_consent` has zero or one row in the selected local database.
+Its singleton PK is also an FK to `settings_state(singleton_id)` with deletion
+restricted. Revision columns describe historical ordering values; they are not
+foreign keys to the mutable revision value. Scope/instance IDs are local labels,
+not credentials or actor records. No Item, Event or Receipt relationship/cascade
+is added: history and completion receipts can outlive consent revocation.
+The migration seeds no evidence. Physical constraints are owned by
+[SQL Schema](09_SQLSchema.md); admission/transfer policy by
+[Clipboard 1A](Planning/Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md).
+
 ## Clipboard D02 — deletion-surviving operation receipt (2026-10-15)
 
 The dormant D02 candidate adds `clipboard_operation_receipts` under Clipboard ownership. Operation identity is unique by producer binding + ingress generation + operation ID. Item/Event/receipt acceptance is atomic; multiple genuine operations may refer to one exact-text Item.

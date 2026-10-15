@@ -1,5 +1,34 @@
 # F7Hub Database Architecture
 
+## Clipboard S05 B — consent and final transaction admission (2026-10-15 candidate)
+
+The S05 candidate adds only migration `0016_clipboard_history_consent.sql`;
+0001–0015 are unchanged. The singleton holds current content-free Setup evidence,
+scope/instance identity, epoch, fixed manual-purpose/disclosure/policy versions and
+Settings revision snapshots. It references `settings_state`; the migration creates
+no consent row and never infers consent from an enabled preference or receipt.
+
+The trusted Clipboard Setup action uses the existing Settings CAS transaction to
+save enablement and consent together. General Settings Apply/Reset cannot grant;
+actual workflow override changes revoke existing evidence in that same transaction.
+Source-process/title flags remain independent. Preparation captures current scope,
+epoch and revision before pure assessment. D02 then rechecks current evidence and
+effective enablement on its own `BEGIN IMMEDIATE` connection before Item/Event/
+Receipt writes. Writer order defines capture versus revocation. Missing, invalid,
+incompatible, exhausted or stale evidence denies. Historical receipt queries remain
+read-only and never confer current authorization. Commit uncertainty is reported
+without claiming that no save occurred; Reload observes current persisted state.
+
+Existing complete backups remain unchanged and may include historical consent.
+Managed restore/import implementation, snapshot sanitization, replacement and
+lifecycle coordination are NOT IMPLEMENTED by S05. Any future supported managed
+restore must invalidate consent before admission and require fresh Setup action.
+Arbitrary external same-path/profile replacement is outside the detection guarantee;
+ordinary restart of the unchanged database/profile preserves valid evidence.
+Domain details belong to the S05 successor in
+[Clipboard 1A](Planning/Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md).
+Validation and candidate lifecycle are recorded in [CURRENT_STATE](Status/CURRENT_STATE.md).
+
 ## Clipboard D02 — dormant atomic persistence candidate (2026-10-15)
 
 D02 extends the existing Clipboard domain/service/repository and normal configured SQLite connections. It adds only migration `0015_clipboard_operation_receipts.sql`; released migrations 0001–0014 remain unchanged. This candidate supplies an in-process dormant writer, without activation in bootstrap, GUI, AHK or IPC. D01 exclusions below describe that original delivery; D02 is the bounded persistence successor.

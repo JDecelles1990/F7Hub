@@ -37,7 +37,7 @@ def insert_receipt(connection, item_id, **changes):
 class ClipboardReceiptsMigrationTests(ClipboardDatabaseTestCase):
     def test_fresh_install_and_repeat_bootstrap(self):
         with database_connection(self.database_path) as connection:
-            self.assertEqual(tuple(r[0] for r in connection.execute("SELECT version FROM schema_migrations ORDER BY version")), tuple(range(1, 16)))
+            self.assertEqual(tuple(r[0] for r in connection.execute("SELECT version FROM schema_migrations ORDER BY version")), tuple(range(1, 17)))
             self.assertEqual(connection.execute("SELECT count(*) FROM clipboard_operation_receipts").fetchone()[0], 0)
             indexes = {r[1] for r in connection.execute("PRAGMA index_list(clipboard_operation_receipts)")}
             self.assertTrue({"idx_clipboard_receipts_expiry", "idx_clipboard_receipts_live_item"} <= indexes)
@@ -57,7 +57,7 @@ class ClipboardReceiptsMigrationTests(ClipboardDatabaseTestCase):
             connection.execute("INSERT INTO settings_user_overrides VALUES ('clipboard.workflow.enabled', 'BOOLEAN', 'true')")
             tables = [r[0] for r in connection.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name")]
             before = {table: tuple(tuple(r) for r in connection.execute('SELECT * FROM "' + table + '"')) for table in tables}
-        self.assertEqual(bootstrap_database(path, PROJECT_ROOT / "Database/Migrations").migration_result.applied_versions, (15,))
+        self.assertEqual(bootstrap_database(path, PROJECT_ROOT / "Database/Migrations").migration_result.applied_versions, (15, 16))
         with database_connection(path) as connection:
             for table, rows in before.items():
                 query = 'SELECT * FROM "' + table + '"' + (" WHERE version <= 14" if table == "schema_migrations" else "")

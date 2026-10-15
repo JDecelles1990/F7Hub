@@ -120,6 +120,8 @@ REQUEST_PROFILE = "clipboard_manual_durable_v1"
 TEMPORARY_DAYS = 7
 RECEIPT_DAYS = 14
 MAX_TEXT_BYTES = 65_536
+CONSENT_DISCLOSURE = "clipboard_setup_manual_history_v1"
+CONSENT_POLICY = "clipboard_history_consent_v1"
 _TOKEN = re.compile(r"[A-Za-z0-9_.:-]+")
 
 
@@ -237,6 +239,24 @@ class ClipboardAdmissionDecision:
         if type(self.binding) is not ClipboardAdmissionBinding or type(self.policy) is not ClipboardPrivacyPolicy:
             raise ClipboardValidationError("Clipboard admission decision is invalid.")
 
+
+@dataclass(frozen=True, slots=True)
+class ClipboardConsentSnapshot:
+    """Prepared local evidence, never a capability or caller authority."""
+
+    database_instance_id: str
+    database_scope: str
+    profile_scope: str
+    consent_epoch: int
+    settings_revision: int
+
+    def __post_init__(self) -> None:
+        for value, size in ((self.database_instance_id, 32), (self.database_scope, 64), (self.profile_scope, 64)):
+            if type(value) is not str or re.fullmatch(r"[0-9a-f]{%d}" % size, value) is None:
+                raise ClipboardValidationError("Clipboard consent scope is invalid.")
+        for value, minimum in ((self.consent_epoch, 1), (self.settings_revision, 0)):
+            if type(value) is not int or not minimum <= value <= 2**63 - 1:
+                raise ClipboardValidationError("Clipboard consent ordering is invalid.")
 
 class ReplayDisposition(str, Enum):
     NEW_CAPTURE = "NEW_CAPTURE"

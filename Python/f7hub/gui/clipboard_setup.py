@@ -11,7 +11,7 @@ from f7hub.domain.clipboard_settings import (
 from f7hub.domain.settings import SettingsValidationError
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.repositories.settings_repository import (
-    SettingsConflictError, SettingsContentionError, SettingsPersistenceError,
+    SettingsConflictError, SettingsContentionError, SettingsPersistenceError, SettingsUncertainError,
 )
 from f7hub.services.settings_service import SettingsService
 
@@ -19,9 +19,14 @@ from f7hub.services.settings_service import SettingsService
 class ClipboardSetup(QWidget):
     """One retained editing session, with immutable worker inputs and explicit reload."""
 
-    def __init__(self, service: SettingsService, parent=None):
+    def __init__(self, service: SettingsService, parent=None, *, clipboard_service=None):
         super().__init__(parent)
         self._service = service
+        self._clipboard_service = clipboard_service
+        self._consent_epoch = None
+        self._consent_eligible = False
+        self._affirmed = False
+        self._grant_pending = False
         self.runner = ServiceTaskRunner(self)
         self._pending = False
         self._generation = 0
@@ -39,12 +44,16 @@ class ClipboardSetup(QWidget):
             "Saved preferences only. Production Clipboard capture and Active Paste "
             "are not implemented or active. Ctrl+Alt+C and Ctrl+Alt+V are unavailable.")
         layout.addWidget(self.runtime_message)
+        self.consent_message = self._label('Durable manual history needs explicit Setup enablement. Automatic capture is not authorized here.')
+        layout.addWidget(self.consent_message)
         self.checkboxes = {}
         fields = (
             (WORKFLOW_ENABLED, "&Enable Clipboard workflow and local history",
              "This is the explicit setup opt-in for future eligible durable manual captures. "
-             "Normal TEMPORARY retention applies unless an independently approved preservation "
-             "action applies. Disabling this preference does not delete historical records."),
+             "TEMPORARY Clipboard content is retained locally for 7 days by default; an independently "
+             "approved preservation action may use a different policy. Content detected as sensitive "
+             "is rejected. Detection has limits and cannot guarantee all secrets are identified. "
+             "Disabling this preference does not delete historical records."),
             (SOURCE_PROCESS_ENABLED, "Store source &application executable name",
              "For future captures, optionally store only the executable basename, not full paths, "
              "command lines or unrestricted application metadata. This preference remains "
@@ -104,7 +113,8 @@ class ClipboardSetup(QWidget):
 
     @property
     def dirty(self):
-        return self._draft != self._loaded
+        return self._draft != self._loaded or bool(self._clipboard_service is not None and self._affirmed
+                and not self._consent_eligible and self._draft.get(WORKFLOW_ENABLED))
 
     @property
     def loaded_revision(self):
@@ -112,6 +122,8 @@ class ClipboardSetup(QWidget):
 
     def _edited(self, key, value):
         self._draft[key] = value
+        if key == WORKFLOW_ENABLED and value:
+            self._affirmed = True
         self._update_controls()
 
     def _update_controls(self):
@@ -143,6 +155,7 @@ class ClipboardSetup(QWidget):
         if self.pending or self._snapshot is None:
             return False
         self._draft = dict(self._loaded)
+        self._affirmed = False
         self._present_values()
         text = "Uncommitted edits discarded. Latest known saved preferences restored."
         if self._conflict:
@@ -162,7 +175,20 @@ class ClipboardSetup(QWidget):
         if not self.confirm_discard():
             return False
         self._generation += 1
+        if self._clipboard_service is not None:
+            return self._submit(self._clipboard_service.refresh_setup, self._loaded_setup, "Loading saved preferences…")
         return self._submit(self._service.refresh, self._loaded_snapshot, "Loading saved preferences…")
+
+    def _loaded_setup(self, state):
+        snapshot, self._consent_epoch, self._consent_eligible = state
+        self._loaded_snapshot(snapshot)
+        self._show_consent()
+
+    def _show_consent(self):
+        text = ('Eligible manual history consent is saved. Native capture remains unavailable.' if self._consent_eligible else
+                'Manual history is ineligible. To enable, deliberately uncheck/recheck Enable Clipboard workflow, then Apply. Saved preferences alone do not grant consent.')
+        self.consent_message.setText(text)
+        self.consent_message.setAccessibleName(text)
 
     def _submit(self, work, success, message):
         if self.pending:
@@ -199,6 +225,7 @@ class ClipboardSetup(QWidget):
         self._snapshot = snapshot
         self._loaded = {key: snapshot.get(key).value for key in self.checkboxes}
         self._draft = dict(self._loaded)
+        self._affirmed = False
         self._conflict = False
         self._save_available = snapshot.storage_available
 
@@ -225,6 +252,10 @@ class ClipboardSetup(QWidget):
                 or self._snapshot is None or not self._snapshot.storage_available):
             return False
         changes = {key: value for key, value in self._draft.items() if value != self._loaded[key]}
+        grant = bool(self._clipboard_service is not None and self._affirmed and self._draft.get(WORKFLOW_ENABLED)
+                     and (not self._loaded.get(WORKFLOW_ENABLED) or not self._consent_eligible))
+        if grant:
+            changes[WORKFLOW_ENABLED] = True
         try:
             for definition in CLIPBOARD_SETTING_DEFINITIONS:
                 if definition.key in changes:
@@ -236,15 +267,28 @@ class ClipboardSetup(QWidget):
             self._status("No changes to save. Saved revision is unchanged.")
             return True
         revision = self.loaded_revision
+        self._grant_pending = grant
+        epoch = self._consent_epoch
         return self._submit(
-            lambda: self._service.apply(changes, expected_revision=revision),
+            (lambda: self._clipboard_service.enable_history_from_setup(changes, expected_revision=revision,
+                       expected_epoch=epoch)) if grant else lambda: self._service.apply(changes, expected_revision=revision),
             self._saved, "Saving preferences…",
         )
 
     def _saved(self, result):
         # A returned Apply result is authoritative commit evidence. Establish the
         # saved baseline before presentation; downstream failure cannot retry a write.
+        if self._grant_pending:
+            self._consent_epoch = (self._consent_epoch or 0) + 1
+            self._consent_eligible = True
+        elif WORKFLOW_ENABLED in result.changed_keys:
+            self._consent_eligible = False
+            if self._consent_epoch is not None:
+                self._consent_epoch += 1
+        self._grant_pending = False
         self._accept_snapshot(result.snapshot)
+        if self._clipboard_service is not None:
+            self._show_consent()
         try:
             self._present_values()
         except Exception:
@@ -257,7 +301,12 @@ class ClipboardSetup(QWidget):
         self._status(text)
 
     def _failed(self, error):
-        if isinstance(error, SettingsConflictError):
+        if isinstance(error, SettingsUncertainError):
+            self._save_available = False
+            self._consent_eligible = False
+            self._show_consent()
+            text = 'Save outcome is uncertain; changes may have committed. Your draft is preserved. Reload to reconcile before a new explicit save.'
+        elif isinstance(error, SettingsConflictError):
             self._conflict = True
             text = "Preferences changed elsewhere. Your draft is preserved. Reload explicitly, then review before Apply."
         elif isinstance(error, SettingsValidationError):
@@ -266,7 +315,7 @@ class ClipboardSetup(QWidget):
             text = "Settings storage is busy. No changes were saved. Your draft is preserved; retry explicitly."
         elif isinstance(error, SettingsPersistenceError):
             self._save_available = False
-            text = "Settings storage is unavailable. No changes were saved. Your draft is preserved. Reload to retry."
+            text = "Settings storage is unavailable. Your draft is preserved. Reload to verify saved state before retrying."
         else:
             self._save_available = False
             text = "The Settings operation could not be completed. Your draft is preserved. Reload saved preferences before retrying."

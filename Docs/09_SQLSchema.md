@@ -1,5 +1,20 @@
 # F7Hub SQL Schema
 
+## Clipboard S05 B — consent physical schema (2026-10-15 candidate)
+
+[Migration 0016](../Database/Migrations/0016_clipboard_history_consent.sql) adds
+`clipboard_history_consent` only. Exact DDL remains in that migration. Columns:
+singleton PK/FK; 32-hex database instance/action IDs; 64-hex database/profile scopes;
+fixed purpose `clipboard_manual_durable_v1`, disclosure
+`clipboard_setup_manual_history_v1`, policy `clipboard_history_consent_v1`;
+positive integer epoch; GRANTED/REVOKED state; nonnegative grant/transition Settings
+revisions; granted_at and nullable revoked_at. Constraints enforce version/shape,
+state/revocation consistency and transition revision >= grant revision. Timestamp
+calendar validation and effective eligibility remain service/repository checks.
+The singleton PK needs no additional index. No seed, content, preview, secret,
+content-derived hash, trigger or Item/Event/Receipt FK is added. Migrations
+0001–0015 and receipt identity/deduplication semantics remain unchanged.
+
 ## Clipboard D02 — operation receipt physical schema
 
 Dormant implementation candidate: additive migration `0015_clipboard_operation_receipts.sql`. Released migrations 0001–0014 remain byte-for-byte unchanged. The exact additive DDL is:

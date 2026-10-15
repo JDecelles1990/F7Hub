@@ -8,7 +8,7 @@ from PySide6.QtWidgets import QApplication
 
 from f7hub.gui.main_window import MainWindow
 from f7hub.infrastructure.database import BootstrapResult, bootstrap_database
-from f7hub.infrastructure.database_paths import resolve_development_database_path
+from f7hub.infrastructure.database_paths import resolve_development_database_path, local_profile_scope, DatabasePathError
 from f7hub.repositories.ticket_repository import TicketRepository
 from f7hub.repositories.clipboard_repository import ClipboardRepository
 from f7hub.services.clipboard_service import ClipboardService
@@ -85,10 +85,14 @@ def bootstrap_application(
     )
     ticket_repository = TicketRepository(resolved_database_path)
     ticket_service = TicketService(ticket_repository)
-    clipboard_repository = ClipboardRepository(resolved_database_path)
-    clipboard_service = ClipboardService(clipboard_repository)
+    try:
+        profile_scope = local_profile_scope()
+    except DatabasePathError:
+        profile_scope = None  # Optional capture consent fails closed; local history reads remain useful.
+    clipboard_repository = ClipboardRepository(resolved_database_path, profile_scope=profile_scope)
     settings_repository = SettingsRepository(resolved_database_path)
     settings_service = SettingsService(settings_repository, CLIPBOARD_SETTING_DEFINITIONS)
+    clipboard_service = ClipboardService(clipboard_repository, settings=settings_service)
     knowledge_repository = KnowledgeRepository(resolved_database_path)
     categories = CategoryRepository(resolved_database_path)
     tags = TagRepository(resolved_database_path)

@@ -133,7 +133,8 @@ class ClipboardWorkspace(QWidget):
             self.sections = QStackedWidget(self)
             self.recent_page = QWidget(self)
             self.sections.addWidget(self.recent_page)
-            self.setup = ClipboardSetup(settings_service, self)
+            self.setup = ClipboardSetup(settings_service, self, clipboard_service=(clipboard_service
+                if getattr(clipboard_service, 'supports_setup', False) else None))
             self.sections.addWidget(self.setup)
             f7hub_layout.addWidget(self.sections, 1)
             layout = QVBoxLayout(self.recent_page)

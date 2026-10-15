@@ -1,4 +1,19 @@
 # F7Hub Phase 1C
+
+## S05 Setup consent presentation successor (2026-10-15 candidate)
+
+The retained editor now receives the composed Clipboard owner beside Settings.
+An affirmative enable+Apply uses the trusted Setup action; ordinary preference
+editing still uses Settings Apply. Imported enabled preferences display ineligible
+manual-history status until deliberate uncheck/recheck+Apply. Launch, Reload,
+no-op Apply and Cancel cannot grant. The editor preserves pending/draft/navigation
+and revision-conflict guards; uncertain save feedback says the save may have
+committed and requires Reload before a new explicit save. The visible opt-in and
+accessible description state the default 7-day TEMPORARY retention, rejection of
+detected sensitive content and the limits of detection; separately approved
+preservation can use another policy. There is no second
+dialog, new native capture control or automatic monitoring. Consent purpose and
+transfer semantics remain with the [1A successor](1A_Clipboard_Domain_Data_Lifecycle.md).
 # PySide6 Clipboard Center Architecture Planning Instructions
 Existing MainWindow/workspace/navigation conventions; reusable Qt components; Clipboard Center shell integration; internal views; query semantics; search/filter model; list/read models; table columns; pagination; Inspector architecture; Entities, Tags, Capture History, Relationships, Retention/Privacy and Actions tabs; deep links; keyboard/accessibility; async loading; stale-result handling; error/empty states; large-dataset strategy; responsive layout; future Mochi-sidebar coexistence; vertical-slice implementation decomposition.
 
