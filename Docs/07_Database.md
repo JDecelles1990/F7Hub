@@ -1,5 +1,41 @@
 # F7Hub Database Architecture
 
+## Clipboard H01-B — atomic append head and final paste reservation (2026-10-15 candidate)
+
+Additive [migration 0017](../Database/Migrations/0017_clipboard_append_head.sql)
+creates a content-free singleton append head. It seeds no row and never derives
+a head from old Items, Events, receipts or Recent order. Upgrades preserve all
+existing history; paste-latest remains EMPTY until a future genuine admitted capture.
+Migrations 0001–0016 remain unchanged. Physical constraints belong to
+[SQL Schema](09_SQLSchema.md#clipboard-h01-b--append-head-physical-schema).
+
+The existing S05 capture writer now atomically commits Item changes, one Event,
+the operation receipt and a fresh random UUID head bound to that Item/revision.
+The existing-receipt branch returns before any head write. Old replays cannot
+rewind or advance the head; a genuine recapture of the same Item does advance it.
+All required writes roll back together. Existing uncertain-commit receipt
+reconciliation remains authoritative and never rewrites the head.
+
+Exact head/source reads use one joined snapshot. Deleting the live Item sets the
+head FK to NULL while retaining its token/revision. Expired, deleted, inconsistent
+or privacy-ineligible head state denies without scanning for an older Item.
+Recent remains an independent bounded preview query.
+
+Prepare and consume recheck scoped S05 consent, full-source assessment, exact
+head/ref/revision, retention and source equality. Expensive assessment precedes
+the final short `BEGIN IMMEDIATE` reservation; the reservation rereads consent,
+Settings and head/source together, performs no content mutation or callbacks, and
+releases before internal text delivery. Service serialization retires the one-use
+ticket before this fence; exceptions or uncertain completion do not permit replay.
+Time is checked again after any database wait, so neither expiry nor the effect
+deadline can be extended by contention. Configured connections retain foreign
+keys ON and the 5000-ms busy timeout. Tests use isolated synthetic databases and
+require integrity_check=ok with zero foreign-key violations.
+
+This candidate provides internal authorization only. No transaction spans native
+Clipboard, keyboard or IPC work; later invalidation cannot retroactively undo an
+authorization that passed its final fence. See [Clipboard 1A](Planning/Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#h01-b--durable-latest-source-and-one-use-authorization-2026-10-15-candidate).
+
 ## Clipboard S05 B — consent and final transaction admission (2026-10-15 candidate)
 
 The S05 candidate adds only migration `0016_clipboard_history_consent.sql`;

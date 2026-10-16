@@ -1,7 +1,7 @@
 """Clipboard use cases; dormant persistence defaults to unavailable admission."""
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 import math
 import sqlite3
 import threading
@@ -17,6 +17,8 @@ from f7hub.domain.clipboard import (
     ClipboardOperation, ClipboardReceiptResult, ClipboardPersistenceCode as Code,
     ClipboardPersistenceError, ReplayDisposition, validate_token,
     ClipboardPrivacyPolicy, CONSENT_POLICY,
+    ClipboardAppendHead, ClipboardConsentSnapshot, ClipboardPasteAuthorization,
+    ClipboardPasteSource, ClipboardPasteError, ClipboardPasteCode as PasteCode, validate_uuid,
 )
 from f7hub.repositories.clipboard_repository import ClipboardRepository
 from f7hub.domain.clipboard_privacy import assess_manual_text, ClipboardPrivacyFinding
@@ -54,6 +56,15 @@ class ClipboardAdmissionContext:
 MAX_GENERATION_SECONDS = 300
 MAX_GENERATION_OPERATIONS = 1024
 CLOCK_DRIFT_TOLERANCE_SECONDS = 60
+PASTE_PREPARATION_SECONDS = 2
+PASTE_EFFECT_SECONDS = 1
+
+
+@dataclass(frozen=True, slots=True, repr=False)
+class _PreparedPaste:
+    authorization: ClipboardPasteAuthorization
+    head: ClipboardAppendHead
+    consent: ClipboardConsentSnapshot
 
 
 class ClipboardService:
@@ -78,6 +89,8 @@ class ClipboardService:
         self._operations: dict[str, str] = {}
         self._last_sample = None
         self._clock_anomaly = False
+        self._prepared_paste: _PreparedPaste | None = None
+        self._paste_presses: set[str] = set()
 
     def refresh_setup(self):
         """Coherent preference/consent projection; reading never grants consent."""
@@ -113,6 +126,8 @@ class ClipboardService:
             self._context = ClipboardAdmissionContext(producer_binding, str(uuid4()))
             self._deadline = monotonic + MAX_GENERATION_SECONDS
             self._operations = {}
+            self._prepared_paste = None
+            self._paste_presses = set()
             return self._context
 
     def new_operation(self, context: ClipboardAdmissionContext) -> ClipboardOperation:
@@ -200,6 +215,170 @@ class ClipboardService:
             as_of, _ = self._sample()
             return self._repository.lookup_receipt(operation, as_of=as_of)
 
+    def prepare_latest_paste(self, context: ClipboardAdmissionContext, *,
+                              press_id: str, target_token: str) -> ClipboardPasteAuthorization:
+        """Internal intent primitive; exact issuing context is required, no native I/O.
+
+        One active ticket, canonical random UUID identity, bounded by the existing
+        300-second monotonic ingress generation (never renewed by prepare/replay).
+        Preparation itself must finish within the approved two-second budget.
+        """
+        validate_uuid(press_id)
+        validate_uuid(target_token)
+        started = self._paste_started()
+        with self._lock:
+            try:
+                as_of, sampled = self._paste_sample(context)
+                if not 0 <= sampled - started < PASTE_PREPARATION_SECONDS:
+                    raise ClipboardPasteError(PasteCode.EXPIRED)
+                if press_id in self._paste_presses:
+                    raise ClipboardPasteError(PasteCode.REPLAYED)
+                self._require_capacity()
+                # BUSY/denied attempts also require a new explicit press afterward.
+                self._paste_presses.add(press_id)
+                if self._prepared_paste is not None:
+                    # Observe invalidation before deciding an old ticket is still busy.
+                    # Cross-process changes need no unreliable in-memory latest pointer.
+                    try:
+                        current_consent = self._paste_consent()
+                        current_head = self._repository._read_latest_paste_source(current_consent, as_of=as_of)
+                        if (current_consent == self._prepared_paste.consent
+                                and current_head == self._prepared_paste.head):
+                            raise ClipboardPasteError(PasteCode.BUSY)
+                    except ClipboardPasteError as error:
+                        if error.code == PasteCode.BUSY:
+                            raise
+                        self._prepared_paste = None
+                        raise
+                    self._prepared_paste = None
+                consent = self._paste_consent()
+                head = self._repository._read_latest_paste_source(consent, as_of=as_of)
+                self._assess_paste_source(head)
+                as_of, sampled = self._paste_sample(context)
+                if not 0 <= sampled - started < PASTE_PREPARATION_SECONDS:
+                    raise ClipboardPasteError(PasteCode.EXPIRED)
+                # Construct all response/state objects before final authorization.
+                authorization = ClipboardPasteAuthorization(str(uuid4()), head.append_token,
+                    head.item_ref, head.item_revision, target_token)
+                prepared = _PreparedPaste(authorization, head, consent)
+                as_of, _ = self._paste_sample(context)
+                # Construction cannot bypass a concurrent capture or revocation.
+                self._repository._validate_latest_paste(head, consent, as_of=as_of)
+                as_of, sampled = self._paste_sample(context)
+                if (not 0 <= sampled - started < PASTE_PREPARATION_SECONDS
+                        or (head.expires_at is not None and head.expires_at <= as_of)):
+                    raise ClipboardPasteError(PasteCode.EXPIRED)
+                # Publish only after final time validation; no fallible construction follows.
+                self._prepared_paste = prepared
+                return authorization
+            except ClipboardPasteError:
+                raise
+            except Exception:
+                self._prepared_paste = None
+                raise ClipboardPasteError(PasteCode.UNAVAILABLE) from None
+
+    def consume_latest_paste(self, context: ClipboardAdmissionContext,
+                             authorization: ClipboardPasteAuthorization) -> ClipboardPasteSource:
+        """Burn before validation; failures/uncertainty cannot re-export source.
+
+        Final SQLite validation is the authorization linearization point. Later
+        revocation/deletion cannot undo it. No writer is held while delivering text.
+        The effect lease starts at this request's entry, including serialization wait.
+        """
+        started = self._paste_started()
+        with self._lock:
+            try:
+                as_of, sampled = self._paste_sample(context)
+                if type(authorization) is not ClipboardPasteAuthorization:
+                    raise ClipboardPasteError(PasteCode.DENIED)
+                prepared = self._prepared_paste
+                if prepared is None or prepared.authorization.prepared_id != authorization.prepared_id:
+                    raise ClipboardPasteError(PasteCode.REPLAYED)
+                self._prepared_paste = None
+                if prepared.authorization != authorization:
+                    raise ClipboardPasteError(PasteCode.DENIED)
+                if not 0 <= sampled - started < PASTE_EFFECT_SECONDS:
+                    raise ClipboardPasteError(PasteCode.EXPIRED)
+                consent = self._paste_consent()
+                if consent != prepared.consent:
+                    raise ClipboardPasteError(PasteCode.DENIED)
+                # Re-read and assess current full source outside the writer reservation.
+                head = self._repository._read_latest_paste_source(consent, as_of=as_of)
+                if head.append_token != prepared.head.append_token:
+                    raise ClipboardPasteError(PasteCode.STALE_HEAD)
+                if head != prepared.head:
+                    raise ClipboardPasteError(PasteCode.STALE_SOURCE)
+                self._assess_paste_source(head)
+                as_of, sampled = self._paste_sample(context)
+                self._check_paste_expiry(head, as_of)
+                remaining = min(started + PASTE_EFFECT_SECONDS, self._deadline) - sampled
+                if remaining <= 0:
+                    raise ClipboardPasteError(PasteCode.EXPIRED)
+                expires = datetime.strptime(as_of, "%Y-%m-%dT%H:%M:%S.%fZ").replace(
+                    tzinfo=timezone.utc) + timedelta(seconds=remaining)
+                if head.expires_at is not None:
+                    expires = min(expires, datetime.strptime(head.expires_at,
+                        "%Y-%m-%dT%H:%M:%S.%fZ").replace(tzinfo=timezone.utc))
+                result = ClipboardPasteSource(authorization, head.source,
+                    expires.isoformat(timespec="milliseconds").replace("+00:00", "Z"))
+                as_of, _ = self._paste_sample(context)
+                # Response construction precedes the approved final SQLite fence.
+                self._repository._validate_latest_paste(head, consent, as_of=as_of)
+                # Final release check includes construction and SQLite waits. Future
+                # effect consumers must still honor expiry after this function returns.
+                as_of, sampled = self._paste_sample(context)
+                if (not 0 <= sampled - started < PASTE_EFFECT_SECONDS
+                        or as_of >= result.effect_lease_expires_at):
+                    raise ClipboardPasteError(PasteCode.EXPIRED)
+                return result
+            except ClipboardPasteError:
+                raise
+            except Exception:
+                self._prepared_paste = None
+                raise ClipboardPasteError(PasteCode.UNAVAILABLE) from None
+
+    def _paste_sample(self, context):
+        try:
+            as_of, sampled = self._sample()
+            self._require_context(context, sampled)
+            if self._clock_anomaly:
+                raise ValueError()
+            return as_of, sampled
+        except Exception:
+            self._prepared_paste = None
+            raise ClipboardPasteError(PasteCode.EXPIRED) from None
+
+    def _paste_started(self):
+        try:
+            sampled = self._monotonic()
+            if type(sampled) not in (int, float) or not math.isfinite(sampled):
+                raise ValueError()
+            return sampled
+        except Exception:
+            with self._lock:
+                self._prepared_paste = None
+            raise ClipboardPasteError(PasteCode.UNAVAILABLE) from None
+
+    def _paste_consent(self):
+        # Synthetic capture-authority injection cannot enable the export boundary.
+        if not self._real_assessment:
+            raise ClipboardPasteError(PasteCode.DENIED)
+        consent = self._repository._read_paste_consent()
+        if consent is None:
+            raise ClipboardPasteError(PasteCode.DENIED)
+        return consent
+
+    @staticmethod
+    def _assess_paste_source(head):
+        assessment = assess_manual_text(head.source)
+        if assessment.finding != ClipboardPrivacyFinding.PERMITTED or not assessment.assessment_complete:
+            raise ClipboardPasteError(PasteCode.DENIED)
+
+    @staticmethod
+    def _check_paste_expiry(head, as_of):
+        if head.retention_intent == "TEMPORARY" and head.expires_at <= as_of:
+            raise ClipboardPasteError(PasteCode.EXPIRED)
+
     def maintain_receipts(self) -> int:
         """Explicit bounded cleanup: at most five transactions of 100 receipts."""
         with self._lock:
@@ -223,9 +402,11 @@ class ClipboardService:
             raise ClipboardPersistenceError(Code.GENERATION_STALE)
 
     def _require_capacity(self):
-        if len(self._operations) >= MAX_GENERATION_OPERATIONS:
+        if len(self._operations) + len(self._paste_presses) >= MAX_GENERATION_OPERATIONS:
             self._context = None
             self._operations = {}
+            self._prepared_paste = None
+            self._paste_presses = set()
             raise ClipboardPersistenceError(Code.CAPACITY_EXHAUSTED)
 
     def _sample(self):

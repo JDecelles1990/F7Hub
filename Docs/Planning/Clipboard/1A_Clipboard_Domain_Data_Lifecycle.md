@@ -1,5 +1,58 @@
 # F7Hub Phase 1A
 
+## H01-B — durable latest source and one-use authorization (2026-10-15 candidate)
+
+This is increment 2 of the user-approved H01 D1–D12 plan, SHA-256
+`c690e10017019da92ddef5cb6f7a3ffad21f3360a8f546507db3aba7d98ee9a2`,
+based on integrated H01-A merge `31301634c9e40c4a1f34523bd790974a38b07296`.
+Implementation readiness and separate independent review are recorded in
+[CURRENT_STATE](../../Status/CURRENT_STATE.md); no integration is authorized here.
+
+D4's new content-free singleton is empty on upgrade; historical Items, Events
+and receipts survive. Only a genuine S05-admitted committed capture advances
+its random append UUID and exact Item/revision. Item/Event/receipt/head commit or
+roll back together. Receipt replay, privacy rejection and failed transactions
+do not move it. Genuine recapture of identical text creates a new Event/head
+while preserving Item identity. Deletion nulls the live FK and retains unavailable
+head identity; expiry is checked strictly at every use. Recent sorting/previews,
+older Items, retained receipts and Event IDs never substitute for the exact head.
+
+D9's internal prepare binds the original full source, head token, typed Item,
+revision, target, issuing context and current S05 consent snapshot. Its public
+result is content-free. One process-local random UUID4 ticket is active; it
+inherits the existing <=300-second monotonic generation deadline and cannot renew
+that deadline. Preparation itself is bounded to two seconds. Combined operation/
+press metadata is bounded to 1024 identities, with fencing before eviction.
+
+Consume retires the ticket before fallible work, rechecks live consent/Settings,
+head/source/revision/retention and full-source privacy, then performs the final
+coherent validation under an immediate SQLite writer reservation. Assessment
+stays outside that reservation. Time checks after database waiting deny newly
+expired content or an elapsed effect lease. The exact source returns only once
+through the internal service interface, with a lease bounded by consume request
+entry + one second, generation expiry and known Item expiry. Binding mismatch,
+replay, restart, replaced/deleted/expired source, revoked consent, incomplete
+assessment and database/error uncertainty deny without older-item fallback.
+New explicit prepares observe invalidated pending tickets before reporting BUSY.
+
+The final validation is the authorization linearization point. Invalidation
+committed before it denies; later invalidation cannot undo an already authorized
+in-flight effect. No SQLite transaction spans external delivery or native effects.
+There is no claim of eventual OS Clipboard write, input delivery or paste success.
+
+S05 Setup-only manual consent, finite sensitive-content detection, exact Unicode,
+seven-day TEMPORARY policy, separate SAVED/pin semantics and fourteen-day operation
+receipts remain. Raw text exists only in its original approved Item storage and
+bounded transient service values; no new plaintext file/store or content-derived
+head/token is introduced. No physical memory erasure guarantee is made.
+Default/unavailable and synthetic capture-authority compositions cannot export.
+H01-B adds no live Clipboard access, hotkey registration, monitoring, native worker,
+IPC endpoint or picker. F1/F2 boundaries and H01-C–F remain separately gated.
+
+Schema and transaction details belong to [09](../../09_SQLSchema.md#clipboard-h01-b--append-head-physical-schema)
+and [07](../../07_Database.md#clipboard-h01-b--atomic-append-head-and-final-paste-reservation-2026-10-15-candidate);
+Python API ownership belongs to [13](../../13_PythonArchitecture.md#clipboard-h01-b--internal-latest-paste-prepare-and-consume-2026-10-15-candidate).
+
 ## S05 Checkpoint B successor — durable manual consent (2026-10-15 candidate)
 
 User approval of R1–R6 authorizes this bounded implementation candidate, not

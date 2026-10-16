@@ -1,5 +1,79 @@
 # F7Hub Current State
 
+## H01-B security corrections F1/F2 — ready for independent rereview (2026-10-15)
+
+**CORRECTIONS IMPLEMENTED, READY_FOR_INDEPENDENT_REREVIEW.** The independent review
+of aggregate `0c4eb557d5f924d55034c1ccd841023fd49c85c51a3f7364d0b37feaeb27a210`
+required changes for an unrestricted public exact-source getter and time checks
+preceding response construction. The original 24-path candidate and review are
+preserved byte-for-byte in the external correction checkpoint. The original author
+handoff below is historical; its passing suites did not establish these invariants.
+
+The public plaintext getter is removed. Its internal replacement rechecks the
+existing S05 consent snapshot against current scoped database evidence before
+loading exact source in the same read snapshot. Service-only supported source
+delivery still requires one-use consume and current full-source assessment.
+Response/state construction now precedes the final SQLite authorization fence;
+final generation/request/Item-expiry checks precede release. Expired preparation
+does not publish a ticket; consume remains spent on failure. Post-fence invalidation
+ordering and future consumers' duty to honor expiry remain unchanged. Scheduling
+or delivery timing after return is not guaranteed by an in-process check.
+
+Fresh Windows-host synthetic checks: **16 security regressions PASS**, existing
+**50 H01-B PASS**, S05 consent/privacy/receipt/service **75 PASS**, isolated
+persistence/Recent Integration **5/5 PASS**, all exit 0 with zero skips. Qt checks
+are offscreen. The first new regression attempt had one incorrect expected denial
+ordering; RT-R01 diagnosis preceded a test-only ordering correction and fresh PASS.
+All prior failure evidence remains preserved. No full Database/protocol rerun is
+claimed for this correction; migration/schema/protocol bytes are unchanged.
+
+Five existing candidate paths are corrected: repository, service, H01-B test file,
+Python architecture and this status document. No new candidate path, migration,
+domain DTO, H01-A contract/hotkey, native effect or IPC change. Exact correction
+diff, per-path CHANGED/UNCHANGED identities, complete corrected 24-path manifest,
+validation and rereview handoff are under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-H01/H01-B/security-correction-20261016T021154Z/`.
+The branch/worktree/base remain those below; the index is empty and the candidate
+is uncommitted. Independent rereview is NOT RUN. No Git integration or H01-C work.
+
+## H01-B — SQLite append head and internal paste authorization (2026-10-15 candidate)
+
+**READY_FOR_INDEPENDENT_REVIEW.** H01-B implementation candidate is in
+`C:/Dev/F7Hub-Clipboard-H01-B`, branch
+`feature/clipboard-h01-append-head`, based on H01-A merge
+`31301634c9e40c4a1f34523bd790974a38b07296`. Live local/fetched/remote main matched
+that base at implementation preflight. H01-A is CLOSED by PR #108; its feature
+commit is `1edf510b0fbca1411ade7ebb2724a16fcf9df596`. The older H01-A candidate
+section below retains its historical meaning. H01 architecture D1–D12 is approved
+for plan SHA-256 `c690e10017019da92ddef5cb6f7a3ffad21f3360a8f546507db3aba7d98ee9a2`.
+
+Migration 0017, atomic genuine-append head updates, exact no-fallback source reads,
+and internal one-use prepare/consume are implemented. S05 consent/assessment and
+existing receipt recovery remain authoritative. Deleted/expired/replaced/invalid
+heads deny. Consume rechecks the assessed exact source under an immediate writer
+reservation and releases it before delivery; its ticket is retired even on failure.
+The effect lease is request-start bounded and never promises OS paste success.
+No H01-C–F runtime, native effect or production registration is delivered.
+
+Fresh final checks on the Windows host: full Database **633 PASS** (including
+**50 H01-B** cases); S01/H01-A/capture/privacy Unit regression **68 PASS**;
+isolated persistence/Recent/Setup/bootstrap Integration **5/5/8/10 PASS**;
+Settings cross-process **1 PASS**. All completed with exit 0 and no skips. Qt
+Integration used offscreen presentation. Synthetic databases require
+integrity_check=ok and zero foreign-key violations.
+An initial bootstrap run failed on a second stale migration-count literal (16);
+RT-R01 diagnosis and an expectation-only correction preceded the fresh 10-test
+PASS. That failed attempt is preserved externally and is not relabeled PASS.
+Full affected-suite results and exact commands are recorded with per-run candidate
+identities under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-H01/H01-B/`.
+The final external manifest/handoff owns the exact review candidate identity.
+No operational database or live Clipboard was used. Native paste, physical keyboard,
+modern Notepad acceptance and cross-process IPC security validation are NOT RUN.
+
+Candidate remains unstaged/uncommitted; separate independent review and any future
+Git integration require their own gates. Canonical unrelated work and all prior
+worktrees/checkpoints are preserved. H01-C has not begun.
+
 ## H01-A — native Clipboard contracts and dormant chord adaptation (2026-10-15 candidate)
 
 **READY_FOR_INDEPENDENT_REVIEW** in isolated

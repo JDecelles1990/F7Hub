@@ -1,5 +1,22 @@
 # F7Hub Entity Relationship Design
 
+## Clipboard H01-B — current append relationship (2026-10-15 candidate)
+
+`clipboard_append_head` has zero or one row. Its singleton PK is constrained to
+1; a random append token and positive exact Item revision identify one genuine
+committed append. The nullable `live_item_id` references `clipboard_items` with
+ON DELETE SET NULL. Deletion preserves unavailable-head identity and cannot link
+to a subsequently reused numeric Item ID. No historical-head reconstruction or
+older-item fallback occurs. Item/Event/receipt/head changes share the S05 writer.
+
+The head stores no source, preview, fingerprint, operation credential or copied
+consent. Paste authorizations remain process-local service state, with no new
+durable authorization entity or Settings relationship. The existing consent and
+Settings owners remain authoritative. Exact columns/constraints are in
+[SQL Schema](09_SQLSchema.md#clipboard-h01-b--append-head-physical-schema);
+[Clipboard 1A](Planning/Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#h01-b--durable-latest-source-and-one-use-authorization-2026-10-15-candidate)
+owns eligibility and no-fallback policy.
+
 ## Clipboard S05 B — current consent evidence (2026-10-15 candidate)
 
 `clipboard_history_consent` has zero or one row in the selected local database.
