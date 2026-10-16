@@ -1,5 +1,28 @@
 # F7Hub AutoHotkey v2 Architecture
 
+## H01-A — dormant native Clipboard chord adaptation (2026-10-15 candidate)
+
+`ClipboardHotkeyPolicy.ahk` now has a third, independent exclusion map for
+`clipboard.paste_latest`; the existing `capture_selection` and `paste_active`
+maps retain their CP-01 behavior. All three start with the five exact Office
+basename exclusions. Foreground identity includes process creation time, so a
+reused PID cannot inherit a pending press target. Missing creation evidence
+denies a real foreground read.
+
+`ClipboardPressCycleController.ahk` accepts a validated fixed `WIN_ALT` chord
+for dormant Win+Alt+C/V controllers while preserving CP-01's `CTRL_ALT` default.
+Latest paste requires the Win+Alt descriptor. Ctrl and Shift reject the new
+chord, including AltGr-like Ctrl+Alt and reserved Ctrl+Win+Alt+V. The future host
+must forward modifier-down observations to `ObserveModifiers()` so a transient
+extra Ctrl/Shift or newly pressed Win side cancels the pending action. The controller
+waits for trigger, both Win sides, Alt, Ctrl and Shift to be released before
+rearming. A callback returning `ClipboardAsyncPending` holds dispatch ownership
+until `Complete()`; cancellation clears pending work without inventing another
+press. No production C/V hotkey is registered by H01-A. The native Clipboard,
+IPC, Settings, SQLite and F7/Alt+F7 host composition are untouched.
+
+The CP-01 section below records its historical delivered scope and evidence.
+
 ## GUI Shell S003 — Guide window identity (2026-10-14 candidate)
 
 `GuideCore.ahk` now titles the main AHK GUI exactly **Guide**; the shared host tray tooltip uses the same name. Internal AltF7Hub identifiers, checkout-specific `F7Hub.AltF7Hub.Ready.v1` endpoint, registered `F7Hub.AltF7Hub.Show.v1` message, fixed payload/ACK values, client timeouts and shared-host ownership are unchanged. Alt+F7 retains toggle/editor-focus semantics, and F7 launch/follow hotkeys are unchanged.

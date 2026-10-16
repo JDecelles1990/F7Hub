@@ -5,12 +5,13 @@ class ClipboardHotkeyPolicy {
     __New() {
         initial := ["WINWORD.EXE", "EXCEL.EXE", "OUTLOOK.EXE", "OLK.EXE", "POWERPNT.EXE"]
         this.Exclusions := Map()
-        for action in ["clipboard.capture_selection", "clipboard.paste_active"]
+        for action in ["clipboard.capture_selection", "clipboard.paste_active", "clipboard.paste_latest"]
             this.SetExclusions(action, initial)
     }
 
     SetExclusions(action, names) {
         if action != "clipboard.capture_selection" && action != "clipboard.paste_active"
+            && action != "clipboard.paste_latest"
             throw ValueError("Unknown Clipboard action")
         excluded := Map()
         for name in names {
@@ -61,10 +62,28 @@ class ClipboardHotkeyPolicy {
             ; Refuse a foreground race during resolution. No window titles.
             if !pid || exe == "" || WinExist("A") != hwnd || WinGetPID(hwnd) != pid
                 return 0
-            return {Hwnd: hwnd, Pid: pid, Exe: exe}
+            creation := this.ProcessCreation(pid)
+            if creation == ""
+                return 0
+            return {Hwnd: hwnd, Pid: pid, Exe: exe, Creation: creation}
         } catch Error {
             return 0
         }
+    }
+
+    ProcessCreation(pid) {
+        ; A PID can be reused while a press is pending. Retain the creation FILETIME.
+        handle := DllCall("OpenProcess", "UInt", 0x1000, "Int", 0, "UInt", pid, "Ptr")
+        if !handle
+            return ""
+        try {
+            created := Buffer(8, 0), exited := Buffer(8, 0)
+            kernel := Buffer(8, 0), user := Buffer(8, 0)
+            if !DllCall("GetProcessTimes", "Ptr", handle, "Ptr", created, "Ptr", exited,
+                "Ptr", kernel, "Ptr", user, "Int")
+                return ""
+            return Format("{:08X}{:08X}", NumGet(created, 4, "UInt"), NumGet(created, 0, "UInt"))
+        } finally DllCall("CloseHandle", "Ptr", handle)
     }
 
     AllowsContext(action, context) {
@@ -75,8 +94,14 @@ class ClipboardHotkeyPolicy {
     }
 
     SameTarget(first, second) {
-        try return first.Hwnd == second.Hwnd && first.Pid == second.Pid
-            && this.NormalizeExecutable(first.Exe) == this.NormalizeExecutable(second.Exe)
+        try {
+            if first.Hwnd != second.Hwnd || first.Pid != second.Pid
+                || this.NormalizeExecutable(first.Exe) != this.NormalizeExecutable(second.Exe)
+                return false
+            firstHas := HasProp(first, "Creation"), secondHas := HasProp(second, "Creation")
+            return firstHas == secondHas && (!firstHas || (first.Creation != ""
+                && first.Creation == second.Creation))
+        }
         catch Error
             return false
     }

@@ -236,7 +236,11 @@ RunTests() {
             Check(true, "Owned window ready " name)
             WinGetPos(, , &width, &height, hwnd)
             FileAppend("READY target=" name " width=" width " height=" height " condition=owned-HWND-PID`n", "*")
-            Targets[name] := {Hwnd: hwnd, Pid: pid, Exe: name, Input: input, Ready: ready}
+            creation := Policy.ProcessCreation(pid)
+            if creation == ""
+                throw Error("SYNTHETIC TARGET NOT READY process creation " name)
+            Targets[name] := {Hwnd: hwnd, Pid: pid, Exe: name, Creation: creation,
+                Input: input, Ready: ready}
         }
         for actionKey in [["clipboard.capture_selection", "F23"], ["clipboard.paste_active", "F24"]] {
             action := actionKey[1], key := actionKey[2]

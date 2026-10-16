@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "description": "Synthetic byte-level vectors for Python and future AHK parser conformance; no authorization semantics.",
+  "vectors": [
+    {
+      "name": "ahk_capture_begin_v1",
+      "valid": true,
+      "wire_utf8": "{\"contract\":\"clipboard.capture_begin\",\"schema_version\":\"1.0\",\"message_class\":\"COMMAND\",\"message_id\":\"00000001-0000-4000-8000-000000000000\",\"created_at\":\"2026-10-15T12:00:00.000Z\",\"producer\":{\"component\":\"ahk.clipboard\"},\"payload\":{\"press_id\":\"00000003-0000-4000-8000-000000000000\",\"action\":\"clipboard.capture_selection\",\"target_token\":\"00000004-0000-4000-8000-000000000000\"}}"
+    },
+    {
+      "name": "python_capture_begin_result_v1",
+      "valid": true,
+      "request": "ahk_capture_begin_v1",
+      "wire_utf8": "{\"contract\":\"clipboard.capture_begin_result\",\"schema_version\":\"1.0\",\"message_class\":\"RESULT\",\"message_id\":\"00000002-0000-4000-8000-000000000000\",\"created_at\":\"2026-10-15T12:00:00.000Z\",\"producer\":{\"component\":\"f7hub.clipboard\"},\"payload\":{\"press_id\":\"00000003-0000-4000-8000-000000000000\",\"status\":\"READY\",\"operation_id\":\"00000005-0000-4000-8000-000000000000\",\"producer_generation\":\"00000006-0000-4000-8000-000000000000\"},\"correlation_id\":\"00000001-0000-4000-8000-000000000000\"}"
+    },
+    {
+      "name": "ahk_unicode_capture_submit_v1",
+      "valid": true,
+      "text": "A\tB\r\nÉ界😀",
+      "wire_utf8": "{\"contract\":\"clipboard.capture_submit\",\"schema_version\":\"1.0\",\"message_class\":\"COMMAND\",\"message_id\":\"00000007-0000-4000-8000-000000000000\",\"created_at\":\"2026-10-15T12:00:00.000Z\",\"producer\":{\"component\":\"ahk.clipboard\"},\"payload\":{\"operation_id\":\"00000005-0000-4000-8000-000000000000\",\"producer_generation\":\"00000006-0000-4000-8000-000000000000\",\"mode\":\"selection\",\"observed_at\":\"2026-10-15T12:00:00.000Z\",\"format\":\"text/plain\",\"text\":\"A\\tB\\r\\nÉ界😀\"}}"
+    },
+    {
+      "name": "duplicate_press_id_rejected",
+      "valid": false,
+      "wire_utf8": "{\"contract\":\"clipboard.capture_begin\",\"schema_version\":\"1.0\",\"message_class\":\"COMMAND\",\"message_id\":\"00000001-0000-4000-8000-000000000000\",\"created_at\":\"2026-10-15T12:00:00.000Z\",\"producer\":{\"component\":\"ahk.clipboard\"},\"payload\":{\"press_id\":\"00000003-0000-4000-8000-000000000000\",\"press_id\":\"00000003-0000-4000-8000-000000000000\",\"action\":\"clipboard.capture_selection\",\"target_token\":\"00000004-0000-4000-8000-000000000000\"}}"
+    },
+    {
+      "name": "unsupported_version_rejected",
+      "valid": false,
+      "wire_utf8": "{\"contract\":\"clipboard.capture_begin\",\"schema_version\":\"1.1\",\"message_class\":\"COMMAND\",\"message_id\":\"00000001-0000-4000-8000-000000000000\",\"created_at\":\"2026-10-15T12:00:00.000Z\",\"producer\":{\"component\":\"ahk.clipboard\"},\"payload\":{\"press_id\":\"00000003-0000-4000-8000-000000000000\",\"action\":\"clipboard.capture_selection\",\"target_token\":\"00000004-0000-4000-8000-000000000000\"}}"
+    }
+  ]
+}

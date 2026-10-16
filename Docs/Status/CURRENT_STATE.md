@@ -1,5 +1,34 @@
 # F7Hub Current State
 
+## H01-A — native Clipboard contracts and dormant chord adaptation (2026-10-15 candidate)
+
+**READY_FOR_INDEPENDENT_REVIEW** in isolated
+`C:/Dev/F7Hub-Clipboard-H01-A`, branch `feature/clipboard-h01-contract-cycle`,
+based on `97593f1e14d6b5efd75303886fdac3d592be71a1`. The user approved H01
+D1–D12 and corrected F1/F2 for the exact external plan SHA-256
+`c690e10017019da92ddef5cb6f7a3ffad21f3360a8f546507db3aba7d98ee9a2`.
+H01-A adds closed inert native DTO/schema/framing profiles and extends the
+existing CP-01 policy/controller with independent latest-paste exclusions,
+Win+Alt chord recognition, process creation identity and async completion.
+
+FRESH `WINDOWS_NATIVE` checks: Python native-protocol unit tests **6 PASS**;
+externally supervised AHK Policy **255 assertions PASS**, Harness **57 PASS**,
+and CP-01 Native hook/foreground fixture **123 PASS**, each exit 0 with zero
+owned survivors. The native fixture used injected Ctrl+Alt+F23/F24 events;
+Win+Alt+C/V were checked through deterministic injected key-state providers,
+not physical keyboard or production hook registration. Physical keyboard,
+installed Notepad, AltGr layout, accessibility/display variants and actual
+Clipboard effects are NOT RUN in H01-A. An initial malformed-vector unit-test
+failure was corrected and the final six tests passed; the failed attempt is
+preserved in external evidence. Candidate manifest, test results and handoff
+are under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-H01/H01-A/`.
+
+No production hotkey, authenticated IPC, session, worker, Clipboard capture or
+paste, SQLite change, S01 semantic change, or F7/Alt+F7 host change is delivered.
+H01-B through H01-F remain separate increments. The candidate is unstaged and
+uncommitted; independent review and Git integration are pending separate gates.
+Older candidate sections below retain their historical wording.
+
 ## S05 Checkpoint B — READY_FOR_INDEPENDENT_REVIEW (2026-10-15 candidate)
 
 Candidate in `C:/Dev/F7Hub-Clipboard-Phase2B-S05`, branch
