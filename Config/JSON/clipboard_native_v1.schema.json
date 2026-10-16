@@ -1,0 +1,1208 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "F7Hub inert Clipboard native profiles 1.0",
+  "description": "Structural conformance only. This schema grants no authentication, session, Clipboard or execution authority. Python enforces Unicode, true UTC dates, byte limits, depth, duplicate fields and correlation.",
+  "x-max-ordinary-document-bytes": 16384,
+  "x-max-content-document-bytes": 131072,
+  "x-max-text-utf8-bytes": 65536,
+  "x-max-depth": 6,
+  "x-max-object-members": 16,
+  "x-max-nodes": 128,
+  "x-frame-layout": "uint32_le length, uint64_le sequence, JSON bytes, 32-byte MAC; MAC authentication belongs to H01-C",
+  "$defs": {
+    "uuid": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\\.[0-9]{3}Z$"
+    }
+  },
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.native_status"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "QUERY"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ahk.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "supported_version": {
+              "const": "1.0"
+            }
+          },
+          "required": [
+            "supported_version"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.native_status_result"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "RESULT"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "f7hub.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "supported_version": {
+              "const": "1.0"
+            },
+            "ready": {
+              "type": "boolean"
+            },
+            "revision": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,18}$",
+              "x-max-value": "9223372036854775807"
+            },
+            "status": {
+              "type": "string",
+              "enum": [
+                "FAILED",
+                "READY",
+                "UNAVAILABLE"
+              ]
+            }
+          },
+          "required": [
+            "supported_version",
+            "ready",
+            "revision",
+            "status"
+          ],
+          "additionalProperties": false
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload",
+        "correlation_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.capture_begin"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "COMMAND"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ahk.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "press_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "action": {
+              "type": "string",
+              "enum": [
+                "clipboard.capture_selection",
+                "clipboard.paste_latest"
+              ]
+            },
+            "target_token": {
+              "$ref": "#/$defs/uuid"
+            }
+          },
+          "required": [
+            "press_id",
+            "action",
+            "target_token"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.capture_begin_result"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "RESULT"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "f7hub.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "press_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "const": "READY"
+                },
+                "operation_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "producer_generation": {
+                  "$ref": "#/$defs/uuid"
+                }
+              },
+              "required": [
+                "press_id",
+                "status",
+                "operation_id",
+                "producer_generation"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "press_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "BUSY",
+                    "DENIED",
+                    "FAILED",
+                    "UNAVAILABLE"
+                  ]
+                }
+              },
+              "required": [
+                "press_id",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload",
+        "correlation_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.capture_submit"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "COMMAND"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ahk.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "operation_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "producer_generation": {
+              "$ref": "#/$defs/uuid"
+            },
+            "mode": {
+              "const": "selection"
+            },
+            "observed_at": {
+              "$ref": "#/$defs/timestamp"
+            },
+            "format": {
+              "const": "text/plain"
+            },
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 65536,
+              "x-max-utf8-bytes": 65536
+            }
+          },
+          "required": [
+            "operation_id",
+            "producer_generation",
+            "mode",
+            "observed_at",
+            "format",
+            "text"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.capture_submit_result"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "RESULT"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "f7hub.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "operation_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "const": "SUCCESS"
+                },
+                "replayed": {
+                  "type": "boolean"
+                },
+                "item_id": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,18}$",
+                  "x-max-value": "9223372036854775807"
+                },
+                "event_id": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,18}$",
+                  "x-max-value": "9223372036854775807"
+                },
+                "receipt_id": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,18}$",
+                  "x-max-value": "9223372036854775807"
+                }
+              },
+              "required": [
+                "operation_id",
+                "status",
+                "replayed",
+                "item_id",
+                "event_id",
+                "receipt_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "operation_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "DENIED",
+                    "FAILED",
+                    "REPLAYED",
+                    "TIMED_OUT",
+                    "UNCERTAIN"
+                  ]
+                },
+                "replayed": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "operation_id",
+                "status",
+                "replayed"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload",
+        "correlation_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.lookup"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "QUERY"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ahk.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "query_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "operation_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "producer_generation": {
+              "$ref": "#/$defs/uuid"
+            }
+          },
+          "required": [
+            "query_id",
+            "operation_id",
+            "producer_generation"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.lookup_result"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "RESULT"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "f7hub.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "query_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "operation_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "const": "SUCCESS"
+                },
+                "item_id": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,18}$",
+                  "x-max-value": "9223372036854775807"
+                },
+                "event_id": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,18}$",
+                  "x-max-value": "9223372036854775807"
+                },
+                "receipt_id": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,18}$",
+                  "x-max-value": "9223372036854775807"
+                }
+              },
+              "required": [
+                "query_id",
+                "operation_id",
+                "status",
+                "item_id",
+                "event_id",
+                "receipt_id"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "query_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "operation_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "NOT_FOUND",
+                    "UNCERTAIN"
+                  ]
+                }
+              },
+              "required": [
+                "query_id",
+                "operation_id",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload",
+        "correlation_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.paste_prepare"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "COMMAND"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ahk.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "press_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "action": {
+              "type": "string",
+              "enum": [
+                "clipboard.capture_selection",
+                "clipboard.paste_latest"
+              ]
+            },
+            "target_token": {
+              "$ref": "#/$defs/uuid"
+            }
+          },
+          "required": [
+            "press_id",
+            "action",
+            "target_token"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.paste_prepare_result"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "RESULT"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "f7hub.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "press_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "const": "READY"
+                },
+                "prepared_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "head_token": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "item_id": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,18}$",
+                  "x-max-value": "9223372036854775807"
+                },
+                "revision": {
+                  "type": "string",
+                  "pattern": "^[1-9][0-9]{0,18}$",
+                  "x-max-value": "9223372036854775807"
+                }
+              },
+              "required": [
+                "press_id",
+                "status",
+                "prepared_id",
+                "head_token",
+                "item_id",
+                "revision"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "press_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "BUSY",
+                    "DENIED",
+                    "FAILED",
+                    "UNAVAILABLE"
+                  ]
+                }
+              },
+              "required": [
+                "press_id",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload",
+        "correlation_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.paste_consume"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "COMMAND"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ahk.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "prepared_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "head_token": {
+              "$ref": "#/$defs/uuid"
+            },
+            "item_id": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,18}$",
+              "x-max-value": "9223372036854775807"
+            },
+            "revision": {
+              "type": "string",
+              "pattern": "^[1-9][0-9]{0,18}$",
+              "x-max-value": "9223372036854775807"
+            },
+            "target_token": {
+              "$ref": "#/$defs/uuid"
+            }
+          },
+          "required": [
+            "prepared_id",
+            "head_token",
+            "item_id",
+            "revision",
+            "target_token"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.paste_consume_result"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "RESULT"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "f7hub.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "oneOf": [
+            {
+              "type": "object",
+              "properties": {
+                "prepared_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "const": "READY"
+                },
+                "text": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 65536,
+                  "x-max-utf8-bytes": 65536
+                },
+                "format": {
+                  "const": "text/plain"
+                },
+                "effect_lease_expires_at": {
+                  "$ref": "#/$defs/timestamp"
+                }
+              },
+              "required": [
+                "prepared_id",
+                "status",
+                "text",
+                "format",
+                "effect_lease_expires_at"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "prepared_id": {
+                  "$ref": "#/$defs/uuid"
+                },
+                "status": {
+                  "type": "string",
+                  "enum": [
+                    "DENIED",
+                    "FAILED",
+                    "REPLAYED",
+                    "UNCERTAIN"
+                  ]
+                }
+              },
+              "required": [
+                "prepared_id",
+                "status"
+              ],
+              "additionalProperties": false
+            }
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload",
+        "correlation_id"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "clipboard.native_observation"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "EVENT"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "ahk.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "operation_id": {
+              "$ref": "#/$defs/uuid"
+            },
+            "read_state": {
+              "type": "string",
+              "enum": [
+                "DENIED",
+                "FAILED",
+                "NOT_ATTEMPTED",
+                "SUCCESS",
+                "UNCERTAIN"
+              ]
+            },
+            "write_state": {
+              "type": "string",
+              "enum": [
+                "DENIED",
+                "FAILED",
+                "NOT_ATTEMPTED",
+                "SUCCESS",
+                "UNCERTAIN"
+              ]
+            },
+            "input_state": {
+              "type": "string",
+              "enum": [
+                "DENIED",
+                "FAILED",
+                "NOT_ATTEMPTED",
+                "SUCCESS",
+                "UNCERTAIN"
+              ]
+            },
+            "cleanup_state": {
+              "type": "string",
+              "enum": [
+                "DENIED",
+                "FAILED",
+                "NOT_ATTEMPTED",
+                "SUCCESS",
+                "UNCERTAIN"
+              ]
+            }
+          },
+          "required": [
+            "operation_id",
+            "read_state",
+            "write_state",
+            "input_state",
+            "cleanup_state"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "contract": {
+          "const": "contract.error"
+        },
+        "schema_version": {
+          "const": "1.0"
+        },
+        "message_class": {
+          "const": "ERROR"
+        },
+        "message_id": {
+          "$ref": "#/$defs/uuid"
+        },
+        "created_at": {
+          "$ref": "#/$defs/timestamp"
+        },
+        "producer": {
+          "type": "object",
+          "properties": {
+            "component": {
+              "const": "f7hub.clipboard"
+            }
+          },
+          "required": [
+            "component"
+          ],
+          "additionalProperties": false
+        },
+        "payload": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "AUTHORIZATION_DENIED",
+                "CONTRACT_VALIDATION_FAILED",
+                "EXECUTION_BOUNDARY_FAILED",
+                "INTERNAL_ERROR",
+                "PAYLOAD_LIMIT_EXCEEDED",
+                "PROVIDER_UNAVAILABLE",
+                "TIMEOUT",
+                "UNKNOWN_CONTRACT",
+                "UNSUPPORTED_VERSION"
+              ]
+            },
+            "message": {
+              "const": "The native Clipboard request failed."
+            },
+            "retryable": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "additionalProperties": false
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/uuid"
+        }
+      },
+      "required": [
+        "contract",
+        "schema_version",
+        "message_class",
+        "message_id",
+        "created_at",
+        "producer",
+        "payload",
+        "correlation_id"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

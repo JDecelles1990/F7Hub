@@ -6,7 +6,7 @@
 passed := 0
 try {
     policy := ClipboardHotkeyPolicy()
-    actions := ["clipboard.capture_selection", "clipboard.paste_active"]
+    actions := ["clipboard.capture_selection", "clipboard.paste_active", "clipboard.paste_latest"]
     for action in actions {
         for name in ["winword.exe", "WINWORD.EXE", "WinWord.Exe", "excel.exe", "EXCEL.EXE",
             "outlook.exe", "OUTLOOK.EXE", "olk.exe", "OLK.EXE", "powerpnt.exe", "POWERPNT.EXE", "PowerPnt.Exe"] {
@@ -32,9 +32,30 @@ try {
     Check(policy.Allows(actions[2], "notepad.exe"), "Paste policy independent")
     Check(!policy.Allows(actions[2], "WINWORD.EXE"), "Paste defaults preserved")
     Check(policy.Allows(actions[1], "WINWORD.EXE"), "Capture can diverge")
+    Check(!policy.Allows(actions[3], "WINWORD.EXE"), "Latest paste exclusion independent")
+    policy.SetExclusions(actions[3], ["notepad.exe"])
+    Check(!policy.Allows(actions[3], "notepad.exe"), "Latest paste replacement independent")
+    Check(policy.Allows(actions[2], "notepad.exe"), "Active paste unchanged by latest policy")
+    Check(!policy.SameTarget({Hwnd: 10, Pid: 20, Exe: "notepad.exe", Creation: "A"},
+        {Hwnd: 10, Pid: 20, Exe: "notepad.exe", Creation: "B"}), "PID reuse rejected")
+    Check(!policy.SameTarget({Hwnd: 10, Pid: 20, Exe: "notepad.exe", Creation: "A"},
+        {Hwnd: 10, Pid: 20, Exe: "notepad.exe"}), "Missing creation evidence rejected")
+    try ClipboardChord("ANYTHING")
+    catch ValueError
+        Check(true, "Unknown chord rejected")
+    else
+        Check(false, "Unknown chord accepted")
     policy := ClipboardHotkeyPolicy()
-    for action in actions
+    for action in [actions[1], actions[2]]
         TestCycles(action, policy)
+    try ClipboardPressCycleController(actions[3], "V", policy, (*) => 0)
+    catch ValueError
+        Check(true, "Latest paste cannot use CP-01 default chord")
+    else
+        Check(false, "Latest paste accepted wrong chord")
+    for pair in [["clipboard.capture_selection", "C"], ["clipboard.paste_latest", "V"]]
+        TestWinCycles(pair[1], pair[2], policy)
+    TestWinCorrections(policy)
     FileAppend("PASS assertions=" passed "`n", "*")
     ExitApp 0
 } catch Error as err {
@@ -153,4 +174,145 @@ TestCycles(action, policy) {
     fixture.ProviderThrows := false
     fixture.Down(), fixture.Up()
     Check(fixture.Count == 9, "Valid fresh cycle after failures")
+}
+
+class WinFixture {
+    __New(action, trigger, policy) {
+        this.Keys := Map("C", false, "V", false, "Ctrl", false, "Alt", false,
+            "Shift", false, "LWin", false, "RWin", false)
+        this.Context := {Hwnd: 10, Pid: 20, Exe: "notepad.exe", Creation: "A"}
+        this.Count := 0
+        this.Async := false
+        this.Throw := false
+        this.CancelOnRead := false
+        this.Trigger := trigger
+        this.Controller := ClipboardPressCycleController(action, trigger, policy,
+            ObjBindMethod(this, "Dispatch"), ObjBindMethod(this, "ReadContext"),
+            (key) => this.Keys[key], ClipboardChord("WIN_ALT"))
+    }
+    ReadContext() {
+        if this.CancelOnRead {
+            this.CancelOnRead := false
+            this.Controller.Cancel()
+        }
+        return this.Context
+    }
+    Dispatch(*) {
+        this.Count++
+        if this.Throw
+            throw Error("Injected callback failure")
+        return this.Async ? ClipboardAsyncPending() : 0
+    }
+    Down(side := "LWin") {
+        this.Keys[side] := true, this.Keys["Alt"] := true, this.Keys[this.Trigger] := true
+        return this.Controller.OnDown()
+    }
+    Up(side := "LWin") {
+        this.Keys[this.Trigger] := false, this.Keys[side] := false, this.Keys["Alt"] := false
+        return this.Controller.OnRelease()
+    }
+}
+
+TestWinCycles(action, trigger, policy) {
+    f := WinFixture(action, trigger, policy), c := f.Controller
+    Check(f.Down(), "Win+Alt+" trigger " eligible")
+    Loop 12
+        c.OnDown()
+    Check(f.Count == 0, "Held Win chord not dispatched")
+    f.Keys[trigger] := false
+    c.OnRelease()
+    Check(f.Count == 0, "Trigger release waits for Win and Alt")
+    f.Keys["Alt"] := false
+    c.OnRelease()
+    Check(f.Count == 0, "Alt release waits for Win")
+    f.Keys["LWin"] := false
+    c.OnRelease()
+    Check(f.Count == 1 && c.State == "IDLE", "Win release dispatches once")
+    Check(f.Down("RWin"), "Right Win recognized")
+    f.Keys["RWin"] := false
+    c.OnRelease()
+    f.Keys[trigger] := false, f.Keys["Alt"] := false
+    c.OnRelease()
+    Check(f.Count == 2, "Right Win different release order")
+    for extra in ["Ctrl", "Shift"] {
+        f.Down(), f.Keys[extra] := true, c.ObserveModifiers()
+        f.Keys[extra] := false, f.Up()
+        Check(f.Count == 2, "Extra " extra " cancels pending Win chord")
+    }
+    f.Down(), f.Keys["RWin"] := true, c.ObserveModifiers()
+    f.Keys["RWin"] := false, f.Up()
+    Check(f.Count == 2, "New Win side cannot retarget held chord")
+    f.Keys["Ctrl"] := true
+    Check(!f.Down(), "Reserved Ctrl+Win+Alt+" trigger " pass-through")
+    f.Up(), f.Keys["Ctrl"] := false, c.OnRelease()
+    Check(f.Count == 2, "Reserved chord never dispatches")
+    f.Keys["Ctrl"] := true, f.Keys["Alt"] := true
+    Check(!c.IsEligible(), "AltGr-like Ctrl+Alt rejected")
+    f.Keys["Ctrl"] := false, f.Keys["Alt"] := false
+    f.Context := {Hwnd: 10, Pid: 20, Exe: "notepad.exe"}
+    Check(!f.Down(), "Win chord needs creation identity")
+    f.Up()
+    Check(f.Count == 2, "Missing process creation stays denied")
+    f.Context := {Hwnd: 10, Pid: 20, Exe: "notepad.exe", Creation: "A"}
+    f.Down()
+    f.Context := {Hwnd: 10, Pid: 20, Exe: "notepad.exe", Creation: "B"}
+    f.Up()
+    Check(f.Count == 2, "Same PID new process cannot retarget")
+    f.Context := {Hwnd: 10, Pid: 20, Exe: "notepad.exe", Creation: "A"}
+    f.Down(), c.Cancel(), f.Up()
+    Check(f.Count == 2 && c.State == "IDLE", "Cancelled Win cycle cleans")
+    f.Throw := true
+    f.Down()
+    try f.Up()
+    catch Error
+        Check(true, "Callback exception propagated")
+    Check(f.Count == 3 && c.State == "IDLE", "Exception clears Win busy state")
+    f.Throw := false, f.Async := true
+    f.Down(), f.Up()
+    Check(f.Count == 4 && c.State == "DISPATCHING", "Async return holds busy ownership")
+    f.Down(), f.Up()
+    Check(f.Count == 4, "Busy async cycle does not duplicate")
+    c.Cancel()
+    Check(c.Cancelled && c.State == "DISPATCHING", "Cancellation retains async ownership")
+    Check(c.Complete() && c.State == "IDLE", "Completion releases async ownership")
+    Check(!c.Complete(), "Duplicate completion rejected")
+    f.Async := false
+    f.Down(), f.Up()
+    Check(f.Count == 5, "Fully rearmed new Win press")
+}
+
+TestWinCorrections(policy) {
+    for side in ["LWin", "RWin"] {
+        for triggerReleased in [false, true] {
+            f := WinFixture("clipboard.capture_selection", "C", policy), c := f.Controller
+            Check(f.Down(side), "Correction cycle starts with " side)
+            Loop 3
+                c.ObserveModifiers(side, true)
+            Check(IsObject(c.Pending), "Held Win repeats retain pending cycle")
+            if triggerReleased {
+                f.Keys[f.Trigger] := false
+                c.OnRelease()
+                Check(f.Count == 0, "Trigger release awaits Win transition")
+            }
+            f.Keys[side] := false
+            c.ObserveModifiers(side, false)
+            f.Keys[side] := true
+            Check(!c.ObserveModifiers(side, true), "Same-side " side " re-press invalidates pending")
+            Check(!c.OnDown(), "Restored " side " cannot rearm while held")
+            f.Up(side)
+            Check(f.Count == 0 && c.State == "IDLE", "Restored modifier cannot dispatch stale cycle")
+            Check(f.Down(side), "Fully released cycle rearms " side)
+            f.Up(side)
+            Check(f.Count == 1 && c.State == "IDLE", "Fresh " side " cycle dispatches once")
+        }
+    }
+    f := WinFixture("clipboard.capture_selection", "C", policy), c := f.Controller
+    Check(f.Down(), "Reentrant cancellation cycle starts")
+    f.CancelOnRead := true
+    f.Up()
+    Check(f.Count == 0 && c.State == "IDLE" && c.Cancelled,
+        "Cancellation inside target revalidation prevents callback")
+    Check(f.Down(), "Reentrant cancellation fully rearms")
+    f.Up()
+    Check(f.Count == 1 && c.State == "IDLE", "Fresh cycle after reentrant cancellation")
 }

@@ -1,5 +1,38 @@
 # F7Hub Phase 1B
 # AHK ↔ Python Clipboard Capture, IPC & Quick HUD Architecture Planning Instructions
+## H01-A — inert native profiles and dormant press-cycle adaptation (2026-10-15 candidate)
+
+The approved external H01 plan at `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-H01/`
+has exact SHA-256 `c690e10017019da92ddef5cb6f7a3ffad21f3360a8f546507db3aba7d98ee9a2`.
+H01-A implements its first bounded increment only. The new
+`Python/f7hub/infrastructure/clipboard_native_protocol.py` and
+`Config/JSON/clipboard_native_v1.schema.json` define exact 1.0 closed profiles
+for native status, capture begin/submit/lookup, paste prepare/consume, native
+observation and safe `contract.error`. Documents use 0B's seven required header
+fields; replies have fresh IDs and must correlate to the request. Fixed payload
+fields, roles, status sets, UUIDs, UTC millisecond timestamps and canonical
+decimal strings reject unknown or coerced values. Exact Unicode text has a
+65,536-byte UTF-8 ceiling, text-bearing documents a 131,072-byte ceiling and
+ordinary documents a 16,384-byte ceiling. Depth 6, 16 members per object and
+128 total nodes are maximums. Synthetic shared JSON vectors are in
+`Tests/Unit/fixtures/clipboard_native_v1_vectors.json`.
+
+The frame model fixes little-endian 32-bit length, 64-bit sequence, JSON bytes
+and 32 MAC bytes, with total ceiling 131,116 bytes. It performs structural
+checks only; a structurally valid MAC, even all zeroes, is not authentication.
+H01-C owns actual authenticated transport, MAC/sequence verification and
+enrollment before any JSON is trusted. No listener, session, Clipboard worker,
+capture/paste command, database effect or production hotkey is delivered here.
+The released S01 snapshot profile and its semantics remain unchanged.
+
+The existing CP-01 policy/controller add independent `paste_latest` exclusions,
+fixed Win+Alt C/V recognition, left/right release handling, original-target
+creation identity, modifier-down cancellation and an explicit asynchronous busy
+completion seam. The shared
+host still includes neither primitive. H01-F owns production registration and
+physical keyboard/native acceptance; H01-A synthetic tests make no claim of
+installed Notepad behavior, IPC readiness or user Clipboard effects.
+
 ## Phase 2B S01 — inert snapshot profile candidate (2026-10-15)
 
 S01 delivers only inert protocol validation in
