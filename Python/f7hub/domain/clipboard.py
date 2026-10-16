@@ -349,3 +349,67 @@ class ClipboardPersistenceError(RuntimeError):
             raise ClipboardValidationError("Clipboard persistence error code is invalid.")
         self.code = code
         super().__init__("Clipboard persistence: " + code.value + ".")
+
+
+class ClipboardPasteCode(str, Enum):
+    EMPTY = "EMPTY"
+    EXPIRED = "EXPIRED"
+    SOURCE_UNAVAILABLE = "SOURCE_UNAVAILABLE"
+    STALE_SOURCE = "STALE_SOURCE"
+    STALE_HEAD = "STALE_HEAD"
+    DENIED = "DENIED"
+    UNAVAILABLE = "UNAVAILABLE"
+    BUSY = "BUSY"
+    REPLAYED = "REPLAYED"
+
+
+class ClipboardPasteError(RuntimeError):
+    """Fixed content-free denial; no native effect has been authorized."""
+
+    def __init__(self, code: ClipboardPasteCode) -> None:
+        if type(code) is not ClipboardPasteCode:
+            raise ClipboardValidationError("Clipboard paste failure is invalid.")
+        self.code = code
+        super().__init__("Clipboard paste: " + code.value + ".")
+
+
+@dataclass(frozen=True, slots=True)
+class ClipboardAppendHead:
+    """Repository-to-service exact source snapshot; never a transport projection."""
+
+    append_token: str
+    item_ref: ClipboardItemRef
+    item_revision: int
+    source: AdmittedManualText = field(repr=False)
+    retention_intent: str
+    expires_at: str | None
+    is_pinned: bool
+    assessment_method: str
+    assessment_version: str
+
+
+@dataclass(frozen=True, slots=True)
+class ClipboardPasteAuthorization:
+    """Content-free binding. Values alone confer no service authority."""
+
+    prepared_id: str = field(repr=False)
+    head_token: str
+    item_ref: ClipboardItemRef
+    revision: int
+    target_token: str = field(repr=False)
+
+    def __post_init__(self) -> None:
+        for value in (self.prepared_id, self.head_token, self.target_token):
+            validate_uuid(value)
+        if type(self.item_ref) is not ClipboardItemRef:
+            raise ClipboardValidationError("Clipboard paste source reference is invalid.")
+        _validate_identity(self.revision)
+
+
+@dataclass(frozen=True, slots=True)
+class ClipboardPasteSource:
+    """One internal delivery only; authorizes no OS effect by itself."""
+
+    authorization: ClipboardPasteAuthorization = field(repr=False)
+    source: AdmittedManualText = field(repr=False)
+    effect_lease_expires_at: str

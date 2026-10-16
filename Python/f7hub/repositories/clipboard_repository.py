@@ -5,6 +5,7 @@ import hashlib
 import os
 from pathlib import Path
 import sqlite3
+from uuid import uuid4
 
 from f7hub.domain.clipboard import (
     ClipboardItemRef, ClipboardRecentItem, ClipboardRecentPage,
@@ -13,6 +14,8 @@ from f7hub.domain.clipboard import (
     ClipboardCaptureOutcome, ClipboardReceiptResult, ReplayDisposition,
     ClipboardPersistenceCode as Code, ClipboardPersistenceError, RECEIPT_DAYS,
     ClipboardConsentSnapshot,
+    ClipboardAppendHead, AdmittedManualText, ClipboardPasteCode as PasteCode,
+    ClipboardPasteError, validate_uuid, validate_token,
 )
 from f7hub.infrastructure.database import DatabaseError, database_connection, open_database
 from f7hub.repositories.settings_repository import _eligible_consent, SettingsPersistenceError
@@ -64,6 +67,68 @@ class ClipboardRepository:
             return ClipboardRecentPage(rows, len(records) > limit, limit, as_of)
         except (sqlite3.Error, OSError, DatabaseError, ValueError, TypeError, UnicodeError):
             raise ClipboardRepositoryError("Could not read Clipboard history.") from None
+
+    def _read_latest_paste_source(self, consent: ClipboardConsentSnapshot,
+                                  *, as_of: str) -> ClipboardAppendHead:
+        """Service preparation read, fenced before loading any exact source.
+
+        Visibility alone is not authorization: recheck the supplied S05 snapshot
+        against current database consent in this same read transaction. Public
+        repository projections expose no new exact-source interface.
+        """
+        validate_utc_timestamp(as_of)
+        if type(consent) is not ClipboardConsentSnapshot:
+            raise ClipboardPasteError(PasteCode.DENIED)
+        try:
+            with database_connection(self._database_path, read_only=True) as connection:
+                connection.execute("BEGIN")
+                current = _eligible_consent(connection, self.database_scope, self.profile_scope)
+                if current is None or current != consent:
+                    raise ClipboardPasteError(PasteCode.DENIED)
+                return _append_head(connection, as_of)
+        except ClipboardPasteError:
+            raise
+        except Exception:
+            raise ClipboardPasteError(PasteCode.UNAVAILABLE) from None
+
+    def _read_paste_consent(self) -> ClipboardConsentSnapshot | None:
+        """Unlike historical capture preparation, distinguish storage failure."""
+        try:
+            with database_connection(self._database_path, read_only=True) as connection:
+                connection.execute("BEGIN")
+                return _eligible_consent(connection, self.database_scope, self.profile_scope)
+        except (ValueError, TypeError, SettingsPersistenceError):
+            return None
+        except Exception:
+            raise ClipboardPasteError(PasteCode.UNAVAILABLE) from None
+
+    def _validate_latest_paste(self, expected: ClipboardAppendHead,
+                               consent: ClipboardConsentSnapshot, *, as_of: str) -> ClipboardAppendHead:
+        """Final authorization snapshot ordered against all supported SQLite writers.
+
+        No detector/caller callback or native effect runs in this reservation.
+        The service retires the one-use ticket before entering; every failure burns it.
+        """
+        validate_utc_timestamp(as_of)
+        if type(expected) is not ClipboardAppendHead or type(consent) is not ClipboardConsentSnapshot:
+            raise ClipboardPasteError(PasteCode.DENIED)
+        try:
+            with database_connection(self._database_path) as connection:
+                connection.execute("BEGIN IMMEDIATE")
+                current = _eligible_consent(connection, self.database_scope, self.profile_scope)
+                if current is None or current != consent:
+                    raise ClipboardPasteError(PasteCode.DENIED)
+                actual = _append_head(connection, as_of)
+                if actual.append_token != expected.append_token:
+                    raise ClipboardPasteError(PasteCode.STALE_HEAD)
+                if actual != expected:
+                    raise ClipboardPasteError(PasteCode.STALE_SOURCE)
+                connection.commit()
+                return actual
+        except ClipboardPasteError:
+            raise
+        except Exception:
+            raise ClipboardPasteError(PasteCode.UNAVAILABLE) from None
 
     def lookup_receipt(self, operation: ClipboardOperation, *, as_of: str) -> ClipboardReceiptResult:
         if type(operation) is not ClipboardOperation:
@@ -248,9 +313,56 @@ def _capture(connection, binding, metadata, accepted_at, temporary_expiry, recei
         item_expires_at=item["expires_at"], accepted_at=accepted_at, expires_at=receipt_expiry)
     connection.execute("INSERT INTO clipboard_operation_receipts (" + ",".join(values)
                        + ") VALUES (" + ",".join("?" for _ in values) + ")", tuple(values.values()))
+    connection.execute("""INSERT INTO clipboard_append_head
+        (singleton_id, append_token, live_item_id, item_revision) VALUES (1, ?, ?, ?)
+        ON CONFLICT(singleton_id) DO UPDATE SET append_token=excluded.append_token,
+        live_item_id=excluded.live_item_id, item_revision=excluded.item_revision""",
+        (str(uuid4()), item_id, item["revision"]))
     outcome = ClipboardCaptureOutcome(operation, item_id, event_id, duplicate, item["captured_total"],
         item["revision"], item["retention_intent"], bool(item["is_pinned"]), item["expires_at"], accepted_at, receipt_expiry)
     return ClipboardReceiptResult(ReplayDisposition.NEW_CAPTURE, outcome, ClipboardItemRef(item_id))
+
+
+def _append_head(connection, as_of):
+    # One join in the caller's coherent snapshot. No historical/recent ordering.
+    rows = connection.execute("""SELECT h.singleton_id, h.append_token, h.live_item_id,
+        h.item_revision, i.* FROM clipboard_append_head h
+        LEFT JOIN clipboard_items i ON i.clipboard_item_id=h.live_item_id""").fetchall()
+    if not rows:
+        raise ClipboardPasteError(PasteCode.EMPTY)
+    if len(rows) != 1 or rows[0]["singleton_id"] != 1:
+        raise ClipboardPasteError(PasteCode.STALE_SOURCE)
+    row = rows[0]
+    try:
+        validate_uuid(row["append_token"])
+        ClipboardItemRef(row["item_revision"])
+        if row["live_item_id"] is None or row["clipboard_item_id"] is None:
+            raise ClipboardPasteError(PasteCode.SOURCE_UNAVAILABLE)
+        ref = ClipboardItemRef(row["live_item_id"])
+        if row["revision"] != row["item_revision"]:
+            raise ClipboardPasteError(PasteCode.STALE_SOURCE)
+        if row["sensitivity"] != "PERMITTED" or row["assessment_complete"] != 1:
+            raise ClipboardPasteError(PasteCode.DENIED)
+        source = AdmittedManualText(row["raw_text"], row["media_type"], row["identity_profile"])
+        for value in (row["assessment_method"], row["assessment_version"]):
+            validate_token(value)
+        if row["is_pinned"] not in (0, 1):
+            raise ValueError()
+        if row["retention_intent"] == "TEMPORARY":
+            validate_utc_timestamp(row["expires_at"])
+            if row["is_pinned"]:
+                raise ValueError()
+            if row["expires_at"] <= as_of:
+                raise ClipboardPasteError(PasteCode.EXPIRED)
+        elif row["retention_intent"] != "SAVED" or row["expires_at"] is not None:
+            raise ValueError()
+        return ClipboardAppendHead(row["append_token"], ref, row["item_revision"], source,
+            row["retention_intent"], row["expires_at"], bool(row["is_pinned"]),
+            row["assessment_method"], row["assessment_version"])
+    except ClipboardPasteError:
+        raise
+    except (ValueError, TypeError, UnicodeError):
+        raise ClipboardPasteError(PasteCode.STALE_SOURCE) from None
 
 
 def _recent_from_row(record: sqlite3.Row) -> ClipboardRecentItem:

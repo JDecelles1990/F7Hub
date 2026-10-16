@@ -167,7 +167,7 @@ class ClipboardConsentTests(_ConsentFixture):
         bootstrap_database(path, prior)
         with database_connection(path) as connection:
             connection.execute("INSERT INTO settings_user_overrides VALUES ('clipboard.workflow_enabled','BOOLEAN','true')")
-        self.assertEqual(bootstrap_database(path, PROJECT_ROOT / 'Database/Migrations').migration_result.applied_versions, (16,))
+        self.assertEqual(bootstrap_database(path, PROJECT_ROOT / 'Database/Migrations').migration_result.applied_versions, (16, 17))
         with database_connection(path) as connection:
             self.assertEqual(connection.execute('SELECT count(*) FROM clipboard_history_consent').fetchone()[0], 0)
             self.assertEqual(connection.execute('SELECT value_text FROM settings_user_overrides').fetchone()[0], 'true')

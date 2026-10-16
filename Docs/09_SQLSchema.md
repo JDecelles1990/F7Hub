@@ -1,5 +1,28 @@
 # F7Hub SQL Schema
 
+## Clipboard H01-B — append-head physical schema
+
+[0017_clipboard_append_head.sql](../Database/Migrations/0017_clipboard_append_head.sql)
+is additive, empty by default and contains the exact DDL. `clipboard_append_head`
+has exactly these columns:
+
+| Column | Constraint / meaning |
+|---|---|
+| `singleton_id` | INTEGER PRIMARY KEY, CHECK = 1; zero or one authoritative head |
+| `append_token` | TEXT NOT NULL UNIQUE; canonical lowercase 36-character UUID shape, four fixed hyphens and 32 hexadecimal digits; service writer supplies fresh UUID4 per genuine append |
+| `live_item_id` | Nullable positive integer FK to `clipboard_items(clipboard_item_id)`, ON DELETE SET NULL |
+| `item_revision` | NOT NULL positive integer exact revision at this append |
+
+No row is seeded or backfilled. No source body, preview, hash, historical Item/
+Event reference, consent copy, trigger or authorization table is introduced.
+The singleton PK and token UNIQUE constraint provide the only required indexes;
+the singleton needs no separate live-reference lookup index. Deletion leaves the
+token/revision and nulls the reference. Runtime checks reject missing/deleted,
+expired, mismatched-revision, malformed and ineligible source state without fallback.
+Previously released migrations 0001–0016 remain byte-for-byte unchanged.
+Transaction/upgrade behavior belongs to
+[Database Architecture](07_Database.md#clipboard-h01-b--atomic-append-head-and-final-paste-reservation-2026-10-15-candidate).
+
 ## Clipboard S05 B — consent physical schema (2026-10-15 candidate)
 
 [Migration 0016](../Database/Migrations/0016_clipboard_history_consent.sql) adds

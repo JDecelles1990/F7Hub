@@ -1,5 +1,21 @@
 # F7Hub ChangeLog
 
+## 2026-10-15 — Clipboard H01-B implementation candidate
+
+- Added migration 0017 for an empty-on-upgrade, content-free append head, with
+  deletion-safe NULL live reference and exact genuine-append UUID/revision.
+- Extended the existing S05 transaction: Item/Event/receipt/head are atomic;
+  old receipt replay cannot move the head. Released migrations are unchanged.
+- Added internal exact-head reads and one-use prepare/consume authorization with
+  consent/privacy/expiry/source fences, no fallback, bounded generation/effect
+  lifetimes and safe failure/uncertainty behavior. No native effect is activated.
+- Added synthetic migration, rollback, replay, competing writer, exact-content,
+  one-use consume, revocation, deletion, expiry, contention and failure coverage.
+  Updated affected full-chain migration expectations only in existing tests.
+- Synchronized affected database/domain/Python owners. Exact candidate, validation
+  and independent-review handoff are external under Clipboard-H01/H01-B; current
+  readiness belongs to CURRENT_STATE. This entry grants no review or integration.
+
 ## 2026-10-15 — S05 Checkpoint B implementation candidate
 
 - Added empty-by-default migration 0016 for content-free manual consent; released

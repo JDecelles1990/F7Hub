@@ -1,5 +1,74 @@
 # F7Hub Python Architecture
 
+## Clipboard H01-B — internal latest-paste prepare and consume (2026-10-15 candidate)
+
+The existing domain, `ClipboardService` and `ClipboardRepository` own this
+increment. No duplicate service, writer, Settings store or runtime composition is
+introduced. Domain DTOs remain independent of SQLite, Qt and native protocols.
+`ClipboardAppendHead` is an internal repository-to-service exact-source snapshot;
+it is never a Recent preview or an IPC response. Its source is excluded from repr.
+
+H01-B security correction F1 removes the public `get_append_head` plaintext
+accessor. The internal `_read_latest_paste_source(consent, as_of=...)` reuses the
+S05 eligibility predicate in its own coherent read transaction and requires the
+typed prepared consent snapshot to equal current scoped database evidence before
+loading source. The final writer fence enforces the same current consent rule.
+An internal method name grants no authority; stale, missing, mismatched or revoked
+evidence cannot authorize either read. Supported application-facing exact-source
+delivery remains the service's one-use consume, including full-source privacy
+assessment. Existing Recent previews and receipt metadata retain their contracts.
+
+`prepare_latest_paste(context, press_id=..., target_token=...)` requires the exact
+live service-issued context and canonical UUID press/target identities. It verifies
+the real S05 composition, current consent/scope/Settings and head eligibility,
+reassesses the full original source, and validates the unchanged binding again.
+It returns only `ClipboardPasteAuthorization`: random UUID4 prepared identity,
+head token, typed Item reference, revision and target token; no content. One ticket
+may be active. Failed/used press identities cannot retarget later history.
+
+The prepared ticket inherits the existing ingress-generation deadline: at most
+300 monotonic seconds from context issuance, never renewed by prepare/replay.
+Preparation must complete within two seconds including service/database waits.
+The combined capture-operation and paste-press tracking ceiling is 1024; capacity
+exhaustion fences the context before dropping tracking. Restart/rekey fences old
+tickets. Subsequent service boundaries observe external invalidations directly
+from SQLite; no separately maintained latest pointer confers authority.
+
+`consume_latest_paste(context, authorization)` validates the exact issuing context
+and binding, retires the ticket before fallible work, rechecks consent/source/
+retention, and repeats authoritative source assessment outside the writer. The
+repository's final immediate reservation coherently checks current consent,
+Settings, head and exact source against that assessed snapshot. No detector,
+caller callback, content mutation or native effect runs under the reservation.
+After release, the service checks time again before returning the exact
+`ClipboardPasteSource` internally. Its effect deadline is no later than consume
+request entry + one second, the generation deadline or known Item expiry.
+Waiting, replay and delayed responses cannot renew it. Unknown/used tickets and
+all failures export no source; a failed consume cannot later become successful.
+
+Security correction F2 constructs response objects and prepared state before the
+final SQLite authorization fence, then samples time and checks all applicable
+deadlines immediately before publishing/returning those existing objects. An
+expired prepare never publishes its ticket; consume remains spent on denial.
+Consent/source changes during construction are observed by the final fence;
+the approved ordering for changes committed after that fence is unchanged.
+No response construction follows the final successful time check. This in-process
+check cannot guarantee scheduling or delivery timing after return; future native
+effect consumers must independently honor the supplied expiry. No SQLite
+transaction spans native effects, and the 5000-ms busy timeout is unchanged.
+
+Fixed content-free failures distinguish EMPTY, EXPIRED, SOURCE_UNAVAILABLE,
+STALE_SOURCE, STALE_HEAD, DENIED, UNAVAILABLE, BUSY and REPLAYED. No scan selects
+an earlier Item. Repr and routine exceptions contain no raw source. Full text is
+released only by the internal one-use consume return, with no transport endpoint.
+
+Final consume is the authorization linearization point. A revocation/deletion
+committed first denies; a later one cannot retroactively cancel an already
+authorized in-flight effect. This is no OS paste-success guarantee. H01-C–F still
+own authenticated delivery, native workers, target verification and activation;
+F1/F2 source/modern-Notepad gates are unchanged. Details belong to
+[Clipboard 1A](Planning/Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md#h01-b--durable-latest-source-and-one-use-authorization-2026-10-15-candidate).
+
 ## Clipboard S05 B — trusted Setup and real in-process admission (2026-10-15 candidate)
 
 This candidate succeeds the earlier B-blocked status below; historical A and D02
