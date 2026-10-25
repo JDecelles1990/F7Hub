@@ -768,6 +768,9 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         cls.application = QApplication.instance() or QApplication([])
 
     def setUp(self):
+        startup = patch('f7hub.services.mochi_service.MochiService.automatic_start', return_value=False)
+        startup.start()
+        self.addCleanup(startup.stop)
         self.temp = tempfile.TemporaryDirectory()
         self.path = Path(self.temp.name) / "ticket-knowledge.db"
         self.boot()
@@ -793,7 +796,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         if self.panel._dialog:
             self.panel._dialog.close()
         self.window.workspace._clear_drafts()
-        self.window.close()
+        self.window.request_exit()
         self.window.deleteLater()
         self.application.processEvents()
 
@@ -962,7 +965,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 15)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 17)
 
     def test_navigation_respects_unsaved_ticket_activity(self):
         self.link()
@@ -1003,7 +1006,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 15)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 17)
 
     def test_unlink_candidate_reappears_and_relink_has_new_timestamp_and_one_row(self):
         with patch("f7hub.services.ticket_knowledge_service.datetime") as clock:

@@ -29,6 +29,9 @@ class ScriptCatalogFlowTests(unittest.TestCase):
         cls.application = QApplication.instance() or QApplication([])
 
     def setUp(self):
+        startup = patch('f7hub.services.mochi_service.MochiService.automatic_start', return_value=False)
+        startup.start()
+        self.addCleanup(startup.stop)
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
@@ -47,7 +50,7 @@ class ScriptCatalogFlowTests(unittest.TestCase):
 
     def tearDown(self):
         self.wait_idle()
-        self.window.close()
+        self.window.request_exit()
         self.window.deleteLater()
         self.application.processEvents()
 
@@ -408,7 +411,7 @@ class ScriptCatalogFlowTests(unittest.TestCase):
             self.assertEqual(tuple(connection.iterdump()), before)
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-        self.window.close()
+        self.window.request_exit()
         self.window.deleteLater()
         self.application.processEvents()
         self.context = bootstrap_application(project_root=self.root, database_path=self.database)

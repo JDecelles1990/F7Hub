@@ -145,7 +145,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
                         self.assertEqual(window.pages.count(), original_count + 1)
             finally:
                 self.wait_window_idle(window)
-                self.assertTrue(window.close())
+                self.assertTrue(window.request_exit())
 
     def wait_window_idle(self, window):
         self.application.processEvents()
@@ -308,7 +308,7 @@ class ApplicationBootstrapTests(unittest.TestCase):
                 while window.runner.busy and time.monotonic() < deadline:
                     QTest.qWait(5)
                 self.assertFalse(window.runner.busy)
-                self.assertTrue(window.close())
+                self.assertTrue(window.request_exit())
                 window.deleteLater()
             self.application.processEvents()
             return 0

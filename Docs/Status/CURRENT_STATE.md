@@ -1,5 +1,41 @@
 # F7Hub Current State
 
+## LIFE-01 — IMPLEMENTATION_BLOCKED (2026-10-25 recovery)
+
+The existing unstaged, uncommitted candidate remains in
+`C:\Dev\F7Hub-Clipboard-LIFE01` on
+`feature/clipboard-life01-tray-lifecycle`, with HEAD/base
+`b779d0bb0589b569b1d75a0bcb445dfaee967243`. Recovery reused this worktree and
+preserved the canonical checkout and all original protected registrations.
+
+The candidate adds one Python-owned tray coordinator, retained-window hide/Open,
+shared guarded explicit Exit and idempotent existing shutdown cleanup. It adds
+no Clipboard acquisition, monitoring, privacy rule, persistence or migration.
+
+The required native gate remains incomplete. The latest retained
+`native-tray-keyboard.result.json` reports FAIL waiting for accepted Exit from
+the tray while the main window is hidden. The menu was observed visible and
+owned foreground input; accepted shutdown and the tray Exit action signal were
+not observed. Root cause is NOT VERIFIED. Earlier native successes do not fill
+that gap. Recovery does not repeat native input without a demonstrated
+correction. Physical hardware input and alternate DPI remain NOT RUN.
+
+Recovery verifies saved focused/broad results and validates only the affected
+fixtures once. That fresh regression reached its 480-second supervision limit
+before completion; its suite outcome is INCOMPLETE / BLOCKED, not PASS, and no
+retry was made. Shutdown-intended fixture calls use explicit Exit, unrelated
+integration fixtures suppress Mochi startup, and six migration-count assertions
+match the unchanged 17-migration baseline. The speculative Script Catalog
+worker-yield addition is excluded because a LIFE-01 scheduling requirement was
+not demonstrated. Exact commands, final results, candidate manifest, ignored
+path inventory and preservation comparison are in the external checkpoint
+directory `LIFE-01-20261025/recovery-20261025T111350Z` under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints`.
+
+Delivery lifecycle: BLOCKED with TESTING interrupted by the native acceptance
+gap. Independent review and all Git integration operations remain pending.
+The dated RAM-01A candidate records below are retained historical snapshots.
+
 ## Clipboard RAM-01A R1 — READY_FOR_INDEPENDENT_REREVIEW (2026-10-25)
 
 RAM-01A is an unstaged, uncommitted implementation candidate on

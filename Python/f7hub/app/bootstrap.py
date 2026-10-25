@@ -7,6 +7,7 @@ from pathlib import Path
 from PySide6.QtWidgets import QApplication
 
 from f7hub.gui.main_window import MainWindow
+from f7hub.gui.application_lifecycle import ApplicationLifecycle
 from f7hub.infrastructure.database import BootstrapResult, bootstrap_database
 from f7hub.infrastructure.database_paths import resolve_development_database_path, local_profile_scope, DatabasePathError
 from f7hub.repositories.ticket_repository import TicketRepository
@@ -105,7 +106,6 @@ def bootstrap_application(
     companies = CompanyRepository(resolved_database_path)
     contacts = ContactRepository(resolved_database_path)
     mochi_service = MochiService(MochiGateway(resolved_project_root, QApplication.instance()))
-    QApplication.instance().aboutToQuit.connect(mochi_service.close)
     reference_service = TicketReferenceService(
         companies, contacts,
         categories,
@@ -123,6 +123,8 @@ def bootstrap_application(
         mochi_service=mochi_service,
         altf7hub_service=AltF7HubService(WindowsAltF7HubGateway(resolved_project_root)),
     )
+
+    ApplicationLifecycle(main_window)
 
     return ApplicationContext(
         database_path=resolved_database_path,

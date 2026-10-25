@@ -31,6 +31,9 @@ class ClipboardSetupFlowTests(unittest.TestCase):
         cls.application = QApplication.instance() or QApplication([])
 
     def setUp(self):
+        startup = patch('f7hub.services.mochi_service.MochiService.automatic_start', return_value=False)
+        startup.start()
+        self.addCleanup(startup.stop)
         self.temporary = tempfile.TemporaryDirectory()
         self.addCleanup(self.temporary.cleanup)
         self.path = Path(self.temporary.name) / "selected.db"
@@ -179,7 +182,7 @@ class ClipboardSetupFlowTests(unittest.TestCase):
                 self.assertTrue(window.show_clipboard())
                 self.assertEqual(workspace.findChildren(ClipboardSetup), [workspace.setup])
             finally:
-                window.close()
+                window.request_exit()
                 window.deleteLater()
                 self.application.processEvents()
 
@@ -226,7 +229,7 @@ class ClipboardSetupFlowTests(unittest.TestCase):
                     self.assertEqual(validate_database_integrity(connection), (("ok",), ()))
             finally:
                 workspace.setup.cancel()
-                window.close()
+                window.request_exit()
                 window.deleteLater()
                 self.application.processEvents()
 

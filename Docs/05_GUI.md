@@ -1,5 +1,34 @@
 # F7Hub GUI Design
 
+## LIFE-01 — system tray lifecycle (2026-10-25 implementation candidate)
+
+The composed Python application retains its existing MainWindow when X is used.
+X hides without draft confirmation, Clipboard leave/discard, or Mochi cleanup.
+The retained tray icon offers **Open F7Hub** and **Exit F7Hub**; single/double
+activation and Open restore the same window, page, drafts and usable editor focus.
+Windows may place the icon behind the notification-area overflow arrow.
+
+Before hiding, the application checks tray availability, installed nonempty icon
+geometry and the retained enabled Open menu route. If those checks fail, the
+window remains visible with recovery guidance. A one-second Qt timer restores a
+hidden window when that route disappears. These runtime checks complement native
+validation; availability alone does not prove the actual Open path works.
+
+The existing Settings utility Exit command, Quit shortcut and tray Exit share one
+guarded coordinator. Exit presents the retained window, applies existing pending
+operation and Ticket/Clipboard draft checks, and preserves state on Cancel.
+Accepted Exit releases existing resources once and quits the application, even
+with last-window automatic quitting disabled. Windows may refuse foreground
+activation; a visible restored window/taskbar remains available in that case.
+
+This candidate adds no automatic Clipboard monitoring or persistence. Retained
+Windows smoke evidence uses synthetic data and OS-injected input at 1000×700,
+96 DPI. Earlier hide/restore and Exit checks passed, but the latest hidden-window
+tray Exit attempts failed to observe accepted shutdown. Their root cause remains
+NOT VERIFIED; final native acceptance is incomplete and LIFE-01 is
+IMPLEMENTATION_BLOCKED. Physical hardware input and other DPI are NOT RUN.
+Independent review and integration remain separate gates.
+
 ## S05 Clipboard Setup consent status (2026-10-15 candidate)
 
 The existing retained Setup surface distinguishes saved workflow preference from
