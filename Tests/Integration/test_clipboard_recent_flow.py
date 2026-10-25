@@ -50,6 +50,12 @@ class ClipboardRecentFlowTests(ClipboardDatabaseTestCase):
 
 
 class ClipboardRecentGuiFlowTests(ClipboardDatabaseTestCase):
+    def setUp(self):
+        super().setUp()
+        startup = patch('f7hub.services.mochi_service.MochiService.automatic_start', return_value=False)
+        startup.start()
+        self.addCleanup(startup.stop)
+
     @classmethod
     def setUpClass(cls):
         cls.application = QApplication.instance() or QApplication([])
@@ -91,14 +97,14 @@ class ClipboardRecentGuiFlowTests(ClipboardDatabaseTestCase):
                     self.assertFalse(window.runner.busy)
                     self.assertIs(window.pages.currentWidget(), window.knowledge_workspace)
                     self.assertTrue(clipboard.loading)
-                    self.assertFalse(window.close())
+                    self.assertFalse(window.request_exit())
                     gate.set()
                     self.wait_idle(window)
                     self.assertIs(window.pages.currentWidget(), window.knowledge_workspace)
             finally:
                 gate.set()
                 self.wait_idle(window)
-                window.close()
+                window.request_exit()
                 window.deleteLater()
                 self.application.processEvents()
 
@@ -168,7 +174,7 @@ class ClipboardRecentGuiFlowTests(ClipboardDatabaseTestCase):
                     self.assertEqual(validate_database_integrity(connection), (("ok",), ()))
             finally:
                 self.wait_idle(window)
-                window.close()
+                window.request_exit()
                 window.deleteLater()
                 self.application.processEvents()
 

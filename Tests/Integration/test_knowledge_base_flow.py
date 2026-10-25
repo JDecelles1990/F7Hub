@@ -33,6 +33,9 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         cls.application = QApplication.instance() or QApplication([])
 
     def setUp(self) -> None:
+        startup = patch('f7hub.services.mochi_service.MochiService.automatic_start', return_value=False)
+        startup.start()
+        self.addCleanup(startup.stop)
         self.temporary_directory = tempfile.TemporaryDirectory()
         self.path = Path(self.temporary_directory.name) / "knowledge-flow.db"
         self.context = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.path)
@@ -46,7 +49,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
         self.wait_idle(self.window.runner)
         self.window.workspace._clear_drafts()
         self.window.ticket_create_widget.reset_form()
-        self.window.close()
+        self.window.request_exit()
         self.window.deleteLater()
         self.application.processEvents()
         self.temporary_directory.cleanup()
@@ -392,7 +395,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
             self.assertEqual(restored_workspace.article.article_code, "KB0002")
             self.assertEqual(restored_workspace.detail_body.toPlainText(), "Run SMTPAUTHCHECK before retrying.")
         finally:
-            restored.close()
+            restored.request_exit()
             restored.deleteLater()
             self.application.processEvents()
 
@@ -541,7 +544,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
             self.assertEqual(self.history(), saved_history)
         finally:
             self.wait_idle(restored.runner)
-            restored.close()
+            restored.request_exit()
             restored.deleteLater()
             self.application.processEvents()
         self.create_through_dialog("KB0002", "Another synthetic article")
@@ -680,7 +683,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
             self.assertEqual(tuple(connection.iterdump()), dump_before)
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 15)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 17)
 
         reconstructed = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.path)
         restored = reconstructed.main_window
@@ -705,7 +708,7 @@ class KnowledgeBaseFlowTests(unittest.TestCase):
             self.assertEqual(reopened.detail_body.toPlainText(), expected[1][2])
             reopened.close()
         finally:
-            restored.close()
+            restored.request_exit()
             restored.deleteLater()
             self.application.processEvents()
 

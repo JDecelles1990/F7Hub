@@ -1,5 +1,19 @@
 # F7Hub ChangeLog
 
+## 2026-10-25 — LIFE-01 system tray lifecycle candidate
+
+The composed PySide6 application now retains the main window on X, with one tray
+Open/Exit route and visible recovery when that route is unavailable or lost.
+Main-window Exit, Quit and tray Exit use shared existing draft/pending guards;
+Cancel preserves state and accepted Exit performs existing cleanup once before
+quitting. No automatic Clipboard monitoring, native acquisition, persistence or
+RAM-01A domain change is included. Validation and exact candidate identities are
+recorded in the external LIFE-01 implementation evidence. This entry records an
+implementation candidate; independent review/publication/integration are pending.
+Recovery preserved prior failures and reports IMPLEMENTATION_BLOCKED because
+final native hidden-window tray Exit has no applicable passing evidence. No
+new monitoring or native Clipboard behavior is delivered.
+
 ## 2026-10-25 — Clipboard RAM-01A R1 bounded correction
 
 - Converted recoverable admission-construction `MemoryError` to the existing

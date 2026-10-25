@@ -1,5 +1,45 @@
 # F7Hub Python Architecture
 
+## LIFE-01 — retained-window application lifecycle (2026-10-25 candidate)
+
+Implementation handoff: **IMPLEMENTATION_BLOCKED**. Passing deterministic checks
+do not establish final native tray Exit while the main window is hidden. The
+latest retained native attempt failed that assertion; its predicate/root cause
+is NOT VERIFIED. See [current state](Status/CURRENT_STATE.md) for recovery status.
+
+`app/bootstrap.py` composes one `gui/application_lifecycle.py`
+`ApplicationLifecycle` for the existing MainWindow. The window owns the QObject;
+the coordinator retains one QSystemTrayIcon, its menu/actions and recovery timer.
+`app/main.py` starts it before showing the composed window and entering the event
+loop. Starting twice does not create another icon or signal connection.
+No second process, service, application or MainWindow is introduced.
+
+MainWindow keeps existing pending-operation and draft negotiation in
+`confirm_exit()` and existing Mochi/dialog release in idempotent
+`cleanup_shutdown()`. Its explicit Exit QAction calls `request_exit()`, which
+delegates to the coordinator. Routine close events ignore destruction and ask the
+coordinator to hide; they never invoke leave/discard or shutdown. Standalone
+MainWindow widget hosts without application composition retain guarded close
+semantics. The application disables automatic last-window quitting and calls
+QApplication.quit once after accepted explicit Exit. `aboutToQuit` releases the
+tray and invokes the same idempotent cleanup as a final lifecycle fallback.
+
+All coordination remains on the Qt GUI thread. Reentrant/accepted Exit is fenced;
+existing operation guards remain authoritative, including workspace pending
+flags during runner callbacks. Tray Open restores maximized state where relevant,
+clears minimization, and attempts to restore retained editor focus. Failed
+foreground activation does not remove the visible recovery path. Missing tray,
+empty geometry, missing/disabled Open route, or later route loss retains/restores
+a visible window. Windows overflow may require opening the arrow then the icon.
+Native evidence must exercise that real route rather than treating Qt capability
+or geometry as proof of native activation.
+
+This change introduces a GUI/application lifetime boundary, with no new database,
+repository, filesystem write, process launcher, Clipboard observer or monitoring
+authorization. Future monitoring fencing/helper release/volatile-history cleanup
+must join accepted shutdown when separately composed; LIFE-01 creates none of
+those components and leaves RAM-01A behavior unchanged.
+
 ## Clipboard RAM-01A — volatile history domain candidate (2026-10-25)
 
 [RAM-00](Planning/Clipboard/RAM01_Volatile_History_And_Promotion_Contract.md)

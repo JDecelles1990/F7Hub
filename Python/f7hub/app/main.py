@@ -49,6 +49,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             )
             return 1
 
+        context.main_window.lifecycle.start()
         context.main_window.show()
         LOGGER.info("Application startup completed.")
         return application.exec()

@@ -56,6 +56,8 @@ class MainWindow(QMainWindow):
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
+        self.lifecycle = None
+        self._shutdown_complete = False
         self.setObjectName("mainWindow")
         self.setWindowTitle("F7Hub")
         available = self.screen().availableGeometry()
@@ -137,7 +139,7 @@ class MainWindow(QMainWindow):
         if quit_shortcut.isEmpty() and sys.platform == "win32":
             quit_shortcut = QKeySequence("Ctrl+Q")
         exit_action.setShortcut(quit_shortcut)
-        exit_action.triggered.connect(self.close)
+        exit_action.triggered.connect(self.request_exit)
         # Parentage retains the command; association registers its shortcut
         # independently of the utility menu's popup visibility.
         self.addAction(exit_action)
@@ -839,17 +841,22 @@ class MainWindow(QMainWindow):
         self.pages.setCurrentWidget(self.knowledge_workspace)
         self.knowledge_workspace.open_article_by_id(article_id)
 
-    def closeEvent(self, event):
+    def request_exit(self):
+        """All explicit Exit commands enter the application lifecycle owner."""
+        if self.lifecycle is not None:
+            return self.lifecycle.request_exit()
+        return self.close()  # Standalone widget hosts retain their close contract.
+
+    def confirm_exit(self):
+        """Negotiate shutdown without releasing drafts on cancellation."""
         if (self._script_run_pending or self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
                 or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading)
                 or (self.clipboard_workspace is not None
                     and (self.clipboard_workspace.loading or self.clipboard_workspace.settings_pending))):
-            self.statusBar().showMessage("An operation is finishing. Please close again when it completes.")
-            event.ignore()
-            return
+            self.statusBar().showMessage("An operation is finishing. Please try Exit again when it completes.")
+            return False
         if not self.workspace.confirm_discard():
-            event.ignore()
-            return
+            return False
         if self.ticket_create_widget.has_draft():
             answer = QMessageBox.question(
                 self, "Unsaved new ticket", "Discard the unsaved new ticket?",
@@ -857,13 +864,30 @@ class MainWindow(QMainWindow):
                 QMessageBox.StandardButton.Cancel,
             )
             if answer != QMessageBox.StandardButton.Discard:
-                event.ignore()
-                return
+                return False
         if not self._leave_clipboard():
-            event.ignore()
+            return False
+        return True
+
+    def cleanup_shutdown(self):
+        """Release existing owned resources once after accepted shutdown."""
+        if self._shutdown_complete:
             return
         if self.mochi_service is not None:
             if self._mochi_dialog is not None:
                 self._mochi_dialog.close()
             self.mochi_service.close()
+        self._shutdown_complete = True
+
+    def closeEvent(self, event):
+        if self.lifecycle is not None:
+            if not self.lifecycle.accepted:
+                event.ignore()
+                self.lifecycle.hide()
+                return
+        else:
+            if not self.confirm_exit():
+                event.ignore()
+                return
+            self.cleanup_shutdown()
         super().closeEvent(event)

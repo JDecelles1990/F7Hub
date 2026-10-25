@@ -27,6 +27,9 @@ class QuickContactFlowTests(unittest.TestCase):
         cls.app = QApplication.instance() or QApplication([])
 
     def setUp(self):
+        startup = patch('f7hub.services.mochi_service.MochiService.automatic_start', return_value=False)
+        startup.start()
+        self.addCleanup(startup.stop)
         self.temp = tempfile.TemporaryDirectory()
         self.path = Path(self.temp.name) / "quick-contact.db"
         bootstrap_database(self.path, Path(__file__).resolve().parents[2] / "Database/Migrations")
@@ -68,7 +71,7 @@ class QuickContactFlowTests(unittest.TestCase):
             self.form._company_dialog.reject()
         self.form.reset_form()
         self.window.workspace._clear_drafts()
-        self.window.close()
+        self.window.request_exit()
         self.window.deleteLater()
         self.app.processEvents()
         self.temp.cleanup()
@@ -114,7 +117,7 @@ class QuickContactFlowTests(unittest.TestCase):
             self.assertEqual(tuple(row), (company_id, contact_name, 1, "alice@example.invalid"))
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 15)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 17)
         self.window.show_new_ticket()
         self.window.show_tickets()
         self.wait_idle()
@@ -176,7 +179,7 @@ class QuickContactFlowTests(unittest.TestCase):
                 QTest.keyClick(dialog, Qt.Key.Key_Escape)
                 dialog.reject()
                 dialog.close()
-                self.window.close()
+                self.window.request_exit()
                 self.assertTrue(dialog.isVisible())
                 self.assertTrue(self.window.isVisible())
                 QTimer.singleShot(0, lambda: heartbeats.append(True))
@@ -303,7 +306,7 @@ class QuickContactFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone()[0], "ok")
             self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
-            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 15)
+            self.assertEqual(connection.execute("SELECT count(*) FROM schema_migrations").fetchone()[0], 17)
 
     def test_inactive_company_after_commit_recovers_and_saves(self):
         self.unavailable_company_recovery()

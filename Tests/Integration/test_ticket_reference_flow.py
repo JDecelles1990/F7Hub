@@ -26,6 +26,9 @@ class TicketReferenceFlowTests(unittest.TestCase):
         cls.app = QApplication.instance() or QApplication([])
 
     def setUp(self):
+        startup = patch('f7hub.services.mochi_service.MochiService.automatic_start', return_value=False)
+        startup.start()
+        self.addCleanup(startup.stop)
         self.temp = tempfile.TemporaryDirectory()
         self.path = Path(self.temp.name) / "reference-flow.db"
         bootstrap_database(self.path, Path(__file__).resolve().parents[2] / "Database/Migrations")
@@ -50,7 +53,7 @@ class TicketReferenceFlowTests(unittest.TestCase):
         self.wait_idle()
         self.form.reset_form()
         self.window.workspace._clear_drafts()
-        self.window.close()
+        self.window.request_exit()
         self.window.deleteLater()
         self.app.processEvents()
         self.temp.cleanup()
@@ -263,7 +266,7 @@ class TicketReferenceFlowTests(unittest.TestCase):
                 self.assertTrue(ticks)
                 self.assertTrue(self.window.runner.busy)
                 self.assertFalse(self.window.pages.isEnabled())
-                self.assertFalse(self.window.close())
+                self.assertFalse(self.window.request_exit())
             finally:
                 gate.set()
                 self.wait_idle()
