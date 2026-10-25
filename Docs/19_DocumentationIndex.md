@@ -1,5 +1,12 @@
 # F7Hub Documentation Index
 
+## Clipboard RAM-00 successor — 2026-10-25
+
+Read the [RAM-01 Volatile History and Explicit Promotion contract](Planning/Clipboard/RAM01_Volatile_History_And_Promotion_Contract.md) for the owner-approved 100-entry/12-hour RAM history, memory-based eviction, session opt-in, supervised helper, X-to-tray prerequisite, native feasibility/harness gates and separate durable Save architecture.
+
+The detailed owner records compatibility with 1A/1B/1C and Foundation 0A/0D/0E, the protected Hybrid B-01 exception, ordered slices and review boundaries. This is a documentation candidate pending independent review/integration, not implemented monitoring, tray behavior or durable Save.
+
+
 ## Documentation reconciliation governance (2026-10-15)
 
 Record approved requirements once in their existing owner; use short contracts,

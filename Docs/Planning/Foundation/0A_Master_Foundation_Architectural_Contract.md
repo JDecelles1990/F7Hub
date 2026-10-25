@@ -1,5 +1,12 @@
 # F7Hub Phase 0A
 
+## RAM-00 successor — owner-approved Clipboard direction (2026-10-25)
+
+The owner accepted the [RAM-01 successor](../Clipboard/RAM01_Volatile_History_And_Promotion_Contract.md), superseding DR01-04's automatic seven-day durable history with bounded 100-entry/12-hour process-local RAM collection, session opt-in and separate explicit durable saving. Preserve DR01-06/10's reviewed promotion, provenance and deletion boundaries. The successor records supervised-helper, tray, native-feasibility and storage-security gates.
+
+Only the identified Clipboard direction is superseded. Foundation ownership, vocabulary, security and existing manual persistence contracts remain. This records completed owner architecture acceptance; the RAM-00 document candidate still requires independent review and integration. Historical approval/implementation records below are preserved unchanged.
+
+
 ## Documentation Reconciliation 01 — decision register (2026-10-15)
 
 This compact extension of the existing 0A register indexes the USER's approved

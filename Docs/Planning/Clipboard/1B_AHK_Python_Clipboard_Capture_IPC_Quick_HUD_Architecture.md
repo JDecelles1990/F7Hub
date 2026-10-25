@@ -1,4 +1,11 @@
 # F7Hub Phase 1B
+
+## RAM-00 successor — owner-approved direction (2026-10-25)
+
+Consume the [RAM-01 contract](RAM01_Volatile_History_And_Promotion_Contract.md) for Python-owned passive observation through an application-owned supervised helper. LIFE-01 tray delivery, independent harness preflight and installed Windows/PySide6 native feasibility precede RAM-01B1. Clipboard ownership is not proof of the originating application; proposed acquisition/processing deadlines and helper memory remain unmeasured.
+
+Generation-bound bounded IPC, stale rejection, no raw-text logging, cancellation and verified cleanup require their own reviewed contract. Do not enlarge S01/H01 wire profiles, reuse Hybrid B-01, call the manual SQLite writer or advance H01-B's append head. Existing AHK/manual capture, hotkey, paste and transport gates remain unchanged. This documentation candidate activates nothing; earlier reports retain historical meaning.
+
 # AHK ↔ Python Clipboard Capture, IPC & Quick HUD Architecture Planning Instructions
 ## H01-A — inert native profiles and dormant press-cycle adaptation (2026-10-15 candidate)
 

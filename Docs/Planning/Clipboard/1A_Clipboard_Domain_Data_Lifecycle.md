@@ -1,5 +1,12 @@
 # F7Hub Phase 1A
 
+## RAM-00 successor — owner-approved direction (2026-10-25)
+
+For automatic collection and explicit promotion, consume the [RAM-01 contract](RAM01_Volatile_History_And_Promotion_Contract.md). The owner-approved successor replaces automatic seven-day durable history with up to 100 process-local RAM entries, at most 12 hours, a 4 MiB item ceiling and a 256 MiB accounted history budget; memory eviction may retain fewer than 100 large documents. No silent truncation.
+
+Session-only monitoring consent and Volatile Clipboard privacy admission are separate from S05/manual SQLite capture. Explicit Saved Snippets use separate Save authorization, immutable revisions and until-deleted retention. Legacy manual Items/Events/receipts, seven-day manual retention and H01-B append-head semantics remain unchanged. This documentation candidate awaits independent review/integration; no runtime capability is activated. Earlier dated decisions/reports below retain historical meaning.
+
+
 ## H01-B — durable latest source and one-use authorization (2026-10-15 candidate)
 
 This is increment 2 of the user-approved H01 D1–D12 plan, SHA-256

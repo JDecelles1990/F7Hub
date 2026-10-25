@@ -1,5 +1,12 @@
 # F7Hub Phase 0E — Foundation Architecture Reconciliation
 
+## RAM-00 reconciliation successor (2026-10-25)
+
+For changed Clipboard assumptions, consume the owner-approved [RAM-01 contract](../Clipboard/RAM01_Volatile_History_And_Promotion_Contract.md): up to 100 entries/12 hours in RAM, session monitoring opt-in, an application-owned supervised helper, verified X-to-tray lifecycle and separately authorized Saved Snippets with immutable revisions.
+
+The successor explicitly reconciles 0A DR01-04, 0D's automatic-history references and Clipboard 1A/1B/1C; shared Foundation semantics and legacy manual consent/persistence remain. Native feasibility, measured helper limits and storage-security review are future gates, not established runtime evidence. This RAM-00 candidate is unintegrated and pending independent review. Original document-control/approval snapshots below are preserved as history.
+
+
 ## Document Control
 
 | Field | Value |

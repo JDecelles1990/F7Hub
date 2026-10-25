@@ -1,5 +1,12 @@
 # F7Hub Phase 1C
 
+## RAM-00 successor — owner-approved direction (2026-10-25)
+
+Consume the [RAM-01 contract](RAM01_Volatile_History_And_Promotion_Contract.md) for the Windows source's planned F7Hub-collected temporary history, succeeding snapshot-only direction. Reuse the retained Center; keep durable Recent distinct. Communicate up to 100 entries, 12 hours and the shared 256 MiB history budget: large entries may evict older entries before 100 are retained. Previews are explicitly partial; never silently truncate admitted text.
+
+Monitoring is application-owned and session-opt-in. X preserves drafts/history/helper through verified tray recovery; explicit Exit stops and clears. Save requires separate review/authorization; Ticket evidence binds an immutable saved revision. Unavailable destinations remain disabled. No GUI, monitoring or Save implementation is delivered by this documentation candidate; earlier dated reports remain historical.
+
+
 ## S05 Setup consent presentation successor (2026-10-15 candidate)
 
 The retained editor now receives the composed Clipboard owner beside Settings.
