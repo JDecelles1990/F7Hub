@@ -1,5 +1,12 @@
 # F7Hub Phase 0D
 
+## RAM-00 successor — separate monitoring and Save purposes (2026-10-25)
+
+Consume the owner-approved [RAM-01 contract](../Clipboard/RAM01_Volatile_History_And_Promotion_Contract.md) for automatic Clipboard history: process-local RAM, up to 100 entries, at most 12 hours and session-only monitoring authorization. This supersedes the older automatic seven-day durable direction referenced below.
+
+Persisted S05 evidence still authorizes only its existing manual purpose; generic Settings enablement grants neither monitoring nor RAM Save. Saved Snippets require separate explicit authorization and retain until explicitly deleted. No new setting, consent row or runtime behavior is introduced here. This successor candidate awaits independent review/integration; historical records below retain their meaning.
+
+
 ## S05 feature extension — preferences remain separate from consent (2026-10-15 candidate)
 
 The approved Clipboard R1–R6 implementation candidate extends existing Settings
