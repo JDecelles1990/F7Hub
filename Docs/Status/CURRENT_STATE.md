@@ -1,5 +1,47 @@
 # F7Hub Current State
 
+## Clipboard RAM-01A R1 — READY_FOR_INDEPENDENT_REREVIEW (2026-10-25)
+
+RAM-01A is an unstaged, uncommitted implementation candidate on
+`feature/clipboard-ram01a-volatile-history` in
+`C:\Dev\F7Hub-Clipboard-RAM01A`, based on integrated RAM-00 merge
+`56ef70e8122a79c3aa816383b6485320dd3a6405`. Independent rereview is pending;
+no implementation approval, integration or production activation is claimed.
+
+Independent review required R1: recoverable allocation failures during admission
+construction escaped. The bounded correction catches only `MemoryError`, returns
+`CAPACITY_OR_CLOCK_CHANGED` and prepares the result/replacement rows before
+publication. Failed construction preserves live history and accounting; expiry,
+generation fencing, cancellation and non-memory error propagation remain intact.
+Fresh correction validation: **43 focused tests**, **41 affected regressions**
+and **14 original reviewer probes PASS**, each exit 0, on the Windows host with
+synthetic data. Reexecuted probes are implementation evidence, not independent
+rereview. The original review artifacts remain unchanged.
+
+The new pure Python `VolatileClipboardHistory` domain provides exact UTF-8
+history, 100-entry/256-MiB accounted limits, 4-MiB per entry, 12-hour dual-clock
+expiry, exact consecutive duplicate suppression, bounded previews and stale
+reference/admission invalidation after Clear or disable. The default privacy
+boundary denies admission; no production assessor or consumer is supplied.
+Details and accounting ownership are in
+[Python architecture](../13_PythonArchitecture.md#clipboard-ram-01a--volatile-history-domain-candidate-2026-10-25).
+
+Initial author Windows-host synthetic validation: **32 RAM-01A Unit tests PASS** and
+**41 existing privacy/manual-contract/database-boundary regressions PASS**,
+Python 3.14.6, exit 0. The initial focused dependency failure was diagnosed:
+the services package eagerly imports Ticket/SQLite. Consolidating RAM-01A in
+the domain removed that dependency without changing existing exports. Failed
+and corrected artifacts are retained externally. Portable domain evidence does
+not establish native Clipboard or physical keyboard behavior; those tests are
+NOT RUN and excluded from this slice.
+
+The approved RAM-00 contract and protected historical evidence remain intact.
+Hybrid B-01 remains IMPLEMENTATION_BLOCKED, integration deferred, physical
+campaign closed and `NATIVE_ACCEPTANCE_VERIFIED=False`. LIFE-01, RAM-01B,
+monitoring consent/observer/tray/GUI, durable Save and integrations are not
+started. Next gate: independent rereview of the exact corrected candidate and
+external manifest/evidence; no staging, publication or integration authorized.
+
 ## H01-B security corrections F1/F2 — ready for independent rereview (2026-10-15)
 
 **CORRECTIONS IMPLEMENTED, READY_FOR_INDEPENDENT_REREVIEW.** The independent review

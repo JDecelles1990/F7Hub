@@ -1,5 +1,87 @@
 # F7Hub Python Architecture
 
+## Clipboard RAM-01A — volatile history domain candidate (2026-10-25)
+
+[RAM-00](Planning/Clipboard/RAM01_Volatile_History_And_Promotion_Contract.md)
+was integrated at `56ef70e8122a79c3aa816383b6485320dd3a6405`. RAM-01A adds
+[domain/clipboard_history.py](../Python/f7hub/domain/clipboard_history.py), a
+pure Python domain dependency for future application-service composition. The
+candidate is implemented and tested, pending independent review; no production
+consumer imports or constructs it. Existing manual ClipboardService, privacy
+rules, SQLite writers, consent, append head and capture profiles are unchanged.
+
+`VolatileClipboardHistory` starts disabled and empty. Its internal
+`_open_admission_context()` is a future trusted composition seam, not monitoring
+consent or a public GUI enable action. `observe(context, text)` accepts only the
+exact live issued context and obtains assessment through a constructor-composed
+`VolatilePrivacyAssessor`. There is no caller-supplied PERMITTED flag. The default
+assessor denies all observations. Reuse is limited to the existing privacy
+assessment/finding/completeness types and bounded preview normalization; the
+65,536-byte manual assessor is not used for the separate 4-MiB RAM profile.
+The future reviewed source/privacy owner must establish stable supported
+acquisition and complete assessment of the exact payload. RAM-01A supplies no
+large-text detector, source acquisition, session consent workflow or activation.
+
+The store retains one immutable exact UTF-8 bytes object per entry. It preserves
+Unicode and original newlines without normalization or truncation. Blank/NUL,
+malformed Unicode and over-limit observations are rejected in full before
+assessment. Metadata includes a process-local UUID/exact-object reference, UTC
+admission/expiry, UTF-8 bytes, Unicode scalar count, line count and a bounded
+240-scalar presentation preview with a truncation flag. Line count is one plus
+CR/LF breaks, with CRLF counted once. Full text and previews are excluded from
+routine repr; no window title, customer identity or document path is collected.
+
+Capacity is at most 100 live entries and 268,435,456 accounted bytes, with at
+most 4,194,304 strict UTF-8 bytes per entry. Accounting is a fixed 16,384-byte
+store reserve plus, for each entry, `sys.getsizeof(payload)` plus
+`sys.getsizeof(preview)` plus a 2,048-byte reserve for metadata, reference, UUID,
+timestamps, scalars and container slots. Tests check metadata fits this reserve
+on the tested interpreter. A bounded list provides identity lookup; there is no
+payload index, duplicate cache or retained decoded full-text copy. Expired rows
+are removed first, then oldest admissions until count and byte bounds fit the
+complete incoming row. A row that cannot fit by itself leaves live rows intact.
+Exact-byte consecutive duplicates increment a saturated 31-bit counter without
+moving the row, changing admission/expiry or increasing accounted storage.
+
+R1 correction: recoverable `MemoryError` during admitted-entry construction
+returns the existing content-free `CAPACITY_OR_CLOCK_CHANGED` outcome. The store
+prepares the success result and complete replacement row list before publishing,
+so failed allocation cannot evict live rows or expose a partial entry. Duplicate
+metadata/result construction also precedes assignment and revalidates the live
+generation and tail. Expiry processing remains authoritative; cancellation and
+unexpected non-memory construction errors propagate. This does not promise
+recovery from fatal process-wide memory exhaustion.
+
+Retention is at most 43,200 seconds from original admission. An injectable
+`HistoryClockSample` provides UTC, elapsed time and continuity. Either deadline
+expires a row at equality. Every list, metadata, text and budget read checks
+expiry; detail delivery checks again after decoding and admission checks again
+after constructing metadata. UTC or elapsed rollback, interclock delta
+disagreement over one second, or explicit continuity loss discards history and
+fences ingress. Invalid/failed clocks clear/fence and raise a fixed content-free
+unavailability error. This fail-closed strategy handles suspend gaps without
+assuming the platform monotonic clock counts suspend. It may discard unexpired
+rows after clock correction; native suspend behavior is not claimed verified.
+
+`list_entries(limit=100)` returns newest-first immutable bounded metadata;
+`get_entry(ref)` and `read_text(ref)` require the exact live reference. Clear
+invalidates pending admissions and references while preserving domain enablement
+and returning a fresh context when enabled. Disable/revocation clears and fences;
+reopening cannot revive old contexts. An RLock serializes state, while assessment
+runs outside the lock so Clear/revocation can finish before a late result. These
+are in-process ownership rules, not protection against malicious same-process
+Python. Callers must release escaped previews/decoded strings when invalidated;
+the store cannot erase copies retained by another owner.
+
+Accounting excludes transient caller strings, encoding/decoding/assessment work,
+external projections, allocator overhead, paging and crash dumps; it is not a
+whole-process RSS limit or secure erasure guarantee. No repository, file, logger,
+Qt, Windows Clipboard, helper, timer, tray, IPC or AHK dependency is introduced.
+The services package eagerly imports existing Ticket persistence, so RAM-01A
+stays in the pure domain instead of changing unrelated package exports.
+LIFE-01, RAM-01B acquisition/large-text assessment and all production monitoring
+remain separate authorized deliveries.
+
 ## Clipboard H01-B — internal latest-paste prepare and consume (2026-10-15 candidate)
 
 The existing domain, `ClipboardService` and `ClipboardRepository` own this

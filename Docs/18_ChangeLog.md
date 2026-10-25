@@ -1,5 +1,29 @@
 # F7Hub ChangeLog
 
+## 2026-10-25 — Clipboard RAM-01A R1 bounded correction
+
+- Converted recoverable admission-construction `MemoryError` to the existing
+  content-free failure result; other construction errors/cancellation propagate.
+- Prepared results and replacement rows before publication/eviction, preserving
+  valid history on failure and revalidating duplicate generation before update.
+- Added 11 deterministic regression tests. Fresh 43 focused tests, 41 affected
+  regressions and 14 original reviewer probes PASS on Windows with synthetic
+  data. Independent rereview is pending; no integration or later slice started.
+
+## 2026-10-25 — Clipboard RAM-01A implementation candidate
+
+- Added a pure Python volatile history domain with exact UTF-8 payloads,
+  100-entry/256-MiB accounted bounds, 4-MiB per-entry limit, 12-hour expiry,
+  duplicate suppression, bounded previews and Clear/revocation fencing.
+- Reused privacy result and preview contracts with unavailable-by-default
+  admission and a future trusted assessor seam; no manual profile extension,
+  persistence, production composition, monitoring or native dependency.
+- Added 32 deterministic synthetic domain tests; fresh focused validation and
+  41 affected existing regressions PASS on the Windows host. An initial import
+  dependency failure was diagnosed and corrected before the passing handoff.
+- Candidate READY_FOR_INDEPENDENT_REVIEW, unstaged/uncommitted; independent
+  approval and integration pending. LIFE-01 and later slices are not started.
+
 ## 2026-10-15 — Clipboard H01-B implementation candidate
 
 - Added migration 0017 for an empty-on-upgrade, content-free append head, with
