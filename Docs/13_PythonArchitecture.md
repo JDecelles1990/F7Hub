@@ -1,11 +1,16 @@
 # F7Hub Python Architecture
 
-## LIFE-01 — retained-window application lifecycle (2026-10-25 candidate)
+## LIFE-01 — retained-window application lifecycle (2026-10-25 integrated)
 
-Implementation handoff: **IMPLEMENTATION_BLOCKED**. Passing deterministic checks
-do not establish final native tray Exit while the main window is hidden. The
-latest retained native attempt failed that assertion; its predicate/root cause
-is NOT VERIFIED. See [current state](Status/CURRENT_STATE.md) for recovery status.
+Implementation status: **INTEGRATED / PASS** through
+[PR #112](https://github.com/JDecelles1990/F7Hub/pull/112), independently reviewed
+**APPROVED WITH NOTES**. Implementation `a89fde20d5da281dd0109a4ed1a6868ed570db30`
+was merged as `041246b288c584f807dd849e450e3ad025f5a93d`. Native physical acceptance
+is PASS through independently approved offline reassessment of retained execution;
+the original FAIL / EVENT_ORDER and earlier blocked recovery remain historical
+evidence. Exception origins and long-suite behavior remain NOT VERIFIED. See
+[current state](Status/CURRENT_STATE.md) for the distinct test outcomes, source
+reports and three retained P3 findings. RAM-01B is NOT STARTED.
 
 `app/bootstrap.py` composes one `gui/application_lifecycle.py`
 `ApplicationLifecycle` for the existing MainWindow. The window owns the QObject;

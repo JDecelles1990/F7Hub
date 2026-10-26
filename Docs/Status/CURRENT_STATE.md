@@ -1,6 +1,76 @@
 # F7Hub Current State
 
-## LIFE-01 — IMPLEMENTATION_BLOCKED (2026-10-25 recovery)
+## LIFE-01 — INTEGRATED / PASS (2026-10-25)
+
+This is the authoritative current LIFE-01 summary. The recovery and candidate
+sections below are historical snapshots; their blocked states and failed attempts
+remain evidence of those executions, not the current integration disposition.
+
+[PR #112](https://github.com/JDecelles1990/F7Hub/pull/112) integrated the exact
+independently reviewed implementation with disposition **APPROVED WITH NOTES**:
+
+- Implementation commit: `a89fde20d5da281dd0109a4ed1a6868ed570db30`.
+- Merge commit and verified remote main: `041246b288c584f807dd849e450e3ad025f5a93d`.
+- Reviewed implementation base: `b779d0bb0589b569b1d75a0bcb445dfaee967243`.
+- Reviewed 18-path aggregate SHA-256:
+  `4ffe3d053bc321f27f48b59eb3f50a87a38c802bd529754e8c5ee17be3673c59`.
+
+The validated lifecycle retains the same MainWindow and drafts on X; tray Open
+restores it. Unavailable or lost tray recovery keeps or restores a visible window.
+Main-window Exit, tray Exit and Quit share pending-operation and draft guards.
+Cancel preserves drafts and state; accepted Exit performs idempotent existing
+cleanup and normal Qt termination. One Python-owned coordinator runs in the
+existing process. No automatic Clipboard monitoring or acquisition is activated;
+RAM-01B is **NOT STARTED** and requires separate authorization and validation.
+
+| Evidence | Provenance and result |
+| --- | --- |
+| Independent lifecycle tests | FRESH in the independent implementation review: **20 PASS**, exit 0 |
+| Independent selected integration tests | FRESH in that review: **10 PASS**, exit 0 |
+| Cumulative affected-method coverage | Independently verified RETAINED **149/149** passing methods; not a single suite PASS |
+| Historical 149-method suite | **INCOMPLETE**; original supervised execution preserved |
+| Historical 577-method suite | **FAIL**; original 11 failures and exit 1 preserved |
+| Completed 578-method full-suite PASS | **NOT VERIFIED**; no such completed PASS established |
+| Native physical acceptance | **PASS** through independently approved offline reassessment of RETAINED physical execution |
+| Original physical adjudication | **FAIL / EVENT_ORDER**, preserved unchanged as a separate record |
+| Origins of `0x8001010D` and `0xC000041D` | **NOT VERIFIED**; neither exception is characterized as harmless or resolved |
+| GitHub CI | **NO CHECKS REPORTED**; no CI PASS claimed |
+
+The offline reassessment used the saved physical selection, unique action
+dispatch, accepted guard, completed cleanup, non-forced quit, natural process
+exit 0 and no-survivor evidence. Independent approval of the corrected adjudicator
+preceded reassessment. It did not repeat physical input or overwrite the original
+EVENT_ORDER verdict. Earlier failed hidden-window tray Exit attempts also remain
+failed records. Retained native Open/restore and lost-tray recovery evidence is
+separate from physical Exit acceptance. Alternate DPI remains NOT RUN. The review
+tests and native executions are retained evidence for this documentation update;
+no application tests or physical attempts were rerun for the synchronization.
+
+All three original P3/nonblocking findings are retained:
+
+- **P3-N1 — stale handoff metadata:** addressed by this four-owner documentation
+  candidate; documentation review/publication remain separate from the completed
+  implementation integration. The original finding and historical labels remain.
+- **P3-N2 — native reliability, OPEN:** the origins, faulting module and relationship
+  of `0x8001010D` and the earlier abnormal `0xC000041D` termination remain NOT VERIFIED.
+  Further investigation needs separate native-diagnostic authorization.
+- **P3-N3 — long-suite interaction, OPEN:** cumulative coverage does not establish
+  monolithic suite behavior or explain the historical stall. Any bounded diagnostic
+  requires separate authorization; old results must retain their original outcomes.
+
+Source reports are retained under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints`:
+`LIFE-01-review-20261025/independent-review.md` and its bound
+`review-decision.json`, plus
+`LIFE-01-20261025/adjudicator-correction-20261025T230000Z/final-handoff.md` and
+`offline-reassessment.result.json`. The integration handoff is retained in Codex
+session `01a17558-cc39-74f3-9475-8abd76103e47`; PR #112 and current Git parent/tree
+verification corroborate its merge facts. Approved architecture contracts remain
+unchanged. Unrelated older subsystem statuses below have not been reconciled.
+
+## Historical LIFE-01 recovery — IMPLEMENTATION_BLOCKED (2026-10-25)
+
+Historical snapshot: the following recovery record is preserved as written.
+The current integration and native-acceptance disposition is recorded above.
 
 The existing unstaged, uncommitted candidate remains in
 `C:\Dev\F7Hub-Clipboard-LIFE01` on

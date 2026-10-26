@@ -1,6 +1,13 @@
 # F7Hub GUI Design
 
-## LIFE-01 — system tray lifecycle (2026-10-25 implementation candidate)
+## LIFE-01 — system tray lifecycle (2026-10-25 integrated)
+
+**INTEGRATED / PASS** through [PR #112](https://github.com/JDecelles1990/F7Hub/pull/112).
+Independent implementation review: **APPROVED WITH NOTES**. Implementation
+`a89fde20d5da281dd0109a4ed1a6868ed570db30` was merged as
+`041246b288c584f807dd849e450e3ad025f5a93d`. See
+[current state](Status/CURRENT_STATE.md) for evidence provenance and all three
+retained P3 findings.
 
 The composed Python application retains its existing MainWindow when X is used.
 X hides without draft confirmation, Clipboard leave/discard, or Mochi cleanup.
@@ -21,13 +28,20 @@ Accepted Exit releases existing resources once and quits the application, even
 with last-window automatic quitting disabled. Windows may refuse foreground
 activation; a visible restored window/taskbar remains available in that case.
 
-This candidate adds no automatic Clipboard monitoring or persistence. Retained
-Windows smoke evidence uses synthetic data and OS-injected input at 1000×700,
-96 DPI. Earlier hide/restore and Exit checks passed, but the latest hidden-window
-tray Exit attempts failed to observe accepted shutdown. Their root cause remains
-NOT VERIFIED; final native acceptance is incomplete and LIFE-01 is
-IMPLEMENTATION_BLOCKED. Physical hardware input and other DPI are NOT RUN.
-Independent review and integration remain separate gates.
+LIFE-01 adds no automatic Clipboard monitoring or persistence; RAM-01B is NOT
+STARTED. Retained Windows smoke evidence uses synthetic data and OS-injected input
+at 1000×700, 96 DPI, covering hide/Open restoration and lost-tray recovery.
+
+Historical hidden-window tray Exit attempts failed to observe accepted shutdown;
+those failures and their undetermined root cause remain preserved. The later
+physical attempt's original adjudication also remains **FAIL / EVENT_ORDER**.
+Its saved physical evidence subsequently received a separate **PASS** through
+independently approved offline reassessment of the corrected adjudicator. That
+reassessment established physical selection, accepted guarded cleanup, non-forced
+quit, natural exit 0 and no owned survivors without another physical attempt.
+Physical acceptance is therefore satisfied for this bounded lifecycle gate.
+The origins of `0x8001010D` and the earlier abnormal `0xC000041D` termination remain
+NOT VERIFIED; crash-free stability and alternate DPI are not established.
 
 ## S05 Clipboard Setup consent status (2026-10-15 candidate)
 

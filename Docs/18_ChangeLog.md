@@ -1,5 +1,35 @@
 # F7Hub ChangeLog
 
+## 2026-10-25 — LIFE-01 integration addendum (PR #112)
+
+**INTEGRATED / PASS.** [PR #112](https://github.com/JDecelles1990/F7Hub/pull/112)
+merged independently reviewed implementation
+`a89fde20d5da281dd0109a4ed1a6868ed570db30` as
+`041246b288c584f807dd849e450e3ad025f5a93d`. Review disposition:
+**APPROVED WITH NOTES**, bound to 18-path aggregate
+`4ffe3d053bc321f27f48b59eb3f50a87a38c802bd529754e8c5ee17be3673c59`.
+The validated retained-window tray lifecycle preserves X-to-hide, tray Open and
+visible recovery, shared guarded Exit/Quit, cancellation and idempotent cleanup.
+
+The independent implementation review ran **20 lifecycle tests PASS** and
+**10 selected integration tests PASS**, both FRESH in that review with exit 0.
+Independently verified RETAINED cumulative affected coverage is **149/149**.
+The historical 149-method suite remains **INCOMPLETE**; the historical 577-method
+suite remains **FAIL**. A completed 578-method full-suite PASS is **NOT VERIFIED**.
+No application tests or physical attempts were rerun for this status addendum.
+
+Native physical acceptance is **PASS** through independently approved offline
+reassessment of retained physical execution. Its original **FAIL / EVENT_ORDER**
+and earlier failed tray Exit attempts remain separate, unchanged evidence.
+The origins of `0x8001010D` and `0xC000041D` remain **NOT VERIFIED**. GitHub CI:
+**NO CHECKS REPORTED**. The three P3 findings remain recorded: stale handoff metadata
+(addressed by this documentation candidate, pending its review/publication),
+unresolved native reliability and the historical long-suite stall. RAM-01B is
+**NOT STARTED**; no automatic Clipboard monitoring or approved architecture change
+is included. See [current state](Status/CURRENT_STATE.md) for source reports and
+evidence distinctions. The original candidate/recovery entry below is historical
+and preserved; its failed and blocked outcomes have not been rewritten as success.
+
 ## 2026-10-25 — LIFE-01 system tray lifecycle candidate
 
 The composed PySide6 application now retains the main window on X, with one tray
