@@ -1,5 +1,25 @@
 # F7Hub ChangeLog
 
+## 2026-10-27 — native IPC retained-process context candidate
+
+Added a dormant read-only 64-bit Windows verifier for the adopted H01-C 112-byte
+context, using original retained process handles and exact PID/creation pins.
+It checks liveness, session, binary user/logon SID and medium integrity without
+opening a peer by PID or owning borrowed-handle closure. Temporary token handles
+are closed once. Unknown/malformed observations fail content-free. No enrollment,
+pipe, authentication, status exchange, Clipboard effect or application wiring is
+delivered. FRESH focused author checks: 20 synthetic and three native process/token
+tests PASS, exit 0; no historical security campaign or full regression rerun.
+Independent review remains pending; candidate is unstaged/uncommitted. Evidence
+and exact identities are in the NativeIPC checkpoint named in CURRENT_STATE.
+
+Approval-evidence reconciliation confirmed HBR-01 and HBR-01N independently
+APPROVED WITH NOTES and integrated unchanged as PR #116 and PR #117 respectively;
+the latter's reviewed eight-line retention addition supersedes the earlier
+session-file blob. Current status and architecture now distinguish those
+integrated dormant prerequisites from this new candidate. The earlier dated
+candidate records below retain their historical meaning.
+
 ## 2026-10-27 — HBR-01N dormant I/O retirement gate candidate
 
 Added a fixed-offer post-START I/O gate for a future authenticated native-status
