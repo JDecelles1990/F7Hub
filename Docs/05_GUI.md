@@ -2456,3 +2456,1533 @@ The core GUI principle is:
 > Show the technician what matters for the current task, keep related tools nearby, and hide complexity that is not currently useful.
 
 F7Hub should feel like one coherent workspace, not twenty utilities taped together.
+
+
+# 93. GUI Control & Action Registry
+
+**GUI_REGISTRY_READY_FOR_INDEPENDENT_REVIEW — author-side documentation gate.**
+Pass 5 reconciles the source-defined GUI construction scope below. This is not
+independent approval, runtime validation or integration authority. Stable control
+IDs are documentation identifiers only; source and approved architecture govern.
+The Pass 1–4 completion/remaining-work paragraphs retain their historical
+progression meaning. The Pass 5 counts, coverage, findings and status are current
+for this pinned candidate; older partial-readiness statements are not its status.
+
+Pinned integrated-source baseline:
+`62f95f185cd5abfefbfbc16822d12dc30144ed79`. A fresh read-only ls-remote query
+on 2026-10-27 confirmed remote main at the same SHA; no baseline movement or
+merge was performed. The documentation candidate is an uncommitted diff on this
+base. `—` means not
+applicable; `NOT VERIFIED` means the relationship has not been established.
+Integrated means present in the inspected source, not physically tested here.
+
+Navigate: [Shell/Guide/Mochi](#gui-registry-shell),
+[Clipboard](#gui-registry-clipboard), [Tickets](#gui-registry-tickets),
+[Knowledge](#gui-registry-knowledge), [Scripts](#gui-registry-scripts),
+[final coverage/counts](#gui-registry-coverage),
+[shortcuts](#gui-registry-shortcuts), [findings](#gui-registry-findings).
+
+<a id="gui-registry-shell"></a>
+
+## Shell, utilities, lifecycle, Mochi and Guide — Pass 4
+
+Inspected integrated source: `62f95f185cd5abfefbfbc16822d12dc30144ed79`.
+Entries inherit **Integrated / static inspection**, with runtime/native execution
+**NOT RUN**. Source locators are not invented Qt objectNames. `—` means no
+source-assigned name or explicit custom shortcut, as applicable. AHK equivalents
+use native control/function names, never Qt metadata. Physical rendering,
+keyboard acceptance and platform standard-key/mnemonic resolution are
+**NOT VERIFIED** here.
+
+Control rows count constructed interactive presentations and transient dialog
+choices. `ACTION.*` records name reusable explicit QAction identities; `BIND.*`
+records name keyboard/window/native events. Those records are separate from
+control counts and are not extra visual buttons. Reused actions/handlers do not
+add identities; distinct presentations are identified explicitly. Containers,
+passive feedback, native scrolling and repeated topic/data rows are excluded.
+Pass 5 still owns final application-wide identity/presentation reconciliation.
+
+### A. Shell and navigation
+
+Owner: [main_window.py](../Python/f7hub/gui/main_window.py), MainWindow and
+`_build_navigation_rail`. **MW** =
+[MainWindow tests](../Tests/GUI/test_main_window.py), including surviving command
+identities, retired containers, rail focus, retained pages and refused routes.
+These are test references, not fresh runtime results. MainWindow builds no menu
+bar, toolbar, dock or shell splitter; the old menu/toolbar are retired. Its
+QHBoxLayout (`navigationShell`) contains the rail (`navigationRail`) then
+`workspaceViewport` (resizable QScrollArea hosting the retained `pages` stack).
+Source calls statusBar().showMessage; no application-defined interactive status
+control is constructed. Native frame/size-grip behavior is inherited and is not
+an additional source-defined control mapping.
+Module-owned splitters and forms remain in their existing inventory sections.
+
+`Shell-busy` is `_set_busy`'s union of supplied/shared-runner busy, Script run
+ownership and Ticket note/creation/status/classification pending flags. It
+disables pages and the four module actions; optional Knowledge/Scripts also
+require their workspaces. Clipboard Recent/Setup use their separate guards,
+not a new global shell-busy owner. Individual route methods retain draft and
+pending guards; an enabled presentation alone does not prove dispatch.
+
+| Stable ID | Label / type / objectName | Logical location | Action/event → owner/handler | Availability / accessibility / keyboard | Tests |
+|---|---|---|---|---|---|
+| SHELL.NAV.TICKETS | Tickets; QToolButton; `ticketsNavigationButton` | Rail QVBoxLayout first module button | setDefaultAction(tickets_action) → show_tickets; local page route | Not Shell-busy; accessible Tickets, TabFocus; native Space; no custom shortcut on button | MW |
+| SHELL.NAV.KNOWLEDGE | Knowledge Base; QToolButton; `knowledgeNavigationButton` | Rail second module button | setDefaultAction(knowledge_action) → show_knowledge | Not Shell-busy and workspace supplied/constructed; unavailable tooltip points to utility Guide; accessible Knowledge Base, TabFocus | MW |
+| SHELL.NAV.SCRIPTS | Scripts; QToolButton; `scriptsNavigationButton` | Rail third module button | setDefaultAction(scripts_action) → show_scripts | Not Shell-busy and workspace supplied; accessible Scripts, TabFocus | MW |
+| SHELL.NAV.CLIPBOARD | Clipboard Center; QToolButton; `clipboardNavigationButton` | Rail fourth module button | setDefaultAction(clipboard_action) → show_clipboard; retained lazy page | Not Shell-busy; accessible Clipboard Center, TabFocus; workspace details remain in Pass 3 | MW |
+| SHELL.UTILITIES.SETTINGS | Settings and utilities; QToolButton; `settingsUtilityButton` | Rail after module buttons and stretch, bottom | clicked → _show_utility_menu; same popup handler as Alt+S | No local busy disabling; popup/modal guard in handler; accessible Settings and utilities, description Alt+S opens Settings and utilities; TabFocus | MW |
+
+| Action identity (not extra control) | Source member / objectName / data | Signal → handler | Presentations |
+|---|---|---|---|
+| ACTION.NAV.TICKETS | MainWindow.tickets_action; — | triggered → show_tickets | SHELL.NAV.TICKETS |
+| ACTION.NAV.KNOWLEDGE | MainWindow.knowledge_action; — | triggered → show_knowledge | SHELL.NAV.KNOWLEDGE |
+| ACTION.NAV.SCRIPTS | MainWindow.scripts_action; — | triggered → show_scripts | SHELL.NAV.SCRIPTS |
+| ACTION.NAV.CLIPBOARD | MainWindow.clipboard_action; clipboardCenterAction; data clipboard.center | triggered → show_clipboard | SHELL.NAV.CLIPBOARD |
+
+| Binding identity (not extra control) | Definition / scope | Handler / guarded effect | Tests |
+|---|---|---|---|
+| BIND.SHELL.NAVIGATION | QShortcut Alt+F; WidgetWithChildrenShortcut; auto-repeat false | activated → _focus_navigation; selected enabled/visible rail button, else first eligible module, else gear; no page change; refuses active popup/modal | MW |
+
+`pages.currentChanged` → `_sync_navigation_rail` derives active icon/property and
+accessible description Current workspace from actual page identity, without
+making QActions checkable. Accepted page changes synchronously reset shell
+scrollbars; same-page/refused routes do not. Explicit Tab links place viewport
+→ Tickets → Knowledge → Scripts → Clipboard → gear → New Ticket; disabled
+controls are handled by Qt. The shell event filter handles rail return/escape
+and generation-guarded focus reconciliation; later deliberate focus/scroll or
+deactivation defeats obsolete restoration. Actual physical traversal remains
+unverified. Utility-popup show/hide temporarily suspends both shell shortcuts,
+resuming on a later event turn; separate windows retain their own shortcuts.
+
+### B. Settings and utility menus
+
+Owner: MainWindow `_build_navigation_rail`, `_show_utility_menu`,
+show_mochi_settings, back_up_database and show_altf7hub. The gear is the existing
+SHELL.UTILITIES.SETTINGS presentation, not another Settings Center. Its popup
+(`settingsUtilityMenu`) inserts Mochi…, Back up database, E&xit, then Knowledge
+Base tools (`knowledgeBaseToolsMenu`) → Guide. The submenu is one navigable menu
+entry; its Qt-generated menu action is not an extra explicit application QAction.
+The popup is anchored to the gear's right/top and clamped to available screen
+geometry; active popup/modal prevents a second popup. No source-defined separator
+or menu-bar/toolbar duplicate remains. **GR** =
+[Guide relocation tests](../Tests/GUI/test_guide_relocation.py); MW covers utility
+shortcuts, backup outcomes and command survival.
+
+| Stable ID | Label / type / objectName | Logical location | Signal → handler / dependency | Availability / accessibility / keyboard | Tests |
+|---|---|---|---|---|---|
+| SHELL.UTILITIES.MOCHI | Mochi…; QAction menu presentation; mochiSettingsAction | Utility popup first | triggered → show_mochi_settings → retained MochiSettingsDialog/MochiService | Requires mochi_service; no shell-busy disable in _set_busy; dialog is shown/raised/activated, never launches on menu construction; no custom shortcut | MW, MC |
+| SHELL.UTILITIES.BACKUP | Back up database; QAction menu presentation; backupDatabaseAction | Popup second | triggered → back_up_database → shared ServiceTaskRunner → DatabaseBackupService.create_backup | Requires backup_service and not Shell-busy; handler rechecks pending owners; no custom shortcut | MW |
+| SHELL.UTILITIES.EXIT | E&xit; QAction menu presentation; exitAction | Popup third | triggered → request_exit → lifecycle.request_exit, or standalone close | Not disabled by _set_busy; accepted Exit still needs shared guards and draft confirmation; mnemonic &x; StandardKey.Quit binding below | MW, LC |
+| SHELL.UTILITIES.KNOWLEDGE_TOOLS | Knowledge Base tools; QMenu submenu; knowledgeBaseToolsMenu | Popup fourth/last | Native submenu open → Guide entry | No custom availability/shortcut assigned; independent of Knowledge workspace construction | GR |
+| SHELL.UTILITIES.GUIDE | Guide; QAction menu presentation; altF7HubGuideAction | Knowledge Base tools submenu, only child | triggered → show_altf7hub → shared runner → AltF7HubService.show_guide | Requires altf7hub_service and not Shell-busy; same QAction as KNOWLEDGE.GUIDE, even if Knowledge unavailable; no custom shortcut on QAction | GR, MW |
+| SHELL.FEEDBACK.BACKUP.SUCCESS | OK; standard QMessageBox choice; — | Database backup completed information dialog | back_up_database.completed → information; acknowledgement dismisses feedback | Only successful backup completion; no second backup dispatch; native Qt default acknowledgement, no custom button label/slot | MW |
+| SHELL.FEEDBACK.BACKUP.FAILURE | OK; standard QMessageBox choice; — | Database backup failed warning dialog | back_up_database.failed → warning | Safe fixed failure text; no completed backup claimed; native acknowledgement | MW |
+| SHELL.FEEDBACK.GUIDE.FAILURE | OK; standard QMessageBox choice; — | Guide could not open warning dialog | show_altf7hub.failed → warning | Unconfirmed request; safe AltF7HubOpenError or fixed fallback; no automatic second request; native acknowledgement | MW, GR |
+| SHELL.FEEDBACK.STARTUP.FAILURE | OK; standard QMessageBox critical choice; — | App entry point, F7Hub could not start; parent None, before MainWindow is shown | [app.main.main](../Python/f7hub/app/main.py): bootstrap exception → critical → return 1 after acknowledgement | Fixed service-initialization feedback; no retry or new service operation; native acknowledgement/focus not exercised | [startup failure test](../Tests/Integration/test_application_bootstrap.py) |
+
+| Action identity (not extra control) | Source member / objectName | Signal → handler | Presentations |
+|---|---|---|---|
+| ACTION.UTILITIES.MOCHI | MainWindow.mochi_action; mochiSettingsAction | triggered → show_mochi_settings | SHELL.UTILITIES.MOCHI |
+| ACTION.UTILITIES.BACKUP | MainWindow.backup_action; backupDatabaseAction | triggered → back_up_database | SHELL.UTILITIES.BACKUP |
+| ACTION.UTILITIES.EXIT | MainWindow.exit_action; exitAction | triggered → request_exit | SHELL.UTILITIES.EXIT; MainWindow.addAction also registers its shortcut, not another visual control |
+| ACTION.UTILITIES.GUIDE | MainWindow.altf7hub_action; altF7HubGuideAction | triggered → show_altf7hub | SHELL.UTILITIES.GUIDE and existing KNOWLEDGE.GUIDE button share one identity |
+
+| Binding identity (not extra control) | Definition / scope | Handler / effect | Tests |
+|---|---|---|---|
+| BIND.SHELL.UTILITIES | QShortcut Alt+S; WidgetWithChildrenShortcut, no auto-repeat | activated → _show_utility_menu; popup-local suspension described above | MW |
+| BIND.SHELL.QUIT | QKeySequence.StandardKey.Quit on exit_action; Ctrl+Q fallback only if standard sequence empty on win32 | QAction triggered → request_exit; registered on MainWindow independent of popup visibility | MW, LC |
+
+[DatabaseBackupService](../Python/f7hub/services/database_backup_service.py)
+owns explicit local snapshot creation via existing create_database_snapshot
+infrastructure, publishing a unique backup beneath LOCALAPPDATA/F7Hub/Backups.
+GUI owns no SQL/path picker and supplies no arbitrary command. A successful path
+is reported only by the completion callback; error feedback does not expose raw
+exceptions. [AltF7HubService](../Python/f7hub/services/altf7hub_service.py) delegates
+the fixed Guide request boundary described in E. Utility operations reuse their
+existing services rather than adding a general Settings service or new router.
+
+### C. Tray and lifecycle
+
+Owner: [application_lifecycle.py](../Python/f7hub/gui/application_lifecycle.py),
+ApplicationLifecycle; **LC** =
+[lifecycle tests](../Tests/GUI/test_application_lifecycle.py). One retained
+MainWindow gets one lifecycle owner. start shows the icon, starts the recovery
+timer and disables last-window automatic quitting; repeated start is a no-op.
+Tray geometry/overflow and actual Windows interaction are not verified here.
+
+| Stable ID | Label / type / objectName | Logical location | Signal/event → handler | Availability / focus / keyboard | Tests |
+|---|---|---|---|---|---|
+| LIFECYCLE.TRAY.ICON | F7Hub tooltip; QSystemTrayIcon; — | Windows notification area, platform-selected position; attached QMenu | activated(reason) → _activated → restore for Trigger/DoubleClick; native context menu exposes two actions | Constructed once; shown by start, hidden on accepted exit/aboutToQuit; no custom shortcut/accessibility name assigned | LC |
+| LIFECYCLE.TRAY.OPEN | Open F7Hub; QAction menu presentation; — | Tray context menu first | open_action.triggered → restore | No explicit disable; restore refuses accepted exit, clears minimized state, restores retained window and usable remembered focus; no custom shortcut | LC |
+| LIFECYCLE.TRAY.EXIT | Exit F7Hub; QAction menu presentation; — | Tray context menu second/last | exit_action.triggered → request_exit → restore → MainWindow.confirm_exit → cleanup_shutdown/quit | Reentrant/accepted exit refused; pending work or draft Cancel keeps application; no custom shortcut | LC |
+| LIFECYCLE.CONFIRM.NEW_TICKET.DISCARD | Discard; QMessageBox standard choice; — | MainWindow.confirm_exit → Unsaved new ticket modal action area | Question result Discard permits remaining Clipboard guard, then accepted exit | Only outstanding creation draft after Ticket activity guard; caller-specific Exit prompt, not an extra Ticket creation button | LC, MW |
+| LIFECYCLE.CONFIRM.NEW_TICKET.CANCEL | Cancel; QMessageBox standard choice; — | Same modal action area | Non-Discard result refuses shutdown | Explicit default Cancel; preserves draft; native resolution NOT VERIFIED | LC, MW |
+
+| Action identity (not extra control) | Source member | Signal → handler | Relationship |
+|---|---|---|---|
+| ACTION.TRAY.OPEN | ApplicationLifecycle.open_action; no objectName | triggered → restore | LIFECYCLE.TRAY.OPEN; icon activation also invokes restore without another QAction |
+| ACTION.TRAY.EXIT | ApplicationLifecycle.exit_action; no objectName | triggered → request_exit | LIFECYCLE.TRAY.EXIT; distinct from ACTION.UTILITIES.EXIT, same coordinator |
+
+| Binding identity (not extra control) | Definition / scope | Handler / effect | Tests |
+|---|---|---|---|
+| BIND.LIFECYCLE.CLOSE | MainWindow closeEvent, including native window X | With unaccepted composed lifecycle: ignore close and lifecycle.hide; standalone host uses confirm_exit; accepted lifecycle permits close | LC |
+| BIND.LIFECYCLE.ACTIVATE | QSystemTrayIcon.activated Trigger/DoubleClick | _activated → restore; other reasons do not trigger this restore branch; one icon, not two buttons | LC |
+
+hide preserves work without invoking draft guards or Clipboard leave. It hides
+only when the started, visible non-null icon has nonempty geometry, an enabled
+retained Open menu route and a system tray; otherwise the window remains/restores
+visible with recovery feedback. Hidden recovery timer cadence is 100 ms; normal
+cadence is 1000 ms. The timer itself is not an interactive control.
+
+PR #114 is included in the pinned source: check_recovery reconciles an owned
+hidden window through the read-only
+[Windows visibility adapter](../Python/f7hub/infrastructure/windows_window_visibility.py).
+A native-visible HWND restores Qt presentation with activate=False/normalize=True;
+lost tray recovery also restores. The accepted/exiting guards prevent reentry.
+restore otherwise preserves maximized state as appropriate and retains editor
+focus when usable; a refused OS foreground activation is not forced success.
+This source trace preserves the earlier exposure-only white-window failure
+record at the document start and does not establish a new physical result.
+
+request_exit restores a visible owner before confirmation. MainWindow rejects
+shared/Ticket/Script/Knowledge-filter/Clipboard pending work, then applies Ticket
+activity, new-ticket and Clipboard draft guards. Existing Ticket activity and
+Clipboard confirmation choices remain in their owning module inventories.
+Cancel never authorizes cleanup. Accepted exit cleans once, stops timer, hides
+tray, closes the retained window and quits. aboutToQuit uses the same idempotent
+cleanup. No Clipboard acquisition or persistence operation is added by lifecycle.
+
+### D. Mochi entry, control dialog and module-owned pet menu
+
+The shell entry is SHELL.UTILITIES.MOCHI; do not count it again. Owner:
+[mochi_settings_dialog.py](../Python/f7hub/gui/mochi_settings_dialog.py),
+MochiSettingsDialog (`mochiSettingsDialog`), parented to MainWindow, modeless,
+WA_DeleteOnClose. Its VBox contains passive mochiStatus, a two-column QGridLayout,
+then Close. MainWindow retains/raises one dialog and clears its reference on
+finished. **MC** = [F7Hub Mochi controls tests](../Tests/GUI/test_mochi_controls.py).
+All seven buttons have source objectNames but no explicit accessibleName,
+custom shortcut, mnemonic or Tab-order assignment; native button text/focus
+behavior is not a new accessibility-validation claim.
+
+`M-usable` means availability AVAILABLE, snapshot present and behavior not
+EXITING. render disables command buttons while service.busy; Start/Show only
+requires not busy. Idle/Wave additionally require not paused. Status is plain
+text and distinguishes connecting/unavailable/timeout/disconnected/uncertain;
+an unconfirmed command is not reported as success.
+
+| Stable ID | Label / member; type; objectName | Grid/parent position | Signal → handler / backend | Availability / keyboard | Tests |
+|---|---|---|---|---|---|
+| MOCHI.DIALOG.START | Start/Show / buttons[start]; QPushButton; mochi_start | Grid row 0 column 0 | clicked closure → invoke(start) → MochiService.start_show | Not service.busy; explicit retry/start/show | MC |
+| MOCHI.DIALOG.HIDE | Hide / buttons[hide]; QPushButton; mochi_hide | Row 0 column 1 | invoke(hide) → service.command(hide) | Not busy and M-usable; no F7Hub window hide | MC |
+| MOCHI.DIALOG.IDLE | Idle / buttons[idle]; QPushButton; mochi_idle | Row 1 column 0 | invoke(idle) → service.command(idle) | Not busy, M-usable, not paused | MC |
+| MOCHI.DIALOG.WAVE | Wave / buttons[wave]; QPushButton; mochi_wave | Row 1 column 1 | invoke(wave) → service.command(wave) | Not busy, M-usable, not paused; existing delivered animation command only | MC |
+| MOCHI.DIALOG.PAUSE | Pause / Resume / buttons[pause]; QPushButton; mochi_pause | Row 2 column 0 | invoke(pause) resolves snapshot.paused to command resume or pause | Not busy and M-usable; one button, changing label | MC |
+| MOCHI.DIALOG.EXIT | Exit / buttons[exit]; QPushButton; mochi_exit | Row 2 column 1 | invoke(exit) → service.command(exit) | Not busy and M-usable; stops Mochi, not F7Hub | MC |
+| MOCHI.DIALOG.CLOSE | Close / local close; QPushButton; mochi_close | VBox below grid | clicked → close → closeEvent → unsubscribe(render) | No explicit busy disable; closing dialog does not send Mochi Exit | MC |
+
+[MochiService](../Python/f7hub/services/mochi_service.py) validates its finite
+command set and tracks availability/snapshot/outcome; start_show requests the
+existing [MochiGateway](../Python/f7hub/infrastructure/mochi_gateway.py) start with
+show=True. Commands use the reviewed local companion channel, not SQL or an
+arbitrary process/AI command. subscribe/render updates this UI; Close removes
+only the subscription. MainWindow shutdown owns the separate service cleanup.
+
+The integrated module's separate
+[PetWindow](../Mochi/src/mochi/ui/pet_window.py) owns its own QMenu and local
+runtime, not MainWindow actions. **MP** =
+[pet-window tests](../Mochi/tests/test_pet_window.py), **MT** =
+[runtime-control tests](../Mochi/tests/test_controls.py). These references are
+inspected, not executed. The frameless tool window is translucent, optionally
+topmost from settings, NoFocus/ShowWithoutActivating at construction; native
+click/menu behavior remains unverified here. No in-window Settings form is
+constructed; file settings are not new GUI controls. Context menu order:
+
+| Stable ID | Label / type / objectName | Position / event | Owner/handler / backend | Enabled condition | Tests |
+|---|---|---|---|---|---|
+| MOCHI.PET.SURFACE | Configured pet name; PetWindow(QWidget) painted input surface; — | Separate frameless top-level pet canvas; constructed by [Mochi app](../Mochi/src/mochi/app.py) | mousePressEvent/mouseMoveEvent/mouseReleaseEvent → retained drag offset/move; contextMenuEvent → local menu | NoFocus/ShowWithoutActivating construction; left drag and native context event are explicitly handled; actual configured caption/native behavior NOT VERIFIED | MP, MT |
+| MOCHI.PET.PAUSE | Pause; QAction menu presentation; — | Pet context menu first; triggered | PetWindow.pause → apply(pause) → local PetRuntime | State IDLE or WAVE | MP, MT |
+| MOCHI.PET.RESUME | Resume; QAction menu presentation; — | Context menu second; triggered | PetWindow.resume → apply(resume) | State PAUSED | MP, MT |
+| MOCHI.PET.EXIT | Exit; QAction menu presentation; — | Context menu third; triggered | PetWindow.close → closeEvent/shutdown | State not EXITING | MP, MT |
+
+These three explicit QActions are distinct module-local identities
+ACTION.MOCHI.PAUSE (pause_action), ACTION.MOCHI.RESUME (resume_action) and
+ACTION.MOCHI.EXIT (exit_action). They have no explicit custom shortcut/name and
+are not the seven F7Hub dialog buttons. BIND.MOCHI.PET.MENU maps contextMenuEvent
+to _sync_actions/menu.popup(globalPos); BIND.MOCHI.PET.DRAG maps left press/move/
+release to retained offset/move/clear. They are event bindings on the existing
+pet surface MOCHI.PET.SURFACE, not extra buttons. Animation timers/state changes add no controls.
+Recognition, screen-context guidance, Luna/provider actions and unrelated
+planned animation behaviors are not delivered controls in these sources.
+
+### E. Guide and AutoHotkey v2
+
+Integrated host: [F7Hub.ahk](../AutoHotkey/F7Hub.ahk), #Requires AutoHotkey v2,
+#SingleInstance Ignore, #MaxThreadsPerHotkey 1. It owns F7 and Alt+F7, and
+includes [GuideHost](../AutoHotkey/Troubleshooting_Sections/GuideHost.ahk),
+[GuideCore](../AutoHotkey/Troubleshooting_Sections/GuideCore.ahk) and the request
+bridge. **AT** = [toggle tests](../Tests/AutoHotkey/test_altf7hub_toggle.ahk),
+**AH** = [host tests](../Tests/AutoHotkey/test_altf7hub_host.ahk), **AN** =
+[navigation tests](../Tests/AutoHotkey/test_altf7hub_navigation.ahk), **AR** =
+[request-failure tests](../Tests/AutoHotkey/test_altf7hub_request_failure.ahk),
+**AL** = [launcher tests](../Tests/AutoHotkey/test_f7hub_launcher.ahk), **AF** =
+[F7 restore tests](../Tests/AutoHotkey/test_f7hub_restore.ahk), **AM** =
+[magnetic follower tests](../Tests/AutoHotkey/test_magnetic_window_follower.ahk),
+**AP** = [Python launch integration](../Tests/Integration/test_altf7hub_launch.py).
+**GF** = [Guide formatting safety](../AutoHotkey/Troubleshooting_Sections/Tests/guide_formatting_safety.ahk),
+**GT** = [topic routing contract](../AutoHotkey/Troubleshooting_Sections/Tests/topic_contract.ahk).
+Test source references do not establish fresh native/physical acceptance.
+GuideCore includes [TopicRouting](../AutoHotkey/Troubleshooting_Sections/TopicRouting.ahk):
+BuildShortcuts, TopicShortcutEnabled and ShortcutTarget own catalog shortcut
+resolution (GT). GF checks selected-text formatting and stale-source save safety;
+native button/acknowledgement acceptance remains NOT VERIFIED. These test sources
+were inspected without running them or opening their topic/preference inputs.
+
+The Python Guide entry uses MainWindow → ServiceTaskRunner → AltF7HubService →
+[WindowsAltF7HubGateway](../Python/f7hub/infrastructure/altf7hub_gateway.py) → fixed
+[short-lived request client](../AutoHotkey/Troubleshooting_Sections/Troubleshooting_Quick_Guide.ahk)
+with --show → [GuideRequest](../AutoHotkey/Troubleshooting_Sections/GuideRequest.ahk)
+→ shared host. Gateway validates Windows, standard 64-bit AHK v2 and required
+files, starts no shell, and accepts only successful SHOWN/FOCUSED_EDITOR output.
+The checkout-derived endpoint's fixed F7Hub.AltF7Hub.Show.v1 request calls
+ShowGuide, not ToggleGuide. An existing editor is focused with its draft intact.
+Dispatched timeout remains unconfirmed, not permission to send a second toggle;
+pre-dispatch keyboard fallback has readiness/dispatch/held-modifier guards.
+Double-click client without --show starts/reuses the host without presenting
+Guide; errors can show the client warning listed below. There is no second
+persistent Guide or topic-to-ticket automation.
+
+#### Guide-owned controls
+
+Owner for the next tables: GuideCore CreateGuide, AddFormattingToolbar,
+ShowEditor and named handlers. AHK controls have native HWNDs/member locators,
+not Qt objectNames; no explicit custom accessible names or global shortcuts are
+assigned to these controls. Native captions/cues and keyboard routing below are
+source facts, not a screen-reader result. Initial logical positions use source
+rows/relative coordinates; ResizeGuide/ResizeEditor reposition controls, so no
+physical pixel claim is made. Passive Opacity/percentage/topic title/status,
+editor labels and Selected words labels are excluded.
+
+Guide is a resizable window titled Guide. Top row is opacity, pin, sidebar,
+heading color and bold headings. Sidebar has search, Create/Edit/Script row,
+Archive/View row and topic list. Notes area is to the right, below title and
+formatting/Auto-fit row. Sidebar controls become hidden with SidebarHidden.
+ShowGuide focuses the notes control and preserves its selection/scroll; an
+existing editor takes priority. No authored topic is counted separately.
+
+| Stable ID | Label / native type / locator | Position / owner | Event → handler / backend | Availability / keyboard / tests |
+|---|---|---|---|---|
+| GUIDE.OPACITY | Opacity; Slider; OpacitySlider | CreateGuide top row x74, range 60–100 | Change → ChangeOpacity → SetGuideOpacity / deferred preferences | Native slider/tooltip; shared Guide/editor opacity; AH, AT |
+| GUIDE.PIN | Always on top; Checkbox; PinCheck | Top row after opacity/percentage | Click → ChangePin → ApplyPin / preferences | Reflects Pinned; native checkbox; AH |
+| GUIDE.SIDEBAR | Show topics / Hide topics; Button; SidebarButton | Top row after pin | Click → ToggleSidebar → ApplySidebar | One changing-label control; no custom shortcut; AH |
+| GUIDE.HEADING.COLOR | Heading color; Button; colorButton | Top row after sidebar | Click → ChangeHeadingColor → PickColor / formatting preferences | Native color picker; Cancel returns without chosen color; AH |
+| GUIDE.HEADING.BOLD | Bold headings; Checkbox; HeadingBoldCheck | Top row after Heading color | Click → ChangeHeadingBold → RefreshFormatting / preferences | Reflects HeadingBold; native checkbox; AH |
+| GUIDE.SEARCH | Search topics... cue; Edit; SearchBox | Sidebar first, y52 | Change → FilterTopics → RebuildTopicList | Filters title/body/id/shortcut locally; Ctrl+F focuses; AN, AH |
+| GUIDE.CREATE | C - Create; Button; CreateButton | Sidebar action row first, y90 | Click closure → ShowEditor(create) | Disabled in archive; focused notes/list C route also invokes; AH |
+| GUIDE.EDIT | E - Edit; Button; EditButton | Same row second | Click closure → ShowEditor(edit) | Active topic required and not archive; focused notes/list E route; AH |
+| GUIDE.SCRIPT | Script; Button; scriptButton | Same row third | Click → OpenScript → fixed notepad.exe with local request-client source path | Opens AHK source for editing; not Scripts workspace or diagnostic execution; AH |
+| GUIDE.ARCHIVE | Archive topic / Restore topic; Button; ArchiveButton | Sidebar next row first, y130 | Click → ArchiveOrRestore → MoveTopic / paired topic files | Current displayed topic required; source invokes no confirmation; errors retain feedback path; AH |
+| GUIDE.ARCHIVE.VIEW | View archive / Back to guide; Button; ArchiveViewButton | Same row second | Click → ToggleArchiveView → FilterTopics | Changes library mode and clears search; disables create/edit in archive; AH |
+| GUIDE.TOPICS | Topic list; ListBox; TopicList | Sidebar below action rows, y170 | Change → SelectTopic; scoped navigation → NavigateTopic/ShowTopic | Dynamic rows from displayed library, owner-drawn titles; repeated rows not controls; AN, AH |
+| GUIDE.FORMAT.COLOR | Text color; Button; toolbar color | Notes toolbar after Selected words label, y90 | Click closure → FormatSelection(false, color) → PickColor / WriteTopic | Requires current topic and selected range; failure has acknowledgement below; AH; direct formatting acceptance NOT VERIFIED |
+| GUIDE.FORMAT.BOLD | Bold; Button; toolbar bold | Same toolbar after Text color | Click closure → FormatSelection(false, bold) | Same selected-range guard; saves local formatting sidecar/topic pair; AH |
+| GUIDE.FORMAT.RESET | Reset formatting; Button; toolbar reset | Same toolbar after Bold | Click closure → FormatSelection(false, reset) | Removes selected-range personal formatting; same guards; AH |
+| GUIDE.AUTOFIT | Auto-fit text; Checkbox; AutoFitCheck | Right of formatting toolbar, y90 | Click → ChangeAutoFit → FitNotes / preferences | Reflects AutoFit; fits notes with bounded font search; AH |
+| GUIDE.NOTES | Topic notes; Custom RICHEDIT50W; NotesBox | Notes area below toolbar, x296/y128 initially | CreateRichControl(..., true); selection/focus/native read-only text; HandleGuideKeys when scoped | Read-only text; native selection/scroll/copy; no command execution; AN, AH |
+
+ShowEditor creates one owned Create topic/Edit topic window, disables Guide
+while open, and reuses an already-open editor. ID/shortcut are on the first row,
+Title next, then formatting toolbar/body and bottom Save/Cancel. It focuses ID
+for create, Title for edit. Cancel/X/Escape use CloseEditor, destroy the editor
+and re-enable/activate Guide; no unsaved-editor confirmation is constructed.
+Failure to save preserves the editor. These controls are distinct instances of
+the shared toolbar factory, not duplicate function implementations.
+
+| Stable ID | Label / native type / locator | Position | Event → handler / backend | Availability / keyboard / tests |
+|---|---|---|---|---|
+| GUIDE.EDITOR.ID | ID; Edit; EditorId | First row left, x50/y12 | Read by SaveEditor(mode) | Read-only for edit, editable for create; AH |
+| GUIDE.EDITOR.SHORTCUT | Shortcut; Edit; EditorShortcut | First row after ID, x374/y12 | Read by SaveEditor; Uppercase Limit1 | Optional; displayed reserved-letter guidance and SaveEditor validation govern; no global hotkey registration; AH |
+| GUIDE.EDITOR.TITLE | Title; Edit; EditorTitle | Second row x66/y50 | Read by SaveEditor | Single-line title required; first edit-mode focus; AH |
+| GUIDE.EDITOR.FORMAT.COLOR | Text color; Button; toolbar color | Editor toolbar after Selected words, x16/y88 row | Click → FormatSelection(true, color) | Selected editor range required; native picker; changes EditorRuns pending Save; AH |
+| GUIDE.EDITOR.FORMAT.BOLD | Bold; Button; toolbar bold | Same toolbar second button | Click → FormatSelection(true, bold) | Selected editor range; no immediate library write; AH |
+| GUIDE.EDITOR.FORMAT.RESET | Reset formatting; Button; toolbar reset | Same toolbar third button | Click → FormatSelection(true, reset) | Removes selected editor formatting; no immediate library write; AH |
+| GUIDE.EDITOR.BODY | Topic body; Custom RICHEDIT50W; EditorBody | Below toolbar x16/y130; resized with window | HandleEditorChange WM_COMMAND/EN_CHANGE and SyncEditorText timer; SaveEditor reads text/runs | Editable native text/undo; plain topic content, not shell input; AH |
+| GUIDE.EDITOR.SAVE | Save; Button; EditorSave | Bottom row before Cancel | Click closure → SaveEditor(mode) → WriteTopic, update library and CloseEditor | Validates ID/uniqueness/shortcut/title/body; preserves draft on failure; no custom save shortcut installed; AH |
+| GUIDE.EDITOR.CANCEL | Cancel; Button; EditorCancel | Bottom right after Save | Click → CloseEditor; same as editor Close/Escape events | Discards uncommitted editor session without library save; AH |
+
+Guide topic edits/formatting/archive use GuideCore's local paired text/style
+file owner, not core SQLite. Preference handlers use existing bounded/deferred
+settings functions. This inventory reads source only: no topics, preference
+contents or protected GuideSettings.ini metadata were opened. PickColor invokes
+the OS ChooseColorW dialog; inherited native picker internals are not separately
+constructed application controls and are excluded like inherited editor menus.
+
+#### Native feedback choices
+
+Each row is one standard OK acknowledgement at a source call site, not another
+domain operation. Native button focus/ordering and physical acceptance are
+NOT VERIFIED. There is no retry/save permission implied by acknowledgement.
+
+| Stable ID | Dialog title / native choice | Source caller / trigger | Result / tests |
+|---|---|---|---|
+| GUIDE.FEEDBACK.SELECTION | Text formatting / OK | GuideCore.FormatSelection: no selected range | Returns false; AH; direct assertion not identified |
+| GUIDE.FEEDBACK.FORMAT.SAVE | Save failed / OK | FormatSelection: WriteTopic fails/stale text | Retains operation failure; AH; direct assertion not identified |
+| GUIDE.FEEDBACK.ID.INVALID | Invalid ID / OK | SaveEditor: ID syntax/length invalid | Editor retained; AH |
+| GUIDE.FEEDBACK.ID.DUPLICATE | ID already used / OK | SaveEditor: active/archive ID collision | No save; AH |
+| GUIDE.FEEDBACK.SHORTCUT.INVALID | Invalid shortcut / OK | SaveEditor: fixed/reserved shortcut invalid | No save; AH |
+| GUIDE.FEEDBACK.SHORTCUT.RESERVED | Shortcut already used / OK | SaveEditor: built-in shortcut collision | No save; AH |
+| GUIDE.FEEDBACK.SHORTCUT.DUPLICATE | Shortcut already used / OK | SaveEditor: other custom shortcut collision | No save; AH |
+| GUIDE.FEEDBACK.CONTENT | Missing content / OK | SaveEditor: title/body invalid | Editor retained; AH |
+| GUIDE.FEEDBACK.EDITOR.SAVE | Save failed / OK | SaveEditor: WriteTopic failure | Draft remains in editor; AH |
+| GUIDE.FEEDBACK.MOVE | Topic not moved / OK | ArchiveOrRestore: MoveTopic error | No success claim; AH |
+| AHK.FEEDBACK.LAUNCHER | F7Hub launcher / OK | F7HotkeyController.ReportError after TAP/HOLD error | Current press consumed; no automatic retry while held; AL, AM |
+| AHK.FEEDBACK.CLIENT | Guide could not start / OK | Troubleshooting_Quick_Guide catch without --show | Native warning then failure exit; --show instead reports stderr; AR, AP |
+
+#### Hotkeys, event scope and launcher ownership
+
+[F7HotkeyController](../AutoHotkey/Hotkeys/F7HotkeyController.ahk) and
+[F7HubLauncher](../AutoHotkey/Launchers/F7HubLauncher.ahk) are the existing owners;
+[MagneticWindowFollower](../AutoHotkey/Helpers/MagneticWindowFollower.ahk) owns
+cursor-follow movement. No new hotkeys are registered by this documentation.
+
+| Binding identity (not extra control) | Definition / source scope | Handler / target / condition | Tests |
+|---|---|---|---|
+| BIND.AHK.F7.DOWN | F7:: in F7Hub.ahk | f7Controller.OnDown → PENDING, one 180-ms hold timer; repeated presses ignored outside IDLE | AL, AM |
+| BIND.AHK.F7.UP | F7 up:: | OnUp: PENDING → RunTap → LaunchOrFocus; HOLD_STARTING/HOLDING/WAIT_RELEASE → Stop and IDLE | AL, AM, AF |
+| BIND.AHK.F7.HOLD | BeginHold timer while physical F7 remains down | LaunchOrFind visible validated HWND → follower.Start; no foreground-focus requirement; release/failure stops, failure consumes press | AM, AF |
+| BIND.AHK.GUIDE.TOGGLE | $!F7::, shared-host global Alt+F7 | ToggleGuide: hide active Guide only without editor; otherwise ShowGuide; editor/draft takes priority | AT, AH |
+| BIND.AHK.GUIDE.SEARCH | $^f:: under Guide active HWND #HotIf | FocusSearch; show sidebar and focus search | AH, AN |
+| BIND.AHK.GUIDE.SIDEBAR | ^l:: under same Guide active scope | ShowSidebar | AH |
+| BIND.AHK.GUIDE.PREVIOUS | ^PgUp:: under Guide active scope | NavigateTopic(-1) | AN |
+| BIND.AHK.GUIDE.NEXT | ^PgDn:: under Guide active scope | NavigateTopic(1) | AN |
+| BIND.AHK.GUIDE.HIDE | Esc:: under Guide active scope; Guide Close event | Guide.Hide; leaves shared host running | AT, AH |
+| BIND.AHK.GUIDE.ARROWS | Up/Down/Left/Right #HotIf GuideNavigationFocused(); WM_KEYDOWN HandleGuideKeys | NotesBox/TopicList focus, active Guide and no Ctrl/Alt/Shift/Win; Up/Down navigate with repeat, Left/Right change opacity ±1; other controls keep native input | AN |
+| BIND.AHK.GUIDE.LETTERS | GuideHost OnMessage(0x100, HandleGuideKeys), notes/list scope | Non-repeat C/E create/edit outside archive; valid ShortcutTarget letters/1–5 open topics; no per-topic inventory or new global hotkeys | AH, AN |
+| BIND.AHK.EDITOR.CLOSE | EditorGui Close/Escape events | CloseEditor; separate from Guide-hide Escape scope | AH |
+
+Launcher finds hidden/existing windows before launching the checkout's pythonw
+module entry. IsF7HubWindow checks exact F7Hub title, Qt window class and Python
+process-name pattern; it does **not** check the target process command line or
+project root. Cross-checkout disambiguation is therefore NOT VERIFIED, a
+source-grounded follow-up rather than an invented identity guarantee. PendingPid
+prevents repeated launches after readiness timeout. EnsureVisible uses native
+show without activation; Focus separately activates and checks foreground within
+two seconds, reporting refusal rather than forcing focus. These AHK operations
+remain distinct from PR #114's Python timer/Qt restoration.
+
+GuideHost installs keyboard/editor/native draw callbacks and the hidden request
+endpoint; that endpoint and passive owner-draw/resize/timer state are not extra
+controls. Default AutoHotkey host-tray commands and native editor menus are
+framework-owned, not custom F7Hub menu construction. Native hotkey precedence,
+modifier/input acceptance, file-save recovery and window presentation were not
+executed here. No current topic contents, protected preferences or native
+Clipboard data were inspected.
+
+### Shell-family current coverage and Pass 4 historical validation
+
+| Pass 4 presentation group | Control rows |
+|---|---:|
+| A: navigation rail and gear | 5 |
+| B: utility/menu presentations and feedback choices | 9 |
+| C: tray icon/menu and new-ticket Exit confirmation | 5 |
+| D: Mochi dialog, interactive pet surface and module pet menu | 11 |
+| E: Guide window/editor controls and native feedback choices | 38 |
+| **Current shell-family total after Pass 5 corrections** | **68** |
+
+The seven preliminary IDs are preserved. The original Pass 4 checkpoint had
+66 rows and added 59; Pass 5 adds the startup acknowledgement and custom pet
+input surface, yielding 68 current rows. Guide has 17 main-window and nine editor controls plus ten Guide feedback
+choices; two AHK launcher/client acknowledgements complete E. A single Guide
+QAction is presented here and by the existing Knowledge button; final distinct
+action and full-application presentation totals remain Pass 5 work. ACTION/BIND
+records and implicit containers/events are excluded from these control rows.
+
+**GUI_REGISTRY_PASS4_COMPLETE — READY_FOR_FINAL_AUDIT.** Fresh author-side
+focused static validation: **PASS**. Checks cover 66 scoped control/presentation
+rows, seven preserved preliminary IDs, factory/loop expansion, named actions and
+handlers, Qt signals and AHK bindings, objectNames/labels, selected layout/state/
+shortcut invariants, source/test identities, unique row IDs, Markdown/counts,
+unchanged bytes outside this section and both AGENTS additions, exact three-path
+candidate scope, empty index and git diff --check. Source inspection supplements
+automated checks for semantic availability/focus/backend relationships.
+
+The original audit FAIL is retained: ShortcutTarget was checked against the
+caller instead of its included TopicRouting owner, and tuple/list JSON read-back
+equality failed. The validator/owner reference were corrected with separate
+failure/correction records before the successful execution; failure history is
+not rewritten as success. No source correction or runtime retry occurred.
+
+A–E subsection checkpoints and final static evidence are external. Runtime GUI,
+AHK/hotkeys, Clipboard, database, PowerShell and full regression execution were
+NOT RUN. Physical/native behavior and the explicitly listed source/test
+limitations remain NOT VERIFIED. Pass 5 comprehensive consistency/coverage/
+shortcut/presentation audit has not begun. Earlier Pass 1–3 checkpoint summaries
+retain their historical remaining-work statements. No independent-review
+request or Git integration is authorized.
+
+<a id="gui-registry-clipboard"></a>
+
+## Clipboard Center — Pass 3 source-verified inventory
+
+Inspected integrated source: `62f95f185cd5abfefbfbc16822d12dc30144ed79`.
+All entries inherit **Integrated / static inspection**; runtime/native tests
+are **NOT RUN** here. The nine preliminary IDs are retained and expanded; five
+rows are added. This section uses the existing control-counting convention:
+one constructed interactive/data-view widget or transient confirmation choice
+per row. Combo-box choices, stacked containers, passive labels, repeated history
+rows, headers and native scrollbars/editor commands are not extra controls.
+`—` for objectName means no source assignment; member names are source locators.
+`—` for shortcut means no explicit custom binding, not absence of native input.
+
+Test keys: **CW** = [workspace tests](../Tests/GUI/test_clipboard_workspace.py)
+(safe table roles, loading/Retry, source switching, callback gaps, scroll and
+keyboard); **CS** = [Setup GUI tests](../Tests/GUI/test_clipboard_setup.py)
+(draft/pending/conflict, dynamic checkboxes, consent, source/shell guards and
+accessible keyboard input); **CR** =
+[Recent integration](../Tests/Integration/test_clipboard_recent_flow.py)
+(bounded service/repository reads and composition); **CI** =
+[Setup integration](../Tests/Integration/test_clipboard_setup_flow.py)
+(revision-checked preferences, restart/database scope and history preservation).
+These are inspected existing references, not fresh execution results.
+
+### Workspace, Recent and unavailable Windows source
+
+Owner: [clipboard_workspace.py](../Python/f7hub/gui/clipboard_workspace.py),
+`ClipboardWorkspace.__init__`. The outer QVBoxLayout contains heading, Source
+QHBoxLayout (label, selector, stretch), hidden-until-needed source feedback, then
+`source_pages` (QStackedWidget, `clipboardSourcePages`, stretch 1). Its first
+page is `f7hub_page` (`f7hubClipboardSourcePage`); second is `windows_page`
+(`windowsClipboardSourcePage`). The workspace is `clipboardWorkspace`, accessible
+Clipboard Center. These containers describe ownership, not extra tab controls.
+
+With SettingsService supplied, the F7Hub page contains Recent/Clipboard Setup
+navigation then `sections` (QStackedWidget: `recent_page`, then one retained
+ClipboardSetup). Without SettingsService, no section buttons or Setup are
+constructed and Recent content goes directly in the F7Hub page VBox. Recent's
+VBox contains status, optional Refresh, table (stretch 1), then page summary.
+Without ClipboardService, Refresh/table/model/summary are absent and the
+truthful unavailable status remains; Setup can still exist independently.
+
+| Stable ID | Label / member; widget; objectName | Logical position / parent | Signal or event → handler / backend | Availability / focus / accessibility | Shortcut | Tests |
+|---|---|---|---|---|---|---|
+| CLIPBOARD.SOURCE | F7Hub Clipboard / Windows Clipboard / `source_selector`; QComboBox; `clipboardSourceSelector` | Source row after Source: label; outside both source pages | activated(index) → `_source_activated` → `select_source(itemData(index))`; presentation only, no acquisition/service call | Always constructed; choices f7hub then windows, default f7hub; accessible Clipboard source with source-choice description; label buddy, no label mnemonic; transition refuses Recent loading or settings_pending and negotiates dirty Setup | Native combo input; no custom shortcut | CW, CS, CI |
+| CLIPBOARD.RECENT | Recent / `recent_button`; QPushButton; — | F7Hub navigation row first, before Setup and stretch | clicked → `show_recent` → `confirm_leave` / `leave`; no automatic query from this handler | Only with SettingsService; source must be f7hub and Setup departure accepted; local button is not disabled for Recent reads; focuses Refresh when present; accessible Recent Clipboard history | — | CW, CS |
+| CLIPBOARD.SETUP | Clipboard Setup / `setup_button`; QPushButton; — | Same navigation row second | clicked → `show_setup` → setup.reload; selects Setup only if accepted | Only with SettingsService and f7hub source; reload guards pending/dirty state; Recent loading is not an independent section-entry guard; requests focus on Reload; accessible Clipboard Setup | — | CS, CI |
+| CLIPBOARD.RECENT.REFRESH | Refresh / Retry / `refresh_button`; QPushButton; `clipboardRefreshButton` | Recent VBox below status, left-aligned, before table | clicked → `refresh` → own ServiceTaskRunner.submit(ClipboardService.get_recent); generation-bound `_recent_completed` → `_loaded` / `_failed` → `_finish` | Only with ClipboardService; handler requires f7hub and not loading; disabled during request; _finish restores enabled state and label/accessibility Refresh or Retry; one button, same handler | — | CW, CR |
+| CLIPBOARD.RECENT.TABLE | `table`; QTableView; `clipboardRecentTable` | Recent VBox after Refresh, stretch 1, before summary | ClipboardRecentTableModel receives replace_rows from GUI completion; data provides DisplayRole/AccessibleTextRole; no row-activation handler or selected Item action | Only with ClipboardService; no edits, selection or sorting; Tab leaves table; accessible Recent Clipboard history; locally remains enabled during reads while rows clear; ancestor state still applies | Native focus/scroll; no custom shortcut | CW, CR |
+| CLIPBOARD.WINDOWS.REFRESH | Refresh / `windows_refresh_button`; QPushButton; `windowsClipboardRefreshButton` | Windows page VBox after heading, unavailable message and help; before stretch | No connected handler; no native acquisition or snapshot backend | Always constructed, disabled; visible on Windows page; accessible Refresh Windows Clipboard; description says refresh unavailable | — | CW |
+
+ClipboardRecentTableModel has exactly Time, Preview, Retention, Pinned columns.
+Time displays explicit UTC, previews remain plain text with a truncation suffix
+when indicated, retention displays Temporary/Saved and pinned displays Yes/No.
+No raw text or tooltip is exposed by the model. The preview column stretches;
+other widths are 230/105/70, headers cannot sort, the vertical header is hidden,
+and word wrap is disabled. Native scrolling is not a separate history paging
+contract. `has_more` adds feedback only: no Next/Previous or load-more control.
+
+Recent uses its own [ServiceTaskRunner](../Python/f7hub/gui/service_task_runner.py),
+separate from MainWindow's shared runner and Setup's runner. First accepted
+`activate` while on f7hub calls `refresh` once; `_started` prevents repeated
+navigation from re-reading. Refresh clears rows/summary before dispatch.
+`loading` includes `_loading`, runner.busy and runner.completing; generation
+checks reject obsolete success/failure. Completion does not force focus.
+Success distinguishes populated/empty pages; errors use fixed safe feedback and
+relabel the same button Retry without exposing exception details or previews.
+The backend path is GUI →
+[ClipboardService](../Python/f7hub/services/clipboard_service.py).get_recent
+(default limit 50) →
+[ClipboardRepository](../Python/f7hub/repositories/clipboard_repository.py) →
+read-only SQLite first-page projection. It is durable F7Hub Recent, not RAM-01A
+history or the current Windows Clipboard. No GUI SQL or native Clipboard read.
+
+Source switching restores the committed combo index before modal guards, refuses
+unknown keys, and treats the current source as a no-op. It preserves the retained
+pages/model/runners and per-source shell-scroll positions. Cancel retains the
+Setup section/draft and restores a usable remembered F7Hub child focus; accepted
+departure ends that editing session, resets the section to Recent and focuses
+the source selector. Scroll restoration is synchronous through the supplied
+shell callbacks. Selecting either source does not itself dispatch Recent,
+Settings or Windows acquisition. Source and section changes are different paths.
+
+The explicit local Tab chain with sections is selector → Recent → Setup →
+Refresh → table when those widgets exist; without sections, selector → Refresh
+→ table. Setup has its separate chain below. `activation_focus_target` picks a
+usable section control, falling back to the selector; Windows always proposes
+the selector. Source-label buddy assignment has no `&` mnemonic. No custom
+QShortcut, QAction or context menu is installed in these two Clipboard classes.
+Physical focus traversal and platform mnemonic behavior are **NOT VERIFIED**.
+
+### Clipboard Setup, preferences and unsaved-draft confirmation
+
+Owner: [clipboard_setup.py](../Python/f7hub/gui/clipboard_setup.py), ClipboardSetup
+(`clipboardSetup`, accessible Clipboard Setup). Its QVBoxLayout contains heading,
+runtime and consent messages, then each checkbox followed by its explanatory
+label; draft/status feedback follows; bottom action row is Apply, Cancel, Reload,
+stretch, followed by outer stretch. The three checkbox instances come from the
+ordered `fields` tuple, stored in `checkboxes[key]`; their objectNames are the
+exact keys in [clipboard_settings.py](../Python/f7hub/domain/clipboard_settings.py).
+All three definitions default false. Callback `lambda value, key=key:
+self._edited(key, value)` captures the definition key per instance; value/key
+are callback arguments, not handler names. `_present_values` blocks signals while
+restoring values, so reading/reloading does not affirm workflow consent.
+
+`E-editable` means a loaded snapshot with storage_available and not pending.
+`pending` includes the local accepted-operation flag and its runner.busy; the
+workspace's settings_pending additionally includes runner.completing. `_submit`
+holds the local flag through completion presentation and generation checks.
+Enabled state is local; ordinary parent-page state can also disable a control.
+
+| Stable ID | Label / member; widget; objectName | Logical position / parent | Signal or event → handler / backend | Availability / accessibility / keyboard | Tests |
+|---|---|---|---|---|---|
+| CLIPBOARD.SETUP.WORKFLOW | &Enable Clipboard workflow and local history / `checkboxes[WORKFLOW_ENABLED]`; QCheckBox; `clipboard.workflow_enabled` | Setup first checkbox, below consent message, before its explanation | toggled(value) → `_edited(WORKFLOW_ENABLED, value)`; local draft, sets _affirmed on true; Apply owns any save/grant | E-editable; accessible Enable Clipboard workflow and local history; description discloses future eligible durable manual capture, 7-day TEMPORARY default, sensitivity-detection limits and no history deletion on disable; &E mnemonic / native Space | CS, CI |
+| CLIPBOARD.SETUP.SOURCE.PROCESS | Store source &application executable name / `checkboxes[SOURCE_PROCESS_ENABLED]`; QCheckBox; `clipboard.source_process_persistence_enabled` | Second checkbox after workflow explanation, before its own explanation | toggled(value) → `_edited(SOURCE_PROCESS_ENABLED, value)`; Apply reads draft for Settings | E-editable independently of workflow value; accessible Store source application executable name; description limits future metadata to executable basename, excludes full paths/command lines; &a mnemonic / native Space | CS, CI |
+| CLIPBOARD.SETUP.SOURCE.TITLE | Store source window &title / `checkboxes[SOURCE_TITLE_ENABLED]`; QCheckBox; `clipboard.source_window_title_persistence_enabled` | Third checkbox after process explanation, before its own explanation and draft/status labels | toggled(value) → `_edited(SOURCE_TITLE_ENABLED, value)`; Apply reads draft for Settings | E-editable independently of workflow/process values; accessible Store source window title; description warns titles may be sensitive and collection is independent; &t mnemonic / native Space | CS, CI |
+| CLIPBOARD.SETUP.APPLY | &Apply / `apply_button`; QPushButton; — | Setup action QHBoxLayout first | clicked → `apply` → changed-key validation → `_submit`; ordinary SettingsService.apply or explicit ClipboardService.enable_history_from_setup; `_saved` handles committed result | E-editable plus _save_available and no conflict; no dirty-only enable gate; accessible Apply Clipboard preferences; no-change path avoids write; &A mnemonic | CS, CI |
+| CLIPBOARD.SETUP.CANCEL | &Cancel / `cancel_button`; QPushButton; — | Action row second | clicked → `cancel` → restore latest loaded draft, clear _affirmed; no service call/write | Loaded snapshot and not pending, even when storage unavailable/conflicted; conflict remains until Reload; accessible Cancel Clipboard preference edits; &C mnemonic | CS, CI |
+| CLIPBOARD.SETUP.RELOAD | &Reload / `reload_button`; QPushButton; — | Action row third, before stretch | clicked → `reload` → confirm_discard → `_submit`; ClipboardService.refresh_setup if supplied, otherwise SettingsService.refresh | Not pending; dirty draft needs Discard; reload never grants consent; accessible Reload Clipboard preferences; &R mnemonic | CS, CI |
+| CLIPBOARD.SETUP.CONFIRM.DISCARD | Discard; QMessageBox standard button | Unsaved Clipboard preferences → native modal action area; source does not specify physical button order | `confirm_discard` compares question result to Discard, allowing the caller's departure/reload/close | Only when draft dirty and not pending; caller performs session reset or authoritative reload; no save/grant from confirmation | CS |
+| CLIPBOARD.SETUP.CONFIRM.CANCEL | Cancel; QMessageBox standard button | Same modal action area | Any result other than Discard refuses the caller's transition and preserves draft | Explicit default Cancel; pending refuses before opening dialog; native dialog behavior, platform resolution NOT VERIFIED | CS |
+
+The Setup Tab chain follows checkbox insertion order: workflow → process → title
+→ Apply → Cancel → Reload. Source label mnemonic markers above are not new
+global shortcuts. The process checkbox (&a) and Apply (&A) share the letter A
+in source; platform dispatch/cycling for that mnemonic is **NOT VERIFIED**.
+No default/auto-default QPushButton policy or custom shortcut is assigned here.
+
+Settings are mediated by [SettingsService](../Python/f7hub/services/settings_service.py)
+and [SettingsRepository](../Python/f7hub/repositories/settings_repository.py).
+Setup receives the composed Clipboard owner only when its supports_setup property
+is true. `refresh_setup` reads coherent preference/consent state; ordinary edits
+use SettingsService.apply with the captured loaded revision. A deliberate
+workflow affirmation plus Apply can call ClipboardService.enable_history_from_setup
+with both revision and consent epoch; imported true values require deliberate
+uncheck/recheck. The owner delegates the trusted Setup transaction through the
+existing Settings service/repository. No-op Apply, Cancel and Reload do not grant.
+Source-process/title preferences remain independent, and disabling workflow does
+not delete existing history. Manual consent is not passive-monitoring authority.
+
+Conflict preserves the draft and blocks Apply until Reload. Uncertain save says
+it may have committed, disables saving and requires read-only reconciliation;
+contention preserves a retryable draft, while persistence/unknown failure blocks
+saving until reload. The saved baseline is accepted before rendering; notification
+or presentation failure is reported separately from commit, preventing a replayed
+write. Invalid/unavailable sensitive settings fail closed; Reload remains the
+recovery route. `end_session` cancels local edits and advances generation only
+when not pending. No content capture or native paste is dispatched by Setup.
+
+Passive indicators are QLabels: workspace heading (`clipboardHeading`),
+status/unavailable alias (`clipboardUnavailableMessage`), Source: label,
+source_message, page_message, windows_heading, windows_unavailable_message
+(`windowsClipboardUnavailableMessage`), windows_help; Setup heading,
+runtime_message, consent_message, one explanation per checkbox, draft_message
+and status_message. They use plain text and accessible feedback; they are not
+additional actions. Windows says snapshot unavailable and retains a constructed
+disabled Refresh. Setup runtime text still advertises unavailable Ctrl+Alt+C/V;
+this wording is not a registered shortcut or evidence of acquisition capability.
+
+### Clipboard-owned shell boundaries and implementation status
+
+[MainWindow](../Python/f7hub/gui/main_window.py) owns the existing shared
+clipboard_action (`clipboardCenterAction`, data clipboard.center) →
+show_clipboard; its rail presentation is already SHELL.NAV.CLIPBOARD and is not
+counted again here. show_clipboard guards shared/Ticket/Script pending work and
+Ticket draft departure, constructs one retained ClipboardWorkspace with the exact
+composed services and scroll callbacks, adds it to pages and calls activate.
+Same-page activation preserves usable editor/rail focus; other accepted entry
+uses activation_focus_target. `_leave_clipboard` negotiates Setup departure.
+Explicit Exit's confirm_exit refuses Recent/settings pending work and negotiates
+drafts; composed X-to-tray does not call that departure path and retains the
+workspace. No shell/Tray control inventory is added by this pass.
+
+Recent reads route through the existing Clipboard service/repository; Setup
+preferences and consent route through their Settings/Clipboard owners. Qt event
+routing creates no native reader. [Bootstrap](../Python/f7hub/app/bootstrap.py)
+supplies the selected-database services. Integrated
+[RAM-01A volatile history](../Python/f7hub/domain/clipboard_history.py) has no
+automatic Windows observation or GUI wiring in these classes. RAM-01B passive
+monitoring is not implemented, and Win+Alt+C HybridB-01 remains an unintegrated,
+blocked development candidate, not an available control. There are no delivered
+monitoring Enable/Pause/Resume/Clear/Save controls here. The
+[RAM-01 successor contract](Planning/Clipboard/RAM01_Volatile_History_And_Promotion_Contract.md)
+describes later native/history/explicit-promotion stages; it does not activate
+them. Preserve the [1A manual-consent](Planning/Clipboard/1A_Clipboard_Domain_Data_Lifecycle.md),
+[1B acquisition](Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md)
+and [1C presentation](Planning/Clipboard/1C_PySide6_Clipboard_Center.md) owners.
+
+Documentation finding: historical CP-02/CC-01 descriptions in
+[Python architecture](13_PythonArchitecture.md) describe an earlier read-only
+ClipboardService/return-button stage. Current source and the later S05 owner
+contract include Setup consent and omit the retired return button. Those dated
+records remain unchanged; they are not current-control evidence or new authority.
+
+### Pass 3 coverage and validation status — historical checkpoint
+
+| Clipboard inventory group | Control rows |
+|---|---:|
+| Source selector and Recent/Setup navigation | 3 |
+| Recent Refresh/Retry and read-only table | 2 |
+| Constructed, disabled Windows Refresh | 1 |
+| Setup preferences and Apply/Cancel/Reload | 6 |
+| Unsaved-draft Discard/Cancel choices | 2 |
+| **Clipboard total** | **14** |
+
+All 14 rows are source-mapped: 12 widget instances and two confirmation choices.
+The nine prior IDs are preserved; three checkbox IDs and two confirmation IDs
+are new. Refresh/Retry and source combo choices are not double-counted. Passive
+labels and stacked/page containers add no control rows.
+
+**GUI_REGISTRY_PASS3_COMPLETE — READY_FOR_CONTINUATION.** Fresh author-side
+focused static validation: **PASS**. Checks cover all 12 widget mappings, dynamic
+definition keys/objectNames/labels and loop-captured callbacks, ten logical
+control connections, the two confirmation choices, source/class/service APIs,
+selected layout/Tab/state invariants, linked source/test/contract identities,
+unique IDs, tables/counts, byte preservation outside this section and of both
+AGENTS additions, exact three-path candidate scope, empty index and
+`git diff --check`. Logical state/backend/focus semantics were also inspected
+in source. These checks establish no runtime/native behavior; referenced tests
+were inspected, not executed. No GUI runtime, Clipboard access, PowerShell,
+database modification, native Windows test or full regression suite was run.
+Physical focus/rendering, DPI and native mnemonic/default-button resolution
+remain **NOT VERIFIED**, including the documented A/a mnemonic overlap.
+
+Passes 1 and 2 below retain their dated completion/remaining-work snapshots.
+The full application registry remains
+INCOMPLETE: remaining work is Shell/Settings utilities, Tray, Mochi, Guide/AHK
+and the final comprehensive action/presentation/shortcut audit. No independent
+review readiness or Git integration eligibility is claimed.
+
+## Pass 1 conventions and coverage
+
+Pass 1 inspects Tickets and Knowledge Base at the source SHA above on
+2026-10-26. The following tables inherit **Integrated / static inspection**;
+runtime tests are **NOT RUN**. Each subsection names the exact source/class,
+parent and test owners. A row's member name is a source locator, never an
+invented objectName. ObjectName is `—` unless explicitly shown. Widget type,
+label, relative position, container, event/handler, backend, state and keyboard
+behavior are recorded per row or inherited from the subsection. Ordinary input
+fields have no separate activation handler: the named submit handler reads them.
+`—` in the shortcut column means no explicit custom shortcut; normal Qt input
+and dialog behavior remains. Mnemonics are shown as source label `&` markers;
+their native resolution has not been exercised here.
+
+Count one row for each input, button, data view, splitter, tab target or transient
+dialog choice. Repeated data rows, table headers, native editor context commands,
+scrollbars and decorative labels are not separate controls. A tab target counts
+once; its read-only editor is recorded in that row. Passive feedback labels are
+listed below each group, outside these control counts. QAction identity is
+separate from its presentations. Child dialogs are counted with the module that
+opens them; TicketKnowledgeWidget belongs to Tickets. These rules apply to the
+new Pass 1 tables; the earlier partial tables await the later audit.
+
+<a id="gui-registry-tickets"></a>
+
+## Tickets — queue and saved-ticket detail
+
+Owner: [ticket_workspace.py](../Python/f7hub/gui/ticket_workspace.py),
+`TicketWorkspace._build_ui`. MainWindow's Tickets page contains a QVBoxLayout
+with a header, feedback and a horizontal QSplitter. The queue is its first
+child; the second is `detail_stack` (QStackedWidget: detail, creation). The
+detail panel is disabled until a ticket is loaded. `T-idle` means no runner
+busy, note, creation, status or classification operation pending. Individual
+handlers retain their own guards; enabled appearance alone does not prove an
+operation will dispatch. Service reads/writes use ServiceTaskRunner and
+[TicketService](../Python/f7hub/services/ticket_service.py) → TicketRepository
+→ SQLite. TicketService owns validation, allowed status transitions, stale-edit
+checks and transactional writes; GUI selections alone do not write.
+
+Test keys: **TW** = [workspace flow](../Tests/Integration/test_ticket_workspace_flow.py),
+**TC** = [workspace creation](../Tests/Integration/test_ticket_workspace_creation.py),
+**TI** = [inline classification](../Tests/Integration/test_ticket_inline_classification.py),
+**CO** = [company context](../Tests/Integration/test_ticket_company_context_flow.py),
+**MW** = [main window](../Tests/GUI/test_main_window.py). These are inspected
+existing test references, not fresh test outcomes. In particular TW covers
+search/paging, note keyboard input, status failures and post-commit recovery;
+TC covers creation/cancellation and callback gaps; TI covers field edits and
+classification; MW covers queue traversal and compact layout reachability.
+
+| Stable ID | Label / member; widget; objectName | Logical position / container and order | Event → handler / dependency | Availability / focus | Shortcut | Tests |
+|---|---|---|---|---|---|---|
+| TICKETS.NEW | + New Ticket / `new_ticket_button`; QPushButton; `newTicketButton` | Header QHBoxLayout, after recovery button | clicked → `begin_creation`; local mode change | T-idle, not creating, create widget supplied; accessible New Ticket; focuses Subject | — | TC, MW |
+| TICKETS.RECOVER | Open created ticket / `retry_created_button`; QPushButton; — | Header, before New Ticket | clicked → `_open_created_ticket` → `open_ticket`; TicketService read | Hidden initially; shown for retained created identity; enabled T-idle and not creating | — | TC |
+| TICKETS.SPLIT | Queue/detail divider; QSplitter; — | Below feedback; queue first, detail stack second; initial sizes 460/620 | Native splitter movement; presentation only | Native splitter behavior; screen geometry NOT VERIFIED | — | MW (compact layout; no direct drag assertion identified) |
+| TICKETS.FILTER.STATUS | All statuses / `status_filter`; QComboBox; — | Queue `filters` QHBoxLayout, first | currentIndexChanged → `refresh_list(offset=0)` → `list_tickets` | Not runner busy; accessible Filter tickets by status | — | TW |
+| TICKETS.REFRESH | Refresh / `refresh_button`; QPushButton; — | Same filter row, second | clicked lambda → `refresh_list` → `list_tickets` | No explicit button disabling; handler rejects busy/pending; preserves page/retry offset | — | TW, TC |
+| TICKETS.FILTER.PRIORITY | All priorities / `priority_filter`; QComboBox; — | Queue QVBoxLayout, below status row | currentIndexChanged → `refresh_list(offset=0)` → `list_tickets` | Not runner busy; accessible Filter tickets by priority | — | TW |
+| TICKETS.FILTER.TYPE | All types / `type_filter`; QComboBox; — | Below priority | currentIndexChanged → `refresh_list(offset=0)` → `list_tickets` | Not runner busy; accessible Filter tickets by type | — | TW |
+| TICKETS.SEARCH.INPUT | Search subjects, descriptions and notes / `subject_search_input`; QLineEdit; — | Queue `search_row`, first, stretch 1 | returnPressed → `search_subjects` → `refresh_list` → `list_tickets` | Not runner busy; accessible name equals placeholder | Return | TW |
+| TICKETS.SEARCH.SUBMIT | Search / `search_subjects_button`; QPushButton; — | Search row, second | clicked → `search_subjects`; same path as input | Not runner busy | — | TW |
+| TICKETS.SEARCH.CLEAR | Clear / `clear_subject_search_button`; QPushButton; — | Search row, third | clicked → `clear_subject_search` → `refresh_list(offset=0)` | Not runner busy | — | TW |
+| TICKETS.NUMBER.INPUT | Ticket number / `ticket_number_input`; QLineEdit; — | Queue `number_row`, first, stretch 1 | returnPressed → `open_ticket_by_number` → `get_ticket_details_by_number` | Not runner busy; accessible Open saved ticket by number | Return | TW |
+| TICKETS.NUMBER.OPEN | Open number / `open_number_button`; QPushButton; — | Number row, second | clicked → `open_ticket_by_number`; same read as input | Not runner busy; handler also guards mode/pending and drafts | — | TW |
+| TICKETS.QUEUE | `table`; QTableView; — | Queue below number row | activated → `_activate_row` → `open_ticket` → `get_ticket_details` | Single read-only row selection; accessible Tickets; activate a row to open; Tab leaves table | Native row activation | TW, MW |
+| TICKETS.QUEUE.OPEN | Open selected ticket / local `open_button`; QPushButton; — | Queue below table | clicked lambda → `_activate_row(currentIndex)` | No explicit enable condition; invalid selection is ignored | — | TW, MW |
+| TICKETS.PAGE.PREVIOUS | Previous / `previous_button`; QPushButton; — | Bottom `pages` QHBoxLayout, before page label | clicked → `refresh_list(offset - PAGE_SIZE)` | Initially disabled; successful read enables if offset > 0; handler guards pending | — | TW |
+| TICKETS.PAGE.NEXT | Next / `next_button`; QPushButton; — | Bottom page row, after page label | clicked → `refresh_list(offset + PAGE_SIZE)` | Initially disabled; successful read enables if more than PAGE_SIZE results | — | TW |
+| TICKETS.TAB.DETAILS | Details / `summary`; QTextEdit | Detail `tabs` QTabWidget, first tab | Native tab change; `_display_details` presents TicketService result | Read-only, plain text; detail parent enabled only after load | — | TW |
+| TICKETS.TAB.NOTES | Notes / `notes_history`; QTextEdit | Detail tabs, second | Native tab change; `_display_details` | Read-only plain text | — | TW |
+| TICKETS.TAB.HISTORY | History & timeline / `timeline`; QTextEdit | Detail tabs, third | Native tab change; `_display_details` | Read-only plain text | — | TW |
+| TICKETS.TAB.KNOWLEDGE | Knowledge / `knowledge_tab`; TicketKnowledgeWidget | Detail tabs, fourth | Native tab change; knowledge_article_requested relays to workspace signal; child mappings below | Detail parent gate; child service/selection gates | — | TK |
+| TICKETS.TAB.COMPANY | Company / local `company_tab`; QWidget | Detail tabs, fifth | Native tab change; controls below | Detail parent gate | — | CO |
+| TICKETS.COMPANY.LOAD | Load recent tickets / `company_load_button`; QPushButton | Company tab QVBoxLayout, after heading/feedback | clicked → `load_company_tickets` → `list_tickets(company_id, limit=20, offset=0)` | Not runner busy, retained non-null company context; handler also guards mode/pending | — | CO |
+| TICKETS.COMPANY.TABLE | `company_table`; QTableView | Company tab, below Load | activated → `_activate_company_row` → `open_ticket`; currentChanged → `_set_company_controls_idle` | Single read-only row selection; accessible Recent tickets for this company | Native row activation | CO |
+| TICKETS.COMPANY.OPEN | Open selected ticket / `company_open_button`; QPushButton | Company tab, below table | clicked lambda → `_activate_company_row(currentIndex)` | Not runner busy and valid current index | — | CO |
+| TICKETS.AUTHOR | Your name (optional) / `author_input`; QLineEdit | Detail QVBoxLayout, immediately below tabs | Read by `add_note` and `change_status` → TicketService | Loaded ticket, not creating, T-idle; accessible Activity author | — | TW |
+| TICKETS.NOTE.TYPE | `note_type`; QComboBox | Quick Note QHBoxLayout, after label, before stretch | Read by `add_note` → `add_note` service | Same note gate; default INTERNAL; accessible Note type | — | TW |
+| TICKETS.NOTE.ADD | Add note / `add_note_button`; QPushButton | Quick Note row, after stretch | clicked → `add_note` → TicketService.add_note | Note gate plus nonblank note; tooltip documents shortcut | Ctrl+Enter in editor also calls handler | TW, MW |
+| TICKETS.NOTE.INPUT | Add a support note… / `note_input`; QTextEdit | Below Quick Note row | textChanged → `_update_note_controls`; eventFilter → `add_note` | Plain text; note gate; accessible New note; focus restored after owned completion; Escape consumed | Ctrl+Return/Enter with no other modifier, no auto-repeat | TW |
+| TICKETS.STATUS.SELECT | Change status / `status_input`; QComboBox | Detail QFormLayout, first row | currentIndexChanged → resolution visibility; read by `change_status` | Loaded-ticket parent gate; choices from `allowed_statuses`; accessible New ticket status | — | TW |
+| TICKETS.STATUS.REASON | Reason / `reason_input`; QLineEdit | Same form, second row | Read by `change_status` | Loaded-ticket parent gate; accessible Status change reason | — | TW |
+| TICKETS.STATUS.RESOLUTION | Resolution summary / `resolution_input`; QTextEdit | Below status form | Read by `change_status` for RESOLVED | Plain text; visible only for RESOLVED; accessible Resolution summary | — | TW |
+| TICKETS.STATUS.APPLY | Apply status / `change_status_button`; QPushButton | Below resolution | clicked → `change_status` → TicketService.change_status | Enabled when status count > 1 at detail load; handler rejects mode/pending/busy | — | TW, TC |
+| TICKETS.CLASSIFY.PRIORITY | Priority / `priority_input`; QComboBox | `properties` QHBoxLayout, before Type | currentIndexChanged → `_update_classification_controls`; read by `apply_classification` | Loaded, T-idle, not creating, no edit dialog; accessible Ticket priority | — | TI |
+| TICKETS.CLASSIFY.TYPE | Type / `type_input`; QComboBox | Properties row, after Priority | currentIndexChanged → `_update_classification_controls`; read by `apply_classification` | Same classification gate; accessible Ticket type | — | TI |
+| TICKETS.CLASSIFY.APPLY | Apply changes / `apply_properties_button`; QPushButton | Properties row, last | clicked → `apply_classification` → `update_ticket_classification` | Classification gate plus dirty baseline; accessible Apply ticket changes | — | TI |
+| TICKETS.EDIT.SUBJECT | Edit subject / `edit_subject_button`; QPushButton | Bottom `detail_actions` QHBoxLayout, first | clicked → `open_edit_subject`; dialog below | Parent gate; handler requires T-idle and no other edit dialog | — | TI, TW |
+| TICKETS.EDIT.DESCRIPTION | Edit description / `edit_description_button`; QPushButton | Detail action row, second | clicked → `open_edit_description`; dialog below | Same handler guard as subject | — | TI, TW |
+| TICKETS.RELOAD | Reload ticket / `reload_button`; QPushButton | Detail action row, third | clicked lambda → `open_ticket(current id)` → `get_ticket_details` | Parent gate; normal read/pending/discard guards apply | — | TI, TW |
+| TICKETS.CREATE.CANCEL | Cancel / `cancel_create_button`; QPushButton | Creation panel QVBoxLayout, below scroll area holding creation widget | clicked → `cancel_creation`; local reset and previous detail restore | Creation panel visible; T-idle; accessible Cancel New Ticket | — | TC |
+| TICKETS.CONFIRM.CREATE.DISCARD | Discard; QMessageBox standard button | Unsaved new ticket dialog in `cancel_creation` | Question result Discard → reset form and leave creation | Only when a creation draft exists; Cancel is default | — | TC |
+| TICKETS.CONFIRM.CREATE.CANCEL | Cancel; QMessageBox standard button | Same confirmation | Question result Cancel → retain draft | Default; native dialog dismissal | Native dialog Cancel | TC |
+| TICKETS.CONFIRM.ACTIVITY.DISCARD | Discard; QMessageBox standard button | Unsaved ticket activity dialog in `confirm_discard` | Question result Discard → caller may navigate/reload | Draft predicate includes note, status, reason, resolution, classification; pending note/classification refuses | — | TI, TW |
+| TICKETS.CONFIRM.ACTIVITY.CANCEL | Cancel; QMessageBox standard button | Same confirmation | Question result Cancel → caller preserves current context | Default | Native dialog Cancel | TI, TW |
+
+Passive indicators: `workspace_heading`, `feedback`, `page_label`, detail
+`heading`, `company_heading`, `company_feedback`, and the Quick Note/Priority/
+Type labels are QLabels. They present mode, read/write/recovery outcome and
+selection context; they are not extra activation actions. Layout positions above
+follow source insertion order; native pixel rendering/DPI is NOT VERIFIED.
+
+### Ticket creation form and quick reference dialogs
+
+Owner: [ticket_create_widget.py](../Python/f7hub/gui/ticket_create_widget.py),
+`TicketCreateWidget._build_ui`, objectName `ticketCreateWidget`; hosted inside
+the creation panel's resizable QScrollArea. Unless shown otherwise, fields are
+read by `submit` → TicketService.create_ticket. In MainWindow it runs through
+ServiceTaskRunner; the standalone widget also has a synchronous fallback.
+The form has a QFormLayout, then an action QHBoxLayout with status/stretch/Create.
+`StandardKey.Save` is scoped to WidgetWithChildrenShortcut → `submit`; actual
+platform key resolution is NOT VERIFIED here. No explicit Tab order is set in
+this form. Creation entry focuses Subject; failures preserve input and target
+the invalid field.
+
+**TF** = [creation widget tests](../Tests/GUI/test_ticket_create_widget.py),
+**TR** = [reference widget tests](../Tests/GUI/test_ticket_reference_widget.py),
+**QC** = [quick company tests](../Tests/GUI/test_quick_company_dialog.py),
+**QN** = [quick contact tests](../Tests/GUI/test_quick_contact_dialog.py).
+TicketReferenceService → CompanyRepository / ContactRepository /
+CategoryRepository supplies choices; CompanyService and ContactService own
+quick creation through their respective repositories. No GUI SQL is involved.
+
+| Stable ID | Label / member; widget; objectName | Position / container | Event → handler / backend | Availability / accessibility | Shortcut | Tests |
+|---|---|---|---|---|---|---|
+| TICKETS.CREATE.NUMBER | Ticket number / `ticket_number_input`; QLineEdit; `ticketNumberInput` | Form row 1 | Read by `submit` | Optional; blank generates number; accessible Ticket number | Save action reads field | TF |
+| TICKETS.CREATE.SUBJECT | Subject * / `subject_input`; QLineEdit; `ticketSubjectInput` | Form after number error row | Read by `submit` | Required; accessible Subject, required | Save action reads field | TF, TC |
+| TICKETS.CREATE.TYPE | Type / `ticket_type_input`; QComboBox; `ticketTypeInput` | Below subject error | Read by `submit` | Incident default; accessible Ticket type | — | TF |
+| TICKETS.CREATE.PRIORITY | Priority / `priority_input`; QComboBox; `ticketPriorityInput` | Below Type | Read by `submit` | Medium default; accessible Priority | — | TF |
+| TICKETS.CREATE.COMPANY | Company / `company_input`; QComboBox; `ticketCompanyInput` | Company form row, first, stretch 1 | currentIndexChanged → `_company_changed` → `_load_contacts`; submit reads id | Not busy and no pending contact; Not selected allowed; accessible Company | — | TR, QC, QN |
+| TICKETS.CREATE.COMPANY.ADD | Add Company / `add_company_button`; QPushButton; `addCompanyButton` | Company row, second | clicked → `open_company_dialog` | Visible with company/reference services and runner; disabled busy/pending contact/company | — | QC |
+| TICKETS.CREATE.CONTACT | Contact / `contact_input`; QComboBox; `ticketContactInput` | Contact row, first, stretch 1 | Submit reads id; `_load_contacts` updates choices | Async company-dependent loading; disabled while loading/no available contacts; accessible Contact | — | TR, QN |
+| TICKETS.CREATE.CONTACT.ADD | Add Contact / `add_contact_button`; QPushButton; `addContactButton` | Contact row, second | clicked → `open_contact_dialog` | Visible with contact/reference services and runner; enabled valid company id, idle and no pending recovery | — | QN |
+| TICKETS.CREATE.REFERENCES | Refresh references / `refresh_references_button`; QPushButton | Below Contact in `reference_actions` QHBoxLayout, first | clicked → `refresh_references` → category/company/contact reference reads | Visible with reference service; handlers guard runner; preserves drafts | — | TR, QC, QN |
+| TICKETS.CREATE.CONTACT.ABANDON | Continue without this contact / `abandon_contact_button`; QPushButton; `abandonPendingContactButton` | Reference actions, second | clicked → `abandon_pending_contact`; local recovery release | Only visible for pending contact with unavailable company; not runner busy | — | QN |
+| TICKETS.CREATE.CATEGORY | Category / `category_input`; QComboBox; `ticketCategoryInput` | Form below reference actions | Submit reads id | Optional, Not selected; accessible Category | — | TF, TR |
+| TICKETS.CREATE.CATEGORY.REFRESH | Refresh categories / `refresh_categories_button`; QPushButton | Category feedback row, after stretchable feedback | clicked → `refresh_categories` → `list_active_ticket_categories` | Visible with reference service; guard prevents busy dispatch | — | TR |
+| TICKETS.CREATE.DESCRIPTION | Description / `description_input`; QTextEdit; `ticketDescriptionInput` | Last form field | Submit reads plain text | Rich text disabled; accessible Description | — | TF |
+| TICKETS.CREATE.SAVE | Create Ticket / `save_button`; QPushButton; `createTicketButton` | Bottom action row, after stretch | clicked / Save shortcut → `submit` → create_ticket; emits ticket_created | Default button; disabled submitting; handler rejects busy/pending reference recovery/blank subject | StandardKey.Save | TF, TC, MW |
+
+Passive creation labels: heading `ticketCreateHeading`, `ticketNumberError`,
+`ticketSubjectError`, `ticketFormError`, `ticketStatusLabel`,
+`reference_feedback`, `category_feedback` and generated form labels. Validation
+and recovery feedback does not constitute another save operation.
+
+Quick dialogs are parented to TicketCreateWidget. Each uses QFormLayout then
+feedback then a QHBoxLayout with stretch, Cancel, default Create. No objectNames
+are assigned. While submitting, fields and buttons are disabled and reject/X
+is refused. Names are required; failures preserve input and focus Name. Creating
+a company/contact does not itself create a ticket; committed reference-refresh
+recovery is retained by the form.
+
+| Stable ID | Owner/source | Label / member; widget | Position | Event → handler / backend | Shortcut / state | Tests |
+|---|---|---|---|---|---|---|
+| TICKETS.COMPANY.NEW.NAME | [QuickCompanyDialog](../Python/f7hub/gui/quick_company_dialog.py) | Company &name * / `name_input`; QLineEdit | Only form field | `submit` reads name → CompanyService.create_company | Label mnemonic; accessible Company name, required; disabled submitting | QC |
+| TICKETS.COMPANY.NEW.CANCEL | QuickCompanyDialog | Cancel / `cancel_button`; QPushButton | Action row, first button | clicked → `reject` | Not auto-default; blocked submitting | QC |
+| TICKETS.COMPANY.NEW.SAVE | QuickCompanyDialog | Create Company / `create_button`; QPushButton | Action row, second | clicked → `submit` | Default/Enter; handler guards submitted/created/busy | QC |
+| TICKETS.CONTACT.NEW.NAME | [QuickContactDialog](../Python/f7hub/gui/quick_contact_dialog.py) | Contact &name * / `name_input`; QLineEdit | Form first | `submit` → ContactService.create_contact(company_id, display_name, email) | Label mnemonic; accessible Contact name, required | QN |
+| TICKETS.CONTACT.NEW.EMAIL | QuickContactDialog | &Email / `email_input`; QLineEdit | Form second | Read by `submit` | Label mnemonic; accessible Email, optional | QN |
+| TICKETS.CONTACT.NEW.CANCEL | QuickContactDialog | Cancel / `cancel_button`; QPushButton | Action row, first button | clicked → `reject` | Blocked submitting | QN |
+| TICKETS.CONTACT.NEW.SAVE | QuickContactDialog | Create Contact / `create_button`; QPushButton | Action row, second | clicked → `submit` | Default/Enter; guards submitted/created/busy | QN |
+
+### Ticket subject and description editors
+
+Owners: [EditTicketSubjectDialog](../Python/f7hub/gui/edit_ticket_subject_dialog.py)
+and [EditTicketDescriptionDialog](../Python/f7hub/gui/edit_ticket_description_dialog.py),
+opened modelessly by TicketWorkspace. Each form shows ticket number then the
+editable field, feedback, and stretch/Cancel/Save QHBoxLayout. No objectNames
+are assigned. Fields/Cancel are disabled submitting; Save additionally remains
+disabled after a conflict or successful save. Reject and X are refused during
+submission. Saves use ServiceTaskRunner → TicketService → TicketRepository,
+with expected content/timestamp guards. Successful signals return to the owning
+workspace for read-only reload. Test owner TI covers dialog completion,
+classification blocking, cancellation and failed saves; TW covers edited search
+results. No separate custom save shortcut is installed.
+
+| Stable ID | Owner | Label / member; widget | Event → handler / backend | Focus / keyboard | Tests |
+|---|---|---|---|---|---|
+| TICKETS.SUBJECT.INPUT | EditTicketSubjectDialog | &Subject * / `subject_input`; QLineEdit | Read by `submit` → update_ticket_subject | Accessible Ticket subject, required; label mnemonic; refocused on failure | TI, TW |
+| TICKETS.SUBJECT.CANCEL | EditTicketSubjectDialog | Cancel / `cancel_button`; QPushButton | clicked → `reject` | Not auto-default | TI |
+| TICKETS.SUBJECT.SAVE | EditTicketSubjectDialog | Save subject / `save_button`; QPushButton | clicked → `submit` → update_ticket_subject | Default/Enter | TI, TW |
+| TICKETS.DESCRIPTION.INPUT | EditTicketDescriptionDialog | &Description / `description_input`; QPlainTextEdit | Read by `submit` → update_ticket_description | Accessible Ticket description, optional; label mnemonic; refocused on failure | TI, TW |
+| TICKETS.DESCRIPTION.CANCEL | EditTicketDescriptionDialog | Cancel / `cancel_button`; QPushButton | clicked → `reject` | Not auto-default | TI |
+| TICKETS.DESCRIPTION.SAVE | EditTicketDescriptionDialog | Save description / `save_button`; QPushButton | clicked → `submit` → update_ticket_description | Default button; multiline input keeps native editing | TI, TW |
+
+### Ticket Knowledge links and selector
+
+Owner: [ticket_knowledge_widget.py](../Python/f7hub/gui/ticket_knowledge_widget.py),
+`TicketKnowledgeWidget`, its `LinkArticleDialog` and `_ArticleIdentityTable`.
+No objectNames are assigned. **TK** =
+[ticket Knowledge GUI tests](../Tests/GUI/test_ticket_knowledge_widget.py),
+including candidate retry, confirmation safety, selection identity, pending
+writes and stale contexts. **TKI** =
+[link integration tests](../Tests/Integration/test_ticket_knowledge_flow.py).
+ServiceTaskRunner → TicketKnowledgeService → TicketKnowledgeRepository → SQLite
+owns list/link/unlink; opening an article emits knowledge_article_requested →
+TicketWorkspace signal → MainWindow.open_knowledge_article →
+KnowledgeWorkspace.open_article_by_id, subject to shell pending/discard guards.
+
+| Stable ID | Parent / label / member; widget | Logical layout position | Event → handler / service method | State / focus / shortcut | Tests |
+|---|---|---|---|---|---|
+| TICKETS.KNOWLEDGE.TABLE | Knowledge tab / `table`; _ArticleIdentityTable (QTableView) | VBox below Linked articles heading | selectionChanged → `_update_controls` | Single read-only row; accessible Linked knowledge articles; native selection; — | TK, TKI |
+| TICKETS.KNOWLEDGE.LINK | Knowledge tab / Link Article / `link_button`; QPushButton | Bottom actions QHBoxLayout, first | clicked → `open_link_dialog` | Loaded ticket, service, not runner busy or confirming unlink | TK |
+| TICKETS.KNOWLEDGE.OPEN | Knowledge tab / Open Article / `open_button`; QPushButton | Actions second | clicked → `open_selected_article` → request signal | Same gate plus selected article id | TK |
+| TICKETS.KNOWLEDGE.UNLINK | Knowledge tab / Unlink Article / `unlink_button`; QPushButton | Actions third | clicked → `unlink_selected_article` → confirmation → unlink_related_article | Same gate plus selection; rechecks context after modal loop | TK, TKI |
+| TICKETS.KNOWLEDGE.REFRESH | Knowledge tab / Refresh / `refresh_button`; QPushButton | Actions after stretch, last | clicked lambda → `refresh_links` → list_linked_articles | Loaded ticket, service, idle, not confirming | TK |
+| TICKETS.KNOWLEDGE.SELECT.TABLE | Link Knowledge Article dialog / `table`; _ArticleIdentityTable | VBox first, before feedback | selectionChanged → `_update_link_button` | Accessible Existing knowledge articles available to link; disabled submitting | TK |
+| TICKETS.KNOWLEDGE.SELECT.RETRY | Selector / Retry loading articles / `retry_button`; QPushButton | Actions first, before stretch | clicked → `load_candidates` → list_link_candidates | Hidden until load failure; handler guards busy/dismissed/completed | TK |
+| TICKETS.KNOWLEDGE.SELECT.CANCEL | Selector / Cancel / `cancel_button`; QPushButton | After stretch | clicked → `reject` | Not auto-default; disabled submitting; dismissal ignores late read | TK |
+| TICKETS.KNOWLEDGE.SELECT.LINK | Selector / Link Article / `link_button`; QPushButton | Actions last | clicked → `submit` → link_related_article | Idle, selected id, not submitting/completed; handler also guards dismissed | TK, TKI |
+| TICKETS.KNOWLEDGE.CONFIRM.UNLINK | Unlink Article QMessageBox / Unlink; destructive-role button | Modal confirmation | clicked result → `_confirm_unlink` returns true | Exact retained selection/context rechecked before dispatch | TK |
+| TICKETS.KNOWLEDGE.CONFIRM.CANCEL | Same dialog / Cancel; standard button | Modal confirmation | clicked result → no unlink | Explicit default and Escape button; Enter cancels | TK |
+
+Both article tables reuse the same identity-view class, not duplicate link
+implementations. Their selection callbacks update action state; no separate row
+activation shortcut opens an article. Feedback labels report loading, safe
+failure and saved outcomes. No custom context-menu actions are defined in the
+inspected Tickets classes; native Qt text-edit menus are inherited behavior.
+
+<a id="gui-registry-knowledge"></a>
+
+## Knowledge Base — workspace
+
+Owner: [knowledge_workspace.py](../Python/f7hub/gui/knowledge_workspace.py),
+`KnowledgeWorkspace.__init__`, hosted as MainWindow's Knowledge page. Its
+QVBoxLayout contains top actions, search, filters, feedback labels, then a
+horizontal QSplitter (list first, article detail second, initial 420/620).
+`K-idle` means `_update_actions`' effective busy flag is false: no shared runner
+busy, tag-filter dialog, manual filter refresh, publish/archive confirmation,
+category dialog or tags dialog. MainWindow's page enable state also applies.
+Filter loading has additional independent runners and gates described below.
+All rows inherit objectName `—` unless specified. Native widget focus/input is
+retained; explicit custom focus policies are listed where set.
+
+Backend: ServiceTaskRunner →
+[KnowledgeService](../Python/f7hub/services/knowledge_service.py) →
+KnowledgeRepository → SQLite for articles, versions, search and guarded writes.
+CategoryRepository supplies active KNOWLEDGE categories; TagRepository supplies
+available/article tags. KnowledgeService owns validation and delegates guarded
+draft category/tag writes to KnowledgeRepository. Category/tag filter option
+reads have separate ServiceTaskRunners; selection changes remain presentation
+state until an explicit operation accepts the values.
+
+Test keys: **KW** = [workspace tests](../Tests/GUI/test_knowledge_workspace.py),
+**KF-C** = [category filter](../Tests/GUI/test_knowledge_category_filter.py),
+**KF-S** = [status filter](../Tests/GUI/test_knowledge_status_filter.py),
+**KF-T** = [tag filter](../Tests/GUI/test_knowledge_tag_filter.py),
+**GR** = [Guide relocation](../Tests/GUI/test_guide_relocation.py),
+**KI** = [Knowledge flow](../Tests/Integration/test_knowledge_base_flow.py).
+KW includes actual input/selection assertions for search, guarded publication,
+editor drafts/conflicts and history; the filter suites cover composition,
+cached choices and retry. References identify coverage to inspect, not freshly
+executed results.
+
+| Stable ID | Label / member; widget; objectName if assigned | Logical position / container | Event → handler / dependency | Availability / focus | Shortcut | Tests |
+|---|---|---|---|---|---|---|
+| KNOWLEDGE.GUIDE | Guide / `guide_button`; QToolButton; `knowledgeGuideButton` | Top QHBoxLayout after heading, before stretch | setDefaultAction(guide_action); shared MainWindow.altf7hub_action.triggered → show_altf7hub → ServiceTaskRunner → AltF7HubService.show_guide | Disabled if no supplied action; otherwise action state, shell busy/service gate; accessible Guide, StrongFocus | No custom binding assigned to button | GR |
+| KNOWLEDGE.NEW | New Article / `new_button`; QPushButton | Top after stretch, first action | clicked → `open_new_article` | K-idle; opens NewArticleDialog | — | KW, KI |
+| KNOWLEDGE.EDIT | Edit Article / `edit_button`; QPushButton | Top second action | clicked → `open_edit_article` | K-idle and loaded DRAFT; opens EditArticleDialog | — | KW, KI |
+| KNOWLEDGE.PUBLISH | Publish / `publish_button`; QPushButton | Top third action | clicked → `publish_article` → confirmation → KnowledgeService.publish_article | Service, K-idle, loaded DRAFT; rechecks article identity after confirmation | — | KW |
+| KNOWLEDGE.ARCHIVE | Archive / `archive_button`; QPushButton | Top fourth action | clicked → `archive_article` → confirmation → KnowledgeService.archive_article | Service, K-idle, loaded PUBLISHED; rechecks article identity | — | KW |
+| KNOWLEDGE.HISTORY | Version History / `version_history_button`; QPushButton | Top fifth action, last | clicked → `open_version_history` | Service, K-idle, any loaded article status | — | KW |
+| KNOWLEDGE.SEARCH.INPUT | Search current articles / `search_input`; QLineEdit | Search QHBoxLayout first, stretch 1 | returnPressed → `search_articles` → search_articles service; textChanged → `_search_text_changed` updates actions | K-idle; accessible Search current knowledge articles | Return | KW, KF-C, KF-S, KF-T |
+| KNOWLEDGE.SEARCH.SUBMIT | Search / `search_button`; QPushButton | Search row second | clicked → `search_articles`; same search as Return | K-idle; blank query clears search | — | KW |
+| KNOWLEDGE.SEARCH.CLEAR | Clear Search / `clear_search_button`; QPushButton | Search row third | clicked → `clear_search` → refresh_list → list_articles | K-idle and active search or nonempty input; retains filters | — | KW, KF-C, KF-S, KF-T |
+| KNOWLEDGE.FILTER.CATEGORY | Category: / `category_filter`; QComboBox | Filter QHBoxLayout, first selector | currentIndexChanged → `_filter_changed` → list/search with category args | K-idle, options ready, category runner idle; accessible Filter knowledge articles by category; All categories / Not selected / active choices | — | KF-C |
+| KNOWLEDGE.FILTER.STATUS | Status: / `status_filter`; QComboBox | Filter row second selector | currentIndexChanged → `_filter_changed` → list/search with status | K-idle; All statuses / Draft / Published / Archived; accessible Filter knowledge articles by status | — | KF-S |
+| KNOWLEDGE.FILTER.TAG | Tag: / `tag_filter`; QComboBox | Filter row third selector | currentIndexChanged → `_tag_filter_changed` → `_filter_changed` or open_tag_filter | K-idle, options ready, tag runner idle; All tags / Untagged / existing tags / multi-tag selector; accessible Filter knowledge articles by tag | — | KF-T |
+| KNOWLEDGE.FILTER.REFRESH | Refresh filters / `refresh_filters_button`; QToolButton | Filter row last | clicked → `refresh_filter_options` → list_active_knowledge_categories and list_available_tags; reconciles results when needed | Service, K-idle, not filter_loading; accessible Refresh knowledge filter choices; StrongFocus | — | KF-C, KF-T |
+| KNOWLEDGE.ARTICLES | `table`; QTableView | Splitter first child → list_panel QVBoxLayout, before empty state | selectionChanged → `_selection_changed` → open_article → get_article | K-idle; single read-only row; accessible Knowledge articles; select a row to read | Native row selection | KW, KI |
+| KNOWLEDGE.SPLIT | List/detail divider; QSplitter | Below feedback, horizontal | Native splitter movement; presentation only | Pixel geometry NOT VERIFIED | — | KF-S (layout; no direct drag assertion identified) |
+| KNOWLEDGE.CATEGORY | Category… / `category_button`; QPushButton | Detail VBox category row QHBoxLayout, after stretchable category QLabel | clicked → `open_category` | Service, K-idle, loaded DRAFT | — | KA-C |
+| KNOWLEDGE.TAGS | Tags… / `tags_button`; QPushButton | Detail VBox tags row, after stretchable tags QLabel | clicked → `open_tags` | Service, K-idle, loaded DRAFT | — | KA-T |
+| KNOWLEDGE.BODY | `detail_body`; QPlainTextEdit | Detail VBox last, below summary, stretch 1 | `_show_article` sets plain text from authoritative loaded article | Read-only; accessible Knowledge article body, read only; no execution/rendered Markdown action | Native text selection/copy | KW |
+| KNOWLEDGE.CONFIRM.PUBLISH.ACCEPT | Publish; QMessageBox AcceptRole button | Publish Article modal confirmation | Result compared by `_confirm_publish`; accepted retained token dispatched by publish_article | DRAFT only; preserves content/version history | — | KW |
+| KNOWLEDGE.CONFIRM.PUBLISH.CANCEL | Cancel; QMessageBox standard button | Same confirmation | Result → no publish | Explicit default and Escape button | Enter/Escape cancel | KW |
+| KNOWLEDGE.CONFIRM.ARCHIVE.ACCEPT | Archive; QMessageBox AcceptRole button | Archive Article modal confirmation | Result compared by `_confirm_archive`; retained token dispatched by archive_article | PUBLISHED only; preserves content/history/relationships; no Unarchive control | — | KW |
+| KNOWLEDGE.CONFIRM.ARCHIVE.CANCEL | Cancel; QMessageBox standard button | Same confirmation | Result → no archive | Explicit default and Escape button | Enter/Escape cancel | KW |
+
+The Guide button and utility submenu present one QAction; they do not duplicate
+the Guide implementation. This pass traces the F7Hub-owned entry point only;
+the delegated AHK host/editor and native launch/focus acceptance remain outside
+Pass 1. No AltF7Hub configuration content was accessed for this mapping.
+
+Passive Knowledge indicators are QLabels: heading `knowledgeHeading`,
+`filter_feedback`, `tag_filter_feedback`, `feedback`, `empty_state`, then detail
+metadata in order `detail_code` (objectName `articleCode`), `detail_title`,
+`detail_status`, `detail_version`, `detail_dates`, `detail_category`,
+`detail_tags`, `detail_summary`. The date label uses the current article's
+created/updated timestamps. Labels are plain text; metadata and body clear when
+selection is unavailable. These labels do not add separate action counts.
+
+### New Article and Edit Article dialogs
+
+Owners: [NewArticleDialog](../Python/f7hub/gui/new_article_dialog.py) and
+[EditArticleDialog](../Python/f7hub/gui/edit_article_dialog.py), parented to
+KnowledgeWorkspace and opened modelessly. No objectNames are assigned. Each
+QVBoxLayout contains a QFormLayout, feedback, then stretch/Cancel/default Save
+in a QHBoxLayout. All editable fields and Cancel are disabled submitting;
+reject/X is blocked during a write. Edit Save is additionally disabled after
+conflict/success. No explicit custom QShortcut is installed. Labels use the
+source mnemonic markers below; bodies preserve native multiline editing.
+Backend writes use ServiceTaskRunner → KnowledgeService; success signals
+article_created/article_updated return to KnowledgeWorkspace._article_created
+for authoritative list/detail refresh. Test owner KW covers fields, cancellation,
+duplicate dispatch, failures, stale versions and successful revisions; KI covers
+the integrated Knowledge workflow.
+
+| Stable ID | Owner / label / member; widget | Form or action position | Event → handler / service | Focus / shortcut | Tests |
+|---|---|---|---|---|---|
+| KNOWLEDGE.NEW.CODE | NewArticleDialog / Article &code * / `code_input`; QLineEdit | Form first | submit reads → create_article | Accessible Article code, required; KB0001 placeholder; label mnemonic | KW |
+| KNOWLEDGE.NEW.TITLE | NewArticleDialog / &Title * / `title_input`; QLineEdit | Form second | submit reads → create_article | Accessible Article title, required; label mnemonic | KW |
+| KNOWLEDGE.NEW.SUMMARY | NewArticleDialog / &Summary / `summary_input`; QLineEdit | Form third | submit reads → create_article | Accessible Article summary, optional; label mnemonic | KW |
+| KNOWLEDGE.NEW.BODY | NewArticleDialog / &Body * / `body_input`; QPlainTextEdit | Form fourth | submit reads plain text → create_article | Accessible Article body, required, Markdown source; label mnemonic | KW |
+| KNOWLEDGE.NEW.CANCEL | NewArticleDialog / Cancel / `cancel_button`; QPushButton | Action row first button | clicked → reject | Not auto-default; blocked submitting | KW |
+| KNOWLEDGE.NEW.SAVE | NewArticleDialog / Create Article / `create_button`; QPushButton | Action row second | clicked → submit → create_article | Default/Enter; guards submitting/created/runner busy; validates nonblank code/title/body | KW, KI |
+| KNOWLEDGE.EDIT.TITLE | EditArticleDialog / &Title * / `title_input`; QLineEdit | Form after read-only code/current version | submit reads → update_article | Accessible Article title, required; label mnemonic | KW |
+| KNOWLEDGE.EDIT.SUMMARY | EditArticleDialog / &Summary / `summary_input`; QLineEdit | Next form row | submit reads → update_article | Accessible Article summary, optional; label mnemonic | KW |
+| KNOWLEDGE.EDIT.BODY | EditArticleDialog / &Body * / `body_input`; QPlainTextEdit | Last form row | submit reads → update_article | Accessible Article body, required, Markdown source; label mnemonic | KW |
+| KNOWLEDGE.EDIT.CANCEL | EditArticleDialog / Cancel / `cancel_button`; QPushButton | Action row first button | clicked → reject | Not auto-default; blocked submitting | KW |
+| KNOWLEDGE.EDIT.SAVE | EditArticleDialog / Save Revision / `save_button`; QPushButton | Action row second | clicked → submit → update_article(expected_version_number) | Default; guarded submitting/saved/conflicted/busy; draft-only service guard | KW, KI |
+
+New feedback and Edit `code_label`, `version_label`, `feedback` are passive
+QLabels; Edit's identity/version labels allow mouse text selection and do not
+permit identity changes. Missing required New inputs receive focus; failed
+writes retain drafts. Published/archived articles are not editable here.
+
+### Article Category and Article Tags dialogs
+
+Owners: [ArticleCategoryDialog](../Python/f7hub/gui/article_category_dialog.py)
+and [ArticleTagsDialog](../Python/f7hub/gui/article_tags_dialog.py), parented to
+the window by KnowledgeWorkspace. No objectNames are assigned. QVBoxLayout:
+current article label, selector (Tags additionally has an instruction label),
+feedback, actions QHBoxLayout: Refresh, stretch, default Cancel, Save.
+`A-idle` means active, runner idle and not submitting. Selector/Save additionally
+require loaded choices and no conflict; Refresh requires no conflict. Cancel
+remains enabled during reference reads, but Cancel/X/done refuse during writes.
+There is no additional custom shortcut. **KA-C** =
+[category dialog tests](../Tests/GUI/test_article_category_dialog.py),
+**KA-T** = [tags dialog tests](../Tests/GUI/test_article_tags_dialog.py).
+
+| Stable ID | Owner / label / member; widget | Position | Event → handler / KnowledgeService method | State / focus / shortcut | Tests |
+|---|---|---|---|---|---|
+| KNOWLEDGE.CATEGORY.INPUT | ArticleCategoryDialog / `category_input`; QComboBox | Below current article/category label | submit reads category id → set_article_category | A-idle, loaded, no conflict; accessible Active Knowledge category; Not selected clears category | KA-C |
+| KNOWLEDGE.CATEGORY.REFRESH | ArticleCategoryDialog / Refresh categories / `refresh_button`; QPushButton | Actions first | clicked → load_categories → list_active_knowledge_categories | A-idle, no conflict | KA-C |
+| KNOWLEDGE.CATEGORY.CANCEL | ArticleCategoryDialog / Cancel / `cancel_button`; QPushButton | Actions after stretch | clicked → reject | Default/Enter; not submitting | KA-C |
+| KNOWLEDGE.CATEGORY.SAVE | ArticleCategoryDialog / Save / `save_button`; QPushButton | Actions last | clicked → submit → set_article_category(id, version, timestamp, category) | A-idle, loaded, no conflict; current-context guard; not auto-default | KA-C |
+| KNOWLEDGE.TAGS.INPUT | ArticleTagsDialog / `tag_list`; QListWidget | Below Select zero or more existing tags | Checked UserRole ids read by submit → set_article_tags | A-idle, loaded, no conflict; accessible Existing global tags; checkable items; zero clears all | KA-T |
+| KNOWLEDGE.TAGS.REFRESH | ArticleTagsDialog / Refresh tags / `refresh_button`; QPushButton | Actions first | clicked → load_tags → list_available_tags and list_article_tags | A-idle, no conflict | KA-T |
+| KNOWLEDGE.TAGS.CANCEL | ArticleTagsDialog / Cancel / `cancel_button`; QPushButton | Actions after stretch | clicked → reject | Default/Enter; not submitting | KA-T |
+| KNOWLEDGE.TAGS.SAVE | ArticleTagsDialog / Save / `save_button`; QPushButton | Actions last | clicked → submit → set_article_tags(id, version, timestamp, ids) | A-idle, loaded, no conflict; current-context guard; not auto-default | KA-T |
+
+The current labels and feedback are passive plain-text QLabels. A stale loaded
+context requires reopening; saved associations are not inferred from a checked
+item. Tag catalog creation is not offered by this dialog.
+
+### Multi-tag filter dialog
+
+Owner: [KnowledgeTagFilterDialog](../Python/f7hub/gui/knowledge_tag_filter_dialog.py),
+window-parented by KnowledgeWorkspace.open_tag_filter. No objectNames or custom
+shortcuts are assigned. The dialog consumes cached available tags and changes
+read-filter state only; it does not call a persistence service. After accept,
+KnowledgeWorkspace._tag_filter_closed reads selected_ids/matches_all, updates
+the filter and reloads list/search if changed. Opening requires idle shared and
+filter runners, ready tag options, and no conflicting dialog/confirmation.
+All controls use native input behavior. **KFD** =
+[tag-filter dialog tests](../Tests/GUI/test_knowledge_tag_filter_dialog.py);
+KF-T covers owner-level query composition and cancellation.
+
+| Stable ID | Label / member; widget | QVBoxLayout / action row order | Event → handler / owner | State / shortcut | Tests |
+|---|---|---|---|---|---|
+| KNOWLEDGE.TAGFILTER.ANY | Match any selected tag / `any_button`; QRadioButton | After instruction, before All | Native exclusive state, read by matches_all | Any default unless supplied all-mode; Space tested | KFD, KF-T |
+| KNOWLEDGE.TAGFILTER.ALL | Match all selected tags / `all_button`; QRadioButton | Below Any | Native exclusive state, read by matches_all | Space tested | KFD, KF-T |
+| KNOWLEDGE.TAGFILTER.TAGS | `tag_list`; QListWidget | Below radio buttons, stretch 1 | Native item checks; selected_ids reads sorted ids | Accessible Tags to match; Space toggles; none = All tags, one = specific tag | KFD, KF-T |
+| KNOWLEDGE.TAGFILTER.CANCEL | Cancel / `cancel_button`; QPushButton | Bottom QHBoxLayout after stretch, first | clicked → reject | Default/Enter; native Escape dismissal | KFD, KF-T |
+| KNOWLEDGE.TAGFILTER.APPLY | Apply / `apply_button`; QPushButton | Bottom last | clicked → accept → owner _tag_filter_closed | Not auto-default; no write | KFD, KF-T |
+
+### Version history viewer
+
+Owner: [VersionHistoryDialog](../Python/f7hub/gui/version_history_dialog.py),
+window-parented by KnowledgeWorkspace.open_version_history. No objectNames or
+custom shortcuts are assigned. QVBoxLayout: feedback, horizontal splitter,
+Close action row. Splitter contains the list then detail panel (390/500 initial
+sizes). Detail panel contains a resizable metadata QScrollArea then body.
+ServiceTaskRunner → KnowledgeService.list_article_versions/get_article_version
+→ KnowledgeRepository supplies immutable revision projections. The viewer can
+close while a read is pending; active/generation guards ignore late callbacks.
+KW tests history availability, exact plain-text content, failures and dismissal.
+
+| Stable ID | Label / member; widget | Position / container | Event → handler / backend | State / accessibility / shortcut | Tests |
+|---|---|---|---|---|---|
+| KNOWLEDGE.HISTORY.TABLE | `table`; QTableView | Splitter first → list_panel QVBoxLayout | selectionChanged → _selection_changed → _load_version → get_article_version | Single read-only row; disabled runner busy; accessible Knowledge article version history | KW |
+| KNOWLEDGE.HISTORY.SPLIT | List/revision divider; QSplitter | Main VBox below feedback | Native movement; no service | Horizontal; no direct drag test identified | KW (layout/content only) |
+| KNOWLEDGE.HISTORY.BODY | `detail_body`; QPlainTextEdit | Detail VBox below metadata_scroll, stretch 1 | _show_version sets plain text | Read-only; accessible Historical knowledge article body, read only; native selection/copy | KW |
+| KNOWLEDGE.HISTORY.CLOSE | Close / `close_button`; QPushButton | Bottom QHBoxLayout after stretch | clicked → reject | Remains available during reads; late completion ignored | KW |
+
+Metadata scroll accessible name is Historical revision metadata, read only.
+Its labels `detail_version`, `detail_title`, `detail_summary`,
+`detail_created_at`, `detail_created_by`, `detail_change_summary` wrap plain text
+and allow mouse selection. These passive labels and the scroll container are
+excluded from control counts under the Pass 1 rule. No restore/revert, delete,
+Unarchive or historical edit action is defined in these inspected classes.
+
+## Pass 1 result and outstanding coverage — historical checkpoint
+
+**GUI_REGISTRY_PASS1_COMPLETE — READY_FOR_CONTINUATION.** Tickets and Knowledge
+Base construction, child dialogs, signal routing, logical layout, explicit
+shortcuts, state gates, service owners and existing test references have been
+inspected at the pinned source revision. This is author-side static evidence;
+independent review and runtime validation are separate gates.
+
+| Pass 1 inventory group | Control rows |
+|---|---:|
+| Tickets queue/detail, tabs, creation-mode Cancel and draft confirmations | 43 |
+| Ticket creation form | 14 |
+| Quick company/contact dialogs | 7 |
+| Ticket subject/description dialogs | 6 |
+| Ticket Knowledge links, selector and unlink confirmation | 11 |
+| **Tickets total** | **81** |
+| Knowledge workspace and publish/archive confirmations | 22 |
+| New/Edit Article dialogs | 11 |
+| Article Category/Tags dialogs | 8 |
+| Multi-tag filter dialog | 5 |
+| Version history viewer | 4 |
+| **Knowledge Base total** | **50** |
+| **Pass 1 total** | **131** |
+
+Focused static validation: **PASS**, including 117 constructed widget-member
+mappings plus 14 structural/confirmation entries, unique IDs, 36 source/test
+links, assigned objectNames, direct control-to-method connection names, table
+column consistency and preservation of the pre-registry document. Logical
+layout, state and backend semantics were manually traced; these automated checks
+are not a semantic or runtime proof. The external audit's original failed result
+is retained alongside the corrected successful result: the first check treated
+callback arguments as handler names and prompted clearer connection wording.
+No runtime, database, native GUI or regression suite was executed.
+
+Limits: native pixel placement, platform shortcut resolution and physical input
+acceptance are **NOT VERIFIED**. The splitter rows have layout/content test
+references but no direct drag assertion was identified. Passive labels and
+inherited Qt editor menus are described under the stated counting rule rather
+than assigned separate control IDs. No unresolved source handler is claimed in
+the new tables; future independent review may identify corrections.
+
+**Full registry INCOMPLETE:** next module is Scripts/Diagnostics. Remaining work
+also includes the Clipboard partial table and setup/state transitions, shell/
+utility/lifecycle completion, AHK hotkeys and delegated Guide boundary, and the
+final comprehensive consistency/coverage audit. Those areas were not extended
+by Pass 1. No full-application total, shortcut count, shared-action count or
+independent-review readiness is claimed.
+
+Maintain stable IDs and update affected entries after approved changes are
+validated. Distinguish a shared QAction from its multiple visual presentations;
+record unresolved relationships as `NOT VERIFIED` and never infer runtime
+behavior or authorization from an entry.
+
+<a id="gui-registry-scripts"></a>
+
+## Pass 2 — Scripts and Diagnostics
+
+This section extends the existing registry at the same inspected source
+`62f95f185cd5abfefbfbc16822d12dc30144ed79`. All entries inherit **Integrated /
+static inspection**; runtime/native validation is **NOT RUN** in this pass.
+The Pass 1 counting convention applies: one row per control, splitter or
+transient dialog choice; passive labels, repeated data rows and native editor
+menus are excluded. Member names are source locators. ObjectName is `—` for
+every counted control below: none is assigned in these three GUI classes.
+`—` for a shortcut means no explicit custom binding; native Qt behavior remains.
+
+### Scripts workspace and implemented diagnostic execution
+
+Owner: [script_workspace.py](../Python/f7hub/gui/script_workspace.py),
+`ScriptWorkspace.__init__`, hosted as MainWindow's Scripts page. Its QVBoxLayout
+contains: heading/action row; pack heading; pack notice; pack action/readiness
+row; search row; summary; feedback; horizontal splitter. The splitter contains
+the list panel (table, empty-state label) then the result panel (metadata,
+run notice, result editor), initially 560/440. These are logical insertion
+positions, not verified screen geometry.
+
+`S-idle` means `_update_actions` has no supplied runner-busy flag or
+`run_pending`, and neither `_loading` nor `_copying` is true. MainWindow's
+parent-page enable state additionally applies: the shared runner and accepted
+diagnostic ownership can disable the page. Enabled appearance is not dispatch
+authority; `_can_run`, `copy_script`, search and refresh retain their own guards.
+The explicit local Tab chain is Run diagnostic → Copy Script → Manage scripts…
+→ Refresh. No other local setTabOrder, custom QShortcut or QAction is installed
+in these three GUI classes. Native/editor and shell focus behavior still apply;
+full physical traversal is **NOT VERIFIED**.
+
+Test keys: **SW** = [workspace tests](../Tests/GUI/test_script_workspace.py)
+(construction, button order/keyboard, metadata, copy/stale selection, search and
+read recovery); **SE** = [execution GUI tests](../Tests/GUI/test_script_execution.py)
+(explicit dispatch, callback gaps, run ownership, readiness and cleanup latch);
+**SC** = [catalog integration](../Tests/Integration/test_script_catalog_flow.py)
+(registration/visibility, copy, search and retained metadata);
+**SX** = [execution integration](../Tests/Integration/test_script_execution_workflow.py);
+**DP** = [pack service tests](../Tests/PowerShell/test_diagnostic_pack.py).
+These are existing source references, not newly executed results; SX includes
+Windows-native execution tests that this documentation pass does not run.
+
+Catalog reads and management use ServiceTaskRunner →
+[ScriptService](../Python/f7hub/services/script_service.py) →
+[ScriptRepository](../Python/f7hub/repositories/script_repository.py) → SQLite.
+Copy uses `read_verified_script` to validate current approved source, then the
+GUI completion sets the clipboard only if selection generation, script code and
+page visibility still match. A prior AVAILABLE observation alone does not grant
+copy approval. Copying neither launches PowerShell nor pastes into another app.
+
+Explicit execution uses ServiceTaskRunner →
+[PowerShellService](../Python/f7hub/services/powershell_service.py) →
+[PowerShellGateway](../Python/f7hub/infrastructure/powershell_gateway.py), with
+ScriptService supplying verified source. [Bootstrap](../Python/f7hub/app/bootstrap.py)
+composes these shared owners. The literal policy permits the reviewed System,
+Network and Services snapshots; the fixed
+[Local Baseline Diagnostics definition](../Python/f7hub/domain/diagnostic_results.py)
+orders System → Network → Services. Service/gateway boundaries recheck identity,
+metadata, source bytes, runtime and process/result contracts; registration or
+availability does not authorize arbitrary execution. See the current Slice 053
+contract in [PowerShell architecture](12_PowerShellArchitecture.md).
+
+| Stable ID | Label / member; widget | Logical position / parent | Event → handler / backend | Availability / accessibility / focus | Shortcut | Tests |
+|---|---|---|---|---|---|---|
+| SCRIPTS.RUN.DIAGNOSTIC | Run diagnostic / `run_button`; QPushButton | Header after stretch, first action | clicked → `run_diagnostic` → `_start_run` → PowerShellService.execute_diagnostic(selected code) | S-idle, AVAILABLE selected entry with execution-approved metadata, no management dialog, execution service supplied, no local cleanup block; accessible Run the selected reviewed diagnostic | — | SE, SW, SX |
+| SCRIPTS.COPY | Copy Script / `copy_button`; QPushButton | Header second action | clicked → `copy_script` → ScriptService.read_verified_script → guarded clipboard completion | S-idle and AVAILABLE selection; service may still reject checksum/eligibility; accessible Copy Script | — | SW, SC |
+| SCRIPTS.MANAGE | Manage scripts… / `manage_button`; QPushButton | Header third action | clicked → `open_management` → ScriptManagementDialog | S-idle, no existing manager; parented to `self.window()` outside the disabled page stack | — | SW, SM, SC |
+| SCRIPTS.REFRESH | Refresh / `refresh_button`; QPushButton | Header fourth action, last | clicked → `refresh_list` → ScriptService.list_scripts(text_query), optional PowerShellService.pack_readiness | S-idle; refresh uses last submitted query, preserves selected code after success | — | SW, SE, SC |
+| SCRIPTS.RUN.BASELINE | Run baseline diagnostics / `pack_button`; QPushButton | Pack QHBoxLayout first, before stretchable readiness label; above search | clicked → `run_pack` → `_start_run` → execute_diagnostic_pack(LOCAL_BASELINE_PACK.code) | S-idle, `_pack_ready`, service supplied, no manager or local cleanup block; readiness is independent of filtered catalog rows; accessible Run baseline diagnostics | — | SE, DP, SX |
+| SCRIPTS.SEARCH.INPUT | Search names, codes and descriptions / `search_input`; QLineEdit | Search QHBoxLayout first, stretch 1 | returnPressed → `search_scripts` → trim query → `refresh_list` | S-idle; text editing alone does not submit; accessible Search script names, codes and descriptions | Return | SW, SC |
+| SCRIPTS.SEARCH.SUBMIT | Search / `search_button`; QPushButton | Search row second | clicked → `search_scripts` → same list query as Return | S-idle; blank submitted text selects unfiltered catalog | — | SW, SC |
+| SCRIPTS.SEARCH.CLEAR | Clear / `clear_search_button`; QPushButton | Search row third | clicked → `clear_search` → clear input/query → `refresh_list` | S-idle; clears submitted filter and current draft | — | SW, SC |
+| SCRIPTS.TABLE | `table`; QTableView | Splitter first child → list panel VBox before empty-state label | selectionChanged → `_selection_changed` → `_show_entry`, update action state | Single read-only row selection; locally disabled during run_pending; accessible Enabled scripts; select a row to read metadata; selection does not execute | Native selection | SW, SE |
+| SCRIPTS.DETAILS | `details`; QPlainTextEdit | Splitter second child → result panel VBox first, stretch 1 | `_show_entry` presents selected service metadata; cleared on missing selection/read reset | Read-only; accessible Script metadata, read only; reference shown as plain text, not a launch control | Native selection/copy | SW |
+| SCRIPTS.RESULTS | `results`; QPlainTextEdit | Result panel below run-notice label, last, stretch 1 | `_present_result` / `_attempt_lines` render single or pack results after accepted completion | Read-only; accessible Diagnostic result, read only; kept in memory only; a run attempt reaching `_start_run` clears the display, including subsequent dispatch rejection | Native selection/copy | SE, SX |
+| SCRIPTS.SPLIT | Catalog/result divider; local `splitter`; QSplitter | Main VBox last; horizontal, list then result panel | Native movement; no backend call | Initial 560/440 sizes; runtime geometry and direct drag acceptance NOT VERIFIED | — | SW (construction; no direct drag assertion identified) |
+
+Passive QLabels: `heading` (objectName `scriptsHeading`), `pack_heading`,
+`pack_notice`, `pack_readiness`, `summary`, `feedback`, `empty_state` and
+`run_notice`. Summary reports shown/available/execution-approved counts; it does
+not authorize a run. Feedback distinguishes loading, invalid search, read/copy
+failure, execution failure and completed results. Empty state distinguishes no
+scripts from no search matches. The run notice describes the selected reviewed
+diagnostic; it is not an additional Run control.
+
+`_run_identity` holds ownership through callback presentation, including the
+runner-idle gap; stale completions cannot release another run. Failed dispatch
+and worker/presentation errors release that ownership with safe feedback.
+Unverified cleanup latches `_execution_blocked`, clears pack readiness and blocks
+both run modes. Results remain in memory; valid collection ERROR is distinct
+from execution failure, and an aborted pack retains attempted results and skipped
+members. Execution has no confirmation dialog or Cancel control here. There is
+no custom Scripts context menu; inherited text-editor selection/copy commands
+are native behavior, excluded from counts. Search is manual text matching over
+names/codes/descriptions; no separate category/type/status filter is constructed.
+The broader planned Diagnostic Center, parameter forms, arbitrary script runs,
+execution history, ticket linkage, remediation and user-defined packs are not
+implemented controls in these classes.
+
+### Script management and enable confirmation
+
+Owner: [script_management_dialog.py](../Python/f7hub/gui/script_management_dialog.py),
+`ScriptManagementDialog`, opened by ScriptWorkspace.open_management using
+`dialog.open()` then `refresh_list`. It is parented to the top-level window,
+outside MainWindow.pages, so the shared worker's page disabling does not disable
+its controls indiscriminately. `M-idle` is `_update_actions`' predicate: runner
+idle, not loading/writing/confirming, no registration child and not closed.
+The QVBoxLayout contains an explanatory note, feedback, table (stretch 1),
+metadata editor, then the action row. **SM** =
+[management/registration GUI tests](../Tests/GUI/test_script_management_dialog.py)
+(selection, enable confirmation, write guards, preserved drafts, committed-write
+refresh failure and dismissed late reads). SC additionally covers real catalog
+reconciliation with isolated test data; no such tests run in this pass.
+
+| Stable ID | Label / member; widget | Logical position / parent | Event → handler / backend | Availability / accessibility / keyboard | Tests |
+|---|---|---|---|---|---|
+| SCRIPTS.MANAGER.TABLE | `table`; QTableView | Management VBox below feedback, above details | selectionChanged → `_selection_changed` → `_selected` metadata / `_update_actions` | M-idle; single read-only row selection; accessible Script registrations, including disabled; columns Name, Code, Enabled, File status; native selection | SM, SC |
+| SCRIPTS.MANAGER.DETAILS | `details`; QPlainTextEdit | Below table, maximum height 150; above actions | `_selection_changed` presents selected registration, including stored checksum; no write | Read-only; accessible Registration metadata, read only; no local enable override; native selection/copy | SM |
+| SCRIPTS.MANAGER.REGISTER | Register script… / `register_button`; QPushButton | Bottom QHBoxLayout first | clicked → `open_registration` → RegisterScriptDialog; finished → `_registration_closed`, script_registered → `_registered` | M-idle; not auto-default; no custom shortcut; one child at a time | SM, SC |
+| SCRIPTS.MANAGER.REFRESH | Refresh / `refresh_button`; QPushButton | Actions second | clicked → `refresh_list` → ScriptService.list_registered_scripts | M-idle; includes disabled records; preserves preferred id after successful reload; not auto-default | SM, SC |
+| SCRIPTS.MANAGER.TOGGLE | Enable / Disable / `toggle_button`; QPushButton | Actions third, before stretch | clicked → `toggle_selected` → optional enable confirmation → ScriptService.set_script_enabled(id, enabled, expected_updated_at) | M-idle and selected record; label reflects retained enabled state; enable rechecks readable source; disable has no confirmation; not auto-default, Space activation tested | SM, SC |
+| SCRIPTS.MANAGER.CLOSE | Close / `close_button`; QPushButton | Actions after stretch, last | clicked → inherited reject → guarded `done`; owner `_management_closed` reconciles changed catalog | Button enabled when not writing and no registration child; done/X additionally refuse during confirmation; can dismiss reads, ignoring late callbacks; default button, no custom shortcut | SM, SC |
+| SCRIPTS.MANAGER.CONFIRM.ENABLE | Yes; QMessageBox standard button | Enable script modal confirmation → native action area; no source-defined button ordering claimed | `toggle_selected` compares exec result to Yes, rechecks exact selected record identity and closed state, then dispatches write | Only enabling opens confirmation; catalog visibility only, no content/copy/execution approval; native dialog activation | SM |
+| SCRIPTS.MANAGER.CONFIRM.CANCEL | Cancel; QMessageBox standard button | Same modal action area | exec result other than Yes → no visibility write | Explicit default Cancel; native standard-button behavior, physical resolution NOT VERIFIED | SM |
+
+No custom shortcuts, explicit Tab order or context menus are installed here.
+The note and `feedback` are passive QLabels. The table/model and selected record
+are the retained operation context; a stale write reports conflict and clears
+the obsolete selection. Successful registration/toggle sets `changed`, retains
+the saved identity and committed notice, then refreshes. Failed refresh does not
+repeat or relabel the committed write. On manager dismissal, the workspace queues
+its changed-catalog refresh until the shared runner is idle.
+
+### Register Script dialog
+
+Owner: [register_script_dialog.py](../Python/f7hub/gui/register_script_dialog.py),
+`RegisterScriptDialog`, parented to the manager and opened by `open_registration`.
+Its QVBoxLayout contains a QFormLayout, note, feedback and an action QHBoxLayout:
+stretch, default Cancel, Register script. `_choices` constructs the three
+QComboBoxes, each starting with Select…/None; these are three control instances,
+not extra rows for the reusable helper. The exact form order is shown below.
+All ten controls are disabled by `_set_submitting(True)`; done/X refuse during
+submission. `submit` also rejects an already-created result or busy runner.
+Failures preserve input and display safe feedback; no explicit field-focus
+restoration, custom shortcut or local Tab order is installed. Form `&` markers
+are source mnemonics; native resolution is **NOT VERIFIED**.
+
+| Stable ID | Label / member; widget | Form or action order | Event → handler / ScriptService dependency | Accessibility / keyboard | Tests |
+|---|---|---|---|---|---|
+| SCRIPTS.REGISTER.CODE | Script &code * / `code_input`; QLineEdit | Form first | `submit` reads text → register_script(script_code) | Accessible Script code, required; label mnemonic | SM, SC |
+| SCRIPTS.REGISTER.NAME | &Name * / `name_input`; QLineEdit | Form second | `submit` reads text → register_script(name) | Accessible Script name, required; label mnemonic | SM, SC |
+| SCRIPTS.REGISTER.PATH | Relative &path * / `path_input`; QLineEdit | Form third | `submit` reads text → register_script(relative_path); service validates approved relative reference | Accessible Relative script path, required; PowerShell/Diagnostics/Example.ps1 placeholder; label mnemonic | SM, SC |
+| SCRIPTS.REGISTER.TYPE | &Type * / `type_input`; QComboBox via `_choices(SCRIPT_TYPES)` | Form fourth | `submit` reads currentData → register_script(script_type) | Accessible Script type, required; Select… then service-defined types; label mnemonic | SM, SC |
+| SCRIPTS.REGISTER.RISK | &Risk * / `risk_input`; QComboBox via `_choices(RISK_LEVELS)` | Form fifth | `submit` reads currentData → register_script(risk_level) | Accessible Script risk, required; Select… then service-defined risk levels; label mnemonic | SM, SC |
+| SCRIPTS.REGISTER.PRIVILEGE | &Privilege * / `privilege_input`; QComboBox via `_choices(PRIVILEGE_LEVELS)` | Form sixth | `submit` reads currentData → register_script(privilege_level) | Accessible Script privilege, required; Select… then service-defined privilege levels; label mnemonic | SM, SC |
+| SCRIPTS.REGISTER.DESCRIPTION | &Description / `description_input`; QPlainTextEdit | Form seventh, maximum height 80 | `submit` reads plain text → register_script(description) | Accessible Description, optional; multiline native editing; label mnemonic | SM, SC |
+| SCRIPTS.REGISTER.VERSION | &Version / `version_input`; QLineEdit | Form eighth, last | `submit` reads text → register_script(version) | Accessible Version, optional; label mnemonic | SM, SC |
+| SCRIPTS.REGISTER.CANCEL | Cancel / `cancel_button`; QPushButton | Bottom actions first button, after stretch | clicked → inherited reject → guarded `done` | Default button; disabled during submission; no custom shortcut | SM |
+| SCRIPTS.REGISTER.SAVE | Register script / `register_button`; QPushButton | Bottom actions last | clicked → `submit` → ServiceTaskRunner → ScriptService.register_script → ScriptRepository; `_succeeded` accepts and emits script_registered | Not auto-default; duplicate/completed/busy guards; no custom shortcut | SM, SC |
+
+`note` and `feedback` are passive plain-text QLabels. The note describes metadata
+registration of an already-existing readable .ps1 under PowerShell/Diagnostics,
+Reports or Modules, disabled with no approved checksum, and defaults of
+PowerShell 7, 120 seconds and structured output. The form offers no file creation,
+content editing, approval, category picker, runtime/timeout editor, file browser
+or Run action. ScriptService validates choices and references; repository methods
+own the transactional metadata writes and stale-token protection. This is not a
+second execution pathway. No GUI code directly writes SQL.
+
+### Pass 2 coverage and validation status — historical checkpoint
+
+| Scripts/Diagnostics inventory group | Control rows |
+|---|---:|
+| Workspace, single diagnostic, fixed baseline pack, search, views and splitter | 12 |
+| Management dialog and enable confirmation choices | 8 |
+| Registration form and actions | 10 |
+| **Pass 2 total** | **30** |
+
+Counts include 27 constructed widget instances, one splitter and two standard
+confirmation choices. Enable/Disable is one button with two labels; its Yes and
+Cancel confirmation choices are separate transient controls. Run diagnostic and
+Run baseline diagnostics are separate buttons that reuse `_start_run` and the
+same service/gateway; neither creates a duplicate QAction. Their shared result
+editor counts once. Passive status/error feedback adds no action rows.
+
+**GUI_REGISTRY_PASS2_COMPLETE — READY_FOR_CONTINUATION.** Fresh focused
+author-side static validation: **PASS**. Checks cover all 27 widget mappings,
+the splitter and two confirmation choices, 16 direct control connections,
+source/class/API and assigned-name checks, accessibility labels, selected layout
+and state invariants, linked source/test identities, unique IDs, table columns,
+counts, prior-document/AGENTS byte preservation, three-path scope and empty
+index. Logical layout, availability and backend semantics were also inspected
+in source; static checks are not runtime proof. Existing test references were
+inspected, not executed. No runtime GUI, PowerShell execution, Clipboard,
+database or full regression operation was performed. Splitter dragging, native
+rendering/DPI, physical input and platform mnemonic/default-key resolution remain
+**NOT VERIFIED**; no direct splitter-drag assertion was identified.
+
+Full registry remains INCOMPLETE;
+the next unfinished inventory is Clipboard Center, followed by shell/utilities/
+lifecycle completion, AHK/delegated Guide mapping and the final consistency audit.
+Those sections have not been extended by this pass. No full-application control,
+presentation or shortcut total, independent-review readiness or integration
+eligibility is claimed.
+
+## Pass 5 — final source reconciliation and review preparation
+
+<a id="gui-registry-coverage"></a>
+
+### Coverage and counting units
+
+The author-side audit covers Python/f7hub and Mochi/src Python construction
+sites, their custom QWidget subclasses/factories, the integrated F7Hub.ahk include
+closure and the fixed Guide request client. Each applicable discovered input,
+view, action, confirmation or binding is mapped or explicitly excluded. Detailed
+per-site construction/signal ledgers and five batch records are external in the
+final review package. No unexplained construction or ownership gap remains in
+this inspected source scope. Unrelated standalone AHK experiments, test fixtures,
+authored topic rows and future features are not production GUI constructions.
+
+| Module family | Current control/presentation rows |
+|---|---:|
+| Tickets and owned dialogs | 81 |
+| Knowledge Base and owned dialogs | 50 |
+| Scripts / Diagnostics and owned dialogs | 30 |
+| Clipboard Center / Setup | 14 |
+| Shell / lifecycle / Mochi / Guide / AHK | 68 |
+| **Final documented total** | **243** |
+
+The recovered Pass 4 total was 241. Two verified omissions were added in Pass 5:
+SHELL.FEEDBACK.STARTUP.FAILURE and MOCHI.PET.SURFACE. This is a source-driven
+correction, not an expected-count target. All prior control IDs remain present.
+
+Construction totals use a union of one instance of each documented source class
+or factory output, including conditional service branches. They do not describe
+simultaneous visibility, repeated dialog openings or platform-private objects.
+Read-only focusable data/text views count as interactive views. Pure composite
+containers do not; the pet's custom mouse-input canvas does.
+
+| Unit | Verified source count / interpretation |
+|---|---|
+| Constructed interactive widgets | 198: 172 Qt widgets and 26 AHK native controls |
+| Interactive splitters | 4, already included in the 172 Qt widgets; not added again |
+| Pure tab-target rows | 2: Knowledge and Company; the other three Ticket tab rows also describe their read-only content editors, counted once per row |
+| Menu-entry presentations | 10: nine explicit QAction menu presentations and one inserted submenu entry |
+| Tray icon | 1 QSystemTrayIcon; QObject surface, outside QWidget total |
+| Confirmation/acknowledgement choices | 32: 20 Qt choices and 12 AHK standard acknowledgements |
+| Presentation-row reconciliation | 198 widgets + 2 tab targets + 10 menu entries + 1 tray icon + 32 choices = 243 |
+| Explicit QAction identities | 13 source-constructed objects: MainWindow 8, lifecycle 2, pet 3; implicit framework actions excluded |
+| Explicit QAction presentations | 14: nine menu entries plus four rail buttons and the Knowledge Guide button; one Guide action has two presentations |
+| QShortcut instances | 3: shell Alt+F / Alt+S and Ticket creation StandardKey.Save; Quit is an action shortcut, not a fourth QShortcut |
+| Registered AHK hotkey definitions | 12 in the integrated host; F7 down/up are two definitions, TAP/HOLD are routing outcomes, topic keys use message dispatch |
+| Passive source templates excluded | 78 QLabel constructor sites and 9 AHK AddText sites; 87 source templates, not a runtime instance count |
+| Unresolved source/handler/action ownership mappings | 0; explicitly unverified runtime/identity/test matters are listed below |
+
+Passive factories may produce multiple labels, and native form labels, headers,
+scrollbars, picker internals, default editor menus and repeated data/topic rows
+are excluded. QTabWidget/QStackedWidget/QScrollArea and ordinary dialog/page
+containers are structural; their represented targets or child controls remain
+covered. TicketKnowledgeWidget's tab row is a target/composite, not a second
+count of its link controls. Factory declarations are not additional instances.
+
+| Inspected class/source owner | Coverage / explicit exclusion |
+|---|---|
+| TicketWorkspace | 43 rows: queue/detail/actions, read-only tab content, Company target and draft choices; one structural QTabWidget represented by its five targets |
+| TicketCreateWidget | 14 rows; three reference-combo outputs mapped individually; helper constructor/error-label templates excluded |
+| QuickCompanyDialog / QuickContactDialog | 3 / 4 rows; dialog containers and generated form labels excluded |
+| EditTicketSubjectDialog / EditTicketDescriptionDialog | 3 / 3 rows; inherited reject/default input semantics distinguished from custom shortcuts |
+| TicketKnowledgeWidget / LinkArticleDialog | 7 / 4 rows; two _ArticleIdentityTable instances covered at their call sites; composite container not extra widget |
+| KnowledgeWorkspace | 22 rows, including shared Guide presentation, splitter and publish/archive choices; passive metadata excluded |
+| NewArticleDialog / EditArticleDialog | 6 / 5 rows; identity/version labels excluded |
+| ArticleCategoryDialog / ArticleTagsDialog | 4 / 4 rows; generated category/tag choices are data, not extra controls |
+| KnowledgeTagFilterDialog / VersionHistoryDialog | 5 / 4 rows; metadata scroll container and labels excluded |
+| ScriptWorkspace / ScriptManagementDialog / RegisterScriptDialog | 12 / 8 / 10 rows; fixed diagnostic pack and manual search covered; three _choices outputs counted, template excluded |
+| ClipboardWorkspace / ClipboardSetup | 6 / 8 rows; two source choices in one selector, conditional section stacks, three checkbox outputs and two draft choices; disabled Windows Refresh is not acquisition |
+| MainWindow / app.main.main | 13 shell/utility/feedback rows plus one startup acknowledgement; named actions and event bindings separate; no active menu bar/toolbar/dock |
+| ApplicationLifecycle / Windows visibility adapter | 5 presentation/choice rows plus close/activation bindings; recovery timer/query/state transitions excluded from control count |
+| MochiSettingsDialog / PetWindow / Mochi app | 7 / 4 rows, including custom pet input surface; app constructs the pet once; timers/animation frames are not controls |
+| GuideCore / TopicRouting / GuideHost | 26 native controls and 10 Guide acknowledgements; shared toolbar has two sets of three buttons; topic catalog, hidden endpoint, draw/resize callbacks excluded |
+| F7HotkeyController / F7HubLauncher / MagneticWindowFollower | 12 host hotkey definitions and one launcher acknowledgement; state/timer/movement bindings are not extra buttons |
+| GuideRequest / Troubleshooting_Quick_Guide | Fixed delegated show/focus route and one client acknowledgement; no second persistent GUI or per-request control count |
+| Table models / ServiceTaskRunner / transport services | Projection, background completion or relay infrastructure, not additional user controls; owning views/actions are mapped above |
+
+### Legitimate action and handler reuse
+
+| Reuse | Source-grounded relationship |
+|---|---|
+| Guide button and utility Guide | Same MainWindow.altf7hub_action, one triggered connection to show_altf7hub; two presentations |
+| Rail navigation and routing | Four QToolButtons use their existing QActions; active marker is derived from pages, not a second action |
+| Shell Exit and tray Exit | Different QActions, same ApplicationLifecycle.request_exit coordinator through MainWindow; shared guards, no duplicate shutdown owner |
+| Tray icon and Open menu | Native Trigger/DoubleClick and open_action both invoke restore; one icon, not one control per activation reason |
+| Single diagnostic and baseline pack | Different buttons/use cases reuse ScriptWorkspace._start_run and the shared PowerShell service/gateway |
+| Refresh/Retry and Pause/Resume | One changing-label button in each applicable owner; labels do not create extra instances |
+| Guide/editor formatting | AddFormattingToolbar constructs three buttons in each of two windows; six instances, one implementation |
+| Source and section navigation | Clipboard source selector changes presentation; its two options and stacked pages are not new capture actions |
+
+<a id="gui-registry-shortcuts"></a>
+
+### Static shortcut ownership matrix
+
+Every row below is source verification, not physical keyboard acceptance. Normal
+native input and platform-generated menus remain available within their owner
+scope; no shortcut was executed or reassigned by this audit.
+
+| Shortcut / input | Owner and context | Effect / source | Potential conflict or limitation | Static status |
+|---|---|---|---|---|
+| Alt+F | MainWindow QShortcut, WidgetWithChildrenShortcut, no repeat | _focus_navigation; main_window.py | Active popup/modal refused; separate dialog windows keep local mnemonic handling | PASS; physical NOT VERIFIED |
+| Alt+S | Same owner/context | _show_utility_menu; main_window.py | Popup show suspends both shortcuts; next-turn guarded resume after hide | PASS; physical NOT VERIFIED |
+| Alt+F / Alt+S while popup active | MainWindow ShortcutOverride event filter | Consumes shell override so popup keeps native handling | Native menu dismissal/dispatch remains untested | PASS / NOT VERIFIED runtime |
+| StandardKey.Quit | MainWindow.exit_action, associated with MainWindow | request_exit; Ctrl+Q fallback only if standard sequence empty on win32 | Exact platform standard sequence unresolved by static source | PASS definition; resolution NOT VERIFIED |
+| StandardKey.Save | TicketCreateWidget QShortcut, WidgetWithChildrenShortcut | submit; ticket_create_widget.py | Scoped to creation widget descendants; no global Save action or assumed physical Ctrl+S result | PASS definition; resolution NOT VERIFIED |
+| Ctrl+Return / Ctrl+Enter | TicketWorkspace note_input focus, no other modifier except keypad bit; no repeat | add_note; ticket_workspace.py eventFilter | Other editors/scopes do not acquire this submission action | PASS; physical NOT VERIFIED |
+| Escape in Quick Note | Focused note_input | Consumed by TicketWorkspace | Preserves editor/draft rather than shell departure | PASS; physical NOT VERIFIED |
+| Escape on rail/gear | Focused rail/gear, no popup, retained same-page editor | MainWindow eventFilter restores usable invoking editor | Popup Escape and dialog Escape remain their own paths | PASS; physical NOT VERIFIED |
+| Enter/Return on gear; Space/Enter rail input | Focused shell controls | Gear explicitly click()s; rail records keyboard intent while default action owns activation | Actual native QToolButton key acceptance not inferred from intent tracking | PASS source; physical NOT VERIFIED |
+| E&xit; &Clipboard Center | MainWindow action text | Source mnemonic markers on action labels | No invented global Alt+C shortcut; platform mnemonic resolution NOT VERIFIED | PASS marker definitions |
+| Setup &E / &a / &t / &A / &C / &R | ClipboardSetup controls | Workflow/process/title/Apply/Cancel/Reload | Process &a and Apply &A overlap; physical dispatch/cycling explicitly NOT VERIFIED | PASS source; conflict resolution NOT VERIFIED |
+| Dialog label & markers / default buttons | Owning Ticket/Knowledge/registration dialogs | Source form labels and setDefault/setDefaultButton/setEscapeButton calls | Default Enter or inherited Escape remain guarded by owning submit/done/reject methods; source defaults are not new QShortcuts | PASS definitions; physical NOT VERIFIED |
+| F7 down / F7 up | Shared F7Hub.ahk host | F7HotkeyController.OnDown/OnUp | Two registered definitions; no repeat-created parallel hold timer | PASS; native NOT VERIFIED |
+| F7 TAP / HOLD / release | Same controller, 180 ms source threshold | TAP LaunchOrFocus; HOLD LaunchOrFind + follower.Start; release Stop | HOLD timer is not another hotkey; physical timing/focus not exercised | PASS; native NOT VERIFIED |
+| Alt+F7 ($!F7) | Shared host global binding | ToggleGuide; editor priority and active-Guide hide/show behavior | Separate from Python show/focus request; no automatic second toggle after dispatch | PASS; native NOT VERIFIED |
+| Ctrl+F / Ctrl+L | Guide active HWND #HotIf | FocusSearch / ShowSidebar | Scoped to Guide window; editor is separate owned window | PASS; native NOT VERIFIED |
+| Ctrl+PgUp / Ctrl+PgDn | Guide active HWND #HotIf | NavigateTopic(-1/+1) | Scope is window-level; notes/list-only scope applies to unmodified arrows instead | PASS; native NOT VERIFIED |
+| Guide Escape / editor Escape | Guide host binding / EditorGui Escape event | Guide.Hide / CloseEditor | Different window scopes; editor Cancel discards uncommitted editor session, no invented confirmation | PASS; native NOT VERIFIED |
+| Up/Down / Left/Right | GuideNavigationFocused, notes/list, active Guide, no Ctrl/Alt/Shift/Win | Repeated topic navigation / opacity ±1 | Other controls retain native input; no arbitrary debounce inferred | PASS; native NOT VERIFIED |
+| C / E / valid topic keys | GuideHost WM_KEYDOWN callback, same notes/list/modifier scope; non-repeat | Create/edit or TopicRouting.ShortcutTarget | Data-driven topic targets are not extra registered hotkeys; archive guards apply | PASS; native NOT VERIFIED |
+
+Source default-button audit covers the named dialog groups, not an assumed
+universal Save key: quick company/contact and new/edit article/subject dialogs
+use their source defaults; category/tags/multi-tag, script registration/manager
+and destructive confirmations prefer Cancel/Close as recorded in their rows.
+Inherited editor copy/undo/context commands and OS color-picker internals are
+excluded from custom shortcut totals.
+
+<a id="gui-registry-findings"></a>
+
+### Findings, architecture and readiness
+
+| Finding | Type / severity | Verification and disposition |
+|---|---|---|
+| P5-D01: startup acknowledgement missing | Documentation defect / P2 | RESOLVED: SHELL.FEEDBACK.STARTUP.FAILURE maps app.main.main and its existing startup-failure test |
+| P5-D02: custom pet input surface missing | Documentation defect / P2 | RESOLVED: MOCHI.PET.SURFACE maps PetWindow construction and mouse/context events; event records are not extra buttons |
+| P5-D03: obsolete partial status / missing reconciled units | Documentation defect / P2 | RESOLVED: current status, navigation, coverage, unit counts and shortcut ownership added; earlier pass outcomes retained as historical progression |
+| P5-S01: F7 target identity predicate | Potential source limitation / P3 | OPEN, nonblocking for documentation: title/Qt class/Python name checks have no command-line/project-root comparison; cross-checkout protection NOT VERIFIED; source unchanged |
+| P5-S02: Clipboard A/a mnemonic overlap | Potential source/platform behavior / P3 | OPEN, nonblocking for documentation: source markers verified; physical dispatch/cycling NOT VERIFIED; no reassignment |
+| P5-E01: physical/native UI acceptance | Runtime-unverified behavior / P3 | NOT RUN by this gate; includes rendering, DPI, tray, hotkey timing, foreground focus and default-key resolution; no fresh physical PASS claimed |
+| P5-T01: control-specific native assertions | Test coverage limitation / P3 | Existing source tests identified; direct formatting functions/fixtures do not establish every button, acknowledgement or physical route; unverified areas remain explicit |
+| P5-H01: earlier GUI/Clipboard/Mochi prose | Historical issue / informational | Earlier delivery snapshots and original failed restoration/adjudication records preserved; they do not override this pinned-source inventory |
+
+The registry preserves GUI → application/service → domain → repository/gateway
+ownership. Recent is a durable read-only projection; Setup's trusted S05 manual
+consent is separate from generic settings and RAM monitoring. Windows Refresh
+has no acquisition connection; RAM-01A domain integration is not automatic
+observation; RAM-01B and HybridB-01 are not delivered GUI capture controls.
+Scripts separates catalog visibility, verified Copy and fixed execution policy;
+single/pack execution does not imply a general Diagnostic Center. PR #114's
+Python restoration is integrated at this source revision without rewriting
+the failed Expose-only history or manufacturing fresh native acceptance.
+Guide owns local topic files, not core SQLite; Mochi Close/Exit and delegated
+local control remain distinct from planned recognition/provider features.
+
+Governance audit: root AGENTS.md and Clipboard AGENTS.md retain their exact
+recovered bytes. Their concise additions require registry consultation, actual
+source inspection/reuse and synchronization after validated authorized changes,
+while preserving source-of-truth precedence, Clipboard consent/privacy and
+planned/candidate distinctions. The detailed inventory remains only here; no
+duplicate maintenance policy or independent implementation authority was added.
+
+All five author-side audit batches and the construction/action census pass.
+Final fresh source/link/handler/objectName/connection/layout/shortcut/status/ID/
+table/governance/history/scope checks are recorded in the external frozen review
+package, bound to raw and Git-normalized file hashes and the exact saved patch.
+No unresolved source coverage gap or blocking documentation finding remains.
+Runtime GUI, AHK/native, Clipboard, PowerShell, database operations and full
+regressions were NOT RUN as required by this documentation-only gate.
+
+**GUI_REGISTRY_READY_FOR_INDEPENDENT_REVIEW.** This is an author readiness
+statement only. Independent review has not been requested or performed, no
+approval is inherited, and staging/commit/push/merge remain unauthorized.

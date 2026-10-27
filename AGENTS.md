@@ -264,3 +264,16 @@ Prefer one authoritative detailed owner plus short root safety reminders; do not
 Before completion, verify requested scope, architecture, security, data integrity, required validation, documentation synchronization, unrelated-work preservation and remaining risks.
 Report changed files, evidence/results, architecture/security impacts, risks, documentation and next required gate.
 Disclose incomplete work and blockers; completion/readiness never grants additional approval or integration authority.
+
+## GUI Control & Action Registry Maintenance
+
+`Docs/05_GUI.md` owns the GUI control and action inventory. Before creating,
+modifying, moving, renaming or removing controls, consult the registry, inspect
+actual source and search for reusable widgets, actions, handlers and services.
+Preserve approved architecture and stable identifiers; verify signal routing,
+shortcuts, focus and accessibility. After authorized changes are validated,
+update affected entries at the appropriate documentation gate. Distinguish
+integrated behavior from candidates and plans; mark unresolved relationships
+`NOT VERIFIED`. Avoid unrelated refactoring and duplicate components. Source and
+approved architecture remain authoritative: a registry entry neither proves
+runtime behavior nor replaces testing or grants implementation authority.
