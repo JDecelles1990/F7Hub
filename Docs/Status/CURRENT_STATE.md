@@ -1,5 +1,60 @@
 # F7Hub Current State
 
+## F7 physical-failure replacement — READY_FOR_USER_SMOKE_TEST (2026-10-26)
+
+Current uncommitted replacement on `fix/canonical-install-20261026`, HEAD/base
+`c77bc5511887545a26974dfe2fedd86c069b7581`. The first candidate FAILED physical
+X/F7 restoration. Tray Open repairs the white window; the user clarified that
+tray Open followed by guarded Exit physically PASS. No general Exit defect is
+inferred. Exact event/callback timing in the physical failure remains NOT VERIFIED.
+
+The replacement removes incidental Expose notification eligibility. The existing
+Qt timer checks the retained HWND's native visibility every 100 ms while hidden
+and restores through Qt without foreground activation, returning to 1000 ms when
+restored. Native queries are read-only, with no new message, IPC endpoint or
+window-command contract. AHK production sources and the database are unchanged.
+
+Fresh validation: 24 lifecycle, three native-query and four startup tests PASS;
+34 native fixture stages PASS, including native X/F7/X/F7/tray Open, true widget
+and child visibility with repair notifications suppressed, retained drafts
+without text logging, HOLD focus/release, no duplicate and real guard cancellation
+followed by natural accepted exit 0. A corrected regression first FAILS the old
+candidate with responsive Qt heartbeat and no repair callback. A registered-host
+synthetic diagnostic did not reproduce the physical failure; that does not erase
+the user's physical FAIL. Replacement physical acceptance and independent review
+remain NOT RUN. No commit, push, merge or integration readiness is claimed.
+
+Evidence and prior candidate/physical failure records:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/F7-Restore-Physical-Correction-20261027T000152Z`
+(directory timestamp is UTC). All worktrees, unrelated files and protected settings
+are preserved. Restart through normal Exit before the one new physical smoke test.
+
+## Historical first F7 correction — physical FAIL (2026-10-26)
+
+The earlier readiness and automated results below are preserved as history. The
+later physical X/F7 failure supersedes its user-smoke readiness disposition.
+
+Local candidate on `fix/canonical-install-20261026`, HEAD/base
+`c77bc5511887545a26974dfe2fedd86c069b7581`. The integrated installation and all
+Clipboard worktrees are preserved. The production correction is confined to
+`ApplicationLifecycle`; AHK launcher/controller/follower, database and migration
+inputs are unchanged. No new IPC contract is introduced.
+
+An isolated Windows fixture demonstrated a fully white native client area with
+Qt and child visibility still false after the existing native show operation;
+tray Open restored Qt state and rendering. Fresh validation of the correction:
+23 lifecycle tests and four startup tests PASS; 25 native synthetic fixture
+stages PASS, including cold TAP, X-hide, tray Open, repeated TAP/HOLD restore,
+maximized-hidden and minimized HOLD, no duplicate window, cancelled Exit and
+accepted natural exit 0. The existing six-geometry/3600-tick follower regression
+also PASS. These are synthetic/automated native results, not physical acceptance.
+
+Physical user smoke and independent review are pending. An already running
+application must exit normally and restart to load the local Python correction;
+the unchanged AHK host needs no reload. No commit, push or merge was performed.
+Evidence, original failed attempts, candidate identity and review handoff are in
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/F7-Restore-White-20261026T233806Z`.
+
 ## LIFE-01 — INTEGRATED / PASS (2026-10-25)
 
 This is the authoritative current LIFE-01 summary. The recovery and candidate

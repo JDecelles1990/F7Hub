@@ -1,5 +1,51 @@
 # F7Hub Python Architecture
 
+## F7 restore presentation correction — candidate (2026-10-26)
+
+A physical user test FAILED the first exposure-only correction: X followed by F7
+still produced a white window, while tray Open restored the interface. The user
+subsequently clarified that tray Open followed by guarded Exit physically PASS.
+The exact missing/rejected notification in that physical run was not captured.
+
+The current correction removes the exposure-dependent repair. While hidden,
+the existing Qt recovery timer runs every 100 ms and queries only the retained
+HWND's `WS_VISIBLE` state through a read-only infrastructure helper. A native
+show is reconciled through Qt on the GUI thread without foreground activation;
+the timer returns to 1000 ms after restoration. `QWindow.isExposed()` is not an
+eligibility condition. No custom message, IPC endpoint or window-command API is
+added. This requires a responsive Qt event loop and permits a short timer-bound
+presentation delay; it does not claim synchronous restoration at the AHK call.
+
+The corrected native regression first fails the old candidate with its repair
+notification withheld and the Qt heartbeat still running, then passes the new
+candidate with all exposure callbacks unused. Native X-close and the exact
+X/F7/X/F7/tray Open sequence check real QWidget and child visibility, retained
+draft state without recording text, one window, HOLD focus behavior and guarded
+Exit cancellation/acceptance. Fresh checks: 24 lifecycle, three native-query,
+four startup tests and 34 native fixture stages PASS. Physical acceptance of this
+replacement and independent review remain pending. No integration is claimed.
+
+### Historical first exposure-only correction — physical FAIL
+
+A Windows fixture reproduced the reported white window after X-to-tray followed
+by F7: the existing AHK `ShowWindow(SW_SHOWNOACTIVATE)` exposed the HWND while
+`QWidget.isVisible()` remained false and the child navigation rail stayed hidden.
+Tray Open repaired the same window through `ApplicationLifecycle.restore()`.
+
+The first candidate lifecycle observed its existing QWindow's Qt Expose events. If a
+lifecycle-hidden widget is externally exposed, one queued GUI-thread callback
+rechecks exposure, shutdown and visibility state, then restores through Qt.
+This repair normalizes the window without foreground activation or explicit
+focus changes, preserving the AHK HOLD path; TAP retains its existing separate
+activation. Tray Open continues to preserve maximization and retained focus.
+Deleted Qt wrappers and stale exposure callbacks are ignored. No new native
+message, IPC endpoint, database behavior or AHK contract is introduced.
+
+Its synthetic/native fixture checks passed, but the later physical user test
+FAILED. Those earlier results remain historical and do not override the physical
+failure. The replacement above remains uncommitted and unintegrated. Historical
+LIFE-01 results below remain unchanged.
+
 ## LIFE-01 — retained-window application lifecycle (2026-10-25 integrated)
 
 Implementation status: **INTEGRATED / PASS** through

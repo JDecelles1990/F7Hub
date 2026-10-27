@@ -3,6 +3,9 @@
 from PySide6.QtCore import QObject, Qt, QTimer
 from PySide6.QtGui import QAction, QIcon, QPainter, QPixmap, QColor
 from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+from shiboken6 import isValid
+
+from f7hub.infrastructure.windows_window_visibility import is_native_window_visible
 
 
 class ApplicationLifecycle(QObject):
@@ -75,22 +78,33 @@ class ApplicationLifecycle(QObject):
         self._was_maximized = self.window.isMaximized()
         self._hidden = True
         self.window.hide()
+        self.recovery_timer.setInterval(100)
         self.check_recovery()
 
-    def restore(self):
+    def restore(self, *, activate=True, normalize=False):
         if self.accepted:
             return False
+        self.recovery_timer.setInterval(1000)
         was_hidden = self._hidden
-        maximized = self._was_maximized if was_hidden else self.window.isMaximized()
+        maximized = not normalize and (
+            self._was_maximized if was_hidden else self.window.isMaximized())
         # Clear minimized state even when activation is refused by Windows.
         # A visible taskbar/window remains the recovery path in that case.
-        if maximized:
-            self.window.showMaximized()
-        else:
-            self.window.showNormal()
-        self.window.raise_()
-        self.window.activateWindow()
-        if was_hidden and self._focus is not None:
+        without_activation = Qt.WidgetAttribute.WA_ShowWithoutActivating
+        previous_attribute = self.window.testAttribute(without_activation)
+        try:
+            if not activate:
+                self.window.setAttribute(without_activation, True)
+            if maximized:
+                self.window.showMaximized()
+            else:
+                self.window.showNormal()
+        finally:
+            self.window.setAttribute(without_activation, previous_attribute)
+        if activate:
+            self.window.raise_()
+            self.window.activateWindow()
+        if activate and was_hidden and self._focus is not None:
             try:
                 if self._focus.isVisible() and self._focus.isEnabled():
                     self._focus.setFocus(Qt.FocusReason.OtherFocusReason)
@@ -106,7 +120,14 @@ class ApplicationLifecycle(QObject):
             self.restore()
 
     def check_recovery(self):
-        if self._hidden and not self.accepted and not self.recovery_available():
+        if self.accepted or self.exiting or not isValid(self.window) or not self._hidden:
+            return
+        # Native show/activation need not deliver a usable Qt Expose event.
+        # Reconcile authoritative HWND state from our existing GUI-thread timer.
+        # Only a known retained window is queried; this sends no native message.
+        if is_native_window_visible(int(self.window.effectiveWinId())):
+            self.restore(activate=False, normalize=True)
+        elif not self.recovery_available():
             self.restore()
             self.window.statusBar().showMessage(
                 "Tray recovery was lost. F7Hub has been restored.")
