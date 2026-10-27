@@ -698,3 +698,12 @@ A missing shared shell/context capability belongs to S1/S2.
 
 Prefer small, independently testable, reversible delivery over feature
 accumulation.
+
+## Clipboard GUI Registry Synchronization
+
+Clipboard GUI changes must inspect and maintain Clipboard Center entries in
+[the canonical GUI Control & Action Registry](../../05_GUI.md), following the
+root maintenance contract. It describes location and wiring, not Clipboard
+domain, privacy, consent, acquisition, IPC or storage authority. Distinguish
+implemented manual operations and volatile RAM history from pending native
+monitoring and unintegrated HybridB-01 functionality.
