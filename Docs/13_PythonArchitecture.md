@@ -1,6 +1,30 @@
 # F7Hub Python Architecture
 
-## HBR-01N — dormant post-START I/O retirement gate (2026-10-27 candidate)
+## Native IPC — retained-process context candidate (2026-10-27)
+
+`infrastructure/windows_clipboard_context.py` adds dormant, read-only 64-bit
+Windows observation of H01-C's adopted 112-byte process context. The future
+trusted enrollment owner lends original retained real process handles plus their
+original PID/creation FILETIME pins. The verifier checks those pins and process
+liveness, queries both primary tokens with TOKEN_QUERY, requires the same Windows
+session and exact binary user/logon SIDs and medium integrity, and encodes the
+existing little-endian layout with SHA-256 SID encodings. Token buffers are
+bounded to 65,536 bytes with no allocation retry; truncated, ambiguous or unknown
+observations fail with a fixed content-free error. Only its temporary token
+handles are closed, once; borrowed process handles remain caller-owned.
+
+This is a context observation, not trusted launch, enrollment, executable/script
+provenance, pipe-peer verification, authentication or dispatch permission. The
+caller must retain the exact handles, serialize use, prevent concurrent close
+and revalidate at the required use boundary. Liveness is a snapshot. No production
+importer, endpoint, keys, policy instance, native I/O, Clipboard access or lifecycle
+wiring is introduced. H01-A, HBR-01 and HBR-01N remain unchanged. ApplicationLifecycle
+retains Exit/tray ownership. Focused synthetic and native process/token tests are
+reported in [CURRENT_STATE](Status/CURRENT_STATE.md); connected status exchange
+and native 500-ms feasibility remain NOT RUN / NOT VERIFIED. Candidate review is
+pending; there is no native activation or integration approval.
+
+## HBR-01N — integrated dormant post-START I/O retirement gate (2026-10-27)
 
 `infrastructure/clipboard_native_io.py` supplies a serialized, fixed-offer
 `PostStartIOGate` for a future trusted native-status adapter. It retains the
@@ -15,7 +39,7 @@ confirmed closure publishes local completion into HBR-01; the app side also
 records server closure. Child CLOSED reason/outcome and authenticated retirement
 messages still require the existing policy gates.
 
-This candidate implements no Windows API, process enrollment, pipe, control
+This prerequisite implements no Windows API, process enrollment, pipe, control
 channel, worker, deadline clock, status dispatch/result, Clipboard access or
 application wiring. A future issuing-process adapter must verify native
 completion, bind the callback to the exact process/offer/handle, serialize calls,

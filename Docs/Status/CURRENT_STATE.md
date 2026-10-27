@@ -1,34 +1,55 @@
 # F7Hub Current State
 
-## HBR-01N — post-START I/O gate candidate (2026-10-27)
+## Native IPC — retained-process context candidate (2026-10-27)
 
-Implementation disposition: **READY_FOR_REVIEW** for this dormant prerequisite.
+Implementation disposition: **READY_FOR_REVIEW**, awaiting independent review.
 
-Base: PR #116 merge `63de01184d084d17556435ab888c587f6fdcf0ca`.
-Candidate: `C:\Dev\F7Hub-Clipboard-HBR01N`, branch
-`feature/clipboard-hbr01n-native-status`; unstaged/uncommitted. The canonical
-checkout was fast-forwarded to that exact baseline after an external preservation
-checkpoint, collision checks and live GitHub verification. Its local work,
-recorded databases, GUI Registry and H01-A identities were preserved; opaque
-configuration was untouched.
+Base: PR #117 merge `d4762afe003f353946c520ad746185c981d4b5df`.
+Candidate: `C:\Dev\F7Hub-Clipboard-NativeIPC-20261027`, branch
+`feature/clipboard-native-ipc-prerequisite-20261027`; unstaged/uncommitted.
+Canonical synchronization was not repeated. Approval reconciliation freshly
+verified both HBR-01/HBR-01N independent **APPROVED WITH NOTES** dispositions,
+their exact PR integration identities and absence of blocking findings. PR #117's
+reviewed eight-line sole-I/O-owner retention addition explains the session blob
+change from PR #116. Final integrated source matches the authorized PR #117 blobs.
 
-The selected prerequisite is a dormant fixed-offer local I/O retirement gate,
-described in [Python architecture](../13_PythonArchitecture.md). It keeps the
-authoritative policy and sole gate alive, bounds read/write slots, separates
-cancellation from completion, and fences a single close attempt after drain.
-No production adapter or connected status exchange is delivered. Native trusted
-enrollment/process pinning, control/data I/O, status result delivery, lifecycle
-wiring and native timing/physical acceptance remain deferred. No GUI, AHK,
-Clipboard, schema, consent or tray/Exit change is included.
+The selected prerequisite observes the adopted 112-byte process context from
+original retained Windows process handles, as described in
+[Python architecture](../13_PythonArchitecture.md). It verifies PID/creation,
+liveness, same token session/user/logon SID and exact medium integrity, closes
+only temporary token handles and fails closed on incomplete or mismatched data.
+It does not establish trusted launch/enrollment or pipe authentication, and has
+no production importer. No connected status exchange is delivered.
 
-Validation and final candidate identity are recorded externally under
-`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/HBR01N/sync-20261027T221049Z`.
-Focused Python synthetic checks PASS: 26 final I/O gate tests, plus 56 HBR-01
-session and six H01-A codec tests whose unchanged inputs are verified. The first
-86-test execution exited 0 / OK; its wrapper newline-classification FAIL is
-preserved beside a separate hash-bound corrected assessment without rerunning it.
-Independent review and all native/physical acceptance remain NOT RUN; no approval
-or integration is claimed. Earlier dated status sections retain historical meaning.
+FRESH author validation: **20 PASS**, WINDOWS_PYTHON_SYNTHETIC; **3 PASS**,
+WINDOWS_NATIVE process/token APIs with short-lived test-owned Python children.
+Both commands exited 0, with zero failures/errors/skips. Native tests cover exact
+context, wrong creation identity and exited retained process; they do not exercise
+AHK, enrollment, IPC, handle transfer, native I/O or 500-ms feasibility. Historical
+security campaigns and full application regression were NOT RUN. Production/test
+identities and completion logs are bound in the external checkpoint:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/NativeIPC/implementation-20261027T2303450737851Z`.
+Independent review is NOT RUN. Host launch, pipe peer checks, control/data I/O,
+status delivery, lifecycle composition and all Clipboard effects remain deferred.
+No GUI Registry, AHK, schema, consent, hotkey or tray/Exit change is included.
+
+## HBR-01 / HBR-01N — integrated dormant prerequisites (2026-10-27)
+
+PR #116 merged the independently approved two-file HBR-01 policy core at
+`63de01184d084d17556435ab888c587f6fdcf0ca`. PR #117 merged the independently
+approved six-file HBR-01N I/O gate at `d4762afe003f353946c520ad746185c981d4b5df`.
+These are integrated dormant prerequisites; neither activates native IPC or
+Clipboard behavior. The previously recorded pre-review/pre-merge candidate
+status is historical. The new checkpoint contains the verified approval and
+integration evidence references; the old campaigns were not rerun.
+
+Historical HBR-01N validation remains separate: 26 final gate tests, 56 session
+and six codec tests across author executions, and 33 independent synthetic
+checks (26 gate plus seven probes). Its original 86-test wrapper FAIL remains
+preserved beside the separate hash-bound derived assessment; no original result
+is rewritten. Native interoperability and full 500-ms feasibility remain
+NOT RUN / NOT VERIFIED. Retain the authoritative policy and sole I/O gate for
+their entire fixed-offer lifetime, including replay/resend state and quarantine.
 
 ## F7 physical-failure replacement — READY_FOR_USER_SMOKE_TEST (2026-10-26)
 
