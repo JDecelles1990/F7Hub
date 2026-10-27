@@ -1,5 +1,18 @@
 # F7Hub ChangeLog
 
+## 2026-10-27 — HBR-01N dormant I/O retirement gate candidate
+
+Added a fixed-offer post-START I/O gate for a future authenticated native-status
+adapter, reusing HBR-01 policy instances and enforcing one retained gate per
+policy lifetime. Bounded read/write tickets retain resources until local I/O
+completion; cancellation cannot authorize close. Retirement fences admission,
+and close is attempted once after drain. Uncertain close quarantines. Existing
+MAC, request deadlines, replay history and retirement receipt rules are unchanged.
+No connected exchange, Windows wrapper, AHK/GUI wiring, Clipboard effect, schema
+or consent change is delivered. Focused synthetic validation and manifest are in
+the external HBR01N checkpoint named in CURRENT_STATE; independent review and
+native acceptance remain pending. Candidate is unstaged/uncommitted.
+
 ## 2026-10-26 — F7 physical-failure correction candidate
 
 Physical X/F7 acceptance FAILED the earlier exposure-only candidate; its passing

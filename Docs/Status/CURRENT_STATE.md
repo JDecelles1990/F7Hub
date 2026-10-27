@@ -1,5 +1,35 @@
 # F7Hub Current State
 
+## HBR-01N — post-START I/O gate candidate (2026-10-27)
+
+Implementation disposition: **READY_FOR_REVIEW** for this dormant prerequisite.
+
+Base: PR #116 merge `63de01184d084d17556435ab888c587f6fdcf0ca`.
+Candidate: `C:\Dev\F7Hub-Clipboard-HBR01N`, branch
+`feature/clipboard-hbr01n-native-status`; unstaged/uncommitted. The canonical
+checkout was fast-forwarded to that exact baseline after an external preservation
+checkpoint, collision checks and live GitHub verification. Its local work,
+recorded databases, GUI Registry and H01-A identities were preserved; opaque
+configuration was untouched.
+
+The selected prerequisite is a dormant fixed-offer local I/O retirement gate,
+described in [Python architecture](../13_PythonArchitecture.md). It keeps the
+authoritative policy and sole gate alive, bounds read/write slots, separates
+cancellation from completion, and fences a single close attempt after drain.
+No production adapter or connected status exchange is delivered. Native trusted
+enrollment/process pinning, control/data I/O, status result delivery, lifecycle
+wiring and native timing/physical acceptance remain deferred. No GUI, AHK,
+Clipboard, schema, consent or tray/Exit change is included.
+
+Validation and final candidate identity are recorded externally under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/HBR01N/sync-20261027T221049Z`.
+Focused Python synthetic checks PASS: 26 final I/O gate tests, plus 56 HBR-01
+session and six H01-A codec tests whose unchanged inputs are verified. The first
+86-test execution exited 0 / OK; its wrapper newline-classification FAIL is
+preserved beside a separate hash-bound corrected assessment without rerunning it.
+Independent review and all native/physical acceptance remain NOT RUN; no approval
+or integration is claimed. Earlier dated status sections retain historical meaning.
+
 ## F7 physical-failure replacement — READY_FOR_USER_SMOKE_TEST (2026-10-26)
 
 Current uncommitted replacement on `fix/canonical-install-20261026`, HEAD/base
