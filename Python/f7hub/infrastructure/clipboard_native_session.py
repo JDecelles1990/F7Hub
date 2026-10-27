@@ -143,7 +143,15 @@ class _BoundPolicy:
         self._frequency = frequency
         self._last_tick = 0
         self._quarantined = False
+        self._io_owner = None  # Retain the sole local gate for this policy lifetime.
         self._now()
+
+    def _retain_io_owner(self, owner):
+        """Trusted local adapter binding; never release/rebind on timeout/close."""
+        self._healthy()
+        if owner is None or self._io_owner is not None:
+            _deny()
+        self._io_owner = owner
 
     @property
     def quarantined(self):

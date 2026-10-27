@@ -1,5 +1,32 @@
 # F7Hub Python Architecture
 
+## HBR-01N — dormant post-START I/O retirement gate (2026-10-27 candidate)
+
+`infrastructure/clipboard_native_io.py` supplies a serialized, fixed-offer
+`PostStartIOGate` for a future trusted native-status adapter. It retains the
+existing HBR-01 `NativeSessionPolicy` or `RetirementLedger`; that policy retains
+its sole gate for its own lifetime, with no release/replacement API. It reserves
+one read and one write slot and retains supplied native-operation resources until
+positive local completion. Cancellation and timeout do not complete a slot.
+Retirement permanently fences new I/O. After all slots drain, one trusted local
+callback may close the exact retained handle; its attempt is consumed before
+invocation. False/uncertain/exceptional closure quarantines without retry. Only
+confirmed closure publishes local completion into HBR-01; the app side also
+records server closure. Child CLOSED reason/outcome and authenticated retirement
+messages still require the existing policy gates.
+
+This candidate implements no Windows API, process enrollment, pipe, control
+channel, worker, deadline clock, status dispatch/result, Clipboard access or
+application wiring. A future issuing-process adapter must verify native
+completion, bind the callback to the exact process/offer/handle, serialize calls,
+retain the policy through cleanup/quarantine, and supervise pending resources.
+PRESTART remote-close authority is outside this gate. Peer messages cannot be
+used as local completion observations. HBR-01 MAC, replay, 500-ms deadline and
+4,096-request fail-closed limits remain authoritative and unchanged; this gate
+grants no consent. The owner-adopted external H01-C contract remains controlling.
+Synthetic tests establish these local bookkeeping rules only; live AHK/Python
+exchange and Windows handle/deadline behavior remain NOT RUN / NOT VERIFIED.
+
 ## F7 restore presentation correction — candidate (2026-10-26)
 
 A physical user test FAILED the first exposure-only correction: X followed by F7
