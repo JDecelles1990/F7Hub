@@ -1,5 +1,35 @@
 # F7Hub ChangeLog
 
+## 2026-10-26 — F7 physical-failure correction candidate
+
+Physical X/F7 acceptance FAILED the earlier exposure-only candidate; its passing
+synthetic fixtures did not supersede that failure. The user clarified physical
+tray Open followed by guarded Exit PASS. Exact physical notification timing is
+not verified. The replacement removes Expose eligibility and uses the existing
+Qt recovery timer to query only retained-HWND visibility while hidden, restoring
+Qt without requesting activation. No AHK production, IPC or database change.
+
+Fresh focused validation: 24 lifecycle, three native-query and four startup
+tests PASS; 34 native stages PASS with exposure repair notifications suppressed,
+native X-close, the required repeated F7 sequence, HOLD and cancelled/accepted
+Exit. The corrected regression failed the old candidate first. Metadata-sharing
+harness failures are retained separately. Replacement physical smoke and
+independent review remain pending; no integration claim.
+
+## 2026-10-26 — F7 white-window restore correction candidate
+
+Historical first candidate: subsequently FAILED physical X/F7 acceptance. Its
+automated results below remain evidence of those executions only.
+
+Reproduced an HWND/Qt visibility mismatch after X-to-tray and the existing AHK
+native show call; tray Open restores the same window correctly. The Python-only
+lifecycle correction queues a non-activating Qt restore on external exposure,
+with stale-event, shutdown and deleted-wrapper guards. Fresh focused validation:
+23 lifecycle tests, four startup tests, 25 native fixture stages and the existing
+six-case/3600-tick follower regression PASS. Physical user smoke and independent
+review remain pending; no commit, integration or database change is claimed.
+Original diagnostic/candidate failures remain in the external recovery evidence.
+
 ## 2026-10-25 — LIFE-01 integration addendum (PR #112)
 
 **INTEGRATED / PASS.** [PR #112](https://github.com/JDecelles1990/F7Hub/pull/112)

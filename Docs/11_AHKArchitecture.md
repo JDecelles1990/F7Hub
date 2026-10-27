@@ -1707,6 +1707,14 @@ Major feature changes may also require:
 
 TAP uses `LaunchOrFocus()`: it finds or launches F7Hub, restores/shows it and requests foreground focus. HOLD uses `LaunchOrFind()`: it finds or launches the same validated F7Hub HWND and makes it visible without foreground activation. Hidden, minimized or maximized windows are normalized with `ShowWindow(SW_SHOWNOACTIVATE)` before movement. `Focus()` remains a separate TAP-only operation and retains its actionable Windows foreground-restriction error.
 
+The 2026-10-26 F7 restore correction is a Python-side candidate: native show can
+expose a tray-hidden HWND while Qt's widget remains explicitly hidden. The first
+Expose-only repair FAILED physical acceptance. Its replacement uses the existing
+Qt timer to query retained-HWND visibility every 100 ms while hidden and restore
+Qt without activation, independent of exposure notifications. Launcher, tap/hold
+controller and follower source remain unchanged. See [Python architecture](13_PythonArchitecture.md#f7-restore-presentation-correction--candidate-2026-10-26)
+for ownership, diagnostic limits and pending replacement physical/review gates.
+
 Existing windows are recognized by exact `F7Hub` title, Qt window class and Python process name, including hidden windows. That identity check is reused by the follower before start and on every tick so an invalid, closed or HWND-reused window stops the timer instead of moving another window. A pending process is retained after a 15-second startup timeout to prevent another launch on retry. This is a development launcher for one checkout: separately started copies with the same window identity are not distinguished. It is not an application-wide single-instance lock.
 
 The follower has no inactive polling. HOLD starts one 16 ms timer with zero velocity; release, invalid identity, HWND disappearance or movement failure stops the timer and clears HWND, physical-key and velocity state. Each tick accelerates toward a cursor-offset target, applies damping, clamps vector speed, suppresses motion within a dead zone and skips `WinMove` when rounded X/Y would not change. The target is clamped to the work area of the monitor containing the cursor, including monitors with negative coordinates.

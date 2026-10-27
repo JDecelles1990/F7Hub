@@ -1,5 +1,17 @@
 # F7Hub GUI Design
 
+## F7 restore correction — candidate (2026-10-26)
+
+The first exposure-only white-window correction FAILED physical acceptance:
+X/F7 remained white, while tray Open restored the GUI. Tray Open followed by
+guarded Exit physically PASS, as clarified by the user. The replacement candidate
+uses the existing Qt recovery timer and a read-only HWND visibility query to
+restore widgets without relying on Expose notifications or altering AHK TAP/HOLD.
+Corrected automated fixtures pass; replacement physical acceptance and
+independent review remain pending. No integration readiness is claimed.
+See [Python architecture](13_PythonArchitecture.md#f7-restore-presentation-correction--candidate-2026-10-26).
+The integrated LIFE-01 history below is preserved.
+
 ## LIFE-01 — system tray lifecycle (2026-10-25 integrated)
 
 **INTEGRATED / PASS** through [PR #112](https://github.com/JDecelles1990/F7Hub/pull/112).

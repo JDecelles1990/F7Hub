@@ -199,6 +199,53 @@ class ApplicationLifecycleTests(unittest.TestCase):
         self.assertTrue(self.window.isVisible())
         self.assertFalse(self.window.isMinimized())
 
+    def test_native_visibility_repairs_hidden_widgets_without_expose_or_activation(self):
+        self.window.showMaximized()
+        self.window.close()
+        with patch('f7hub.gui.application_lifecycle.is_native_window_visible', return_value=True), patch.object(
+                self.window, 'raise_') as raise_window, patch.object(
+                self.window, 'activateWindow') as activate, patch.object(
+                self.window, 'showNormal', wraps=self.window.showNormal) as show:
+            self.lifecycle.check_recovery()
+            self.lifecycle.check_recovery()
+        self.assertTrue(self.window.isVisible())
+        self.assertTrue(self.window.navigation_rail.isVisible())
+        self.assertFalse(self.window.isMaximized())
+        self.assertFalse(self.lifecycle._hidden)
+        self.assertFalse(self.window.testAttribute(Qt.WidgetAttribute.WA_ShowWithoutActivating))
+        show.assert_called_once_with()
+        raise_window.assert_not_called()
+        activate.assert_not_called()
+        self.assertEqual(self.lifecycle.recovery_timer.interval(), 1000)
+
+    def test_hidden_native_window_does_not_reopen_without_show(self):
+        self.window.close()
+        with patch('f7hub.gui.application_lifecycle.is_native_window_visible', return_value=False):
+            self.lifecycle.check_recovery()
+        self.assertFalse(self.window.isVisible())
+        self.assertTrue(self.lifecycle._hidden)
+        self.assertEqual(self.lifecycle.recovery_timer.interval(), 100)
+
+    def test_accepted_exit_ignores_native_visibility(self):
+        self.assertTrue(self.lifecycle.request_exit())
+        with patch('f7hub.gui.application_lifecycle.is_native_window_visible', return_value=True) as query, patch.object(
+                self.window, 'showNormal') as show:
+            self.lifecycle.check_recovery()
+        show.assert_not_called()
+        query.assert_not_called()
+        self.assertFalse(self.window.isVisible())
+
+    def test_in_progress_exit_does_not_reenter_recovery(self):
+        self.window.close()
+        self.lifecycle.exiting = True
+        try:
+            with patch('f7hub.gui.application_lifecycle.is_native_window_visible', return_value=True) as query:
+                self.lifecycle.check_recovery()
+            query.assert_not_called()
+            self.assertFalse(self.window.isVisible())
+        finally:
+            self.lifecycle.exiting = False
+
     def test_availability_alone_does_not_authorize_hiding(self):
         self.lifecycle.started = True
         with patch.object(QSystemTrayIcon, 'isSystemTrayAvailable', return_value=True), patch.object(
