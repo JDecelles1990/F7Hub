@@ -1,5 +1,15 @@
 # F7Hub Phase 1A
 
+## Current selection-capture ownership exception (2026-10-28)
+
+The [current 1B decision](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#python-selection-current)
+is USER APPROVED: Python owns Win+Alt+C, controlled Ctrl+C and acquisition of
+fresh highlighted text in-process. Earlier AHK trigger/snapshot assignments and
+Ctrl+Alt+C examples are superseded for this action only. Capture Current remains
+a separate operation without Ctrl+C. ClipboardService consent, complete privacy
+assessment, Item/Event identity and repository-owned durable writes are unchanged.
+Successful copying alone creates no durable record or consent.
+
 ## RAM-00 successor — owner-approved direction (2026-10-25)
 
 For automatic collection and explicit promotion, consume the [RAM-01 contract](RAM01_Volatile_History_And_Promotion_Contract.md). The owner-approved successor replaces automatic seven-day durable history with up to 100 process-local RAM entries, at most 12 hours, a 4 MiB item ceiling and a 256 MiB accounted history budget; memory eviction may retain fewer than 100 large documents. No silent truncation.

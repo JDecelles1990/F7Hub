@@ -1,6 +1,6 @@
 """Clipboard use cases; dormant persistence defaults to unavailable admission."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 import math
 import sqlite3
@@ -16,7 +16,7 @@ from f7hub.domain.clipboard import (
     ClipboardAdmissionBinding, ClipboardAdmissionDecision, ClipboardCaptureCommand,
     ClipboardOperation, ClipboardReceiptResult, ClipboardPersistenceCode as Code,
     ClipboardPersistenceError, ReplayDisposition, validate_token,
-    ClipboardPrivacyPolicy, CONSENT_POLICY,
+    ClipboardPrivacyPolicy, CONSENT_POLICY, AdmittedManualText,
     ClipboardAppendHead, ClipboardConsentSnapshot, ClipboardPasteAuthorization,
     ClipboardPasteSource, ClipboardPasteError, ClipboardPasteCode as PasteCode, validate_uuid,
 )
@@ -65,6 +65,14 @@ class _PreparedPaste:
     authorization: ClipboardPasteAuthorization
     head: ClipboardAppendHead
     consent: ClipboardConsentSnapshot
+
+
+@dataclass(frozen=True, slots=True)
+class SelectionCaptureResult:
+    """Eligible transient projection; excluded from repr and never logged."""
+
+    text: str = field(repr=False)
+    persistence: str = "PREVIEW_ONLY"
 
 
 class ClipboardService:
@@ -141,7 +149,8 @@ class ClipboardService:
             return operation
 
     def capture_manual_text(self, context: ClipboardAdmissionContext,
-                            command: ClipboardCaptureCommand) -> ClipboardReceiptResult:
+                            command: ClipboardCaptureCommand, *,
+                            expected_consent: ClipboardConsentSnapshot | None = None) -> ClipboardReceiptResult:
         if type(command) is not ClipboardCaptureCommand:
             raise ClipboardValidationError("Clipboard capture requires an immutable command.")
         # Serializes local fencing/assessment; separate repository connections still
@@ -168,6 +177,8 @@ class ClipboardService:
                 # grant or settings change must not retarget this preparation.
                 consent = self._repository._prepare_consent() if (
                     self._real_assessment or not isinstance(self._admission, _UnavailableAdmission)) else None
+                if expected_consent is not None and consent != expected_consent:
+                    raise ClipboardPersistenceError(Code.ADMISSION_DENIED)
                 if self._real_assessment:
                     assessment = assess_manual_text(command.source)
                     if assessment.finding != ClipboardPrivacyFinding.PERMITTED or not assessment.assessment_complete:
@@ -206,6 +217,44 @@ class ClipboardService:
                 raise
             self._operations[operation.operation_id] = "done"
             return result
+
+    def capture_active_selection(self, acquire, cancelled) -> SelectionCaptureResult:
+        """Trusted in-process native acquisition; no IPC or consent fabrication.
+
+        The worker supplies a fixed acquisition callable, never external code.
+        Consent is bound BEFORE acquisition, then checked again by existing
+        admission and repository transaction fences. Missing consent yields an
+        eligible nonpersistent preview, with no Item/Event/receipt write.
+        """
+        try:
+            consent = self._repository._prepare_consent() if self._real_assessment else None
+        except Exception:
+            consent = None
+        text = acquire()
+        if cancelled.is_set():
+            raise ClipboardValidationError("Selection capture cancelled before admission.")
+        source = AdmittedManualText(text)
+        assessment = assess_manual_text(source)
+        if assessment.finding != ClipboardPrivacyFinding.PERMITTED or not assessment.assessment_complete:
+            raise ClipboardValidationError("Selection privacy admission denied.")
+        if consent is None:
+            return SelectionCaptureResult(text)
+        context = self.open_admission_context("python-active-selection")
+        command = ClipboardCaptureCommand(self.new_operation(context), source, capture_method="F7HUB")
+        try:
+            receipt = self.capture_manual_text(context, command, expected_consent=consent)
+        except ClipboardPersistenceError as error:
+            if error.code == Code.UNCERTAIN:
+                # Query exactly this operation; never repeat a copy or write.
+                try:
+                    receipt = self.lookup_receipt(command.operation)
+                except Exception:
+                    return SelectionCaptureResult(text, "PERSISTENCE_UNCERTAIN")
+                if receipt.disposition == ReplayDisposition.UNKNOWN_OR_EXPIRED:
+                    return SelectionCaptureResult(text, "PERSISTENCE_UNCERTAIN")
+            else:
+                return SelectionCaptureResult(text, "NOT_SAVED")
+        return SelectionCaptureResult(text, "PERSISTED")
 
     def lookup_receipt(self, operation: ClipboardOperation) -> ClipboardReceiptResult:
         """Query-only recovery, including after restart/lease expiry/source deletion."""

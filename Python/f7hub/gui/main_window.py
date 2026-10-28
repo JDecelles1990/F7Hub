@@ -849,6 +849,11 @@ class MainWindow(QMainWindow):
 
     def confirm_exit(self):
         """Negotiate shutdown without releasing drafts on cancellation."""
+        selection = getattr(self, "selection_capture", None)
+        if selection is not None and selection.busy:
+            selection.cancel()
+            self.statusBar().showMessage("Selection capture is draining native resources. Please try Exit when it finishes.")
+            return False
         if (self._script_run_pending or self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
                 or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading)
                 or (self.clipboard_workspace is not None
@@ -872,12 +877,16 @@ class MainWindow(QMainWindow):
     def cleanup_shutdown(self):
         """Release existing owned resources once after accepted shutdown."""
         if self._shutdown_complete:
-            return
+            return True
+        selection = getattr(self, "selection_capture", None)
+        if selection is not None and not selection.close():
+            return False
         if self.mochi_service is not None:
             if self._mochi_dialog is not None:
                 self._mochi_dialog.close()
             self.mochi_service.close()
         self._shutdown_complete = True
+        return True
 
     def closeEvent(self, event):
         if self.lifecycle is not None:

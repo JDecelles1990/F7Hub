@@ -185,7 +185,7 @@ class ClipboardSetup(QWidget):
         self._show_consent()
 
     def _show_consent(self):
-        text = ('Eligible manual history consent is saved. Native capture remains unavailable.' if self._consent_eligible else
+        text = ('Eligible manual history consent is saved. Capture availability is reported by the application.' if self._consent_eligible else
                 'Manual history is ineligible. To enable, deliberately uncheck/recheck Enable Clipboard workflow, then Apply. Saved preferences alone do not grant consent.')
         self.consent_message.setText(text)
         self.consent_message.setAccessibleName(text)

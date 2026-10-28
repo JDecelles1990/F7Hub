@@ -55,6 +55,9 @@ class ApplicationLifecycle(QObject):
         self.application.setQuitOnLastWindowClosed(False)
         self.tray.show()
         self.recovery_timer.start()
+        selection = getattr(self.window, "selection_capture", None)
+        if selection is not None:
+            selection.start()
 
     def recovery_available(self):
         # Availability is only a capability check. Require an installed, nonempty
@@ -141,7 +144,8 @@ class ApplicationLifecycle(QObject):
             self.restore()
             if not self.window.confirm_exit():
                 return False
-            self.window.cleanup_shutdown()
+            if self.window.cleanup_shutdown() is False:
+                return False
             self.accepted = True
             self.recovery_timer.stop()
             self.tray.hide()

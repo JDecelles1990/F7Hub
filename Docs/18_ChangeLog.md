@@ -1,5 +1,24 @@
 # F7Hub ChangeLog
 
+## 2026-10-28 — Python active selection copy candidate and 1B correction
+
+Recorded the explicit user-approved Python-only Win+Alt+C exception in current
+1B and reconciled affected 1A/1C/system/AHK/Python ownership statements while
+preserving historical decisions and the previous blocked candidate. Implemented
+one lifecycle-owned Windows hotkey, controlled Ctrl+C and fresh-only Unicode
+acquisition off the GUI thread. ClipboardService preserves privacy and pre-copy
+consent binding; eligible content is transient when consent is unavailable and
+uses existing persistence/receipt contracts when authorized. No AHK/IPC, schema,
+monitoring, paste, new interactive control or GUI Registry change.
+
+Focused author validation: 83 PASS initially; 41 overlapping affected checks PASS
+after self-review safeguards. Native registration/Qt dispatch/unregister 1 PASS
+with posted WM_HOTKEY and no native copy/read. Focused Setup GUI/integration
+checks PASS 34/34 after correcting obsolete passive feedback. Physical F7Hub acceptance remains
+user-owned/NOT RUN. Delayed-render drain and application compatibility limits
+are explicit in CURRENT_STATE and Python architecture. Independent review pending;
+unstaged/uncommitted candidate, no push/PR/merge.
+
 ## 2026-10-27 — native IPC retained-process context candidate
 
 Added a dormant read-only 64-bit Windows verifier for the adopted H01-C 112-byte

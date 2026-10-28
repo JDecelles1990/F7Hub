@@ -8,6 +8,7 @@ from PySide6.QtWidgets import QApplication
 
 from f7hub.gui.main_window import MainWindow
 from f7hub.gui.application_lifecycle import ApplicationLifecycle
+from f7hub.gui.selection_capture import SelectionCapture
 from f7hub.infrastructure.database import BootstrapResult, bootstrap_database
 from f7hub.infrastructure.database_paths import resolve_development_database_path, local_profile_scope, DatabasePathError
 from f7hub.repositories.ticket_repository import TicketRepository
@@ -124,6 +125,7 @@ def bootstrap_application(
         altf7hub_service=AltF7HubService(WindowsAltF7HubGateway(resolved_project_root)),
     )
 
+    main_window.selection_capture = SelectionCapture(main_window, clipboard_service)
     ApplicationLifecycle(main_window)
 
     return ApplicationContext(

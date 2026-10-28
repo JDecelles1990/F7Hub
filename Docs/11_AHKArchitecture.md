@@ -1,5 +1,15 @@
 # F7Hub AutoHotkey v2 Architecture
 
+## Win+Alt+C ownership exception (2026-10-28)
+
+[Current 1B](Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md)
+records the user-approved Python-only active selection-copy action. Python owns
+its Win+Alt+C registration, controlled Ctrl+C and fresh native acquisition inside
+F7Hub. Earlier broad AHK manual-capture responsibility and hotkey examples are
+superseded for this action only. Dormant AHK policy primitives remain dormant;
+AHK does not register or dispatch Win+Alt+C. F7, Alt+F7, other native automation,
+paste and H01-C authentication for actual IPC remain unchanged.
+
 ## H01-A — dormant native Clipboard chord adaptation (2026-10-15 candidate)
 
 `ClipboardHotkeyPolicy.ahk` now has a third, independent exclusion map for
