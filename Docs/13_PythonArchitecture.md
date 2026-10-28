@@ -1,5 +1,49 @@
 # F7Hub Python Architecture
 
+## Python Win+Alt+C active selection capture — candidate (2026-10-28)
+
+The user-approved [current 1B contract](Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#python-selection-current)
+assigns this action to Python in the existing F7Hub process. Bootstrap composes
+`gui/selection_capture.py`; ApplicationLifecycle.start registers Win+Alt+C once
+through `RegisterHotKey(MOD_WIN | MOD_ALT | MOD_NOREPEAT)`. The existing Qt native
+event dispatcher routes WM_HOTKEY; no second application, tray or AHK listener.
+A single retained background thread calls `infrastructure/windows_selection_copy.py`.
+It waits up to 1.5 seconds for chord/modifier release, binds a retained live
+foreground process, rejects known terminal/command hosts and elevated/unavailable
+targets, sends one Ctrl+C, and waits up to 1.5 seconds for a nonzero new sequence.
+Owner PID, foreground and sequence stability fence acquisition. No stale fallback,
+Clipboard clearing/restoration, ANSI fallback, UIA/title scan or source metadata
+persistence. Allocation <=128 KiB + 2 UTF-16 bytes; strict decoded UTF-8 <=64 KiB.
+OS exclusion markers and malformed text fail closed.
+
+`ClipboardService.capture_active_selection` binds existing consent before native
+acquisition, performs the existing complete privacy assessment and invokes the
+existing manual capture/receipt/repository contract only with that exact consent.
+`capture_manual_text` adds an optional expected-consent restriction; existing
+callers retain their existing gates. Newly granted or changed consent cannot
+retarget the in-flight operation. No eligible consent means a nonpersistent
+privacy-admitted projection with no Item/Event/receipt write. Save outcome and
+post-operation feedback are separate: uncertain commit is queried by the exact
+operation once; it is never recopied or rewritten. No new SQLite schema or consent.
+
+The existing status bar shows an eligible bounded literal excerpt for 15 seconds,
+labelled saved, preview-only, denied-save or uncertain-save. It is not a raw-content
+cache or log. Its text is normalized using the existing safe preview function.
+Recent remains service-backed and refreshes through its existing controls.
+One obsolete passive Setup label now refers to actual application availability.
+No interactive GUI control, stable registry ID, layout or shortcut in the audited
+GUI Registry is changed. F7/Alt+F7 code and all actual IPC authentication stay unchanged.
+
+In-process delayed rendering can outlast a soft deadline. Late completion is
+rejected; normal Exit requests cancellation and refuses accepted shutdown until
+the worker drains. Confirmed cleanup unregisters only this hotkey. Failed cleanup
+fences future capture and failed unregister prevents accepted Exit. No hard
+external native-call interruption or physical memory zeroization is promised.
+Terminal exclusions are conservative, not a guarantee every application's Ctrl+C
+means copy. Same-process/owner observations reject detected races; they do not
+cryptographically prove causation. Physical Notepad and F7/Alt+F7 acceptance is
+user-owned and NOT RUN by the agent. Candidate review is pending; no integration.
+
 ## Native IPC — retained-process context candidate (2026-10-27)
 
 `infrastructure/windows_clipboard_context.py` adds dormant, read-only 64-bit

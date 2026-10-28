@@ -1,5 +1,17 @@
 # F7Hub System Architecture
 
+## Python active selection capture — current ownership decision (2026-10-28)
+
+The user-approved [1B exception](Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md)
+assigns Win+Alt+C registration, controlled Ctrl+C and fresh highlighted-text
+acquisition to Python within the existing application. Acquisition runs outside
+the GUI thread. ClipboardService retains privacy, consent and persistence;
+repositories retain SQLite writes. Existing lifecycle owns startup/cleanup.
+Earlier broad AHK shortcut/native-copy ownership excludes this specific action.
+There is no AHK/Python IPC for it. Other IPC authentication, AHK F7/Alt+F7,
+automatic monitoring and paste boundaries are unchanged. Implementation and
+validation remain candidate-specific; this architectural decision is not a merge.
+
 ## CP-02 Stage 2 — Clipboard Setup composition
 
 The local-required preference editor follows PySide6 GUI → existing SettingsService → SettingsRepository → selected SQLite database. Bootstrap/MainWindow pass the exact composed service to one retained Clipboard Center child; its independent existing ServiceTaskRunner performs bounded repository reads/writes off the GUI thread and delivers widget changes on the GUI thread. Recent retains its separate read worker and unchanged ClipboardService authority.

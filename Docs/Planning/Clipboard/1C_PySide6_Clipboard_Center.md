@@ -1,5 +1,14 @@
 # F7Hub Phase 1C
 
+## Current selection-capture ownership exception (2026-10-28)
+
+The [current 1B decision](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#python-selection-current)
+assigns Win+Alt+C active selection capture to Python in-process. Earlier AHK
+selection-copy ownership and Ctrl+Alt+C selection-default references are superseded
+for this action. Capture Current and explicit outbound copy remain separate;
+applicable H01-C/AHK prerequisites are unchanged. No Clipboard Center control or
+unauthenticated content channel is authorized by this ownership exception.
+
 ## RAM-00 successor — owner-approved direction (2026-10-25)
 
 Consume the [RAM-01 contract](RAM01_Volatile_History_And_Promotion_Contract.md) for the Windows source's planned F7Hub-collected temporary history, succeeding snapshot-only direction. Reuse the retained Center; keep durable Recent distinct. Communicate up to 100 entries, 12 hours and the shared 256 MiB history budget: large entries may evict older entries before 100 are retained. Previews are explicitly partial; never silently truncate admitted text.
@@ -7373,7 +7382,7 @@ Do not intercept every widget Ctrl+C or route it through AHK. Conversely,
 a full-item action shortcut remains the explicit service/bridge/AHK path, not
 widget-native copy. The GUI is not a second F7Hub Clipboard-domain Windows
 Clipboard adapter. Python remains the authorization/domain owner; 1B retains
-the Windows-facing AHK boundary.
+the Windows-facing AHK boundary except for its current Python-owned Win+Alt+C action.
 
 ## CP00-02 successor: Clipboard-subsystem Windows writes
 
@@ -7402,7 +7411,7 @@ Clipboard-owned content onto Windows Clipboard, the current owner flow is:
 The GUI does not directly mutate Qt/Windows Clipboard for these explicit
 Clipboard-domain commands. There is no direct Qt fallback when AHK capability
 is unavailable; the action reports unavailable or fails safely. Python owns
-what may be copied and the meaning of any transformation. AHK owns the native
+what may be copied and the meaning of any transformation. Except for Python-owned Win+Alt+C selection capture, AHK owns the native
 write. No new bridge endpoint/profile or runtime capability is implemented by
 this documentation successor.
 
@@ -7412,7 +7421,7 @@ this documentation successor.
 | **Copy normalized value** | Explicit intent and typed source/reference | Resolve source; use existing approved normalization semantics; revalidate; authorize exact bounded output | Write supplied text unchanged | Do not invent an algorithm; any unresolved normalization detail remains for its owner |
 | **Copy Entity/value** (`clipboard.copy_entity`) | Explicit intent and typed occurrence/source reference | Resolve and authorize the exact approved textual projection | Write supplied text unchanged | Does not create canonical Entity identity, assign Tags, accept semantics, infer RCA or grant execution |
 | Ordinary text-widget Ctrl+C | Native copy of only manually selected visible text | No Clipboard-domain command | Not involved | Control-local editing exception; no capture, item/history/Event, Active Paste, retention or semantic effect |
-| **Copy Selection to F7Hub** (`clipboard.capture_selection`) | Explicit capture intent | Validate and admit fresh received content under 1A | Request native Ctrl+C and acquire only a fresh supported Clipboard update under 1B | Capture input path, not a Clipboard Center output-copy command; never fall back to stale content |
+| **Copy Selection to F7Hub** (`clipboard.capture_selection`) | Explicit Win+Alt+C capture intent | Python requests native Ctrl+C, acquires only a fresh supported update, and validates/admits content under current 1B and 1A | Not involved | Capture input path, not a Clipboard Center output-copy command; never fall back to stale content |
 | **Capture Current Clipboard** (`clipboard.capture_current`) | Explicit capture intent | Validate/admit the current snapshot under 1A | Read existing Windows Clipboard; send no Ctrl+C | Capture input path; no Qt write or automatic import |
 | **Active Paste** (`clipboard.paste_active`) | Explicit paste intent for armed Item/revision | Revalidate and authorize exact full text for this operation | Write authorized text, then request native Ctrl+V | Existing 1B path; no Qt write, automatic previous-Clipboard restoration or repeat |
 | Scripts module copy | Outside Clipboard Center | Existing Scripts owner | Existing ownership | OUT OF CP-00 SCOPE; no change and no CP-01 dependency |

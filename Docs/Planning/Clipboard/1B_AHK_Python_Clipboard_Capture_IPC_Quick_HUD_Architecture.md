@@ -1,5 +1,66 @@
 # F7Hub Phase 1B
 
+<a id="python-selection-current"></a>
+
+## Current user-approved contract: Win+Alt+C — Python-Owned Active Selection Capture (2026-10-28)
+
+**APPROVED architectural decision; implementation candidate, not integrated.**
+The user's mandatory correction replaces conflicting earlier recommendations for
+`clipboard.capture_selection`. This section is authoritative for this action.
+Python owns the global Win+Alt+C registration, binds the foreground target,
+waits for physical Win/Alt/C and other modifiers to release, sends one controlled
+Ctrl+C, and obtains only newly copied highlighted plain Unicode text. A fresh
+Windows Clipboard update is mandatory; no prior manual Ctrl+C is required and
+previously copied content is never a fallback. AHK neither owns nor dispatches
+this action. No AHK/Python IPC is necessary for this in-process operation.
+ClipboardService owns consent, privacy, authorization and persistence. The existing
+F7Hub application lifecycle owns startup, registration and cleanup. No automatic
+monitoring, second application, tray owner, SQLite migration or paste action.
+
+| Action | Current owner and behavior | Binding |
+| --- | --- | --- |
+| `clipboard.capture_selection` | Python in the running F7Hub process; controlled Ctrl+C then fresh, stable, eligible Unicode capture | Win+Alt+C |
+| `clipboard.capture_current` | Separate explicitly invoked existing-Clipboard operation; no simulated Ctrl+C; existing unimplemented native/IPC prerequisites remain | No new global binding |
+| Paste, picker and other IPC workflows | Existing owning contracts, including AHK/native and H01-C authentication where IPC is used | Unchanged |
+
+### Supersession map
+
+| Earlier provision | Disposition for Win+Alt+C selection capture |
+| --- | --- |
+| Sections 15 and 16: read existing Clipboard; optional deferred copy | SUPERSEDED: active copying is required now; existing-Clipboard capture remains separate |
+| Manual Capture Workflow / Snapshot, Hotkey Model, Settings Inputs, D01/D02 and associated responsibility/hotkey tables/diagrams in the 2026-10-07 report | HISTORICAL: AHK capture-current / no-synthesis / deferred-selection statements do not apply to this action |
+| AHK-owned snapshot-worker and native-copy recommendations, including CP-00 ownership and selection-copy worker containment | SUPERSEDED FOR THIS ACTION: Python in-process acquisition; no AHK worker or IPC. These remain applicable to their other workflows |
+| Phase 1 current-contract selection default Ctrl+Alt+C and AHK native owner | SUPERSEDED FOR THIS ACTION: Win+Alt+C and Python |
+| 2026-10-28 Active Selection Copy owner-gate appendix | HISTORICAL BLOCKED CANDIDATE: its unresolved ownership finding is closed by this explicit user decision; its original evidence is preserved |
+
+### In-process safety and truthful completion
+
+Registration uses Windows RegisterHotKey with MOD_NOREPEAT and one application
+owner. Acquisition runs outside the GUI thread; one outstanding operation and
+physical release gating prevent held-chord duplicates. Bind and recheck target
+process identity, foreground, Clipboard owner and sequence before/after reading;
+reject zero/unchanged sequence, detected races, denied input, empty, unsupported,
+malformed or excessive text. Do not clear/restore the Clipboard or log its text.
+Known console/terminal process names are rejected before input because Ctrl+C
+can interrupt commands. Unknown application-specific shortcut effects remain a
+compatibility limitation; Notepad physical acceptance is user-owned.
+OS exclusion markers and complete existing privacy assessment precede presentation
+or persistence. Item/Event semantics, default-deny admission and explicit history
+consent remain unchanged. No network, content spool or unauthenticated bridge.
+
+The explicitly requested in-process implementation replaces the earlier killable
+AHK-worker recommendation for this action. A Python timer cannot interrupt
+GetClipboardData during delayed rendering. A worker must reject a late result,
+remain single-flight until native completion, and prevent accepted application
+Exit until its resources have actually drained; never report a timeout as native
+cleanup. The GUI remains responsive while it waits. A hard externally enforceable
+native-read deadline is not promised by this in-process candidate; obtaining one
+would require a separately authorized isolation change, not a return to AHK
+ownership. Native compatibility, delayed-render behavior and physical acceptance
+must be reported independently from synthetic checks. Windows may refuse input
+into higher-integrity applications; no elevation or focus-stealing fallback.
+
+
 ## RAM-00 successor — owner-approved direction (2026-10-25)
 
 Consume the [RAM-01 contract](RAM01_Volatile_History_And_Promotion_Contract.md) for Python-owned passive observation through an application-owned supervised helper. LIFE-01 tray delivery, independent harness preflight and installed Windows/PySide6 native feasibility precede RAM-01B1. Clipboard ownership is not proof of the originating application; proposed acquisition/processing deadlines and helper memory remain unmeasured.
@@ -122,7 +183,8 @@ new documentation aggregate requires independent rereview before integration.
 
 Existing AHK/hotkey/AltF7Hub integration inventory; manual capture semantics; Clipboard snapshot behavior; source process/window metadata; privacy policy; hotkey ownership and conflicts; AHK/Python responsibility matrix; actual IPC transport recommendation; authentication; endpoint discovery; timeout/retry policy; transport idempotency vs content deduplication; F7Hub-running/not-running behavior; Quick HUD states; HUD action routing; native Windows validation; explicit loop/retry guard.
 
-> Current direction: [2026-10-15 picker/capture](#quick-picker-and-automatic-capture-direction-2026-10-15),
+> Win+Alt+C selection capture follows the current user-approved contract at the top.
+> Other current direction: [2026-10-15 picker/capture](#quick-picker-and-automatic-capture-direction-2026-10-15),
 > with the [Phase 1 successor](#phase-1-current-contract-2026-10-14) for unchanged contracts.
 > Earlier dated planning instructions and reports retain their historical scope;
 > use the successor for current availability, approved decisions and execution gates.
@@ -588,9 +650,13 @@ with the binding visible in Settings or diagnostics.
 
 ---
 
-# 15. Clipboard Read Timing
+# 15. Clipboard Read Timing — historical, superseded for selection capture
 
-A manual F7Hub capture hotkey should normally read:
+**Current:** Win+Alt+C actively copies the selection in Python under the current
+user-approved contract above. The following earlier recommendation applies only
+to the separate Capture Current Clipboard operation.
+
+Historical recommendation: a current-Clipboard action should read:
 
 ```text
 the Clipboard content that already exists
@@ -608,9 +674,12 @@ This avoids changing the active application's selection or state.
 
 ---
 
-# 16. Optional Copy-and-Capture Action
+# 16. Optional Copy-and-Capture Action — historical deferral superseded
 
-A future separate action could perform:
+**Current:** `clipboard.capture_selection` is required Python-owned Win+Alt+C,
+not deferred or optional. Capture Current Clipboard stays separate.
+
+Historical design considered a future separate action that could perform:
 
 ```text
 copy current selection
@@ -3361,6 +3430,8 @@ AHK vs Python vs Clipboard domain.
 
 ## Manual Capture Workflow
 
+> Historical AHK/current-Clipboard design; current Python selection contract supersedes.
+
 Exact conceptual behavior.
 
 ## Hotkey Architecture
@@ -3542,6 +3613,9 @@ Only vertical-slice-delivery exists in the inspected project skill inventory. Im
 
 ## Responsibility Boundary
 
+> HISTORICAL recommendations for selection capture: superseded by the current
+> user-approved Python contract at the top. Other workflow contracts retain scope.
+
 | Responsibility | AHK adapter | Python IPC adapter | ClipboardService/domain | Repository / SQLite |
 | --- | --- | --- | --- | --- |
 | Manual hotkey, Windows interaction | OWN shared host | No | No | No |
@@ -3559,6 +3633,9 @@ SQLite does not classify or authorize; PowerShell performs only approved technic
 
 ## Manual Capture Workflow
 
+> HISTORICAL recommendations for selection capture: superseded by the current
+> user-approved Python contract at the top. Other workflow contracts retain scope.
+
 1. Technician copies using native application behavior; one fresh capture key press reads CURRENT Clipboard, with no synthesized Ctrl+C.
 2. Host captures trigger time and an ephemeral foreground HWND; starts one bounded snapshot worker. No preview or persistent queue.
 3. Worker obtains a stable permitted text/plain snapshot, enforces early limits and the narrow producer secret preflight, releases Windows handles, and returns eligible data through a private parent-child pipe.
@@ -3571,6 +3648,9 @@ SQLite does not classify or authorize; PowerShell performs only approved technic
 At most one pending capture per host. A fresh press while busy shows Capture in progress without reading another snapshot or queueing it; holding the key is one press, not many captures. A deliberate later press after release/completion is not suppressed by content-based debounce. Clipboard mutations/transforms/copy-and-capture remain separate deferred workflows.
 
 ## Clipboard Snapshot Model
+
+> HISTORICAL recommendations for selection capture: superseded by the current
+> user-approved Python contract at the top. Other workflow contracts retain scope.
 
 RECOMMENDATION: capture the first stable supported snapshot obtained within the bounded read window, not an unverifiable promise of contents at the exact key-down nanosecond. Record observed_at when that snapshot completes. Do not infer that the foreground application originally copied it: foreground context is only context at capture; clipboard owner can differ, exit or represent delayed rendering.
 
@@ -3619,6 +3699,9 @@ Bounded inventory: all tracked AHK files (production and fixture declarations), 
 | Other Ctrl/Shift/Alt/Win global combinations | No other declaration/dynamic registration found in tracked audit | E-HOST tracked-file searches | Bounded negative finding, no universal absence claim |
 
 ## Hotkey Recommendation
+
+> HISTORICAL recommendations for selection capture: superseded by the current
+> user-approved Python contract at the top. Other workflow contracts retain scope.
 
 | Priority / binding | Repository | Windows / known applications | AHK / usability | Recommendation |
 | --- | --- | --- | --- | --- |
@@ -3907,6 +3990,9 @@ No automatic Analytics/Mochi/external feed. Enablement flags do not constitute d
 
 ## Settings Inputs
 
+> HISTORICAL recommendations for selection capture: superseded by the current
+> user-approved Python contract at the top. Other workflow contracts retain scope.
+
 0D central service/definitions own allowed durable USER preferences and effective source-aware resolution. Clipboard contributes pure key definitions; adapter consumes a bounded authenticated immutable projection at attach/status and start of operation. No AHK DB read/write, new INI truth or independent default authority. Existing guide-local preferences remain local and unchanged.
 
 | Input / proposed key | Class | Proposed default/bounds | Update / owner |
@@ -4125,6 +4211,9 @@ stateDiagram-v2
 ~~~
 
 ## Decision Register
+
+> HISTORICAL recommendations for selection capture: superseded by the current
+> user-approved Python contract at the top. Other workflow contracts retain scope.
 
 All current choices remain RECOMMENDED until independent review, explicit USER approval and controlled integration. No new 1B decision is APPROVED. E-keys refer to Repository Areas Inspected; external links identify documented facts, not tested runtime.
 
@@ -4347,7 +4436,7 @@ shortcut reassignment or assumed third production binding.
 
 | Stable action | USER current semantics | Desired future default |
 | --- | --- | --- |
-| clipboard.capture_selection | COPY_SELECTION: native Ctrl+C request, then newly copied eligible text; fresh update required | Ctrl+Alt+C |
+| clipboard.capture_selection | CURRENT EXCEPTION: Python-controlled Ctrl+C then fresh eligible text; see current user-approved contract | Win+Alt+C |
 | clipboard.capture_current | CAPTURE_CURRENT_CLIPBOARD: bounded read of existing Windows Clipboard, no Ctrl+C synthesis | Explicit future UI action; no new global binding selected by CP-00 |
 | clipboard.paste_active | Exact explicitly armed Item/revision; Python authorizes full text, AHK writes it to normal Windows Clipboard and requests native Ctrl+V | Ctrl+Alt+V |
 
@@ -4356,6 +4445,7 @@ or implemented capabilities. Native Ctrl+C/Ctrl+V outside an explicitly invoked
 eligible F7Hub action remain ordinary application behavior. No Ctrl+C hook or
 global Office exclusion is introduced by this plan.
 
+Except for Python-owned Win+Alt+C selection capture (current decision above),
 AHK v2 owns shortcuts, cheap foreground awareness, bounded native copy/paste,
 Windows Clipboard acquisition/write and transient Windows context. It stays a
 narrow adapter in the existing shared host, with contained worker mechanics
@@ -4425,7 +4515,7 @@ including modifier release ordering and an initially excluded/unknown held chord
 moving into an allowed context. Registration alone or direct callbacks are
 insufficient evidence of physical hotkey behavior.
 
-## Selection-copy acquisition contract for later delivery
+## Selection-copy acquisition contract — current Python exception applies
 
 Check prerequisites and foreground eligibility before any native copy effect.
 Bind original foreground identity and read a transient pre-copy sequence marker;
@@ -4453,7 +4543,11 @@ residual races need a bounded acquisition slice. No absolute source-attribution
 claim follows from process/title. See [sequence documentation](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-getclipboardsequencenumber)
 and [Clipboard operations/ownership](https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-operations).
 
-Keep existing containment: finite attempts and an external whole-worker/native
+Finite attempts remain required. For Python-owned Win+Alt+C, the current
+in-process completion/drain rule above supersedes the historical external
+whole-worker deadline below. Other worker-based workflows retain it.
+
+Historical worker containment: an external whole-worker/native
 run deadline effective during blocking APIs. Reuse 1B's proposed read ceiling,
 worker ownership and cleanup; exact copy-wait/write/input sub-budgets must be
 reviewed and measured in their delivery slices. No infinite polling, automatic
@@ -4584,7 +4678,7 @@ database, service, protocol, Settings store or resident bridge is introduced.
 
 | Intent | Approved effect | Availability at this baseline |
 | --- | --- | --- |
-| `clipboard.capture_selection` | Explicit future Ctrl+Alt+C; one native Ctrl+C, fresh update, bounded eligible snapshot, 1A admission | APPROVED_NOT_IMPLEMENTED; no production binding |
+| `clipboard.capture_selection` | CURRENT: Python-owned Win+Alt+C; one controlled native Ctrl+C, fresh eligible Unicode, 1A admission | USER_APPROVED; isolated in-process implementation candidate, physical acceptance pending |
 | `clipboard.capture_current` | Explicit fresh read of existing Windows Clipboard; no Ctrl+C; separate 1A capture admission | APPROVED_NOT_IMPLEMENTED; no extra global binding selected |
 | `clipboard.paste_active` | Explicit future Ctrl+Alt+V; exact armed Item/revision, Python authorization, AHK write then one native Ctrl+V | APPROVED_NOT_IMPLEMENTED; no production binding |
 | Explicit outbound full Item / normalized / Entity-value copy | Typed intent → Python resolution/approved transform/revalidation/authorization → authenticated bridge → AHK writes supplied text unchanged | APPROVED_NOT_IMPLEMENTED; unavailable without bridge, no Qt fallback |
@@ -4666,3 +4760,111 @@ uncertain-cleanup run. This rule does not redesign separately approved bounded
 product lock/readiness protocols; it prevents unchanged harness re-execution.
 No runtime, native capture, AHK, IPC, GUI, PowerShell or database test is run for
 this documentation-only delta; source inspection establishes availability only.
+
+
+# Historical Active Selection Copy - owner decision and architecture gate (2026-10-28)
+
+> SUPERSEDED by the current user-approved Python ownership contract at the top.
+> Preserved original blocked-candidate record; not a current gate or restriction.
+
+## Current user behavior decision
+
+USER DECISION, supplied in the 2026-10-28 implementation request: highlighting
+text in another Windows application and pressing **Win+Alt+C** must actively
+copy that selection. The technician does not press Ctrl+C first. This decision
+supersedes the historical capture-current recommendation and the earlier future
+Ctrl+Alt+C default for this action. It does not register a production hotkey.
+The current implementation request stops before production changes if contract
+reconciliation requires separate architecture review or affects a security boundary.
+
+| Stable action | Current required effect | Failure and fallback rule |
+| --- | --- | --- |
+| `clipboard.capture_selection` - Copy Selection and Capture | Win+Alt+C requests one controlled native Ctrl+C against the bound foreground application; only its fresh supported, stable, eligible Unicode result may enter capture admission | Never substitute old/current Clipboard content, including when copy fails or no selection/update is observed |
+| `clipboard.capture_current` - Capture Current Clipboard | An explicitly invoked independent operation reads the existing Windows Clipboard without synthesizing Ctrl+C | No new global binding is selected here; never use this operation as selection-copy fallback |
+
+A new update is necessary but insufficient for source attribution. Target and
+Clipboard-owner observations, stable acquisition, ambiguity rejection and
+bounded native completion remain required. Identical text can be freshly copied;
+content equality alone establishes neither success nor failure. Preserve focus,
+reject unsupported/elevated targets safely, wait for physical chord modifiers to
+release before input, and permit at most one operation per physical press cycle.
+Do not clear the Clipboard as a freshness test, retain old raw content for
+restoration, or overwrite newer user Clipboard data during cleanup.
+
+The existing [1A lifecycle, consent and Item/Event rules](1A_Clipboard_Domain_Data_Lifecycle.md#phase-1-current-contract-2026-10-14)
+and [1C presentation/intent boundary](1C_PySide6_Clipboard_Center.md#phase-1-current-contract-2026-10-14)
+remain controlling. Copying into Windows Clipboard does not itself admit a
+capture, create an Item/Event, grant history consent or authorize persistence.
+Unicode/size and authoritative privacy policy must reject empty, unsupported,
+excessive, suspected-secret, sensitive or incompletely assessed F7Hub input.
+No raw Clipboard content enters logs, arbitrary execution or external delivery.
+This decision grants no automatic monitoring, paste action or second tray owner.
+
+## Execution-owner conflict - BLOCKED before production changes
+
+FACT: the adopted [CP-00 action and technology boundary](#action-and-technology-ownership)
+assigns native copy/paste and Windows Clipboard acquisition to AHK v2. The
+[safe snapshot prerequisites](#safe-windows-snapshot-prerequisites-and-unavailable-state)
+require a fixed supervised AHK native worker; Python owns trusted validation,
+privacy, consent, application services and persistence. 1A's CP-00 ownership
+matrix preserves this same Windows-facing adapter boundary.
+
+The current request's expected path names a **trusted Python selection-copy
+operation**, and the inspected standalone proof performs SendInput and native
+Clipboard reads in Python. Porting those native effects into a production Python
+helper would change the cross-language owner and native worker contract. The
+behavior decision above resolves the operation and hotkey choice; it does not
+establish independent approval of that execution-owner change. Root AGENTS.md
+requires explicit review for technology ownership and IPC/cross-language changes.
+The request's Phase 2 stop condition therefore applies to this candidate.
+
+The available local-only fallback explicitly permits active copying without
+secure delivery or persistence. Its execution boundary still needs resolution:
+
+- Preserve the adopted AHK native-effect/worker owner and use Python only for its
+  existing trusted service/privacy responsibilities. The missing native worker
+  and private acquisition handoff must be delivered within their approved boundary.
+- Review a narrow exception for a one-shot Python native-copy helper, with AHK
+  retaining the single production global-hotkey owner. Review must specify exact
+  launch/target identity, trigger authorization, physical modifier release,
+  worker/process and handle ownership, external whole-run deadline, input cleanup,
+  privacy admission, content-free result semantics and uncertain-completion
+  handling. Raw text must stay local to that helper until an approved secure
+  content channel exists. Fixed paths, a successful launch or a content-free
+  completion code do not establish capture authentication or capture success.
+
+These alternatives are review inputs, not a selected or approved replacement
+architecture. The existing host launcher/Guide request bridge is not a sensitive
+Clipboard channel. H01-A, adopted H01-C, HBR-01, HBR-01N, native process-context
+verification and their lifetime/authentication rules remain unchanged. Missing
+secure delivery does not authorize text in arguments, environment, stdout,
+files, public window messages, or another unauthenticated content bridge.
+
+## Implementation and validation truth
+
+The current candidate appends this decision and blocker only. It contains no
+production source, native hotkey activation, GUI control or SQLite change.
+
+| Capability | This candidate |
+| --- | --- |
+| ACTIVE COPY IMPLEMENTED | NO - BLOCKED at execution-owner architecture review |
+| SECURE F7HUB DELIVERY | DEFERRED; no composed authenticated content path |
+| SQLITE PERSISTENCE FOR THIS SELECTION-COPY PATH | DEFERRED; existing repository/service capability does not activate this input |
+| PHYSICAL ACCEPTANCE | NOT RUN for this candidate |
+
+USER-REPORTED PHYSICAL PASS applies only to the earlier standalone proof: the
+user reported Win+Alt+C recognition, active copying of highlighted text, new text
+in the proof window and no reuse of old Clipboard contents. No timestamps,
+instrumentation, source-attribution proof or production acceptance are inferred.
+The reference is not approved production code and its Python global-hotkey
+listener must not become a second permanent production listener.
+
+Next gate: independent review of the precise execution-owner/worker contract and
+explicit disposition before production implementation. Then use focused
+synthetic and supervised native checks, with physical Notepad acceptance
+performed by the user. Preserve the OLD TEXT / NEW SELECTED TEXT no-prior-Ctrl+C
+scenario, ambiguous updates, no-selection/unchanged/empty/unsupported results,
+blocked input, repeat/race/recovery paths and F7/Alt+F7 checks. Apply RT-R01 and
+the user's maximum two justified corrections per underlying failure; unchanged
+failed executions cannot be retried. No runtime PASS or implementation readiness
+follows from documentation validation. Disposition: `ACTIVE_SELECTION_COPY_BLOCKED`.

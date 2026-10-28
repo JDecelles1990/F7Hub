@@ -1,5 +1,53 @@
 # F7Hub Current State
 
+## Python Win+Alt+C active selection capture — candidate (2026-10-28)
+
+**Contract correction: PASS.** Python ownership is explicitly USER APPROVED in
+[current 1B](../Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#python-selection-current).
+The current contract supersedes conflicting Sections 15/16, AHK snapshot/selection
+ownership, no-synthesis and capture-current hotkey recommendations. Earlier blocked
+candidate text remains labelled historical; its bytes and checkpoints are preserved.
+Capture Current remains separate. No unresolved ownership decision remains.
+
+Candidate worktree: `C:\Dev\F7Hub-Clipboard-ActiveSelectionCopy-20261028`;
+branch `feature/clipboard-active-selection-copy`; base/HEAD
+`c3db85fb2e1d72cc3dd3baed7cf48a7443a74cd1`. Unstaged/uncommitted; not integrated.
+The canonical checkout and unrelated worktrees are preserved.
+
+Python registers the hotkey in the existing lifecycle, actively copies the
+selection off the GUI thread, requires a fresh stable eligible Unicode result,
+and routes it through ClipboardService. No prior manual Ctrl+C or old-content
+fallback. Existing consent gates allow durable Recent only when affirmative
+consent existed before copying and still matches at admission/commit. Otherwise
+eligible text is shown transiently in the existing status bar with a not-saved
+label. Failed acquisition and rejected privacy create no successful capture record.
+Existing Item/Event/receipt and SQLite integrity rules remain unchanged.
+
+FRESH author evidence: first focused run **83 PASS**, exit 0. After narrow
+self-review changes, affected checks **41 PASS**, exit 0; these overlap the first
+run and are not additive. The first run's 24 lifecycle and 23 consent checks remain
+applicable after input verification. Bounded native hotkey registration, posted
+WM_HOTKEY dispatch through Qt and unregister/re-registration **1 PASS**, exit 0
+against the updated adapter. This native check performed no SendInput or real
+Clipboard read. Synthetic full F7Hub bootstrap receives the expected fresh-text
+projection using a fake native adapter. Real service tests use isolated SQLite;
+integrity_check=ok, foreign_key_check=zero violations.
+
+Focused Setup GUI/integration checks after passive-feedback correction: **34 PASS**,
+exit 0. No interactive controls or audited registry rows changed.
+
+The user's earlier standalone proof is USER-REPORTED PHYSICAL PASS only.
+In-F7Hub physical Notepad acceptance, actual Ctrl+C/read compatibility and physical
+F7/Alt+F7 regression are NOT RUN / user-owned. In-process delayed native rendering
+has no hard external deadline; Exit waits for actual drain and late results are
+rejected. Full regression, historical native campaigns and independent review
+are NOT RUN. See [Python architecture](../13_PythonArchitecture.md) for limits.
+
+Evidence/checkpoint/manifest:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/PythonActiveCopy/20261028T165348Z`.
+Final handoff validation and exact path identity are in `implementation-report.md`
+and `candidate-manifest.json`; this section does not self-approve the candidate.
+
 ## Native IPC — retained-process context candidate (2026-10-27)
 
 Implementation disposition: **READY_FOR_REVIEW**, awaiting independent review.
