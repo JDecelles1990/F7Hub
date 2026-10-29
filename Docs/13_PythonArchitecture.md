@@ -1,5 +1,39 @@
 # F7Hub Python Architecture
 
+## CP02-S3 — original-target source provenance candidate (2026-10-29)
+
+Candidate only in `C:/Dev/F7Hub-Clipboard-SourceAppProvenance-20261029`, branch
+`feature/clipboard-source-app-provenance-20261029`, base/HEAD
+`b049a56a88305d48cf64d813065efa5a9b96f3e5`. Unstaged and uncommitted;
+independent review and user-owned physical acceptance remain pending.
+
+The baseline includes integrated Win+Alt+C (PR119) and Win+Alt+V (PR120); older
+integration-pending snapshots below are historical. This slice extends the existing
+selection path without changing technology ownership or paste execution mechanics.
+
+WindowsSelectionAPI reuses the original accepted target's existing required
+QueryFullProcessImageNameW safety lookup. Its optional internal callback emits only
+a validated basename after target policy succeeds; no second interrogation and no
+Clipboard-owner attribution are introduced. `copy_selection(with_metadata=True)`
+returns immutable `ClipboardSelectionAcquisition` after native handle cleanup.
+The default text-only gateway return remains compatible for existing callers.
+No full path or native identity enters the acquisition result, capture command,
+Recent projection, receipt or normal logs. Private DTO fields are excluded from repr.
+
+ClipboardService accepts the typed acquisition or an unattributed text-only result,
+binds the existing field preference before acquisition and applies unchanged text
+privacy/history consent. ClipboardCaptureCommand carries normalized optional metadata;
+ClipboardRepository independently checks the effective preference under its existing
+writer reservation and stores it on the genuine Event. Settings revision changes
+invalidate the prepared consent snapshot, preventing late enable/disable writes.
+Missing/invalid optional metadata does not alter content admission. Replays retain
+original Event attribution; content identity and one-use latest-paste authorization
+remain unchanged. Recent's immutable projection adds a nullable basename from the
+highest committed Event ID, never an older non-NULL fallback.
+
+Author validation uses synthetic native adapters, isolated SQLite and offscreen Qt.
+Physical keyboard, native layout/DPI and assistive-technology acceptance are NOT RUN.
+
 <a id="python-paste-latest-accepted-candidate"></a>
 
 ## Python Paste Latest — accepted candidate architecture and cleanup (2026-10-29)

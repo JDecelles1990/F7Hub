@@ -76,7 +76,7 @@ class SettingsBackendTests(unittest.TestCase):
             objects = set(tuple(row) for row in connection.execute(
                 "SELECT type, name FROM sqlite_master WHERE name LIKE 'settings_%'"))
             self.assertEqual(objects, {("table", "settings_state"), ("table", "settings_user_overrides")})
-            self.assertEqual(connection.execute("SELECT COUNT(*) FROM schema_migrations").fetchone()[0], 17)
+            self.assertEqual(connection.execute("SELECT COUNT(*) FROM schema_migrations").fetchone()[0], 18)
         self.assert_integrity()
 
     def test_grouped_apply_and_restart(self):
@@ -462,7 +462,7 @@ class SettingsBackendTests(unittest.TestCase):
             history = tuple(tuple(row) for row in connection.execute("SELECT * FROM schema_migrations ORDER BY version"))
             scripts = tuple(tuple(row) for row in connection.execute("SELECT * FROM scripts ORDER BY script_id"))
         result = bootstrap_database(path, MIGRATIONS)
-        self.assertEqual(result.migration_result.applied_versions, (14, 15, 16, 17))
+        self.assertEqual(result.migration_result.applied_versions, (14, 15, 16, 17, 18))
         with database_connection(path) as connection:
             self.assertEqual(tuple(tuple(row) for row in connection.execute("SELECT * FROM schema_migrations WHERE version<=13 ORDER BY version")), history)
             self.assertEqual(tuple(tuple(row) for row in connection.execute("SELECT * FROM scripts ORDER BY script_id")), scripts)

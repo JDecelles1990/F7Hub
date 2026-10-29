@@ -79,6 +79,24 @@ class ClipboardWorkspaceTests(unittest.TestCase):
             QTest.qWait(5)
         self.assertFalse(self.workspace.loading, "Clipboard read did not settle")
 
+    def test_source_app_plain_accessible_bounded_display_and_refresh(self):
+        from dataclasses import replace
+        self.compose()
+        rows = self.service.page.rows
+        for name in ("notepad.exe", "msedge.exe", "é" * 251 + ".exe", None):
+            self.service.page = replace(self.service.page, rows=(replace(rows[0], source_process_basename=name),))
+            self.workspace.activate()
+            self.wait_idle()
+            self.workspace.refresh_button.click()
+            self.wait_idle()
+            index = self.workspace.model.index(0, 2)
+            expected = name or "Not recorded"
+            self.assertEqual(self.workspace.model.data(index), expected)
+            self.assertEqual(self.workspace.model.data(index, Qt.ItemDataRole.AccessibleTextRole), expected)
+            self.assertFalse(self.workspace.model.flags(index) & Qt.ItemFlag.ItemIsEditable)
+            self.assertEqual(self.workspace.table.selectionMode(), QAbstractItemView.SelectionMode.NoSelection)
+            self.assertFalse(self.workspace.table.isSortingEnabled())
+
     def test_populated_page_displays_exact_safe_fields_and_unicode(self):
         self.compose()
         model_threads = []
@@ -87,13 +105,13 @@ class ClipboardWorkspaceTests(unittest.TestCase):
             self.assertTrue(self.workspace.activate())
             self.wait_idle()
         model = self.workspace.model
-        self.assertEqual(model.HEADERS, ("Time", "Preview", "Retention", "Pinned"))
-        self.assertEqual(model.columnCount(), 4)
+        self.assertEqual(model.HEADERS, ("Time", "Preview", "Source App", "Retention", "Pinned"))
+        self.assertEqual(model.columnCount(), 5)
         self.assertEqual(model.rowCount(), 2)
-        self.assertEqual([model.data(model.index(0, c)) for c in range(4)],
-                         ["2026-10-08 10:00:00.000 UTC", "<b>Résumé 😀 東京</b>", "Temporary", "No"])
-        self.assertEqual([model.data(model.index(1, c)) for c in range(1, 4)],
-                         ["Synthetic long preview … [truncated]", "Saved", "Yes"])
+        self.assertEqual([model.data(model.index(0, c)) for c in range(5)],
+                         ["2026-10-08 10:00:00.000 UTC", "<b>Résumé 😀 東京</b>", "Not recorded", "Temporary", "No"])
+        self.assertEqual([model.data(model.index(1, c)) for c in range(1, 5)],
+                         ["Synthetic long preview … [truncated]", "Not recorded", "Saved", "Yes"])
         self.assertEqual(model.data(model.index(0, 1), Qt.ItemDataRole.AccessibleTextRole),
                          "<b>Résumé 😀 東京</b>")
         self.assertFalse(hasattr(self.service.page.rows[0], "raw_text"))

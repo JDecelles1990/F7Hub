@@ -1,5 +1,66 @@
 # F7Hub Current State
 
+## CP02-S3 — Source App Provenance author handoff (2026-10-29)
+
+**SOURCE_APP_PROVENANCE_READY_FOR_REVIEW** — lifecycle READY_FOR_REVIEW. Author
+implementation, validation, documentation and final preservation reconciliation
+are complete. Independent review and user-owned physical acceptance remain pending.
+
+Candidate only in `C:/Dev/F7Hub-Clipboard-SourceAppProvenance-20261029`, branch
+`feature/clipboard-source-app-provenance-20261029`, base/HEAD
+`b049a56a88305d48cf64d813065efa5a9b96f3e5`. Unstaged and uncommitted;
+independent review and user-owned physical acceptance remain pending.
+
+FACT baseline: fresh remote main is `b049a56a88305d48cf64d813065efa5a9b96f3e5`,
+the PR120 merge with the existing Win+Alt+C/V implementation. The older
+Paste Latest integration-pending sections below are historical snapshots.
+CP02-S3 is the documented unstarted successor to closed CP02-S1/S2; only this
+request's bounded source-process path is implemented. CC-03 search is untouched.
+
+The candidate carries a strictly bounded optional original-target basename from
+the existing native safety query through ClipboardService and the authorized Event
+transaction to Recent's new Source App column. The existing independent preference
+defaults False; pre-acquisition preference and final consent/revision/field checks
+prevent retroactive or late authorization. No title/full path/PID/HWND/URL/command
+line is persisted. Existing exact-text deduplication, replay, append head and
+latest-paste mechanics are preserved. Latest Event ID selects source, including NULL.
+
+| Author evidence | Result / provenance |
+|---|---|
+| Focused provenance + offscreen GUI | FRESH PASS 74, exit0; Database fixture batching later verified by full Database suite |
+| Full Database regression | FRESH PASS 664, exit0; fresh/upgraded SQLite integrity_check=ok; zero foreign-key violations |
+| Synthetic capture/paste and release-cycle regression | FRESH PASS 198, exit0 after two existing synthetic adapters were updated for the typed acquisition |
+| Affected integration selection | 70 distinct methods covered: 60 unchanged non-bootstrap passing executions plus fresh corrected bootstrap module10 PASS, exit0; separate hash-bound derived applicability record |
+| Physical Windows acceptance and native layout | NOT RUN; user-owned single controlled session prepared externally |
+| Independent review | NOT RUN; exact candidate handoff pending |
+
+Initial focused run FAIL (missing PySide6 under default interpreter), initial
+capture/paste regression FAIL (old synthetic adapters), and original integration
+run FAIL (69/70 passed; one stale migration-count assertion) remain preserved.
+The corrected environment reuses the existing F7Hub virtualenv, PySide6 6.11.2.
+No unchanged full integration rerun was performed. Results identify tested candidate
+aggregates, with later documentation changes separated from code/test inputs.
+
+External evidence/checkpoint/manifest and physical procedure:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/SourceAppProvenance-20261029/`.
+The final candidate manifest is authoritative for exact path/content identity.
+The canonical dirty checkout branch/HEAD/index/status and ordinary local file hashes
+match the starting preservation record. Protected GuideSettings.ini/desktop.ini
+remain pathname-only opaque state. Five pre-existing worktree directories changed
+from available to missing during the task: ActiveSelectionCopy-20261028, HBR01,
+HBR01N, NativeIPC-20261027 and PythonPasteLatest-20261028 (all under the
+C:/Dev/F7Hub-Clipboard- prefix). Their registrations retain branch/HEAD but are now
+prunable. The user subsequently confirmed, "Yes, I intentionally removed them."
+The user further clarified that the folders were moved to another disk to free
+space. This is USER-REPORTED INTENTIONAL RELOCATION and resolves the earlier unexplained
+availability blocker; no move timestamp, destination or missing-folder byte preservation
+is inferred. The original BLOCKED finding remains in the external historical
+evidence. Fresh checks confirm canonical status/ordinary bytes and candidate
+identity; this task did not remove, restore or prune those worktrees.
+All candidate changes remain unstaged/uncommitted. Next gate: independent
+read-only review. User-owned physical acceptance remains required before any
+later integration; no staging, commit, publication or merge is authorized.
+
 <a id="python-paste-latest-current-state"></a>
 
 ## Python Paste Latest — accepted feature candidate; integration pending (2026-10-29)

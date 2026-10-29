@@ -22,7 +22,8 @@ from f7hub.domain.clipboard import (
 )
 from f7hub.repositories.clipboard_repository import ClipboardRepository
 from f7hub.domain.clipboard_privacy import assess_manual_text, ClipboardPrivacyFinding
-from f7hub.domain.clipboard_settings import WORKFLOW_ENABLED, CLIPBOARD_SETTING_DEFINITIONS
+from f7hub.domain.clipboard import ClipboardSelectionAcquisition
+from f7hub.domain.clipboard_settings import WORKFLOW_ENABLED, SOURCE_PROCESS_ENABLED, CLIPBOARD_SETTING_DEFINITIONS
 from f7hub.repositories.settings_repository import SettingsPersistenceError
 
 
@@ -249,7 +250,17 @@ class ClipboardService:
             consent = self._repository._prepare_consent() if self._real_assessment else None
         except Exception:
             consent = None
-        text = acquire()
+        # The independent field preference is bound before the native copy.
+        # The consent revision is rechecked again inside the SQLite writer.
+        process_enabled = False
+        if consent is not None and self._settings is not None:
+            snapshot = self._settings.refresh()
+            process_enabled = (snapshot.storage_available and snapshot.revision == consent.settings_revision
+                               and snapshot.get(SOURCE_PROCESS_ENABLED).value is True)
+        acquired = acquire()
+        text = acquired.text if type(acquired) is ClipboardSelectionAcquisition else acquired
+        basename = (acquired.source_process_basename
+                    if process_enabled and type(acquired) is ClipboardSelectionAcquisition else None)
         if cancelled.is_set():
             raise ClipboardValidationError("Selection capture cancelled before admission.")
         source = AdmittedManualText(text)
@@ -259,7 +270,8 @@ class ClipboardService:
         if consent is None:
             return SelectionCaptureResult(text)
         context = self.open_admission_context("python-active-selection")
-        command = ClipboardCaptureCommand(self.new_operation(context), source, capture_method="F7HUB")
+        command = ClipboardCaptureCommand(self.new_operation(context), source, capture_method="F7HUB",
+                                          source_process_basename=basename)
         try:
             receipt = self.capture_manual_text(context, command, expected_consent=consent)
         except ClipboardPersistenceError as error:

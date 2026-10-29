@@ -294,7 +294,7 @@ class TargetDiagnosticQtTests(unittest.TestCase):
                     setattr(self.owner, attribute, previous)
                     self.api.held = False
     def test_capture_still_uses_original_service_and_copy(self):
-        self.service.capture_active_selection.side_effect = lambda acquire, cancel: SelectionCaptureResult(acquire())
+        self.service.capture_active_selection.side_effect = lambda acquire, cancel: SelectionCaptureResult(acquire().text)
         self.assertTrue(self.owner.trigger()); self.wait()
         self.service.begin_selection_capture.assert_called_once()
         self.service.capture_active_selection.assert_called_once()

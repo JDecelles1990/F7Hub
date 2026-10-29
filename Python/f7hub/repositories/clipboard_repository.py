@@ -18,12 +18,16 @@ from f7hub.domain.clipboard import (
     ClipboardPasteError, validate_uuid, validate_token,
 )
 from f7hub.infrastructure.database import DatabaseError, database_connection, open_database
-from f7hub.repositories.settings_repository import _eligible_consent, SettingsPersistenceError
+from f7hub.repositories.settings_repository import _eligible_consent, _read_state, SettingsPersistenceError
+from f7hub.domain.clipboard_settings import SOURCE_PROCESS_ENABLED
 
 
 _RECENT_SQL = """
     SELECT clipboard_item_id, revision, substr(raw_text, 1, 241) AS preview_excerpt,
-           last_received_at, retention_intent, is_pinned, expires_at, sensitivity
+           last_received_at, retention_intent, is_pinned, expires_at, sensitivity,
+           (SELECT e.source_process_basename FROM clipboard_capture_events AS e
+            WHERE e.clipboard_item_id = clipboard_items.clipboard_item_id
+            ORDER BY e.clipboard_capture_event_id DESC LIMIT 1) AS source_process_basename
     FROM clipboard_items
     WHERE sensitivity = 'PERMITTED' AND assessment_complete = 1
       AND (retention_intent = 'SAVED' OR expires_at > ?)
@@ -164,7 +168,12 @@ class ClipboardRepository:
                 current = None
             if current is None or current != consent:
                 raise ClipboardPersistenceError(Code.ADMISSION_DENIED)
-            return _capture(connection, binding, metadata, accepted_at, temporary_expiry, receipt_expiry)
+            # Resolve this independent false-default field on the same reserved writer.
+            state = _read_state(connection)
+            process_enabled = any(x.key == SOURCE_PROCESS_ENABLED and x.value_type == "BOOLEAN"
+                                  and x.value_text == "true" for x in state.overrides)
+            basename = binding.command.source_process_basename if process_enabled else None
+            return _capture(connection, binding, metadata, accepted_at, temporary_expiry, receipt_expiry, basename)
         return self._write(persist)
 
     def _delete_expired_receipts(self, *, as_of: str,
@@ -265,7 +274,7 @@ def _receipt_result(connection, row, *, replay_source=None):
     return ClipboardReceiptResult(ReplayDisposition.KNOWN_COMMITTED, outcome, ClipboardItemRef(row["live_item_id"]))
 
 
-def _capture(connection, binding, metadata, accepted_at, temporary_expiry, receipt_expiry):
+def _capture(connection, binding, metadata, accepted_at, temporary_expiry, receipt_expiry, source_process_basename=None):
     command = binding.command
     operation = command.operation
     receipt = _find_receipt(connection, operation)
@@ -302,9 +311,9 @@ def _capture(connection, binding, metadata, accepted_at, temporary_expiry, recei
         item_id = cursor.lastrowid
     event_id = connection.execute("""INSERT INTO clipboard_capture_events
         (clipboard_item_id, received_at, observed_at, capture_method, source_class,
-         producer_binding, ingress_generation, operation_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+         producer_binding, ingress_generation, operation_id, source_process_basename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
         (item_id, accepted_at, command.observed_at, command.capture_method, command.source_class,
-         operation.producer_binding, operation.ingress_generation, operation.operation_id)).lastrowid
+         operation.producer_binding, operation.ingress_generation, operation.operation_id, source_process_basename)).lastrowid
     item = connection.execute("SELECT * FROM clipboard_items WHERE clipboard_item_id=?", (item_id,)).fetchone()
     values = dict(producer_binding=operation.producer_binding, ingress_generation=operation.ingress_generation,
         operation_id=operation.operation_id, **metadata, historical_item_id=item_id, historical_event_id=event_id,
@@ -376,4 +385,5 @@ def _recent_from_row(record: sqlite3.Row) -> ClipboardRecentItem:
         last_received_at=record["last_received_at"],
         retention_intent=record["retention_intent"], is_pinned=bool(pin),
         expires_at=record["expires_at"], sensitivity=record["sensitivity"],
+        source_process_basename=record["source_process_basename"],
     )

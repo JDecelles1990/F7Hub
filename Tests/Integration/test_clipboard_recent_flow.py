@@ -153,13 +153,14 @@ class ClipboardRecentGuiFlowTests(ClipboardDatabaseTestCase):
                                                clipboard.windows_page, clipboard.setup))
                     recent.assert_called_once_with()
                     self.assertEqual(clipboard.model.rowCount(), expected_count)
-                    self.assertEqual(clipboard.model.columnCount(), 4)
+                    self.assertEqual(clipboard.model.columnCount(), 5)
                     self.assertEqual(clipboard.page_message.text(), f"Showing {expected_count} recent items." +
                                      (" More items are available." if has_more else ""))
                     if expected_count:
                         self.assertEqual(clipboard.model.data(clipboard.model.index(0, 1)), "Synthetic 054 😀")
-                        self.assertEqual(clipboard.model.data(clipboard.model.index(0, 2)), "Saved")
-                        self.assertEqual(clipboard.model.data(clipboard.model.index(0, 3)), "Yes")
+                        self.assertEqual(clipboard.model.data(clipboard.model.index(0, 2)), "Not recorded")
+                        self.assertEqual(clipboard.model.data(clipboard.model.index(0, 3)), "Saved")
+                        self.assertEqual(clipboard.model.data(clipboard.model.index(0, 4)), "Yes")
                     else:
                         self.assertEqual(clipboard.status_message.text(), "No recent Clipboard history is available.")
                 self.assertEqual(reads, [(self.database_path.resolve(), True)])

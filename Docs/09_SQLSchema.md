@@ -1,5 +1,23 @@
 # F7Hub SQL Schema
 
+## CP02-S3 — optional Event source process basename
+
+Candidate migration **0018**, not yet integrated. Released migrations 0001–0017
+are unchanged. Exact additive DDL and frozen Unicode 16.0 forbidden ranges live in
+[0018_clipboard_source_process_basename.sql](../Database/Migrations/0018_clipboard_source_process_basename.sql).
+
+| Table / column | Physical constraints and meaning |
+|---|---|
+| `clipboard_capture_events.source_process_basename` | Nullable TEXT, no backfill/default attribution; 5–255 scalars; at most 1020 UTF-8 bytes; `.exe` suffix; no leading dot/space, path/Windows-invalid filename characters, NUL, controls, format controls, surrogates or line/paragraph separators |
+
+Domain normalization is NFC plus lowercase before insertion; SQL constraints defend
+shape and size without custom functions. Existing keys, foreign keys, operation
+uniqueness, transactions and indexes are preserved. Legacy Event rows gain NULL.
+No other table or receipt payload gains this field. The original migration0013
+CREATE TABLE listing in section89 remains the historical base; apply0018 for the
+candidate schema. Fresh/upgrade, failed-migration rollback, failed-Event rollback,
+constraints and integrity are covered by author tests; physical acceptance pending.
+
 ## Clipboard H01-B — append-head physical schema
 
 [0017_clipboard_append_head.sql](../Database/Migrations/0017_clipboard_append_head.sql)

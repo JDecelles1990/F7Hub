@@ -41,23 +41,24 @@ class ClipboardSetup(QWidget):
         heading = self._label("Clipboard Setup")
         layout.addWidget(heading)
         self.runtime_message = self._label(
-            "Saved preferences only. Production Clipboard capture and Active Paste "
-            "are not implemented or active. Ctrl+Alt+C and Ctrl+Alt+V are unavailable.")
+            "Win+Alt+C captures highlighted text; Win+Alt+V pastes the latest eligible saved capture. "
+            "Release each chord after use. Automatic capture and window-title collection remain unavailable.")
         layout.addWidget(self.runtime_message)
         self.consent_message = self._label('Durable manual history needs explicit Setup enablement. Automatic capture is not authorized here.')
         layout.addWidget(self.consent_message)
         self.checkboxes = {}
         fields = (
             (WORKFLOW_ENABLED, "&Enable Clipboard workflow and local history",
-             "This is the explicit setup opt-in for future eligible durable manual captures. "
+             "This is the explicit setup opt-in for eligible durable manual captures. "
              "TEMPORARY Clipboard content is retained locally for 7 days by default; an independently "
              "approved preservation action may use a different policy. Content detected as sensitive "
              "is rejected. Detection has limits and cannot guarantee all secrets are identified. "
              "Disabling this preference does not delete historical records."),
             (SOURCE_PROCESS_ENABLED, "Store source &application executable name",
-             "For future captures, optionally store only the executable basename, not full paths, "
-             "command lines or unrestricted application metadata. This preference remains "
-             "independent when workflow is disabled."),
+             "For new eligible Win+Alt+C captures, optionally store only the executable basename "
+             "shown in Recent as Source App. Full paths, command lines and window titles are excluded. "
+             "This preference defaults off and remains independent when workflow is disabled. "
+             "Disabling it does not remove previously recorded names."),
             (SOURCE_TITLE_ENABLED, "Store source window &title",
              "Window titles may contain sensitive information. Optional title collection is "
              "independent of executable-name collection and workflow enablement."),

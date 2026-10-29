@@ -1,5 +1,28 @@
 # F7Hub GUI Design
 
+## CP02-S3 — Source App in Recent candidate (2026-10-29)
+
+Candidate only in `C:/Dev/F7Hub-Clipboard-SourceAppProvenance-20261029`, branch
+`feature/clipboard-source-app-provenance-20261029`, base/HEAD
+`b049a56a88305d48cf64d813065efa5a9b96f3e5`. Unstaged and uncommitted;
+independent review and user-owned physical acceptance remain pending.
+
+The candidate's existing Recent QTableView/model has exactly **Time | Preview |
+Source App | Retention | Pinned**. Source App is the latest committed Event's
+permitted executable basename (`notepad.exe`, `msedge.exe`) or **Not recorded**
+when NULL/unavailable; an older Event's name is never substituted. Plain display
+and AccessibleTextRole use the same bounded value. Preview stretches; fixed widths
+for Time/Source App/Retention/Pinned are 230/170/105/70. Refresh, navigation,
+read-only behavior and NoSelection remain unchanged. No sorting/filtering/actions
+or title presentation are added. Stable registry IDs are retained below.
+
+Setup now describes the integrated Win+Alt+C/V behavior and the false-default
+source-process option for new eligible captures, including preservation of prior
+names when disabled. Automatic capture and window-title collection remain unavailable.
+The baseline includes PR120; earlier integration-pending snapshots below remain
+historical. Author offscreen model/accessibility/refresh/navigation checks PASS;
+physical layout, Narrator/high contrast and alternate DPI remain NOT RUN.
+
 ## Python Clipboard shortcut status — accepted candidate, integration pending (2026-10-29)
 
 Win+Alt+C is integrated through PR #119. The Python/Qt Win+Alt+V Paste Latest
@@ -156,7 +179,7 @@ Candidate **READY_FOR_REVIEW**, unstaged/uncommitted. FRESH WINDOWS_NATIVE host,
 
 Production Clipboard Center now consumes the merged D01 service. Accepted navigation lazily constructs and retains one workspace, starts one asynchronous `get_recent()` read with the default 50-item limit, and reuses that page on reopening. An optional absent service retains CC-01's truthful unavailable state. The CC-01 record below describes its original shell delivery; CC-02 supersedes its production no-service/no-worker state.
 
-A read-only Qt table model/view displays exactly **Time**, **Preview**, **Retention**, and **Pinned**. Time is the validated latest receipt instant displayed explicitly in UTC with milliseconds. Preview is only D01's bounded safe plain text, with a textual truncation suffix when flagged; long cells use normal Qt elision in the stretching Preview column. Retention reads Temporary/Saved and pin state Yes/No. There are no fabricated Kind/Entity/Tag/source/relationship columns, sorting controls, stable Item selection, Inspector or mutations.
+The integrated CC-02 baseline has four columns. The CP02-S3 candidate extends the same read-only model/view to exactly **Time**, **Preview**, **Source App**, **Retention**, and **Pinned**. Time is the validated latest receipt instant displayed explicitly in UTC with milliseconds. Preview is only D01's bounded safe plain text, with a textual truncation suffix when flagged; long cells use normal Qt elision in the stretching Preview column. Retention reads Temporary/Saved and pin state Yes/No. Source App follows the nullable Event attribution contract above. There are no fabricated Kind/Entity/Tag/relationship columns, sorting controls, stable Item selection, Inspector or mutations.
 
 **Refresh** performs one new first-page read. Loading shows **Loading Clipboard history…**, clears old rows/count (including the accessibility label), and disables only Refresh. Empty success shows **No recent Clipboard history is available.** Failure clears rows and shows only **Clipboard history could not be loaded.**, with explicit **Retry**. Successful feedback is **Showing N recent items.**, adding **More items are available.** only for `has_more`. There is no Next/Previous, cursor, polling, capture or automatic retry.
 
@@ -2991,11 +3014,11 @@ truthful unavailable status remains; Setup can still exist independently.
 | CLIPBOARD.RECENT.TABLE | `table`; QTableView; `clipboardRecentTable` | Recent VBox after Refresh, stretch 1, before summary | ClipboardRecentTableModel receives replace_rows from GUI completion; data provides DisplayRole/AccessibleTextRole; no row-activation handler or selected Item action | Only with ClipboardService; no edits, selection or sorting; Tab leaves table; accessible Recent Clipboard history; locally remains enabled during reads while rows clear; ancestor state still applies | Native focus/scroll; no custom shortcut | CW, CR |
 | CLIPBOARD.WINDOWS.REFRESH | Refresh / `windows_refresh_button`; QPushButton; `windowsClipboardRefreshButton` | Windows page VBox after heading, unavailable message and help; before stretch | No connected handler; no native acquisition or snapshot backend | Always constructed, disabled; visible on Windows page; accessible Refresh Windows Clipboard; description says refresh unavailable | — | CW |
 
-ClipboardRecentTableModel has exactly Time, Preview, Retention, Pinned columns.
+In the CP02-S3 candidate, ClipboardRecentTableModel has exactly Time, Preview, Source App, Retention, Pinned columns.
 Time displays explicit UTC, previews remain plain text with a truncation suffix
-when indicated, retention displays Temporary/Saved and pinned displays Yes/No.
+when indicated, Source App displays a permitted basename or Not recorded, retention displays Temporary/Saved and pinned displays Yes/No.
 No raw text or tooltip is exposed by the model. The preview column stretches;
-other widths are 230/105/70, headers cannot sort, the vertical header is hidden,
+other widths are 230/170/105/70, headers cannot sort, the vertical header is hidden,
 and word wrap is disabled. Native scrolling is not a separate history paging
 contract. `has_more` adds feedback only: no Next/Previous or load-more control.
 
@@ -3054,7 +3077,7 @@ Enabled state is local; ordinary parent-page state can also disable a control.
 | Stable ID | Label / member; widget; objectName | Logical position / parent | Signal or event → handler / backend | Availability / accessibility / keyboard | Tests |
 |---|---|---|---|---|---|
 | CLIPBOARD.SETUP.WORKFLOW | &Enable Clipboard workflow and local history / `checkboxes[WORKFLOW_ENABLED]`; QCheckBox; `clipboard.workflow_enabled` | Setup first checkbox, below consent message, before its explanation | toggled(value) → `_edited(WORKFLOW_ENABLED, value)`; local draft, sets _affirmed on true; Apply owns any save/grant | E-editable; accessible Enable Clipboard workflow and local history; description discloses future eligible durable manual capture, 7-day TEMPORARY default, sensitivity-detection limits and no history deletion on disable; &E mnemonic / native Space | CS, CI |
-| CLIPBOARD.SETUP.SOURCE.PROCESS | Store source &application executable name / `checkboxes[SOURCE_PROCESS_ENABLED]`; QCheckBox; `clipboard.source_process_persistence_enabled` | Second checkbox after workflow explanation, before its own explanation | toggled(value) → `_edited(SOURCE_PROCESS_ENABLED, value)`; Apply reads draft for Settings | E-editable independently of workflow value; accessible Store source application executable name; description limits future metadata to executable basename, excludes full paths/command lines; &a mnemonic / native Space | CS, CI |
+| CLIPBOARD.SETUP.SOURCE.PROCESS | Store source &application executable name / `checkboxes[SOURCE_PROCESS_ENABLED]`; QCheckBox; `clipboard.source_process_persistence_enabled` | Second checkbox after workflow explanation, before its own explanation | toggled(value) → `_edited(SOURCE_PROCESS_ENABLED, value)`; Apply reads draft for Settings | E-editable independently of workflow value; accessible Store source application executable name; CP02-S3 description limits new eligible Win+Alt+C metadata to executable basename, excludes paths/command lines/titles, defaults off and preserves prior names when disabled; &a mnemonic / native Space | CS, CI |
 | CLIPBOARD.SETUP.SOURCE.TITLE | Store source window &title / `checkboxes[SOURCE_TITLE_ENABLED]`; QCheckBox; `clipboard.source_window_title_persistence_enabled` | Third checkbox after process explanation, before its own explanation and draft/status labels | toggled(value) → `_edited(SOURCE_TITLE_ENABLED, value)`; Apply reads draft for Settings | E-editable independently of workflow/process values; accessible Store source window title; description warns titles may be sensitive and collection is independent; &t mnemonic / native Space | CS, CI |
 | CLIPBOARD.SETUP.APPLY | &Apply / `apply_button`; QPushButton; — | Setup action QHBoxLayout first | clicked → `apply` → changed-key validation → `_submit`; ordinary SettingsService.apply or explicit ClipboardService.enable_history_from_setup; `_saved` handles committed result | E-editable plus _save_available and no conflict; no dirty-only enable gate; accessible Apply Clipboard preferences; no-change path avoids write; &A mnemonic | CS, CI |
 | CLIPBOARD.SETUP.CANCEL | &Cancel / `cancel_button`; QPushButton; — | Action row second | clicked → `cancel` → restore latest loaded draft, clear _affirmed; no service call/write | Loaded snapshot and not pending, even when storage unavailable/conflicted; conflict remains until Reload; accessible Cancel Clipboard preference edits; &C mnemonic | CS, CI |

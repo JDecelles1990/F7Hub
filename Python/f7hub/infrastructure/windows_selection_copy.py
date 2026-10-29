@@ -8,6 +8,8 @@ from dataclasses import dataclass
 import os
 import time
 
+from f7hub.domain.clipboard import ClipboardSelectionAcquisition, normalize_source_process_basename
+
 
 class SelectionCopyError(RuntimeError):
     """Fixed content-free failure; optional guard is used only by target diagnosis."""
@@ -145,7 +147,7 @@ class WindowsSelectionAPI:
     def owner_pid(self):
         return self._pid(self.user.GetClipboardOwner())
 
-    def pin(self, target):
+    def pin(self, target, *, on_source_process=None):
         if target.pid == os.getpid():
             raise SelectionCopyError('TARGET_UNAVAILABLE', guard='SELF_TARGET')
         handle = self.kernel.OpenProcess(0x101000, False, target.pid)
@@ -178,6 +180,8 @@ class WindowsSelectionAPI:
             finally:
                 if not self.kernel.CloseHandle(token):
                     raise SelectionCopyError('CLEANUP_FAILED', guard='TOKEN_CLOSE_FAILED')
+            if on_source_process is not None:
+                on_source_process(normalize_source_process_basename(basename))
             return handle
         except BaseException:
             if not self.kernel.CloseHandle(handle):
@@ -247,9 +251,10 @@ class WindowsSelectionAPI:
                 raise SelectionCopyError('CLEANUP_FAILED')
 
 
-def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.sleep, on_release=None, on_release_wait=None):
+def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.sleep, on_release=None, on_release_wait=None, with_metadata=False):
     """One copy only; sequence change plus target/owner checks, never old text."""
-    handle = api.pin(target)
+    source_process = []
+    handle = (api.pin(target, on_source_process=source_process.append) if with_metadata else api.pin(target))
     try:
         def check():
             if cancelled.is_set():
@@ -282,7 +287,8 @@ def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.s
                 check()
                 if clock() >= deadline or api.sequence() != after:
                     raise SelectionCopyError('LATE_OR_UNSTABLE')
-                return text
+                return (ClipboardSelectionAcquisition(text, source_process[0] if source_process else None)
+                        if with_metadata else text)
             sleep(.02)
         raise SelectionCopyError('NO_FRESH_COPY')
     finally:

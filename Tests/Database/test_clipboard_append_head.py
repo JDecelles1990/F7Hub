@@ -65,11 +65,12 @@ class AppendHeadMigrationTests(ClipboardDatabaseTestCase):
             tables = [r[0] for r in c.execute("SELECT name FROM sqlite_master WHERE type='table'")]
             before = {name: tuple(tuple(r) for r in c.execute('SELECT * FROM "'+name+'"')) for name in tables}
         result = bootstrap_database(path, PROJECT_ROOT/'Database/Migrations')
-        self.assertEqual(result.migration_result.applied_versions, (17,))
+        self.assertEqual(result.migration_result.applied_versions, (17, 18))
         with database_connection(path) as c:
             for name, rows in before.items():
                 query = 'SELECT * FROM "'+name+'"'+(' WHERE version<=16' if name=='schema_migrations' else '')
-                self.assertEqual(tuple(tuple(r) for r in c.execute(query)), rows, name)
+                self.assertEqual(tuple(tuple(r)[:-1] if name == "clipboard_capture_events" else tuple(r)
+                                       for r in c.execute(query)), rows, name)
             self.assertEqual(c.execute('SELECT count(*) FROM clipboard_append_head').fetchone()[0], 0)
             self.assertEqual(validate_database_integrity(c), (('ok',), ()))
         self.assertEqual(bootstrap_database(path, PROJECT_ROOT/'Database/Migrations').migration_result.applied_versions, ())

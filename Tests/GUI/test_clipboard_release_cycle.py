@@ -15,9 +15,9 @@ class CycleAPI(FakeHotkeyAPI):
         super().__init__()
         self.capture_waiting = threading.Event()
         self.paste_waiting = threading.Event()
-    def pin(self, target):
+    def pin(self, target, *, on_source_process=None):
         self.sequences = [10, 11, 11]
-        return 999
+        return super().pin(target, on_source_process=on_source_process)
     def pin_paste(self, target): return 999
     def keys_down(self):
         if self.held: self.capture_waiting.set()
@@ -34,7 +34,7 @@ class ClipboardReleaseCycleTests(unittest.TestCase):
         self.mode = patch.dict(os.environ, {'F7HUB_DEV_PASTE_TARGET_DIAGNOSTIC': '1'})
         self.mode.start(); self.addCleanup(self.mode.stop)
         self.window = QMainWindow(); self.api = CycleAPI(); self.service = Mock()
-        self.service.capture_active_selection.side_effect = lambda acquire, cancel: SelectionCaptureResult(acquire())
+        self.service.capture_active_selection.side_effect = lambda acquire, cancel: SelectionCaptureResult(acquire().text)
         self.owner = SelectionCapture(self.window, self.service, api=self.api)
         self.owner.start(); self.owner.timer.stop()  # Explicitly schedule observations; no timer luck.
     def join_worker(self):
