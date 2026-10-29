@@ -852,7 +852,7 @@ class MainWindow(QMainWindow):
         selection = getattr(self, "selection_capture", None)
         if selection is not None and selection.busy:
             selection.cancel()
-            self.statusBar().showMessage("Selection capture is draining native resources. Please try Exit when it finishes.")
+            self.statusBar().showMessage("Clipboard capture/paste is draining native resources. Please try Exit when it finishes.")
             return False
         if (self._script_run_pending or self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
                 or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading)

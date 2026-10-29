@@ -11,6 +11,7 @@ from PySide6.QtWidgets import QApplication, QMainWindow
 from f7hub.gui.selection_capture import SelectionCapture
 from f7hub.infrastructure.windows_selection_copy import WindowsSelectionAPI, HOTKEY_ID
 from f7hub.services.clipboard_service import SelectionCaptureResult
+from f7hub.infrastructure.windows_latest_paste import WindowsPasteAPI
 
 
 @unittest.skipUnless(os.name == 'nt', 'Windows native APIs required')
@@ -18,7 +19,7 @@ class NativeSelectionHotkeyTests(unittest.TestCase):
     def test_register_native_dispatch_and_unregister(self):
         app = QApplication.instance() or QApplication([])
         window = QMainWindow()
-        api = WindowsSelectionAPI()
+        api = WindowsPasteAPI()
         service = Mock()
         # Isolates real Qt/Windows registration and delivery, intentionally no acquisition.
         service.capture_active_selection.return_value = SelectionCaptureResult('Synthetic native dispatch')

@@ -99,6 +99,8 @@ class ClipboardService:
         self._clock_anomaly = False
         self._prepared_paste: _PreparedPaste | None = None
         self._paste_presses: set[str] = set()
+        self._selection_generation = None
+        self._latest_selection_head = None  # None: no session attempt; False: unavailable; str: exact head
 
     def refresh_setup(self):
         """Coherent preference/consent projection; reading never grants consent."""
@@ -218,6 +220,22 @@ class ClipboardService:
             self._operations[operation.operation_id] = "done"
             return result
 
+    def begin_selection_capture(self):
+        """Fence older persisted history as soon as an explicit press is accepted."""
+        with self._lock:
+            generation = object()
+            self._selection_generation = generation
+            self._latest_selection_head = False
+            self._prepared_paste = None
+            return generation
+
+    def _require_latest_selection(self, head=None):
+        if self._latest_selection_head is False:
+            raise ClipboardPasteError(PasteCode.SOURCE_UNAVAILABLE)
+        if (head is not None and self._latest_selection_head is not None
+                and head.append_token != self._latest_selection_head):
+            raise ClipboardPasteError(PasteCode.STALE_HEAD)
+
     def capture_active_selection(self, acquire, cancelled) -> SelectionCaptureResult:
         """Trusted in-process native acquisition; no IPC or consent fabrication.
 
@@ -226,6 +244,7 @@ class ClipboardService:
         admission and repository transaction fences. Missing consent yields an
         eligible nonpersistent preview, with no Item/Event/receipt write.
         """
+        generation = self.begin_selection_capture()
         try:
             consent = self._repository._prepare_consent() if self._real_assessment else None
         except Exception:
@@ -254,6 +273,18 @@ class ClipboardService:
                     return SelectionCaptureResult(text, "PERSISTENCE_UNCERTAIN")
             else:
                 return SelectionCaptureResult(text, "NOT_SAVED")
+        # Persistence and paste eligibility are separate outcomes. Failure to bind
+        # this exact saved append must never enable an older source.
+        with self._lock:
+            if self._selection_generation is generation:
+                try:
+                    as_of, _ = self._sample()
+                    head = self._repository._read_latest_paste_source(consent, as_of=as_of)
+                    if (head.item_ref == receipt.live_item_ref
+                            and head.item_revision == receipt.outcome.item_revision):
+                        self._latest_selection_head = head.append_token
+                except Exception:
+                    pass  # Remains explicitly unavailable, even if saving succeeded.
         return SelectionCaptureResult(text, "PERSISTED")
 
     def lookup_receipt(self, operation: ClipboardOperation) -> ClipboardReceiptResult:
@@ -263,6 +294,19 @@ class ClipboardService:
         with self._lock:
             as_of, _ = self._sample()
             return self._repository.lookup_receipt(operation, as_of=as_of)
+
+    def paste_latest(self, deliver):
+        """Trusted local delivery capability; the service owns its one-use context.
+
+        The native gateway binds the target and calls prepare/consume at its
+        release/effect boundaries. No GUI source cache or repository access.
+        """
+        context = self.open_admission_context('python-paste-latest')
+        def prepare(target_token):
+            return self.prepare_latest_paste(context, press_id=str(uuid4()), target_token=target_token)
+        def consume(authorization):
+            return self.consume_latest_paste(context, authorization)
+        return deliver(prepare, consume)
 
     def prepare_latest_paste(self, context: ClipboardAdmissionContext, *,
                               press_id: str, target_token: str) -> ClipboardPasteAuthorization:
@@ -278,6 +322,7 @@ class ClipboardService:
         with self._lock:
             try:
                 as_of, sampled = self._paste_sample(context)
+                self._require_latest_selection()
                 if not 0 <= sampled - started < PASTE_PREPARATION_SECONDS:
                     raise ClipboardPasteError(PasteCode.EXPIRED)
                 if press_id in self._paste_presses:
@@ -302,6 +347,7 @@ class ClipboardService:
                     self._prepared_paste = None
                 consent = self._paste_consent()
                 head = self._repository._read_latest_paste_source(consent, as_of=as_of)
+                self._require_latest_selection(head)
                 self._assess_paste_source(head)
                 as_of, sampled = self._paste_sample(context)
                 if not 0 <= sampled - started < PASTE_PREPARATION_SECONDS:
@@ -340,6 +386,7 @@ class ClipboardService:
                 as_of, sampled = self._paste_sample(context)
                 if type(authorization) is not ClipboardPasteAuthorization:
                     raise ClipboardPasteError(PasteCode.DENIED)
+                self._require_latest_selection()
                 prepared = self._prepared_paste
                 if prepared is None or prepared.authorization.prepared_id != authorization.prepared_id:
                     raise ClipboardPasteError(PasteCode.REPLAYED)
@@ -357,6 +404,7 @@ class ClipboardService:
                     raise ClipboardPasteError(PasteCode.STALE_HEAD)
                 if head != prepared.head:
                     raise ClipboardPasteError(PasteCode.STALE_SOURCE)
+                self._require_latest_selection(head)
                 self._assess_paste_source(head)
                 as_of, sampled = self._paste_sample(context)
                 self._check_paste_expiry(head, as_of)

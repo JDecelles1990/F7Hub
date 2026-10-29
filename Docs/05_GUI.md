@@ -1,5 +1,17 @@
 # F7Hub GUI Design
 
+## Python Clipboard shortcut status — accepted candidate, integration pending (2026-10-29)
+
+Win+Alt+C is integrated through PR #119. The Python/Qt Win+Alt+V Paste Latest
+action is implemented in the isolated feature candidate; final code-review
+disposition is **APPROVED WITH NOTES**, with A/B/C, stale-history rejection and
+compatibility **USER-REPORTED PHYSICAL PASS**. It remains uncommitted and
+unmerged. See the [single shortcut entry](#gui-registry-shortcuts),
+[1B current contract](Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#python-paste-latest-current)
+and [current status](Status/CURRENT_STATE.md#python-paste-latest-current-state).
+This documentation delta awaits focused review. Older dated GUI/registry
+snapshots retain their original evidence; no unrelated shortcut is reassigned.
+
 ## F7 restore correction — candidate (2026-10-26)
 
 The first exposure-only white-window correction FAILED physical acceptance:
@@ -2460,6 +2472,14 @@ F7Hub should feel like one coherent workspace, not twenty utilities taped togeth
 
 # 93. GUI Control & Action Registry
 
+Current extension (2026-10-29): the existing shortcut matrix adds exactly one
+Win+Alt+V record for the isolated accepted feature candidate. It is a native
+action/event entry, not a new visual control or a second registry. The earlier
+Pass 5 presentation counts remain the pinned audit totals. No fresh physical
+acceptance is performed by this documentation change.
+
+### Historical registry audit status — pinned 2026-10-27 baseline
+
 **GUI_REGISTRY_READY_FOR_INDEPENDENT_REVIEW — author-side documentation gate.**
 Pass 5 reconciles the source-defined GUI construction scope below. This is not
 independent approval, runtime validation or integration authority. Stable control
@@ -3092,6 +3112,16 @@ uses activation_focus_target. `_leave_clipboard` negotiates Setup departure.
 Explicit Exit's confirm_exit refuses Recent/settings pending work and negotiates
 drafts; composed X-to-tray does not call that departure path and retains the
 workspace. No shell/Tray control inventory is added by this pass.
+
+Current native-action extension: Python/Qt owns the integrated Win+Alt+C route
+and the isolated Win+Alt+V candidate through the same SelectionCapture lifecycle
+and worker. ClipboardService remains the consent/privacy/source authority.
+There is no Windows Clipboard history integration or additional Recent/Setup
+control. The Win+Alt+V shortcut row below maps the candidate without claiming
+it is on main.
+
+Pinned audit record (2026-10-27; the native-action availability statement is
+historical and superseded by the current extension):
 
 Recent reads route through the existing Clipboard service/repository; Setup
 preferences and consent route through their Settings/Clipboard owners. Qt event
@@ -3911,8 +3941,15 @@ Every row below is source verification, not physical keyboard acceptance. Normal
 native input and platform-generated menus remain available within their owner
 scope; no shortcut was executed or reassigned by this audit.
 
+The Win+Alt+V row is the 2026-10-29 candidate extension; its physical status is
+explicitly USER-REPORTED. The earlier rows retain their pinned-audit status.
+Static source search found one Python paste RegisterHotKey route and no active
+AHK Win+Alt+V registration. Installed-application conflicts cannot be excluded
+by source inspection: registration refusal leaves that operation unavailable.
+
 | Shortcut / input | Owner and context | Effect / source | Potential conflict or limitation | Static status |
 |---|---|---|---|---|
+| Win+Alt+V | Python/Qt SelectionCapture; global native RegisterHotKey with MOD_NOREPEAT; existing safety/target restrictions | Paste Latest authorized F7Hub Clipboard capture: trigger(action='paste') → ClipboardService.paste_latest → native paste_latest / WindowsPasteAPI; latest eligible persisted source; one attempt per eligible press/release cycle | Existing ClipboardService consent/privacy and one-use authorization; original non-elevated target, release/cancellation/lease guards; no stale-history fallback or Windows Clipboard history integration; registration can collide with another app; Windows paste is non-atomic | Candidate source verified; code review APPROVED WITH NOTES; A/B/C USER-REPORTED PHYSICAL PASS; integration PENDING; documentation-delta review pending |
 | Alt+F | MainWindow QShortcut, WidgetWithChildrenShortcut, no repeat | _focus_navigation; main_window.py | Active popup/modal refused; separate dialog windows keep local mnemonic handling | PASS; physical NOT VERIFIED |
 | Alt+S | Same owner/context | _show_utility_menu; main_window.py | Popup show suspends both shortcuts; next-turn guarded resume after hide | PASS; physical NOT VERIFIED |
 | Alt+F / Alt+S while popup active | MainWindow ShortcutOverride event filter | Consumes shell override so popup keeps native handling | Native menu dismissal/dispatch remains untested | PASS / NOT VERIFIED runtime |

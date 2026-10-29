@@ -10,7 +10,10 @@ import time
 
 
 class SelectionCopyError(RuntimeError):
-    """Fixed content-free failure; native/provider details never escape."""
+    """Fixed content-free failure; optional guard is used only by target diagnosis."""
+    def __init__(self, code, *, guard=None):
+        super().__init__(code)
+        self.guard = guard
 
 
 @dataclass(frozen=True)
@@ -121,8 +124,12 @@ class WindowsSelectionAPI:
 
     def _pid(self, hwnd):
         pid = W.DWORD()
-        if not hwnd or not self.user.GetWindowThreadProcessId(hwnd, C.byref(pid)) or not pid.value:
-            raise SelectionCopyError('TARGET_UNAVAILABLE')
+        if not hwnd:
+            raise SelectionCopyError('TARGET_UNAVAILABLE', guard='NO_WINDOW')
+        if not self.user.GetWindowThreadProcessId(hwnd, C.byref(pid)):
+            raise SelectionCopyError('TARGET_UNAVAILABLE', guard='WINDOW_QUERY_FAILED')
+        if not pid.value:
+            raise SelectionCopyError('TARGET_UNAVAILABLE', guard='WINDOW_PROCESS_MISSING')
         return pid.value
 
     def foreground(self):
@@ -140,37 +147,41 @@ class WindowsSelectionAPI:
 
     def pin(self, target):
         if target.pid == os.getpid():
-            raise SelectionCopyError('TARGET_UNAVAILABLE')
+            raise SelectionCopyError('TARGET_UNAVAILABLE', guard='SELF_TARGET')
         handle = self.kernel.OpenProcess(0x101000, False, target.pid)
         if not handle:
-            raise SelectionCopyError('TARGET_UNAVAILABLE')
+            raise SelectionCopyError('TARGET_UNAVAILABLE', guard='PROCESS_OPEN_FAILED')
         try:
             # Ctrl+C may interrupt commands instead of copying in these hosts.
             image = C.create_unicode_buffer(32768)
             length = W.DWORD(len(image))
             if not self.kernel.QueryFullProcessImageNameW(handle, 0, image, C.byref(length)):
-                raise SelectionCopyError('TARGET_UNAVAILABLE')
+                raise SelectionCopyError('TARGET_UNAVAILABLE', guard='IMAGE_QUERY_FAILED')
             basename = image.value.rsplit('\\', 1)[-1].lower()
             if basename in {'windowsterminal.exe', 'openconsole.exe', 'conhost.exe',
                             'cmd.exe', 'powershell.exe', 'pwsh.exe'}:
-                raise SelectionCopyError('UNSUPPORTED_TARGET')
+                raise SelectionCopyError('UNSUPPORTED_TARGET', guard='TERMINAL_POLICY')
             times = [W.FILETIME() for _ in range(4)]
             if not self.kernel.GetProcessTimes(handle, *(C.byref(t) for t in times)):
-                raise SelectionCopyError('TARGET_UNAVAILABLE')
+                raise SelectionCopyError('TARGET_UNAVAILABLE', guard='PROCESS_TIMES_FAILED')
             token = W.HANDLE()
             if not self.advapi.OpenProcessToken(handle, 8, C.byref(token)):
-                raise SelectionCopyError('TARGET_UNAVAILABLE')
+                raise SelectionCopyError('TARGET_UNAVAILABLE', guard='TOKEN_OPEN_FAILED')
             try:
                 elevated, used = W.DWORD(), W.DWORD()
-                if not self.advapi.GetTokenInformation(token, 20, C.byref(elevated), 4, C.byref(used)) or used.value != 4 or elevated.value:
-                    raise SelectionCopyError('TARGET_UNAVAILABLE')
+                if not self.advapi.GetTokenInformation(token, 20, C.byref(elevated), 4, C.byref(used)):
+                    raise SelectionCopyError('TARGET_UNAVAILABLE', guard='TOKEN_QUERY_FAILED')
+                if used.value != 4:
+                    raise SelectionCopyError('TARGET_UNAVAILABLE', guard='TOKEN_SIZE_INVALID')
+                if elevated.value:
+                    raise SelectionCopyError('TARGET_UNAVAILABLE', guard='ELEVATED_POLICY')
             finally:
                 if not self.kernel.CloseHandle(token):
-                    raise SelectionCopyError('CLEANUP_FAILED')
+                    raise SelectionCopyError('CLEANUP_FAILED', guard='TOKEN_CLOSE_FAILED')
             return handle
         except BaseException:
             if not self.kernel.CloseHandle(handle):
-                raise SelectionCopyError('CLEANUP_FAILED') from None
+                raise SelectionCopyError('CLEANUP_FAILED', guard='REJECTED_HANDLE_CLOSE_FAILED') from None
             raise
 
     def live(self, handle):
@@ -178,7 +189,7 @@ class WindowsSelectionAPI:
 
     def unpin(self, handle):
         if not self.kernel.CloseHandle(handle):
-            raise SelectionCopyError('CLEANUP_FAILED')
+            raise SelectionCopyError('CLEANUP_FAILED', guard='HANDLE_CLOSE_FAILED')
 
     @staticmethod
     def _key(vk, up=False):
@@ -236,7 +247,7 @@ class WindowsSelectionAPI:
                 raise SelectionCopyError('CLEANUP_FAILED')
 
 
-def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.sleep):
+def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.sleep, on_release=None, on_release_wait=None):
     """One copy only; sequence change plus target/owner checks, never old text."""
     handle = api.pin(target)
     try:
@@ -246,11 +257,15 @@ def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.s
             if not api.live(handle) or api.foreground() != target:
                 raise SelectionCopyError('TARGET_CHANGED')
         release_deadline = clock() + 1.5
+        if on_release_wait is not None:
+            on_release_wait()  # Diagnostic observation only; no admission decision.
         while api.keys_down():
             check()
             if clock() >= release_deadline:
                 raise SelectionCopyError('RELEASE_TIMEOUT')
             sleep(.015)
+        if on_release is not None:
+            on_release()  # Preserve this press's observed release for the coordinator.
         check()
         before = api.sequence()
         if not before:

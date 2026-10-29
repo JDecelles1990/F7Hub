@@ -18,6 +18,15 @@ class FakeHotkeyAPI(FakeAPI):
         super().__init__()
         self.registrations = self.unregistrations = 0
         self.registration_ok = self.cleanup_ok = True
+        self.paste_registration_ok = True
+        self.paste_registrations = self.paste_unregistrations = 0
+    def register_paste(self):
+        self.paste_registrations += 1
+        return self.registration_ok and self.paste_registration_ok
+    def unregister_paste(self):
+        self.paste_unregistrations += 1
+        return self.cleanup_ok
+    def paste_keys_down(self): return self.held
     def register(self):
         self.registrations += 1
         return self.registration_ok
