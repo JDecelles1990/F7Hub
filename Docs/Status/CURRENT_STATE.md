@@ -1,5 +1,259 @@
 # F7Hub Current State
 
+<a id="python-paste-latest-current-state"></a>
+
+## Python Paste Latest — accepted feature candidate; integration pending (2026-10-29)
+
+**Win+Alt+C is integrated through [PR #119](https://github.com/JDecelles1990/F7Hub/pull/119).
+Win+Alt+V is implemented and functionally accepted in the isolated feature
+worktree; it is not available on main through this candidate.** Worktree:
+C:\Dev\F7Hub-Clipboard-PythonPasteLatest-20261028; branch:
+feature/clipboard-python-paste-latest; base/HEAD:
+2a659f351df764ddf7681781b2b647665ffb1035. The worktree remains unstaged and
+uncommitted. Candidate integration is **PENDING**; a feature commit, push,
+Draft PR and GitHub merge have **NOT BEEN PERFORMED**.
+
+| Evidence / gate | Current result and provenance |
+| --- | --- |
+| Final independent code-review disposition | **APPROVED WITH NOTES**; final targeted write-cleanup review after the preceding source/correction reviews |
+| Physical Test A — actual text insertion | **USER-REPORTED PHYSICAL PASS** |
+| Physical Test B — Windows Clipboard independence | **USER-REPORTED PHYSICAL PASS** |
+| Physical Test C — held-key duplicate prevention | **USER-REPORTED PHYSICAL PASS** |
+| No stale-history fallback | **USER-REPORTED PHYSICAL PASS** |
+| Existing Win+Alt+C, F7, Alt+F7 and Exit compatibility | **USER-REPORTED PHYSICAL PASS** |
+| This five-document reconciliation | **READY FOR FOCUSED DOCUMENTATION REVIEW**; it is not additional code-review approval or integration authority |
+
+The physical results are the user's reported outcomes. No execution timestamps,
+screenshots, process-exit result or unreported sub-observations are inferred.
+Earlier FAIL, CHANGES REQUIRED and NOT RUN records remain historical evidence.
+The accepted 19-path candidate before this documentation delta was bound to
+aggregate 1ac5b58ce9420e45a1211d211a776635b22950c80f24cc5c68a7b1ecb6fd0091;
+the new documentation manifest must preserve all production/test identities.
+
+The [1B current contract](../Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#python-paste-latest-current)
+owns Python/ClipboardService responsibilities. The
+[Python owner](../13_PythonArchitecture.md#python-paste-latest-accepted-candidate)
+describes post-close verification, native cleanup and the observed-state,
+non-atomic Windows paste limits. The existing
+[GUI shortcut registry](../05_GUI.md#gui-registry-shortcuts) records the single
+Win+Alt+V action. Functional evidence is retained externally under
+%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Python-Paste-Latest/, notably
+final-independent-review-20261029T033628Z and
+write-cleanup-physical-retest-20261029T034801Z. The latest physical PASS reports
+come from the user's controlled-integration/documentation requests.
+
+**Historical checkpoint boundary:** the earlier Paste Latest sections dated
+2026-10-28 below preserve their original status and outcomes. Their uses of
+"Current disposition", review pending, physical NOT RUN or blocked describe
+those earlier checkpoints and are superseded for current status by this section.
+
+## Paste Latest exceptional readback cleanup - ready for targeted rereview (2026-10-28)
+
+The latest independent outcome-propagation rereview returned CHANGES REQUIRED
+for a raised read-lock CloseClipboard followed by target cleanup failure falsely
+reporting UNCHANGED after the authorized write. The post-close verifier now
+normalizes that exception into CLEANUP_FAILED / WRITTEN / NOT_SENT and retains
+the original close exception as cause. Target cleanup preserves this typed
+outcome and causal chain. False-close rejection and one close attempt remain.
+Only the native effect source, its focused test module and affected owner docs
+changed; no service, coordinator, Win+Alt+C, schema, AHK or IPC change.
+
+Regression-first: FAIL 1/1, exit 1. Corrected native writer/exception checks:
+PASS 59/59; affected diagnostic/GUI checks: PASS 31/31; both exit 0, zero
+failures/errors/skips. These are author synthetic checks on Windows with
+offscreen Qt and isolated SQLite, without real Clipboard writes or input.
+Previous failures and review dispositions remain historical; earlier sections
+retain their snapshot status. The existing Python heading links resolve through
+an explicit compatibility anchor in the Python owner.
+
+Current disposition: EXCEPTIONAL_CLEANUP_CORRECTED_READY_FOR_REREVIEW.
+Independent targeted rereview is required; physical insertion is NOT RUN.
+Candidate remains unstaged/uncommitted; no push, PR or merge.
+Evidence: external Python-Paste-Latest/20261028T235514Z-post-close-verification/
+exceptional-cleanup-correction-20261029T030411Z.
+
+## Paste Latest outcome propagation correction - ready for targeted rereview (2026-10-28)
+
+The prior post-close candidate received independent CHANGES REQUIRED for a
+combined verification and target-cleanup failure reporting UNCHANGED after an
+authorized write. The Python owner now propagates the existing PasteEffectError
+Clipboard and dispatch outcomes before cleanup and retains the first fixed-code
+error as safe cause when cleanup fails. No policy, coordinator, Win+Alt+C,
+schema, AHK or IPC change was made. Regression-first FAIL 1/1 is preserved;
+fresh focused synthetic validation PASS 76/76, exit 0, zero failures/errors/
+skips, and a separate combined-failure probe PASSed with WRITTEN / NOT_SENT.
+The superseded review records and user-reported physical failure remain intact.
+Current disposition: OUTCOME_PROPAGATION_CORRECTED_READY_FOR_REREVIEW.
+Independent targeted rereview and user-owned Notepad insertion are NOT RUN.
+No staging, commit, push, PR or merge. Evidence: external
+Python-Paste-Latest/20261028T235514Z-post-close-verification/
+outcome-propagation-correction-20261028.
+
+## Post-close Paste Latest correction — pre-rereview snapshot (2026-10-28)
+
+The [Python owner](../13_PythonArchitecture.md#post-close-paste-latest-verification-correction--candidate-2026-10-28)
+describes verified post-close exact Unicode/privacy-marker/owner checks before
+establishing a stable dispatch baseline. Source policy, service, coordinator and
+Win+Alt+C remain unchanged. There is no operation-specific marker; identical
+same-owner semantic state cannot establish producer identity. Existing non-atomic
+Windows limits remain explicit. Pre-fix FAIL 1/1 and the initial focused fixture
+FAIL are preserved; corrected affected runs PASS 21 and 27 (overlapping), exit 0,
+zero skips, with unchanged selected checks carried by a source-bound audit.
+Independent targeted rereview and normal physical insertion were NOT RUN at this snapshot;
+no integration. Evidence: Python-Paste-Latest/20261028T235514Z-post-close-verification.
+
+## Native Clipboard sequence diagnostic — development candidate (2026-10-28)
+
+Added the explicitly enabled, one-attempt S1/S2/S3 diagnostic described in
+[Python architecture](../13_PythonArchitecture.md#native-clipboard-sequence-diagnostic--development-candidate-2026-10-28).
+It reuses normal consent/source authorization and the actual writer, preserves
+rejection, and always stops before Ctrl+V. No normal-mode correction was made.
+Initial focused checks PASS 125/125; final affected diagnostic checks PASS 21/21
+after a reporting-only refinement. Both exit 0, zero skips; overlapping counts.
+The physical sequence diagnostic is NOT RUN / USER OWNED; Test A's original
+CLIPBOARD_CHANGED failure and stopped B/C remain preserved. Integration blocked.
+External manifest/results/handoff: Python-Paste-Latest/20261028T232238Z-native-sequence-diagnostic.
+
+## C-to-V physical release regression — BLOCKED (2026-10-28)
+
+Disposition `RELEASE_REGRESSION_BLOCKED`. The user reports that candidate
+20db710ddec0089c8408db82e6feaa0bc20ab08f1046d48826023997a3c89e7b
+still returned ADMISSION_RELEASE_REQUIRED after a successful C capture. The
+previous 119 synthetic PASS results did not establish physical resolution.
+Prior readiness below is historical and superseded by this failure.
+
+Fresh import-only provenance matches the expected interpreter, checkout and
+release-callback code; process metadata shows one matching runtime family
+(the Windows venv launcher and its child). Past live imported module state is
+NOT VERIFIED. No new failing production transition was reproduced, so no
+additional state-machine workaround was made. Exact physical latch/event
+states and first divergence remain NOT VERIFIED.
+
+Necessary diagnostic instrumentation now retains one bounded C state record
+in RAM and reports fixed state flags with V results, distinguishing an
+unsignaled release, a signaled/unreconciled event, another pending operation,
+completed worker awaiting drain, and sampled key state. A same-process launcher
+pins imports and verifies loaded code against the manifest before application
+startup. It writes content-free provenance metadata only; release state stays
+in RAM. No Clipboard/input effect is added to diagnostic V.
+
+FRESH WINDOWS_NATIVE / SYNTHETIC offscreen evidence: 111 focused tests PASS,
+zero skips, exit 0, including timing permutations and consecutive C/V cycles.
+This is diagnostic/invariant validation, not a reproduced fix or physical PASS.
+New diagnostic physical execution is NOT RUN / USER OWNED. General paste and
+integration remain blocked. External checkpoint:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Python-Paste-Latest/20261028T220103Z-release-regression`.
+
+## ADMISSION_RELEASE_REQUIRED correction — awaiting diagnostic retest (2026-10-28)
+
+Disposition: `ADMISSION_RELEASE_CORRECTED_READY_FOR_RETEST`. General Paste
+Latest remains CHANGES_REQUIRED; this is not review approval or physical paste
+acceptance. User evidence against the previous diagnostic candidate: V after
+C returned ADMISSION_RELEASE_REQUIRED, while V alone returned
+TARGET_VALIDATED_AFTER_RELEASE, with Clipboard UNCHANGED, Ctrl+V NOT_SENT and
+authorization NOT_REQUESTED. Exact physical timings were not supplied.
+
+Confirmed synthetic defect: C worker observes full release between GUI timer
+samples; V is down when the next GUI sample drains C completion, leaving the
+old shared latch true. The correction preserves a per-press worker release
+observation and reconciles it in poll/admission. Each accepted press reserves a
+fresh Event; busy, actual-release and duplicate guards remain. No change to
+target policy, authorization, source/consent/privacy rules or native effects.
+
+FRESH author WINDOWS_NATIVE / SYNTHETIC offscreen evidence: pre-fix regression
+FAIL 1/1 preserved; after relevant source correction, 119 focused checks PASS,
+zero skips, exit 0. This covers both action orders, held repeats, new cycles,
+cancellation/start failures/Exit, diagnostic no-effects, target policy and
+existing authorization/latest-source fences. No automated native input or
+physical retest. External checkpoint:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Python-Paste-Latest/20261028T214052Z-release-correction`.
+Next is one diagnostic V press after a user C capture in the isolated launcher;
+normal paste physical testing follows only if target diagnosis succeeds. Prior
+TARGET_UNAVAILABLE and original 4 PASS / 4 FAIL physical evidence remain open.
+No staging, commit, push, PR or merge authority.
+
+## Win+Alt+V target diagnostic — prepared for one physical test (2026-10-28)
+
+Disposition: `TARGET_DIAGNOSTIC_READY_FOR_PHYSICAL_TEST` for the bounded
+development diagnostic only. General Paste Latest remains CHANGES_REQUIRED
+with the original user-reported physical 4 PASS / 4 FAIL preserved below.
+The exact rejecting guard from the failed press remains NOT VERIFIED.
+
+Source-checkout opt-in `F7HUB_DEV_PASTE_TARGET_DIAGNOSTIC=1` routes the same
+Win+Alt+V event, foreground binding and worker through the existing target pin
+and modifier-release checks. It reports fixed allowlisted branch/phase codes
+and stops before service authorization, history retrieval, Windows Clipboard
+access or Ctrl+V. Status contains no target identifiers, process details,
+window titles, Clipboard text or tokens and is not persisted. Normal target
+policy and Win+Alt+C behavior are preserved; no workaround is implemented.
+
+FRESH author `WINDOWS_NATIVE / SYNTHETIC` offscreen checks: 90/90 PASS; after
+adding two composed Qt/native-mock cases, 26/26 diagnostic checks PASS, zero
+skips (overlapping suites). No automated real keyboard injection, native
+physical press or general paste acceptance was run. A separate external
+checkpoint provides a manifest-verified launcher using a new isolated acceptance
+database and a single user-owned diagnostic procedure. Stop after that result;
+no automatic retry. Candidate remains unstaged/uncommitted, without approval
+or integration authority. Source and exact evidence are in the diagnostic
+checkpoint under `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Python-Paste-Latest/20261028T211933Z-target-diagnostic`.
+
+## Python Win+Alt+V Paste Latest — physical acceptance failed; changes required (2026-10-28)
+
+User-approved Python implementation is present in isolated worktree
+`C:\Dev\F7Hub-Clipboard-PythonPasteLatest-20261028`, branch
+`feature/clipboard-python-paste-latest`, base/HEAD
+`2a659f351df764ddf7681781b2b647665ffb1035` (merged PR #119).
+Canonical checkout was safely fast-forwarded from PR #118 with external
+before/after preservation checks; all pre-existing local state was preserved.
+The candidate remains unstaged/uncommitted; no PR or integration is authorized.
+
+Current [1B](../Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#python-paste-latest-current)
+resolves Paste Latest ownership and supersedes historical AHK/Ctrl+Alt+V
+recommendations for this operation. Existing append-head prepare/consume APIs
+supply consent/privacy/source/replay authority. One Python worker owns capture
+or paste, requires key release, binds/rechecks the original target and effects
+one Clipboard write plus one Ctrl+V dispatch. Any unsaved/unavailable latest
+session capture prevents fallback to an older saved Item. Output status is
+content-free and distinguishes Clipboard mutation from dispatch. No AHK/IPC,
+monitoring, migration, Quick Picker, GUI Registry or 1A/1C edits.
+
+FRESH author validation on Windows with synthetic native effects / offscreen Qt:
+**48/48 focused PASS**, exit 0; **193/193 affected regression PASS**, exit 0;
+zero skips. After a narrow safe-feedback self-review correction, **45/45 affected
+GUI/flow checks PASS**, exit 0, zero skips. These overlap and must not be added.
+Unchanged service/gateway/database/lifecycle regression inputs are hash-compared
+in the external applicability record. Regression includes a real
+bootstrapped F7Hub owner/service with fake Clipboard/input and isolated SQLite;
+source/consent/replay races, capture compatibility, lifecycle and integrity checks.
+Isolated integrity_check=ok; foreign_key_check=zero violations. Full regression
+and unrelated native campaigns NOT RUN.
+
+The first run remains FAIL: default interpreter lacked PySide6 and an expiry
+fixture violated a CHECK. The existing project venv and valid synthetic clock
+advance corrected those causes before the successful run. Native-01 remains
+**FAIL (2/2)**: Win+Alt+C registration collision prevented native routing checks.
+After the user closed the conflicting applications, a fresh process inventory
+found no matching runtime processes; native-02 **2/2 PASS**, exit 0. Following
+the feedback correction, native-final **2/2 PASS**, exit 0, zero skips, on final
+Python inputs. Those checks register both real hotkeys, route posted WM_HOTKEY
+through Qt and unregister/re-register; no real Clipboard read/write or keyboard
+injection. This is native registration evidence, not actual paste acceptance.
+Physical Win+Alt+V Notepad acceptance is now **USER-REPORTED PHYSICAL FAIL**: four checks PASS and four FAIL. The first failed paste reported `TARGET_UNAVAILABLE`, `Clipboard: UNCHANGED`, and `Ctrl+V: NOT_SENT` while Notepad B was visibly active. The exact symptoms of the other three failed checks were not supplied; they may depend on the first failure. A read-only native pin against the currently running Notepad process passed from both main and worker threads, so the failing target gate within the original press remains **NOT VERIFIED**. No product correction or native physical retest has occurred. The original acceptance placeholder and author test reports remain preserved in the external checkpoint.
+
+External evidence, test-impact matrix, failed/successful logs, candidate manifest,
+implementation report and independent-review handoff are under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Python-Paste-Latest/20261028T175234Z`.
+Disposition: `PASTE_LATEST_BLOCKED` / `CHANGES_REQUIRED`. The original candidate aggregate `b01a0787604f122ad62bb0e090e416c164636178ab0bb92d7cdbe475f06b5835` remains historical author evidence; it is not ready for independent review or integration. The user-reported physical failure and this status correction require a new manifest. No staging, commit, PR or integration is authorized.
+
+## Win+Alt+C integration and physical acceptance reconciliation (2026-10-28)
+
+Current FACT: PR #119 is merged at the baseline above and live GitHub main was
+verified at that SHA. Current user evidence: **USER-REPORTED PHYSICAL PASS 8/8**
+for Python Win+Alt+C. No timestamps or individual observations were supplied here.
+The earlier candidate section below is preserved as HISTORICAL author evidence;
+its not-integrated / physical-pending statements describe that earlier point.
+They do not negate current integration or user-reported acceptance.
+
 ## Python Win+Alt+C active selection capture — candidate (2026-10-28)
 
 **Contract correction: PASS.** Python ownership is explicitly USER APPROVED in

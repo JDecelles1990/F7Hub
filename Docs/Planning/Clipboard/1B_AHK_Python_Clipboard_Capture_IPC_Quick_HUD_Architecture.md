@@ -4,9 +4,11 @@
 
 ## Current user-approved contract: Win+Alt+C — Python-Owned Active Selection Capture (2026-10-28)
 
-**APPROVED architectural decision; implementation candidate, not integrated.**
+**APPROVED architectural decision; integrated through merged PR #119.**
 The user's mandatory correction replaces conflicting earlier recommendations for
 `clipboard.capture_selection`. This section is authoritative for this action.
+Historical acceptance: USER-REPORTED PHYSICAL PASS 8/8, supplied in this paste
+implementation request; no new physical timestamps or sub-observations inferred.
 Python owns the global Win+Alt+C registration, binds the foreground target,
 waits for physical Win/Alt/C and other modifiers to release, sends one controlled
 Ctrl+C, and obtains only newly copied highlighted plain Unicode text. A fresh
@@ -15,13 +17,15 @@ previously copied content is never a fallback. AHK neither owns nor dispatches
 this action. No AHK/Python IPC is necessary for this in-process operation.
 ClipboardService owns consent, privacy, authorization and persistence. The existing
 F7Hub application lifecycle owns startup, registration and cleanup. No automatic
-monitoring, second application, tray owner, SQLite migration or paste action.
+monitoring, second application, tray owner or SQLite migration. Paste Latest has
+its own current contract below.
 
 | Action | Current owner and behavior | Binding |
 | --- | --- | --- |
 | `clipboard.capture_selection` | Python in the running F7Hub process; controlled Ctrl+C then fresh, stable, eligible Unicode capture | Win+Alt+C |
 | `clipboard.capture_current` | Separate explicitly invoked existing-Clipboard operation; no simulated Ctrl+C; existing unimplemented native/IPC prerequisites remain | No new global binding |
-| Paste, picker and other IPC workflows | Existing owning contracts, including AHK/native and H01-C authentication where IPC is used | Unchanged |
+| `clipboard.paste_latest` | Python in-process; latest eligible persisted F7Hub capture, one authorized Clipboard write and Ctrl+V | Win+Alt+V |
+| Picker, explicitly armed Active Paste and other IPC workflows | Separate future contracts; their AHK/H01-C requirements do not apply to Python Paste Latest | No additional binding |
 
 ### Supersession map
 
@@ -60,6 +64,110 @@ ownership. Native compatibility, delayed-render behavior and physical acceptance
 must be reported independently from synthetic checks. Windows may refuse input
 into higher-integrity applications; no elevation or focus-stealing fallback.
 
+
+<a id="python-paste-latest-current"></a>
+
+## Current user-approved contract: Win+Alt+V — Python Paste Latest (2026-10-28)
+
+**Current status reconciled 2026-10-29: USER APPROVED architecture;
+Win+Alt+V implemented in the isolated feature worktree; final independent
+code-review disposition APPROVED WITH NOTES; physical A/B/C, stale-history
+rejection and compatibility USER-REPORTED PHYSICAL PASS; integration PENDING.**
+Win+Alt+C is already integrated through PR #119. Win+Alt+V is still unstaged
+and uncommitted, with no candidate PR or merge performed. The
+[current-state record](../../Status/CURRENT_STATE.md#python-paste-latest-current-state)
+owns current delivery/evidence details. This documentation delta awaits focused
+review and does not change the approved architecture.
+
+Python/Qt owns the shared native-event coordinator; the native Windows gateways
+perform selection acquisition and paste effects. ClipboardService owns consent,
+privacy, source authorization, persistence and one-use delivery policy.
+Ordinary Windows Clipboard contents do not select the F7Hub source, and this
+operation does not integrate Windows Clipboard history. AHK retains its
+separate existing shared-host, launch/focus and Guide responsibilities; no new
+AHK/Python IPC is required for these Python-owned actions.
+
+### Historical initial implementation status (2026-10-28)
+
+The following status predates the final correction review and user acceptance;
+it is retained as a checkpoint record:
+
+**USER APPROVED direction; implementation candidate, independent review pending.**
+
+### Accepted architecture (unchanged)
+
+Python owns `clipboard.paste_latest` in the running F7Hub process, using the
+existing Qt native-event/lifecycle owner shared with Win+Alt+C. This decision
+supersedes every historical AHK-owned / Ctrl+Alt+V recommendation **for Paste
+Latest**, including the Phase 1 successor's generic native-paste ownership.
+It introduces no AHK code or AHK/Python IPC. Explicitly armed `paste_active`,
+the Quick Picker and capture-current remain separate future operations; their
+contracts neither activate them nor govern this in-process operation.
+
+Reuse ClipboardService.prepare_latest_paste / consume_latest_paste, the exact
+append head, current consent, privacy assessment, revision/expiry and one-use
+replay fences. Bind the original foreground window and retained process before
+preparation. Reject unavailable, elevated, terminal/command targets, changed
+focus or process death; never steal focus, elevate or redirect delivery. Share
+one outstanding capture/paste worker and require physical release to rearm.
+Prepare, wait for Win/Alt/V and modifiers to release, then consume immediately
+before writing, so held keys cannot spend the one-second effect lease. Recheck
+target, lease, modifiers and Clipboard ownership/sequence before one Ctrl+V.
+No automatic operation on startup/recovery; no raw-text logging or hidden cache.
+
+**Latest-capture rule:** accepting any Win+Alt+C attempt blocks Paste Latest
+until that attempt is confirmed persisted and bound to its exact append head.
+Transient, rejected, cancelled, failed or uncertain capture never falls back to
+an older Item. A successful later persisted capture can re-enable paste. This
+is process-local, content-free safety state, not new storage or session-only
+paste. Before any capture attempt in a new process, existing authorized persisted
+append-head eligibility still applies. Missing/deleted/expired/stale/sensitive or
+unauthorized sources fail visibly without any fallback. Row selection does not
+choose the source.
+
+Authorized text remains on the normal Windows Clipboard after the operation.
+Never restore older contents or rewrite after a newer user Clipboard change.
+Distinguish unchanged, possibly changed and successfully written Clipboard state
+from Ctrl+V dispatch (which is not proof of insertion). Partial input failure is
+uncertain, never retried automatically. Cleanup failure disables both operations;
+Exit cancels and waits for the existing worker to drain, then unregisters both
+owned hotkeys. In-process Windows calls have no externally enforceable hard
+termination deadline. Focus/sequence checks detect observed races, not an atomic
+OS compare-and-paste guarantee.
+
+### Historical initial validation snapshot (2026-10-28)
+
+The following status and results describe the earlier implementation checkpoint,
+before the final review and user acceptance recorded above. They remain
+historical evidence, not fresh validation:
+
+Actual Notepad paste acceptance is user-owned and NOT RUN.
+Author synthetic validation: 48 focused PASS and 193 affected-regression PASS,
+then 45 affected checks PASS after a narrow feedback correction (overlapping
+counts). Final native registration / posted Qt dispatch / unregister: 2 PASS,
+without real Clipboard/input effects. Native-01 remains FAIL due to a collision;
+after the user closed conflicting applications, corrected-environment checks
+passed. Physical paste and independent review remain pending; no integration.
+
+### Historical post-close correction checkpoint (2026-10-28)
+
+The current verification and cleanup mechanics are reconciled in the
+[Python owner](../../13_PythonArchitecture.md#python-paste-latest-accepted-candidate).
+The following then-pending record is preserved:
+
+Post-close verification correction candidate: the existing writer verifies the
+exact authorized Unicode text, existing privacy markers, expected HWND/process
+and a stable post-close sequence under one read lock before returning a dispatch
+baseline. No marker proves operation provenance; identical same-owner semantic
+state remains indistinguishable. Detected changes and mismatches still reject.
+The [Python owner](../../13_PythonArchitecture.md#post-close-paste-latest-verification-correction--candidate-2026-10-28)
+owns mechanics and evidence. Independent targeted rereview and normal physical
+acceptance remain pending; no ownership, consent or IPC contract is replaced.
+
+Historical provisions below retain their original scope. In particular, the
+`Active paste authorization and native effect` section describes the separate
+armed-item workflow, not the source selection, binding or owner of Paste Latest.
+No 1A/1C, consent, privacy, Item/Event, schema or released IPC requirement changes.
 
 ## RAM-00 successor — owner-approved direction (2026-10-25)
 
@@ -4438,14 +4546,16 @@ shortcut reassignment or assumed third production binding.
 | --- | --- | --- |
 | clipboard.capture_selection | CURRENT EXCEPTION: Python-controlled Ctrl+C then fresh eligible text; see current user-approved contract | Win+Alt+C |
 | clipboard.capture_current | CAPTURE_CURRENT_CLIPBOARD: bounded read of existing Windows Clipboard, no Ctrl+C synthesis | Explicit future UI action; no new global binding selected by CP-00 |
-| clipboard.paste_active | Exact explicitly armed Item/revision; Python authorizes full text, AHK writes it to normal Windows Clipboard and requests native Ctrl+V | Ctrl+Alt+V |
+| clipboard.paste_latest | CURRENT EXCEPTION: Python in-process latest eligible persisted capture; see current contract | Win+Alt+V |
+| clipboard.paste_active | Separate future explicitly armed Item/revision workflow; historical AHK recommendation does not apply to Paste Latest | No production binding in this slice |
 
 These are future action semantics and desired defaults, not registered hotkeys
 or implemented capabilities. Native Ctrl+C/Ctrl+V outside an explicitly invoked
 eligible F7Hub action remain ordinary application behavior. No Ctrl+C hook or
 global Office exclusion is introduced by this plan.
 
-Except for Python-owned Win+Alt+C selection capture (current decision above),
+Except for Python-owned Win+Alt+C selection capture and Win+Alt+V Paste Latest
+(current decisions above),
 AHK v2 owns shortcuts, cheap foreground awareness, bounded native copy/paste,
 Windows Clipboard acquisition/write and transient Windows context. It stays a
 narrow adapter in the existing shared host, with contained worker mechanics
@@ -4556,6 +4666,10 @@ eligible immutable snapshot is accepted, transport retry retains original
 operation/message/source/mode; it cannot recopy or capture a later Clipboard.
 
 ## Active paste authorization and native effect
+
+This section owns the separate future explicitly armed-item operation. Its AHK
+delivery recommendation is superseded for Python Paste Latest by the current
+contract above; shared privacy, one-use and truthful-outcome safeguards remain.
 
 USER DECISION: Set for Paste explicitly arms an exact Item/revision in the
 current F7Hub application session; row selection does not arm. Python owns the
@@ -4678,9 +4792,10 @@ database, service, protocol, Settings store or resident bridge is introduced.
 
 | Intent | Approved effect | Availability at this baseline |
 | --- | --- | --- |
-| `clipboard.capture_selection` | CURRENT: Python-owned Win+Alt+C; one controlled native Ctrl+C, fresh eligible Unicode, 1A admission | USER_APPROVED; isolated in-process implementation candidate, physical acceptance pending |
+| `clipboard.capture_selection` | CURRENT: Python-owned Win+Alt+C; one controlled native Ctrl+C, fresh eligible Unicode, 1A admission | INTEGRATED PR #119; historical USER-REPORTED PHYSICAL PASS 8/8 |
 | `clipboard.capture_current` | Explicit fresh read of existing Windows Clipboard; no Ctrl+C; separate 1A capture admission | APPROVED_NOT_IMPLEMENTED; no extra global binding selected |
-| `clipboard.paste_active` | Explicit future Ctrl+Alt+V; exact armed Item/revision, Python authorization, AHK write then one native Ctrl+V | APPROVED_NOT_IMPLEMENTED; no production binding |
+| `clipboard.paste_latest` | Current Python-owned Win+Alt+V; exact eligible persisted append head, service authorization and controlled Ctrl+V | Implementation candidate; see current contract |
+| `clipboard.paste_active` | Separate future armed Item/revision workflow; historical Ctrl+Alt+V/AHK recommendation does not govern Paste Latest | APPROVED_NOT_IMPLEMENTED; no production binding |
 | Explicit outbound full Item / normalized / Entity-value copy | Typed intent → Python resolution/approved transform/revalidation/authorization → authenticated bridge → AHK writes supplied text unchanged | APPROVED_NOT_IMPLEMENTED; unavailable without bridge, no Qt fallback |
 | Proposed Windows view opening / Refresh | One privacy-admitted current snapshot for viewing only; no capture admission or persistence | PROPOSED_REQUIRES_APPROVAL; native prerequisites missing |
 | Ordinary Ctrl+C within a standard text widget | Native copy of manually selected displayed text under presentation privacy rules | Existing narrow editing behavior; does not invoke a Clipboard-domain action |
