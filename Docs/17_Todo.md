@@ -1,5 +1,19 @@
 # F7Hub Todo
 
+## CP02-S4 — candidate gates (2026-10-29)
+
+- [x] Verify merged Source App baseline and preserve canonical/worktree state.
+- [x] Implement bounded checkbox selection, full-text authorization and existing-writer delivery in the isolated CP02-S4 worktree.
+- [x] Execute focused unit/database/service/GUI/integration and real Windows Clipboard/Qt paste checks; preserve original failed attempts and corrections.
+- [x] Synchronize affected documentation and prepare an external reproducible candidate manifest and review handoff.
+- [ ] Independent read-only review of the exact manifest-bound candidate.
+- [ ] Physical user keyboard/Ctrl+V acceptance; distinguish it from native QTest input.
+- [ ] Separately authorize any commit, push, PR or merge.
+
+[CURRENT_STATE](Status/CURRENT_STATE.md#cp02-s4-current-state) owns delivery evidence.
+No later slice is started by this checklist. Prior dated candidate records retain
+their historical meaning.
+
 ## CP02-S3 — bounded Source App Provenance (2026-10-29)
 
 - [x] Implement optional Event basename, original-target acquisition, preference/consent fences and latest-Event Recent projection.

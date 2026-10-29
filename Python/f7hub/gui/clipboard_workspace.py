@@ -1,12 +1,14 @@
 """Bounded read-only Recent presentation using Clipboard owner projections."""
 
-from PySide6.QtCore import QAbstractTableModel, QEvent, QModelIndex, QSignalBlocker, Qt
+from PySide6.QtCore import QAbstractTableModel, QEvent, QModelIndex, QSignalBlocker, Qt, Signal
 from PySide6.QtWidgets import (
     QAbstractItemView, QComboBox, QHeaderView, QHBoxLayout, QLabel, QPushButton, QStackedWidget,
     QTableView, QVBoxLayout, QWidget,
 )
 
-from f7hub.domain.clipboard import ClipboardRecentItem, ClipboardRecentPage
+from f7hub.domain.clipboard import (ClipboardRecentItem, ClipboardRecentPage,
+    ClipboardCopyItem, ClipboardCopyError, COPY_MAX_ITEMS)
+from f7hub.infrastructure.windows_selected_copy import write_selected_text
 from f7hub.gui.service_task_runner import ServiceTaskRunner
 from f7hub.services.clipboard_service import ClipboardService
 from f7hub.gui.clipboard_setup import ClipboardSetup
@@ -14,18 +16,78 @@ from f7hub.services.settings_service import SettingsService
 
 
 class ClipboardRecentTableModel(QAbstractTableModel):
-    """Present immutable safe rows; no owner reads, edits or selection contract."""
+    """Safe immutable rows plus transient check state; no full text or SQL."""
 
-    HEADERS = ("Time", "Preview", "Source App", "Retention", "Pinned")
+    selection_changed = Signal()
+
+    HEADERS = ("Time", "Preview", "Source App", "Retention", "Pinned", "Select")
+    CHECK_COLUMN = 5
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._rows: tuple[ClipboardRecentItem, ...] = ()
+        self._checked: set[ClipboardCopyItem] = set()
+        self._checking_enabled = True
 
     def replace_rows(self, rows: tuple[ClipboardRecentItem, ...]) -> None:
         self.beginResetModel()
         self._rows = rows
+        self._checked.clear()
         self.endResetModel()
+        self.selection_changed.emit()
+
+    def selected_items(self):
+        return tuple(ClipboardCopyItem(row.item_ref, row.revision) for row in self._rows
+                     if ClipboardCopyItem(row.item_ref, row.revision) in self._checked)
+
+    def clear_checks(self):
+        if self._checked:
+            self._checked.clear()
+            self._checks_changed()
+
+    def select_all_visible(self):
+        if not self._checking_enabled or len(self._rows) > COPY_MAX_ITEMS:
+            return
+        self._checked = {ClipboardCopyItem(row.item_ref, row.revision) for row in self._rows}
+        self._checks_changed()
+
+    def set_checking_enabled(self, enabled):
+        if self._checking_enabled != enabled:
+            self._checking_enabled = enabled
+            self._checks_changed()
+
+    def _checks_changed(self):
+        if self._rows:
+            self.dataChanged.emit(self.index(0, self.CHECK_COLUMN),
+                                  self.index(len(self._rows) - 1, self.CHECK_COLUMN),
+                                  [Qt.ItemDataRole.CheckStateRole, Qt.ItemDataRole.AccessibleTextRole])
+        self.selection_changed.emit()
+
+    def flags(self, index):
+        flags = super().flags(index)
+        if index.isValid() and index.column() == self.CHECK_COLUMN:
+            flags = Qt.ItemFlag.ItemIsUserCheckable
+            if self._checking_enabled:
+                flags |= Qt.ItemFlag.ItemIsEnabled
+        return flags
+
+    def setData(self, index, value, role=Qt.ItemDataRole.EditRole):
+        if (not self._checking_enabled or not index.isValid()
+                or index.column() != self.CHECK_COLUMN or not 0 <= index.row() < len(self._rows)
+                or role != Qt.ItemDataRole.CheckStateRole
+                or value not in (Qt.CheckState.Checked, Qt.CheckState.Unchecked,
+                                 Qt.CheckState.Checked.value, Qt.CheckState.Unchecked.value)):
+            return False
+        row = self._rows[index.row()]
+        item = ClipboardCopyItem(row.item_ref, row.revision)
+        if value in (Qt.CheckState.Checked, Qt.CheckState.Checked.value):
+            if item not in self._checked and len(self._checked) >= COPY_MAX_ITEMS:
+                return False
+            self._checked.add(item)
+        else:
+            self._checked.discard(item)
+        self._checks_changed()
+        return True
 
     def rowCount(self, parent=QModelIndex()):
         return 0 if parent.isValid() else len(self._rows)
@@ -41,6 +103,14 @@ class ClipboardRecentTableModel(QAbstractTableModel):
         return None
 
     def data(self, index, role=Qt.ItemDataRole.DisplayRole):
+        if index.isValid() and 0 <= index.row() < len(self._rows) and index.column() == self.CHECK_COLUMN:
+            row = self._rows[index.row()]
+            checked = ClipboardCopyItem(row.item_ref, row.revision) in self._checked
+            if role == Qt.ItemDataRole.CheckStateRole:
+                return Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
+            if role == Qt.ItemDataRole.AccessibleTextRole:
+                return f"Select item {index.row() + 1}: {'checked' if checked else 'unchecked'}"
+            return None
         if (not index.isValid() or not 0 <= index.row() < len(self._rows)
                 or not 0 <= index.column() < len(self.HEADERS)
                 or role not in (Qt.ItemDataRole.DisplayRole, Qt.ItemDataRole.AccessibleTextRole)):
@@ -62,10 +132,13 @@ class ClipboardWorkspace(QWidget):
 
     def __init__(self, parent=None, *, clipboard_service: ClipboardService | None = None,
                  settings_service: SettingsService | None = None,
-                 capture_scroll=None, restore_scroll=None) -> None:
+                 capture_scroll=None, restore_scroll=None, copy_delivery=None) -> None:
         super().__init__(parent)
         self._service = clipboard_service
+        self._copy_delivery = copy_delivery or write_selected_text
+        self._copy_pending = False
         self.runner = ServiceTaskRunner(self)
+        self.runner.completion_finished.connect(self._update_selection_controls)
         self._loading = False
         self._started = False
         self._recent_generation = 0
@@ -146,16 +219,41 @@ class ClipboardWorkspace(QWidget):
         self.table = None
         self.model = None
         self.page_message = None
+        self.select_all_button = self.clear_selection_button = self.copy_selected_button = None
+        self.selected_count = None
         if self._service is not None:
             self.refresh_button = QPushButton("Refresh", self)
             self.refresh_button.setObjectName("clipboardRefreshButton")
             self.refresh_button.setAccessibleName("Refresh")
             self.refresh_button.clicked.connect(self.refresh)
             layout.addWidget(self.refresh_button, alignment=Qt.AlignmentFlag.AlignLeft)
+            controls = QHBoxLayout()
+            self.select_all_button = QPushButton("Select All Visible", self)
+            self.clear_selection_button = QPushButton("Clear Selection", self)
+            self.copy_selected_button = QPushButton("Copy Selected (0)", self)
+            self.selected_count = QLabel("0 selected", self)
+            self.selected_count.setTextFormat(Qt.TextFormat.PlainText)
+            for button, name in ((self.select_all_button, "clipboardSelectAllVisibleButton"),
+                                 (self.clear_selection_button, "clipboardClearSelectionButton"),
+                                 (self.copy_selected_button, "clipboardCopySelectedButton")):
+                button.setObjectName(name)
+                button.setAccessibleName(button.text())
+                controls.addWidget(button)
+            self.selected_count.setObjectName("clipboardSelectedCount")
+            controls.addWidget(self.selected_count)
+            controls.addStretch()
+            layout.addLayout(controls)
+            self.copy_selected_button.setAccessibleDescription(
+                "Copy complete selected F7Hub items in displayed order. Maximum 100 items and 65536 UTF-8 bytes. No automatic paste.")
             self.model = ClipboardRecentTableModel(self)
+            self.model.selection_changed.connect(self._update_selection_controls)
+            self.select_all_button.clicked.connect(self.model.select_all_visible)
+            self.clear_selection_button.clicked.connect(self.model.clear_checks)
+            self.copy_selected_button.clicked.connect(self.copy_selected)
             self.table = QTableView(self)
             self.table.setObjectName("clipboardRecentTable")
             self.table.setAccessibleName("Recent Clipboard history")
+            self.table.setAccessibleDescription("Use arrow keys to move. Space toggles the current row checkbox; Tab leaves the table.")
             self.table.setModel(self.model)
             self.table.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
             self.table.setSelectionMode(QAbstractItemView.SelectionMode.NoSelection)
@@ -165,12 +263,14 @@ class ClipboardWorkspace(QWidget):
             self.table.verticalHeader().hide()
             header = self.table.horizontalHeader()
             header.setSectionsClickable(False)
+            header.moveSection(self.model.CHECK_COLUMN, 0)  # Keep checkboxes reachable at compact widths.
             header.setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
             self.table.setColumnWidth(0, 230)
             header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
             self.table.setColumnWidth(2, 170)
             self.table.setColumnWidth(3, 105)
             self.table.setColumnWidth(4, 70)
+            self.table.setColumnWidth(self.model.CHECK_COLUMN, 70)
             layout.addWidget(self.table, 1)
             self.page_message = QLabel(self)
             self.page_message.setTextFormat(Qt.TextFormat.PlainText)
@@ -216,13 +316,26 @@ class ClipboardWorkspace(QWidget):
         elif self.refresh_button is not None:
             QWidget.setTabOrder(self.source_selector, self.refresh_button)
         if self.refresh_button is not None:
-            QWidget.setTabOrder(self.refresh_button, self.table)
+            QWidget.setTabOrder(self.refresh_button, self.select_all_button)
+            QWidget.setTabOrder(self.select_all_button, self.clear_selection_button)
+            QWidget.setTabOrder(self.clear_selection_button, self.copy_selected_button)
+            QWidget.setTabOrder(self.copy_selected_button, self.table)
+        self._update_selection_controls()
 
     @property
     def source_key(self) -> str:
         return self._source_key
 
     def eventFilter(self, watched, event):
+        if (watched is self.table and event.type() == QEvent.Type.KeyPress
+                and event.key() == Qt.Key.Key_Space and event.modifiers() == Qt.KeyboardModifier.NoModifier):
+            if not event.isAutoRepeat() and self.model is not None and self.model.rowCount():
+                current = self.table.currentIndex()
+                index = self.model.index(current.row() if current.isValid() else 0, self.model.CHECK_COLUMN)
+                checked = self.model.data(index, Qt.ItemDataRole.CheckStateRole) == Qt.CheckState.Checked
+                self.model.setData(index, Qt.CheckState.Unchecked if checked else Qt.CheckState.Checked,
+                                   Qt.ItemDataRole.CheckStateRole)
+            return True
         if event.type() == QEvent.Type.FocusIn and isinstance(watched, QWidget):
             if self.f7hub_page.isAncestorOf(watched):
                 self._source_focus["f7hub"] = watched
@@ -261,6 +374,7 @@ class ClipboardWorkspace(QWidget):
         if self._source_key == "f7hub":
             self.leave()
         self._source_key = key
+        self._update_selection_controls()
         self.source_pages.setCurrentWidget(self.f7hub_page if key == "f7hub" else self.windows_page)
         self._sync_source_selector()
         self._source_feedback("")
@@ -307,28 +421,34 @@ class ClipboardWorkspace(QWidget):
     @property
     def loading(self) -> bool:
         # Covers the runner's idle-before-callback interval too.
-        return self._loading or self.runner.busy or self.runner.completing
+        return self._copy_pending or self._loading or self.runner.busy or self.runner.completing
 
     @property
     def settings_pending(self) -> bool:
         return self.setup is not None and (self.setup.pending or self.setup.runner.completing)
 
     def confirm_leave(self) -> bool:
-        if self.settings_pending:
+        if self._copy_pending or self.settings_pending:
             return False
         if self.setup is None:
             return True
         return self.setup.confirm_discard()
 
     def leave(self) -> None:
+        if self._copy_pending:
+            return
+        if self.model is not None:
+            self.model.clear_checks()
         if self.setup is not None:
             self.setup.end_session()
             self.sections.setCurrentWidget(self.recent_page)
             self._source_focus["f7hub"] = None
 
     def show_setup(self) -> bool:
-        if self._source_key != "f7hub" or self.setup is None or not self.setup.reload():
+        if self._source_key != "f7hub" or self._copy_pending or self.setup is None or not self.setup.reload():
             return False
+        if self.model is not None:
+            self.model.clear_checks()
         self.sections.setCurrentWidget(self.setup)
         self.setup.reload_button.setFocus()
         return True
@@ -349,6 +469,7 @@ class ClipboardWorkspace(QWidget):
         if self._source_key != "f7hub" or self._service is None or self.loading:
             return False
         self._loading = True
+        self._update_selection_controls()
         self.model.replace_rows(())
         self.page_message.clear()
         self.page_message.setAccessibleName("")
@@ -366,6 +487,62 @@ class ClipboardWorkspace(QWidget):
         else:
             self._failed(None)
         return accepted
+
+    def _update_selection_controls(self):
+        if self.model is None:
+            return
+        count = len(self.model.selected_items())
+        ready = not self.loading and self._source_key == "f7hub"
+        self.model.set_checking_enabled(ready)
+        self.selected_count.setText(f"{count} selected")
+        self.selected_count.setAccessibleName(self.selected_count.text())
+        self.copy_selected_button.setText(f"Copy Selected ({count})")
+        self.copy_selected_button.setAccessibleName(self.copy_selected_button.text())
+        self.copy_selected_button.setEnabled(ready and count > 0 and callable(getattr(self._service, "copy_selected", None)))
+        self.select_all_button.setEnabled(ready and count < self.model.rowCount())
+        self.clear_selection_button.setEnabled(ready and count > 0)
+        self.refresh_button.setEnabled(ready)
+
+    def copy_selected(self) -> bool:
+        if (self._source_key != "f7hub" or self.loading or self.model is None
+                or not callable(getattr(self._service, "copy_selected", None))):
+            return False
+        selection = self.model.selected_items()
+        if not selection:
+            return False
+        owner_hwnd = int(self.window().winId())  # Qt access stays on the GUI thread.
+        self._copy_pending = True
+        self._set_status("Copying selected items…")
+        self._update_selection_controls()
+        generation = self._recent_generation
+        delivery = self._copy_delivery
+        accepted = self.runner.submit(
+            lambda: self._service.copy_selected(selection, lambda text, guard: delivery(text, owner_hwnd, guard)),
+            lambda outcome: self._copy_completed(generation, outcome),
+            lambda error: self._copy_completed(generation, error, failed=True))
+        if not accepted:
+            self._copy_completed(generation, ClipboardCopyError("BUSY"), failed=True)
+        return accepted
+
+    def _copy_completed(self, generation, value, *, failed=False):
+        self._copy_pending = False
+        if generation != self._recent_generation:
+            return
+        if not failed and value == "WRITTEN":
+            self._set_status("Selected items copied. Use Ctrl+V to paste.")
+        else:
+            error = value if isinstance(value, ClipboardCopyError) else ClipboardCopyError("UNAVAILABLE", "MAY_HAVE_CHANGED")
+            if error.clipboard == "UNCHANGED":
+                feedback = ("Selection is no longer eligible. Refresh and select again."
+                            if error.code in {"DENIED", "STALE_SELECTION", "EXPIRED"} else
+                            "Selection exceeds 100 items or 65536 UTF-8 bytes. Select fewer items."
+                            if error.code == "TOO_LARGE" else "Selected items could not be copied. Clipboard was unchanged.")
+            else:
+                feedback = "Copy could not be verified. Clipboard may have changed. No automatic retry was made."
+            if error.code in {"DENIED", "STALE_SELECTION", "EXPIRED"}:
+                self.model.clear_checks()
+            self._set_status(feedback)
+        self._update_selection_controls()
 
     def _recent_completed(self, generation, value, *, failed=False):
         if generation != self._recent_generation:

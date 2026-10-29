@@ -1,5 +1,38 @@
 # F7Hub Python Architecture
 
+## CP02-S4 candidate — selected history output (2026-10-29)
+
+The explicitly authorized Copy Selected use case extends the existing
+ClipboardWorkspace, ClipboardService and ClipboardRepository. It has its own
+nonblocking operation lock and does not open/retire capture generations or alter
+Paste Latest's append-head authorization. The GUI submits immutable ordered
+ClipboardCopyItem references and revisions to its retained ServiceTaskRunner.
+Only the worker reads full text, assesses privacy and assembles output. Qt model,
+status, focus and HWND acquisition stay on the GUI thread.
+
+`_read_copy_selection` checks current scoped consent and every requested Item in
+one read-only SQLite transaction with parameterized IDs. It preserves request
+order, validates revisions/retention/privacy metadata and returns bounded full
+sources privately. The service assesses each exact AdmittedManualText and the
+combined output, then a service guard rereads and compares the entire snapshot.
+The existing writer invokes that guard after native waits and before replacement.
+All database transactions close before the next native call. The operation has a
+two-second monotonic budget, rejects backwards clocks and enforces the 100-Item /
+65,536-UTF-8-byte combined limit. No SQLite/native atomicity or hard native-call
+interruption is promised.
+
+`windows_selected_copy.write_selected_text` is a delivery adapter around unchanged
+WindowsPasteAPI.write_text. It adds no writer, hotkey registration, target binding,
+focus change, Ctrl+V, retry or restoration. Existing allocation, privacy markers,
+handle-transfer cleanup and post-close readback remain authoritative. Errors carry
+fixed codes and UNCHANGED / MAY_HAVE_CHANGED / WRITTEN; unexpected delivery results
+are uncertain, never success. Full text never enters the Recent model or logs.
+
+[1B](Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#cp02-s4-copy-selected-contract)
+records the narrow user-approved output ownership successor. Source, tests and
+native evidence remain an uncommitted candidate pending independent review;
+[CURRENT_STATE](Status/CURRENT_STATE.md#cp02-s4-current-state) owns status.
+
 ## CP02-S3 — original-target source provenance candidate (2026-10-29)
 
 Candidate only in `C:/Dev/F7Hub-Clipboard-SourceAppProvenance-20261029`, branch

@@ -1,5 +1,46 @@
 # F7Hub Phase 1B
 
+<a id="cp02-s4-copy-selected-contract"></a>
+
+## CP02-S4 — narrow Python-owned Copy Selected contract (2026-10-29)
+
+Explicit user authorization approves the bounded CP02-S4 Copy Selected output
+path. This is a successor to CP00-01/CP00-02 AHK-only delivery wording **only for
+this action**. Python ClipboardService authorizes selected persisted Items;
+ClipboardRepository owns consistent reads; the existing Python WindowsPasteAPI
+write_text primitive owns the native effect through windows_selected_copy.
+There is no GUI Qt Clipboard fallback, AHK IPC, new writer or new global hotkey.
+Other Clipboard actions retain their owning contracts. Win+Alt+C acquisition and
+Win+Alt+V Paste Latest implementations are unchanged by this slice.
+
+The GUI supplies explicit intent and an immutable displayed-order tuple of stable
+Item IDs/expected revisions, never full source or authorization assertions.
+The owning service resolves scoped current consent and all complete sources in
+one SQLite read snapshot, checks revision/retention/availability, reassesses every
+exact AdmittedManualText plus the assembled output, and rejects the entire request
+on any denial. The output limit is 100 distinct Items and 65,536 UTF-8 bytes,
+including exactly two newline characters per separator; no metadata/truncation.
+The final guard rereads and compares consent/full sources/retention after native
+waits. The two-second monotonic budget includes those waits and rejects backwards
+clocks; no database transaction remains open across a native call.
+
+Existing native allocation-before-replacement, ownership transfer, cleanup,
+history/cloud privacy markers and exact post-close verification remain in force.
+Validation failure invokes no replacement. After native effects begin, failure
+reports UNCHANGED / MAY_HAVE_CHANGED / WRITTEN truthfully; it does not restore,
+retry or send Ctrl+V. Native calls cannot be forcibly interrupted by this timer,
+and SQLite authorization plus OS replacement is not atomic across resources.
+Another writer can change Clipboard state after the final observed check.
+
+Normal Windows Clipboard exposure and history/sync limitations are documented
+in [User Workflows](../../04_UserWorkflows.md). Privacy markers are not a guarantee
+against third-party consumers. Native contracts follow Microsoft's
+[Clipboard operations](https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-operations)
+and [history/cloud formats](https://learn.microsoft.com/en-us/windows/win32/dataxchg/clipboard-formats#cloud-clipboard-and-clipboard-history-formats).
+This user-approved contract is implemented only in the unintegrated CP02-S4
+candidate; [current evidence](../../Status/CURRENT_STATE.md#cp02-s4-current-state)
+distinguishes author validation, physical acceptance and independent review.
+
 <a id="python-selection-current"></a>
 
 ## Current user-approved contract: Win+Alt+C — Python-Owned Active Selection Capture (2026-10-28)

@@ -1,5 +1,17 @@
 # F7Hub Roadmap
 
+## CP02-S4 — Multi-Select and Copy Selected candidate (2026-10-29)
+
+CP02-S3 Source App Provenance is integrated through PR #121, regular merge
+`8150dc7e139fee62a7121b3fd449d3e3c9d7de4d`. CP02-S4 extends that exact baseline
+with checkable Recent rows and explicit all-or-nothing full-text output through
+the existing Python native writer. Limits are 100 Items / 65,536 UTF-8 bytes.
+Author implementation, focused validation and documentation are complete in the
+isolated candidate; independent review, physical user acceptance and separately
+authorized integration remain pending. No search/paging, migrations, IPC, new
+hotkeys or other bulk actions are included. See
+[current evidence](Status/CURRENT_STATE.md#cp02-s4-current-state).
+
 ## CP02-S3 — Source App Provenance candidate (2026-10-29)
 
 The documented unstarted CP02-S3 successor now has a bounded implementation

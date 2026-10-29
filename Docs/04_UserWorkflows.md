@@ -1,5 +1,35 @@
 ﻿# F7Hub User Workflows
 
+## CP02-S4 candidate — select and copy F7Hub history (2026-10-29)
+
+In the isolated CP02-S4 candidate, use Win+Alt+C as before, open Clipboard Center,
+and choose F7Hub Clipboard / Recent. Check the items to include, or choose
+**Select All Visible**. **Clear Selection** clears checks. **Copy Selected (N)**
+is disabled for an empty selection or a pending operation. Checking never copies.
+Space toggles the current row; arrows move and Tab leaves the table. Checkboxes
+appear first; compact tables retain normal horizontal scrolling for other fields.
+
+Copy Selected retrieves complete authorized text, preserves displayed row order,
+and inserts exactly two newline characters between items. It adds no source or
+other metadata and never substitutes previews. Limits are 100 distinct Items and
+65,536 UTF-8 bytes including separators; oversized selections are rejected.
+Refresh, dataset replacement, accepted source/section departure and navigation
+clear checks. Pending copy freezes checks and refuses overlapping navigation.
+Success retains checks; stale, expired or denied selections clear them. Failure
+never silently retries; uncertain native effects are reported as possibly changed.
+Use Ctrl+V manually in the destination after success; the action sends no input.
+
+Content is placed on the normal Windows Clipboard and becomes accessible to other
+Clipboard consumers. Windows History/device-sync settings can govern subsequently
+retained or recopied content. The existing writer retains its history/cloud
+exclusion markers; these are privacy requests, not a guarantee against every
+consumer or third-party history tool. No content is logged or sent to a provider.
+Win+Alt+C, Win+Alt+V and Settings consent behavior retain their existing contracts.
+This is an unintegrated candidate; independent review and physical user acceptance
+remain pending. [Current evidence](Status/CURRENT_STATE.md#cp02-s4-current-state)
+owns validation and the [1B contract](Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#cp02-s4-copy-selected-contract)
+owns the narrow Python output path.
+
 ## Clipboard Phase 2A — choosing a source (2026-10-14 candidate)
 
 Open **Clipboard Center** through its existing sidebar route. A newly constructed Center starts with **F7Hub Clipboard**. Use **Source:** to choose F7Hub Clipboard or Windows Clipboard inside the same retained Center.

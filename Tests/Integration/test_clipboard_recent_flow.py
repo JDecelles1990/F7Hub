@@ -153,7 +153,7 @@ class ClipboardRecentGuiFlowTests(ClipboardDatabaseTestCase):
                                                clipboard.windows_page, clipboard.setup))
                     recent.assert_called_once_with()
                     self.assertEqual(clipboard.model.rowCount(), expected_count)
-                    self.assertEqual(clipboard.model.columnCount(), 5)
+                    self.assertEqual(clipboard.model.columnCount(), 6)
                     self.assertEqual(clipboard.page_message.text(), f"Showing {expected_count} recent items." +
                                      (" More items are available." if has_more else ""))
                     if expected_count:

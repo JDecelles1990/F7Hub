@@ -456,3 +456,59 @@ class ClipboardPasteSource:
     authorization: ClipboardPasteAuthorization = field(repr=False)
     source: AdmittedManualText = field(repr=False)
     effect_lease_expires_at: str
+
+
+# CP02-S4: transient explicit output selection; never capture/paste authority.
+COPY_MAX_ITEMS = 100
+COPY_MAX_BYTES = 65_536
+COPY_EFFECT_SECONDS = 2
+
+
+class ClipboardCopyError(RuntimeError):
+    """Content-free failure with a truthful OS effect state."""
+
+    CODES = frozenset({"INVALID_SELECTION", "DENIED", "STALE_SELECTION", "EXPIRED",
+        "TOO_LARGE", "UNAVAILABLE", "BUSY", "TIMEOUT", "CLIPBOARD_LOCKED",
+        "CLIPBOARD_WRITE_FAILED", "CLEANUP_FAILED", "CLIPBOARD_VERIFY_FAILED",
+        "CLIPBOARD_CHANGED"})
+
+    def __init__(self, code: str, clipboard: str = "UNCHANGED") -> None:
+        self.code = code if type(code) is str and code in self.CODES else "UNAVAILABLE"
+        self.clipboard = clipboard if clipboard in {"UNCHANGED", "MAY_HAVE_CHANGED", "WRITTEN"} else "MAY_HAVE_CHANGED"
+        super().__init__(self.code)
+
+
+@dataclass(frozen=True, slots=True)
+class ClipboardCopyItem:
+    item_ref: ClipboardItemRef
+    revision: int
+
+    def __post_init__(self) -> None:
+        if type(self.item_ref) is not ClipboardItemRef:
+            raise ClipboardCopyError("INVALID_SELECTION")
+        try:
+            _validate_identity(self.revision)
+        except ClipboardValidationError:
+            raise ClipboardCopyError("INVALID_SELECTION") from None
+
+
+def validate_copy_selection(selection: tuple[ClipboardCopyItem, ...]) -> None:
+    if (type(selection) is not tuple or not 1 <= len(selection) <= COPY_MAX_ITEMS
+            or any(type(item) is not ClipboardCopyItem for item in selection)
+            or len({item.item_ref for item in selection}) != len(selection)):
+        raise ClipboardCopyError("INVALID_SELECTION")
+
+
+def assemble_copy_text(texts: tuple[str, ...]) -> str:
+    if type(texts) is not tuple or not 1 <= len(texts) <= COPY_MAX_ITEMS:
+        raise ClipboardCopyError("INVALID_SELECTION")
+    size = 2 * (len(texts) - 1)
+    for text in texts:
+        try:
+            AdmittedManualText(text)
+            size += len(text.encode("utf-8", errors="strict"))
+        except (ClipboardValidationError, UnicodeError):
+            raise ClipboardCopyError("DENIED") from None
+        if size > COPY_MAX_BYTES:
+            raise ClipboardCopyError("TOO_LARGE")
+    return "\n\n".join(texts)

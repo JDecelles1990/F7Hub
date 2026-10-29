@@ -1,5 +1,112 @@
 # F7Hub Current State
 
+<a id="cp02-s4-current-state"></a>
+
+## CP02-S4 — R1 focused clock/expiry correction (2026-10-29)
+
+**READY_FOR_REREVIEW — implementer correction complete; independent rereview pending.**
+This is the user-requested correction handoff, not independent approval or Git
+integration. The original independent review remains **CHANGES_REQUIRED** for
+aggregate `a9c66a8fa4a486955e6e1e1219e53c5cbba1fb2ec89fca5b396e4f0afa7dfa60`;
+its R1 reproduction and report are preserved unchanged.
+
+`ClipboardService.copy_selected` now compares each wall-clock sample with the
+immediately preceding accepted sample throughout service, native-wait and
+readback guards. Equal timestamps are valid; any backward movement fails closed
+without a new tolerance. Existing monotonic lifetime/drift protections remain.
+Each guard uses one validated post-read timestamp for every selected Item expiry;
+exact expiry rejects. No database transaction spans native Clipboard operations.
+Pre-replacement rejection leaves Clipboard unchanged; post-replacement rejection
+retains the existing WRITTEN effect state and never retries.
+
+Fresh implementer validation: six deterministic R1 tests PASS, including the
+original .800/.900/.300 expiry reproduction, 13 rollback sampling boundaries,
+equal/increasing clocks, native-wait expiry, different Item expiries and exact
+expiry. A separate relevant service/repository/consent/GUI/capture/Paste Latest
+regression campaign PASS 246/246; the six new cases are excluded from that count.
+Native regression PASS 1/1 with actual Unicode Clipboard readback and QTest paste.
+All processes exit 0 with zero failures/errors/skips. Synthetic fixtures and
+native injected input are distinct from physical user acceptance, which remains
+NOT RUN. Prior Clipboard MIME representations were restored from RAM under the
+existing newer-sequence guard; no prior content was persisted.
+
+Only the service, selected-copy database tests, this current-state record and
+ChangeLog differ from the reviewed candidate. All other candidate paths retain
+their reviewed bytes. The new manifest, full old/new drift matrix, test commands,
+logs, input identities, preservation audit and independent rereview handoff are
+outside the worktree under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP02-S4/r1-correction-20261029T1810Z`.
+Rereview must rerun an independently controlled clock-regression probe against
+the new manifest; implementer results do not close the independent R1 finding.
+
+Carry forward N1: actual native test-host captures remain 1000x700 and 660x612,
+DPR 1.0. The extra paste editor is part of that fixture; no production 500-pixel
+fit is established. Physical keyboard/Narrator/alternate DPI/RDP remain NOT RUN.
+SQLite/native atomicity and interruptible native-call budgets are not promised.
+Candidate remains unstaged/uncommitted at the same approved base; no push, PR,
+merge, canonical synchronization or adjacent slice is authorized here.
+
+## CP02-S4 — original author implementation record (2026-10-29)
+
+The following preserves the initial author readiness record. The independent
+review subsequently required R1 changes; the correction status above is current.
+
+**READY_FOR_REVIEW — author candidate, independent review pending.**
+Explicit implementation authorization follows the completed read-only plan and
+preflight. PR #121 is confirmed merged by regular merge at approved base
+`8150dc7e139fee62a7121b3fd449d3e3c9d7de4d`. Its tree matches the inspected Source App
+candidate; no architecture reinvestigation was needed. Earlier CP02-S3 and Paste
+Latest candidate sections below remain historical snapshots.
+
+Worktree: `C:/Dev/F7Hub-Clipboard-CP02-S4`; branch
+`feature/clipboard-cp02-s4-copy-selected`; HEAD/base remain the approved merge.
+Changes are unstaged and uncommitted. No push, PR or merge is authorized here.
+The dirty canonical checkout, protected settings, existing worktrees/databases
+and review checkpoints are preserved; no canonical synchronization was performed.
+
+Implemented: stable Item/revision check state, Select All Visible, Clear Selection,
+selected count, Copy Selected (N), asynchronous complete-text retrieval, fresh
+all-or-nothing consent/privacy/retention validation and existing-writer output.
+Logical Select column is visually first. Output follows displayed Item order,
+uses exactly two newline characters between complete texts and excludes metadata.
+Limits: 100 distinct Items and 65,536 combined UTF-8 bytes including separators.
+Selection clears on refresh/replacement and accepted source/section/module
+navigation; pending copy freezes checks and guards departure. Settings-only
+composition and Setup navigation during ordinary Recent reads are preserved.
+
+| Author evidence | Result / environment / provenance |
+|---|---|
+| Selected focused + affected regressions, final-01 | PASS 245/245; exit 0; no failures/errors/skips; FRESH Windows-host SYNTHETIC, Qt offscreen, isolated SQLite |
+| Final GUI scope-preservation correction, final-gui-01 | PASS 63/63; exit 0; no skips; FRESH Windows-host SYNTHETIC; overlaps prior GUI cases |
+| Native final, native-02 | PASS 1/1; exit 0; actual Windows Clipboard write/readback, native Qt editor paste via QTest Ctrl+V; deletion rejection leaves native sequence unchanged |
+| Isolated database integrity | PASS: integrity_check = ok; foreign_key_check = zero; configured foreign_keys ON / busy_timeout 5000; no data/schema mutations from copying |
+| Native visual inspection | Two captures inspected at actual 1000x700 and 660x612, DPR 1.0; leading checkboxes and action/count feedback visible; normal horizontal overflow for other fields at compact width |
+| Physical user input / Narrator / alternate DPI / RDP | NOT RUN; native QTest evidence does not establish physical user acceptance |
+| Independent review / integration | NOT RUN / PENDING separate gates |
+
+Counts overlap and must not be added. The final GUI-only change preserves normal
+Setup entry during read-only Recent loading; final-01's service/writer/capture
+behavior is unchanged and final-gui-01 refreshes affected GUI/composition evidence.
+Native test preservation restored prior MIME representations from RAM; prior
+content never entered logs, screenshots or evidence files. This is observed
+semantic restoration, not a claim of identical original native format ownership.
+
+External evidence root: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Clipboard-CP02-S4/implementation-20261029T170910Z`.
+It contains the reproducible candidate manifest, input identities, per-attempt
+logs/results, self-review, preservation checks and independent review handoff.
+Original FAIL records remain intact: focused-01 (assessor caller + button inventory),
+focused-02 (verified fixture polling starvation), regression-01 (Settings-only
+model absence). Corrections and successful subsequent evidence are separate.
+
+Remaining limits: no atomic transaction spans SQLite and Windows Clipboard;
+changes after the final check remain possible. Native calls have soft budgets,
+not enforced interruption. Partial/uncertain writes can change the Clipboard;
+feedback preserves effect state and never retries automatically. Normal Clipboard
+consumers/history/sync policy remain relevant despite retained exclusion markers.
+[1B](../Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#cp02-s4-copy-selected-contract)
+owns the narrow output contract; Win+Alt+C and Win+Alt+V retain their independent
+existing contracts and byte-identical implementation files.
+
 ## CP02-S3 — Source App Provenance author handoff (2026-10-29)
 
 **SOURCE_APP_PROVENANCE_READY_FOR_REVIEW** — lifecycle READY_FOR_REVIEW. Author

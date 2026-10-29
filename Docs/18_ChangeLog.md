@@ -1,5 +1,46 @@
 # F7Hub ChangeLog
 
+## 2026-10-29 — CP02-S4 R1 focused clock/expiry correction candidate
+
+Corrected the independent review's MAJOR R1 finding in the unintegrated CP02-S4
+candidate. Selected-copy guards now reject backward wall-clock movement relative
+to the immediately preceding accepted sample and use one validated post-wait time
+for all selected Item expirations. Equal timestamps remain valid; existing
+monotonic lifetime checks, consent/revision/privacy validation, native effect
+states, no-retry behavior and transaction boundaries remain intact.
+
+Fresh implementer checks: six deterministic correction tests PASS; separate
+existing affected regressions PASS 246/246; actual Windows Clipboard/QTest native
+regression PASS 1/1. All exit 0, zero failures/errors/skips. The original review
+and reproduction remain unchanged; these results do not rewrite the original
+FAIL/CHANGES_REQUIRED outcome or grant independent approval. Status is
+READY_FOR_REREVIEW, with a new external manifest and an independent clock-probe
+requirement in the handoff. Physical user acceptance and Git integration remain
+separate and unperformed. [Current state](Status/CURRENT_STATE.md#cp02-s4-current-state)
+owns correction evidence and carry-forward limitations.
+
+## 2026-10-29 — CP02-S4 Multi-Select and Copy Selected implementation candidate
+
+Built only in `C:/Dev/F7Hub-Clipboard-CP02-S4`, branch
+`feature/clipboard-cp02-s4-copy-selected`, from approved merged PR #121 baseline
+`8150dc7e139fee62a7121b3fd449d3e3c9d7de4d`. Recent gains check state, three selection
+buttons and count feedback. Service/repository validation resolves complete Items
+and rejects the entire request on stale identity/revision, revoked consent,
+privacy denial, expiry, unavailable source or oversize output. A thin adapter
+reuses the unchanged native writer. No capture/paste behavior, migration or AHK
+IPC is changed. Output is displayed-order exact text with two-newline separators,
+bounded to 100 Items and 65,536 UTF-8 bytes.
+
+Author evidence: selected suite 245 PASS; the final GUI-only scope correction is
+covered by 63 fresh GUI/composition PASS; counts overlap. Native final 1 PASS uses
+real CF_UNICODETEXT/readback and Qt Ctrl+V with QTest input, not physical input.
+Two final native captures were inspected at actual 1000x700 and 660x612, DPR 1.0.
+The compact requested 660x500 fixture expanded to its 612-pixel minimum height.
+Initial focused failures, a verified polling-starvation fixture failure and the
+Settings-only composition regression are preserved with diagnoses and corrections.
+Candidate remains unstaged/uncommitted and unmerged; independent review and
+physical user acceptance are pending. See [current status](Status/CURRENT_STATE.md#cp02-s4-current-state).
+
 ## 2026-10-29 — CP02-S3 Source App Provenance implementation candidate
 
 Implemented only in the isolated SourceAppProvenance worktree on base
