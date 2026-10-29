@@ -10,6 +10,7 @@ from uuid import uuid4
 from f7hub.domain.clipboard import (
     ClipboardItemRef, ClipboardRecentItem, ClipboardRecentPage,
     normalize_preview, validate_recent_limit, validate_utc_timestamp,
+    ClipboardCopyError, validate_copy_selection, assemble_copy_text,
     ClipboardAdmissionBinding, ClipboardPrivacyPolicy, ClipboardOperation,
     ClipboardCaptureOutcome, ClipboardReceiptResult, ReplayDisposition,
     ClipboardPersistenceCode as Code, ClipboardPersistenceError, RECEIPT_DAYS,
@@ -71,6 +72,55 @@ class ClipboardRepository:
             return ClipboardRecentPage(rows, len(records) > limit, limit, as_of)
         except (sqlite3.Error, OSError, DatabaseError, ValueError, TypeError, UnicodeError):
             raise ClipboardRepositoryError("Could not read Clipboard history.") from None
+
+    def _read_copy_selection(self, selection, *, as_of):
+        """Private owner read: consent and every full Item in one SQLite snapshot.
+
+        The immutable request order survives SQL's unordered IN results. No Event
+        join, persistence, expiry cleanup or native effect is performed here.
+        """
+        validate_copy_selection(selection)
+        validate_utc_timestamp(as_of)
+        try:
+            with database_connection(self._database_path, read_only=True) as connection:
+                connection.execute("BEGIN")
+                consent = _eligible_consent(connection, self.database_scope, self.profile_scope)
+                if consent is None:
+                    raise ClipboardCopyError("DENIED")
+                ids = tuple(item.item_ref.clipboard_item_id for item in selection)
+                placeholders = ",".join("?" for _ in ids)
+                records = connection.execute(
+                    "SELECT clipboard_item_id, revision, raw_text, sensitivity, assessment_complete, "
+                    "retention_intent, expires_at, media_type, identity_profile FROM clipboard_items "
+                    "WHERE clipboard_item_id IN (" + placeholders + ")", ids).fetchall()
+                by_id = {row["clipboard_item_id"]: row for row in records}
+                if len(by_id) != len(selection):
+                    raise ClipboardCopyError("STALE_SELECTION")
+                sources = []
+                for item in selection:
+                    row = by_id[item.item_ref.clipboard_item_id]
+                    if row["revision"] != item.revision:
+                        raise ClipboardCopyError("STALE_SELECTION")
+                    if (row["sensitivity"] != "PERMITTED" or row["assessment_complete"] != 1
+                            or row["media_type"] != "text/plain"
+                            or row["identity_profile"] != "clipboard_text_exact_v1"):
+                        raise ClipboardCopyError("DENIED")
+                    retention, expiry = row["retention_intent"], row["expires_at"]
+                    if retention == "TEMPORARY":
+                        validate_utc_timestamp(expiry)
+                        if expiry <= as_of:
+                            raise ClipboardCopyError("EXPIRED")
+                    elif retention != "SAVED" or expiry is not None:
+                        raise ClipboardCopyError("DENIED")
+                    sources.append((row["raw_text"], retention, expiry))
+                # Bound output before it leaves repository ownership, even for a
+                # caller other than the normal service. Text stays transient.
+                assemble_copy_text(tuple(source[0] for source in sources))
+                return consent, tuple(sources)
+        except ClipboardCopyError:
+            raise
+        except Exception:
+            raise ClipboardCopyError("UNAVAILABLE") from None
 
     def _read_latest_paste_source(self, consent: ClipboardConsentSnapshot,
                                   *, as_of: str) -> ClipboardAppendHead:

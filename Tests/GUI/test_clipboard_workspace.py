@@ -105,8 +105,8 @@ class ClipboardWorkspaceTests(unittest.TestCase):
             self.assertTrue(self.workspace.activate())
             self.wait_idle()
         model = self.workspace.model
-        self.assertEqual(model.HEADERS, ("Time", "Preview", "Source App", "Retention", "Pinned"))
-        self.assertEqual(model.columnCount(), 5)
+        self.assertEqual(model.HEADERS, ("Time", "Preview", "Source App", "Retention", "Pinned", "Select"))
+        self.assertEqual(model.columnCount(), 6)
         self.assertEqual(model.rowCount(), 2)
         self.assertEqual([model.data(model.index(0, c)) for c in range(5)],
                          ["2026-10-08 10:00:00.000 UTC", "<b>Résumé 😀 東京</b>", "Not recorded", "Temporary", "No"])
@@ -136,7 +136,7 @@ class ClipboardWorkspaceTests(unittest.TestCase):
         self.assertEqual(self.workspace.table.selectionMode(), QAbstractItemView.SelectionMode.NoSelection)
         self.assertFalse(self.workspace.table.isSortingEnabled())
         self.assertEqual([b.text() for b in self.workspace.findChildren(QPushButton)],
-                         ["Refresh", "Refresh"])
+                         ["Refresh", "Refresh", "Select All Visible", "Clear Selection", "Copy Selected (0)"])
 
     def test_loading_refuses_duplicates_and_has_no_enabled_recent_control(self):
         self.compose()

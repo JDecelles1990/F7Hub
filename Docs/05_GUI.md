@@ -1,5 +1,24 @@
 # F7Hub GUI Design
 
+## CP02-S4 candidate — Recent multi-select and Copy Selected (2026-10-29)
+
+Unintegrated candidate from merged PR #121 base `8150dc7e139fee62a7121b3fd449d3e3c9d7de4d`.
+Recent adds Select All Visible, Clear Selection, Copy Selected (N), a passive
+selected-count label and model check state. Logical columns remain Time, Preview,
+Source App, Retention, Pinned, then Select; Select is moved to the first visual
+section. All text columns remain read-only; no native row-selection or sorting
+contract is added. Source App values and underlying field indices are preserved.
+
+The stable registry rows below describe the candidate where marked. Its three
+new action buttons do not rewrite pinned historical registry audit totals.
+`clipboardSelectedCount` is a plain accessible QLabel, not another action.
+Checks use Item ID/revision and CheckStateRole, never per-row checkbox widgets.
+The table's Space event toggles one current row without autorepeat; normal arrows,
+Tab/Shift+Tab and accessible check state remain available. Copy feedback reuses the
+existing status label. Selection and pending lifecycle are owned by
+[1C](Planning/Clipboard/1C_PySide6_Clipboard_Center.md#cp02-s4-selection-contract);
+[CURRENT_STATE](Status/CURRENT_STATE.md#cp02-s4-current-state) owns evidence.
+
 ## CP02-S3 — Source App in Recent candidate (2026-10-29)
 
 Candidate only in `C:/Dev/F7Hub-Clipboard-SourceAppProvenance-20261029`, branch
@@ -3001,7 +3020,7 @@ With SettingsService supplied, the F7Hub page contains Recent/Clipboard Setup
 navigation then `sections` (QStackedWidget: `recent_page`, then one retained
 ClipboardSetup). Without SettingsService, no section buttons or Setup are
 constructed and Recent content goes directly in the F7Hub page VBox. Recent's
-VBox contains status, optional Refresh, table (stretch 1), then page summary.
+VBox contains status, optional Refresh, candidate selection actions/count, table (stretch 1), then page summary.
 Without ClipboardService, Refresh/table/model/summary are absent and the
 truthful unavailable status remains; Setup can still exist independently.
 
@@ -3009,12 +3028,16 @@ truthful unavailable status remains; Setup can still exist independently.
 |---|---|---|---|---|---|---|
 | CLIPBOARD.SOURCE | F7Hub Clipboard / Windows Clipboard / `source_selector`; QComboBox; `clipboardSourceSelector` | Source row after Source: label; outside both source pages | activated(index) → `_source_activated` → `select_source(itemData(index))`; presentation only, no acquisition/service call | Always constructed; choices f7hub then windows, default f7hub; accessible Clipboard source with source-choice description; label buddy, no label mnemonic; transition refuses Recent loading or settings_pending and negotiates dirty Setup | Native combo input; no custom shortcut | CW, CS, CI |
 | CLIPBOARD.RECENT | Recent / `recent_button`; QPushButton; — | F7Hub navigation row first, before Setup and stretch | clicked → `show_recent` → `confirm_leave` / `leave`; no automatic query from this handler | Only with SettingsService; source must be f7hub and Setup departure accepted; local button is not disabled for Recent reads; focuses Refresh when present; accessible Recent Clipboard history | — | CW, CS |
-| CLIPBOARD.SETUP | Clipboard Setup / `setup_button`; QPushButton; — | Same navigation row second | clicked → `show_setup` → setup.reload; selects Setup only if accepted | Only with SettingsService and f7hub source; reload guards pending/dirty state; Recent loading is not an independent section-entry guard; requests focus on Reload; accessible Clipboard Setup | — | CS, CI |
+| CLIPBOARD.SETUP | Clipboard Setup / `setup_button`; QPushButton; — | Same navigation row second | clicked → `show_setup` → setup.reload; selects Setup only if accepted | Only with SettingsService and f7hub source; reload guards pending/dirty state; Recent loading remains independent; pending Copy Selected blocks section entry in the candidate; requests focus on Reload; accessible Clipboard Setup | — | CS, CI |
 | CLIPBOARD.RECENT.REFRESH | Refresh / Retry / `refresh_button`; QPushButton; `clipboardRefreshButton` | Recent VBox below status, left-aligned, before table | clicked → `refresh` → own ServiceTaskRunner.submit(ClipboardService.get_recent); generation-bound `_recent_completed` → `_loaded` / `_failed` → `_finish` | Only with ClipboardService; handler requires f7hub and not loading; disabled during request; _finish restores enabled state and label/accessibility Refresh or Retry; one button, same handler | — | CW, CR |
-| CLIPBOARD.RECENT.TABLE | `table`; QTableView; `clipboardRecentTable` | Recent VBox after Refresh, stretch 1, before summary | ClipboardRecentTableModel receives replace_rows from GUI completion; data provides DisplayRole/AccessibleTextRole; no row-activation handler or selected Item action | Only with ClipboardService; no edits, selection or sorting; Tab leaves table; accessible Recent Clipboard history; locally remains enabled during reads while rows clear; ancestor state still applies | Native focus/scroll; no custom shortcut | CW, CR |
+| CLIPBOARD.RECENT.TABLE | `table`; QTableView; `clipboardRecentTable` | Recent after selection actions, before summary | CP02-S4 candidate: immutable safe rows plus CheckStateRole and accessible check state; setData updates transient Item/revision selection; no full text in model | Read-only text, NoSelection, no sorting; checking disabled during work; Select logical column is visually first | Space toggles current row once; native arrows, Tab escape and scroll | CW; selected-copy GUI/integration |
+| CLIPBOARD.RECENT.SELECT_ALL | Select All Visible; QPushButton; `clipboardSelectAllVisibleButton` | Candidate selection row, first | clicked → model.select_all_visible → selection_changed | Loaded visible F7Hub rows only, max 100; disabled during work or when all checked | Tab/Space | selected-copy GUI |
+| CLIPBOARD.RECENT.CLEAR | Clear Selection; QPushButton; `clipboardClearSelectionButton` | Candidate selection row, second | clicked → model.clear_checks | Transient only; disabled empty/pending | Tab/Space | selected-copy GUI |
+| CLIPBOARD.RECENT.COPY_SELECTED | Copy Selected (N); QPushButton; `clipboardCopySelectedButton` | Candidate selection row, third, before passive `clipboardSelectedCount` label | clicked → copy_selected → own ServiceTaskRunner → ClipboardService.copy_selected → native delivery adapter → guarded completion | Positive count, F7Hub source, owner available and no pending work; all-or-nothing fresh authorization; generation-bound safe feedback | Tab/Space; no global hotkey | selected-copy GUI/integration/native |
 | CLIPBOARD.WINDOWS.REFRESH | Refresh / `windows_refresh_button`; QPushButton; `windowsClipboardRefreshButton` | Windows page VBox after heading, unavailable message and help; before stretch | No connected handler; no native acquisition or snapshot backend | Always constructed, disabled; visible on Windows page; accessible Refresh Windows Clipboard; description says refresh unavailable | — | CW |
 
-In the CP02-S3 candidate, ClipboardRecentTableModel has exactly Time, Preview, Source App, Retention, Pinned columns.
+Historical CP02-S3 column snapshot: Time, Preview, Source App, Retention, Pinned.
+CP02-S4 adds logical Select and moves it visually first, as described above.
 Time displays explicit UTC, previews remain plain text with a truncation suffix
 when indicated, Source App displays a permitted basename or Not recorded, retention displays Temporary/Saved and pinned displays Yes/No.
 No raw text or tooltip is exposed by the model. The preview column stretches;

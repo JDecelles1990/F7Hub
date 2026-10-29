@@ -12,6 +12,7 @@ from pathlib import Path
 
 from f7hub.domain.clipboard import (
     ClipboardRecentPage, ClipboardValidationError, RECENT_DEFAULT_LIMIT,
+    ClipboardCopyError, COPY_EFFECT_SECONDS, validate_copy_selection, assemble_copy_text,
     validate_recent_limit, validate_utc_timestamp,
     ClipboardAdmissionBinding, ClipboardAdmissionDecision, ClipboardCaptureCommand,
     ClipboardOperation, ClipboardReceiptResult, ClipboardPersistenceCode as Code,
@@ -93,6 +94,7 @@ class ClipboardService:
             raise ValueError('Clipboard and Settings must use the same database.')
         self._monotonic = monotonic if monotonic is not None else time.monotonic
         self._lock = threading.RLock()
+        self._copy_lock = threading.Lock()
         self._context = None
         self._deadline = 0.0
         self._operations: dict[str, str] = {}
@@ -306,6 +308,72 @@ class ClipboardService:
         with self._lock:
             as_of, _ = self._sample()
             return self._repository.lookup_receipt(operation, as_of=as_of)
+
+    def copy_selected(self, selection, deliver):
+        """Explicit selected output; independent of capture generations/append head.
+
+        Trusted delivery receives exact text and a fresh service guard. The native
+        writer calls the guard after allocation/OpenClipboard waits and before
+        EmptyClipboard. No database transaction spans a native call. The bounded
+        snapshot comparison includes text, consent and retention, not previews.
+        """
+        validate_copy_selection(selection)
+        if not self._copy_lock.acquire(blocking=False):
+            raise ClipboardCopyError("BUSY")
+        delivery_started = False
+        try:
+            if not self._real_assessment:
+                raise ClipboardCopyError("DENIED")
+            started = self._monotonic()
+            instant = self._clock()
+            last_wall = instant
+            def now():
+                nonlocal last_wall
+                elapsed = self._monotonic() - started
+                current = self._clock()
+                if (type(started) not in (int, float) or not math.isfinite(started)
+                        or not math.isfinite(elapsed) or not 0 <= elapsed < COPY_EFFECT_SECONDS
+                        or type(current) is not datetime or current.utcoffset() is None
+                        or type(instant) is not datetime or instant.utcoffset() is None
+                        or current < last_wall
+                        or abs((current - instant).total_seconds() - elapsed) > CLOCK_DRIFT_TOLERANCE_SECONDS):
+                    raise ClipboardCopyError("TIMEOUT")
+                last_wall = current
+                return current.astimezone(timezone.utc).isoformat(timespec="milliseconds").replace("+00:00", "Z")
+            original = self._repository._read_copy_selection(selection, as_of=now())
+            text = assemble_copy_text(tuple(source[0] for source in original[1]))
+            for candidate in (*tuple(source[0] for source in original[1]), text):
+                assessment = assess_manual_text(AdmittedManualText(candidate))
+                if (assessment.finding != ClipboardPrivacyFinding.PERMITTED
+                        or not assessment.assessment_complete):
+                    raise ClipboardCopyError("DENIED")
+            active = True
+            def guard():
+                if not active:
+                    raise ClipboardCopyError("STALE_SELECTION")
+                current = self._repository._read_copy_selection(selection, as_of=now())
+                if current != original:
+                    raise ClipboardCopyError("STALE_SELECTION")
+                # One validated sample covers SQLite waits and every Item expiry.
+                final_as_of = now()
+                for _, retention, expiry in current[1]:
+                    if retention == "TEMPORARY" and expiry <= final_as_of:
+                        raise ClipboardCopyError("EXPIRED")
+            try:
+                guard()
+                delivery_started = True
+                outcome = deliver(text, guard)
+                if outcome != "WRITTEN":
+                    raise ClipboardCopyError("UNAVAILABLE", "MAY_HAVE_CHANGED")
+                return outcome
+            finally:
+                active = False  # A retained callback cannot authorize a later write.
+        except ClipboardCopyError:
+            raise
+        except Exception:
+            raise ClipboardCopyError("UNAVAILABLE", "MAY_HAVE_CHANGED" if delivery_started else "UNCHANGED") from None
+        finally:
+            self._copy_lock.release()
 
     def paste_latest(self, deliver):
         """Trusted local delivery capability; the service owns its one-use context.

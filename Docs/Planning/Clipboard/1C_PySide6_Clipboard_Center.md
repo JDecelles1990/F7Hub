@@ -1,5 +1,40 @@
 # F7Hub Phase 1C
 
+<a id="cp02-s4-selection-contract"></a>
+
+## CP02-S4 — Recent selection and explicit copy candidate (2026-10-29)
+
+The user-approved CP02-S4 slice extends the retained F7Hub Recent surface with
+CheckStateRole state keyed by Item ID/revision, Select All Visible, Clear Selection,
+a plain selected-count label and Copy Selected (N). Its logical Select column is
+visually first; Source App and other field indices remain stable. No checkbox
+widgets, persisted selection, sorting/paging/search change or Windows History
+source capability is introduced. Existing text fields remain read-only.
+
+Checkbox changes never copy. Select All covers only the visible loaded page.
+Submission captures the current displayed order, freezes controls, and executes
+through the existing ServiceTaskRunner. Model/widget/HWND operations stay on the
+GUI thread; SQLite, full-text privacy assessment and native delivery run in the
+worker. Space toggles the current row once, arrows navigate, Tab/Shift+Tab leave
+the table, and Qt accessibility exposes check state and count/button names.
+
+Refresh/replacement, accepted source switching, Setup entry and module departure
+clear checks. Pending copy rejects changes and unsafe departure, explicit Exit or workspace
+close until completion, including the runner callback interval. Existing shell
+X-to-tray retains the workspace; an accepted copy can finish while hidden. Read-only Recent loads retain
+their preexisting Setup navigation behavior; Settings-only composition is valid.
+Successful copy retains checks. Stale/expired/denied results clear them; other
+failure feedback retains truthful native-effect state, never raw exception text.
+Request generations prevent obsolete result feedback from replacing a newer page.
+
+The [CP02-S4 1B successor](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#cp02-s4-copy-selected-contract)
+is the narrow Python-owned output contract, superseding the preserved CP00-01/02
+AHK-delivery wording for Copy Selected alone. The service/repository revalidate
+all Items and authorize complete text, with 100-Item / 65,536-byte combined bounds.
+No Capture Event, arming, automatic paste, new hotkey or durable state follows.
+This is a candidate pending independent review and physical user acceptance;
+[CURRENT_STATE](../../Status/CURRENT_STATE.md#cp02-s4-current-state) owns evidence.
+
 ## Current selection-capture ownership exception (2026-10-28)
 
 The [current 1B decision](1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md#python-selection-current)
