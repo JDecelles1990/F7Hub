@@ -19,7 +19,10 @@ class FakeAPI:
         self.text = 'NEW SELECTED TEXT'
         self.read_effect = lambda: None
 
-    def pin(self, target): return 999
+    def pin(self, target, *, on_source_process=None):
+        if on_source_process is not None:
+            on_source_process(getattr(self, "source_process_basename", None))
+        return 999
     def unpin(self, handle): self.closed += 1
     def live(self, handle): return self.alive
     def foreground(self): return self.focus

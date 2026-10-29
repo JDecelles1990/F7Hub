@@ -43,7 +43,7 @@ class SelectionCaptureTests(unittest.TestCase):
         self.window = QMainWindow()
         self.api = FakeHotkeyAPI()
         self.service = Mock()
-        self.service.capture_active_selection.side_effect = lambda acquire, cancel: SelectionCaptureResult(acquire())
+        self.service.capture_active_selection.side_effect = lambda acquire, cancel: SelectionCaptureResult(acquire().text)
         self.capture = SelectionCapture(self.window, self.service, api=self.api)
         self.capture.start()
 

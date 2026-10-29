@@ -1,5 +1,18 @@
 # F7Hub Todo
 
+## CP02-S3 — bounded Source App Provenance (2026-10-29)
+
+- [x] Implement optional Event basename, original-target acquisition, preference/consent fences and latest-Event Recent projection.
+- [x] Add Source App to the existing read-only model and correct directly stale Setup wording.
+- [x] Complete author synthetic/SQLite/offscreen validation and affected documentation; preserve original failures/corrections.
+- [ ] Independent read-only review of the external final candidate manifest.
+- [ ] User-owned controlled physical acceptance and native layout validation.
+- [ ] Separately authorized Git preparation/integration; all candidate changes remain unstaged/uncommitted.
+
+[Current status](Status/CURRENT_STATE.md#cp02-s3--source-app-provenance-author-handoff-2026-10-29)
+owns evidence. Earlier CP02-S3-unstarted entries are historical. This bounded
+successor does not authorize monitoring, titles, source filtering or other CC work.
+
 ## Clipboard D02 — dormant persistence implementation candidate (2026-10-15)
 
 - [x] Implement Checkpoint A: additive receipt migration 0015, constraints, deletion survival and immutable original outcome contracts.

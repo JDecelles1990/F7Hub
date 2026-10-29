@@ -46,6 +46,42 @@ def normalize_preview(excerpt: str) -> tuple[str, bool]:
     return preview, len(excerpt) > PREVIEW_MAX_SCALARS
 
 
+SOURCE_PROCESS_MAX_SCALARS = 255
+SOURCE_PROCESS_MAX_BYTES = 1020
+_SOURCE_PROCESS_FORBIDDEN = frozenset('<>:"/\\|?*')
+
+
+def normalize_source_process_basename(value: object) -> str | None:
+    """Optional original-target basename; never extract a path or echo bad input."""
+    if type(value) is not str or not 5 <= len(value) <= SOURCE_PROCESS_MAX_SCALARS:
+        return None
+    value = unicodedata.normalize("NFC", value.lower())
+    if (not 5 <= len(value) <= SOURCE_PROCESS_MAX_SCALARS
+            or not value.endswith(".exe") or value[0] in " ."
+            or value[-1] in " ."
+            or any(c in _SOURCE_PROCESS_FORBIDDEN
+                   or unicodedata.category(c) in {"Cc", "Cf", "Cs", "Zl", "Zp"} for c in value)):
+        return None
+    try:
+        if len(value.encode("utf-8", errors="strict")) > SOURCE_PROCESS_MAX_BYTES:
+            return None
+    except UnicodeError:
+        return None
+    return value
+
+
+@dataclass(frozen=True, slots=True)
+class ClipboardSelectionAcquisition:
+    """Trusted native result; no title, target handles, path or persistence authority."""
+
+    text: str = field(repr=False)
+    source_process_basename: str | None = field(default=None, repr=False)
+
+    def __post_init__(self) -> None:
+        object.__setattr__(self, "source_process_basename",
+                           normalize_source_process_basename(self.source_process_basename))
+
+
 def _validate_identity(value: int) -> None:
     if type(value) is not int or not 1 <= value <= 2**63 - 1:
         raise ClipboardValidationError("Clipboard identity or revision must be a positive SQLite integer.")
@@ -75,6 +111,7 @@ class ClipboardRecentItem:
     expires_at: str | None
     sensitivity: str
     kind: None = None
+    source_process_basename: str | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         if not isinstance(self.item_ref, ClipboardItemRef):
@@ -86,6 +123,9 @@ class ClipboardRecentItem:
         validate_utc_timestamp(self.last_received_at)
         if type(self.is_pinned) is not bool or type(self.preview_truncated) is not bool:
             raise ClipboardValidationError("Clipboard projection flags must be booleans.")
+        if (self.source_process_basename is not None
+                and normalize_source_process_basename(self.source_process_basename) != self.source_process_basename):
+            raise ClipboardValidationError("Clipboard source application is invalid.")
         if self.sensitivity != "PERMITTED" or self.kind is not None:
             raise ClipboardValidationError("Clipboard projection is outside D01 scope.")
         if self.retention_intent == "TEMPORARY":
@@ -180,6 +220,7 @@ class ClipboardCaptureCommand:
     observed_at: str | None = None
     source_class: str | None = None
     request_profile: str = REQUEST_PROFILE
+    source_process_basename: str | None = field(default=None, repr=False)
 
     def __post_init__(self) -> None:
         if type(self.operation) is not ClipboardOperation or type(self.source) is not AdmittedManualText:
@@ -190,6 +231,8 @@ class ClipboardCaptureCommand:
             validate_utc_timestamp(self.observed_at)
         if self.source_class not in (None, "terminal", "browser", "editor", "unknown"):
             raise ClipboardValidationError("Clipboard coarse source class is invalid.")
+        object.__setattr__(self, "source_process_basename",
+                           normalize_source_process_basename(self.source_process_basename))
 
 
 @dataclass(frozen=True, slots=True)

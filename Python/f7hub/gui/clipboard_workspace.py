@@ -16,7 +16,7 @@ from f7hub.services.settings_service import SettingsService
 class ClipboardRecentTableModel(QAbstractTableModel):
     """Present immutable safe rows; no owner reads, edits or selection contract."""
 
-    HEADERS = ("Time", "Preview", "Retention", "Pinned")
+    HEADERS = ("Time", "Preview", "Source App", "Retention", "Pinned")
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -50,6 +50,7 @@ class ClipboardRecentTableModel(QAbstractTableModel):
         values = (
             row.last_received_at.replace("T", " ").replace("Z", " UTC"),
             row.preview + (" … [truncated]" if row.preview_truncated else ""),
+            row.source_process_basename or "Not recorded",
             "Temporary" if row.retention_intent == "TEMPORARY" else "Saved",
             "Yes" if row.is_pinned else "No",
         )
@@ -167,8 +168,9 @@ class ClipboardWorkspace(QWidget):
             header.setSectionResizeMode(QHeaderView.ResizeMode.Fixed)
             self.table.setColumnWidth(0, 230)
             header.setSectionResizeMode(1, QHeaderView.ResizeMode.Stretch)
-            self.table.setColumnWidth(2, 105)
-            self.table.setColumnWidth(3, 70)
+            self.table.setColumnWidth(2, 170)
+            self.table.setColumnWidth(3, 105)
+            self.table.setColumnWidth(4, 70)
             layout.addWidget(self.table, 1)
             self.page_message = QLabel(self)
             self.page_message.setTextFormat(Qt.TextFormat.PlainText)

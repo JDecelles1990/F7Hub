@@ -157,7 +157,8 @@ class ClipboardSetupTests(unittest.TestCase):
                      "cannot guarantee all secrets are identified"):
             self.assertIn(text, labels[0].text())
             self.assertIn(text, disclosure)
-        self.assertIn("not implemented or active", self.editor.runtime_message.text())
+        self.assertIn("Win+Alt+C captures highlighted text", self.editor.runtime_message.text())
+        self.assertIn("Win+Alt+V pastes the latest eligible saved capture", self.editor.runtime_message.text())
         self.assertIn("unavailable", self.editor.runtime_message.text())
 
     def test_unavailable_snapshot_is_safe_disabled_with_reload(self):

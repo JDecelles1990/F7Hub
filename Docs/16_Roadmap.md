@@ -1,5 +1,16 @@
 # F7Hub Roadmap
 
+## CP02-S3 — Source App Provenance candidate (2026-10-29)
+
+The documented unstarted CP02-S3 successor now has a bounded implementation
+candidate: optionally record only original-target executable basename on admitted
+Events and show the latest Event's source in Recent. Source-process preference is
+independent and defaults off. Author validation/documentation complete; independent
+review and user-owned physical acceptance remain pending. No integration, monitoring,
+titles, Application catalog or sorting/filtering is delivered by this candidate.
+See [current state](Status/CURRENT_STATE.md#cp02-s3--source-app-provenance-author-handoff-2026-10-29).
+Older CP02-S3-unstarted roadmap snapshots below retain their historical meaning.
+
 ## Clipboard CP-02 lifecycle status (2026-10-12)
 
 CP02-S1 and CP02-S2 are **MERGED; closure pending** documentation review/integration and final canonical synchronization. Stage 1 merged through PR #91 (`8717e99f4cc77fc723497376dd858d22b8d6f18f`); Stage 2 merged through PR #92 (`828507f952919662e518b1dd5cfbffdd21ecc5b4`). The initial canonical synchronization is verified at the Stage 2 merge. See `Docs/Status/CURRENT_STATE.md` and the external integration reports and closure report for evidence and provenance.

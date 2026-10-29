@@ -1,5 +1,31 @@
 # F7Hub ChangeLog
 
+## 2026-10-29 — CP02-S3 Source App Provenance implementation candidate
+
+Implemented only in the isolated SourceAppProvenance worktree on base
+`b049a56a88305d48cf64d813065efa5a9b96f3e5`: migration0018 adds nullable Event
+basename; existing target lookup, Settings/consent transaction, domain, Recent
+query and model are extended. Recent displays Time/Preview/Source App/Retention/
+Pinned. Setup runtime/source-process guidance is corrected. No source title,
+Application catalog, new index, IPC, hotkey owner or paste mechanics are added.
+Legacy metadata remains NULL; content deduplication and replay are unchanged.
+
+Author checks: focused74, Database664, synthetic capture/paste198 PASS. Integration
+coverage combines60 unchanged passing methods with corrected bootstrap10 PASS;
+original integration70 run remains FAIL69/70. All executions are Windows-host
+synthetic/offscreen where relevant; physical acceptance and independent review
+remain pending. Initial environment/adapter/count failures and their corrections
+are preserved externally. Candidate unstaged/uncommitted; no publication/merge. Final preservation
+audit found five pre-existing worktree directories newly missing/prunable while
+canonical branch/HEAD/index/local bytes remain unchanged. That initial
+SOURCE_APP_PROVENANCE_BLOCKED finding is preserved externally. The user then
+confirmed the five old-path removals were intentional and clarified that the
+folders were moved to another disk to free space; fresh identity/preservation checks
+resolve the availability blocker as USER-REPORTED INTENTIONAL RELOCATION. Current
+disposition: SOURCE_APP_PROVENANCE_READY_FOR_REVIEW. Independent review and
+user-owned physical acceptance remain pending; no Git integration is authorized.
+See [current status](Status/CURRENT_STATE.md#cp02-s3--source-app-provenance-author-handoff-2026-10-29).
+
 ## 2026-10-29 — Python Paste Latest implementation and acceptance; integration pending
 
 Win+Alt+V is **IMPLEMENTED** in the isolated

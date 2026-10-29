@@ -1,5 +1,22 @@
 # F7Hub Entity Relationship Design
 
+## CP02-S3 — Capture Event attribution candidate (2026-10-29)
+
+Candidate only in `C:/Dev/F7Hub-Clipboard-SourceAppProvenance-20261029`, branch
+`feature/clipboard-source-app-provenance-20261029`, base/HEAD
+`b049a56a88305d48cf64d813065efa5a9b96f3e5`. Unstaged and uncommitted;
+independent review and user-owned physical acceptance remain pending.
+
+The existing Item 1-to-many Capture Event relationship is unchanged. An Event may
+carry one eligible `source_process_basename`; NULL means not recorded or unavailable.
+Two genuine captures of identical text from different applications still resolve
+one Item and two Events with distinct permitted basenames. There is no Application
+entity or new relationship. Metadata follows the Event's existing Item-owned
+cascade. Recent projects the latest committed Event ID's value, including NULL,
+without duplicating Item rows. [SQL Schema](09_SQLSchema.md#cp02-s3--optional-event-source-process-basename)
+owns the additive field and physical constraints. Historical D01 descriptions
+below retain their original scope; this candidate supplies only bounded attribution.
+
 ## Clipboard H01-B — current append relationship (2026-10-15 candidate)
 
 `clipboard_append_head` has zero or one row. Its singleton PK is constrained to

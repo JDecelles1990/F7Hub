@@ -246,7 +246,7 @@ class SelectionCapture(QAbstractNativeEventFilter):
                     return
                 result = self.service.capture_active_selection(
                     lambda: copy_selection(self.api, target, self._cancelled,
-                                           on_release=release_observed.set,
+                                           on_release=release_observed.set, with_metadata=True,
                                            on_release_wait=(capture_diagnostic['wait_entered'].set
                                                             if capture_diagnostic is not None else None)), self._cancelled)
                 outcome = ('success', result)

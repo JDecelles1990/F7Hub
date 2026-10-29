@@ -1,5 +1,36 @@
 # F7Hub Database Architecture
 
+## CP02-S3 — Source App Provenance candidate (2026-10-29)
+
+Candidate only in `C:/Dev/F7Hub-Clipboard-SourceAppProvenance-20261029`, branch
+`feature/clipboard-source-app-provenance-20261029`, base/HEAD
+`b049a56a88305d48cf64d813065efa5a9b96f3e5`. Unstaged and uncommitted;
+independent review and user-owned physical acceptance remain pending.
+
+[Migration 0018](../Database/Migrations/0018_clipboard_source_process_basename.sql)
+adds nullable `source_process_basename` to the existing Capture Event. It preserves
+all prior Item/Event/receipt/consent/append-head records and migration checksums;
+legacy Events remain NULL. There is no Application table, backfill or new index.
+Bounds are 255 Unicode scalars / 1020 UTF-8 bytes. The domain normalizes to NFC
+and lowercase; SQL enforces executable-basename shape, bounds and forbidden
+filename/control/format/line-separator ranges. Invalid optional input is omitted.
+
+The false-default existing source-process preference is read through SettingsService
+before acquisition. Existing consent evidence binds the Settings revision; the
+reserved writer revalidates consent/revision and the effective field preference
+before the Event insert. Any intervening Settings revision conservatively refuses
+the durable capture under existing policy. Disabling future capture does not erase
+prior metadata. No title, full image path, PID, HWND, URL or command line is stored.
+
+One genuine capture still commits Item/Event/receipt/head together. Exact-text
+Item deduplication and operation replay are unchanged: optional attribution is not
+an identity or receipt key, and replay never changes an existing Event or head.
+Recent uses a correlated scalar lookup ordered by descending committed Event ID,
+including NULL, while retaining Item ordering, retention and limit+1 bounds.
+The 15,300-Event fixture uses existing Recent and Item-child indexes with no
+query-plan temporary sort. Full Database regression: 664 PASS; fresh/upgrade,
+rollback, integrity_check=ok and zero foreign_key_check violations are covered.
+
 ## Clipboard H01-B — atomic append head and final paste reservation (2026-10-15 candidate)
 
 Additive [migration 0017](../Database/Migrations/0017_clipboard_append_head.sql)

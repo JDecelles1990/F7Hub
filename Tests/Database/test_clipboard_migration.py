@@ -19,7 +19,7 @@ class ClipboardMigrationTests(ClipboardDatabaseTestCase):
             versions = tuple(row[0] for row in connection.execute("SELECT version FROM schema_migrations ORDER BY version"))
             objects = tuple((row[0], row[1]) for row in connection.execute(
                 "SELECT type, name FROM sqlite_master WHERE name LIKE 'clipboard_%' OR name LIKE 'idx_clipboard_%' ORDER BY name"))
-            self.assertEqual(versions, tuple(range(1, 18)))
+            self.assertEqual(versions, tuple(range(1, 19)))
             self.assertEqual(set(objects), {("table", "clipboard_items"), ("table", "clipboard_capture_events"),
                 ("index", "idx_clipboard_items_recent"), ("index", "idx_clipboard_capture_events_item"),
                 ("table", "clipboard_operation_receipts"), ("index", "idx_clipboard_receipts_expiry"),
@@ -28,7 +28,7 @@ class ClipboardMigrationTests(ClipboardDatabaseTestCase):
             self.assertEqual(validate_database_integrity(connection), (("ok",), ()))
             for table in ("clipboard_items", "clipboard_capture_events"):
                 self.assertEqual(connection.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0], 0)
-            for table, expected in (("clipboard_items", ITEM_COLUMNS), ("clipboard_capture_events", EVENT_COLUMNS)):
+            for table, expected in (("clipboard_items", ITEM_COLUMNS), ("clipboard_capture_events", (*EVENT_COLUMNS, "source_process_basename"))):
                 self.assertEqual(tuple(row[1] for row in connection.execute(f"PRAGMA table_info({table})")), expected)
 
     def test_repeat_bootstrap_preserves_history_and_rows(self):
@@ -55,7 +55,7 @@ class ClipboardMigrationTests(ClipboardDatabaseTestCase):
             prior = tuple(tuple(row) for row in connection.execute("SELECT * FROM schema_migrations ORDER BY version"))
             scripts = tuple(tuple(row) for row in connection.execute("SELECT * FROM scripts ORDER BY script_id"))
         result = bootstrap_database(path, PROJECT_ROOT / "Database/Migrations")
-        self.assertEqual(result.migration_result.applied_versions, (13, 14, 15, 16, 17))
+        self.assertEqual(result.migration_result.applied_versions, (13, 14, 15, 16, 17, 18))
         with database_connection(path) as connection:
             self.assertEqual(prior, tuple(tuple(row) for row in connection.execute("SELECT * FROM schema_migrations WHERE version <= 12 ORDER BY version")))
             self.assertEqual(scripts, tuple(tuple(row) for row in connection.execute("SELECT * FROM scripts ORDER BY script_id")))
