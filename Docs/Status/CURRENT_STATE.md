@@ -1,5 +1,90 @@
 # F7Hub Current State
 
+<a id="tax-02-dp01-current-state"></a>
+
+## TAX-02 — DP-01 formal contract adoption candidate (2026-11-01)
+
+**DP-01 documented; independent documentation and production reviews pending.**
+Owner approval dated **2026-11-01** defers incomplete native AC08–AC10 assurance
+from the immediate TAX-02 production gate only. Independent contract-adoption
+disposition is **TAX-02 DP01_ADOPTION_APPROVED_WITH_NOTES**. This documentation
+candidate is not a production readiness declaration; integration authorization
+is **NOT GRANTED**.
+
+[Database contract](../07_Database.md#tax-02-dp01-contract) owns the ten retained
+mandatory requirements, immutable decision provenance and
+[TAX-02-DA01](../07_Database.md#tax-02-da01), now **DEFERRED / OPEN / UNVERIFIED**.
+[Python architecture](../13_PythonArchitecture.md#tax-02-dp01-python) owns the
+three reference operations and narrow category error boundary.
+
+### Candidate and gate separation
+
+The isolated worktree is `C:/Dev/F7Hub-TAX-02`, branch
+`feature/tax-02-taxonomy-read-safety`, baseline/HEAD
+`e72c390a57ac73fb64b5afd3c8dd852516494366`. The six production/test candidate paths
+retain their frozen identities: category_repository.py, tag_repository.py,
+ticket_reference_service.py, database.py (docstring only),
+test_category_references.py and test_taxonomy_reference_read_safety.py.
+Only the four approved documentation owners change in this adoption task.
+
+The original ten-path aggregate
+`103ef07d5982ae0e4b5358aeb92f8300c7e9d7acdbe5cf810fd87c60db6bbd2b` identifies the
+preserved pre-adoption snapshot. It is not the aggregate of these new document
+bytes. The new exact source/package manifests and before/after documentation
+diffs are recorded externally at
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/TAX-02/dp01-documentation-adoption-20261101T100627Z/`.
+Changes remain unstaged and uncommitted; independent documentation review and
+production evidence adjudication remain pending. No integrated behavior is claimed.
+
+### Evidence provenance and adoption review notes
+
+Historical `implementation-20261029T235100Z/focused-results.json` reports
+**31 PASS**, exit 0, for category-reference/Knowledge-category/Knowledge-tag
+modules, and **15 overlapping PASS**, exit 0, for taxonomy-read-safety/category
+references. These are retained WINDOWS_NATIVE author records, not fresh results
+from this documentation task, and their counts are not summed.
+
+**DP01-N01:** 11 category-reference, 14 Knowledge-category and seven Knowledge-tag
+test methods are statically visible in the current first-campaign modules
+(**32 methods**). Why the historical record reports 31 executions is unresolved.
+Do not infer a missing, skipped or failed test, alter the historical count, or
+assume a per-run edit sequence. The current second-campaign modules contain
+11 plus four methods, matching the reported 15; no Python discovery was run.
+Applicability/sufficiency remains for production review; DP-01 adds no fresh-only
+requirement.
+
+**DP01-N02:** source and package identities were independently reviewed.
+The normal-user Python314 identity observation is **USER_REPORTED**:
+version 3.14.6 and base SHA-256
+`03168c01b7b7491423350e82c26fee71f35b43694d1319d3c668bda6903a0c38` match the
+existing approved pin. The venv launcher pin is
+`199ce15a9f0d4f9522edba59338e4879d28cf61f88e377b8164bcb716275ed22`.
+These observations do not clear the sandbox read/hash restriction.
+The earlier focused-suite attempt exited **103** before tests loaded; zero tests
+executed and its result remains **BLOCKED**, not a test assertion failure.
+Any required new execution must verify identities/access in its actual permitted
+context. This documentation task runs no Python, SQLite or campaign.
+
+### Deferred native evidence and accepted residual risk
+
+AC08, AC09 and AC10 each remain **DEFERRED / OPEN / UNVERIFIED**.
+D02 M01–M03 still define future layered observation, qualified
+`ENGINE_CONSISTENT_SHM`, denied-storage inventory and valid recovery evidence.
+No original native BLOCKED result is relabeled PASS. The historical zero-header
+journal is not a recovery-required fixture and does not establish a production defect.
+
+TAX-02-DA01 retains B1 (sandbox runtime access), B2 (existing fixture/evidence
+limitations), B3 (unavailable original SHM byte images) and B4 (inadequate
+denied-storage observations and the prior ACL prohibition). Runtime-specific
+sidecar, restricted-storage and recovery behavior remain insufficiently verified;
+the evidence neither establishes a concrete defect nor proves its absence.
+Reassessment requires separately authorized valid native evidence and independent
+adjudication under the preserved D02 standards. No H01/V01B resumption or new
+infrastructure follows automatically.
+
+Release/adoption history is recorded in the
+[dated ChangeLog entry](../18_ChangeLog.md#tax-02-dp01-changelog).
+
 <a id="cp02-s4-current-state"></a>
 
 ## CP02-S4 — R1 focused clock/expiry correction (2026-10-29)

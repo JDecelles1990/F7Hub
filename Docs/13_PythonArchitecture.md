@@ -1,5 +1,45 @@
 # F7Hub Python Architecture
 
+<a id="tax-02-dp01-python"></a>
+
+## TAX-02 — reference-read boundary and DP-01 adoption (2026-11-01)
+
+The isolated TAX-02 implementation candidate uses the existing
+`database_connection(..., read_only=True)` in exactly
+`CategoryRepository.list_categories`, `TagRepository.list_tags` and
+`TagRepository.list_article_tags`. The existing helper selects an encoded
+`mode=ro` URI and skips parent creation. SQL, parameters, frozen record fields,
+scope/active filters, ordering, article membership and return shapes are unchanged.
+Its executable connection algorithm, ordinary locking, foreign-key configuration
+and 5000-ms busy policy are unchanged; the database.py change is a docstring only.
+
+`TicketReferenceService.list_active_ticket_categories` translates
+`sqlite3.Error`, `OSError` and `RuntimeError` from its category repository call
+to the existing `TicketReferenceError("Could not load ticket categories.")`
+with the original cause. Option mapping remains outside that catch so unrelated
+`TypeError`/`AttributeError` defects remain visible. KnowledgeService and
+company/contact reference behavior are unchanged. No application SQL write,
+writable fallback, bootstrap, migration or repair is added to these reads.
+
+Owner DP-01 approval dated **2026-11-01** and independent adoption disposition
+**TAX-02 DP01_ADOPTION_APPROVED_WITH_NOTES** are recorded in the
+[TAX-02 acceptance contract](07_Database.md#tax-02-dp01-contract), which owns all
+ten retained requirements and decision provenance. The incomplete AC08–AC10
+native assurance is **DEFERRED / OPEN / UNVERIFIED** in
+[TAX-02-DA01](07_Database.md#tax-02-da01). D01 safety behavior and the original
+D02 M01–M03 future-assurance standards are preserved; this scope change applies
+only to TAX-02 and grants no integration or automatic campaign authority.
+
+**DP01-N01:** historical 31 PASS overlaps the 15 PASS record; current first-campaign
+modules contain 32 static test methods, with the discrepancy unresolved.
+**DP01-N02:** normal-session Python identity is user-reported; independently
+reviewed source/package identity does not establish sandbox runtime access or
+verified native sidecar/recovery behavior. No fresh-only test rule is added.
+[Current state](Status/CURRENT_STATE.md#tax-02-dp01-current-state) records evidence
+and pending production review. Runtime-specific storage and compatibility risks
+remain explicit; contract adoption does not declare the candidate production-ready.
+See the [dated adoption entry](18_ChangeLog.md#tax-02-dp01-changelog).
+
 ## CP02-S4 candidate — selected history output (2026-10-29)
 
 The explicitly authorized Copy Selected use case extends the existing

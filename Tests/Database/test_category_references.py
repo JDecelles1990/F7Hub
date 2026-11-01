@@ -76,8 +76,28 @@ class CategoryReferenceTests(unittest.TestCase):
         self.assertEqual([(o.reference_id, o.label) for o in options], [(23, "Hardware"), (12, "Microsoft 365"), (31, "Networking")])
 
     def test_reference_errors_are_safe(self):
-        with patch.object(self.categories, "list_categories", side_effect=sqlite3.OperationalError("private database path")):
-            with self.assertRaisesRegex(TicketReferenceError, "^Could not load ticket categories.$"):
+        for failure in (
+            sqlite3.OperationalError("private database path"),
+            OSError("private database path"),
+            RuntimeError("private database path"),
+        ):
+            with self.subTest(failure=type(failure).__name__):
+                with patch.object(self.categories, "list_categories", side_effect=failure):
+                    with self.assertRaises(TicketReferenceError) as caught:
+                        self.references.list_active_ticket_categories()
+                self.assertEqual(str(caught.exception), "Could not load ticket categories.")
+                self.assertIs(caught.exception.__cause__, failure)
+                self.assertNotIn("private database path", str(caught.exception))
+
+    def test_category_mapping_programming_errors_remain_visible(self):
+        for failure in (TypeError("mapping defect"), AttributeError("mapping defect")):
+            with self.subTest(failure=type(failure).__name__):
+                with patch.object(self.categories, "list_categories", side_effect=failure):
+                    with self.assertRaises(type(failure)) as caught:
+                        self.references.list_active_ticket_categories()
+                self.assertIs(caught.exception, failure)
+        with patch.object(self.categories, "list_categories", return_value=(object(),)):
+            with self.assertRaises(AttributeError):
                 self.references.list_active_ticket_categories()
 
     def test_active_and_null_categories_commit_ticket_history_and_timeline(self):

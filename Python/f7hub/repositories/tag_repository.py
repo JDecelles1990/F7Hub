@@ -21,14 +21,14 @@ class TagRepository:
         self._database_path = database_path
 
     def list_tags(self) -> tuple[TagRecord, ...]:
-        with database_connection(self._database_path) as connection:
+        with database_connection(self._database_path, read_only=True) as connection:
             rows = connection.execute(
                 "SELECT tag_id, name FROM tags ORDER BY name COLLATE NOCASE, tag_id"
             ).fetchall()
         return tuple(TagRecord(int(row["tag_id"]), str(row["name"])) for row in rows)
 
     def list_article_tags(self, article_id: int) -> tuple[TagRecord, ...]:
-        with database_connection(self._database_path) as connection:
+        with database_connection(self._database_path, read_only=True) as connection:
             rows = connection.execute(
                 """
                 SELECT t.tag_id, t.name

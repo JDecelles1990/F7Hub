@@ -1,5 +1,135 @@
 # F7Hub Database Architecture
 
+<a id="tax-02-dp01-contract"></a>
+
+## TAX-02 — DP-01 production acceptance contract (2026-11-01)
+
+The owner approved DP-01 on **2026-11-01** for the TAX-02 production slice only.
+Independent contract-adoption review returned
+**TAX-02 DP01_ADOPTION_APPROVED_WITH_NOTES**. This section records that amendment
+in the existing documentation owner; independent review of these documentation
+changes and of the production candidate remains pending. **No production
+integration authorization is granted.**
+
+The existing Category/Tag reference reads use the approved D01 Option A:
+`database_connection(..., read_only=True)` selects the existing encoded
+`mode=ro` connection path, which does not create a missing primary database or
+missing parents. Normal SQLite-managed WAL/SHM coordination may occur. This is
+a scoped non-creating-primary contract, not a guarantee that every SQLite
+filesystem object is unchanged. Application data/schema writes, bootstrap,
+migration, repair, writable fallback/retry, explicit checkpoints and unapproved
+journal-mode changes remain prohibited in these reference reads. Ordinary
+locking, `foreign_keys=ON` and the existing 5000-ms busy policy are preserved;
+`immutable=1` and `nolock=1` are not approved workarounds.
+
+### Retained mandatory production acceptance
+
+1. The approved repository reads use the existing `read_only=True` mechanism.
+2. A missing primary SQLite database is not created.
+3. Missing parent directories are not created.
+4. No application SQL writes, writable fallback, migration, bootstrap or repair
+   operation is introduced.
+5. Existing successful category and tag reference behavior remains compatible.
+6. Approved category-specific exception translation and error causes are preserved.
+7. Source and approved runtime identities are verified.
+8. Existing focused production tests pass in an authorized execution environment.
+   Applicable retained evidence is permitted; DP-01 adds no fresh-only rule.
+9. The production candidate receives independent review.
+10. Required documentation is synchronized before integration.
+
+The [Python boundary](13_PythonArchitecture.md#tax-02-dp01-python) describes the
+three operations and category error scope.
+[Current state](Status/CURRENT_STATE.md#tax-02-dp01-current-state) owns actual
+candidate and evidence status; adoption approval does not declare production readiness.
+
+<a id="tax-02-da01"></a>
+
+### TAX-02-DA01 — deferred native SQLite assurance
+
+**DEFERRED / OPEN / UNVERIFIED.** DP-01 removes the following incomplete
+assurance from the immediate TAX-02 acceptance gate only. It does not turn
+historical BLOCKED evidence into PASS, eliminate risk, or change unrelated slices.
+
+| Original criterion | Deferred assurance and preserved standard |
+|---|---|
+| AC08 — DEFERRED / OPEN / UNVERIFIED | Complete layered resident-WAL/SHM evidence: supported filesystem observations, observer limitations, and relevant byte/metadata changes under D02 M01. |
+| AC09 — DEFERRED / OPEN / UNVERIFIED | Complete denied-storage inventories and every applicable D02 M02/M03 condition before classifying an effect as `ENGINE_CONSISTENT_SHM`. |
+| AC10 — DEFERRED / OPEN / UNVERIFIED | Genuinely recovery-required journal fixtures and validated access/recovery prerequisites. A zero-header journal does not establish recovery need. |
+
+The original AC clauses and D02 **M01–M03** remain preserved for future assurance.
+M01 requires layered evidence and controls for declared observable classes;
+notification absence is not universal memory-mapped-store observation or proof
+of unchanged bytes. M02 requires all approved conditions for qualified
+`ENGINE_CONSISTENT_SHM`; unexplained material effects remain BLOCKED for native
+assurance closure. Exact per-byte writer identity must not be invented. M03 retains
+strict inventory
+completeness, complementary denied-interval observations, valid permission and
+recovery prerequisites, full reader lifetime and separate close/cleanup effects.
+
+| Carried-forward blocker | OPEN limitation |
+|---|---|
+| B1 | The sandbox cannot read/hash the approved base Python; a prior startup returned exit 103. Matching normal-session identity is user-reported and does not establish sandbox execution access. |
+| B2 | Inspected legacy native utilities lack complete eligible evidence: historical output destinations, ACL changes, selection/oracle gaps, and incomplete recovery prerequisites prevent unchanged reuse. |
+| B3 | Original before/after SHM byte images are unavailable; hash strings and the post-cleanup primary cannot reconstruct the missing field-level evidence. |
+| B4 | Existing denied-storage records lack required complete observations; recreating them with the inspected utilities would change ACLs, prohibited in the closure task. |
+
+Historical measurements remain limited: sampled primary/WAL hashes were stable
+while SHM changed without a directory notification; denied inventories were empty
+without completeness proof; the retained 4616-byte journal had zero magic.
+The old journal expectation failure is not an established production defect.
+The mapped-file diagnostic characterizes an observer limitation, and the later
+recovery setup was NOT RUN. H01 fake-adapter and V01B static results supply
+different assurance and cannot close these native criteria.
+
+Runtime-specific sidecar behavior, restricted-storage effects and recovery-required
+journals remain insufficiently verified. No concrete defect has been established;
+the absence of defects in these conditions has not been proved.
+
+Future reassessment requires explicit scope/execution authority, applicable
+candidate/runtime identities, a permitted context and disposable resources,
+inspected valid fixtures, complete D02 evidence, bounded ownership/exit/cleanup
+and independent adjudication. Record later outcomes with their immutable evidence
+and review references, preserving prior failures. No H01/V01B resumption, new
+testing infrastructure, permission change or automatic retry is authorized here.
+
+| Deferred-assurance outcome | Status |
+|---|---|
+| Original native matrix and AC08–AC10 closure assessment | Historical BLOCKED/incomplete, preserved. |
+| DP-01 owner deferral and independent adoption review | Owner APPROVED; adoption APPROVED_WITH_NOTES; no native PASS. |
+| Later independent native validation | NOT RUN; no new outcome recorded. |
+
+### Review-note and decision provenance
+
+**DP01-N01:** preserve the historical 31 PASS and overlapping 15 PASS reports.
+The current first-campaign modules contain 32 statically visible test methods.
+The discrepancy and per-run applicability remain unresolved; do not infer a
+missing, skipped or failed test, or sum the reports into a unique total.
+**DP01-N02:** retain user-reported normal-session runtime identity, independently
+reviewed source/package identity, sandbox access limits and unverified native
+behavior as distinct evidence. No fresh test PASS is claimed by documentation.
+
+External authority root: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/TAX-02/`.
+The immutable records below remain authoritative provenance; their historical
+wording and results are not rewritten:
+
+- D01: `revised-plan-20261029T232256Z/Approved-Decision-Record.json` and
+  `Acceptance-Criteria.md`; independent plan review
+  `independent-plan-review-20261029T234210Z/review-decision.json`.
+- D02: `adopted-tax-02-d02-20261030T105757Z/approved-decision-record.json`;
+  M01–M03 and fixture specifications remain in `design-tax-02-d02-20261030T101128Z/`.
+- DP-01 owner approval and original deferred record:
+  `dp01-owner-adoption-20261101T094541Z/01-Owner-Decision-Record.md`,
+  `03-Prospective-Acceptance-Addendum.md` and
+  `04-TAX-02-DA01-Deferred-Native-Assurance.md`.
+- Independent adoption approval:
+  `independent-dp01-adoption-review-20261101T095509Z/06-Machine-Readable-Decision.json`;
+  reviewed owner-manifest SHA-256
+  `c4900dc08203a52fb8ad8241f5f162ce750496f2cafba8d8079b0d74c6f66d31`.
+- Native blocker assessment: `tax-02-ac08-ac10-native-evidence-20261101T093658Z/`.
+
+The [dated adoption entry](18_ChangeLog.md#tax-02-dp01-changelog) preserves the
+prospective decision separately from historical implementation and validation.
+
 ## CP02-S3 — Source App Provenance candidate (2026-10-29)
 
 Candidate only in `C:/Dev/F7Hub-Clipboard-SourceAppProvenance-20261029`, branch

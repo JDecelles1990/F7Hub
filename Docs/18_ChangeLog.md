@@ -1,5 +1,42 @@
 # F7Hub ChangeLog
 
+<a id="tax-02-dp01-changelog"></a>
+
+## 2026-11-01 — TAX-02 DP-01 formal contract adoption candidate
+
+Recorded owner DP-01 approval dated **2026-11-01** and independent adoption
+disposition **TAX-02 DP01_ADOPTION_APPROVED_WITH_NOTES** in the four existing
+documentation owners. The [database contract](07_Database.md#tax-02-dp01-contract)
+preserves all ten retained mandatory acceptance requirements; the
+[Python boundary](13_PythonArchitecture.md#tax-02-dp01-python) describes the three
+existing read-only reference operations and narrow Ticket category error/cause
+translation. The six production/test candidate files are unchanged by this task.
+
+For the TAX-02 production slice only, incomplete native AC08–AC10 assurance is
+**DEFERRED / OPEN / UNVERIFIED** in
+[TAX-02-DA01](07_Database.md#tax-02-da01). Original D01/D02 decisions and M01–M03
+evidence standards remain traceable; historical native BLOCKED findings are not
+rewritten or relabeled PASS. DA01 retains B1–B4, missing observations and fixture
+prerequisites, future outcome tracking and explicit reassessment conditions.
+Runtime-specific sidecar coordination, restricted-storage and recovery-required
+journal behavior remain insufficiently verified. The zero-header journal is not
+accepted as recovery evidence; no established defect or proof of its absence
+is inferred from these incomplete observations.
+
+**DP01-N01:** preserve the historical **31 PASS** and **15 overlapping PASS**
+author records; **32 test methods** are statically visible in the current first
+campaign modules and that discrepancy remains unresolved. No missing, skipped
+or failed test is inferred and no counts are summed. **DP01-N02:** normal-session
+Python identity remains user-reported, reviewed source/package identities remain
+distinct, sandbox execution access remains limited, and deferred native behavior
+is unverified. No fresh-only requirement or new test PASS is introduced.
+
+This is an unstaged, uncommitted documentation adoption candidate with independent
+documentation and production reviews pending. **No integration authorization is
+granted and no production readiness is declared.** The
+[current-state record](Status/CURRENT_STATE.md#tax-02-dp01-current-state) owns
+qualified evidence and gate status. Existing historical entries are preserved.
+
 ## 2026-10-29 — CP02-S4 R1 focused clock/expiry correction candidate
 
 Corrected the independent review's MAJOR R1 finding in the unintegrated CP02-S4
