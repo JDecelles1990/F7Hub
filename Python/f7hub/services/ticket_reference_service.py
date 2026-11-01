@@ -35,10 +35,10 @@ class TicketReferenceService:
 
     def list_active_ticket_categories(self) -> tuple[TicketReferenceOption, ...]:
         try:
-            return tuple(TicketReferenceOption(row.category_id, row.name)
-                         for row in self._categories.list_categories(scope="TICKET", active_only=True))
-        except sqlite3.Error as error:
+            rows = self._categories.list_categories(scope="TICKET", active_only=True)
+        except (sqlite3.Error, OSError, RuntimeError) as error:
             raise TicketReferenceError("Could not load ticket categories.") from error
+        return tuple(TicketReferenceOption(row.category_id, row.name) for row in rows)
 
     def list_active_companies(self) -> tuple[TicketReferenceOption, ...]:
         try:

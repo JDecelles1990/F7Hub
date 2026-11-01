@@ -61,7 +61,8 @@ def open_database(
     """Create or open a configured SQLite connection.
 
     Writable file-backed connections create parent directories when needed.
-    Read-only connections require an existing file and never create storage.
+    Read-only file connections do not create a missing primary database or parents.
+    SQLite may create or update WAL/SHM sidecars during supported read-only access.
     The caller owns the returned connection and must close it.
     """
 

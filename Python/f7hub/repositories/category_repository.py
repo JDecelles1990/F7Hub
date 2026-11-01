@@ -25,7 +25,7 @@ class CategoryRepository:
 
     def list_categories(self, *, scope: str, active_only: bool = False) -> tuple[CategoryRecord, ...]:
         """Return scoped rows ordered by sort order, case-insensitive name and ID."""
-        with database_connection(self._database_path) as connection:
+        with database_connection(self._database_path, read_only=True) as connection:
             rows = connection.execute(
                 "SELECT category_id, scope, name, is_active, sort_order FROM categories "
                 "WHERE scope = ? AND (? = 0 OR is_active = 1) "
