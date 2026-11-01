@@ -16,6 +16,7 @@ class SelectionCopyError(RuntimeError):
     def __init__(self, code, *, guard=None):
         super().__init__(code)
         self.guard = guard
+        self.stage = None  # Content-free acquisition boundary; never target metadata.
 
 
 @dataclass(frozen=True)
@@ -254,7 +255,12 @@ class WindowsSelectionAPI:
 def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.sleep, on_release=None, on_release_wait=None, with_metadata=False):
     """One copy only; sequence change plus target/owner checks, never old text."""
     source_process = []
-    handle = (api.pin(target, on_source_process=source_process.append) if with_metadata else api.pin(target))
+    try:
+        handle = (api.pin(target, on_source_process=source_process.append) if with_metadata else api.pin(target))
+    except SelectionCopyError as error:
+        error.stage = 'PIN'
+        raise
+    stage = 'WAIT_RELEASE'
     try:
         def check():
             if cancelled.is_set():
@@ -271,11 +277,14 @@ def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.s
             sleep(.015)
         if on_release is not None:
             on_release()  # Preserve this press's observed release for the coordinator.
+        stage = 'CHECK_SOURCE'
         check()
         before = api.sequence()
         if not before:
             raise SelectionCopyError('SEQUENCE_UNAVAILABLE')
+        stage = 'SEND_COPY'
         api.send_copy()
+        stage = 'WAIT_COPY'
         deadline = clock() + 1.5
         while clock() < deadline:
             check()
@@ -283,7 +292,9 @@ def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.s
             if after and after != before:
                 if api.owner_pid() != target.pid:
                     raise SelectionCopyError('AMBIGUOUS_UPDATE')
+                stage = 'READ_TEXT'
                 text = api.read_text(target, after)
+                stage = 'FINAL_CHECK'
                 check()
                 if clock() >= deadline or api.sequence() != after:
                     raise SelectionCopyError('LATE_OR_UNSTABLE')
@@ -291,5 +302,12 @@ def copy_selection(api, target, cancelled, *, clock=time.monotonic, sleep=time.s
                         if with_metadata else text)
             sleep(.02)
         raise SelectionCopyError('NO_FRESH_COPY')
+    except SelectionCopyError as error:
+        error.stage = stage
+        raise
     finally:
-        api.unpin(handle)
+        try:
+            api.unpin(handle)
+        except SelectionCopyError as error:
+            error.stage = 'CLEANUP'
+            raise

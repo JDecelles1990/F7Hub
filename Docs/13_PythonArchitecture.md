@@ -303,6 +303,37 @@ previous candidate. Exact human timing was not recorded. Corrected C-to-V
 physical diagnosis is pending; original paste TARGET_UNAVAILABLE and 4 PASS / 4 FAIL
 physical acceptance remain separate unresolved history.
 
+## Capture target diagnostic — isolated candidate (2026-11-01)
+
+The unintegrated hotkey recovery candidate adds
+F7HUB_DEV_CAPTURE_TARGET_DIAGNOSTIC=1, off by default, source-checkout only
+and disabled in frozen builds. It is a child-process development environment
+flag, never a persisted Setting. Normal capture feedback remains unchanged.
+Capture still performs its existing acquisition, consent/privacy assessment and
+optional authorized persistence; this flag is not a side-effect-free capture mode.
+
+Diagnostic feedback uses fixed allowlisted STAGE, CODE and GUARD values in the
+existing status bar. Unknown values become UNCLASSIFIED; no arbitrary exception,
+captured text, target title/path, PID/HWND or token is displayed. Initial
+foreground/service binding is INITIAL_BINDING; native pinning is PIN; later
+release/source/copy/read/final/cleanup boundaries are distinct. Native
+SelectionCopyError identity, code and guard survive stage attribution.
+COMPLETE / ACQUIRED confirms acquisition and service completion, not persistence
+or physical paste. Inspect the disposable Recent page separately for saved data.
+
+The existing F7HUB_DEV_PASTE_TARGET_DIAGNOSTIC=1 mode remains the separate
+no-effect V diagnostic: no paste authorization, history source retrieval,
+Clipboard write or Ctrl+V. One-use normal paste authorization, source fences,
+target/elevation policy and cleanup refusal are unchanged. Existing release
+diagnostic records retain their bounded RAM-only semantics.
+
+Fresh implementer evidence: 76 focused synthetic tests PASS on a Windows host,
+Qt offscreen, exit 0. Physical capture, registration and insertion remain
+BLOCKED / NOT RUN: an existing canonical instance prevents an isolated launch.
+The historical TARGET_UNAVAILABLE guard is still unknown; no production repair
+or restoration is claimed. External checkpoint: Clipboard-HotkeyRecovery /
+diagnostic-20261101T134812Z. No new GUI control/action or registry identity exists.
+
 ## Win+Alt+V target validation diagnostic — development candidate (2026-10-28)
 
 The isolated Python Paste Latest candidate includes a bounded target diagnostic.

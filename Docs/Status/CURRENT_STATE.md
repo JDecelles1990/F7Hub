@@ -1,5 +1,29 @@
 # F7Hub Current State
 
+## Clipboard hotkey recovery — isolated diagnostic candidate (2026-11-01)
+
+**BLOCKED at physical validation; diagnostic implementation only.**
+Candidate worktree: C:\Dev\F7Hub-Clipboard-HotkeyRecovery-20261101;
+branch: fix/clipboard-hotkey-diagnostics-20261101;
+base: e72c390a57ac73fb64b5afd3c8dd852516494366.
+The canonical checkout is unchanged; this candidate is not integrated.
+
+Opt-in capture target feedback preserves fixed native stage/code/guard while
+normal feedback and native security/consent/paste boundaries remain unchanged.
+Unknown diagnostic values are redacted and acquired text is not displayed.
+The existing side-effect-free V target diagnostic is reused. No targeted
+production repair has been invented: the reported TARGET_UNAVAILABLE guard
+and current V failure remain unidentified.
+
+Fresh implementer evidence: 76 focused tests PASS, exit 0, Windows host /
+Qt offscreen / synthetic APIs. Physical Windows C/V validation is BLOCKED:
+the preflight found an active canonical launcher/interpreter pair with no
+explicit disposable database argument. No candidate GUI or database was
+launched/opened. Independent static review and the operator handoff are external;
+neither can establish restored hotkeys or satisfy the physical gate.
+Checkpoint: %LOCALAPPDATA%\F7Hub\CodexCheckpoints\Clipboard-HotkeyRecovery\diagnostic-20261101T134812Z.
+No staging, commit, push or merge.
+
 <a id="cp02-s4-current-state"></a>
 
 ## CP02-S4 — R1 focused clock/expiry correction (2026-10-29)
