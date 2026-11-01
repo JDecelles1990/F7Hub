@@ -960,3 +960,85 @@ IAM-007 and VPN-001 compatibility obligations remain pending despite conceptual-
 Independent review handoff: compare this exact two-document delta with P-USER, the original packet, available R1/review evidence, current 0C/2A–2C and immutable imported catalogs. Verify ten uniquely declared decisions, eight identities, eight bilingual pairs, fifteen assessments (5/10), unresolved mappings, compatibility obligations, provenance levels and byte-preserved prior history. Recover missing evidence or retain NOT VERIFIED. Author static checks are not independent review. Technical/domain, bilingual/lexical, canonical identity and operational publication/implementation acceptance remain separate gates.
 
 Batch 001 change record, 2026-11-01: appended owner decision documentation with linked 2C lexical detail. Prior document bytes/review records preserved; this delta awaits independent review. External candidate manifest and static results accompany the handoff. No staging, commit, push, PR, merge, import or vocabulary activation is authorized.
+
+
+## Batch 001 VPN-001 Successor Candidate R2
+
+Recorded 2026-11-01 (America/Toronto). This append-only proposal prepares the existing VPN-001 concern for review against the owner-approved scope. It preserves the earlier definitions, registers, architecture and review histories. Earlier availability and review-status statements remain author-time records. Recovery of the exact R1 packet is recorded below; it does not establish the previously reported completed R1 rereview.
+
+| Document control | Candidate value |
+| --- | --- |
+| Proposed definition revision | **Batch 001 VPN-001 R2**; successor candidate to the VPN-001 definition in **Batch 001 R1** only |
+| Candidate status | READY_FOR_REVIEW; independent review of this appended candidate: NOT RUN |
+| Retained source identity | `VPN-001`; source-local proposed key `vpn_connection_or_authentication_failure` |
+| Proposed English label | VPN connection or session failure |
+| Proposed French-Canadian label | Échec de connexion ou interruption d’une session VPN |
+| Label acceptance | Both labels remain candidates; technical/language acceptance, preferred designation and bilingual equivalence are NOT ESTABLISHED |
+| Revision scope | Adds explicit unexpected session-continuity failure to the R1 establishment scope under existing B001-D06; no change to another concern or to an architecture decision |
+
+### VPN-001 R2 Source and Review Provenance
+
+| Reference | Inspected evidence and practical limit |
+| --- | --- |
+| R1-VPN | Owner-supplied `C:\Users\Jo\Downloads\Batch001_R1_Corrected.txt`, 48,337 bytes, raw SHA-256 `eddc483987ccb105ec25170685b4fa148b3cbec794e3cbee10bb75d99bb42158`, directly reverified during this authoring task. Packet revision **Batch 001 R1** (document control lines 15 and 76); no separate per-definition revision identifier. Original VPN-001 definition/inclusions/exclusions/limitations: lines 206–227. VPN-002 boundary: lines 231–252. This external source is identified by hash and locators; no repository copy or source edit is made. |
+| B001-D06 | [Existing Batch 001 decision register](#batch-001-decision-register), B001-D06 / D06: owner-approved establishment, establishment authentication and session continuity/loss; distinct VPN-002 resource-access concern; reported status and technical corroboration remain separate. This reference adds no decision or second register. |
+| B001-COMP-02 | Owner-supplied compatibility direction **QUALIFIED COMPATIBILITY**, in the supplied conversation. The completed `BATCH001_COMPATIBILITY_TECHNICAL_REVIEW_COMPLETE` response supports qualified source-local key retention and preserves acceptance gates. It did not accept an exact R1 revision or establish vendor applicability. |
+| R1 reconciliation | Supplied conversation response `BATCH001_R1_COMPATIBILITY_RECONCILED` verified the R1 hash and identified FAIL for full D06 coverage: R1 lines 215–227 cover establishment and explicitly defer later disconnection. The proposal below addresses that wording gap; it does not retroactively change R1. |
+| Completed documentary compatibility assessment | Supplied conversation response beginning “PASS — the proposed successor closes the VPN-001 establishment-only gap identified in Batch 001 R1.” It assessed the owner-pasted successor wording, including intentional/expected termination, VPN-002, uncertain state and historical identity. This is documentary evidence for that supplied text, not independent approval of this new file delta. No separate signed report, reviewer authorization identity, original decision time or transcript hash is established here. |
+| Existing lexical and source lineage | [2C Batch 001 label candidates](2C_Troubleshooting_Lexical_Model.md#batch-001-candidate-bilingual-labels) and [expression assessments](2C_Troubleshooting_Lexical_Model.md#batch-001-imported-expression-assessments) remain controlling candidates. The original imported [issue catalog](../../../Data/SemanticModel/Imports/Synthetic-Troubleshooting-Starter-v0.1/Packages/F7Hub_Taxonomy_Planning_v0.1/catalogs/issues.json), VPN-001/VPN-002, remains unchanged and proposed. The source names only “VPN client”; vendor, protocol, deployment and version coverage are NOT VERIFIED. |
+
+### VPN-001 R2 Proposed Definition
+
+A troubleshooting concern in which an intended VPN connection cannot be established, authentication required to establish that connection fails, or a previously established VPN session is unexpectedly interrupted while the connection remains required.
+
+The concern encompasses three distinguishable stages:
+
+1. **Establishment failure:** The required VPN connection cannot be established.
+2. **Establishment authentication failure:** Authentication required for the VPN connection is unsuccessful or cannot be completed.
+3. **Session continuity failure:** A previously established VPN session unexpectedly disconnects or loses its intended connection state while the connection remains required.
+
+“Loss of intended connection state” refers specifically to VPN session establishment or continuity, not merely to failure of an application or remote resource accessed through the VPN.
+
+### VPN-001 R2 Exclusions and Diagnostic Boundaries
+
+- Intentional disconnection alone does not establish failure.
+- Expected session termination must be distinguished from unexpected interruption in the relevant intended-use and time context.
+- VPN-002 remains independently assessable for inability to access an intended remote resource during a reported or observed established VPN session. Resource-access failure alone does not establish VPN session failure; separately supported concerns can coexist.
+- A VPN client’s reported Connected status does not independently verify tunnel health, routing, DNS resolution, authentication state or resource reachability.
+- Unknown session state remains unresolved. “VPN not working” alone does not select VPN-001 or VPN-002.
+- No cause can be inferred from the concern label or retained proposed key. No diagnostic execution, causal acceptance, validation, resolution or case closure follows from selection of the concern.
+
+Preserve attributable reported symptoms, timestamps, client/platform/version and connection context, intended session and required-use context, relevant stage, and separately verified technical observations. A report can support a concern candidate while its technical implications remain unverified. Distinguish uncompleted authentication, denied or cancelled interaction, expected termination and technical failure; incomplete interaction alone does not identify a defective authentication mechanism. Do not infer routing, DNS, credential, policy, server or client causes from the label.
+
+### VPN-001 R2 Documentary Scenario Criteria
+
+These are synthetic documentary criteria for this candidate, not executed runtime or matcher tests. Author validation checks their presence and consistency; actual case classification still requires admitted contextual evidence and owning-workflow review.
+
+| Criterion | Synthetic scenario | Expected documentary interpretation |
+| --- | --- | --- |
+| 1 — Establishment | A required VPN connection cannot be established. | VPN-001 establishment-stage candidate; preserve context and failure evidence without selecting a cause. |
+| 2 — Establishment authentication | Authentication necessary to establish the required VPN connection fails or cannot complete. | VPN-001 establishment-authentication candidate; preserve completion/cancellation status and verification limits. Application sign-in after connection alone does not establish this stage. |
+| 3 — Unexpected continuity loss | A previously established session unexpectedly disconnects while it remains required. | VPN-001 continuity-stage candidate; preserve earlier-state evidence, time and observations without inferring why it disconnected. |
+| 4 — Intentional disconnection | The operator intentionally disconnects. | Intentional disconnection alone does not establish VPN-001 failure. |
+| 5 — Expected termination | The session terminates as expected in its declared context. | Expected termination alone does not establish unexpected continuity failure. Record any separately supported unexpected impact without automatically relabeling termination. |
+| 6 — Connected with inaccessible resource | The client reports an established session and an intended internal resource is inaccessible. | Assess a VPN-002 candidate with reported-state verification limits. Failed resource access alone does not establish VPN-001 session failure or resource-path cause. |
+| 7 — Unknown state | The only report is “VPN not working.” | Retain the report and abstain from selecting VPN-001 or VPN-002 pending stage, connection-state and resource context. |
+| 8 — Unverified Connected indicator | The client displays Connected, with no technical corroboration of the relevant tunnel or path. | Preserve the observation. Do not promote it to verified tunnel health, routing, DNS, authentication or reachability; it establishes neither success nor a particular failure by itself. |
+
+### VPN-001 R2 Acceptance Limits and Independent Review Handoff
+
+Retain the source ID and historical proposed key under [2A semantic identity](2A_Semantic_Model_Foundation.md#semantic-identity) and [0C alias/label governance](../Foundation/0C_Taxonomy_Information_Vocabulary.md#aliases--multilingual-labels). The key preserves source continuity; its wording is not proof of equivalence across expanded session-continuity scope. R2 is a proposed definition revision, not a new semantic identity, module, schema, enum or canonical target.
+
+| Acceptance dimension | State for this candidate |
+| --- | --- |
+| Owner conceptual direction | Existing B001-D06 and B001-COMP-02 supplied authority; preparation of this proposal is explicitly authorized |
+| Proposed wording | READY_FOR_REVIEW; bounded author documentary checks accompany the external handoff |
+| Independent review of this appended candidate | NOT RUN; prior documentary assessment does not approve this exact delta |
+| Authorized technical/domain acceptance | NOT ESTABLISHED; VPN/Networking specialist and SemanticModel curator must assess this exact revision and declared applicability |
+| Lexical and bilingual acceptance | NOT ESTABLISHED; both proposed labels and all expressions require their own attributable review and acceptance |
+| Canonical identity and mappings | `canonical_target_identity`, `category_mapping` and `tag_mapping` remain UNRESOLVED in the existing roster; operational IDs and eligibility NOT VERIFIED |
+| Operational approval | NONE granted; no import, assignment, runtime activation, database change, execution or Knowledge publication authority |
+
+Independent review must bind its result to the base and exact candidate manifest, compare R1-VPN and the supplied owner/review provenance with this section, verify all eight scenario criteria and the session-versus-resource distinction, and confirm byte preservation of the complete preceding document. Preserve the separate [2C lexical acceptance limits](2C_Troubleshooting_Lexical_Model.md#batch-001-lexical-acceptance-and-handoff-limits), nine predicate profiles and P0–P8. A discovered owning-contract conflict stops the affected decision for owner review.
+
+Batch 001 change record, 2026-11-01: appended the proposed VPN-001 R2 definition, source/review provenance, documentary scenario criteria and acceptance limits. The earlier Batch 001 register remains the single decision register. Technical/language acceptance, canonical mapping, implementation/publication and Git integration require their separate gates. This authoring task stops at READY_FOR_REVIEW.
