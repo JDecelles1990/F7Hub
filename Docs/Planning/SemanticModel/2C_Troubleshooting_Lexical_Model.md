@@ -732,3 +732,61 @@ One architecture candidate exists; author-side model, evidence reconciliation an
 ## Change History
 
 2026-10-08 — Created the sole authorized 2C architecture candidate in an isolated worktree from integrated 2B. Preserved approved authoring direction and S0 addendum, all 28 stable roles/nine predicates including F-01, complete 20/9 source accounting and seven mechanism boundaries. Prepared external static/preservation/identity evidence for a separate independent-review gate; no integration or runtime change authorized.
+
+
+## Batch 001 Lexical Documentation Addendum
+
+Recorded 2026-11-01 (America/Toronto). Candidate lexical details support the single [Batch 001 decision register](2B_Troubleshooting_Concept_Relationship_Model.md#batch-001-decision-register) in 2B; this creates no second register. Its [evidence/provenance](2B_Troubleshooting_Concept_Relationship_Model.md#batch-001-evidence-and-approval-provenance), [per-decision governance](2B_Troubleshooting_Concept_Relationship_Model.md#batch-001-approval-levels-and-per-decision-governance) and [retained identity/mapping roster](2B_Troubleshooting_Concept_Relationship_Model.md#batch-001-retained-identity-and-mapping-roster) apply individually to every row. Original D08/D09 are documentation-level candidate directions; D10 preserves existing identity ownership. Prior 2C architecture statuses and review history remain intact and historical. Independent review of this addition: NOT RUN.
+
+### Batch 001 Candidate Bilingual Labels
+
+The owner approved these eight pairs as documentation-level preferred-label candidates only. Actual preferred-label designation and bilingual equivalence require authorized technical and language review. Every row retains its 2B roster key, P-USER provenance and corresponding R1 concern/revision under R-UNVERIFIED. No canonical target identity is established.
+
+| Source concept ID | English candidate | French-Canadian candidate |
+| --- | --- | --- |
+| IAM-001 | Microsoft 365 / Entra ID sign-in failure | Échec de connexion à Microsoft 365 ou à une ressource utilisant Microsoft Entra ID |
+| IAM-007 | MFA verification failure or MFA-related block | Échec de vérification multifacteur ou blocage associé à l’authentification multifacteur |
+| EXO-001 | Repeated Outlook authentication prompts | Demandes répétées d’authentification dans Outlook |
+| EXO-005 | Email sending, receiving, or delivery failure | Échec de l’envoi, de la réception ou de la remise de courriels |
+| OD-001 | OneDrive synchronization failure | Échec de synchronisation avec OneDrive |
+| VPN-001 | VPN connection or session failure | Échec de connexion ou interruption d’une session VPN |
+| VPN-002 | Remote resource access failure through VPN | Échec d’accès à une ressource distante par une connexion VPN |
+| PRN-002 | Print job or printing failure | Échec d’impression ou du traitement d’une tâche d’impression |
+
+IAM-007 key/label compatibility warning: retained `mfa_challenge_failure_or_authentication_lockout` and new wording require review against the bounded required-MFA-step meaning; neither implies general account lockout or a diagnosed blocking mechanism. VPN-001 key/label compatibility warning: session continuity/loss extends original establishment-only wording while `vpn_connection_or_authentication_failure` remains unchanged. Compatibility review is pending, NOT VERIFIED for both; no key rename, concept split, new identity or operational equivalence is authorized.
+
+Original imported labels/provenance remain in I-ISSUES and the [bilingual issue CSV](../../../Data/SemanticModel/Imports/Synthetic-Troubleshooting-Starter-v0.1/Packages/F7Hub_Troubleshooting_Tools_Bilingual/issues_bilingual.csv), inspected raw SHA-256 `f1c41e0c25068f3efbe5a30a6e129f4c6e6b90ee7e3d2c1a9029ff3f839b0128`; CSV records remain `status = draft`. Candidate pairs replace no source label and establish no reviewed translation accuracy, locale equivalence or production designation. Underlying attribution remains source-declared.
+
+### Batch 001 Imported Expression Assessments
+
+L-TERMS is the immutable [search-term catalog](../../../Data/SemanticModel/Imports/Synthetic-Troubleshooting-Starter-v0.1/Packages/F7Hub_Taxonomy_Planning_v0.1/vocabulary/search_terms.json), inspected raw SHA-256 `86309c0115699a9194c38e59620d532fdcb470b8b0156fe96f04e1aba5ccbd79`, `schema_version = 0.1.0`, `catalog_status = planning_proposal`. Indices below are zero-based positions in that exact revision, not new semantic/database IDs. Each selected record has language `en`; its listed usage has `role = unreviewed_issue_search_phrase`, `record_ref =` the target ID, `source_field = aliases_en`. Original wording also remains in the corresponding I-ISSUES `search_phrases` and bilingual CSV `aliases_en`.
+
+Every assessment originates in P-USER's documentation direction. The original source review status remains `unreviewed`; the row-specific pointer, wording, language and usage preserve individual provenance. Proposed disposition is a separate candidate assessment, not an accepted alias, production mapping or replacement source status.
+
+| Original expression | Target candidate | Proposed disposition | L-TERMS source record | Original source review_status |
+| --- | --- | --- | --- | --- |
+| cloud sign-in failure | IAM-001 | Ambiguous discovery cue | records[31] | unreviewed |
+| account access issue | IAM-001 | Ambiguous discovery cue | records[1] | unreviewed |
+| MFA lockout | IAM-007 | Ambiguous discovery cue | records[73] | unreviewed |
+| MFA verification issue | IAM-007 | Discovery cue | records[76] | unreviewed |
+| Outlook login loop | EXO-001 | Discovery cue | records[100] | unreviewed |
+| Outlook keeps asking for password | EXO-001 | Candidate scoped alias | records[98] | unreviewed |
+| mail flow issue | EXO-005 | Discovery cue | records[67] | unreviewed |
+| delivery issue | EXO-005 | Ambiguous discovery cue | records[44] | unreviewed |
+| OneDrive sync error | OD-001 | Candidate scoped alias | records[92] | unreviewed |
+| OneDrive file synchronization | OD-001 | Discovery cue; not an exact failure synonym | records[88] | unreviewed |
+| VPN fails to connect | VPN-001 | Candidate scoped alias | records[157] | unreviewed |
+| VPN login problem | VPN-001 | Ambiguous discovery cue | records[159] | unreviewed |
+| connected to VPN but cannot access resources | VPN-002 | Candidate scoped alias | records[36] | unreviewed |
+| printer not printing | PRN-002 | Discovery cue | records[122] | unreviewed |
+| printing failure | PRN-002 | Candidate scoped alias | records[123] | unreviewed |
+
+Totals: 15 separately assessed expressions; 5 candidate scoped aliases and 10 discovery cues, including ambiguous cues. No automatic activation. Discovery supports candidate retrieval/disambiguation or abstention, not exact failure equivalence, identity assignment, technical finding or cause. A candidate scoped alias remains unaccepted and cannot broaden its target or establish unknown context. Establishment wording for VPN-001 cannot silently prove equivalence across expanded session-continuity scope.
+
+### Batch 001 Lexical Acceptance and Handoff Limits
+
+An approved lexical mapping still requires an eligible approved target, identified reviewed revision, declared scope, source evidence, permitted use, technical/language review and accountable acceptance. Current category_mapping, tag_mapping and canonical_target_identity remain UNRESOLVED for every concern; operational row IDs and mapping eligibility are NOT VERIFIED. This addition activates no target, alias, translation or preferred label. Meaning, lexical acceptance, Search relevance, case truth and publication authority remain distinct under existing 0C/2A–2C contracts.
+
+D11 remains the earlier independent documentary gate with its provenance limitation recorded in 2B, not another owner semantic decision or production vocabulary approval. Missing original approval records and R1/review artifacts remain NOT VERIFIED. Author static validation supplies no substitute technical, language or independent acceptance evidence.
+
+Batch 001 change record, 2026-11-01: appended eight candidate bilingual pairs and fifteen individually attributed candidate expression assessments linked to the single 2B register. Preserved architecture decisions, catalog bytes and review history. Next gate: independent read-only review of the exact two-document candidate and external evidence. No runtime implementation, staging, commit, push, PR, merge, publication or vocabulary activation is authorized.
