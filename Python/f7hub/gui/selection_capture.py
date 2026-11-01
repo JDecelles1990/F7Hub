@@ -21,11 +21,46 @@ from f7hub.infrastructure.windows_latest_paste import (
 )
 
 
+_CAPTURE_CODES = frozenset({
+    'TARGET_UNAVAILABLE', 'TARGET_CHANGED', 'UNSUPPORTED_TARGET', 'CANCELLED',
+    'RELEASE_TIMEOUT', 'SEQUENCE_UNAVAILABLE', 'INPUT_DENIED', 'NO_FRESH_COPY',
+    'AMBIGUOUS_UPDATE', 'CLIPBOARD_LOCKED', 'PRIVACY_DENIED', 'UNSUPPORTED_TEXT',
+    'LATE_OR_UNSTABLE', 'CLEANUP_FAILED', 'NATIVE_UNAVAILABLE', 'WINDOWS_REQUIRED',
+    'NATIVE_EXCEPTION', 'ACQUIRED', 'WORKER_START_FAILED',
+})
+_CAPTURE_GUARDS = frozenset({
+    'NO_WINDOW', 'WINDOW_QUERY_FAILED', 'WINDOW_PROCESS_MISSING', 'SELF_TARGET',
+    'PROCESS_OPEN_FAILED', 'IMAGE_QUERY_FAILED', 'PROCESS_TIMES_FAILED',
+    'TOKEN_OPEN_FAILED', 'TOKEN_QUERY_FAILED', 'TOKEN_SIZE_INVALID',
+    'ELEVATED_POLICY', 'TOKEN_CLOSE_FAILED', 'REJECTED_HANDLE_CLOSE_FAILED',
+    'HANDLE_CLOSE_FAILED',
+})
+_CAPTURE_STAGES = frozenset({
+    'INITIAL_BINDING', 'PIN', 'WAIT_RELEASE', 'CHECK_SOURCE', 'SEND_COPY',
+    'WAIT_COPY', 'READ_TEXT', 'FINAL_CHECK', 'CLEANUP', 'WORKER', 'WORKER_START',
+    'COMPLETE',
+})
+
+
+def _capture_diagnostic(stage, code, guard=None):
+    # Validate types before membership; never format unknown objects/exception text.
+    def fixed(value, allowed):
+        return value if type(value) is str and value in allowed else 'UNCLASSIFIED'
+    return ('Capture Target Diagnostic: STAGE=' + fixed(stage, _CAPTURE_STAGES)
+            + '; CODE=' + fixed(code, _CAPTURE_CODES)
+            + '; GUARD=' + ('NONE' if guard is None else fixed(guard, _CAPTURE_GUARDS)) + '.')
+
+
 class SelectionCapture(QAbstractNativeEventFilter):
     def __init__(self, window, service, *, api=None):
         super().__init__()
         self.window, self.service = window, service
         self.api = api
+        self.capture_target_diagnostic = (
+            os.environ.get('F7HUB_DEV_CAPTURE_TARGET_DIAGNOSTIC') == '1'
+            and not getattr(sys, 'frozen', False)
+            and (Path(__file__).resolve().parents[3] / '.git').exists()
+        )
         self.target_diagnostic = (
             os.environ.get('F7HUB_DEV_PASTE_TARGET_DIAGNOSTIC') == '1'
             and not getattr(sys, 'frozen', False)
@@ -194,6 +229,10 @@ class SelectionCapture(QAbstractNativeEventFilter):
                 code = ('INITIAL_' + (error.guard or 'UNCLASSIFIED')
                         if isinstance(error, SelectionCopyError) else 'INITIAL_NATIVE_EXCEPTION')
                 self.diagnostic_feedback(code)
+            elif action == 'capture' and self.capture_target_diagnostic:
+                code = str(error) if isinstance(error, SelectionCopyError) else 'NATIVE_EXCEPTION'
+                guard = error.guard if isinstance(error, SelectionCopyError) else None
+                self.window.statusBar().showMessage(_capture_diagnostic('INITIAL_BINDING', code, guard), 0)
             else:
                 self.feedback('Clipboard operation unavailable: target or service unavailable.')
             return False
@@ -254,10 +293,13 @@ class SelectionCapture(QAbstractNativeEventFilter):
                 outcome = ('paste_failure', (str(error), error.clipboard, error.dispatch))
             except SelectionCopyError as error:
                 # Fixed native code only. Never stringify arbitrary exceptions.
-                outcome = ('failure', str(error))
+                outcome = (('capture_diagnostic_failure', (str(error), error.guard, error.stage))
+                           if self.capture_target_diagnostic else ('failure', str(error)))
             except Exception:
                 outcome = (('paste_failure', ('AUTHORIZATION_OR_SERVICE_UNAVAILABLE', 'UNCHANGED', 'NOT_SENT'))
-                           if action == 'paste' else ('failure', 'ADMISSION_OR_SERVICE_UNAVAILABLE'))
+                           if action == 'paste' else
+                           ('capture_diagnostic_failure', ('NATIVE_EXCEPTION', None, 'WORKER'))
+                           if self.capture_target_diagnostic else ('failure', 'ADMISSION_OR_SERVICE_UNAVAILABLE'))
             self._results.put_nowait(outcome)
             if capture_diagnostic is not None:
                 if outcome[0] == 'success':
@@ -273,6 +315,8 @@ class SelectionCapture(QAbstractNativeEventFilter):
                 self.window.statusBar().showMessage(sequence_record.summary('WORKER_START_FAILED'), 0)
             elif diagnostic:
                 self.diagnostic_feedback('WORKER_START_FAILED')
+            elif action == 'capture' and self.capture_target_diagnostic:
+                self.window.statusBar().showMessage(_capture_diagnostic('WORKER_START', 'WORKER_START_FAILED'), 0)
             else:
                 self.feedback('Clipboard operation not started: worker unavailable.')
             return False
@@ -315,12 +359,22 @@ class SelectionCapture(QAbstractNativeEventFilter):
             self.feedback('Paste Latest: ' + code + '. Clipboard: ' + clipboard
                           + '; Ctrl+V: ' + dispatch + '. No automatic retry or older-item fallback.')
             return
+        if kind == 'capture_diagnostic_failure':
+            code, guard, stage = result
+            if code == 'CLEANUP_FAILED':
+                self.cleanup_failed = True
+                self._unregister()
+            self.window.statusBar().showMessage(_capture_diagnostic(stage, code, guard), 0)
+            return
         if kind == 'failure':
             if result == 'CLEANUP_FAILED':
                 self.cleanup_failed = True
                 self._unregister()
             self.feedback('Selection not captured: ' + result + '. No old Clipboard fallback was used.')
             return
+        if self.capture_target_diagnostic:
+            self.window.statusBar().showMessage(_capture_diagnostic('COMPLETE', 'ACQUIRED'), 0)
+            return  # Diagnostic feedback never contains acquired text.
         preview, truncated = normalize_preview(result.text[:241])
         label = {'PERSISTED': 'saved to Recent', 'PREVIEW_ONLY': 'not saved; explicit history consent is unavailable',
                  'NOT_SAVED': 'not saved; consent changed or persistence was denied',

@@ -1,5 +1,21 @@
 # F7Hub ChangeLog
 
+## 2026-11-01 — isolated Clipboard hotkey diagnostic candidate
+
+Added development-only opt-in capture stage/code/guard status feedback to the
+isolated hotkey recovery candidate. Native errors retain identity and guards;
+fixed allowlists redact unknown values and diagnostic success omits captured
+text. Initial binding, pinning, subsequent acquisition and cleanup are distinct.
+Normal feedback, target/elevation restrictions, consent, no-stale-history
+fallback and one-use paste authorization remain unchanged. Existing V target
+diagnostics are reused.
+
+Fresh focused synthetic validation: 76 tests PASS, exit 0, Windows host /
+Qt offscreen. Native validation remains BLOCKED by an active canonical instance;
+physical capture/paste are NOT RUN. No root-cause repair, restoration,
+integration, schema or operational-database change is claimed.
+External evidence: Clipboard-HotkeyRecovery/diagnostic-20261101T134812Z.
+
 ## 2026-10-29 — CP02-S4 R1 focused clock/expiry correction candidate
 
 Corrected the independent review's MAJOR R1 finding in the unintegrated CP02-S4
