@@ -1,5 +1,34 @@
 # F7Hub GUI Design
 
+## KB-SG03A — shared standalone editor candidate (2026-11-01)
+
+KB-SG02 is integrated through PR #127 at
+`f9954998866f22a3521c83b2e748877d1565bc94`. The new **unintegrated KB-SG03A
+candidate** extracts the existing controls into one `KBPreviewEditor(QWidget)`.
+The registry identities `KB_SG02.FIXTURE/SOURCE/TITLE/SUMMARY/BODY/ANNOTATIONS/CLOSE`
+below remain stable; their widget members now belong to `KBPreviewDialog.editor`.
+Selector changes route to the shared editor's guarded `_select_case`; Close emits
+`close_requested` to the standalone host. The wrapper owns Escape/reject/accept/
+done/window-X negotiation and uses the session owner for terminal invalidation.
+Accepted departure grants no saving or semantic authority.
+
+The shared Close button explicitly retains `setAutoDefault(False)`; Return in
+clean/dirty title or summary does not close, invalidate or ask to discard.
+Explicit Close/Space and Escape retain the guarded host route.
+The shared editor has no standalone minimum size. The standalone wrapper retains
+1080x780 initial size and 860x620 minimum. Source replacement prepares before
+Discard/Cancel; Cancel preserves source identity, all fields, selection and undo.
+Committed closure freezes and clears content/undo; the owner invalidates once.
+Six exact fixtures, plain text, qualifications, limits and accessibility remain.
+
+Fresh offscreen GUI checks PASS. A fresh visible Windows CLI smoke PASS uses
+Qt-injected input at 1080x780/96 logical DPI; three captures were inspected.
+Physical input, alternate DPI, AT and high contrast remain NOT RUN.
+No embedded tab, toolbar action, MainWindow or application-exit change is
+implemented in A. [Stage contract](Planning/DataReadiness/KB_SG03_Implementation_Contract.md)
+and [current evidence](Status/CURRENT_STATE.md#kb-sg03a-current-state) bind this candidate.
+The KB-SG02 section below preserves its original implementation-time history.
+
 ## KB-SG02 — standalone synthetic preview lab candidate (2026-11-01)
 
 Unintegrated candidate only; no main-window action or navigation route is added.

@@ -1,5 +1,38 @@
 # F7Hub Python Architecture
 
+## KB-SG03A — shared editor and one-shot lab session candidate (2026-11-01)
+
+The unintegrated extraction adds `gui/kb_preview_editor.py` and
+`services/kb_lab_session.py`. `KBPreviewEditor(service, snapshots, parent)` owns
+the existing plain-text draft, guarded fixture replacement and bounds.
+`close_requested` reports intent; `confirm_close()` is nonterminal and reentry
+guarded; `commit_close()` freezes/erases view state without invalidating or I/O.
+Only `KBPreviewDialog(session, parent)` supplies standalone geometry and routes
+all terminal host requests through confirmation to the same owner. The shared
+Close button preserves the original `setAutoDefault(False)` policy, preventing
+Return in single-line editors from becoming a terminal action.
+
+`SyntheticLabSession(project_root)` accepts only an asset root. `prepare()`
+admits the pinned package, allocates one private temporary root, composes fresh
+lab-only services, reads immutable snapshots and closes all setup connections.
+It is one-shot, including after failure. No repository or connection is retained
+by the editor. `invalidate()` commits once; `close()` performs one explicitly
+requested cleanup attempt and does not repeat successful cleanup. The context
+manager does not retry preparation failure cleanup in a finally block.
+
+`LabSetupError.owner` and `LabCleanupError.owner` retain the exact resource
+owner for diagnostics/recovery. `setup_failed`, `cleanup_failed`,
+`cleanup_complete`, `terminal`, `allocated_root` and the disposable
+`database_path` distinguish failure with residue from success. Error feedback is
+fixed and content-free. Successful cleanup retains diagnostic allocation identity;
+ownership mismatch refuses deletion. The retained CLI has no arbitrary input/root/
+database options and uses the shared context owner and thin dialog.
+
+The unchanged KBPreviewService still owns fixed admission/snapshot identity and
+write-free preview generation. No MainWindow, bootstrap, runner or application
+lifecycle implementation is added. [Stage contract](Planning/DataReadiness/KB_SG03_Implementation_Contract.md)
+and [current state](Status/CURRENT_STATE.md#kb-sg03a-current-state) own evidence.
+
 <a id="tax-02-dp01-python"></a>
 
 ## TAX-02 — reference-read boundary and DP-01 adoption (2026-11-01)

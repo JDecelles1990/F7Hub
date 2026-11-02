@@ -1,5 +1,27 @@
 # F7Hub ChangeLog
 
+## 2026-11-01 — KB-SG03A shared editor/session extraction candidate
+
+Extracted one reusable QWidget editor and one synthetic-only temporary-session
+owner from the integrated KB-SG02 standalone lab. The thin dialog/CLI preserve
+six fixtures, plain text, bounds, provenance, unresolved proposals, editing,
+annotations, undo, Cancel and replacement-before-discard. The owner adds explicit
+one-shot preparation, retained directory identity and safe double-failure
+diagnostics, exactly-once terminal invalidation and idempotent successful cleanup.
+
+Fresh focused checks PASS; corrected visible retained-CLI Windows smoke PASS 39 assertions,
+three inspected captures at 1080x780/96 DPI, process exit 0 and owned-temp removal.
+[Current state](Status/CURRENT_STATE.md#kb-sg03a-current-state) records exact suite
+counts and independent-review state. Candidate remains unstaged, uncommitted and
+unintegrated. B's embedded UI and deferred application shutdown are not implemented
+or authorized by this extraction. Original KB-SG02 entries remain historical.
+Initial review CHANGES_REQUIRED identified R1 Return/default-button drift and R2
+unrelated historical path edits. Restored the original non-default Close policy,
+added Return regression coverage and restored existing doc tails. Fresh corrected
+editor/dialog/integration checks PASS38, unchanged preview14 retained; independent
+correction review pending. Initial review/keyboard FAIL and earlier PASS records
+remain preserved.
+
 ## 2026-11-01 — KB-SG02 isolated synthetic preview lab candidate
 
 Implemented a standalone, temporary KB editor over six bounded synthetic fixtures

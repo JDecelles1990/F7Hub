@@ -1,5 +1,65 @@
 # F7Hub Current State
 
+<a id="kb-sg03a-current-state"></a>
+
+## KB-SG03A — shared editor / synthetic session candidate (2026-11-01)
+
+Candidate implementation and corrected validation complete;
+**independent correction review PENDING**. Initial review returned
+**CHANGES_REQUIRED** for R1 Return/default-button behavior and R2 unrelated
+historical documentation edits. Both corrections and original evidence are
+preserved; no implementation approval is claimed at this author handoff.
+
+Unstaged, uncommitted and unintegrated in C:/Dev/F7Hub-KB-SG03A, branch
+`feature/kb-sg03a-shared-editor`, base/HEAD
+`f9954998866f22a3521c83b2e748877d1565bc94`. Live remote main matched before
+implementation and at the initial review handoff. This is the integrated KB-SG02
+PR #127 baseline; earlier KB-SG02 implementation-time sections remain historical.
+
+User explicitly authorized A's exact 13-path implementation, tests and independent
+review. Architecture authority: `KB_SG03_ARCHITECTURE_APPROVED_WITH_NOTES` v2.
+[Contract](../Planning/DataReadiness/KB_SG03_Implementation_Contract.md) records
+scope, failure semantics and evidence. One shared QWidget editor and one synthetic
+session owner serve the retained standalone CLI. Embedded tabs, toolbar and deferred
+application shutdown remain NOT IMPLEMENTED; B validation NOT RUN.
+
+Corrected author coverage PASS **52/52 unique tests**: fresh editor 9/9,
+dialog 12/12 and real-service integration 17/17, plus RETAINED unchanged preview
+regression 14/14 after input comparison. The initial author 50-test run, added-guard
+integration17 and independent focused51 PASS remain preserved; the independent
+keyboard compatibility diagnostic was FAIL and required R1. No unchanged retry
+was performed. Restored `setAutoDefault(False)` precedes fresh tests of clean/
+dirty title and summary Return (no close/question/invalidation), Close/Space and
+Escape guards. All five pre-existing documentation tails match the approved base.
+
+Disposable database integrity and foreign-key checks PASS, logical dumps match,
+all setup connections close and preview-time SQLite/file/network/service I/O
+guards PASS. Production path resolvers/context/Settings use is guarded; no
+production database is opened as an isolation probe.
+
+Fresh corrected WINDOWS_NATIVE retained-CLI smoke PASS **39 assertions**, three
+new inspected captures at 1080x780/96 DPI/DPR1.0. Observable-ready editor, six
+fixtures, clean/dirty Return preservation, keyboard focus/edit, Cancel/Discard,
+Close/Space, normal process/CLI exit0 and exact owned-root removal are recorded.
+Qt-injected input only; physical input, alternate DPI, AT/high contrast NOT RUN.
+The original native34 PASS remains historical for its recorded assertions and
+does not conceal the later diagnosed keyboard defect.
+
+Current external evidence:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/KB-SG03A/correction-r1-r2-20261101/`.
+Initial author and independent-review directories remain preserved alongside it.
+The corrected manifest and correction report bind exact13, old/new drift and
+suite applicability. Independent correction review is required before approval.
+No staging, commit, push, PR, merge or B authority. Canonical dirty checkout,
+unrelated worktrees, protected opaque GuideSettings.ini and superseded subprocess
+candidate remain untouched.
+
+Retained KB-SG02 N01-N03: note revisions exist in immutable snapshots but not the
+pane; six manual fixtures do not establish extraction/canonical/technical truth;
+physical/native accessibility and other byte profiles are unverified.
+Historical KB-SG01 approval remains NOT VERIFIED; B01 closure belongs to the
+separately reviewed owner replacement decision.
+
 <a id="kb-sg02-current-state"></a>
 
 ## KB-SG02 — isolated synthetic semantic-proposal / KB preview lab (2026-11-01)
