@@ -53,11 +53,15 @@ class MainWindow(QMainWindow):
         altf7hub_service: AltF7HubService | None = None,
         clipboard_service: ClipboardService | None = None,
         settings_service: SettingsService | None = None,
+        lab_session_factory=None,
         parent: QWidget | None = None,
     ) -> None:
         super().__init__(parent)
         self.lifecycle = None
         self._shutdown_complete = False
+        self._fallback_exit_token = 0
+        self._fallback_exit_guarding = False
+        self._fallback_exit_pending = None
         self.setObjectName("mainWindow")
         self.setWindowTitle("F7Hub")
         available = self.screen().availableGeometry()
@@ -92,7 +96,8 @@ class MainWindow(QMainWindow):
             try:
                 self.knowledge_workspace = KnowledgeWorkspace(
                     knowledge_service, self.runner,
-                    guide_action=self.altf7hub_action)
+                    guide_action=self.altf7hub_action, lab_session_factory=lab_session_factory)
+                self.knowledge_workspace.lab_close_finished.connect(self._fallback_lab_closed)
             except Exception as error:
                 logging.getLogger(__name__).warning(
                     "Knowledge Base workspace unavailable: %s", type(error).__name__)
@@ -674,7 +679,7 @@ class MainWindow(QMainWindow):
         return self.script_workspace is not None and self.script_workspace.run_pending
 
     def show_new_ticket(self):
-        if (self._script_run_pending or self.runner.busy or self.workspace.note_pending
+        if (self._script_run_pending or self.runner.busy or self.runner.completing or self.workspace.note_pending
                 or self.workspace.creation_pending or self.workspace.status_pending
                 or self.workspace.classification_pending):
             return
@@ -750,7 +755,8 @@ class MainWindow(QMainWindow):
                 return
             self.workspace._clear_drafts()
             self.pages.setCurrentWidget(self.knowledge_workspace)
-            self.knowledge_workspace.refresh_list()
+            if self.knowledge_workspace.articles_active:
+                self.knowledge_workspace.refresh_list()
 
     def show_scripts(self):
         if self._script_run_pending:
@@ -765,7 +771,7 @@ class MainWindow(QMainWindow):
             self.script_workspace.refresh_list()
 
     def show_clipboard(self) -> bool:
-        if (self._script_run_pending or self.runner.busy or self.workspace.note_pending
+        if (self._script_run_pending or self.runner.busy or self.runner.completing or self.workspace.note_pending
                 or self.workspace.creation_pending or self.workspace.status_pending
                 or self.workspace.classification_pending):
             return False
@@ -854,7 +860,7 @@ class MainWindow(QMainWindow):
             selection.cancel()
             self.statusBar().showMessage("Clipboard capture/paste is draining native resources. Please try Exit when it finishes.")
             return False
-        if (self._script_run_pending or self.runner.busy or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
+        if (self._script_run_pending or self.runner.busy or self.runner.completing or self.workspace.note_pending or self.workspace.creation_pending or self.workspace.status_pending or self.workspace.classification_pending
                 or (self.knowledge_workspace is not None and self.knowledge_workspace.filter_loading)
                 or (self.clipboard_workspace is not None
                     and (self.clipboard_workspace.loading or self.clipboard_workspace.settings_pending))):
@@ -870,7 +876,8 @@ class MainWindow(QMainWindow):
             )
             if answer != QMessageBox.StandardButton.Discard:
                 return False
-        if not self._leave_clipboard():
+        if self.clipboard_workspace is not None and not self.clipboard_workspace.confirm_leave():
+            self.statusBar().showMessage("Finish or discard the Clipboard preference edits before leaving.")
             return False
         return True
 
@@ -878,9 +885,13 @@ class MainWindow(QMainWindow):
         """Release existing owned resources once after accepted shutdown."""
         if self._shutdown_complete:
             return True
+        if self.knowledge_workspace is not None and not self.knowledge_workspace.lab_shutdown_ready:
+            return False
         selection = getattr(self, "selection_capture", None)
         if selection is not None and not selection.close():
             return False
+        if self.clipboard_workspace is not None:
+            self.clipboard_workspace.leave()
         if self.mochi_service is not None:
             if self._mochi_dialog is not None:
                 self._mochi_dialog.close()
@@ -895,8 +906,52 @@ class MainWindow(QMainWindow):
                 self.lifecycle.hide()
                 return
         else:
-            if not self.confirm_exit():
+            if not self._preflight_fallback_exit():
                 event.ignore()
                 return
-            self.cleanup_shutdown()
         super().closeEvent(event)
+
+    def _preflight_fallback_exit(self):
+        if self._fallback_exit_pending is not None or self._fallback_exit_guarding:
+            return False
+        self._fallback_exit_guarding = True
+        try:
+            if not self.confirm_exit():
+                return False
+            if self.knowledge_workspace is not None:
+                lab = self.knowledge_workspace
+                lab.set_lab_exit_pending(True)
+                outcome = lab.close_synthetic_kb_lab()
+                if outcome is not True:
+                    if outcome is None:
+                        self._fallback_exit_token += 1
+                        self._fallback_exit_pending = (self._fallback_exit_token, lab._lab_generation)
+                    else:
+                        lab.set_lab_exit_pending(False)
+                    return False
+            if self.cleanup_shutdown() is False:
+                if self.knowledge_workspace is not None:
+                    self.knowledge_workspace.set_lab_exit_pending(False)
+                return False
+            return True
+        finally:
+            self._fallback_exit_guarding = False
+
+    def _fallback_lab_closed(self, generation, success):
+        request = self._fallback_exit_pending
+        if self.lifecycle is not None or request is None or request[1] != generation:
+            return
+        QTimer.singleShot(0, lambda: self._resume_fallback_exit(request, success))
+
+    def _resume_fallback_exit(self, request, success):
+        if self.lifecycle is not None or self._fallback_exit_pending != request:
+            return
+        self._fallback_exit_pending = None
+        if success and self.knowledge_workspace.lab_shutdown_ready:
+            if not self.close():
+                self.knowledge_workspace.set_lab_exit_pending(False)
+                self.statusBar().showMessage(
+                    "Synthetic lab discard completed. Exit was vetoed by another operation or draft.")
+        else:
+            self.knowledge_workspace.set_lab_exit_pending(False)
+            self.statusBar().showMessage("Exit cancelled: synthetic lab cleanup failed; temporary storage remains.")

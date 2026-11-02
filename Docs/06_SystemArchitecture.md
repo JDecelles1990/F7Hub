@@ -1,5 +1,25 @@
 # F7Hub System Architecture
 
+## KB-SG03B — embedded lab capability/lifecycle candidate (2026-11-01)
+
+Unintegrated Stage B extends only KnowledgeWorkspace, bootstrap, MainWindow and ApplicationLifecycle. Stage A is integrated at `5657047c35ca8d8fc52c2b82f9de2f96f4dde3b7`; its runtime remains unchanged. Earlier candidate-status sections below retain their historical meaning.
+
+Composition supplies one lazy zero-argument factory closing over only the resolved asset/project root: `SyntheticLabSession(project_root)`. Startup checks fixed asset availability without opening lab storage; worker admission verifies fixed pins before allocation. The factory receives no ApplicationContext, production DB path, operational service/repository, Settings or credentials. A dedicated existing ServiceTaskRunner performs setup and terminal filesystem cleanup; only immutable snapshots/service presentation reach the shared GUI-thread QWidget. No SQL, process launcher, IPC, migration, separate lab window or new navigation module is introduced.
+
+KnowledgeWorkspace reserves exact owner/generation before submitting, retains them through PREPARING/OPEN/CLOSING/FAILED, and rejects stale callbacks. Completion work waits beyond both busy and completing, with queued continuations after completion_finished. Committed Discard and cleanup outcome remain distinct. Cleanup failure closes the activation latch and retains exact ownership; no automatic retry. Explicit residual acknowledgment retains an owner record and truthfully leaves storage unremoved.
+
+ApplicationLifecycle owns token-bound pending Exit; existing preflight precedes Lab confirmation and existing guards run again after drain. Tray hiding retains the session. MainWindow fallback independently vetoes pending/failed closure. Operational actions have handler/context guards as well as visual state; callbacks do not move the active page. This is trusted same-process capability isolation, not an OS sandbox or crash-proof erasure.
+
+R4 Knowledge tests FRESH PASS 40 plus 202 verified applicable tests RETAINED PASS (242 unique); exact-disposable SQL target/closed-connection/zero-preview-I/O and integrity/foreign-key checks PASS. Visible WINDOWS_NATIVE composed validation PASS 45 assertions with exit 0, inspected captures and owned-root cleanup. Integration and final canonical acceptance remain pending. Detailed candidate/evidence status belongs to CURRENT_STATE and the stage contract.
+
+
+Independent initial review returned CHANGES REQUIRED for the original aggregate `bd5d9bd858a8701571c21e7501823fc6226e6896032522e6b2ca3e91551e01ce`. Bounded corrections retain nonempty hidden Articles detail/search/filter reload intent, reconcile it only on eligible Articles, coalesce fallback close before preflight, report committed discard with later veto, and cancel queued cursor restoration after newer deliberate focus/input. Eight added regressions cover these findings. Author correction evidence is complete; independent closure of R1-R3 remains pending rereview. Two new-test precondition/Qt recursive-close-return errors were stopped, preserved and corrected separately; no runtime correction was inferred from those fixture errors. No unchanged retry. The corrected native45 scenario includes pending operational-list reconciliation and newer-focus checks; initial native40 and all failed records remain historical.
+
+
+Latest R4 correction: independent rereview freshly passed the original R1 read and R3 focus probes, then returned CHANGES REQUIRED for a saved mutation delivered in Lab retaining incompatible Articles filters. The existing category/status/tag reset logic now runs before page-aware deferral; it performs no hidden-page read or focus change. Fresh three-case regression verifies committed results remain visible on Articles return. The latest native45 scenario also checks a delayed DRAFT creation callback against a Published filter using only disposable operational storage. Current author coverage is 40 fresh Knowledge tests plus 202 applicable retained tests (242 unique); current native45 exited 0 and both exact Lab roots were removed. Earlier 233/241 test and native40/43 records remain historical, not summed. R4 author correction is complete; independent final rereview and prior R2 fresh independent runtime checks remain pending. Final evidence is under `correction-r4-callback/`; no integration or KB-SG03 closure.
+
+---
+
 ## KB-SG03A — synthetic session ownership candidate (2026-11-01)
 
 The unintegrated Stage A extraction follows standalone CLI → thin

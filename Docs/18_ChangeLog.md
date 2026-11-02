@@ -1,5 +1,21 @@
 # F7Hub ChangeLog
 
+## 2026-11-01 — KB-SG03B embedded workspace candidate
+
+Implemented the reviewed Stage B candidate over integrated Stage A PR #128 at `5657047c35ca8d8fc52c2b82f9de2f96f4dde3b7`. Added one permanent Articles tab, Open Synthetic KB Lab action, one retained closable embedded shared editor, lazy asset-only session factory, dedicated asynchronous owner lifecycle, operational action isolation, and token-bound deferred Exit including MainWindow fallback. Navigation retains draft/source/undo; Cancel preserves state; Discard and cleanup failure remain distinct. Residual acknowledgment is explicit and truthfully retains failed-cleanup ownership.
+
+Current R4 Knowledge suite FRESH PASS 40 plus 202 applicable tests RETAINED PASS (242 unique), with zero skips. Initial scheduler-helper timeout and later selection-loss failure are preserved; H1 yielded the worker scheduler and R1 restored cursor/selection after navigation. Visible Windows composed validation PASS 45 assertions, exit 0, three inspected captures at 1180x792/96 DPI, real tray hide/restore and both owned temporary roots removed. Physical input, alternate DPI, AT/high contrast NOT RUN.
+
+Exactly four runtime, five test and six documentation paths; Stage A runtime/fixtures and standalone launcher unchanged. Candidate is unstaged/uncommitted/unintegrated; independent rereview pending. No PR/merge/canonical synchronization or KB-SG03 closure. Previous entries remain historical.
+
+
+Independent initial review returned CHANGES REQUIRED for the original aggregate `bd5d9bd858a8701571c21e7501823fc6226e6896032522e6b2ca3e91551e01ce`. Bounded corrections retain nonempty hidden Articles detail/search/filter reload intent, reconcile it only on eligible Articles, coalesce fallback close before preflight, report committed discard with later veto, and cancel queued cursor restoration after newer deliberate focus/input. Eight added regressions cover these findings. Author correction evidence is complete; independent closure of R1-R3 remains pending rereview. Two new-test precondition/Qt recursive-close-return errors were stopped, preserved and corrected separately; no runtime correction was inferred from those fixture errors. No unchanged retry. The corrected native45 scenario includes pending operational-list reconciliation and newer-focus checks; initial native40 and all failed records remain historical.
+
+
+Latest R4 correction: independent rereview freshly passed the original R1 read and R3 focus probes, then returned CHANGES REQUIRED for a saved mutation delivered in Lab retaining incompatible Articles filters. The existing category/status/tag reset logic now runs before page-aware deferral; it performs no hidden-page read or focus change. Fresh three-case regression verifies committed results remain visible on Articles return. The latest native45 scenario also checks a delayed DRAFT creation callback against a Published filter using only disposable operational storage. Current author coverage is 40 fresh Knowledge tests plus 202 applicable retained tests (242 unique); current native45 exited 0 and both exact Lab roots were removed. Earlier 233/241 test and native40/43 records remain historical, not summed. R4 author correction is complete; independent final rereview and prior R2 fresh independent runtime checks remain pending. Final evidence is under `correction-r4-callback/`; no integration or KB-SG03 closure.
+
+---
+
 ## 2026-11-01 — KB-SG03A shared editor/session extraction candidate
 
 Extracted one reusable QWidget editor and one synthetic-only temporary-session

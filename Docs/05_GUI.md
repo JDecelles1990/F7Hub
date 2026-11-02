@@ -1,5 +1,31 @@
 # F7Hub GUI Design
 
+## KB-SG03B — embedded synthetic lab candidate (2026-11-01)
+
+Stage A is integrated in PR #128, baseline `5657047c35ca8d8fc52c2b82f9de2f96f4dde3b7`, containing reviewed feature `2485f837009eb079f91003eb94a61f0ac68c3c64`. Stage B is an **unintegrated corrected candidate; independent rereview pending**. Earlier Stage A/B/KB-SG02 status sections below are historical snapshots.
+
+| Stable registry identity | Widget/action and routing | Candidate behavior |
+|---|---|---|
+| KB.LAB.OPEN | `KnowledgeWorkspace.open_synthetic_kb_lab_button`; objectName `open_synthetic_kb_lab_button`; click/Space → `open_synthetic_kb_lab` | Exact text Open Synthetic KB Lab; accessible description and temporary/synthetic tooltip; disabled with reason without factory/assets; no ticket selection required |
+| KB.TABS | `knowledge_tabs` QTabWidget; Articles `knowledge_articles_tab` and optional `synthetic_kb_lab_tab` | Articles permanent/nonclosable; at most one closable Lab; repeat activation focuses retained Lab |
+| KB_SG02.FIXTURE/SOURCE/TITLE/SUMMARY/BODY/ANNOTATIONS/CLOSE | Existing shared `KBPreviewEditor`; Close intent → workspace guarded close | Same six fixtures/notice/plain text/provenance/limits; embedded QWidget in scrolling page, no second editor or laboratory window |
+| KB.LAB.CLOSE | Lab tab X and editor Close → `close_synthetic_kb_lab` | Cancel keeps complete live state; committed Discard freezes/clears content and undo, then drains owned cleanup; closing page retained until settled |
+| KB.LAB.RESIDUAL | Acknowledge residual storage… → `acknowledge_lab_residual` | Failure-only explicit Ok/Cancel; defaults Cancel; retains exact owner record; acknowledgment is not cleanup success and triggers no retry |
+
+Articles operations are disabled and their direct/shortcut handlers reject Lab context; callback `_update_actions` cannot enable them. Operational results update Articles without selecting it or stealing Lab focus. Explicit Open Article targets Articles and preserves Lab. Inner/primary navigation keeps the editor, fixture, draft fields, annotations, source, dirty state and undo; saved cursor/selection restore after Qt focus transfer. Lab return performs no Articles refresh or setup.
+
+X-to-tray is nonterminal. Explicit Exit preflights existing operation/draft guards, asks Lab, and remains pending until safe completion; final existing guards are rechecked. Failed cleanup leaves visible fixed feedback and a retained owner; acknowledgment never reports successful removal. The no-lifecycle MainWindow close path also vetoes pending/failed cleanup.
+
+Correction evidence: Knowledge suite FRESH PASS 40 tests plus 202 applicable tests RETAINED PASS, totaling 242 unique tests with zero skips; WINDOWS_NATIVE visible composed window PASS 45 assertions, process exit 0, 1180x792 / 96 DPI / DPR 1.0, three inspected captures and both exact lab roots removed. Native input was Qt-injected; physical input, alternate DPI, AT/high contrast NOT RUN. [Current evidence](Status/CURRENT_STATE.md#kb-sg03b-current-state) owns candidate status. No staging/integration or final canonical acceptance occurred.
+
+
+Independent initial review returned CHANGES REQUIRED for the original aggregate `bd5d9bd858a8701571c21e7501823fc6226e6896032522e6b2ca3e91551e01ce`. Bounded corrections retain nonempty hidden Articles detail/search/filter reload intent, reconcile it only on eligible Articles, coalesce fallback close before preflight, report committed discard with later veto, and cancel queued cursor restoration after newer deliberate focus/input. Eight added regressions cover these findings. Author correction evidence is complete; independent closure of R1-R3 remains pending rereview. Two new-test precondition/Qt recursive-close-return errors were stopped, preserved and corrected separately; no runtime correction was inferred from those fixture errors. No unchanged retry. The corrected native45 scenario includes pending operational-list reconciliation and newer-focus checks; initial native40 and all failed records remain historical.
+
+
+Latest R4 correction: independent rereview freshly passed the original R1 read and R3 focus probes, then returned CHANGES REQUIRED for a saved mutation delivered in Lab retaining incompatible Articles filters. The existing category/status/tag reset logic now runs before page-aware deferral; it performs no hidden-page read or focus change. Fresh three-case regression verifies committed results remain visible on Articles return. The latest native45 scenario also checks a delayed DRAFT creation callback against a Published filter using only disposable operational storage. Current author coverage is 40 fresh Knowledge tests plus 202 applicable retained tests (242 unique); current native45 exited 0 and both exact Lab roots were removed. Earlier 233/241 test and native40/43 records remain historical, not summed. R4 author correction is complete; independent final rereview and prior R2 fresh independent runtime checks remain pending. Final evidence is under `correction-r4-callback/`; no integration or KB-SG03 closure.
+
+---
+
 ## KB-SG03A — shared standalone editor candidate (2026-11-01)
 
 KB-SG02 is integrated through PR #127 at

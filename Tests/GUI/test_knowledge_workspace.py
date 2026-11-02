@@ -968,3 +968,162 @@ class KnowledgeWorkspaceTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EmbeddedKnowledgeContextTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = QApplication.instance() or QApplication([])
+
+    def test_unavailable_factory_has_reason_and_permanent_articles(self):
+        runner = ServiceTaskRunner()
+        widget = KnowledgeWorkspace(RecordingKnowledgeService(), runner)
+        try:
+            self.assertFalse(widget.open_synthetic_kb_lab_button.isEnabled())
+            self.assertIn("unavailable", widget.open_synthetic_kb_lab_button.toolTip())
+            widget.open_synthetic_kb_lab()
+            self.assertEqual(widget.knowledge_tabs.count(), 1)
+        finally:
+            widget.deleteLater()
+            runner.deleteLater()
+            self.app.processEvents()
+
+    def test_operational_result_updates_articles_without_focus_or_tab_theft(self):
+        from Tests.GUI import test_kb_lab_workspace as labs
+        fixture = labs.LabFixture(self.app)
+        try:
+            editor = fixture.ready()
+            editor.fixture_selector.setCurrentIndex(1)
+            editor.title_input.setFocus()
+            fixture.service.create_article(article_code="OP-1", title="Operational", summary="", body="literal")
+            article = fixture.service.articles[0]
+            fixture.widget._article_created(article)
+            self.assertIs(fixture.widget.knowledge_tabs.currentWidget(), fixture.widget._lab_tab)
+            self.assertIs(fixture.widget.focusWidget(), editor.title_input)
+            self.assertFalse(fixture.widget.new_button.isEnabled())
+            self.assertEqual(fixture.widget.article.knowledge_article_id, article.knowledge_article_id)
+            fixture.widget.open_article_by_id(article.knowledge_article_id)
+            labs.wait_for(self.app, lambda: not fixture.runner.busy and not fixture.runner.completing)
+            self.assertTrue(fixture.widget.articles_active)
+            self.assertIs(fixture.widget.lab_editor, editor)
+        finally:
+            fixture.cleanup()
+
+    def test_pending_nonempty_list_and_search_reconcile_detail_only_on_articles_return(self):
+        from Tests.GUI import test_kb_lab_workspace as labs
+        fixture = labs.LabFixture(self.app)
+        try:
+            editor = fixture.ready()
+            editor.fixture_selector.setCurrentIndex(1)
+            widget = fixture.widget
+            fixture.service.create_article(article_code="OP-READ-1", title="Operational", summary="", body="literal")
+            article = fixture.service.articles[0]
+            for search in (False, True):
+                gate, entered = threading.Event(), threading.Event()
+                fixture.gates.append(gate)
+                widget.knowledge_tabs.setCurrentWidget(widget.articles_tab)
+                def result(*args, **kwargs):
+                    entered.set()
+                    if not gate.wait(4):
+                        raise AssertionError("Bounded pending operational read")
+                    return (article,)
+                name = "search_articles" if search else "list_articles"
+                with patch.object(fixture.service, name, side_effect=result), patch.object(
+                        fixture.service, "get_article", wraps=fixture.service.get_article) as detail:
+                    if search:
+                        widget.search_articles(query="Operational")
+                    else:
+                        widget.refresh_list(load_filter_options=False)
+                    labs.wait_for(self.app, entered.is_set)
+                    widget.knowledge_tabs.setCurrentWidget(widget._lab_tab)
+                    editor.summary_input.setFocus()
+                    gate.set()
+                    labs.wait_for(self.app, lambda: not fixture.runner.busy and not fixture.runner.completing)
+                    self.assertIs(widget.knowledge_tabs.currentWidget(), widget._lab_tab)
+                    self.assertIs(widget.focusWidget(), editor.summary_input)
+                    detail.assert_not_called()
+                    self.assertEqual(widget._articles_detail_pending, article.knowledge_article_id)
+                    widget.knowledge_tabs.setCurrentWidget(widget.articles_tab)
+                    labs.wait_for(self.app, lambda: not fixture.runner.busy and not fixture.runner.completing)
+                    self.assertEqual(widget.article.knowledge_article_id, article.knowledge_article_id)
+                    self.assertEqual(widget.detail_code.text(), article.article_code)
+                    detail.assert_called_once_with(article.knowledge_article_id)
+                    self.assertIs(widget.lab_editor, editor)
+                    widget.knowledge_tabs.setCurrentWidget(widget._lab_tab)
+        finally:
+            fixture.cleanup()
+
+    def test_changed_filter_callback_retains_one_deferred_reload_without_lab_focus_theft(self):
+        from Tests.GUI import test_kb_lab_workspace as labs
+        fixture = labs.LabFixture(self.app)
+        try:
+            editor = fixture.ready()
+            widget = fixture.widget
+            fixture.service.create_article(article_code="OP-FILTER-1", title="Operational", summary="", body="literal")
+            widget.category_filter.addItem("Expired category", 4)
+            widget.category_filter.setCurrentIndex(2)
+            widget._manual_filter_refresh_active = True
+            widget._manual_filter_refresh_pending = {"category"}
+            widget._manual_category_filter_selection = ("category", 4)
+            with patch.object(fixture.service, "list_articles", wraps=fixture.service.list_articles) as reads:
+                widget._filter_options_succeeded(())
+                self.assertTrue(widget._articles_refresh_required)
+                self.assertIs(widget.knowledge_tabs.currentWidget(), widget._lab_tab)
+                reads.assert_not_called()
+                widget.knowledge_tabs.setCurrentWidget(widget.articles_tab)
+                labs.wait_for(self.app, lambda: not fixture.runner.busy and not fixture.runner.completing)
+                reads.assert_called_once_with()
+                self.assertEqual(widget.article.knowledge_article_id, fixture.service.articles[0].knowledge_article_id)
+                self.assertFalse(widget._articles_refresh_required)
+                self.assertIs(widget.lab_editor, editor)
+        finally:
+            fixture.cleanup()
+
+    def test_hidden_mutation_resets_incompatible_status_category_and_tag_filters(self):
+        from Tests.GUI import test_kb_lab_workspace as labs
+        fixture = labs.LabFixture(self.app)
+        try:
+            editor = fixture.ready()
+            editor.fixture_selector.setCurrentIndex(1)
+            widget = fixture.widget
+            fixture.service.create_article(article_code="OP-SAVED-1", title="Committed operational fixture", summary="", body="literal")
+            original = fixture.service.articles[0]
+            for mode in ("status", "category", "tag"):
+                with self.subTest(mode=mode):
+                    result = SimpleNamespace(**(vars(original) | dict(
+                        status="PUBLISHED" if mode == "status" else "DRAFT",
+                        category_id=6 if mode == "category" else None,
+                        category_name="New category" if mode == "category" else None,
+                        tag_ids=(4,) if mode == "tag" else (),
+                        tag_names=("New tag",) if mode == "tag" else (),
+                    )))
+                    fixture.service.articles[:] = [result]
+                    if mode == "status":
+                        widget.status_filter.setCurrentIndex(1)
+                    elif mode == "category":
+                        widget.category_filter.addItem("Old category", 5)
+                        widget.category_filter.setCurrentIndex(widget.category_filter.findData(5))
+                    else:
+                        widget.tag_filter.addItem("Old tag", ("tag", 3))
+                        widget.tag_filter.setCurrentIndex(widget.tag_filter.findData(("tag", 3)))
+                    editor.summary_input.setFocus()
+                    with patch.object(fixture.runner, "submit", side_effect=AssertionError("No hidden-page read")):
+                        widget._article_created(result)
+                    self.assertIs(widget.knowledge_tabs.currentWidget(), widget._lab_tab)
+                    self.assertIs(widget.focusWidget(), editor.summary_input)
+                    self.assertEqual(widget.category_filter.currentIndex(), 0)
+                    self.assertEqual(widget.status_filter.currentIndex(), 0)
+                    self.assertEqual(widget.tag_filter.currentData(), ("all", None))
+                    with patch.object(fixture.service, "list_articles", wraps=fixture.service.list_articles) as reads:
+                        widget.knowledge_tabs.setCurrentWidget(widget.articles_tab)
+                        labs.wait_for(self.app, lambda: not fixture.runner.busy and not fixture.runner.completing
+                                      and not widget.filter_loading)
+                        reads.assert_called_once_with()
+                    self.assertEqual(widget.model.rowCount(), 1)
+                    self.assertEqual(widget.article.knowledge_article_id, result.knowledge_article_id)
+                    self.assertNotIn("no longer exists", widget.feedback.text())
+                    self.assertEqual(widget.detail_status.text(), "Status: " + result.status)
+                    self.assertIs(widget.lab_editor, editor)
+                    widget.knowledge_tabs.setCurrentWidget(widget._lab_tab)
+        finally:
+            fixture.cleanup()

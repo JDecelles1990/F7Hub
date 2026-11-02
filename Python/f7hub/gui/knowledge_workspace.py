@@ -3,7 +3,7 @@
 import logging
 from html import escape
 
-from PySide6.QtCore import QItemSelectionModel, QSignalBlocker, Qt
+from PySide6.QtCore import QItemSelectionModel, QSignalBlocker, Qt, QTimer, Signal, QEvent
 from PySide6.QtGui import QAction, QStandardItem, QStandardItemModel
 from PySide6.QtWidgets import (
     QAbstractItemView,
@@ -17,11 +17,15 @@ from PySide6.QtWidgets import (
     QPushButton,
     QSplitter,
     QTableView,
+    QTabWidget,
+    QTabBar,
+    QScrollArea,
     QToolButton,
     QVBoxLayout,
     QWidget,
 )
 
+from f7hub.gui.kb_preview_editor import KBPreviewEditor
 from f7hub.gui.new_article_dialog import NewArticleDialog
 from f7hub.gui.article_category_dialog import ArticleCategoryDialog
 from f7hub.gui.article_tags_dialog import ArticleTagsDialog
@@ -40,6 +44,8 @@ _TAG_FILTER_CHOOSE = ("choose", None)
 class KnowledgeWorkspace(QWidget):
     """A deliberately small Knowledge Base list/detail workspace."""
 
+    lab_close_finished = Signal(int, bool)
+
     def __init__(
         self,
         service: KnowledgeService,
@@ -47,8 +53,28 @@ class KnowledgeWorkspace(QWidget):
         parent=None,
         *,
         guide_action: QAction | None = None,
+        lab_session_factory=None,
     ) -> None:
         super().__init__(parent)
+        self._lab_factory = lab_session_factory
+        self._lab_runner = ServiceTaskRunner(self)
+        self._lab_runner.completion_finished.connect(self._queue_lab_settle)
+        self._lab_owner = None
+        self._lab_generation = 0
+        self._lab_state = "NONE"
+        self._lab_close_requested = False
+        self._lab_cleanup_attempted = False
+        self._lab_guarding = False
+        self._lab_exit_pending = False
+        self._lab_tab = None
+        self.lab_editor = None
+        self._lab_saved_focus = None
+        self._lab_focus_restore_serial = 0
+        self._lab_pending_focus_restore = None
+        self._lab_residual_owners = []
+        self._articles_refresh_pending = None
+        self._articles_refresh_required = False
+        self._articles_detail_pending = None
         self._service = service
         self._runner = runner
         self._filter_runner = ServiceTaskRunner(self)
@@ -108,6 +134,18 @@ class KnowledgeWorkspace(QWidget):
         top.addWidget(heading)
         top.addWidget(self.guide_button)
         top.addStretch()
+        self.open_synthetic_kb_lab_button = QPushButton("Open Synthetic KB Lab", self)
+        self.open_synthetic_kb_lab_button.setObjectName("open_synthetic_kb_lab_button")
+        self.open_synthetic_kb_lab_button.setAccessibleName("Open Synthetic KB Lab")
+        self.open_synthetic_kb_lab_button.setAccessibleDescription(
+            "Open or focus one temporary synthetic knowledge lab inside F7Hub.")
+        self.open_synthetic_kb_lab_button.setToolTip(
+            "Temporary synthetic fixtures only; no article is saved."
+            if lab_session_factory is not None else
+            "Synthetic KB Lab unavailable: verified assets or session factory are unavailable.")
+        self.open_synthetic_kb_lab_button.setEnabled(lab_session_factory is not None)
+        self.open_synthetic_kb_lab_button.clicked.connect(self.open_synthetic_kb_lab)
+        top.addWidget(self.open_synthetic_kb_lab_button)
         top.addWidget(self.new_button)
         top.addWidget(self.edit_button)
         top.addWidget(self.publish_button)
@@ -238,20 +276,35 @@ class KnowledgeWorkspace(QWidget):
 
         layout = QVBoxLayout(self)
         layout.addLayout(top)
-        layout.addLayout(search_row)
-        layout.addLayout(filter_row)
-        layout.addWidget(self.filter_feedback)
-        layout.addWidget(self.tag_filter_feedback)
-        layout.addWidget(self.feedback)
-        layout.addWidget(splitter, 1)
+        self.knowledge_tabs = QTabWidget(self)
+        self.knowledge_tabs.setObjectName("knowledge_tabs")
+        self.knowledge_tabs.setAccessibleName("Knowledge workspace tabs")
+        self.knowledge_tabs.setTabsClosable(True)
+        self.articles_tab = QWidget(self.knowledge_tabs)
+        self.articles_tab.setObjectName("knowledge_articles_tab")
+        articles_layout = QVBoxLayout(self.articles_tab)
+        articles_layout.addLayout(search_row)
+        articles_layout.addLayout(filter_row)
+        articles_layout.addWidget(self.filter_feedback)
+        articles_layout.addWidget(self.tag_filter_feedback)
+        articles_layout.addWidget(self.feedback)
+        articles_layout.addWidget(splitter, 1)
+        self.knowledge_tabs.addTab(self.articles_tab, "Articles")
+        for side in (QTabBar.ButtonPosition.LeftSide, QTabBar.ButtonPosition.RightSide):
+            self.knowledge_tabs.tabBar().setTabButton(0, side, None)
+        self.knowledge_tabs.tabCloseRequested.connect(self._close_knowledge_tab)
+        self.knowledge_tabs.currentChanged.connect(self._knowledge_tab_changed)
+        layout.addWidget(self.knowledge_tabs, 1)
         self._runner.busy_changed.connect(self._update_actions)
+        self._runner.completion_finished.connect(self._reconcile_articles)
         self._filter_runner.busy_changed.connect(lambda _busy: self._update_actions(self._runner.busy))
         self._tag_filter_runner.busy_changed.connect(lambda _busy: self._update_actions(self._runner.busy))
         self._update_actions(False)
 
     @property
     def filter_loading(self) -> bool:
-        return self._filter_runner.busy or self._tag_filter_runner.busy
+        return (self._filter_runner.busy or self._filter_runner.completing
+                or self._tag_filter_runner.busy or self._tag_filter_runner.completing)
 
     def _load_filter_options(self) -> None:
         if not self._filter_options_loaded and not self._filter_runner.busy:
@@ -277,6 +330,8 @@ class KnowledgeWorkspace(QWidget):
         return ("category", category_id)
 
     def refresh_filter_options(self) -> None:
+        if not self.articles_active:
+            return
         if (self._runner.busy or self.filter_loading or self._manual_filter_refresh_active
                 or self._tag_filter_dialog is not None):
             return
@@ -424,6 +479,8 @@ class KnowledgeWorkspace(QWidget):
         )
 
     def _tag_filter_changed(self, index: int) -> None:
+        if not self.articles_active:
+            return
         selection = self.tag_filter.currentData()
         if selection == _TAG_FILTER_CHOOSE:
             self._set_tag_filter_selection(self._selected_tag_filter)
@@ -433,6 +490,8 @@ class KnowledgeWorkspace(QWidget):
         self._filter_changed(index)
 
     def open_tag_filter(self) -> KnowledgeTagFilterDialog | None:
+        if not self.articles_active:
+            return
         if (self._runner.busy or self.filter_loading or self._manual_filter_refresh_active
                 or self._tag_filter_dialog is not None or self._category_dialog is not None
                 or self._tags_dialog is not None or self._confirming_publish
@@ -503,6 +562,10 @@ class KnowledgeWorkspace(QWidget):
             self._reload_results_after_filter_refresh()
 
     def _reload_results_after_filter_refresh(self) -> None:
+        if not self.articles_active:
+            self._articles_refresh_required = True
+            self._articles_refresh_pending = self.article.knowledge_article_id if self.article else None
+            return
         selected_id = self.article.knowledge_article_id if self.article else None
         if self._search_active:
             self.search_articles(query=self._search_query)
@@ -558,6 +621,10 @@ class KnowledgeWorkspace(QWidget):
         return True
 
     def _filter_changed(self, _index) -> None:
+        if not self.articles_active:
+            self._articles_refresh_required = True
+            self._articles_refresh_pending = self.article.knowledge_article_id if self.article else None
+            return
         if self._runner.busy:
             return
         selected_id = self.article.knowledge_article_id if self.article else None
@@ -572,8 +639,11 @@ class KnowledgeWorkspace(QWidget):
         self, *, select_article_id: int | None = None,
         load_filter_options: bool = True, preserve_search_input: bool = False,
     ) -> None:
+        if not self.articles_active:
+            return
         if self._runner.busy:
             return
+        self._articles_detail_pending = None
         self._search_active = False
         self._search_query = ""
         if not preserve_search_input:
@@ -591,8 +661,11 @@ class KnowledgeWorkspace(QWidget):
             self._load_filter_options()
 
     def search_articles(self, *, query: str | None = None) -> None:
+        if not self.articles_active:
+            return
         if self._runner.busy:
             return
+        self._articles_detail_pending = None
         if query is None:
             query = self.search_input.text()
         if not query.strip():
@@ -615,11 +688,15 @@ class KnowledgeWorkspace(QWidget):
         )
 
     def clear_search(self) -> None:
+        if not self.articles_active:
+            return
         if self._runner.busy:
             return
         self.refresh_list()
 
     def open_new_article(self) -> NewArticleDialog | None:
+        if not self.articles_active:
+            return
         if self._runner.busy or self._category_dialog is not None or self._tags_dialog is not None:
             return None
         dialog = NewArticleDialog(self._service, self._runner, self)
@@ -629,6 +706,8 @@ class KnowledgeWorkspace(QWidget):
         return dialog
 
     def open_edit_article(self) -> EditArticleDialog | None:
+        if not self.articles_active:
+            return
         if self._runner.busy or self._category_dialog is not None or self._tags_dialog is not None or self.article is None or self.article.status != "DRAFT":
             return None
         dialog = EditArticleDialog(self._service, self._runner, self.article, self)
@@ -638,6 +717,8 @@ class KnowledgeWorkspace(QWidget):
         return dialog
 
     def open_category(self) -> ArticleCategoryDialog | None:
+        if not self.articles_active:
+            return
         if (self._service is None or self._runner.busy or self._category_dialog is not None or self._tags_dialog is not None
                 or self._confirming_publish or self._confirming_archive
                 or self.article is None or self.article.status != "DRAFT"):
@@ -645,7 +726,7 @@ class KnowledgeWorkspace(QWidget):
         article = self.article
         dialog = ArticleCategoryDialog(
             self._service, self._runner, article,
-            context_is_current=lambda: self.article is article,
+            context_is_current=lambda: self.articles_active and self.article is article,
             parent=self.window(),
         )
         self._category_dialog = dialog
@@ -669,6 +750,8 @@ class KnowledgeWorkspace(QWidget):
             self._filter_changed(self.category_filter.currentIndex())
 
     def open_tags(self) -> ArticleTagsDialog | None:
+        if not self.articles_active:
+            return
         if (self._service is None or self._runner.busy or self._category_dialog is not None or self._tags_dialog is not None
                 or self._confirming_publish or self._confirming_archive
                 or self.article is None or self.article.status != "DRAFT"):
@@ -676,7 +759,7 @@ class KnowledgeWorkspace(QWidget):
         article = self.article
         dialog = ArticleTagsDialog(
             self._service, self._runner, article,
-            context_is_current=lambda: self.article is article,
+            context_is_current=lambda: self.articles_active and self.article is article,
             parent=self.window(),
         )
         self._tags_dialog = dialog
@@ -719,6 +802,8 @@ class KnowledgeWorkspace(QWidget):
         return accepted
 
     def publish_article(self) -> None:
+        if not self.articles_active:
+            return
         if (self._service is None or self._runner.busy or self._confirming_publish or self._confirming_archive
                 or self._category_dialog is not None or self._tags_dialog is not None
                 or self.article is None or self.article.status != "DRAFT"):
@@ -732,7 +817,7 @@ class KnowledgeWorkspace(QWidget):
             self._confirming_publish = False
             self._update_actions(self._runner.busy)
         # The modal confirmation runs an event loop; retain the reviewed token.
-        if not confirmed or self._runner.busy or self.article is not article:
+        if not confirmed or not self.articles_active or self._runner.busy or self.article is not article:
             return
         self.feedback.setText("Publishing article…")
         self._runner.submit(
@@ -770,6 +855,8 @@ class KnowledgeWorkspace(QWidget):
         return accepted
 
     def archive_article(self) -> None:
+        if not self.articles_active:
+            return
         if (self._service is None or self._runner.busy or self._confirming_archive or self._confirming_publish
                 or self._category_dialog is not None or self._tags_dialog is not None
                 or self.article is None or self.article.status != "PUBLISHED"):
@@ -783,7 +870,7 @@ class KnowledgeWorkspace(QWidget):
             self._confirming_archive = False
             self._update_actions(self._runner.busy)
         # The modal confirmation runs an event loop; retain the reviewed token.
-        if not confirmed or self._runner.busy or self.article is not article:
+        if not confirmed or not self.articles_active or self._runner.busy or self.article is not article:
             return
         self.feedback.setText("Archiving article…")
         self._runner.submit(
@@ -802,6 +889,8 @@ class KnowledgeWorkspace(QWidget):
         )
 
     def open_version_history(self) -> VersionHistoryDialog | None:
+        if not self.articles_active:
+            return
         if self._service is None or self._runner.busy or self.article is None:
             return None
         # The window owns the viewer outside the page hierarchy disabled by reads.
@@ -812,8 +901,11 @@ class KnowledgeWorkspace(QWidget):
         return dialog
 
     def open_article(self, article_id: int) -> None:
+        if not self.articles_active:
+            return
         if self._runner.busy:
             return
+        self._articles_detail_pending = None
         self._show_article(None)
         self.feedback.setText("Loading article…")
         self._runner.submit(
@@ -826,6 +918,10 @@ class KnowledgeWorkspace(QWidget):
         """Reconcile the list and reuse selection-driven current detail loading."""
         if self._runner.busy:
             return
+        self._articles_refresh_required = False
+        self._articles_refresh_pending = None
+        self._articles_detail_pending = None
+        self.knowledge_tabs.setCurrentWidget(self.articles_tab)
         self._reset_category_filter()
         self._reset_status_filter()
         self._reset_tag_filter()
@@ -840,6 +936,11 @@ class KnowledgeWorkspace(QWidget):
             self._reset_status_filter()
         if not self._article_matches_tag_filter(article):
             self._reset_tag_filter()
+        if not self.articles_active:
+            self._articles_refresh_pending = article.knowledge_article_id
+            self._articles_refresh_required = True
+            self._show_article(article)
+            return
         self.refresh_list(select_article_id=article.knowledge_article_id)
 
     def _list_loaded(self, articles) -> None:
@@ -922,8 +1023,12 @@ class KnowledgeWorkspace(QWidget):
             QItemSelectionModel.SelectionFlag.ClearAndSelect
             | QItemSelectionModel.SelectionFlag.Rows,
         )
+        if not self.articles_active:
+            self._articles_detail_pending = self.model.item(row, 0).data(Qt.ItemDataRole.UserRole)
 
     def _selection_changed(self, selected, _deselected) -> None:
+        if not self.articles_active:
+            return
         indexes = selected.indexes()
         if not indexes or self._runner.busy:
             return
@@ -975,7 +1080,8 @@ class KnowledgeWorkspace(QWidget):
         self.detail_body.setPlainText(article.body_markdown)
 
     def _update_actions(self, busy: bool) -> None:
-        busy = (busy or self._tag_filter_dialog is not None
+        busy = (busy or not self.articles_active or self._lab_exit_pending
+                or self._tag_filter_dialog is not None
                 or self._manual_filter_refresh_active or self._confirming_publish
                 or self._confirming_archive or self._category_dialog is not None
                 or self._tags_dialog is not None)
@@ -1030,3 +1136,290 @@ class KnowledgeWorkspace(QWidget):
 
     def _search_text_changed(self, _text: str) -> None:
         self._update_actions(self._runner.busy)
+
+    @property
+    def articles_active(self):
+        return self.knowledge_tabs.currentWidget() is self.articles_tab and not self._lab_exit_pending
+
+    @property
+    def lab_shutdown_ready(self):
+        return (self._lab_tab is None and not self._lab_runner.busy
+                and not self._lab_runner.completing)
+
+    def set_lab_exit_pending(self, pending):
+        self._lab_exit_pending = pending
+        self.open_synthetic_kb_lab_button.setEnabled(self._lab_factory is not None and not pending)
+        self._update_actions(self._runner.busy)
+
+    def _knowledge_tab_changed(self, _index):
+        self._update_actions(self._runner.busy)
+        if not self.articles_active and self._lab_tab is not None:
+            self._queue_lab_focus_restore()
+        self._reconcile_articles()
+
+    def _reconcile_articles(self):
+        """Resume only operational reads, once Articles is eligible; never select it."""
+        if not self.articles_active or self._runner.busy or self._runner.completing:
+            return
+        if self._articles_refresh_required:
+            article_id = self._articles_refresh_pending
+            self._articles_refresh_required = False
+            self._articles_refresh_pending = None
+            self._articles_detail_pending = None
+            if self._search_active:
+                self.search_articles(query=self._search_query)
+                self._preferred_selection_id = article_id
+            else:
+                self.refresh_list(select_article_id=article_id)
+        elif self._articles_detail_pending is not None:
+            article_id = self._articles_detail_pending
+            self._articles_detail_pending = None
+            current = self.table.currentIndex()
+            if (current.isValid()
+                    and self.model.item(current.row(), 0).data(Qt.ItemDataRole.UserRole) == article_id):
+                self.open_article(article_id)
+
+    def _close_knowledge_tab(self, index):
+        if self._lab_tab is not None and self.knowledge_tabs.widget(index) is self._lab_tab:
+            self.close_synthetic_kb_lab()
+
+    def open_synthetic_kb_lab(self):
+        if self._lab_exit_pending:
+            return
+        if self._lab_tab is not None:
+            self.knowledge_tabs.setCurrentWidget(self._lab_tab)
+            if self.lab_editor is not None and self._lab_state == "OPEN":
+                self.lab_editor.fixture_selector.setFocus(Qt.FocusReason.OtherFocusReason)
+            return
+        if self._lab_factory is None or self._lab_runner.busy or self._lab_runner.completing:
+            return
+        self._lab_generation += 1
+        generation = self._lab_generation
+        self._lab_close_requested = False
+        self._lab_cleanup_attempted = False
+        self._lab_state = "PREPARING"
+        self._lab_tab = QWidget(self.knowledge_tabs)
+        self._lab_tab.setObjectName("synthetic_kb_lab_tab")
+        tab_layout = QVBoxLayout(self._lab_tab)
+        self._lab_feedback = QLabel("Preparing temporary synthetic fixtures…", self._lab_tab)
+        self._lab_feedback.setTextFormat(Qt.TextFormat.PlainText)
+        self._lab_feedback.setWordWrap(True)
+        tab_layout.addWidget(self._lab_feedback)
+        self._lab_acknowledge = QPushButton("Acknowledge residual storage…", self._lab_tab)
+        self._lab_acknowledge.setAccessibleDescription(
+            "Acknowledge that owned temporary storage remains; this does not retry or complete cleanup.")
+        self._lab_acknowledge.clicked.connect(self.acknowledge_lab_residual)
+        self._lab_acknowledge.hide()
+        tab_layout.addWidget(self._lab_acknowledge)
+        self.knowledge_tabs.addTab(self._lab_tab, "Synthetic KB Lab")
+        self.knowledge_tabs.setCurrentWidget(self._lab_tab)
+        try:
+            # Factory accepts no operational capabilities; reserve owner before submit.
+            self._lab_owner = self._lab_factory()
+            owner = self._lab_owner
+            submitted = self._lab_runner.submit(
+                owner.prepare,
+                lambda result: self._lab_prepared(owner, generation, result),
+                lambda error: self._lab_prepare_failed(owner, generation, error))
+        except Exception:
+            submitted = False
+        if not submitted:
+            self._lab_state = "FAILED"
+            self._lab_feedback.setText("Synthetic lab preparation could not start. Close this tab before reopening.")
+
+    def _lab_matches(self, owner, generation):
+        return (self._lab_tab is not None and self._lab_owner is owner
+                and self._lab_generation == generation)
+
+    def _lab_prepared(self, owner, generation, result):
+        if not self._lab_matches(owner, generation) or self._lab_state != "PREPARING":
+            return
+        if result is not owner:
+            self._lab_prepare_failed(owner, generation, None)
+            return
+        if self._lab_close_requested:
+            self._lab_state = "CLOSING"
+            return
+        self.lab_editor = KBPreviewEditor(owner.service, owner.snapshots, self._lab_tab)
+        self.lab_editor.close_requested.connect(self.close_synthetic_kb_lab)
+        self._lab_saved_focus = None
+        for field in self.lab_editor._editors.values():
+            field.installEventFilter(self)
+            if isinstance(field, QPlainTextEdit):
+                field.viewport().installEventFilter(self)
+        scroll = QScrollArea(self._lab_tab)
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(self.lab_editor)
+        self._lab_tab.layout().addWidget(scroll, 1)
+        self._lab_feedback.hide()
+        self._lab_state = "OPEN"
+        # An asynchronous result never steals focus/tab/module from deliberate navigation.
+        if self.knowledge_tabs.currentWidget() is self._lab_tab and self.isVisible():
+            self.lab_editor.fixture_selector.setFocus(Qt.FocusReason.OtherFocusReason)
+
+    def _lab_prepare_failed(self, owner, generation, error):
+        if not self._lab_matches(owner, generation) or self._lab_state != "PREPARING":
+            return
+        self._lab_state = "FAILED"
+        self._lab_feedback.setText(
+            "Synthetic lab preparation failed; owned temporary storage remains. Cleanup did not succeed."
+            if owner.cleanup_failed else "Synthetic lab preparation failed. No preview was opened.")
+        self._lab_acknowledge.setVisible(owner.cleanup_failed)
+
+    def close_synthetic_kb_lab(self):
+        """True: drained; None: pending; False: veto/failure. Never retry failed cleanup."""
+        if self._lab_tab is None:
+            return True if self.lab_shutdown_ready else None
+        if self._lab_guarding:
+            return False
+        owner = self._lab_owner
+        if owner is not None and (owner.cleanup_failed or
+                                  (self._lab_cleanup_attempted and self._lab_state == "FAILED")):
+            self._lab_feedback.show()
+            self._lab_feedback.setText(
+                "Temporary preview is closed; owned storage remains. Cleanup failed. Explicit acknowledgment is required.")
+            return False
+        if self._lab_close_requested:
+            return None
+        self._lab_guarding = True
+        try:
+            if self.lab_editor is not None and not self.lab_editor.confirm_close():
+                return False
+            if self.lab_editor is not None and not self.lab_editor.commit_close():
+                return False
+            self._lab_close_requested = True
+            if self._lab_state != "PREPARING":
+                self._lab_state = "CLOSING"
+            self._lab_feedback.setText("Temporary preview discarded. Finishing owned-resource cleanup…")
+            self._lab_feedback.show()
+        finally:
+            self._lab_guarding = False
+        self._queue_lab_settle()
+        return None
+
+    def _queue_lab_settle(self):
+        owner, generation = self._lab_owner, self._lab_generation
+        QTimer.singleShot(0, lambda: self._settle_lab(owner, generation))
+
+    def _settle_lab(self, owner, generation):
+        if (not self._lab_matches(owner, generation) or self._lab_runner.busy
+                or self._lab_runner.completing or not self._lab_close_requested):
+            return
+        if owner is None or owner.cleanup_complete:
+            self._remove_lab(generation)
+        elif owner.cleanup_failed or (self._lab_cleanup_attempted and self._lab_state == "FAILED"):
+            self._lab_state = "FAILED"
+            self.lab_close_finished.emit(generation, False)
+        elif not self._lab_cleanup_attempted:
+            self._lab_state = "CLOSING"
+            self._lab_cleanup_attempted = True
+            submitted = self._lab_runner.submit(
+                owner.close, lambda _: self._lab_cleaned(owner, generation),
+                lambda error: self._lab_cleanup_failed(owner, generation, error))
+            if not submitted:
+                self._lab_cleanup_failed(owner, generation, None)
+                self._queue_lab_settle()
+
+    def _lab_cleaned(self, owner, generation):
+        if not self._lab_matches(owner, generation) or self._lab_state != "CLOSING":
+            return
+        if not owner.cleanup_complete:
+            self._lab_cleanup_failed(owner, generation, None)
+
+    def _lab_cleanup_failed(self, owner, generation, error):
+        if not self._lab_matches(owner, generation) or self._lab_state != "CLOSING":
+            return
+        self._lab_state = "FAILED"
+        self._lab_feedback.setText(
+            "Temporary preview discarded; owned storage remains. Cleanup failed. No automatic retry will occur.")
+        self._lab_acknowledge.show()
+        # completion_finished, not the callback's busy=False gap, reports terminal failure.
+
+    def _remove_lab(self, generation):
+        tab = self._lab_tab
+        self._lab_tab = None
+        self.lab_editor = None
+        self._lab_owner = None
+        self._lab_state = "NONE"
+        self._lab_close_requested = False
+        self.knowledge_tabs.removeTab(self.knowledge_tabs.indexOf(tab))
+        tab.deleteLater()
+        self.lab_close_finished.emit(generation, True)
+
+    def acknowledge_lab_residual(self):
+        owner = self._lab_owner
+        if (self._lab_guarding or self._lab_state != "FAILED" or owner is None
+                or not owner.cleanup_failed or self._lab_runner.busy or self._lab_runner.completing):
+            return False
+        self._lab_guarding = True
+        generation = self._lab_generation
+        try:
+            answer = QMessageBox.warning(
+                self, "Temporary lab storage remains",
+                "Cleanup failed. The exact owned temporary directory will remain on disk. "
+                "Acknowledge this residual storage and close the discarded lab? This does not report cleanup success.",
+                QMessageBox.StandardButton.Ok | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Cancel)
+            if answer != QMessageBox.StandardButton.Ok:
+                return False
+            self._lab_residual_owners.append(owner)
+            self.feedback.setText("Residual synthetic lab storage acknowledged; cleanup did not succeed.")
+            self._remove_lab(generation)
+            return True
+        finally:
+            self._lab_guarding = False
+
+    def eventFilter(self, watched, event):
+        editor = self.lab_editor
+        pending = self._lab_pending_focus_restore
+        if editor is not None and pending is not None:
+            fields = tuple(editor._editors.values())
+            field_input = watched in fields or any(
+                isinstance(field, QPlainTextEdit) and watched is field.viewport() for field in fields)
+            if field_input and (
+                    event.type() in (QEvent.Type.KeyPress, QEvent.Type.MouseButtonPress)
+                    or (event.type() == QEvent.Type.FocusIn and watched is not pending[1][0])):
+                self._lab_pending_focus_restore = None
+        if (editor is not None and not editor._closed and event.type() == QEvent.Type.FocusOut
+                and watched in editor._editors.values()):
+            if isinstance(watched, QLineEdit):
+                cursor = (watched.cursorPosition(), watched.selectionStart(), len(watched.selectedText()))
+            else:
+                text_cursor = watched.textCursor()
+                cursor = (text_cursor.position(), text_cursor.anchor())
+            self._lab_saved_focus = (watched, editor._value(watched), cursor)
+        return super().eventFilter(watched, event)
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._queue_lab_focus_restore()
+
+    def _queue_lab_focus_restore(self):
+        owner, generation = self._lab_owner, self._lab_generation
+        saved = self._lab_saved_focus
+        self._lab_focus_restore_serial += 1
+        serial = self._lab_focus_restore_serial
+        self._lab_pending_focus_restore = (serial, saved) if saved is not None else None
+        QTimer.singleShot(0, lambda: self._restore_lab_focus(owner, generation, saved, serial))
+
+    def _restore_lab_focus(self, owner, generation, saved, serial):
+        if (self._lab_pending_focus_restore != (serial, saved) or saved is None or not self._lab_matches(owner, generation) or self._lab_state != "OPEN"
+                or self.knowledge_tabs.currentWidget() is not self._lab_tab or not self.isVisible()):
+            return
+        self._lab_pending_focus_restore = None
+        field, text, cursor = saved
+        if self.lab_editor._value(field) != text:
+            return
+        field.setFocus(Qt.FocusReason.OtherFocusReason)
+        if isinstance(field, QLineEdit):
+            position, start, length = cursor
+            if start >= 0:
+                field.setSelection(start, length)
+            else:
+                field.setCursorPosition(position)
+        else:
+            from PySide6.QtGui import QTextCursor
+            text_cursor = field.textCursor()
+            text_cursor.setPosition(cursor[1])
+            text_cursor.setPosition(cursor[0], QTextCursor.MoveMode.KeepAnchor)
+            field.setTextCursor(text_cursor)

@@ -1,5 +1,43 @@
 # F7Hub Current State
 
+<a id="kb-sg03b-current-state"></a>
+
+## KB-SG03B — embedded synthetic Knowledge Lab candidate (2026-11-01)
+
+**READY_FOR_REVIEW after bounded corrections; independent rereview PENDING.** Owner authorized implementation, tests, documentation and genuinely independent review; strict stop before staging/commit/push/PR/merge/canonical synchronization. KB-SG03 remains open until B integration and final canonical acceptance.
+
+Live remote main verified exactly `5657047c35ca8d8fc52c2b82f9de2f96f4dde3b7` before implementation, containing reviewed Stage A `2485f837009eb079f91003eb94a61f0ac68c3c64` through PR #128. Candidate worktree `C:/Dev/F7Hub-KB-SG03B`, branch `feature/kb-sg03b-embedded-workspace`, base/HEAD the required main. Earlier Stage A pending/unintegrated prose below is STALE HANDOFF METADATA preserved as historical; current integrated identity is the verified fact above. Canonical dirty state, unrelated worktrees and opaque protected paths are preserved.
+
+Candidate implements one Articles/Lab inner-tab host, lazy synthetic asset-only factory, reserve-before-submit exact ownership, dedicated setup/cleanup worker, stale generation/token fences, operational handler/action isolation, retained navigation/edit/undo/source state, shared guarded Cancel/Discard, failure-visible ownership, explicit residual acknowledgment and pending/rechecked Exit. Tray hide retains Lab; standalone launcher unchanged. Exactly fifteen allowlisted paths; no schema/migration or production capability injection.
+
+| Fresh author suite | Result / tests |
+|---|---|
+| Embedded Lab | RETAINED PASS 18 |
+| Knowledge workspace | FRESH PASS 40 |
+| Application lifecycle | RETAINED PASS 31 |
+| MainWindow | RETAINED PASS 90 |
+| Bootstrap integration | RETAINED PASS 11 |
+| Stage A shared editor / dialog / real integration | RETAINED PASS 9 / 12 / 17 |
+| Preview unit regression | RETAINED PASS 14 |
+
+Current R4 coverage is 242 unique tests: Knowledge40 FRESH PASS plus 202 applicable tests RETAINED PASS. Only _article_created changed after the preceding correction; retained tests do not dispatch it, and all other workspace methods/shared imports/runtime/test/helper/dependency inputs are verified unchanged. Zero failures/errors/skips in the successful selected executions; prior failed attempts remain preserved. Environment: Windows offscreen, disposable synthetic fixtures; no native/physical inference from those suites. Required database isolation checks guard every setup SQLite target against the exact disposable Lab database, assert closed connections, six NEW tickets, one DRAFT article, zero promoted links, no preview-time SQL/source/network I/O, equal disposable logical dumps, integrity_check=ok and zero foreign_key_check violations. No production database was opened/copied/hashed as a probe.
+
+WINDOWS_NATIVE correction author run PASS 45 assertions, process exit 0; exposed composed MainWindow at 1180x792, 96 logical DPI, DPR 1.0. Three inspected captures show readable notice/provenance/French/negated case, embedded parentage and disabled article actions. Qt-injected keyboard, inner/module persistence, dirty Cancel/Discard, actual tray hide/restore, responsive workers, deferred Exit, process completion and both exact temporary-root removals were checked. Controlled 80ms worker delays support heartbeat observation, not a performance claim. Physical input, alternate DPI, AT/high contrast NOT RUN; no owner physical acceptance requested.
+
+External evidence: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/KB-SG03B/implementation-20261101/`. Initial successful 233-test evidence: `correction-r1-navigation/`; prior R1-R3 correction evidence: embedded18 in `correction-r2-review/`, Knowledge39/lifecycle31 in `correction-r2b-fixture/`, MainWindow90/bootstrap11 and prior native43 in `correction-r2c-close-event/`. Current Knowledge40/native45, final manifest/drift/applicability/report are in `correction-r4-callback/`. Original failfast attempt and H1 scheduler/R1 navigation failure/correction records remain preserved, not relabeled PASS. Initial native40 records remain at the evidence root; current native45 records/captures/exact roots, revised manifest/aggregate, correction report and fifteen-path drift matrix are in `correction-r4-callback/`. Documentation-only final edits do not change tested runtime/transitive inputs.
+
+Carry-forward notes: original KB-SG02 N01-N03 remain (note tuple revisions not displayed; manual fixtures confer no technical/causal/canonical acceptance; expanded physical/accessibility profiles unverified). A separate instrumented setup diagnostic timed out and exited 1 before it persisted an allocated-root identity; possible unrecorded diagnostic residue is NOT VERIFIED and was not deleted by filename inference. It is separate from the completed suites/native exact-root cleanup evidence. No broad temp cleanup is authorized.
+
+Next gate: independent rereview of the corrected exact candidate and evidence. Approval cannot grant integration; later B integration and final canonical acceptance remain separate.
+
+
+Independent initial review returned CHANGES REQUIRED for the original aggregate `bd5d9bd858a8701571c21e7501823fc6226e6896032522e6b2ca3e91551e01ce`. Bounded corrections retain nonempty hidden Articles detail/search/filter reload intent, reconcile it only on eligible Articles, coalesce fallback close before preflight, report committed discard with later veto, and cancel queued cursor restoration after newer deliberate focus/input. Eight added regressions cover these findings. Author correction evidence is complete; independent closure of R1-R3 remains pending rereview. Two new-test precondition/Qt recursive-close-return errors were stopped, preserved and corrected separately; no runtime correction was inferred from those fixture errors. No unchanged retry. The corrected native45 scenario includes pending operational-list reconciliation and newer-focus checks; initial native40 and all failed records remain historical.
+
+
+Latest R4 correction: independent rereview freshly passed the original R1 read and R3 focus probes, then returned CHANGES REQUIRED for a saved mutation delivered in Lab retaining incompatible Articles filters. The existing category/status/tag reset logic now runs before page-aware deferral; it performs no hidden-page read or focus change. Fresh three-case regression verifies committed results remain visible on Articles return. The latest native45 scenario also checks a delayed DRAFT creation callback against a Published filter using only disposable operational storage. Current author coverage is 40 fresh Knowledge tests plus 202 applicable retained tests (242 unique); current native45 exited 0 and both exact Lab roots were removed. Earlier 233/241 test and native40/43 records remain historical, not summed. R4 author correction is complete; independent final rereview and prior R2 fresh independent runtime checks remain pending. Final evidence is under `correction-r4-callback/`; no integration or KB-SG03 closure.
+
+---
+
 <a id="kb-sg03a-current-state"></a>
 
 ## KB-SG03A — shared editor / synthetic session candidate (2026-11-01)

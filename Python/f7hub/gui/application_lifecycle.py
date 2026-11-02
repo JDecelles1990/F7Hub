@@ -20,6 +20,10 @@ class ApplicationLifecycle(QObject):
         self.exiting = False
         self.accepted = False
         self.started = False
+        self._exit_token = 0
+        self._exit_pending = None
+        if window.knowledge_workspace is not None:
+            window.knowledge_workspace.lab_close_finished.connect(self._lab_closed)
         self._hidden = False
         self._focus = None
         self._was_maximized = False
@@ -136,24 +140,67 @@ class ApplicationLifecycle(QObject):
                 "Tray recovery was lost. F7Hub has been restored.")
 
     def request_exit(self):
-        if self.exiting or self.accepted:
+        if self.exiting or self.accepted or self._exit_pending is not None:
             return False
         self.exiting = True
+        self._exit_token += 1
+        token = self._exit_token
         try:
-            # Negotiate with a visible owner, including Exit requested from tray.
             self.restore()
             if not self.window.confirm_exit():
                 return False
-            if self.window.cleanup_shutdown() is False:
-                return False
-            self.accepted = True
-            self.recovery_timer.stop()
-            self.tray.hide()
-            self.window.close()
-            self.application.quit()
-            return True
+            lab = self.window.knowledge_workspace
+            if lab is not None:
+                lab.set_lab_exit_pending(True)
+                outcome = lab.close_synthetic_kb_lab()
+                if outcome is None:
+                    self._exit_pending = (token, lab._lab_generation)
+                    return False
+                if outcome is False:
+                    lab.set_lab_exit_pending(False)
+                    return False
+            return self._finish_exit()
         finally:
             self.exiting = False
+
+    def _lab_closed(self, generation, success):
+        request = self._exit_pending
+        if request is None or request[1] != generation:
+            return
+        QTimer.singleShot(0, lambda: self._continue_exit(request, success))
+
+    def _continue_exit(self, request, success):
+        if self.accepted or self._exit_pending != request or request[0] != self._exit_token:
+            return
+        lab = self.window.knowledge_workspace
+        self._exit_pending = None
+        self.exiting = True
+        try:
+            if not success or not lab.lab_shutdown_ready:
+                self.window.statusBar().showMessage(
+                    "Exit cancelled: synthetic lab cleanup failed; temporary storage remains.")
+                return
+            if not self.window.confirm_exit():
+                self.window.statusBar().showMessage(
+                    "Synthetic lab discard completed. Exit was vetoed by another operation or draft.")
+                return
+            self._finish_exit()
+        finally:
+            self.exiting = False
+            if not self.accepted:
+                lab.set_lab_exit_pending(False)
+
+    def _finish_exit(self):
+        if self.window.cleanup_shutdown() is False:
+            if self.window.knowledge_workspace is not None:
+                self.window.knowledge_workspace.set_lab_exit_pending(False)
+            return False
+        self.accepted = True
+        self.recovery_timer.stop()
+        self.tray.hide()
+        self.window.close()
+        self.application.quit()
+        return True
 
     def _about_to_quit(self):
         self.recovery_timer.stop()

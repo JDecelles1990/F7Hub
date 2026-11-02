@@ -1,5 +1,27 @@
 # F7Hub Python Architecture
 
+## KB-SG03B — embedded host and deferred shutdown candidate (2026-11-01)
+
+Stage A is integrated at `5657047c35ca8d8fc52c2b82f9de2f96f4dde3b7`; Stage B is unintegrated and independent rereview pending. Historical extraction sections below remain unchanged.
+
+`bootstrap_application` passes only a lazy asset-root closure to `MainWindow`, which passes it to `KnowledgeWorkspace`. Missing fixed assets disable the action with an unavailable tooltip; admission/setup are deferred until activation. No operational capability enters SyntheticLabSession. The shared editor/session modules and standalone CLI/dialog are unchanged.
+
+KnowledgeWorkspace owns the inner tabs, dedicated ServiceTaskRunner, exact owner/generation, preparation/closing latch, guarded close and residue acknowledgment. Workers perform setup/cleanup; widgets remain on GUI thread. A busy=False callback is still completing: follow-up cleanup/removal and shutdown continuations wait until completion_finished, then revalidate generation/request identity. Stale callbacks cannot attach an old editor or approve another Exit. Setup/cleanup double failure preserves owner/root; cleanup attempt failure is not retried automatically.
+
+Cancel is nonterminal. Discard commits editor clear/freeze before terminal owner cleanup; cleanup failure cannot restore discarded text. Successful cleanup removes/disposes the tab; explicit reopening creates a fresh owner/root. Explicit residual acknowledgment retains the exact owner and does not change cleanup_complete. Tab/module navigation performs no lab setup or Articles refresh and preserves source/draft/dirty/undo; cursor state restores with owner/generation/text guards.
+
+MainWindow keeps normal navigation, chooses Articles for explicit Open Article, and preserves Lab on ordinary Knowledge return. ApplicationLifecycle preflights existing operations/drafts, then Lab; token-bound pending Exit waits for drain and rechecks existing guards. Clipboard leave is deferred until accepted shutdown cleanup so Lab Cancel does not end the other session. No Clipboard acquisition/service changes occur. No-lifecycle closeEvent honors False/pending and never destroys live lab workers.
+
+Current R4 Knowledge suite FRESH PASS 40. Embedded18, lifecycle31, MainWindow90, bootstrap11 and Stage A editor9/dialog12/integration17/preview14 are RETAINED PASS after function-level dependency/input verification: 202 retained tests, 242 unique covered tests total. Only _article_created changed after their executed cycle; those retained suites do not dispatch that callback. First-failure records, scheduler H1 and navigation R1 correction evidence are retained. WINDOWS_NATIVE PASS 45 assertions, exit 0, three inspected captures at 1180x792/96 DPI; Qt-injected input only. Physical input/alternate DPI/AT/high contrast NOT RUN. Evidence/manifests and next gate are in CURRENT_STATE; no integration authority follows.
+
+
+Independent initial review returned CHANGES REQUIRED for the original aggregate `bd5d9bd858a8701571c21e7501823fc6226e6896032522e6b2ca3e91551e01ce`. Bounded corrections retain nonempty hidden Articles detail/search/filter reload intent, reconcile it only on eligible Articles, coalesce fallback close before preflight, report committed discard with later veto, and cancel queued cursor restoration after newer deliberate focus/input. Eight added regressions cover these findings. Author correction evidence is complete; independent closure of R1-R3 remains pending rereview. Two new-test precondition/Qt recursive-close-return errors were stopped, preserved and corrected separately; no runtime correction was inferred from those fixture errors. No unchanged retry. The corrected native45 scenario includes pending operational-list reconciliation and newer-focus checks; initial native40 and all failed records remain historical.
+
+
+Latest R4 correction: independent rereview freshly passed the original R1 read and R3 focus probes, then returned CHANGES REQUIRED for a saved mutation delivered in Lab retaining incompatible Articles filters. The existing category/status/tag reset logic now runs before page-aware deferral; it performs no hidden-page read or focus change. Fresh three-case regression verifies committed results remain visible on Articles return. The latest native45 scenario also checks a delayed DRAFT creation callback against a Published filter using only disposable operational storage. Current author coverage is 40 fresh Knowledge tests plus 202 applicable retained tests (242 unique); current native45 exited 0 and both exact Lab roots were removed. Earlier 233/241 test and native40/43 records remain historical, not summed. R4 author correction is complete; independent final rereview and prior R2 fresh independent runtime checks remain pending. Final evidence is under `correction-r4-callback/`; no integration or KB-SG03 closure.
+
+---
+
 ## KB-SG03A — shared editor and one-shot lab session candidate (2026-11-01)
 
 The unintegrated extraction adds `gui/kb_preview_editor.py` and
