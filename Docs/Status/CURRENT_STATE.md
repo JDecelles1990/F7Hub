@@ -1,5 +1,175 @@
 # F7Hub Current State
 
+<a id="slice-055-r1-current-state"></a>
+
+## Slice 055 R1 — deferred manual-refresh correction (2026-11-02)
+
+**S055_CORRECTION_READY_FOR_REREVIEW — separate independent R1 rereview PENDING.**
+The owner authorized the bounded runtime/test correction after independent R1
+review returned **CHANGES REQUIRED** on the eight-file candidate. Work remains
+in `C:/Dev/F7Hub-S055`, branch `feature/knowledge-filter-refresh-s055`, at
+base/HEAD `e843b7daee32fd15f6519946ac8a0da03313fde7`. This is an unintegrated
+author-validated correction, not independent approval. No staging, commit,
+push, PR, merge or CanonicalSync; canonical F7Hub and personal Guide data remain
+outside the correction. Earlier S055/S054 entries below are historical handoffs;
+their readiness/identity statements refer to their recorded candidates.
+
+R1 occurred because immediate manual-result reloads used
+`load_filter_options=False`, but deferred resumption used the normal default.
+A never-successful reference source could therefore be read a second time and
+have its manual failure feedback hidden. The correction stores a one-shot
+reference-loading option with each deferred Articles request. Manual-result-only
+requests suppress reference loading; the option is captured and reset before
+resumption dispatch, including reentrancy and the search branch. Ordinary
+filter/article-created requests and explicit article reveal preserve their own
+normal initial-load behavior. Pending article selection, last executed query,
+newer unsubmitted input and zero-or-one result reload remain preserved. Explicit
+Refresh filters still reads each source once and can retry failed sources.
+
+Only `Python/f7hub/gui/knowledge_workspace.py` and
+`Tests/GUI/test_knowledge_category_filter.py` change from the reviewed runtime/test
+candidate. Fifteen new regression methods cover both failed sources, both
+completion orders, inactive Articles, shared-runner busy/completing boundaries,
+explicit retry, one-shot consumption, request supersession, selection/search,
+ordinary initial-load retry and unchanged synthetic database contents. The tag
+GUI and ticket/Knowledge integration test files remain byte-identical to v2.
+The same four documentation owners are updated; final candidate scope stays
+eight paths. No schema, migration, runner implementation, service/repository,
+dependency or asynchronous infrastructure change.
+
+| Correction environment / provenance | Result | Evidence and scope |
+|---|---|---|
+| Windows Qt offscreen, FRESH former independent R1 probe | PASS 1/1, exit 0 | `r1-probe-first.result.json`; first execution after production correction, byte-identical probe copy. Tag reads remain one after resume; failure feedback stays visible. Original FAIL is preserved. |
+| Windows Qt offscreen, FRESH focused checks | PASS 35/35, exit 0 | `r1-focused.result.json`; full 33-test category module, original mixed-outcome/order matrix and inherited integration flow. Includes all 15 new methods. |
+| Windows Qt offscreen, FRESH remaining affected Knowledge GUI/integration | PASS 137/137, exit 0 | `r1-affected-remainder.result.json`; with the already fresh category module, covers 170 distinct current Knowledge/Lab GUI and SQLite integration tests. The two extra focused checks overlap this 137. |
+| Windows Qt offscreen, FRESH selected shell/lifecycle boundaries | PASS 4/4, exit 0 | `r1-shell-boundaries.result.json`; Lab module navigation, fallback close, shared completion and deferred exit cleanup. |
+| WINDOWS_NATIVE, FRESH visible synthetic R1 workflow | PASS 27 assertions, exit 0; author visual PASS | `r1-native.result.json` and `r1-native.visual-review.result.json`; real Lab draft/source/undo/focus retention, deferred reload/read counts, retry, ticket reveal and normal cleanup; two inspected 1000×700 captures, 96 DPI/DPR 1.0, Qt-injected input. |
+| Physical input, alternate display/DPI, high contrast and assistive technology | NOT RUN | No physical or broader accessibility/display acceptance claimed. |
+
+All fresh isolated database checks preserve logical dump equality across the
+refresh workflow, return `PRAGMA integrity_check = ok`, and show zero foreign-key
+violations. Optional Mochi automatic startup is mocked in the external harness;
+no operational/user database or clipboard data is used. The real Lab's owned
+temporary storage was removed after normal cleanup. No runtime check is repeated
+solely for Markdown/manifest edits. Previous broad/native PASS records remain
+historical or narrowly retained only after explicit input applicability checks;
+they do not validate changed R1 behavior. Prior baseline, regression-first,
+native harness/visual and independent R1 failures remain preserved as failures.
+
+Evidence root: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-055/`.
+`correction-r1-20261102/correction-report.md` owns the current author handoff,
+`candidate-manifest.v3.json` the corrected eight-file identity, and
+`candidate-drift-matrix.json` the per-path comparisons. Original four-file
+`implementation-20261102/candidate-manifest.json` and expanded
+`documentation-20261102/candidate-manifest.v2.json` remain intact; v3 has its own
+aggregate recorded externally to avoid self-reference. The old independent
+report remains bound to v2, not approval of this correction.
+
+R1 is author-corrected; independent rereview is **NOT RUN** and must specifically
+verify R1 plus original S055 behavior against v3. `S054-KNOWLEDGE-BASELINE-001`
+retirement remains pending independent approval, separately authorized
+integration and verification on main. Next gate: a separate independent
+read-only rereview of the corrected candidate and evidence.
+
+---
+
+<a id="slice-055-current-state"></a>
+
+## Slice 055 — Knowledge Filter Refresh Lifecycle candidate (2026-11-02)
+
+**S055_READY_FOR_REVIEW — independent read-only review PENDING.** The owner
+amended the scope to complete documentation only in `C:/Dev/F7Hub-S055`, branch
+`feature/knowledge-filter-refresh-s055`, base/HEAD
+`e843b7daee32fd15f6519946ac8a0da03313fde7`. This is an unintegrated candidate.
+The canonical checkout `C:/Dev/F7Hub` is not synchronized or modified by this
+gate. No staging, commit, push, PR, merge or CanonicalSync is authorized or
+performed. Readiness is not review approval or integration authority.
+
+The completion correction is confined to
+[KnowledgeWorkspace](../../Python/f7hub/gui/knowledge_workspace.py), with coverage
+in [category GUI tests](../../Tests/GUI/test_knowledge_category_filter.py),
+[tag GUI tests](../../Tests/GUI/test_knowledge_tag_filter.py) and the
+[ticket/Knowledge integration flow](../../Tests/Integration/test_ticket_knowledge_flow.py).
+Those four files remain byte-for-byte identical to the tested implementation
+candidate. The only additional candidate paths are `Docs/05_GUI.md`,
+`Docs/13_PythonArchitecture.md`, this current-state file and `Docs/18_ChangeLog.md`.
+
+Both reference runners reuse `completion_finished`. Manual refresh remains
+active until both source callbacks settle and both runners leave busy and
+completing states; action reconciliation then permits the next activation when
+otherwise eligible. Each accepted activation reads categories once and tags
+once. Successful sources replace/reconcile choices by stable ID, including
+renames. Failed sources retain cached choices and selection with safe feedback;
+mixed success/failure and explicit retry remain usable. Category/tag selectors
+also reject their own completing state.
+
+A valid retained selection issues no article query. One or both successful
+sources invalidating selections request at most one final list/search reload.
+Inactive Articles or a busy/completing shared runner retain the existing
+pending refresh intent. Resumption preserves the last executed search query,
+newer unsubmitted input and applicable article selection. Reference completion
+does not select Articles, replace Lab draft/source/undo/focus, or change the
+existing ticket-to-article reveal/reset route. There is no schema, migration,
+service/repository, dependency, new runner or infrastructure change.
+
+### Validation provenance and limits
+
+The documentation gate performs fresh documentation/reference, scope and
+manifest checks. Runtime results below are **RETAINED author evidence**, after
+verifying unchanged executable inputs, test/harness identities and accessible
+completion records. Documentation changes do not alter executable inputs or
+acceptance requirements; the 169 selected current tests were not rerun.
+
+| Environment / provenance | Result | Evidence and scope |
+|---|---|---|
+| Windows Qt offscreen, RETAINED focused checks | PASS 6/6, exit 0 | `focused-corrected.result.json`; includes real callback state and both completion orders. These six are also in the 155-test suite. |
+| Windows Qt offscreen, RETAINED affected Knowledge/Lab GUI and SQLite integration | PASS 155/155, no failures/errors/skips, exit 0 | `knowledge-regression.result.json`; category/status/tag controls, workspace/Lab, Knowledge and ticket/Knowledge integration. |
+| Windows Qt offscreen, RETAINED MainWindow/Lab and exit lifecycle | PASS 14/14, no failures/errors/skips, exit 0 | `affected-shell-lifecycle.result.json`; 155 + 14 = 169 distinct current tests. |
+| Windows Qt offscreen, RETAINED unedited pinned-baseline test replay | PASS 1/1, exit 0 | `original-baseline-test-corrected.result.json`; original expected behavior preserved, an additional replay rather than a new unique test. |
+| WINDOWS_NATIVE, RETAINED visible synthetic validation | PASS 31 checks, exit 0; visual PASS | `native-final.result.json` and `native-final.visual-review.result.json`; three author-inspected 1000×700 captures, 96 DPI/DPR 1.0, Qt-injected input. Checks are assertions, not unittest cases. |
+| Physical keyboard/mouse, alternate DPI/display, high contrast and assistive technology | NOT RUN | No physical-input or broader accessibility/display acceptance is claimed. |
+
+Real isolated SQLite checks established unchanged logical dumps across refresh,
+`PRAGMA integrity_check = ok` and zero `PRAGMA foreign_key_check` violations.
+Operational/user databases were not probed. Offscreen suites mocked optional
+Mochi automatic startup in an external harness; the test-created worktree host
+was closed through its normal Exit protocol, with zero remaining S055 host
+processes at the implementation gate. No unrelated process was stopped.
+
+Preserved failures remain failures: the pinned baseline failed at line 301
+(`Mixed success category` expected, `Renamed category` observed); the new
+regression-first callback probe failed before the correction. The first native
+harness failed after an invalid tag lookup; a later attempt passed 27 behavioral
+assertions but failed the 1000×700 visual gate for two captures. Diagnoses,
+original attempts and the final corrected 31-check/visual PASS are retained.
+General geometry retention across native restore was not established by S055.
+
+### Identity, evidence and remaining gates
+
+Original four-file manifest: `implementation-20261102/candidate-manifest.json`;
+original four-file aggregate:
+`82e7c999aaba09fb8aa30dff162173a18eece945670b935bb66c2469fd7769a0`.
+That aggregate identifies the original tested code/test candidate only.
+
+The expanded eight-file candidate uses the versioned
+`documentation-20261102/candidate-manifest.v2.json`, with its own recomputed
+aggregate and original-to-final per-file comparisons. The manifest/report are
+external to avoid a self-referential candidate hash. Evidence root:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-055/`. The implementation report and
+original manifest remain preserved under `implementation-20261102/`;
+`documentation-20261102/documentation-completion-report.md` records this later
+gate and retained-evidence applicability.
+
+`S054-KNOWLEDGE-BASELINE-001` remains active on main. The inherited test passes
+on this candidate, but retirement remains pending independent approval,
+separately authorized integration and verification on main. Independent review
+is **NOT RUN**; author self-checks and retained tests are not independent review.
+The next gate is a separate read-only reviewer bound to the expanded manifest,
+its exact eight paths, preserved failure records and applicable validation.
+Earlier S054 records below retain their historical handoff meaning.
+
+---
+
 <a id="slice-054-current-state"></a>
 
 ## Slice 054 — Find in Current Ticket Notes candidate (2026-11-02)

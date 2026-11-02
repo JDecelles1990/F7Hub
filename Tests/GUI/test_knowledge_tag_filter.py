@@ -271,57 +271,94 @@ class KnowledgeTagFilterGuiTests(unittest.TestCase):
 
     def test_all_refresh_waits_for_both_callback_orders_and_partial_failure(self):
         self.show()
+        original_categories = self.service.list_active_knowledge_categories
+        original_tags = self.service.list_available_tags
         for order in (("category", "tag"), ("tag", "category")):
-            for tag_fails in (False, True):
-                with self.subTest(order=order, tag_fails=tag_fails):
-                    self.workspace._filter_options_succeeded(
-                        self.service.list_active_knowledge_categories()
-                    )
-                    self.workspace._tag_filter_options_succeeded(
-                        self.service.list_available_tags()
-                    )
+            for category_fails, tag_fails in ((False, False), (False, True),
+                                              (True, False), (True, True)):
+                with self.subTest(order=order, category_fails=category_fails, tag_fails=tag_fails):
+                    self.workspace._filter_options_succeeded(original_categories())
+                    self.workspace._tag_filter_options_succeeded(original_tags())
                     self.choose_category(11)
                     self.choose_all((11, 22, 33))
-                    callbacks = {}
+                    gates = {source: threading.Event() for source in order}
+                    reload_states = []
+                    original_reload = self.workspace._reload_results_after_filter_refresh
 
-                    def capture(source):
-                        def submit(_operation, succeeded, rejected):
-                            callbacks[source] = (succeeded, rejected)
-                            return True
-                        return submit
+                    def category_read():
+                        if not gates["category"].wait(5):
+                            raise RuntimeError("category test gate timed out")
+                        if category_fails:
+                            raise RuntimeError("private category")
+                        return tuple(c for c in original_categories() if c.category_id != 11)
 
-                    with patch.object(self.workspace._filter_runner, "submit",
-                                      side_effect=capture("category")), patch.object(
-                        self.workspace._tag_filter_runner, "submit",
-                        side_effect=capture("tag"),
-                    ), patch.object(self.service, "list_articles",
-                                    wraps=self.service.list_articles) as listing:
-                        self.workspace.refresh_filter_options()
-                        self.assertIsNone(self.workspace.open_tag_filter())
-                        for source in order:
-                            succeeded, rejected = callbacks[source]
-                            if source == "category":
-                                succeeded(tuple(
-                                    category for category in
-                                    self.service.list_active_knowledge_categories()
-                                    if category.category_id != 11
-                                ))
-                            elif tag_fails:
-                                rejected(RuntimeError("private"))
-                            else:
-                                succeeded(tuple(
-                                    tag for tag in self.service.list_available_tags()
-                                    if tag.tag_id != 33
-                                ))
-                            if source == order[0]:
-                                listing.assert_not_called()
+                    def tag_read():
+                        if not gates["tag"].wait(5):
+                            raise RuntimeError("tag test gate timed out")
+                        if tag_fails:
+                            raise RuntimeError("private tag")
+                        return tuple(t for t in original_tags() if t.tag_id != 33)
+
+                    def reload_results():
+                        reload_states.append(self.workspace.filter_loading)
+                        original_reload()
+
+                    with patch.object(self.service, "list_active_knowledge_categories",
+                                      side_effect=category_read) as categories, patch.object(
+                        self.service, "list_available_tags", side_effect=tag_read,
+                    ) as tags, patch.object(self.service, "list_articles",
+                                           wraps=self.service.list_articles) as listing, patch.object(
+                        self.workspace, "_reload_results_after_filter_refresh", side_effect=reload_results,
+                    ):
+                        try:
+                            self.assertTrue(self.workspace.refresh_filters_button.isEnabled())
+                            self.workspace.refresh_filters_button.click()
+                            self.assertIsNone(self.workspace.open_tag_filter())
+                            gates[order[0]].set()
+                            first = (self.workspace._filter_runner if order[0] == "category"
+                                     else self.workspace._tag_filter_runner)
+                            deadline = time.monotonic() + 4
+                            while (first.busy or first.completing) and time.monotonic() < deadline:
+                                QTest.qWait(10)
+                            self.assertFalse(first.busy or first.completing)
+                            self.assertTrue(self.workspace.filter_loading)
+                            self.assertTrue(self.workspace._manual_filter_refresh_active)
+                            self.assertFalse(self.workspace.refresh_filters_button.isEnabled())
+                            listing.assert_not_called()
+                            self.assertEqual(reload_states, [])
+                        finally:
+                            for gate in gates.values():
+                                gate.set()
                         self.wait_idle()
-                        listing.assert_called_once()
-                    self.assertIsNone(self.workspace.category_filter.currentData())
-                    self.assertEqual(
-                        self.workspace.tag_filter.currentData(),
-                        ("all_selected", (11, 22, 33) if tag_fails else (11, 22)),
-                    )
+                        categories.assert_called_once_with()
+                        tags.assert_called_once_with()
+                        expected_reload = int(not (category_fails and tag_fails))
+                        self.assertEqual(listing.call_count, expected_reload)
+                        self.assertEqual(reload_states, [False] * expected_reload)
+                        self.assertFalse(self.workspace._manual_filter_refresh_active)
+                        self.assertEqual(self.workspace._manual_filter_refresh_pending, set())
+                        self.assertTrue(self.workspace.refresh_filters_button.isEnabled())
+                        self.assertEqual(self.workspace.category_filter.currentData(),
+                                         11 if category_fails else None)
+                        self.assertEqual(self.workspace.tag_filter.currentData(),
+                                         ("all_selected", (11, 22, 33) if tag_fails else (11, 22)))
+                        for fails, feedback in ((category_fails, self.workspace.filter_feedback),
+                                                (tag_fails, self.workspace.tag_filter_feedback)):
+                            self.assertNotIn("private", feedback.text())
+                            if fails:
+                                self.assertTrue(feedback.isVisible())
+                                self.assertIn("retained", feedback.text())
+                        # Settlement is idempotent, including repeat notifications.
+                        self.workspace._filter_runner.completion_finished.emit()
+                        self.workspace._tag_filter_runner.completion_finished.emit()
+                        self.assertEqual(listing.call_count, expected_reload)
+                        self.assertEqual(reload_states, [False] * expected_reload)
+                        self.workspace.refresh_filters_button.click()
+                        self.wait_idle()
+                        self.assertEqual(categories.call_count, 2)
+                        self.assertEqual(tags.call_count, 2)
+                        self.assertEqual(listing.call_count, expected_reload)
+                        self.assertTrue(self.workspace.refresh_filters_button.isEnabled())
 
     def test_all_filter_reconciles_article_tag_mutation(self):
         self.show()

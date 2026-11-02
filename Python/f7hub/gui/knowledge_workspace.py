@@ -74,6 +74,7 @@ class KnowledgeWorkspace(QWidget):
         self._lab_residual_owners = []
         self._articles_refresh_pending = None
         self._articles_refresh_required = False
+        self._articles_refresh_load_filter_options = True
         self._articles_detail_pending = None
         self._service = service
         self._runner = runner
@@ -299,6 +300,8 @@ class KnowledgeWorkspace(QWidget):
         self._runner.completion_finished.connect(self._reconcile_articles)
         self._filter_runner.busy_changed.connect(lambda _busy: self._update_actions(self._runner.busy))
         self._tag_filter_runner.busy_changed.connect(lambda _busy: self._update_actions(self._runner.busy))
+        self._filter_runner.completion_finished.connect(self._reconcile_filter_options)
+        self._tag_filter_runner.completion_finished.connect(self._reconcile_filter_options)
         self._update_actions(False)
 
     @property
@@ -550,21 +553,26 @@ class KnowledgeWorkspace(QWidget):
     ) -> None:
         self._manual_filter_refresh_reset |= selection_reset
         self._manual_filter_refresh_pending.discard(source)
-        if self._manual_filter_refresh_pending:
-            return
-        reload_results = self._manual_filter_refresh_reset
-        self._manual_filter_refresh_active = False
-        self._manual_filter_refresh_reset = False
-        self._manual_category_filter_selection = None
-        self._manual_tag_filter_selection = None
+        self._reconcile_filter_options()
+
+    def _reconcile_filter_options(self) -> None:
+        """Settle the manual cycle only after both reference callbacks drain."""
+        if (self._manual_filter_refresh_active
+                and not self._manual_filter_refresh_pending and not self.filter_loading):
+            reload_results = self._manual_filter_refresh_reset
+            self._manual_filter_refresh_active = False
+            self._manual_filter_refresh_reset = False
+            self._manual_category_filter_selection = None
+            self._manual_tag_filter_selection = None
+            if reload_results:
+                self._reload_results_after_filter_refresh()
         self._update_actions(self._runner.busy)
-        if reload_results:
-            self._reload_results_after_filter_refresh()
 
     def _reload_results_after_filter_refresh(self) -> None:
-        if not self.articles_active:
+        if not self.articles_active or self._runner.busy or self._runner.completing:
             self._articles_refresh_required = True
             self._articles_refresh_pending = self.article.knowledge_article_id if self.article else None
+            self._articles_refresh_load_filter_options = False
             return
         selected_id = self.article.knowledge_article_id if self.article else None
         if self._search_active:
@@ -624,6 +632,7 @@ class KnowledgeWorkspace(QWidget):
         if not self.articles_active:
             self._articles_refresh_required = True
             self._articles_refresh_pending = self.article.knowledge_article_id if self.article else None
+            self._articles_refresh_load_filter_options = True
             return
         if self._runner.busy:
             return
@@ -920,6 +929,7 @@ class KnowledgeWorkspace(QWidget):
             return
         self._articles_refresh_required = False
         self._articles_refresh_pending = None
+        self._articles_refresh_load_filter_options = True
         self._articles_detail_pending = None
         self.knowledge_tabs.setCurrentWidget(self.articles_tab)
         self._reset_category_filter()
@@ -939,6 +949,7 @@ class KnowledgeWorkspace(QWidget):
         if not self.articles_active:
             self._articles_refresh_pending = article.knowledge_article_id
             self._articles_refresh_required = True
+            self._articles_refresh_load_filter_options = True
             self._show_article(article)
             return
         self.refresh_list(select_article_id=article.knowledge_article_id)
@@ -1089,11 +1100,13 @@ class KnowledgeWorkspace(QWidget):
         self.search_input.setEnabled(not busy)
         self.search_button.setEnabled(not busy)
         self.category_filter.setEnabled(
-            not busy and self._filter_options_ready and not self._filter_runner.busy
+            not busy and self._filter_options_ready
+            and not self._filter_runner.busy and not self._filter_runner.completing
         )
         self.status_filter.setEnabled(not busy)
         self.tag_filter.setEnabled(
-            not busy and self._tag_filter_options_ready and not self._tag_filter_runner.busy
+            not busy and self._tag_filter_options_ready
+            and not self._tag_filter_runner.busy and not self._tag_filter_runner.completing
         )
         self.refresh_filters_button.setEnabled(
             self._service is not None and not busy and not self.filter_loading
@@ -1163,14 +1176,20 @@ class KnowledgeWorkspace(QWidget):
             return
         if self._articles_refresh_required:
             article_id = self._articles_refresh_pending
+            load_filter_options = self._articles_refresh_load_filter_options
             self._articles_refresh_required = False
             self._articles_refresh_pending = None
+            # Consume the request option before callbacks can enqueue more work.
+            self._articles_refresh_load_filter_options = True
             self._articles_detail_pending = None
             if self._search_active:
                 self.search_articles(query=self._search_query)
                 self._preferred_selection_id = article_id
             else:
-                self.refresh_list(select_article_id=article_id)
+                self.refresh_list(
+                    select_article_id=article_id, preserve_search_input=True,
+                    load_filter_options=load_filter_options,
+                )
         elif self._articles_detail_pending is not None:
             article_id = self._articles_detail_pending
             self._articles_detail_pending = None

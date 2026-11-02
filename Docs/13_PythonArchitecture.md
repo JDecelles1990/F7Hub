@@ -1854,9 +1854,50 @@ The existing list/search service and repository calls add `match_all_tags: bool 
 
 ## Implemented Manual Filter-Reference Refresh — Slice 023
 
-`KnowledgeWorkspace.refresh_filter_options()` snapshots category mode/ID and tag mode/ID, then submits exactly one call to `KnowledgeService.list_active_knowledge_categories()` and one call to `KnowledgeService.list_available_tags()` through the existing independent reference runners. Callbacks replace a source only after successful completion, reconcile by stable ID under `QSignalBlocker`, and retain cached options on failure. The existing repository/service SELECT paths remain the only data sources.
+`KnowledgeWorkspace.refresh_filter_options()` snapshots category mode/ID and tag mode/ID, then submits exactly one call to `KnowledgeService.list_active_knowledge_categories()` and one call to `KnowledgeService.list_available_tags()` through the existing independent reference runners. Source success callbacks replace choices from successful reference reads, reconcile by stable ID under `QSignalBlocker`, and retain cached options on failure. The existing repository/service SELECT paths remain the only data sources.
 
-Minimal per-cycle state records pending sources and whether either successful result invalidated an active specific selection. Only the final callback may request result reconciliation: no reset means no article query; one or two resets mean one shared-runner list/search request with the final controls. Active search passes the stored executed query without changing the input field; normal reload preserves unsubmitted input. `filter_loading` and MainWindow close protection remain unchanged. No repository, service, domain, migration, schema, FTS, dependency or cross-language change is introduced.
+Minimal per-cycle state records pending sources and whether either successful
+result invalidated an active specific selection. The integrated Slice 023 path
+requested result reconciliation inside the final source callback. The
+**unintegrated S055 candidate** corrects that completion boundary: both existing
+reference runners connect `ServiceTaskRunner.completion_finished` to
+`KnowledgeWorkspace._reconcile_filter_options()`. Source callbacks record their
+outcomes; the manual active flag, selection snapshots and reset intent remain
+until both sources have settled and neither runner is busy or completing. The
+reconciler consumes that state once, then recalculates actions using the current
+workspace guards. Repeated completion notifications do not repeat reads or
+result reloads. Each selector additionally rejects its own runner's completing
+state, including initial-load success and failure callbacks.
+
+No reset means no article query; one or two successful-source selection resets
+coalesce into one shared-runner list/search request with final controls. A
+failed source keeps its cached choices/selection and safe feedback while the
+successful source applies its result. Active search uses the stored executed
+query; normal and deferred reloads preserve unsubmitted input. If Articles is
+inactive or the shared runner is busy/completing, the existing pending Articles
+refresh fields retain the intent until `_reconcile_articles()` can resume it.
+
+The **S055 R1 corrective candidate** preserves deferred manual-reset provenance
+with the one-shot `_articles_refresh_load_filter_options` option. A manual-result
+request records `False`; `_reconcile_articles()` captures it, clears the pending
+request and restores the option to `True` before dispatch/reentrant callbacks.
+Its non-search result reload passes that captured option to `refresh_list()`;
+search resumption also consumes it. Thus a source whose initial load and manual
+refresh failed is not implicitly retried by this same deferred manual cycle,
+and its cached choices and failure feedback remain until a subsequent action.
+Explicit Refresh filters still requests each source once and can retry. Ordinary
+inactive filter changes and article-created requests set their own `True`
+option; explicit open-by-ID clears the old request/option before revealing the
+article. The default `refresh_list(load_filter_options=True)` and ordinary
+initial-load retry policy are unchanged. Pending article selection, stored
+executed query and newer unsubmitted input retain their existing handling.
+
+Filter completion never selects Articles or transfers Lab/ticket ownership.
+`filter_loading` still includes both reference runners' busy/completing states,
+and existing MainWindow close protection remains. No runner implementation,
+repository, service, domain, migration, schema, FTS, dependency or cross-language
+change is introduced. The [S055 R1 current-state record](Status/CURRENT_STATE.md#slice-055-r1-current-state)
+separates candidate validation from pending independent review and integration.
 
 ## Implemented Knowledge Category Filtering — Slice 019
 

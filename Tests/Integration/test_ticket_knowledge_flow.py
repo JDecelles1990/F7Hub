@@ -226,6 +226,20 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         self.wait_idle()
         workspace = self.window.knowledge_workspace
 
+        def refresh_filters():
+            self.assertTrue(workspace.refresh_filters_button.isEnabled())
+            service = self.context.knowledge_service
+            with patch.object(service, "list_active_knowledge_categories",
+                              wraps=service.list_active_knowledge_categories) as categories, \
+                    patch.object(service, "list_available_tags", wraps=service.list_available_tags) as tags:
+                workspace.refresh_filters_button.click()
+                self.wait_idle()
+                categories.assert_called_once_with()
+                tags.assert_called_once_with()
+            self.assertFalse(workspace._manual_filter_refresh_active)
+            self.assertEqual(workspace._manual_filter_refresh_pending, set())
+            self.assertTrue(workspace.refresh_filters_button.isEnabled())
+
         with database_connection(self.path) as connection:
             connection.execute(
                 "INSERT INTO categories (category_id, scope, name, is_active, sort_order, slug, created_at, updated_at) "
@@ -237,8 +251,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
                 ("2026-09-22T12:01:00Z",),
             )
             before_refresh = tuple(connection.iterdump())
-        workspace.refresh_filters_button.click()
-        self.wait_idle()
+        refresh_filters()
         self.assertGreaterEqual(workspace.category_filter.findData(77), 0)
         self.assertIn(
             ("tag", 202),
@@ -269,8 +282,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
             self.context.knowledge_service, "list_articles",
             wraps=self.context.knowledge_service.list_articles,
         ) as listing:
-            workspace.refresh_filters_button.click()
-            self.wait_idle()
+            refresh_filters()
             listing.assert_not_called()
         self.assertEqual(workspace.category_filter.currentData(), 77)
         self.assertEqual(workspace.category_filter.currentText(), "Renamed category")
@@ -294,8 +306,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
             self.context.knowledge_service, "list_articles",
             wraps=self.context.knowledge_service.list_articles,
         ) as listing:
-            workspace.refresh_filters_button.click()
-            self.wait_idle()
+            refresh_filters()
             listing.assert_not_called()
         self.assertEqual(workspace.category_filter.currentData(), 77)
         self.assertEqual(workspace.category_filter.currentText(), "Mixed success category")
@@ -304,8 +315,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
         with database_connection(self.path) as connection:
             self.assertEqual(tuple(connection.iterdump()), before_refresh)
 
-        workspace.refresh_filters_button.click()
-        self.wait_idle()
+        refresh_filters()
         self.assertFalse(workspace.tag_filter_feedback.isVisible())
         self.assertEqual(workspace.tag_filter.currentData(), ("tag", 202))
 
@@ -320,8 +330,7 @@ class TicketKnowledgeFlowTests(unittest.TestCase):
             self.context.knowledge_service, "list_articles",
             wraps=self.context.knowledge_service.list_articles,
         ) as listing:
-            workspace.refresh_filters_button.click()
-            self.wait_idle()
+            refresh_filters()
             listing.assert_called_once_with(status="DRAFT")
         self.assertEqual(workspace.category_filter.currentText(), "All categories")
         self.assertEqual(workspace.tag_filter.currentText(), "All tags")
