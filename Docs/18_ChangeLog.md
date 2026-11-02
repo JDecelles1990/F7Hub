@@ -1,5 +1,24 @@
 # F7Hub ChangeLog
 
+## 2026-11-01 — KB-SG02 isolated synthetic preview lab candidate
+
+Implemented a standalone, temporary KB editor over six bounded synthetic fixtures
+and manually authored semantic proposals. Existing Ticket/Knowledge services stage
+and read only disposable lab data; previews have no persistence/publication
+capability. Source qualifications, unresolved identities and the synthetic notice
+remain separate from editable prose. Dirty switches/close preserve edits on Cancel
+and discard them only on accepted departure.
+
+FRESH focused tests PASS 31/31; existing Ticket/Knowledge service checks PASS
+23/23. Separate Windows-native Qt smoke PASS 20 assertions with three inspected
+captures and normal exit 0; physical input remains NOT RUN. Initial integration
+failures/corrections are preserved. No production storage, migrations, existing
+datasets, Clipboard or main application composition changed. Candidate is
+READY_FOR_REVIEW, uncommitted and unintegrated; independent fixture-expectation
+and owner review remain pending. See the
+[contract](Planning/DataReadiness/KB_SG02_Implementation_Contract.md) and
+[current evidence](Status/CURRENT_STATE.md#kb-sg02-current-state).
+
 <a id="tax-02-dp01-changelog"></a>
 
 ## 2026-11-01 — TAX-02 DP-01 formal contract adoption candidate

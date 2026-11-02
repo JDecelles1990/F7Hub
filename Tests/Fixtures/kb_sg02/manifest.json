@@ -1,0 +1,10 @@
+{
+  "profile": "KB-SG02-LAB-v1",
+  "package_revision": "1",
+  "fixture_sha256": "c9257ca3c6a6ef3ac3060eafdf5e89e3112491ef2da86fe9eeacb7493a1d9ce5",
+  "source_sha256": {
+    "Data/SemanticModel/Synthetic/synthetic_cases.jsonl": "612e115caeabb000ab5e19e6782168d43f0bc1149b9ae725c93a143cf2790eeb",
+    "Data/SemanticModel/Synthetic/synthetic_case_seed_v0_1.schema.json": "b024f4182c66a0d9280279ebfe4d1572fff228e01db8b04a26155da4575ac871"
+  },
+  "expectation_review": "AUTHOR_PROPOSED_INDEPENDENT_REVIEW_PENDING"
+}
