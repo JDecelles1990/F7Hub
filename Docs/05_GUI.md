@@ -1,5 +1,16 @@
 # F7Hub GUI Design
 
+## Slice 054 — Notes Find controls (implementation candidate, 2026-11-02)
+
+The second ticket-detail tab retains the read-only notes_history editor inside
+notes_tab. The compact row above it has Find in notes, Previous, Next and Clear,
+with a feedback label below. No-note, hidden-tab, busy, pending and completing
+states reject Find. Enter/Shift+Enter navigate; Ctrl+F is scoped to the Notes
+tab; Escape clears and returns focus to history. Selection scrolls without
+taking focus from the initiating control. Quick Note and the other tabs keep
+their existing actions. See
+[current candidate status](Status/CURRENT_STATE.md#slice-054-current-state).
+
 ## KB-SG03B — embedded synthetic lab candidate (2026-11-01)
 
 Stage A is integrated in PR #128, baseline `5657047c35ca8d8fc52c2b82f9de2f96f4dde3b7`, containing reviewed feature `2485f837009eb079f91003eb94a61f0ac68c3c64`. Stage B is an **unintegrated corrected candidate; independent rereview pending**. Earlier Stage A/B/KB-SG02 status sections below are historical snapshots.
@@ -3376,7 +3387,12 @@ classification; MW covers queue traversal and compact layout reachability.
 | TICKETS.PAGE.PREVIOUS | Previous / `previous_button`; QPushButton; — | Bottom `pages` QHBoxLayout, before page label | clicked → `refresh_list(offset - PAGE_SIZE)` | Initially disabled; successful read enables if offset > 0; handler guards pending | — | TW |
 | TICKETS.PAGE.NEXT | Next / `next_button`; QPushButton; — | Bottom page row, after page label | clicked → `refresh_list(offset + PAGE_SIZE)` | Initially disabled; successful read enables if more than PAGE_SIZE results | — | TW |
 | TICKETS.TAB.DETAILS | Details / `summary`; QTextEdit | Detail `tabs` QTabWidget, first tab | Native tab change; `_display_details` presents TicketService result | Read-only, plain text; detail parent enabled only after load | — | TW |
-| TICKETS.TAB.NOTES | Notes / `notes_history`; QTextEdit | Detail tabs, second | Native tab change; `_display_details` | Read-only plain text | — | TW |
+| TICKETS.TAB.NOTES | Notes / notes_tab; QWidget containing notes_history; QTextEdit | Detail tabs, second | Native tab change; _display_details | Read-only plain text and local Find | Ctrl+F scoped to Notes | TW |
+| TICKETS.NOTES.FIND.INPUT | Find in notes / notes_find_input; QLineEdit | Notes tab, first row | textChanged resets match; Enter/Shift+Enter call _find_in_notes | Loaded notes and idle ticket context | Enter, Shift+Enter, scoped Ctrl+F | TW |
+| TICKETS.NOTES.FIND.PREVIOUS | Previous / notes_find_previous_button; QPushButton | Notes find row | clicked → _find_in_notes(backward=True) | Nonblank query and available history | Native button activation | TW |
+| TICKETS.NOTES.FIND.NEXT | Next / notes_find_next_button; QPushButton | Notes find row | clicked → _find_in_notes | Nonblank query and available history | Native button activation | TW |
+| TICKETS.NOTES.FIND.CLEAR | Clear / notes_find_clear_button; QPushButton | Notes find row | clicked → _clear_notes_find | Nonblank query and available history | Escape in find field | TW |
+| TICKETS.NOTES.FIND.FEEDBACK | notes_find_feedback; QLabel | Notes tab, below find row | Match/wrap/no-match/empty-history result | Plain text without query or note contents | — | TW |
 | TICKETS.TAB.HISTORY | History & timeline / `timeline`; QTextEdit | Detail tabs, third | Native tab change; `_display_details` | Read-only plain text | — | TW |
 | TICKETS.TAB.KNOWLEDGE | Knowledge / `knowledge_tab`; TicketKnowledgeWidget | Detail tabs, fourth | Native tab change; knowledge_article_requested relays to workspace signal; child mappings below | Detail parent gate; child service/selection gates | — | TK |
 | TICKETS.TAB.COMPANY | Company / local `company_tab`; QWidget | Detail tabs, fifth | Native tab change; controls below | Detail parent gate | — | CO |

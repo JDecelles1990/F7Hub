@@ -107,7 +107,7 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         for widget in (self.workspace.author_input, self.workspace.reason_input,
                        self.workspace.subject_search_input, self.workspace.notes_history):
             if widget is self.workspace.notes_history:
-                self.workspace.detail_tabs.setCurrentWidget(widget)
+                self.workspace.detail_tabs.setCurrentWidget(self.workspace.notes_tab)
             widget.setFocus()
             QTest.keyClick(widget, Qt.Key.Key_Return, Qt.KeyboardModifier.ControlModifier)
             self.wait_idle()
@@ -1234,6 +1234,95 @@ class TicketWorkspaceFlowTests(unittest.TestCase):
         self.assertEqual(self.workspace.details.ticket.description,
                          "Saved while on page two")
         self.assertIn("Description saved", self.workspace.feedback.text())
+
+
+    def test_notes_find_real_sqlite_is_read_only_and_reloads_safely(self):
+        workspace = self.workspace
+        self.service.add_note(self.ticket_id, note_text="First Écran 😀 %_.*",
+                              note_type="INTERNAL", author_label="Synthetic technician")
+        self.service.add_note(self.ticket_id, note_text="Second Écran",
+                              note_type="INTERNAL", author_label="Synthetic technician")
+        workspace.open_ticket(self.ticket_id)
+        self.wait_idle()
+        workspace.detail_tabs.setCurrentWidget(workspace.notes_tab)
+        with closing(sqlite3.connect(self.path)) as connection:
+            before = tuple(connection.iterdump())
+        rendered = workspace.notes_history.toPlainText()
+        workspace.notes_find_input.setText("écran")
+        workspace.notes_find_next_button.click()
+        self.assertEqual(workspace.notes_history.textCursor().selectedText(), "Écran")
+        workspace.notes_find_next_button.click()
+        self.assertEqual(workspace.notes_history.textCursor().selectedText(), "Écran")
+        workspace.notes_find_input.setText("%_.*")
+        workspace.notes_find_next_button.click()
+        self.assertEqual(workspace.notes_history.textCursor().selectedText(), "%_.*")
+        self.assertEqual(workspace.notes_history.toPlainText(), rendered)
+        with closing(sqlite3.connect(self.path)) as connection:
+            self.assertEqual(tuple(connection.iterdump()), before)
+            self.assertEqual(connection.execute("PRAGMA integrity_check").fetchone(), ("ok",))
+            self.assertEqual(connection.execute("PRAGMA foreign_key_check").fetchall(), [])
+
+        workspace.open_ticket(self.ticket_id)
+        self.wait_idle()
+        self.assertEqual(workspace.notes_find_input.text(), "%_.*")
+        self.assertFalse(workspace.notes_history.textCursor().hasSelection())
+        other = self.service.create_ticket(subject="Another synthetic ticket")
+        workspace.open_ticket(other.ticket_id)
+        self.wait_idle()
+        self.assertEqual(workspace.notes_find_input.text(), "")
+        self.assertEqual(workspace.notes_find_feedback.text(), "No notes to search.")
+
+    def test_notes_find_failed_and_cancelled_open_keep_context(self):
+        workspace = self.workspace
+        self.service.add_note(self.ticket_id, note_text="Context anchor",
+                              note_type="INTERNAL", author_label="Synthetic technician")
+        workspace.open_ticket(self.ticket_id)
+        self.wait_idle()
+        workspace.detail_tabs.setCurrentWidget(workspace.notes_tab)
+        workspace.notes_find_input.setText("anchor")
+        workspace.notes_find_next_button.click()
+        self.assertEqual(workspace.notes_history.textCursor().selectedText(), "anchor")
+        another = self.service.create_ticket(subject="Switch target")
+        workspace.note_input.setPlainText("Keep unsaved note")
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Cancel):
+            workspace.open_ticket(another.ticket_id)
+            self.wait_idle()
+        self.assertEqual(workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(workspace.notes_find_input.text(), "anchor")
+        self.assertEqual(workspace.notes_history.textCursor().selectedText(), "anchor")
+        workspace.note_input.clear()
+        with patch.object(self.service, "get_ticket_details", side_effect=TicketReadError("private")):
+            workspace.open_ticket(another.ticket_id)
+            self.wait_idle()
+        self.assertEqual(workspace.details.ticket.ticket_id, self.ticket_id)
+        self.assertEqual(workspace.notes_find_input.text(), "anchor")
+        self.assertEqual(workspace.notes_history.textCursor().selectedText(), "anchor")
+
+    def test_notes_find_committed_note_reload_failure_uses_read_only_recovery(self):
+        workspace = self.workspace
+        self.service.add_note(self.ticket_id, note_text="Before",
+                              note_type="INTERNAL", author_label="Synthetic technician")
+        workspace.open_ticket(self.ticket_id)
+        self.wait_idle()
+        workspace.detail_tabs.setCurrentWidget(workspace.notes_tab)
+        workspace.notes_find_input.setText("Before")
+        workspace.notes_find_next_button.click()
+        workspace.note_input.setPlainText("After")
+        original_read = self.service.get_ticket_details
+        with patch.object(self.service, "get_ticket_details", side_effect=TicketReadError("private")):
+            workspace.add_note()
+            self.wait_idle()
+        self.assertEqual(len(self.repository.list_notes(self.ticket_id)), 2)
+        self.assertEqual(workspace.notes_find_input.text(), "Before")
+        self.assertEqual(workspace.notes_history.textCursor().selectedText(), "Before")
+        self.assertIn("Note saved", workspace.feedback.text())
+        with patch.object(self.service, "get_ticket_details", wraps=original_read) as read:
+            workspace.reload_button.click()
+            self.wait_idle()
+        self.assertEqual(read.call_count, 1)
+        self.assertEqual(workspace.notes_find_input.text(), "Before")
+        self.assertFalse(workspace.notes_history.textCursor().hasSelection())
+        self.assertIn("After", workspace.notes_history.toPlainText())
 
 
 if __name__ == "__main__":

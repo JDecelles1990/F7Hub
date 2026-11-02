@@ -1,5 +1,20 @@
 # F7Hub Todo
 
+## Slice 054 — Find in Current Ticket Notes (2026-11-02)
+
+- [x] Select the approved bounded scope from verified main.
+- [x] Implement local Notes tab controls in an isolated worktree.
+- [x] Complete focused, real SQLite, Ticket/MainWindow and visible Windows
+  checks; preserve initial failed and corrected-run evidence.
+- [ ] Resolve the selected affected Knowledge regression FAIL under separate
+  scope or an authorized gate disposition before READY_FOR_REVIEW.
+- [x] Synchronize eight documentation owners and seal the eleven-path manifest.
+- [ ] Independently review the exact candidate and evidence.
+- [ ] Separately authorize any Git publication or integration.
+
+[Current status](Status/CURRENT_STATE.md#slice-054-current-state)
+owns results. Canonical synchronization remains paused.
+
 ## CP02-S4 — candidate gates (2026-10-29)
 
 - [x] Verify merged Source App baseline and preserve canonical/worktree state.

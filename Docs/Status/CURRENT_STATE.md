@@ -1,5 +1,49 @@
 # F7Hub Current State
 
+<a id="slice-054-current-state"></a>
+
+## Slice 054 — Find in Current Ticket Notes candidate (2026-11-02)
+
+**VALIDATION INCOMPLETE — NOT READY_FOR_REVIEW.** Owner-authorized implementation
+is isolated in `C:/Dev/F7Hub-S054`, branch `feature/tickets-notes-find-s054`,
+from reverified main `10c969d0ca86baa77fdc52ece20bc9654e49b4c9`.
+Exactly eleven paths are in scope: one TicketWorkspace production file, two
+test files and eight documentation owners. Canonical dirty work, protected
+opaque files, unrelated worktrees and historical KB evidence are preserved.
+No staging, commit, push, PR, merge or CanonicalSync is authorized or performed.
+
+The Notes tab now retains its read-only `notes_history` inside `notes_tab` and
+adds local Find, Previous, Next, Clear and feedback. Qt document cursors search
+the rendered history literally and case-insensitively, including note headers,
+with directional wrap. Query state is widget memory only. Same-ticket reload
+retains the query and invalidates the match; accepted replacement/new-ticket
+entry clears it; failed or cancelled navigation preserves it. Busy, pending,
+completing, hidden and empty-history guards cover controls and direct handlers.
+No Find operation submits work, reads/writes a service or database, logs content,
+or changes Quick Note and ticket drafts.
+
+| Environment / provenance | Result | Evidence and limit |
+|---|---|---|
+| Windows offscreen, FRESH focused GUI | PASS 7/7 | `focused-gui-final-no-match.log`; matching, Unicode/literal text, keyboard, focus, hidden/busy/completing, creation and layout. Earlier new-test cursor-precondition FAIL and its correction are preserved. |
+| Windows offscreen, FRESH Ticket/creation/classification/MainWindow | PASS 176/176 | `affected-ticket-regression-final.log`; includes 43 real Ticket workspace flow tests. Earlier focused flow 43/43 PASS is retained as a pre-final run. |
+| Windows offscreen, FRESH selected Knowledge regression | FAIL 1/164 | `affected-regression.log`; 163 other tests passed. `test_manual_filter_reference_refresh_reconciles_external_changes_read_only` expected Mixed success category but retained Renamed category. The unchanged Knowledge workspace leaves Refresh filters disabled after a runner callback while completing, so the next click is ignored. Two separate failed diagnostics and source trace are preserved; this is outside the eleven-path scope. |
+| WINDOWS_NATIVE, FRESH synthetic visible MainWindow | PASS 11 checks, exit 0 | `native-closure-corrected/native-validation.result.json`; Qt-injected input, 1000×700, 96 DPI, DPR 1.0, two inspected captures, scrollable history, selection/focus, expanded Resolution and normal close. Initial and dialog-interrupted attempts remain preserved. |
+| Physical owner input, alternate DPI, assistive technology | NOT RUN | No physical or broader display/accessibility claim. |
+
+The new isolated SQLite Find test compares logical dumps before/after Find,
+checks `PRAGMA integrity_check = ok`, and requires zero
+`PRAGMA foreign_key_check` rows. No operational database was probed. The
+external test-impact matrix was selected before execution and the external
+candidate manifest binds raw and Git-normalized identities; evidence root:
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-054/implementation-20261102/`.
+
+Next gate: resolve or explicitly disposition the affected Knowledge regression
+under separate scope/authority, then reverify applicable evidence and request
+independent read-only review of the exact candidate. Current S054 author work
+does not grant review approval or integration authority.
+
+---
+
 <a id="kb-sg03b-current-state"></a>
 
 ## KB-SG03B — embedded synthetic Knowledge Lab candidate (2026-11-01)

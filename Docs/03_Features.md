@@ -1,5 +1,16 @@
 # F7Hub Features
 
+## Slice 054 — Find in Current Ticket Notes (implementation candidate, 2026-11-02)
+
+The Notes tab of a loaded ticket adds local Find in notes, Previous, Next, Clear
+and compact feedback. Search matches literal case-insensitive text in the
+rendered read-only history, including displayed note headers, and wraps once
+in either direction. The query is memory-only; tab/module navigation retains it,
+same-ticket reload keeps the query but clears the old match, and a new ticket
+clears it. No service read, note write, database change or universal search is
+performed by Find. Current validation and review state belong to
+[CURRENT_STATE](Status/CURRENT_STATE.md#slice-054-current-state).
+
 ## GUI Shell S005 — Clipboard return through the rail (2026-10-14 candidate)
 
 Clipboard Center uses the existing Tickets button in the 52px module rail for return navigation. Its redundant lower Back to Tickets control is retired. Recent history and Clipboard Setup remain in the same retained, lazy workspace; reads, preferences, drafts, pending work and close protections keep their existing owners. S005 is an unstaged READY_FOR_REVIEW candidate, not integrated. The S004 and earlier sections below describe the behavior delivered at those historical stages.

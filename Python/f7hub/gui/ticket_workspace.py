@@ -3,6 +3,7 @@
 import logging
 
 from PySide6.QtCore import QAbstractTableModel, QEvent, QModelIndex, QTimer, Qt, Signal
+from PySide6.QtGui import QKeySequence, QShortcut, QTextDocument
 from PySide6.QtWidgets import (
     QAbstractItemView, QComboBox, QFormLayout, QGridLayout, QHBoxLayout, QHeaderView,
     QLabel, QLineEdit, QMessageBox, QPushButton, QSplitter, QTabWidget,
@@ -83,6 +84,7 @@ class TicketWorkspace(QWidget):
         self._classification_baseline = None
         self.status_pending = False
         self._note_focus_ticket_id = None
+        self._notes_find_query = None
         self.create_widget = create_widget
         self.creating = False
         self._previous_details = None
@@ -92,6 +94,12 @@ class TicketWorkspace(QWidget):
         self._creation_focus_pending = False
         self._build_ui()
         self._runner.busy_changed.connect(self._update_note_controls)
+        self._runner.busy_changed.connect(self._update_notes_find_controls)
+        self._runner.completion_finished.connect(self._update_notes_find_controls)
+        self.note_pending_changed.connect(self._update_notes_find_controls)
+        self.creation_pending_changed.connect(self._update_notes_find_controls)
+        self.status_pending_changed.connect(self._update_notes_find_controls)
+        self.classification_pending_changed.connect(self._update_notes_find_controls)
         self.note_pending_changed.connect(self._update_note_controls)
         self._update_note_controls()
         self._runner.busy_changed.connect(self._update_creation_controls)
@@ -134,6 +142,7 @@ class TicketWorkspace(QWidget):
                 or self.note_pending or self.creation_pending or self.status_pending or self.classification_pending or not self.confirm_discard()):
             return False
         self._clear_drafts()
+        self._clear_notes_find()
         self._creation_generation += 1
         self._previous_details = self.details
         self.details = None
@@ -321,10 +330,42 @@ class TicketWorkspace(QWidget):
         # Detail content scrolls; allow it to yield space to visible draft controls.
         tabs.setMinimumHeight(100)
         self.summary = _plain_editor(tabs, read_only=True)
-        self.notes_history = _plain_editor(tabs, read_only=True)
+        self.notes_tab = QWidget(tabs)
+        notes_layout = QVBoxLayout(self.notes_tab)
+        notes_layout.setContentsMargins(4, 4, 4, 4)
+        notes_layout.setSpacing(3)
+        find_row = QHBoxLayout()
+        self.notes_find_input = QLineEdit(self.notes_tab)
+        self.notes_find_input.setAccessibleName("Find in notes")
+        self.notes_find_input.setPlaceholderText("Find in notes")
+        self.notes_find_previous_button = QPushButton("Previous", self.notes_tab)
+        self.notes_find_previous_button.setAccessibleName("Previous note match")
+        self.notes_find_next_button = QPushButton("Next", self.notes_tab)
+        self.notes_find_next_button.setAccessibleName("Next note match")
+        self.notes_find_clear_button = QPushButton("Clear", self.notes_tab)
+        self.notes_find_clear_button.setAccessibleName("Clear note search")
+        find_row.addWidget(self.notes_find_input, 1)
+        for button in (self.notes_find_previous_button, self.notes_find_next_button,
+                       self.notes_find_clear_button):
+            find_row.addWidget(button)
+        notes_layout.addLayout(find_row)
+        self.notes_find_feedback = QLabel(self.notes_tab)
+        self.notes_find_feedback.setAccessibleName("Note search feedback")
+        notes_layout.addWidget(self.notes_find_feedback)
+        self.notes_history = _plain_editor(self.notes_tab, read_only=True)
+        notes_layout.addWidget(self.notes_history, 1)
+        self.notes_find_input.textChanged.connect(self._notes_find_changed)
+        self.notes_find_input.installEventFilter(self)
+        self.notes_find_previous_button.clicked.connect(lambda: self._find_in_notes(backward=True))
+        self.notes_find_next_button.clicked.connect(self._find_in_notes)
+        self.notes_find_clear_button.clicked.connect(self._clear_notes_find)
+        self._notes_find_shortcut = QShortcut(QKeySequence("Ctrl+F"), self.notes_tab)
+        self._notes_find_shortcut.setContext(Qt.ShortcutContext.WidgetWithChildrenShortcut)
+        self._notes_find_shortcut.activated.connect(self._focus_notes_find)
         self.timeline = _plain_editor(tabs, read_only=True)
         tabs.addTab(self.summary, "Details")
-        tabs.addTab(self.notes_history, "Notes")
+        tabs.addTab(self.notes_tab, "Notes")
+        tabs.currentChanged.connect(self._update_notes_find_controls)
         tabs.addTab(self.timeline, "History & timeline")
         self.knowledge_tab = TicketKnowledgeWidget(self._knowledge_link_service, self._runner, tabs)
         self.knowledge_tab.knowledge_article_requested.connect(self.knowledge_article_requested.emit)
@@ -641,6 +682,73 @@ class TicketWorkspace(QWidget):
             ) if generation == self._creation_generation else None,
         )
 
+    def _notes_find_available(self):
+        return (self.details is not None and bool(self.details.notes)
+                and not self.creating and self.detail_tabs.currentWidget() is self.notes_tab
+                and self.isVisible() and not self._runner.busy and not self._runner.completing
+                and not self.note_pending and not self.creation_pending
+                and not self.status_pending and not self.classification_pending)
+
+    def _update_notes_find_controls(self, *_):
+        available = self._notes_find_available()
+        has_query = bool(self.notes_find_input.text().strip())
+        self.notes_find_input.setEnabled(available)
+        self.notes_find_previous_button.setEnabled(available and has_query)
+        self.notes_find_next_button.setEnabled(available and has_query)
+        self.notes_find_clear_button.setEnabled(available and has_query)
+        if self.details is not None and not self.details.notes:
+            self.notes_find_feedback.setText("No notes to search.")
+        elif not has_query:
+            self.notes_find_feedback.clear()
+
+    def _notes_find_changed(self, *_):
+        self._notes_find_query = None
+        self.notes_find_feedback.clear()
+        cursor = self.notes_history.textCursor()
+        if cursor.hasSelection():
+            cursor.clearSelection()
+            self.notes_history.setTextCursor(cursor)
+        self._update_notes_find_controls()
+
+    def _clear_notes_find(self, *_):
+        self._notes_find_query = None
+        self.notes_find_input.clear()
+        self._notes_find_changed()
+
+    def _focus_notes_find(self):
+        if self._notes_find_available():
+            self.notes_find_input.setFocus()
+            self.notes_find_input.selectAll()
+
+    def _find_in_notes(self, *, backward=False):
+        if not self._notes_find_available():
+            return
+        query = self.notes_find_input.text()
+        if not query.strip():
+            self._clear_notes_find()
+            return
+        document = self.notes_history.document()
+        options = (QTextDocument.FindFlag.FindBackward if backward
+                   else QTextDocument.FindFlag(0))
+        first = query != self._notes_find_query
+        start = (document.characterCount() - 1 if backward else 0)
+        cursor = document.find(query, start if first else self.notes_history.textCursor(),
+                               options)
+        wrapped = False
+        if cursor.isNull() and not first:
+            cursor = document.find(query, start, options)
+            wrapped = not cursor.isNull()
+        self._notes_find_query = query
+        if cursor.isNull():
+            self.notes_find_feedback.setText("No matches.")
+            return
+        self.notes_history.setTextCursor(cursor)
+        self.notes_history.ensureCursorVisible()
+        self.notes_find_feedback.setText(
+            "Wrapped to end." if wrapped and backward else
+            "Wrapped to start." if wrapped else "Match found."
+        )
+
     def has_draft(self):
         return bool(self.note_input.toPlainText().strip() or self.reason_input.text().strip()
                     or self.resolution_input.toPlainText().strip() or self.status_input.currentData() or self._classification_dirty())
@@ -716,6 +824,7 @@ class TicketWorkspace(QWidget):
             not reset_classification and self._classification_dirty()
             and self._classification_baseline.ticket_id == details.ticket.ticket_id
         )
+        previous_ticket_id = self.details.ticket.ticket_id if self.details is not None else None
         self.details = details
         if not retain_classification:
             self._set_classification_baseline(details.ticket)
@@ -752,6 +861,11 @@ class TicketWorkspace(QWidget):
             f"{' · AI-generated' if n.is_ai_generated else ''}\n{n.note_text}"
             for n in details.notes
         ) or "No notes yet.")
+        if previous_ticket_id != ticket.ticket_id:
+            self._clear_notes_find()
+        else:
+            self._notes_find_changed()
+        self._update_notes_find_controls()
         history = "\n".join(
             f"{h.changed_at} · {h.previous_status or 'Created'} → {h.new_status}"
             f" · {h.changed_by or 'Unknown actor'}{': ' + h.reason if h.reason else ''}"
@@ -904,7 +1018,25 @@ class TicketWorkspace(QWidget):
             return
         self._reload_after_save(updated.ticket_id, "Description saved.")
 
+    def showEvent(self, event):
+        super().showEvent(event)
+        self._update_notes_find_controls()
+
+    def hideEvent(self, event):
+        super().hideEvent(event)
+        self._update_notes_find_controls()
+
     def eventFilter(self, watched, event):
+        if watched is self.notes_find_input and event.type() == QEvent.Type.KeyPress:
+            if event.key() in (Qt.Key.Key_Return, Qt.Key.Key_Enter) and event.modifiers() in (
+                    Qt.KeyboardModifier.NoModifier, Qt.KeyboardModifier.ShiftModifier):
+                self._find_in_notes(backward=event.modifiers() == Qt.KeyboardModifier.ShiftModifier)
+                return True
+            if event.key() == Qt.Key.Key_Escape and event.modifiers() == Qt.KeyboardModifier.NoModifier:
+                if self._notes_find_available():
+                    self._clear_notes_find()
+                    self.notes_history.setFocus()
+                return True
         if watched is self.note_input and self.note_input.hasFocus():
             submit_key = (
                 event.type() in (QEvent.Type.KeyPress, QEvent.Type.ShortcutOverride)
