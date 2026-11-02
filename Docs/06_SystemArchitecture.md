@@ -1,5 +1,32 @@
 # F7Hub System Architecture
 
+## KB-SG03A — synthetic session ownership candidate (2026-11-01)
+
+The unintegrated Stage A extraction follows standalone CLI → thin
+`KBPreviewDialog` → shared `KBPreviewEditor(QWidget)`. The editor receives only
+the existing preview service and immutable source snapshots, with no SQLite,
+repository, Settings, credential or ApplicationContext capability.
+
+`SyntheticLabSession` in `services/kb_lab_session.py` owns one fixed-fixture,
+one-shot preparation. Fixed admission precedes allocation. Fresh existing lab-only
+Ticket/Knowledge repositories/services target only its internally allocated
+`synthetic-lab.sqlite3`; setup connections close before presentation. Preview,
+edit, switch and confirmation perform no database/source/network I/O.
+
+The owner retains exact allocated-directory identity across setup and cleanup
+failure. Fixed safe exceptions carry the owner; setup-plus-cleanup failure remains
+a residue-bearing failure. Terminal invalidation and successful cleanup are
+individually idempotent. Cleanup checks allocation path, temporary parent,
+directory device/inode and reparse/symlink state before deleting only that root;
+failure retains identity and never automatically retries. Explicit recovery must
+revalidate ownership. This is trusted same-process capability separation, not
+operating-system sandbox isolation, crash-proof cleanup or secure erasure.
+
+A changes no production composition, schema, migration or operational service.
+Embedded tabs and asynchronous application shutdown remain Stage B plans.
+[The Stage contract](Planning/DataReadiness/KB_SG03_Implementation_Contract.md)
+owns exact scope and evidence limits.
+
 ## Python active selection capture — current ownership decision (2026-10-28)
 
 The user-approved [1B exception](Planning/Clipboard/1B_AHK_Python_Clipboard_Capture_IPC_Quick_HUD_Architecture.md)
