@@ -28,6 +28,21 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 
 class ApplicationBootstrapTests(unittest.TestCase):
+    def test_lab_factory_is_lazy_and_accepts_only_verified_asset_root(self):
+        from f7hub.app import bootstrap as composition
+        with patch.object(composition, "SyntheticLabSession") as constructor:
+            context = bootstrap_application(project_root=PROJECT_ROOT, database_path=self.database_path)
+            window = context.main_window
+            self.addCleanup(window.deleteLater)
+            constructor.assert_not_called()
+            lab = window.knowledge_workspace
+            self.assertTrue(lab.open_synthetic_kb_lab_button.isEnabled())
+            owner = lab._lab_factory()
+            constructor.assert_called_once_with(PROJECT_ROOT.resolve())
+            self.assertIs(owner, constructor.return_value)
+            self.assertIsNot(owner, context)
+            self.assertEqual(lab.knowledge_tabs.count(), 1)
+
     def test_shared_settings_composition_defaults_and_no_clipboard_effects(self):
         with (
             patch("f7hub.services.mochi_service.MochiService.automatic_start", return_value=False),

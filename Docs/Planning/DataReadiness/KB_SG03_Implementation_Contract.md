@@ -1,5 +1,35 @@
 # KB-SG03 — reviewed implementation contract
 
+## Current Stage B candidate handoff — 2026-11-01
+
+This section records the separately owner-authorized B implementation/test/documentation/review task. Earlier A-only authority/status below is retained as historical. A is now integrated through PR #128 at required base `5657047c35ca8d8fc52c2b82f9de2f96f4dde3b7`, containing reviewed A `2485f837009eb079f91003eb94a61f0ac68c3c64`. Live remote main and ancestry were verified before B; no baseline advancement occurred.
+
+B candidate: `C:/Dev/F7Hub-KB-SG03B`, `feature/kb-sg03b-embedded-workspace`; unstaged/uncommitted/unintegrated. Status READY_FOR_REVIEW, independent rereview pending. The approved v2 external architecture report and mandatory AC1-AC4 govern B. Stage A runtime/fixtures/launcher are frozen.
+
+Exact B allowlist (15):
+
+- Runtime: `Python/f7hub/gui/knowledge_workspace.py`, `Python/f7hub/app/bootstrap.py`, `Python/f7hub/gui/main_window.py`, `Python/f7hub/gui/application_lifecycle.py`.
+- Tests: add `Tests/GUI/test_kb_lab_workspace.py`; modify `Tests/GUI/test_knowledge_workspace.py`, `Tests/GUI/test_main_window.py`, `Tests/GUI/test_application_lifecycle.py`, `Tests/Integration/test_application_bootstrap.py`.
+- Documentation: `Docs/05_GUI.md`, `Docs/06_SystemArchitecture.md`, `Docs/13_PythonArchitecture.md`, `Docs/18_ChangeLog.md`, `Docs/Status/CURRENT_STATE.md`, this existing contract.
+
+Implemented B uses one permanent Articles tab and one optional closable Lab within the main window. Exact action/object names and reused editor controls are in the GUI registry. A zero-argument synthetic-only factory closes over the asset root; no operational capability is injected. Dedicated ServiceTaskRunner retains exact owner/generation through setup/close/failure, fences stale callbacks and waits past completing. Article handlers and callback-driven action states isolate Lab. Navigation keeps session/draft/source/undo/selection, without refreshing Articles on Lab return. Explicit Open Article selects Articles without destroying Lab.
+
+Tab X/editor Close share nonterminal Cancel and committed Discard. Discard clears/freezes the editor; terminal cleanup runs off GUI thread and removes the tab only after settlement. Failure retains exact ownership, fixed feedback and a closed activation latch; no automatic retry. Explicit residual acknowledgment defaults Cancel and retains the owner without reporting cleanup success. Composed/fallback Exit negotiate existing guards, ask Lab, retain pending request identity, drain safely and recheck existing guards. Tray hide remains nonterminal. Existing Clipboard leave occurs only at accepted cleanup, preserving it on Lab Cancel.
+
+Current R4 Knowledge offscreen results FRESH PASS 40 plus 202 applicable tests RETAINED PASS (242 unique, zero skips). Visible WINDOWS_NATIVE composed correction run PASS 45 assertions, exit 0, three inspected captures, 1180x792/96 DPI/DPR1, actual tray preservation and exact removal of both owned Lab roots. Physical input, alternate DPI, AT/high contrast NOT RUN. Required exact-target DB guards, closed connections, no preview I/O, unchanged disposable logical dumps, integrity_check=ok and zero FK violations PASS. Six NEW/manual fixtures and DRAFT reference do not confer technical verification/publication/semantic activation.
+
+First-failure stop was applied: initial helper-scheduler timeout, then navigation text-selection loss; original results were preserved and relevant H1/R1 corrections recorded before affected execution. No unchanged retry. External evidence/manifests/report: `%LOCALAPPDATA%/F7Hub/CodexCheckpoints/KB-SG03B/implementation-20261101/`. An instrumented diagnostic timed out before recording any root; its possible unrecorded residue is NOT VERIFIED, separately disclosed in CURRENT_STATE and report, and not broadly deleted.
+
+Stop after genuinely independent implementation review. No staging, commit, push, PR, readiness-for-integration, merge or canonical synchronization. KB-SG03 remains open pending Stage B integration and final canonical acceptance. Preserve original A/KB-SG02 historical sections and notes below.
+
+
+Independent initial review returned CHANGES REQUIRED for the original aggregate `bd5d9bd858a8701571c21e7501823fc6226e6896032522e6b2ca3e91551e01ce`. Bounded corrections retain nonempty hidden Articles detail/search/filter reload intent, reconcile it only on eligible Articles, coalesce fallback close before preflight, report committed discard with later veto, and cancel queued cursor restoration after newer deliberate focus/input. Eight added regressions cover these findings. Author correction evidence is complete; independent closure of R1-R3 remains pending rereview. Two new-test precondition/Qt recursive-close-return errors were stopped, preserved and corrected separately; no runtime correction was inferred from those fixture errors. No unchanged retry. The corrected native45 scenario includes pending operational-list reconciliation and newer-focus checks; initial native40 and all failed records remain historical.
+
+
+Latest R4 correction: independent rereview freshly passed the original R1 read and R3 focus probes, then returned CHANGES REQUIRED for a saved mutation delivered in Lab retaining incompatible Articles filters. The existing category/status/tag reset logic now runs before page-aware deferral; it performs no hidden-page read or focus change. Fresh three-case regression verifies committed results remain visible on Articles return. The latest native45 scenario also checks a delayed DRAFT creation callback against a Published filter using only disposable operational storage. Current author coverage is 40 fresh Knowledge tests plus 202 applicable retained tests (242 unique); current native45 exited 0 and both exact Lab roots were removed. Earlier 233/241 test and native40/43 records remain historical, not summed. R4 author correction is complete; independent final rereview and prior R2 fresh independent runtime checks remain pending. Final evidence is under `correction-r4-callback/`; no integration or KB-SG03 closure.
+
+---
+
 Date: 2026-11-01, America/Toronto. Architecture:
 **KB_SG03_ARCHITECTURE_APPROVED_WITH_NOTES**. Stage A implementation:
 **READY_FOR_REVIEW**, independent correction approval PENDING (initial review CHANGES_REQUIRED).

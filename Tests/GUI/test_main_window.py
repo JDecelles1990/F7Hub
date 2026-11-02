@@ -2188,3 +2188,171 @@ class ShellRetirementTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EmbeddedMainWindowTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.app = QApplication.instance() or QApplication([])
+
+    def make_window(self):
+        from Tests.GUI import test_kb_lab_workspace as labs
+        self.labs = labs
+        from f7hub.services.kb_lab_session import SyntheticLabSession
+        self.owners = []
+        def factory():
+            owner = SyntheticLabSession(labs.ROOT)
+            self.owners.append(owner)
+            return owner
+        self.window = MainWindow(RecordingTicketService(),
+                                 knowledge_service=labs.RecordingKnowledgeService(),
+                                 lab_session_factory=factory)
+        self.window.show()
+        labs.wait_for(self.app, lambda: not self.window.runner.busy and not self.window.runner.completing)
+        self.window.show_knowledge()
+        labs.wait_for(self.app, lambda: not self.window.runner.busy and not self.window.knowledge_workspace.filter_loading)
+        self.lab = self.window.knowledge_workspace
+        self.lab.open_synthetic_kb_lab()
+        labs.wait_for(self.app, lambda: self.lab._lab_state == "OPEN")
+
+    def tearDown(self):
+        if not hasattr(self, "window"):
+            return
+        if self.lab.lab_editor is not None:
+            self.lab.lab_editor._confirm_discard = lambda: True
+        self.lab.close_synthetic_kb_lab()
+        self.labs.wait_for(self.app, lambda: self.lab.lab_shutdown_ready)
+        self.window.hide()
+        self.window.deleteLater()
+        self.app.processEvents()
+
+    def test_primary_navigation_preserves_lab_without_operational_refresh(self):
+        self.make_window()
+        editor = self.lab.lab_editor
+        editor.fixture_selector.setCurrentIndex(1)
+        editor.title_input.insert(" keep")
+        owner = self.lab._lab_owner
+        self.window.show_tickets()
+        self.labs.wait_for(self.app, lambda: not self.window.runner.busy and not self.window.runner.completing)
+        with patch.object(self.lab, "refresh_list", side_effect=AssertionError("No Articles refresh on lab return")):
+            self.window.show_knowledge()
+        self.assertIs(self.window.pages.currentWidget(), self.lab)
+        self.assertIs(self.lab.lab_editor, editor)
+        self.assertIs(self.lab._lab_owner, owner)
+        self.assertTrue(editor.dirty)
+        self.assertTrue(editor.title_input.isUndoAvailable())
+
+    def test_no_lifecycle_close_vetoes_cancel_then_defers_until_drain(self):
+        self.make_window()
+        editor = self.lab.lab_editor
+        editor.fixture_selector.setCurrentIndex(1)
+        editor.title_input.insert(" dirty")
+        owner = self.lab._lab_owner
+        with patch.object(editor, "_confirm_discard", return_value=False):
+            self.assertFalse(self.window.close())
+        self.assertTrue(self.window.isVisible())
+        self.assertFalse(owner.terminal)
+        with patch.object(editor, "_confirm_discard", return_value=True):
+            self.assertFalse(self.window.close())
+        self.assertFalse(self.window._shutdown_complete)
+        self.labs.wait_for(self.app, lambda: self.window._shutdown_complete)
+        self.assertFalse(self.window.isVisible())
+        self.assertTrue(owner.cleanup_complete)
+        self.assertFalse(owner.allocated_root.exists())
+
+    def test_no_lifecycle_cleanup_false_always_vetoes_close(self):
+        self.make_window()
+        self.lab.close_synthetic_kb_lab()
+        self.labs.wait_for(self.app, lambda: self.lab.lab_shutdown_ready)
+        with patch.object(self.window, "cleanup_shutdown", return_value=False):
+            self.assertFalse(self.window.close())
+        self.assertTrue(self.window.isVisible())
+
+    def test_fallback_repeated_cleanup_close_coalesces_before_guards(self):
+        self.make_window()
+        owner = self.lab._lab_owner
+        entered, gate = threading.Event(), threading.Event()
+        original = owner.close
+        def cleanup():
+            entered.set()
+            if not gate.wait(4):
+                raise AssertionError("Bounded fallback cleanup gate")
+            original()
+        try:
+            with patch.object(owner, "close", side_effect=cleanup), patch.object(self.window, "confirm_exit", return_value=True) as guard:
+                self.assertFalse(self.window.close())
+                self.labs.wait_for(self.app, entered.is_set)
+                for _ in range(3):
+                    self.assertFalse(self.window.close())
+                self.assertEqual(guard.call_count, 1)
+                self.assertTrue(self.window.isVisible())
+                self.assertFalse(self.window._shutdown_complete)
+                gate.set()
+                self.labs.wait_for(self.app, lambda: self.window._shutdown_complete)
+                self.assertEqual(guard.call_count, 2)
+            self.assertTrue(owner.cleanup_complete)
+        finally:
+            gate.set()
+
+    def test_fallback_repeated_prepare_close_coalesces_and_never_attaches(self):
+        self.make_window()
+        self.lab.close_synthetic_kb_lab()
+        self.labs.wait_for(self.app, lambda: self.lab.lab_shutdown_ready)
+        entered, gate = threading.Event(), threading.Event()
+        original_factory = self.lab._lab_factory
+        def factory():
+            owner = original_factory()
+            prepare = owner.prepare
+            def work():
+                entered.set()
+                if not gate.wait(4):
+                    raise AssertionError("Bounded fallback prepare gate")
+                return prepare()
+            owner.prepare = work
+            return owner
+        self.lab._lab_factory = factory
+        self.lab.open_synthetic_kb_lab()
+        self.labs.wait_for(self.app, entered.is_set)
+        owner = self.lab._lab_owner
+        try:
+            with patch.object(self.window, "confirm_exit", return_value=True) as guard:
+                self.assertFalse(self.window.close())
+                self.assertFalse(self.window.close())
+                self.assertEqual(guard.call_count, 1)
+                self.assertIsNone(self.lab.lab_editor)
+                gate.set()
+                self.labs.wait_for(self.app, lambda: self.window._shutdown_complete)
+                self.assertEqual(guard.call_count, 2)
+                self.assertIsNone(self.lab.lab_editor)
+                self.assertTrue(owner.cleanup_complete)
+        finally:
+            gate.set()
+
+    def test_fallback_later_guard_veto_reports_committed_discard(self):
+        self.make_window()
+        owner = self.lab._lab_owner
+        with patch.object(self.window, "confirm_exit", side_effect=[True, False]) as guard:
+            self.assertFalse(self.window.close())
+            self.labs.wait_for(self.app, lambda: self.lab.lab_shutdown_ready and self.window._fallback_exit_pending is None)
+            self.assertEqual(guard.call_count, 2)
+        self.assertTrue(self.window.isVisible())
+        self.assertFalse(self.window._shutdown_complete)
+        self.assertTrue(owner.cleanup_complete)
+        self.assertIn("discard completed", self.window.statusBar().currentMessage())
+        self.assertIn("vetoed", self.window.statusBar().currentMessage())
+
+    def test_fallback_reentrant_preflight_cannot_bypass_cancel(self):
+        from PySide6.QtGui import QCloseEvent
+        self.make_window()
+        nested_acceptance = []
+        def guard():
+            event = QCloseEvent()
+            self.window.closeEvent(event)
+            nested_acceptance.append(event.isAccepted())
+            return False
+        with patch.object(self.window, "confirm_exit", side_effect=guard) as confirm:
+            self.assertFalse(self.window.close())
+            confirm.assert_called_once_with()
+        self.assertEqual(nested_acceptance, [False])
+        self.assertFalse(self.lab._lab_owner.terminal)
+        self.assertTrue(self.window.isVisible())

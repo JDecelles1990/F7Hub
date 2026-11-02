@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from PySide6.QtWidgets import QApplication
 
+from f7hub.services.kb_lab_session import SyntheticLabSession
+from f7hub.services.kb_preview_service import FIXTURE_PATH, MANIFEST_PATH, INPUT_HASHES
 from f7hub.gui.main_window import MainWindow
 from f7hub.gui.application_lifecycle import ApplicationLifecycle
 from f7hub.gui.selection_capture import SelectionCapture
@@ -111,10 +113,15 @@ def bootstrap_application(
         companies, contacts,
         categories,
     )
+    lab_assets_available = all((resolved_project_root / relative).is_file() for relative in (
+        FIXTURE_PATH, MANIFEST_PATH, *INPUT_HASHES,
+    ))
     main_window = MainWindow(
         ticket_service, reference_service=reference_service, company_service=CompanyService(companies),
         contact_service=ContactService(contacts, companies),
         knowledge_service=knowledge_service,
+        lab_session_factory=((lambda: SyntheticLabSession(resolved_project_root))
+                             if lab_assets_available else None),
         knowledge_link_service=ticket_knowledge_service,
         backup_service=DatabaseBackupService(resolved_database_path),
         script_service=script_service,
