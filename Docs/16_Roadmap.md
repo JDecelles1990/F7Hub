@@ -1,5 +1,13 @@
 # F7Hub Roadmap
 
+## Slice 054 — Find in Current Ticket Notes (implementation candidate, 2026-11-02)
+
+This approved bounded candidate addresses the historical Slice 049 "Find in
+notes" follow-up in the existing ticket detail view. It adds local literal
+navigation without a search subsystem, schema or cross-domain result contract.
+[CURRENT_STATE](Status/CURRENT_STATE.md#slice-054-current-state) owns the
+implementation evidence. The dated Slice 049 handoff below remains historical.
+
 ## CP02-S4 — Multi-Select and Copy Selected candidate (2026-10-29)
 
 CP02-S3 Source App Provenance is integrated through PR #121, regular merge

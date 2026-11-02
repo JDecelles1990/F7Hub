@@ -1,5 +1,16 @@
 ﻿# F7Hub User Workflows
 
+## Slice 054 — Find within an open ticket's notes (implementation candidate, 2026-11-02)
+
+Open a saved ticket and choose **Notes**. Enter a phrase in **Find in notes**;
+Enter or **Next** searches forward, and Shift+Enter or **Previous** searches
+backward. Search is literal and ignores case. Selected matches scroll into
+view; feedback reports a wrap, no match or empty history. Ctrl+F focuses the
+field only within Notes. **Clear** removes the query; Escape in the field also
+returns focus to history. Opening another ticket clears Find; reloading the
+same ticket keeps the query but requires another Find action. Finding never
+saves notes or changes activity drafts.
+
 ## CP02-S4 candidate — select and copy F7Hub history (2026-10-29)
 
 In the isolated CP02-S4 candidate, use Win+Alt+C as before, open Clipboard Center,

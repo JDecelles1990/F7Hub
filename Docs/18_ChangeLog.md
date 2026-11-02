@@ -1,5 +1,33 @@
 # F7Hub ChangeLog
 
+## 2026-11-02 — Slice 054 Find in Current Ticket Notes candidate
+
+Implemented local, literal, case-insensitive Find in the existing read-only
+Notes tab, with Previous, Next, Clear, wrap feedback, scoped keyboard actions,
+and ticket/reload/pending-state guards. The candidate changes one production
+file, two test files and eight documentation owners. There is no service,
+repository, schema, migration, Settings, Clipboard, network or storage change.
+
+Fresh Windows offscreen GUI 7/7 PASS and affected Ticket/MainWindow regression
+176/176 PASS. Real isolated SQLite tests include unchanged logical dumps during
+Find, integrity_check=ok and zero foreign-key violations. A separately selected
+Knowledge navigation regression execution was FAIL 1/164: an unchanged Knowledge
+filter refresh test did not dispatch its second click because Refresh filters
+remained disabled after its runner completed. Two preserved diagnostics confirmed
+the failure; Knowledge source/test changes are outside S054 scope.
+
+Corrected visible WINDOWS_NATIVE synthetic run PASS 11 checks, process exit 0,
+1000×700 at 96 DPI/DPR 1.0, with two inspected captures and normal close.
+The prior native close-dialog interruption and its external dismissal remain in
+the evidence record. Qt-injected input was used; physical input, alternate DPI
+and assistive-technology profiles are NOT RUN.
+
+The exact candidate and evidence are in
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/Slice-054/implementation-20261102/`.
+Candidate remains unstaged, uncommitted and unintegrated. Because a selected
+affected regression is FAIL, it is NOT READY_FOR_REVIEW; independent review and
+all Git publication/integration require separate gates.
+
 ## 2026-11-01 — KB-SG03B embedded workspace candidate
 
 Implemented the reviewed Stage B candidate over integrated Stage A PR #128 at `5657047c35ca8d8fc52c2b82f9de2f96f4dde3b7`. Added one permanent Articles tab, Open Synthetic KB Lab action, one retained closable embedded shared editor, lazy asset-only session factory, dedicated asynchronous owner lifecycle, operational action isolation, and token-bound deferred Exit including MainWindow fallback. Navigation retains draft/source/undo; Cancel preserves state; Discard and cleanup failure remain distinct. Residual acknowledgment is explicit and truthfully retains failed-cleanup ownership.

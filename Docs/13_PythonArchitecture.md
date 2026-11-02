@@ -1,5 +1,16 @@
 # F7Hub Python Architecture
 
+## Slice 054 — local ticket-note finding (implementation candidate, 2026-11-02)
+
+TicketWorkspace owns in-memory Find state. It searches the current read-only
+notes_history.document() with Qt's literal string find and a single wrap.
+The existing TicketDetailsRecord and _display_details own rendered content.
+Accepted replacement clears the query; same-ticket reload invalidates the
+old match; failed/cancelled reads preserve current state. The existing
+ServiceTaskRunner.completion_finished signal rechecks controls after callbacks.
+Find submits no work and has no service, repository, SQLite, Settings, IPC,
+logging, Clipboard or provider path.
+
 ## KB-SG03B — embedded host and deferred shutdown candidate (2026-11-01)
 
 Stage A is integrated at `5657047c35ca8d8fc52c2b82f9de2f96f4dde3b7`; Stage B is unintegrated and independent rereview pending. Historical extraction sections below remain unchanged.
