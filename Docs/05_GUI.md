@@ -1,5 +1,32 @@
 # F7Hub GUI Design
 
+## KB-SG02 — standalone synthetic preview lab candidate (2026-11-01)
+
+Unintegrated candidate only; no main-window action or navigation route is added.
+The [implementation contract](Planning/DataReadiness/KB_SG02_Implementation_Contract.md)
+owns source admission and temporary state. The separate launcher supplies only
+synthetic snapshots to a write-free dialog. The persistent notice is **Synthetic
+lab — temporary, unpublished**. Sources, authored proposal qualifications and
+unresolved canonical identities stay read-only and separate from editable prose.
+
+| Stable lab ID | Control / routing | Behavior |
+|---|---|---|
+| KB_SG02.FIXTURE | `fixture_selector` → guarded source selection | Explicit selection from six fixed synthetic fixtures; Discard/Cancel for dirty state |
+| KB_SG02.SOURCE | `source_display`, read-only plain text | Source/proposal provenance, revisions, fictional qualifications, unresolved targets |
+| KB_SG02.TITLE | `title_input` | Temporary title; 200 Unicode scalars |
+| KB_SG02.SUMMARY | `summary_input` | Temporary summary; 1,000 Unicode scalars |
+| KB_SG02.BODY | `body_input`, plain text | Temporary KB prose; 64 KiB UTF-8 |
+| KB_SG02.ANNOTATIONS | `annotations_input`, plain text | Temporary review notes; 16 KiB UTF-8; no acceptance authority |
+| KB_SG02.CLOSE | `close_button` / Escape / window close | Discard/Cancel defaults Cancel; accepted departure clears draft and invalidates session |
+
+Editors remain disabled until selection. Invalid edits preserve prior valid text
+with visible feedback. Replacement failure preserves the prior draft. Normal Tab
+focus is retained; fields have accessible names. There is no save/publication,
+semantic acceptance, export or execution action. Native injected-input smoke and
+offscreen Qt checks PASS; physical input, alternate DPI and assistive-technology
+acceptance remain NOT RUN. [Current evidence](Status/CURRENT_STATE.md#kb-sg02-current-state)
+does not establish integrated production behavior.
+
 ## CP02-S4 candidate — Recent multi-select and Copy Selected (2026-10-29)
 
 Unintegrated candidate from merged PR #121 base `8150dc7e139fee62a7121b3fd449d3e3c9d7de4d`.

@@ -1,0 +1,227 @@
+[
+  {
+    "fixture_id": "F01",
+    "title": "Teams microphone report (synthetic EN)",
+    "parent_case": "SYN-IT-0004",
+    "lineage": "selected_original_synthetic",
+    "synthetic": true,
+    "not_authoritative": true,
+    "training_allowed": false,
+    "production_knowledge_allowed": false,
+    "sources": [
+      {
+        "reference": "customer_report.en",
+        "text": "Nobody hears me in Teams meetings.",
+        "origin": "original_synthetic_field"
+      }
+    ],
+    "proposals": [
+      {
+        "proposal_id": "F01-P1",
+        "role": "symptom_report",
+        "source_field": "customer_report.en",
+        "qualifications": [
+          "reported, not directly observed",
+          "fictional source; technical correctness unverified"
+        ],
+        "canonical_target": null,
+        "method": "manual_fixture_authoring"
+      }
+    ],
+    "expectation": "Keep the report distinct from verified failure and canonical identity."
+  },
+  {
+    "fixture_id": "F02",
+    "title": "Signal du moniteur (synthétique FR)",
+    "parent_case": "SYN-IT-0009",
+    "lineage": "selected_original_synthetic",
+    "synthetic": true,
+    "not_authoritative": true,
+    "training_allowed": false,
+    "production_knowledge_allowed": false,
+    "sources": [
+      {
+        "reference": "customer_report.fr",
+        "text": "Mon deuxième écran affiche Aucun signal après reconnexion.",
+        "origin": "original_synthetic_field"
+      }
+    ],
+    "proposals": [
+      {
+        "proposal_id": "F02-P1",
+        "role": "symptom_report",
+        "source_field": "customer_report.fr",
+        "qualifications": [
+          "French source preserved; no approved translation mapping",
+          "fictional report, not accepted cause"
+        ],
+        "canonical_target": null,
+        "method": "manual_fixture_authoring"
+      }
+    ],
+    "expectation": "Preserve French accents and wording; canonical identity stays unresolved."
+  },
+  {
+    "fixture_id": "F03",
+    "title": "DNS reports and fictional hypothesis (synthetic EN/FR)",
+    "parent_case": "SYN-IT-0010",
+    "lineage": "selected_original_synthetic",
+    "synthetic": true,
+    "not_authoritative": true,
+    "training_allowed": false,
+    "production_knowledge_allowed": false,
+    "sources": [
+      {
+        "reference": "customer_report.en",
+        "text": "Websites fail but I can reach an approved IP test endpoint.",
+        "origin": "original_synthetic_field"
+      },
+      {
+        "reference": "customer_report.fr",
+        "text": "Les sites échouent, mais un point de test IP est accessible.",
+        "origin": "original_synthetic_field"
+      },
+      {
+        "reference": "root_cause.hypothesis",
+        "text": "The local adapter contained an incorrect DNS server configuration.",
+        "origin": "original_synthetic_field"
+      }
+    ],
+    "proposals": [
+      {
+        "proposal_id": "F03-P1",
+        "role": "symptom_report",
+        "source_field": "customer_report.en",
+        "qualifications": [
+          "English fictional report"
+        ],
+        "canonical_target": null,
+        "method": "manual_fixture_authoring"
+      },
+      {
+        "proposal_id": "F03-P2",
+        "role": "symptom_report",
+        "source_field": "customer_report.fr",
+        "qualifications": [
+          "French fictional report; same source family, not independent corroboration"
+        ],
+        "canonical_target": null,
+        "method": "manual_fixture_authoring"
+      },
+      {
+        "proposal_id": "F03-P3",
+        "role": "cause_hypothesis",
+        "source_field": "root_cause.hypothesis",
+        "qualifications": [
+          "parent labels confirmation within fictional scenario only",
+          "not an accepted causal claim; no collected evidence"
+        ],
+        "canonical_target": null,
+        "method": "manual_fixture_authoring"
+      }
+    ],
+    "expectation": "Keep bilingual reports and fictional hypothesis separate; source success is simulated only."
+  },
+  {
+    "fixture_id": "F04",
+    "title": "Negated Teams report and conditional check (synthetic variant)",
+    "parent_case": "SYN-IT-0004",
+    "lineage": "newly_authored_synthetic_variant",
+    "synthetic": true,
+    "not_authoritative": true,
+    "training_allowed": false,
+    "production_knowledge_allowed": false,
+    "sources": [
+      {
+        "reference": "variant.note",
+        "text": "Teams audio is not failing. If it fails, check the selected microphone.",
+        "origin": "newly_authored_synthetic_variant"
+      }
+    ],
+    "proposals": [
+      {
+        "proposal_id": "F04-P1",
+        "role": "symptom_report",
+        "source_field": "variant.note",
+        "qualifications": [
+          "negated current failure",
+          "new fictional variant; parent success not inherited"
+        ],
+        "canonical_target": null,
+        "method": "manual_fixture_authoring"
+      },
+      {
+        "proposal_id": "F04-P2",
+        "role": "check",
+        "source_field": "variant.note",
+        "qualifications": [
+          "conditional planned check only",
+          "no diagnostic attempt, execution, result or validation"
+        ],
+        "canonical_target": null,
+        "method": "manual_fixture_authoring"
+      }
+    ],
+    "expectation": "No positive current failure or executed check follows from negated/conditional wording."
+  },
+  {
+    "fixture_id": "F05",
+    "title": "Contradictory monitor observations (synthetic variant)",
+    "parent_case": "SYN-IT-0009",
+    "lineage": "newly_authored_synthetic_variant",
+    "synthetic": true,
+    "not_authoritative": true,
+    "training_allowed": false,
+    "production_knowledge_allowed": false,
+    "sources": [
+      {
+        "reference": "variant.note",
+        "text": "The monitor reports no signal. Windows did not detect the display, contrary to the earlier fictional account. The input source has not been verified.",
+        "origin": "newly_authored_synthetic_variant"
+      }
+    ],
+    "proposals": [
+      {
+        "proposal_id": "F05-P1",
+        "role": "symptom_report",
+        "source_field": "variant.note",
+        "qualifications": [
+          "fictional report of no signal"
+        ],
+        "canonical_target": null,
+        "method": "manual_fixture_authoring"
+      },
+      {
+        "proposal_id": "F05-P2",
+        "role": "observation",
+        "source_field": "variant.note",
+        "qualifications": [
+          "reported fictional non-detection contradicts the parent account",
+          "input source unverified; no accepted cause or inherited resolution"
+        ],
+        "canonical_target": null,
+        "method": "manual_fixture_authoring"
+      }
+    ],
+    "expectation": "Show the contradiction and missing verification; never reuse parent resolved/PASS state."
+  },
+  {
+    "fixture_id": "F06",
+    "title": "Unrelated synthetic note",
+    "parent_case": null,
+    "lineage": "newly_authored_synthetic_variant",
+    "synthetic": true,
+    "not_authoritative": true,
+    "training_allowed": false,
+    "production_knowledge_allowed": false,
+    "sources": [
+      {
+        "reference": "variant.note",
+        "text": "This lab note contains no troubleshooting report. The training room opens at nine.",
+        "origin": "newly_authored_synthetic_variant"
+      }
+    ],
+    "proposals": [],
+    "expectation": "No authored proposals; not an extraction result or measured successful abstention."
+  }
+]

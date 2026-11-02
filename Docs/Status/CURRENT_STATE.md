@@ -1,5 +1,42 @@
 # F7Hub Current State
 
+<a id="kb-sg02-current-state"></a>
+
+## KB-SG02 — isolated synthetic semantic-proposal / KB preview lab (2026-11-01)
+
+**READY_FOR_REVIEW — UNSTAGED, UNCOMMITTED, NOT INTEGRATED.** Candidate:
+`C:/Dev/F7Hub-KB-SG02`, branch `feature/kb-sg02-synthetic-preview`, base/HEAD
+`b5ef6e6b49899cb249617e39de553c720e6c0556`. User authorized the reconstructed
+bounded plan; original KB-SG01 record remains NOT VERIFIED and independent
+fixture-expectation/owner review remains pending. No general 2E/2F, canonical
+mapping or technical-claim approval is inferred.
+
+The [contract](../Planning/DataReadiness/KB_SG02_Implementation_Contract.md)
+records the exact twelve-path scope. Six fixed synthetic fixtures produce manually
+authored, source-bound proposals with unresolved canonical targets and a temporary
+editable title/summary/body/review annotation surface. Persistent provenance and
+the synthetic notice remain outside editable prose. The lab alone stages six NEW
+Ticket records and one DRAFT synthetic reference article in an owned disposable
+database using existing services. The preview receives no persistence capability.
+No production database is opened, resolved, copied or written; no publication,
+semantic acceptance, automatic extraction, Tag/Entity assignment or Ticket change
+occurs through preview interaction. Original corpus/schema and all migrations are
+unchanged. The main application and Clipboard remain untouched.
+
+FRESH evidence: 14 unit, 9 offscreen GUI, 8 lab integration and 23 existing
+Ticket/Knowledge service tests PASS, exit 0, zero skips. Disposable-fixture
+integrity=ok, foreign-key violations=0; before/after logical snapshots match and
+preview interactions execute zero database I/O. Separate WINDOWS_NATIVE Qt smoke
+PASS: 20 assertions, three inspected 1080x780 captures at recorded DPI, normal exit
+0 and owned storage removed. Input was injected through Qt, not physical input.
+Physical acceptance, alternate DPI and assistive-technology validation: NOT RUN.
+
+Evidence and reproducible candidate identity are external under
+`%LOCALAPPDATA%/F7Hub/CodexCheckpoints/KB-SG02/implementation-20261101/`.
+Initial integration failures and corrected passing reruns are preserved. Next gate:
+independent implementation/fixture-expectation review, including owner reconciliation
+of the replacement basis. Git integration remains separately unauthorized.
+
 <a id="tax-02-dp01-current-state"></a>
 
 ## TAX-02 — DP-01 formal contract adoption candidate (2026-11-01)
