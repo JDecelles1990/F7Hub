@@ -1042,6 +1042,24 @@ Slice 021 adds a plain-text Tags detail and adjacent Tags… action for an idle 
 
 Slice 023 adds Refresh filters to the existing compact filter row. It preserves static modes and stable-ID selections, displays renamed choices, retains cached options on source-specific failure, and coalesces unavailable category/tag resets into one authoritative result reload. Automated and native Windows 1000×700 evidence is recorded in Status/CURRENT_STATE.md.
 
+The **unintegrated S055 candidate** corrects the asynchronous completion of
+Refresh filters. The manual cycle remains active until both category/tag
+callbacks have settled and neither reference runner is busy or completing.
+Completion then recalculates control eligibility, allowing consecutive
+activations when the existing workspace guards permit them. Category and tag
+selectors also respect their own runner's completing state. Successful sources
+reconcile choices by stable ID; failed sources retain cached choices and
+selection with safe source-specific feedback. One or both unavailable-selection
+resets coalesce into at most one result reload; inactive Articles or a busy or
+completing shared runner defer that reload. The S055 R1 correction retains a
+one-shot reference-loading option on that deferred manual-result request, so
+resuming Articles reloads results without repeating either reference read or
+hiding failed-source feedback. Explicit Refresh filters can retry; ordinary
+initial-load retries retain their existing behavior. Search uses the last
+executed query and preserves newer unsubmitted input. Lab draft/focus and ticket
+navigation retain their existing owners. See the [S055 R1 current-state record](Status/CURRENT_STATE.md#slice-055-r1-current-state)
+for retained validation, limitations and pending independent review.
+
 The main window owns this modal outside the disabled pages hierarchy. Reference reads remain dismissible; late callbacks after dismissal are ignored. Save retains the original version/updated_at tokens and rejects changed workspace context. Competing actions and repeat submits are disabled. After the repository reloads and commits, the returned authoritative record updates the displayed category with safe success feedback. Failure preserves current detail and permits retry or reopening as appropriate. Native 1000×700 workflow and captures are recorded in Status/CURRENT_STATE.md.
 
 Slice 010 adds Knowledge Base beside New ticket and Saved tickets in the existing toolbar/menu and stacked application shell. The workspace has New Article, a code/title/status table, a clear empty state and a read view with code, title, status, summary and read-only Markdown source. Metadata is explicitly plain text so HTML-like input remains literal.
@@ -3588,10 +3606,10 @@ executed results.
 | KNOWLEDGE.SEARCH.INPUT | Search current articles / `search_input`; QLineEdit | Search QHBoxLayout first, stretch 1 | returnPressed → `search_articles` → search_articles service; textChanged → `_search_text_changed` updates actions | K-idle; accessible Search current knowledge articles | Return | KW, KF-C, KF-S, KF-T |
 | KNOWLEDGE.SEARCH.SUBMIT | Search / `search_button`; QPushButton | Search row second | clicked → `search_articles`; same search as Return | K-idle; blank query clears search | — | KW |
 | KNOWLEDGE.SEARCH.CLEAR | Clear Search / `clear_search_button`; QPushButton | Search row third | clicked → `clear_search` → refresh_list → list_articles | K-idle and active search or nonempty input; retains filters | — | KW, KF-C, KF-S, KF-T |
-| KNOWLEDGE.FILTER.CATEGORY | Category: / `category_filter`; QComboBox | Filter QHBoxLayout, first selector | currentIndexChanged → `_filter_changed` → list/search with category args | K-idle, options ready, category runner idle; accessible Filter knowledge articles by category; All categories / Not selected / active choices | — | KF-C |
+| KNOWLEDGE.FILTER.CATEGORY | Category: / `category_filter`; QComboBox | Filter QHBoxLayout, first selector | currentIndexChanged → `_filter_changed` → list/search with category args | K-idle, options ready, category runner idle; S055 candidate also requires not completing; accessible Filter knowledge articles by category; All categories / Not selected / active choices | — | KF-C |
 | KNOWLEDGE.FILTER.STATUS | Status: / `status_filter`; QComboBox | Filter row second selector | currentIndexChanged → `_filter_changed` → list/search with status | K-idle; All statuses / Draft / Published / Archived; accessible Filter knowledge articles by status | — | KF-S |
-| KNOWLEDGE.FILTER.TAG | Tag: / `tag_filter`; QComboBox | Filter row third selector | currentIndexChanged → `_tag_filter_changed` → `_filter_changed` or open_tag_filter | K-idle, options ready, tag runner idle; All tags / Untagged / existing tags / multi-tag selector; accessible Filter knowledge articles by tag | — | KF-T |
-| KNOWLEDGE.FILTER.REFRESH | Refresh filters / `refresh_filters_button`; QToolButton | Filter row last | clicked → `refresh_filter_options` → list_active_knowledge_categories and list_available_tags; reconciles results when needed | Service, K-idle, not filter_loading; accessible Refresh knowledge filter choices; StrongFocus | — | KF-C, KF-T |
+| KNOWLEDGE.FILTER.TAG | Tag: / `tag_filter`; QComboBox | Filter row third selector | currentIndexChanged → `_tag_filter_changed` → `_filter_changed` or open_tag_filter | K-idle, options ready, tag runner idle; S055 candidate also requires not completing; All tags / Untagged / existing tags / multi-tag selector; accessible Filter knowledge articles by tag | — | KF-T |
+| KNOWLEDGE.FILTER.REFRESH | Refresh filters / `refresh_filters_button`; QToolButton | Filter row last | clicked → `refresh_filter_options` → list_active_knowledge_categories and list_available_tags; reconciles results when needed | Service, K-idle, not filter_loading; S055 candidate reconciles eligibility after both reference callbacks drain; accessible Refresh knowledge filter choices; StrongFocus | — | KF-C, KF-T |
 | KNOWLEDGE.ARTICLES | `table`; QTableView | Splitter first child → list_panel QVBoxLayout, before empty state | selectionChanged → `_selection_changed` → open_article → get_article | K-idle; single read-only row; accessible Knowledge articles; select a row to read | Native row selection | KW, KI |
 | KNOWLEDGE.SPLIT | List/detail divider; QSplitter | Below feedback, horizontal | Native splitter movement; presentation only | Pixel geometry NOT VERIFIED | — | KF-S (layout; no direct drag assertion identified) |
 | KNOWLEDGE.CATEGORY | Category… / `category_button`; QPushButton | Detail VBox category row QHBoxLayout, after stretchable category QLabel | clicked → `open_category` | Service, K-idle, loaded DRAFT | — | KA-C |

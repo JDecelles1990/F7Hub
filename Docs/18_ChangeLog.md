@@ -1,5 +1,62 @@
 # F7Hub ChangeLog
 
+## 2026-11-02 — Slice 055 R1 deferred-refresh corrective candidate
+
+Author-corrected independent P2 R1 in the isolated S055 worktree. Deferred
+manual-result requests now carry a one-shot reference-loading option, consumed
+before result dispatch, so resumption does not reread a source already attempted
+by that manual cycle or hide its failure feedback. Explicit retry remains
+available; ordinary initial loading, superseding filter/article requests,
+article reveal, selection/search/input and Lab/ticket ownership retain their
+existing behavior. No new runner, service, framework, dependency or migration.
+
+Fresh formerly failing probe PASS 1/1; focused PASS 35/35 (33 category checks plus
+two overlapping affected checks); remaining Knowledge GUI/SQLite integration
+PASS 137/137, covering 170 distinct current Knowledge tests together; selected
+shell/lifecycle PASS 4/4. Fresh WINDOWS_NATIVE PASS 27 assertions and two inspected
+1000×700 captures at 96 DPI/DPR 1.0, all exit 0. Physical input and broader
+display/accessibility profiles are NOT RUN. Previous review FAIL and earlier
+attempts/manifests remain preserved. Current source/test evidence is not replaced
+by historical PASS records.
+
+The corrected candidate keeps the eight-path scope, with a new v3 manifest and
+explicit changed/unchanged comparisons against preserved v1/v2 identities.
+Status: **S055_CORRECTION_READY_FOR_REREVIEW; independent R1 rereview PENDING**.
+No staging, commit, push, PR, merge, CanonicalSync or baseline-exception retirement.
+[Current S055 R1 state](Status/CURRENT_STATE.md#slice-055-r1-current-state) records
+the evidence and limits; preceding S055/S054 entries retain their historical meaning.
+
+## 2026-11-02 — Slice 055 Knowledge filter completion candidate
+
+Completed the unintegrated S055 correction and its worktree-only documentation
+gate. Both existing category/tag reference runners reconcile actions through
+`completion_finished`; the manual cycle drains both callbacks before release,
+and each selector also respects completing. Consecutive activations remain
+usable. Stable-ID selections, renamed options, cached failed-source choices
+and safe feedback are preserved. Selection resets coalesce into one result
+reload, deferred through existing Articles state when needed, without executing
+unsubmitted search text or changing Lab/ticket navigation ownership.
+
+The original four code/test files are byte-for-byte preserved. Four affected
+documentation owners extend the candidate; the original manifest/aggregate is
+retained and a versioned eight-file manifest records the expanded identity.
+Retained author evidence: Knowledge/Lab GUI and SQLite integration PASS 155/155,
+MainWindow/Lab and exit lifecycle PASS 14/14, original pinned test replay PASS
+1/1, and WINDOWS_NATIVE PASS 31 assertions plus three inspected 1000×700
+captures at 96 DPI/DPR 1.0, all with exit 0. The focused six are included in
+155; native assertions and the original replay are not added to the 169 distinct
+current tests. Earlier failures and harness/capture corrections remain recorded.
+Physical input, alternate display/DPI and accessibility profiles are NOT RUN.
+No schema, migration, dependency, runner implementation or new infrastructure.
+
+Status: **S055_READY_FOR_REVIEW; independent review PENDING; unintegrated**.
+`S054-KNOWLEDGE-BASELINE-001` retirement remains pending independent approval,
+authorized integration and main verification. No canonical checkout change,
+staging, commit, push, PR, merge or CanonicalSync is part of this gate.
+[Current S055 state](Status/CURRENT_STATE.md#slice-055-current-state) owns the
+validation provenance, evidence locations, limitations and next gate. Existing
+S054 historical entries are unchanged.
+
 ## 2026-11-02 — Slice 054 Find in Current Ticket Notes candidate
 
 Implemented local, literal, case-insensitive Find in the existing read-only
